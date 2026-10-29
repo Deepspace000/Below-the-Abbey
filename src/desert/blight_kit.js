@@ -186,8 +186,8 @@ function blKit(spec){
     const door=h.door||[(h.x0+h.x1)>>1,h.y1];
     if(h.to)KH_DOOR[dgid]={lvl:h.to,get at(){if(!LEVELS[h.to]&&KH_LAZY[h.to])KH_LAZY[h.to]();const L=LEVELS[h.to],st=L&&L.start;return st?{x:st.x,y:st.y,f:0}:{x:4,y:4,f:0}}};
     for(let y=h.y0;y<=h.y1;y++)for(let x=h.x0;x<=h.x1;x++){if(rows[y][x]==='.')solid(x,y,x===door[0]&&y===door[1]?ch(dgid):pw);used.add(x+','+y)}
-    sky.push({x:(h.x0+h.x1+1)/2,y:h.y1+1.15,k:h.img,w:h.w,z:0,big:1});
-    h.front=[door[0],door[1]+1];C.reserve(h.x0-1,h.y0-1,h.x1+1,h.y1+1);used.delete(h.front[0]+','+h.front[1]);return true};
+    sky.push({x:(h.x0+h.x1+1)/2,y:h.sy!==undefined?h.sy:h.y1+1.15,k:h.img,w:h.w,z:0,big:1});
+    h.front=[door[0],door[1]+(h.up?-1:1)];C.reserve(h.x0-1,h.y0-1,h.x1+1,h.y1+1);used.delete(h.front[0]+','+h.front[1]);return true};
   /* ---- a lettered signpost (once per key) and a milestone ---- */
   C.post=(x,y,key,boards,npcId,say_,o)=>{const k=blPost(key,boards,(o&&o.i)||0);if(npcId&&!NPCS[npcId])khNpc(npcId,'A signpost',k,()=>say(say_,[BYE]));return dec(k,x,y,{block:true,npc:npcId,sc:(o&&o.sc)||1})};
   C.milestone=(x,y)=>{const n=blPlaceN(id),k=blMilestone(n),nid='bl_mile'+n;if(!NPCS[nid]){const left=10-n;khNpc(nid,'A milestone',k,()=>say(left>0?'A grey milestone beside the road. The letters cut in it read SALE, '+left+(left===1?' STAGE':' STAGES')+'. Somebody has scratched a small tally under it, and the tally stops.':'A grey milestone at the foot of the bridge. The letters cut in it read SALE, THE GATE. Under it somebody has scratched: NO FURTHER.',[BYE]))}return dec(k,x,y,{block:true,npc:nid,sc:1})};

@@ -24,7 +24,7 @@ if(typeof NO_VARY!=='undefined')NO_VARY.push('blcrowqueen');
 if(typeof BOSS_GOLD!=='undefined')BOSS_GOLD.blcrowqueen=[3800,4600];
 if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^blcrowqueen/,'bleeding',.3]);
 /* the flying crow pictures of tools/crows are used for every crow of the road, and the Queen is the big Carrion Crow */
-if(typeof CROW_KIND!=='undefined'){CROW_KIND.blcrow={set:'crow',span:.9,body:.709,rise:.7,sh:.7};CROW_KIND.blcrowflock={set:'flock',span:1.55,body:.576,rise:.62,sh:.95};CROW_KIND.blcrowqueen={set:'carrion',span:3.3,body:.71,rise:1.1,sh:1.5}}
+if(typeof CROW_KIND!=='undefined'){CROW_KIND.blcrow={set:'crow',span:.9,body:.709,rise:.7,sh:.7};CROW_KIND.blcrowflock={set:'flock',span:1.15,body:.576,rise:.62,sh:.95};CROW_KIND.blcrowqueen={set:'carrion',span:2.6,body:.71,rise:1.1,sh:1.5}}
 /* ---------- polish shared by places 9 and 10 (the Rookery Mill and the Pale Bridge): the pale fence, huts and roofs of the road made dark and dead, the plague cart, the abyss floor, ground mist ---------- */
 const B9={};
 function b9Art(){
@@ -217,7 +217,10 @@ function blrkBuild(p){
   const {hs,block,fm}=C,F=blF(),W=BLRK.W,H=BLRK.H,ix=(x,y)=>y*W+x,hgt=C.hgt;
   C.hills(.34);b9Boundary(C,W,H);C.setF(2,2,77,67,'0');
   C.pth(2,34,77,36,'1');C.pth(43,15,44,33,'1');C.pth(16,29,16,33,'1');C.pth(52,28,60,28,'1');C.pth(56,26,60,33,'1');C.pth(28,28,28,33,'1');C.pth(29,29,34,29,'1');
-  C.flatten(2,28,77,40);C.flatten(36,4,52,20);C.flatten(50,14,70,30);C.flatten(12,22,34,40);
+  C.flatten(2,32,77,38);C.flatten(36,4,52,20);C.flatten(50,14,70,30);C.flatten(12,26,34,40);
+  // height variation: knolls and a long ridge south of the road, a rise by the pond, so the fields are not one flat sheet
+  {const bump=(cx,cy,r,a)=>{for(let y=Math.max(3,cy-r);y<=Math.min(66,cy+r);y++)for(let x=Math.max(3,cx-r);x<=Math.min(76,cx+r);x++){const d=Math.hypot(x-cx,y-cy)/r;if(d<1)hgt[ix(x,y)]+=a*(1-d*d)*(1-d*d)}};
+   for(const [x,y,r,a] of [[48,46,7,.8],[62,56,8,.9],[70,44,6,.7],[40,60,6,.6],[56,42,5,.5],[8,52,7,.7],[8,60,5,.5],[10,14,6,.6],[34,24,5,.5],[72,8,6,.6],[66,64,5,.5],[44,52,4,.4]])bump(x,y,r,a)}
   C.gate('E',35);C.gate('W',35);
   // the millrace: black water across the whole map north to south, under a plank bridge on the road; a pond at each end
   const wat=new Uint8Array(W*H);
@@ -227,7 +230,7 @@ function blrkBuild(p){
   for(let y=34;y<=36;y++)for(let x=18;x<=32;x++)wat[ix(x,y)]=0;
   for(let y=3;y<=66;y++)for(let x=3;x<=76;x++){if(wat[ix(x,y)]){fm[ix(x,y)]='5';hgt[ix(x,y)]=-.3;block[ix(x,y)]=1;C.used.add(x+','+y)}}
   for(let y=34;y<=36;y++)for(let x=24;x<=26;x++)fm[ix(x,y)]='3';
-  for(let x=23;x<=27;x++){if(x!==25)C.dec('b9_fence',x,33,{block:true,sc:.8});C.dec('b9_fence',x,37,{block:true,sc:.8})}
+  for(let x=23;x<=27;x++){if(x===24||x===26)continue;if(x!==25)C.dec('b9_fence',x,33,{block:true,sc:.8});C.dec('b9_fence',x,37,{block:true,sc:.8})}   // round 2: posts with gaps between them, so the water shows
   C.dec('gy_lantern',23,33,{block:true});C.light(23,33,C.pale);C.dec('gy_lantern',27,37,{block:true});C.light(27,37,C.pale);
   C.dec('b9_fence',25,33,{block:true,sc:.8,npc:'blr_bridge'});
   C.dec('bl_urn',22,38,{block:true,npc:'blr_pond',sc:.8});
@@ -293,7 +296,7 @@ function blrGround(){
       C.raw('gy_hatch2',11,2,{npc:'blr_looploft',solid:1,deco:false,sc:1});
       for(const [x,y] of [[1,6],[2,7],[11,6],[11,7]])C.raw('hay',x,y,{block:true,sc:1});
       C.raw('gy_chest',1,2,{npc:'blr_millchest',solid:1,deco:false,sc:.9});
-      P('waterbarrel',2,8,{h:.7});P('coatrack',11,5,{h:1.0});C.raw('barrel',9,8,{block:true,sc:.9});
+      P('waterbarrel',2,8,{h:.7});P('coatrack',11,5,{h:1.0});C.raw('barrel',9,8,{block:true,sc:.9});C.raw('kh_oqstuff_9',3,5,{block:false,sc:.9});C.raw('kh_oqstuff_8',10,4,{block:false,sc:.8});C.raw('kh_oqstuff_9',8,3,{block:false,sc:.7});C.raw('barrel',1,9,{block:true,sc:.8});C.raw('crate',12,8,{block:true,sc:.9});
       C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_web',11,1,{block:false,sc:.5});C.raw('gy_bones',8,6,{block:false,sc:.6});C.raw('gy_bones',4,6,{block:false,sc:.5})}})}
 function blrLoft(){
   const F=blF();
@@ -313,10 +316,10 @@ function blrCap(){
   blRoom({id:BLRK.CAP,name:'The Rookery Mill: the cap',w:11,h:10,amb:.4,rating:89,floor:'wood',wall:blrWall(),
     back:{to:BLRK.LOFT,x:10,y:7,f:2},
     lights:[[2,2],[8,2],[5,5],[2,8],[8,8]],lcol:{'2,2':[.72,1.1,.95],'8,2':[.72,1.1,.95],'5,5':[.8,1.1,1.0],'2,8':[.72,1.1,.95],'8,8':[1.3,.95,.6]},col:[.85,1.05,.95],
-    enemies:[['blcrowqueen',5,3],['blcrow',2,5],['blcrow',8,5],['blcrowflock',5,7]],
+    enemies:[['blcrowqueen',5,3],['blcrow',2,5],['blcrow',8,6]],
     build:C=>{
       C.raw('ww_crowtree',5,1,{npc:'blr_nest',solid:1,deco:false,sc:.9});
-      C.raw('gy_raven',5,2,{npc:'blr_queen',solid:1,deco:false,sc:3.0});
+      C.raw('gy_raven',5,2,{npc:'blr_queen',solid:1,deco:false,sc:2.4});
       C.raw('gy_rune',9,2,{npc:'blr_glass',solid:1,deco:false,sc:.9});
       C.raw('ww_cauldron',1,3,{npc:'blr_wheel',solid:1,deco:false,sc:1.2});
       for(const x of [0,10])C.raw('hl_p_window',x,4,{block:true,sc:1.0});

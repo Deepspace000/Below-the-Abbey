@@ -36,6 +36,10 @@ function blhArt(){
   bl3Tint('bl_tower','wl_bldg1_4','saturate(.35) brightness(.66) sepia(.1)',null);
   bl3Tint('bl_silverbell',IMG.hpb_bell_4?'hpb_bell_4':'gy_bell','grayscale(.85) brightness(1.4) contrast(.95)',IMG.hpb_bell_4?.85:1.0);
   bl3Tint('bl_silverbellL',IMG.hpb_bell_4?'hpb_bell_4':'gy_bell','grayscale(.85) brightness(1.4) contrast(.95)',IMG.hpb_bell_4?.85:1.0);
+  /* round 2: painted pieces (Gemini): the ruined church front, the Abbot, and the bell (made pale silver here) */
+  if(IMG.blh_church&&IMG.blh_church.width){bl3Tint('bl_church',IMG.blh_church,'saturate(.85) brightness(.95)',1)}
+  if(IMG.blh_abbot&&IMG.blh_abbot.width){IMG.bl_abbot=IMG.blh_abbot;NPC_H.bl_abbot=1.9;ENEMY_DEF.blabbot.w=+(1.9*IMG.blh_abbot.width/IMG.blh_abbot.height).toFixed(2)}
+  if(IMG.bl_bell&&IMG.bl_bell.width){bl3Tint('bl_silverbell',IMG.bl_bell,'grayscale(.75) brightness(1.55) contrast(.9)',.85);bl3Tint('bl_silverbellL',IMG.bl_bell,'grayscale(.75) brightness(1.55) contrast(.9)',.85)}
   bl3Tint('bl_rope','ww_ribbon','saturate(.3) brightness(.7) sepia(.5)',.9);
   bl3Ghost('bl_g_prior','kh_ohcourt1_5');bl3Ghost('bl_g_cuth','kh_ohfolk5_3');bl3Ghost('bl_g_anselm','kh_ohfolk2_2');bl3Ghost('bl_g_osmund','kh_ohfolk2_1');bl3Ghost('bl_g_monk','kh_ohfolk1_4');bl3Ghost('bl_g_monk2','kh_ohfolk5_4');
   for(const [k,h] of [['bl_g_prior',.98],['bl_g_cuth',.98],['bl_g_anselm',.98],['bl_g_osmund',.98],['bl_g_monk',.98],['bl_g_monk2',.98],['gy_ghost0',1.1],['gy_ghost1',1.1],['gy_ghost2',1.1],['gy_banshee',1.0],['ww_cauldron',.95],['kh_cart1_0',1.1],['mi_pew',.8]])if(NPC_H[k]===undefined||k.startsWith('bl_g_'))NPC_H[k]=h;
@@ -193,7 +197,7 @@ function blhBuild(p){
   for(const [x,y] of [[14,4],[70,4],[14,31],[70,31],[39,31],[43,31]]){C.DB('bl_column',x,y,{sc:1.1,npc:x===39||x===43?undefined:'blh_ruin'});}
   C.dec('gy_lych',41,31,{sc:1.1});C.light(40,30,C.pale);C.light(42,30,C.pale);
   // the church, fallen in: the painted church over a hidden block; the door goes down to the crypt
-  C.picHouse({img:'bl_church',x0:33,x1:40,y0:5,y1:9,w:8.3,wh:2.8,to:BLH.CRYPT,door:[36,9]});
+  C.picHouse({img:'bl_church',x0:33,x1:40,y0:5,y1:9,w:IMG.blh_church?6.8:8.3,wh:2.8,to:BLH.CRYPT,door:[36,9]});
   C.reserve(32,4,41,11);C.light(35,11,C.pale);C.light(38,11,C.pale);
   // the cloister: a ring of broken columns, the garth, the well
   for(let x=28;x<=48;x+=2){for(const y of [12,24]){if(y===24&&x>=38&&x<=42)continue;if(hs(x,y,4)<.88)C.DB('bl_column',x,y,{sc:.85})}}
@@ -285,7 +289,7 @@ function blhRefec(){
       C.raw('gy_candles',3,1,{npc:'blh_kitchen',solid:1,deco:false,sc:.8});
       P('longtable',5,4,{h:.6,free:true});P('longtable',9,4,{h:.6,free:true});P('longtable',13,4,{h:.6,free:true});
       for(const x of [4,6,8,10,12,14]){C.raw('gy_skel',x,3,{npc:'blh_seated',solid:1,deco:false,sc:.7})}
-      C.raw('gy_candles',9,6,{npc:'blh_table',solid:1,deco:false,sc:.8});
+      C.raw('gy_candles',9,6,{npc:'blh_table',solid:1,deco:false,sc:.45});
       C.npc('blh_anselm',3,3);
       P('lectern',17,3,{h:1.0});P('waterbarrel',17,6,{h:.7});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_bones',7,7,{block:false,sc:.6});C.raw('gy_bones',14,7,{block:false,sc:.6})}})}
 function blhTowerRoom(){

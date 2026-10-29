@@ -183,6 +183,9 @@ khNpc('blc_pauper',"A pauper's niche",'gy_rune',d=>{
   const F=blF();
   if(F.bowl||F.bowlGiven)return say('A plain niche in the wall, with a small bowl cut over the opening. The shelf inside is empty, and swept.',[BYE]);
   return say('Under the stair, behind the last of the great sarcophagi, a plain niche is let into the wall, with a small bowl cut over the opening. The stone shelf inside is bare, and a flat slab stands before it, with a loose edge.',[['Lift the slab.',()=>{F.bowl=1;if(!bagAdd(mkItem('blalmsbowl')))G.items.push({k:'blalmsbowl',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg('You take the Hollow Saint\'s alms bowl.','#ffe36a');return null}],BYE])});
+khNpc('blc_cof0','A stone coffin','gy_coffin',()=>say('A plain stone coffin. The lid is carved with a hood and has no name. One edge is rubbed smooth, where people have rested a hand on it while going past.',[BYE]));
+khNpc('blc_cof1','A stone coffin','gy_coffin',()=>say('A coffin with its lid pushed a handbreadth off. Inside there is only a folded grey cloth, and a smell of candle smoke.',[BYE]));
+khNpc('blc_cof2','A stone coffin','gy_coffin',()=>say('A coffin with a small mitten set on the lid, and a bunch of dried reeds. Somebody still comes down here.',[BYE]));
 khNpc('blc_cryptchest','A chantry chest','gy_chest',d=>{
   const F=blF();if(F.cryptChest)return say('The chest is open and empty.',[BYE]);
   return say('A small iron-bound chest in a niche, with a candle stub on the lid. The lock was forced long ago.',[['Open it.',()=>{F.cryptChest=1;G.gold+=1600;sfx('win');msg('You take 1600 gold.','#ffe36a');return null}],BYE])});
@@ -235,7 +238,7 @@ function blcBuild(p){
   C.dec('gy_lych',37,31,{sc:1.0});C.light(36,30,C.pale);C.light(38,30,C.pale);
   C.post(34,32,'bl_ch_sign',[{n:'THE CHURCH OF THE HOLLOW SAINT',d:0},{n:'THE CHURCHYARD',d:0}],'blc_sign_church','A notice board at the lych-gate. THE CHURCH OF THE HOLLOW SAINT. ALL WELCOME. SERVICES: ALWAYS. SERMON IN PROGRESS: PLEASE ENTER QUIETLY. Under it, in a different hand: PLEASE ENTER. HE IS VERY LONELY.',{i:3});
   // the four upside-down bells on stone blocks beside the path, with lamps
-  for(const [x,y] of [[35,24],[39,24],[35,29],[39,29]]){C.dec('bl_ibell',x,y,{block:true,npc:'blc_ibell',sc:1.25})}
+  for(const [x,y] of [[35,24],[39,24],[35,29],[39,29]]){C.dec(IMG.bl_ibell2?'bl_ibell2':'bl_ibell',x,y,{block:true,npc:'blc_ibell',sc:IMG.bl_ibell2?.85:1.25})}
   for(const [x,y] of [[35,22],[39,22],[35,27],[39,27]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.pale)}
   C.dec('bl_urn',33,18,{block:true,sc:.9});C.dec('bl_urn',42,18,{block:true,sc:.9});C.light(33,21,C.warm);C.light(42,21,C.warm);
   // the west plot: rows of graves, and the six grave boards of the last congregation
@@ -274,7 +277,7 @@ function blcBuild(p){
   lv.tele=undefined;
   return lv}
 /* ---------- the rooms ---------- */
-const blcFloor=()=>FLOORS.wl2f5?'wl2f5':FLOORS.cobble?'cobble':'wood';
+const blcFloor=()=>{if(FLOORS.wl2f5&&typeof gyFloorTone==='function'){try{return gyFloorTone('blc_nave','wl2f5',.58,[.92,.96,1])}catch(e){}}return FLOORS.wl2f5?'wl2f5':FLOORS.cobble?'cobble':'wood'};
 const blcWall=()=>IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0';
 function blcNave(){
   const F=blF();
@@ -290,11 +293,11 @@ function blcNave(){
       // the pulpit end: Father Alder at his lectern
       P('lectern',10,3,{h:1.0});C.npc('blc_alder',10,4);
       // pews in two blocks with an aisle between
-      for(const y of [8,10,12])for(const x of [3,4,5,6,7,13,14,15,16,17])if(!(y===12&&(x===3||x===17)))C.raw('mi_pew',x,y,{block:true,sc:1});
+      for(const y of [10,12])for(const x of [3,4,5,6,7,13,14,15,16,17])if(!(y===12&&(x===3||x===17)))C.raw('mi_pew',x,y,{block:true,sc:1});
       // the stalls of the choir: two rows of singers, the precentor in front
       if(!F.choirRest){
-        const GK=['gy_ghost0','gy_ghost1','gy_ghost2','gy_banshee'];let n=0;
-        for(const [x,y] of [[2,5],[3,5],[4,5],[5,5],[6,5],[2,6],[4,6],[6,6],[14,5],[15,5],[16,5],[17,5],[18,5],[14,6],[16,6],[18,6]])C.raw(GK[(n++)%4],x,y,{npc:'blc_choir',solid:1,deco:false,sc:.95,bob:.08+(n%3)*.04})}
+        const GK=b34Ghosts();let n=0;
+        for(const [x,y] of [[2,5],[3,5],[4,5],[5,5],[6,5],[2,6],[4,6],[6,6],[14,5],[15,5],[16,5],[17,5],[18,5],[14,6],[16,6],[18,6]])C.raw(GK[((x%4)*2+(y%2))%8],x,y,{npc:'blc_choir',solid:1,deco:false,sc:.9+((x*3+y)%4)*.03,bob:.08+((n++)%3)*.04})}
       C.raw('mi_pew',7,5,{npc:'blc_stall',solid:1,deco:false,sc:1});
       C.npc('blc_ambrose',8,6);
       // the three doors: crypt stair (south west), belfry trapdoor (east corner), vestry (east wall)
@@ -311,7 +314,7 @@ function blcCrypt(){
     build:C=>{
       // the stair up is the door in the south wall (middle); the stair set into the wall is decoration to match
       for(const [x,y] of [[2,3],[2,5],[18,3],[18,5],[2,9],[18,9]])C.raw('gy_niche',x,y,{npc:'blc_niche',solid:1,deco:false,sc:.9});
-      for(const [x,y] of [[5,3],[15,3],[5,8],[15,8],[8,10],[12,10]])C.raw('gy_coffin',x,y,{block:true,sc:.9});
+      for(const [x,y] of [[5,3],[15,3],[5,8],[15,8],[8,10],[12,10]]){const ci=({'5,3':0,'15,8':1,'8,10':2})[x+','+y];if(ci!==undefined)C.raw('gy_coffin',x,y,{npc:'blc_cof'+ci,solid:1,deco:false,sc:.9});else C.raw('gy_coffin',x,y,{block:true,sc:.9})}
       C.raw('gy_sarc',10,2,{npc:'blc_sarc',solid:1,deco:false,sc:1.2});
       if(!F.pg1)C.raw('gy_book',9,1,{npc:'blc_page1',solid:1,deco:false,sc:.9,bob:.55});
       for(const [x,y] of [[8,1],[12,1],[1,7],[19,7]])C.raw('gy_candles',x,y,{block:true,sc:.85});
@@ -339,7 +342,7 @@ function blcVestry(){
     enemies:[['blbones',8,6]],
     build:C=>{
       const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
-      P('bookshelf',2,1,{h:1.1});P('bookshelf',4,1,{h:1.1});P('dresser',9,1,{h:1.1});P('cot',1,6,{h:.7});P('waterbarrel',9,6,{h:.7});P('candlerack',6,1,{h:1.0});P('clock',8,1,{h:1.1});
+      P('bookshelf',2,1,{h:1.1});P('scrollrack',4,1,{h:1.0});P('dresser',9,1,{h:1.1});P('cot',1,6,{h:.7});P('waterbarrel',9,6,{h:.7});P('candlerack',6,1,{h:1.0});P('clock',8,1,{h:1.1});
       P('readdesk',5,3,{h:.85});C.raw('gy_book',5,3,{npc:'blc_book',solid:1,deco:false,bob:.4,sc:1});
       C.raw('gy_chest',9,4,{npc:'blc_offer',solid:1,deco:false,sc:.9});C.raw('gy_chest',1,2,{npc:'blc_robes',solid:1,deco:false,sc:.9});
       C.raw('gy_web',9,1,{block:false,sc:.5});C.raw('gy_bones',4,6,{block:false,sc:.3})}})}
@@ -360,8 +363,9 @@ function b14ChurchDress(C){
   // the pilgrims' road: a cart at each side, sacks and barrels, torn banners at the lych-gate, cages with bones on the fence posts
   b14Place(C,[[ban,33,32],[ban,41,32],[ban,29,34],[ban,45,34],[cart,24,34],[cart,50,36],[sacks,52,36],['barrel',23,34,{sc:.8}],['barrel',51,36,{sc:.8}],[cage,34,30],[cage,40,30]]);
   // the plague pit: bone heaps around the ring, a cart tipped at its edge
-  for(const [x,y] of [[50,45],[58,47],[52,49],[56,49],[54,43],[58,44]])C.dec(bones,x,y,{sc:1});
+  [[50,45],[58,47],[52,49],[56,49],[54,43],[58,44]].forEach(([x,y],i)=>C.dec(i===3?'gy_bones':bones,x,y,i===3?{sc:.6}:{sc:1}));
   C.dec(cart,49,47,{block:true,sc:.9});
   // bone charms hung on the churchyard railings
   for(const [x,y] of [[19,12],[19,22],[61,14],[61,24],[28,11],[46,11]])C.dec(charm,x,y,{block:true,sc:.9});
-  for(const [x,y] of [[36,40],[44,40],[56,36],[20,36]])C.dec('crate',x,y,{block:true,sc:.8})}
+  for(const [x,y] of [[33,40],[47,40],[56,36],[20,36]])C.dec('crate',x,y,{block:true,sc:.8});
+  b34ChurchExtra(C)}

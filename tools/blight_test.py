@@ -57,7 +57,7 @@ def run_links():
         b, pg, errs = boot(p)
         r = pg.evaluate("""() => {
           const out = [];
-          const doors = id => { const L = LEVELS[id]; const o = []; for (const c in L.chars) { const d = KH_DOOR[L.chars[c]]; if (d && d.bl) o.push({side: d.side, lvl: d.lvl, at: d.at}) } return o };
+          const doors = id => { const L = LEVELS[id]; const o = []; for (const c in L.chars) { const d = KH_DOOR[L.chars[c]]; if (d && d.bl) o.push({side: d.side, lvl: d.lvl, at: d.at}); else if (d && d.vt === 'road') { const nb = vtNeighbour(d.dir); o.push({side: d.dir === 'east' ? 'E' : 'W', lvl: nb && nb.id, at: nb && nb.at}) } } return o };   /* the Vault (place 7): its gates are {vt:'road',dir} (vault_hill.js), handled by vtRoad/vtNeighbour (vault_core.js) */
           for (const p of BL_ROAD) { if (!LEVELS[p.id]) KH_LAZY[p.id]();
             const ds = doors(p.id), E = ds.find(d => d.side === 'E'), Wd = ds.find(d => d.side === 'W');
             const eDest = blEastDest(p), wDest = blWestDest(p);

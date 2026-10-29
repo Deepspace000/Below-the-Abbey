@@ -85,6 +85,7 @@ function vtMake(id){
   const setF=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(open(x,y))fm[y][x]=f};
   const C={id,S,W,H,g,rows,open,free,dec,sign,foe,light,trap,setF,decor,enemies,lights,lcol,occ,traps,V,rng:(a,b)=>hash2(a,b,id*3),start:null};
   S.dress(C);
+  try{vtPolish(C)}catch(e){console.error('vtPolish',e)}
   /* ---- the way in: the arrival square ---- */
   /* ---- wall torches of this floor's colour: along the way, every few squares, in the rooms more often; none beside a lock or a stair ---- */
   const torches=[];
@@ -107,7 +108,7 @@ function vtMake(id){
      const ns=GYM_D.filter(([a,b])=>open(x+a,y+b));if(ns.length!==1)continue;const [a,b]=ns[0],nx=x+a,ny=y+b;
      if(torches.some(t=>Math.hypot(t[0]-x,t[1]-y)<1.6)||occ.has(nx+','+ny))continue;cand.push({x,y,nx,ny,h:hs(x,y,95)})}
    cand.sort((p,q)=>p.h-q.h);const nic=[];
-   for(const c of cand){if(nic.length>=(S.niches===undefined?10:S.niches))break;if(nic.some(n=>Math.hypot(n.x-c.x,n.y-c.y)<5))continue;nic.push(c);put(c.x,c.y,ch(NIL));light(c.nx,c.ny,[1.15,.8,.42])}}
+   for(const c of cand){if(nic.length>=(S.niches===undefined?16:Math.max(S.niches,12)))break;if(nic.some(n=>Math.hypot(n.x-c.x,n.y-c.y)<4))continue;nic.push(c);put(c.x,c.y,ch(NIL));light(c.nx,c.ny,[1.15,.8,.42])}}
   /* ---- a lamp every few squares where none is near ---- */
   {const have=lights.slice();for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!open(x,y))continue;if(have.every(l=>Math.hypot(l[0]-x,l[1]-y)>=(S.lampGap||5.2))){have.push([x,y]);lights.push([x,y]);lcol[x+','+y]=S.lcol}}}
   /* ---- floors ---- */

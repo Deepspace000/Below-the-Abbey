@@ -9,6 +9,7 @@ const SA_ART={man:null};
 async function saLoadOwn(){
   try{SA_ART.man=await (await fetch('assets/sa/manifest.json?v='+VERSION)).json()}catch(e){SA_ART.man={}}
   await Promise.all(Object.keys(SA_ART.man||{}).map(k=>loadImg('sa_'+k,'assets/sa/'+SA_ART.man[k].file)));
+  for(const k in (SA_ART.man||{}))if(SA_ART.man[k].h_cells)NPC_H['sa_'+k]=SA_ART.man[k].h_cells;
 }
 function saLoad(){
   if(SA.loading)return SA.loading;
@@ -51,7 +52,9 @@ function saFloors(){
   return ['sa_cobble','sa_flag','sa_dead','sa_earth','sa_mire','sa_dry']}
 function saPrep(){
   wlHeights();wlRoofs();wlStyles();gyAlias();saRoofs();
-  for(const k in SA_STYLES){const t=SA_STYLES[k];OH_STY[k]={plain:'kh_ohwall1_0',alt:'kh_ohwall1_1',win:'kh_ohwall1_4',shop:'kh_ohwall1_4',door:'kh_ohwall1_5',win2:'kh_ohwall1_4',slit:'kh_ohwall1_3',tint:t,zoom:1.5,contrast:1.7}}
+  for(const k in SA_STYLES){const t=SA_STYLES[k];OH_STY[k]={plain:'kh_ohwall1_0',alt:k==='sa_moss'?'kh_ohwall1_0':'kh_ohwall1_1',win:'kh_ohwall1_4',shop:'kh_ohwall1_4',door:'kh_ohwall1_5',win2:'kh_ohwall1_4',slit:'kh_ohwall1_3',tint:t,zoom:1.5,contrast:1.7}}
+  // painted ghost villagers (assets/sa: gv0..gv3) stand in for the tinted folk when they exist
+  if(IMG.sa_gv0)SA_GHOSTFOLK.forEach((s,i)=>{const g=IMG['sa_gv'+(i%4)];if(g&&!IMG['sa_gh_'+i]){IMG['sa_gh_'+i]=g;NPC_H['sa_gh_'+i]=NPC_H['sa_gv'+(i%4)]||1.05}});
   SA_GHOSTFOLK.forEach((s,i)=>saGhost(s,'sa_gh_'+i));
   for(const i of [0,1,2]){if(IMG['gyp_ghost_'+i])NPC_H['sa_gl_'+i]=1.1}
   // the stand-ins for the pieces that are painted later: a boarded door is the iron fence, the gibbet and the dead fountain are the wooden post and a tall stone
@@ -85,7 +88,15 @@ Object.assign(ITEMDEF,{
   sa_reply:{n:"The Bellman's Reply",k:'quest',t:'Quest item',ic:'book',c:'#cfc4a8',stack:1,price:0,sw:.05,d:'A scrap of paper with three words on it, written with a shaking hand. The bellman has signed it with a drawing of a bell.'}});
 /* ---- the look: cold fog and dusk over the streets; the cellars, crypt and belfry keep their own dark ---- */
 {const _w=weatherNow;weatherNow=function(){
-  if(LEVEL===SA.ID)return {id:'fog',n:'Grave fog',fog:.03,haze:.6,dark:.55,mix:.55,col:[150,160,184],text:'A cold grey fog lies in the streets of Sale. A bell tolls somewhere, a long way off, and nobody is ringing it.'};
+  if(LEVEL===SA.ID){
+    // the fog changes colour with the part of town: green and thick in the dead quarter, brown and thin over the farm, blue by the belfry, pale in the square
+    const px=G.P?G.P.x:36,py=G.P?G.P.y:36,z=typeof saZoneAt==='function'?saZoneAt(px|0,py|0):null;
+    let col=[150,160,184],fog=.017,dark=.55,haze=.42;
+    if(z&&z.k==='dead'){col=[128,158,138];fog=.026;dark=.62;haze=.5}
+    else if(z&&z.k==='farm'){col=[162,154,128];fog=.016;dark=.58;haze=.42}
+    else if(px>=50&&px<=64&&py<=36){col=[132,150,196];fog=.02;dark=.6;haze=.46}
+    else if(px>=29&&px<=41&&py>=29&&py<=43){col=[176,180,198];fog=.014;dark=.5;haze=.4}
+    return {id:'fog',n:'Grave fog',fog,haze,dark,mix:.45,col,text:'A cold grey fog lies in the streets of Sale. A bell tolls somewhere, a long way off, and nobody is ringing it.'}}
   if(saIs(LEVEL))return null;
   return _w.apply(this,arguments)}}
 /* ---- arrival: the pictures first, then the level; every id of Sale builds when asked for ---- */

@@ -1,1 +1,22 @@
-{}
+{
+ "gv0": {
+  "file": "gv0.webp",
+  "h_cells": 1.05
+ },
+ "gv1": {
+  "file": "gv1.webp",
+  "h_cells": 1.15
+ },
+ "gv2": {
+  "file": "gv2.webp",
+  "h_cells": 0.75
+ },
+ "gv3": {
+  "file": "gv3.webp",
+  "h_cells": 1.0
+ },
+ "gibbet": {
+  "file": "gibbet.webp",
+  "h_cells": 2.4
+ }
+}

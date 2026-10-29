@@ -317,3 +317,92 @@ function vtSpot(w){return w==='vaultboss'?[9677,12,20,0]:[9670,30,44,0]}
   const go=()=>{vtMake&&0;const L=LEVELS[id]||(KH_LAZY[id]&&(KH_LAZY[id](),LEVELS[id]));let at={x:x0,y:y0,f:f0};if(town==='vaultarchive'){at={x:L.start.x,y:L.start.y,f:L.start.f}}
     goToLevel(id,at);G.state='play';G.menu=false;msg('Your party stands at '+VT.NAMES[id]+', at level '+target+'.','#ffe36a')};
   G.state='play';G.menu=false;if(VT.ready)go();else vtLoad().then(go)}}
+
+/* ==========================================================================
+   THE QA AND ATMOSPHERE PASS OF THE VAULT (prefix vtq). Called at the end of every floor's dress function (vtMake) and of the hill's build (vthPolish): small readable notes that tell what happened
+   (a garrison log, a helmet with a name in it, a place card at an empty seat, a shawl on a chair), things dropped (boots, buckets, books, rings, chains, candle stubs), coloured lights in the
+   chambers, and then a clean-up: no two identical props within two squares of each other and no two identical creatures side by side.
+   ========================================================================== */
+const VT_NOTES=[
+  "Garrison log, a torn page pinned to the wall. 'Day 1: we go down at dawn. Day 2: nobody answered at the door. Day 3: the door was open, and the hall beyond it was clean.'",
+  "A helmet lying on its side with a candle stub burnt down inside it. A name is scratched on the inside of the rim: PRICE.",
+  "A strip of cloth tied to the bars of a cage. Marks on it, in fives, in soot. Fifty-eight days. The soot is fresh at the end.",
+  "A reading stand with a pencil on a string. Somebody has underlined the last name on the Roll twice, and then written the name of another person beside it, and crossed that out.",
+  "A pair of boots set side by side at the foot of a bed. The bed has not been slept in for a long time. The boots are still laced.",
+  "A tally of the cold store, in the gravedigger's hand: forty-one blocks of ice, eleven jars of salt. Under it: the salt does not keep them.",
+  "A bell-ringer's rota on a board. Five names for five bells, and a sixth name added later in a child's writing, with no bell next to it.",
+  "A counting-house slip in a small, neat hand. 'One cask of silver, delivered to the hill. Received: twelve households. Balance owing: nothing.' The word 'nothing' has been written over twice.",
+  "A name card at an empty place at the long table: WAT BRAMBLE. The chair has been pushed back, as if its owner had just stood up.",
+  "A statue's plinth. Somebody has chalked a tally of the steps down, and then wiped it, and the chalk marks are the only clean thing on the stair.",
+  "Twelve candles for twelve households. Each stands on a card with a name. The first candle is out, and its card is blank.",
+  "A woman's grey shawl, folded over the back of the chair beside the desk. There is no dust on it.",
+  "A broken pair of spectacles on a ledger, next to a pen with the nib snapped. The ledger is open at the page that records the price of the fever: it was never paid in money.",
+  "A child's drawing pinned under a stone: a house, a well, a hill with a door in it, and twelve people standing on the hill. The thirteenth person is drawn in, smaller, at the door."];
+khNpc('vto_note','A note',null,d=>gySay(VT_NOTES[vtI(d)%VT_NOTES.length],[BYE]));
+/* what each floor gets: items [key, x, y, scale, block]; notes [x, y, note number]; lights [x, y, colour] */
+const VT_POLISH={
+  9671:{items:[['wm_bucket',16,5,1],['ww_boot',13,4,1],['hl_p_candle',9,11,.6],['ww_boot',11,13,1],['wm_crate',6,10,.9,1],['wm_bucket',20,12,1],['wm_bucket',2,14,1],['hl_p_chains',2,9,1],['gy_book',25,12,.9],['hl_p_candle',27,12,.6],['hl_p_armour',17,20,.9,1],['ww_boot',10,23,1],['wm_barrel',19,23,.9]],
+    notes:[[16,3,0],[12,13,1],[2,10,2]],lights:[[14,9,[1.2,1.0,.7]],[12,21,[1.3,.95,.6]],[26,10,[1.2,1.0,.75]]]},
+  9672:{items:[['wm_bucket',16,3,1],['ww_boot',14,4,1],['gy_book',16,7,.9],['hl_p_candle',10,6,.6],['wm_crate',20,8,.9],['ww_boot',5,6,1],['wm_barrel',28,6,.9,1],['hl_p_chains',26,5,1],['wm_crate',24,9,.9,1],['hl_p_chains',8,14,1],['hl_p_chains',22,14,1],['ww_boot',8,24,1],['wm_bucket',22,24,1],['gy_book',12,19,.9]],
+    notes:[[12,6,3],[6,8,4],[27,8,5]],lights:[[26,7,[1.1,1.15,.9]],[15,10,[1.25,1.15,.7]]]},
+  9673:{items:[['hl_p_chains',7,7,1],['hl_p_chains',12,7,.9],['hl_p_chains',17,7,1],['hl_p_chains',22,7,.9],['hl_p_chains',27,7,1],['gy_book',5,18,.9],['wm_crate',9,16,.9,1],['wm_bucket',9,21,1],['hl_p_candle',4,21,.6],['gy_book',26,19,.9],['wm_barrel',30,17,.9,1],['ww_boot',14,18,1]],
+    notes:[[6,19,6]],lights:[[16,10,[1.3,1.0,.6]],[6,19,[1.2,1.0,.7]]]},
+  9674:{items:[['gy_ring',14,10,.9],['gy_locket',20,14,.9],['wm_crate',13,9,.9,1],['wm_crate',21,15,.9,1],['gy_ring',3,13,.9],['hl_p_candle',31,10,.6],['ww_boot',31,14,1],['gy_book',5,25,.9],['wm_bucket',12,24,1],['hl_p_chains',3,27,1]],
+    notes:[[13,11,7]],lights:[[17,12,[.8,1.0,1.4]],[6,12,[.8,.95,1.35]],[8,25,[.85,1.0,1.3]]]},
+  9675:{items:[['wm_bucket',7,12,1],['hl_p_chains',30,12,1],['wm_barrel',6,13,.9,1],['gy_book',24,10,.9],['hl_p_candle',9,11,.6],['hl_p_candle',21,11,.6],['ww_boot',16,9,1],['gy_ring',26,13,.9],['wm_crate',12,20,.9,1],['wm_bucket',30,24,1]],
+    notes:[[14,7,8]],lights:[[10,12,[1.3,1.05,.65]],[22,12,[1.3,1.05,.65]]]},
+  9676:{items:[['hl_p_chains',11,9,1],['wm_bucket',17,11,1],['gy_book',16,19,.9],['ww_boot',12,22,1],['hl_p_candle',7,18,.6],['hl_p_candle',26,20,.6],['wm_crate',12,29,.9,1],['wm_barrel',18,30,.9,1],['ww_boot',14,31,1]],
+    notes:[[15,7,9]],lights:[[14,10,[.85,1.0,1.3]],[14,30,[.85,.95,1.35]]]},
+  9677:{items:[['gy_rose',10,3,.8],['gy_rose',14,3,.8],['gy_book',12,10,.9],['hl_p_candle',8,12,.6],['hl_p_candle',16,12,.6],['gy_rose',12,17,.8]],
+    notes:[[12,5,10]],lights:[[12,12,[.8,.9,1.3]]]},
+  9678:{items:[['gy_book',4,8,.9],['gy_book',16,6,.9],['hl_p_candle',6,12,.6],['wm_bucket',15,8,1],['gy_rose',11,12,.8]],
+    notes:[[11,6,11]],lights:[[10,8,[1.3,1.1,.75]]]}};
+const VT_POOLS={
+  gy_candles:[{k:'hl_p_candle',sc:.7,b:0},{k:'gy_rose',sc:.5,b:0}],gy_web:[{k:'gy_bones',sc:.7,b:0}],gy_bones:[{k:'gy_rose',sc:.5,b:0},{k:'gy_book',sc:.8,b:0},{k:'ww_boot',sc:1,b:0}],
+  gy_sarc:[{k:'gy_tomb',sc:.9,b:1},{k:'hl_p_coffin',sc:.85,b:1}],gy_bench:[{k:'wm_crate',sc:.9,b:1},{k:'gy_tomb',sc:.8,b:1},{k:'wm_barrel',sc:.9,b:1}],
+  hl_p_shelf:[{k:'wm_bookshelf',sc:.64,b:1},{k:'hl_p_lectern',sc:1,b:1}],hl_p_cage:[{k:'hl_p_chains',sc:1,b:1}],
+  gy_lantern:[{k:'wm_cage_lantern',sc:1.3,b:0}],gy_dead:[{k:'gy_yew',sc:.9,b:1},{k:'ww_stump',sc:.9,b:1},{k:'ww_crowtree',sc:.8,b:1}],ltree2:[{k:'gy_dead',sc:1,b:1},{k:'gy_yew',sc:.9,b:1},{k:'ww_stump',sc:.9,b:1}],
+  gy_stone1:[{k:'gy_stone2',sc:.9,b:1},{k:'gy_slab',sc:.9,b:1},{k:'gy_lean',sc:.9,b:1},{k:'gy_wcross',sc:.9,b:1}],gy_stone2:[{k:'gy_stone1',sc:.9,b:1},{k:'gy_slab',sc:.9,b:1},{k:'gy_lean',sc:.9,b:1}],
+  gy_slab:[{k:'gy_stone1',sc:.9,b:1},{k:'gy_lean',sc:.9,b:1},{k:'gy_wcross',sc:.9,b:1}],gy_lean:[{k:'gy_stone1',sc:.9,b:1},{k:'gy_stone2',sc:.9,b:1},{k:'gy_slab',sc:.9,b:1}],gy_wcross:[{k:'gy_stone1',sc:.9,b:1},{k:'gy_lean',sc:.9,b:1},{k:'gy_slab',sc:.9,b:1}],
+  barrel:[{k:'crate',sc:.9,b:1},{k:'sacks',sc:.9,b:0}],gy_rose:[{k:'gy_ring',sc:.9,b:0},{k:'gy_locket',sc:.9,b:0}],gy_rpost:[{k:'ww_totem',sc:.5,b:1},{k:'wm_signpost',sc:.7,b:1}],gy_urn:[{k:'gy_ccross',sc:.8,b:1},{k:'gy_slab',sc:.9,b:1}],gy_ccross:[{k:'gy_urn',sc:.9,b:1},{k:'gy_slab',sc:.9,b:1}]};
+/* two creatures of one kind side by side: the second becomes another of the dead of the same rank */
+const VT_SWAP={gyskel:['gypike','gyghoul'],gypike:['gyskel','gyzombie'],gyghoul:['gyzombie','gyskel'],gyzombie:['gyghoul','gypike'],gybmage:['gyskel'],gywraith:['gyghoul'],gyhound:['gyghoul'],gyraven:['gyhound']};
+function vtqCreatures(enemies,rad){
+  let n=0;const kept=[];
+  for(const e of enemies){
+    const clash=t=>kept.some(o=>o.t===t&&Math.max(Math.abs(o.x-e.x),Math.abs(o.y-e.y))<=rad);
+    if(VT_SWAP[e.t]&&!/^vt/.test(e.t)&&clash(e.t)){const a=VT_SWAP[e.t].find(t=>ENEMY_DEF[t]&&!clash(t));if(a){e.t=a;n++}}
+    kept.push(e)}
+  return n}
+function vtPolish(C){
+  const P=VT_POLISH[C.id],out={placed:0,notes:0};
+  const spot=(x,y)=>{for(let r=0;r<=1;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(C.free(x+dx,y+dy))return [x+dx,y+dy]}return null};
+  if(P){
+    for(const [k,x,y,sc,b] of P.items){if(!IMG[k])continue;const q=spot(x,y);if(q){C.dec(k,q[0],q[1],{raw:true,sc:sc||1,block:!!b});out.placed++}}
+    for(const [x,y,i] of P.notes){const q=spot(x,y);if(q){C.dec('hl_p_note',q[0],q[1],{raw:true,block:true,npc:'vto_note',i,sc:1.1});out.notes++}}
+    for(const [x,y,col] of P.lights){if(C.open(x,y))C.light(x,y,col)}}
+  out.swapped=b7Dedupe(C.decor,VT_POOLS,d=>d.k==='sign_gy'||(d.npc&&d.k!=='gy_sarc'&&d.k!=='gy_bench')).swapped;
+  out.creatures=vtqCreatures(C.enemies,1);
+  C.V.qa=out}
+/* the hill: the same clean-up, a few more notes, a trail of boots and drag marks, and the fog that changes with the ground */
+VTH_SIGNS.push(
+  ['NOTE PINNED TO A CROSS',"Private Denny to the sergeant: I have gone up to look at the open barrows. I will be back for supper. The supper is on the fire."],
+  ["A SOLDIER'S PACK",'Oilcloth, half a loaf, a letter home that was never sent. It begins: Dear Ma, the hill is quiet tonight.'],
+  ['BARROW LID','The stone lid lies in the grass six paces from the grave. The earth under it is dry, and there are no tool marks. It was pushed from inside.'],
+  ['A WELL RUNNER','A boy has chalked on a stone: SILVER IN THE WELL. DO NOT DRINK. DO NOT TELL THE VICAR. The vicar is in the chapel and has not moved.']);
+function vthPolish(E){
+  const {decor,enemies,lights,free,path,D,DB}=E,res={};
+  const at=(cands,fn)=>{for(const [x,y] of cands){if(free(x,y)&&!path.has(x+','+y)){fn(x,y);return true}}return false};
+  // notes: signs on posts, by the picket, the path and the old village
+  at([[36,41],[36,40],[37,41]],(x,y)=>D('ww_sign',x,y,{block:true,npc:'vto_sign',i:8}));
+  at([[23,33],[23,32],[24,33]],(x,y)=>D('hl_p_note',x,y,{block:true,npc:'vto_sign',i:9,sc:1.1}));
+  at([[47,35],[47,34],[48,35]],(x,y)=>D('hl_p_note',x,y,{block:true,npc:'vto_sign',i:10,sc:1.1}));
+  at([[33,49],[33,50],[32,49]],(x,y)=>D('hl_p_note',x,y,{block:true,npc:'vto_sign',i:11,sc:1.1}));
+  // a trail up the path: a boot, a dropped pack, a lost helmet, three drag marks of bones out of an open barrow
+  [[36,40],[34,33],[38,37],[44,30],[24,28],[30,24]].forEach(([x,y],i)=>at([[x,y],[x+1,y],[x-1,y],[x,y+1]],(a,b)=>D(['ww_boot','gy_book','hl_p_apple','ww_boot','gy_ring','ww_crumbs'][i],a,b,{sc:1})));
+  [[41,34],[42,32],[43,31],[28,33],[29,31],[27,30]].forEach(([x,y],i)=>at([[x,y],[x,y+1],[x+1,y]],(a,b)=>D(i%2?'bones':'rose',a,b,{sc:i%2?.8:.6})));
+  // a few warm lights of the picket's fire and cold ones by the vault front
+  lights.push([27,43],[33,41]);
+  res.dedupe=b7Dedupe(decor,VT_POOLS,d=>d.pic||d.npc||d.k==='sign_gy'||/^pgrass|^pbracken/.test(d.k)||d.k==='gy_lantern'||d.k==='gy_angel'||d.k==='gy_obelisk'||d.k==='gy_column'||d.k==='gy_hatch'||d.k==='gy_mound'||d.k==='gy_fence');
+  res.creatures=vtqCreatures(enemies,1);
+  return res}

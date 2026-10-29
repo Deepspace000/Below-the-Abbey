@@ -117,7 +117,7 @@ function blaBuild(p){
   C.flatten(2,18,77,40);
   C.gate('E',35);C.gate('W',35);
   // the farmhouse, the barn, the yard
-  C.house(BLA_HOUSE);C.picHouse(BLA_BARN);C.reserve(35,25,65,33);
+  C.house(BLA_HOUSE);C.picHouse(BLA_BARN);C.light(BLA_HOUSE.front[0]-1,BLA_HOUSE.front[1],[1.8,1.2,.6]);C.light(BLA_HOUSE.front[0]+1,BLA_HOUSE.front[1],[1.8,1.2,.6]);C.light(BLA_HOUSE.front[0],BLA_HOUSE.front[1]+1,[1.5,1.0,.55]);C.reserve(35,25,65,33);
   for(const [x,y] of [[43,26],[50,26]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.warm)}
   C.dec('bl_urn',41,25,{block:true,sc:.8});C.dec('bl_urn',52,25,{block:true,sc:.8});
   C.dec('ww_well',39,29,{block:true,npc:'bla_well'});
@@ -164,7 +164,7 @@ function blaKitchen(){
   blRoom({id:BLA.HOUSE,name:"The Sedges' Kitchen",w:15,h:10,amb:.52,rating:85,floor:'wood',wall:'kh_ohwall1_2',
     back:{to:BLA.ID,x:f[0],y:f[1],f:2},
     lights:[[3,2],[7,5],[11,2],[3,7],[12,7]],lcol:{'3,2':[1.4,1.0,.6],'7,5':[1.35,.98,.58],'11,2':[1.4,1.0,.6],'3,7':[1.3,.95,.6],'12,7':[.75,1.1,.95]},col:[1.3,.95,.6],
-    enemies:[['blbones',12,8]],
+    enemies:[['blbones',10,7]],
     build:C=>{
       const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
       P('hearth',7,1,{h:1.3});C.raw('crate',7,2,{npc:'bla_hearth',solid:1,deco:false,hidden:true});
@@ -182,8 +182,8 @@ function blaCellar(){
     enemies:[['blghoul',8,5]],
     build:C=>{
       const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
-      P('coopstack',2,1,{h:.95});P('coopstack',4,1,{h:.95});P('shelving',7,1,{h:1.2});P('shelving',9,1,{h:1.2});P('waterbarrel',1,3,{h:.7});P('veg',9,4,{h:.6});
-      P('cot',8,6,{h:.55});P('coopstack',2,6,{h:.9});
+      P('coopstack',2,1,{h:.95});P('waterbarrel',4,1,{h:.7});P('shelving',7,1,{h:1.2});P('candlerack',9,1,{h:1.0});P('waterbarrel',1,3,{h:.7});P('veg',9,4,{h:.6});
+      P('cot',8,6,{h:.55});C.raw('crate',6,3,{block:true,sc:.75});C.raw('barrel',3,3,{block:true,sc:.7});C.raw('gy_bones',4,5,{block:false,sc:.3});P('coopstack',2,6,{h:.9});
       C.raw('gy_chest',9,6,{npc:'bla_chest',solid:1,deco:false,sc:.9});C.raw('gy_bones',5,4,{block:false,sc:.3});
       if(!blF().tillyFree){const kp=KH_KEEPERS.bla_tilly;C.raw(khFaceKey(kp.face),3,5,{npc:'bla_tilly',solid:1,deco:false,sc:kp.sc||1,block:false,walk:true})}}})}
 function blaBarn(){
@@ -212,9 +212,9 @@ function b14AshDress(C){
   const cart=b14Dead('b14_cart','cart','saturate(.3) brightness(.62)',1.1),gcart=b14Dead('b14_gcart','wl_prop1_5','saturate(.2) brightness(.55)',1.0),sacks=b14Dead('b14_sacks','sacks','saturate(.3) brightness(.6)',.7),
     wash=b14Dead('b14_wash','yar_washing','saturate(.1) brightness(.7) opacity(.9)',1.3),pots=b14Dead('b14_pots','yar_pots','saturate(.3) brightness(.6)',.4),ban=b14Dead('b14_banner','banner','saturate(.5) brightness(.75)',1.6);
   // the grain cart left in the yard, sacks and barrels at the barn door, a washing line with grey sheets, a milk-can stack (crates), the water trough side (barrels)
-  b14Place(C,[[gcart,54,31,{sc:1}],[sacks,56,27,{sc:.9}],['barrel',60,27,{sc:.9}],['barrel',61,27,{sc:.8}],['crate',57,27,{sc:.9}],[wash,38,32,{sc:1}],[pots,41,31,{sc:1}],['barrel',37,26],['crate',38,26],
-    [cart,52,30,{sc:.9}],['gy_lantern',45,26],['gy_lantern',48,26]]);
-  C.light(45,26,C.warm);C.light(48,26,C.warm);
+  b14Place(C,[[gcart,54,31,{sc:1}],[sacks,56,27,{sc:.9}],['barrel',60,27,{sc:.9}],['crate',61,27,{sc:.8}],['crate',57,27,{sc:.9}],[wash,38,32,{sc:1}],[pots,41,31,{sc:1}],['barrel',37,26],['crate',38,26],
+    [cart,52,30,{sc:.9}],['ww_cauldron',37,29,{sc:.7}]]);
+  C.light(45,26,C.warm);C.light(48,26,C.warm);b12Ash(C);
   for(const [x,y] of [[46,32],[59,31],[40,28],[51,32],[44,29]])C.dec('gy_bones',x,y,{sc:.25});
   // the lane and the road: a broken cart and a crate stack at the verges
   for(const [x,y] of [[20,33],[66,37],[30,37]])C.dec(x%2?cart:gcart,x,y,{block:true,sc:.9});

@@ -1,0 +1,50 @@
+PASS gideon offers blq7 (gold !)
+PASS blq7 accept
+PASS a false bell hurts, does not finish the quest
+PASS the true bell: quest ready
+PASS blq7 hand in
+PASS ambrose offers blq8
+PASS blq8 accept
+PASS choir singers stand in the nave
+PASS boss stands in the crypt
+PASS page 1 taken
+PASS niche gives the alms bowl
+PASS chantry chest
+PASS page 2 taken
+PASS page 3 taken, quest step 1 done
+PASS pages given, choir rests, quest ready
+PASS blq8 hand in
+PASS blq9 accept (Alder)
+PASS six grave boards read
+PASS names read to Alder, ready
+PASS blq9 hand in
+PASS blq10 accept (statue)
+PASS bowl set in the statue hands, ready
+PASS blq10 hand in
+PASS osk offers blq11
+PASS blq11 accept
+PASS boat to Heron Isle moves the party
+PASS lantern taken
+PASS marker Peascod set
+PASS boat back to the village
+PASS lantern given, quest ready
+PASS blq11 hand in
+PASS blq12 accept (Nan)
+PASS three salt sacks
+PASS salt given, ready
+PASS blq12 hand in
+PASS blq14 offered after blq12
+PASS blq14 accept
+PASS blq13 accept (Tam)
+PASS markers Corder and Hay set, ready
+PASS blq13 hand in
+PASS lamp 2 refuses before lamp 1
+PASS lamps light in order and banish wisps
+PASS the Reeve is here with his bloats
+PASS the Reeve falls: rod, quest ready
+PASS blq14 hand in
+quests blq7:done blq8:done blq9:done blq10:done blq11:done blq12:done blq13:done blq14:done
+PASS flags are plain data (save safe)
+errors []
+PASS no console errors
+QUESTS OK

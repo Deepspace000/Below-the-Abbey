@@ -129,6 +129,7 @@ function vtHillBuild(){
     ['gyzombie',48,25],['gyzombie',32,29],['gyzombie',24,21],['gyzombie',40,22],['gywraith',16,37],['gywraith',50,19],['gywraith',26,15],['gyhound',54,44],['gyhound',12,45],['gyraven',36,32],['gyraven',20,19],['gyraven',48,36],['gypike',34,18],['gypike',30,17],['gybmage',38,17],
     ['gyskel',40,47],['gyghoul',55,48],['gyzombie',16,48]];
   for(const [t,x,y] of FOES){if(!foe(t,x,y)){let ok=false;for(let r=1;r<4&&!ok;r++)for(let a=-r;a<=r&&!ok;a++)for(let b=-r;b<=r&&!ok;b++)if(Math.max(Math.abs(a),Math.abs(b))===r&&!path.has((x+a)+','+(y+b)))ok=foe(t,x+a,y+b)}}
+  try{VTH.qa=vthPolish({decor,enemies,lights,free,path,D,DB})}catch(e){console.error('vthPolish',e)}
   // ---- the level ----
   const rowsS=[],fmS=[];for(let y=0;y<H;y++){rowsS.push(rows[y].join(''));let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmS.push(s)}
   const mapNames=[{t:'The Road to Lanternrest',x:58,y:45,k:'place'},{t:'The Road to Hollowbell Abbey',x:5,y:45,k:'place'},{t:"The Garrison's Picket",x:29,y:40,k:'place'},{t:'Underhill, a ruined village',x:16,y:50,k:'place'},{t:'The Barrow Path',x:40,y:37,k:'place'},{t:'The Standing Stones',x:14,y:36,k:'place'},{t:'The Barrows',x:28,y:27,k:'place'},{t:'The Door of the Vault',x:34,y:14,k:'place'}];

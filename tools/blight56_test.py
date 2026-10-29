@@ -5,7 +5,7 @@ load    both places and all their rooms build with zero errors
 links   the gates of 5 and 6 lead to the neighbours and back; the west gate of 6 leads to the Vault stub 9670
 quests  blq50 to blq53 and blq54 to blq59 run from offer to hand-in
 shop    the quartermaster's stores and the reserve open, stock grows with the supplies; the smith opens
-rest    the inn rests the party for free (no gold taken), the teleport stone is in the inn and nowhere else on the road
+rest    the inn rests the party for free (no gold taken), there is no teleport stone on the road any more (3.695)
 save    a game saved in each place and room loads again
 walk    flood fill: gates, doors, people reached; no creature inside the fort walls or near an arrival square
 shots   screenshots
@@ -62,7 +62,7 @@ def run_links():
     with sync_playwright() as p:
         b, pg, errs = boot(p)
         r = pg.evaluate("""() => { const out = [];
-          const doors = id => { const L = LEVELS[id]; const o = []; for (const c in L.chars) { const d = KH_DOOR[L.chars[c]]; if (d && d.bl) o.push({side: d.side, lvl: d.lvl, at: d.at}) } return o };
+          const doors = id => { const L = LEVELS[id]; const o = []; for (const c in L.chars) { const d = KH_DOOR[L.chars[c]]; if (d && d.bl) o.push({side: d.side, lvl: d.lvl, at: d.at}); else if (d && d.vt === 'road') { const nb = vtNeighbour(d.dir); o.push({side: d.dir === 'east' ? 'E' : 'W', lvl: nb && nb.id, at: nb && nb.at}) } } return o };   /* the Vault (place 7): its gates are {vt:'road',dir} (vault_hill.js), handled by vtRoad/vtNeighbour (vault_core.js) */
           for (const n of [4, 5, 6, 7]) { const p = BL_ROAD[n - 1]; if (!LEVELS[p.id]) KH_LAZY[p.id]();
             const ds = doors(p.id), E = ds.find(d => d.side === 'E'), Wd = ds.find(d => d.side === 'W'), eD = blEastDest(p), wD = blWestDest(p);
             out.push({n, id: p.id, built: p.built, E: E && E.lvl, expectE: eD.lvl, W: Wd && Wd.lvl, expectW: wD.lvl, ok: !!E && !!Wd && E.lvl === eD.lvl && Wd.lvl === wD.lvl}) }
@@ -279,9 +279,9 @@ def run_rest():
         check('the inn rests the party free of charge', r['gold'] == 500 and all(r['hp']) and all(r['mp']) and all(r['food']), r)
         r2 = ev("""() => ({tele9661: !!teleSpot(9661), spot: teleSpot(9661), road: [9610,9611,9620,9621,9650,9651,9652,9653,9654,9655,9660,9662,9663,9664,9665,9666].map(id => { if (!LEVELS[id]) KH_LAZY[id](); return [id, !!teleSpot(id)] }).filter(x => x[1]) })""")
         print(r2)
-        check('one teleport stone: in the inn, nowhere else on the built road', r2['tele9661'] and not r2['road'], r2)
+        check('no teleport stone anywhere on the Blighted Road (3.695 removed them all, the inn too)', not r2['tele9661'] and not r2['road'], r2)
         ev("async () => { await T.go(9661,{x:7,y:8,f:0}) }")
-        check('the stone is in the level of the inn (G.tele)', ev("() => !!G.tele && G.tele.n===9661 && !!G.decor.find(d=>d.k==='teleporter')"))
+        check('the inn has no stone object (G.tele empty)', ev("() => !G.tele && !G.decor.find(d=>d.k==='teleporter')"))
         check('the fort and the orchard have no stones of their own', ev("async () => { await T.go(9660,{x:44,y:50,f:0}); const a=!G.tele; await T.go(9650,{x:44,y:36,f:0}); return a && !G.tele }"))
         print('errors', real(errs)[:10])
         check('no console errors', not real(errs))

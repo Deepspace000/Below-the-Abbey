@@ -37,7 +37,7 @@ function vtTone(src,key,mul,add,sat){
 function vtPics(){
   vtTone('hl_boss0','vti_warden',[1.15,1.22,1.4],[26,30,42],.12);        // the skeleton king of the Orange Spire, silvered and made the old barrow guard
   vtTone('gyp_boss_2','vti_silver',[1.12,1.18,1.32],[22,28,40],.18);       // the armoured knight, pale as moonlit silver
-  vtTone('hg_wizard','vti_maldrake',[1.08,1.12,1.22],[26,28,36],.2);       // Aldous Wend's figure, leached grey by the silver (the painted pieces are a stand-in)
+  if(IMG.vt_maldrake)IMG.vti_maldrake=IMG.vt_maldrake;else vtTone('hg_wizard','vti_maldrake',[1.08,1.12,1.22],[26,28,36],.2);       // Aldous Wend's figure, leached grey by the silver (the painted pieces are a stand-in)
   NPC_H.vti_warden=NPC_H.vti_warden||1.25;NPC_H.vti_silver=NPC_H.vti_silver||1.55;NPC_H.vti_maldrake=1.1;
   IMG.vti_wizard=IMG.vti_maldrake;
   const aw=(k,h)=>IMG[k]?+(h*IMG[k].width/IMG[k].height).toFixed(2):.7;   // the creature's width from its picture, for the height wanted
@@ -59,9 +59,14 @@ ITEMDEF.vtamulet={n:'Underhill Well Ring',k:'ring',t:'Ring',ic:'ring',c:'#b8d0e8
 {const id='vtquiet',s={cls:'Vault',lv:88,id,name:'Quiet the Dead',aim:['area',5],fx:[['undead',12,[110,150]],['sleep',3]],d:'Undead within 5 squares flee for 12 rounds or are destroyed outright, and the living cower for 3 rounds. Learned from Maldrake.',col:'#cfe0ff',cost:30,price:0};
   if(typeof MX!=='undefined'&&!MX.some(m=>m.id===id)){MX.push(s);MX_POWER[id]={lv:s.lv,act:true,cost:s.cost,type:'mx',name:s.name,d:s.d,col:s.col,mx:id,aim:s.aim,fx:s.fx,icn:'sp_c20'}}}
 /* ---------- loading: the pictures first, then the level; the Wenlock graveyard's pictures are used, so they are loaded with it ---------- */
+/* the painted pieces of the vault itself (assets/vt/manifest.json: name -> {file,h_cells}), loaded as IMG['vt_<name>']; none is fine */
+async function vtLoadOwn(){
+  try{VT.man=await (await fetch('assets/vt/manifest.json?v='+VERSION)).json()}catch(e){VT.man={}}
+  await Promise.all(Object.keys(VT.man||{}).map(k=>loadImg('vt_'+k,'assets/vt/'+VT.man[k].file).catch(()=>0)));
+}
 function vtLoad(){
   if(VT.loading)return VT.loading;
-  VT.loading=Promise.all([gyLoad(),typeof khLoadAssets==='function'?khLoadAssets():0]).then(()=>{try{gyAlias();vtPics()}catch(e){console.error('vtLoad',e)}VT.ready=true}).catch(e=>{console.error('vtLoad',e);VT.ready=true});
+  VT.loading=Promise.all([gyLoad(),typeof khLoadAssets==='function'?khLoadAssets():0,vtLoadOwn()]).then(()=>{try{gyAlias();vtPics()}catch(e){console.error('vtLoad',e)}VT.ready=true}).catch(e=>{console.error('vtLoad',e);VT.ready=true});
   return VT.loading}
 {const _g=goToLevel;goToLevel=function(n,entry){
   if(vtIs(n)&&!VT.ready&&!VT._wait){VT._wait=1;vtLoad().then(()=>{VT._wait=0;goToLevel(n,entry)});return}
@@ -86,7 +91,11 @@ function vtLoad(){
 if(typeof TELE_KEEP_HI!=='undefined')TELE_KEEP_HI.add(9670);   // the hill has a stone, the crypt floors none (noTele)
 /* ---------- the look and the sound ---------- */
 {const _w=weatherNow;weatherNow=function(){
-  if(LEVEL===VT.ID)return {id:'fog',n:'Grey blight-mist',fog:.026,haze:.78,dark:.05,mix:.5,col:[196,214,178],text:'A sick grey-green mist lies on the hill. The grass is dead to the root, the barrows are open at the doors, and the crows do not fly. Somewhere low a bell is tolling for nobody.'};
+  if(LEVEL===VT.ID){
+    // the mist changes with the ground: colder and bluer under the vault front, sicker and yellower in Underhill, a little warm by the picket fire
+    const py=G.P?G.P.y:45,px=G.P?G.P.x:30;let col=[196,214,178],fog=.026,haze=.78;
+    if(py<=22){col=[176,206,200];fog=.03;haze=.8}else if(py>=48){col=[206,214,160];fog=.03;haze=.8}else if(py>=36&&py<=43&&px>=22&&px<=34){col=[206,212,184];fog=.022;haze=.74}
+    return {id:'fog',n:'Grey blight-mist',fog,haze,dark:.05,mix:.5,col,text:'A sick grey-green mist lies on the hill. The grass is dead to the root, the barrows are open at the doors, and the crows do not fly. Somewhere low a bell is tolling for nobody.'}}
   if(vtIs(LEVEL))return null;
   return _w.apply(this,arguments)}}
 if(typeof WIND_AMT!=='undefined'){WIND_AMT[9670]=.42;for(let n=9671;n<=9678;n++)WIND_AMT[n]=.02}
@@ -96,6 +105,27 @@ function vtsBell(v){if(!AC||G.mute)return;const f=146.8;tone(f,f*.995,2.6,'sine'
 function vtsDrip(v){if(!AC||G.mute)return;const f=900+Math.random()*700;tone(f,f*.6,.12,'sine',.03*v,0);tone(f*.7,f*.5,.14,'sine',.012*v,.1)}
 function vtsCreak(v){if(!AC||G.mute)return;const f=100+Math.random()*60;tone(f,f*1.5,.6,'sawtooth',.02*v,0);tone(f*1.5,f*1.1,.4,'sawtooth',.016*v,.4);nz(.7,.008*v,'bandpass',380,280,0)}
 function vtsMoan(v){if(!AC||G.mute)return;const f=170+Math.random()*60;tone(f,f*.8,1.6,'sine',.02*v,0);tone(f*1.5,f*1.2,1.4,'triangle',.008*v,.2);nz(1.4,.004*v,'bandpass',700,400,0)}
+/* more voices (QA pass): a gust over the hill, the dead grass, a clink of silver, the clatter of spoons at the long table, far footsteps on the stair, a page turning, a candle guttering, a chain, a stone shifting */
+function vtsGust(v){if(!AC||G.mute)return;nz(3,.05*v,'lowpass',240,640,0);nz(2.4,.025*v,'bandpass',800,1300,.5)}
+function vtsRustle(v){if(!AC||G.mute)return;for(let i=0;i<6;i++)nz(.05,.03*v,'highpass',3800,3000,i*.08+Math.random()*.03)}
+function vtsClink(v){if(!AC||G.mute)return;for(let i=0;i<3;i++){const f=2400+Math.random()*1800,d=i*(.07+Math.random()*.05);tone(f,f*.97,.14,'sine',.02*v,d);tone(f*1.5,f*1.45,.09,'sine',.008*v,d)}}
+function vtsSpoons(v){if(!AC||G.mute)return;for(let i=0;i<6;i++){const f=1300+Math.random()*900,d=i*(.18+Math.random()*.2);tone(f,f*.8,.05,'triangle',.018*v,d);nz(.03,.012*v,'bandpass',2500,1800,d)}}
+function vtsSteps(v){if(!AC||G.mute)return;for(let i=0;i<5;i++){const d=i*.52;tone(70,45,.12,'sine',.04*v,d);nz(.07,.02*v,'lowpass',500,200,d)}}
+function vtsPage(v){if(!AC||G.mute)return;nz(.35,.02*v,'bandpass',3500,1800,0);nz(.2,.012*v,'highpass',5000,4000,.3)}
+function vtsChain(v){if(!AC||G.mute)return;for(let i=0;i<4;i++){const d=i*(.1+Math.random()*.05);tone(1900+Math.random()*900,1500,.06,'triangle',.02*v,d)}}
+function vtsStone(v){if(!AC||G.mute)return;nz(1.6,.035*v,'lowpass',160,70,0);tone(50,42,1.6,'sine',.03*v,0)}
+function vtsHush(v){if(!AC||G.mute)return;nz(2.2,.012*v,'bandpass',1500,900,0);nz(2,.01*v,'bandpass',2000,1300,.6)}
+function vtsExtras(now){
+  const N=VTS.n=VTS.n||{},due=(k,lo,hi)=>{if(N[k]===undefined){N[k]=now+Math.random()*hi;return false}if(now<=N[k])return false;N[k]=now+lo+Math.random()*(hi-lo);return true};
+  if(LEVEL===VT.ID){if(due('gust',18,40))vtsGust(.8);if(due('rus',9,22))vtsRustle(.7);if(due('moan',26,60))vtsMoan(.55);return}
+  if(LEVEL===9671){if(due('chn',16,36))vtsChain(.7);if(due('stp',24,50))vtsSteps(.6)}
+  else if(LEVEL===9672){if(due('hush',20,45))vtsHush(.8);if(due('page',22,50))vtsPage(.8)}
+  else if(LEVEL===9673){if(due('chn',14,30))vtsChain(.6)}
+  else if(LEVEL===9674){if(due('clk',9,24))vtsClink(.9);if(due('clk2',16,36))vtsClink(.5)}
+  else if(LEVEL===9675){if(due('spn',10,26))vtsSpoons(.9);if(due('hush',25,50))vtsHush(.7)}
+  else if(LEVEL===9676){if(due('stp',12,30))vtsSteps(.8);if(due('stn',24,50))vtsStone(.7)}
+  else if(LEVEL===9677){if(due('hush',14,32))vtsHush(1);if(due('stn',30,60))vtsStone(.5)}
+  else if(LEVEL===9678){if(due('page',8,20))vtsPage(1);if(due('hush',24,50))vtsHush(.6)}}
 function vtsTick(){
   if(!AC||!NB||!MASTER||G.state!=='play'||G.mute||!vtIs(LEVEL)||!SNDOPT.amb)return;
   const now=AC.currentTime;
@@ -109,7 +139,8 @@ function vtsTick(){
     if(now>VTS.nextMoan){VTS.nextMoan=now+24+Math.random()*30;vtsMoan(.5+Math.random()*.4)}
     if(LEVEL===9673&&now>VTS.nextBell){VTS.nextBell=now+17+Math.random()*14;vtsBell(.35)}   // the bell gallery rings itself, very faintly
     if(LEVEL===9675&&now>VTS.nextWhisper){VTS.nextWhisper=now+11+Math.random()*13;vtsMoan(.6)}
-  }}
+  }
+  vtsExtras(now)}
 {const _ys=yarSoundTick;yarSoundTick=function(){_ys.apply(this,arguments);try{vtsTick()}catch(e){console.error('vts',e)}}}
 /* the lights: lamps take the colour of the floor; the wall torches of each floor are one flame colour, put in the engine's list after setupLights has emptied it */
 {const _sl=setupLights;setupLights=function(){

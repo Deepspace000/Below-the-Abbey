@@ -1,0 +1,7651 @@
+{
+ "600": {
+  "size": [
+   72,
+   72
+  ],
+  "name": "Sale",
+  "badRows": 0,
+  "start": [
+   67,
+   36,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [
+   [
+    "decor",
+    "gy_bones",
+    64,
+    59,
+    ""
+   ],
+   [
+    "decor",
+    "gy_wcross",
+    65,
+    58,
+    ""
+   ]
+  ],
+  "missingImg": [
+   "sign_sa7202",
+   "sign_sa7204",
+   "sign_sa7206",
+   "sign_sa7207",
+   "sign_sa7209",
+   "sign_sa7210",
+   "sign_sa7213",
+   "sign_sa7215",
+   "sign_sa7216",
+   "sign_sa7217",
+   "sign_sasanct",
+   "sign_sabelfry",
+   "sign_sacrypt"
+  ],
+  "openCells": 4080,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [
+   {
+    "x": 57,
+    "y": 19,
+    "lvl": 603,
+    "vt": null,
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 56,
+    "y": 22,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 1
+   },
+   {
+    "x": 58,
+    "y": 24,
+    "lvl": 7239,
+    "vt": null,
+    "sale": 0,
+    "front": 2,
+    "frontOK": 1
+   },
+   {
+    "x": 56,
+    "y": 26,
+    "lvl": 7237,
+    "vt": null,
+    "sale": 0,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 58,
+    "y": 28,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 33,
+    "y": 29,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 34,
+    "y": 29,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 35,
+    "y": 29,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 56,
+    "y": 32,
+    "lvl": 7238,
+    "vt": null,
+    "sale": 0,
+    "front": 2,
+    "frontOK": 1
+   },
+   {
+    "x": 58,
+    "y": 32,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 5,
+    "y": 35,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 1
+   },
+   {
+    "x": 9,
+    "y": 35,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 13,
+    "y": 35,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 17,
+    "y": 35,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 21,
+    "y": 35,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 25,
+    "y": 35,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 44,
+    "y": 35,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 48,
+    "y": 35,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 53,
+    "y": 35,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 61,
+    "y": 35,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 64,
+    "y": 35,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 1
+   },
+   {
+    "x": 5,
+    "y": 37,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 9,
+    "y": 37,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 13,
+    "y": 37,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 25,
+    "y": 37,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 44,
+    "y": 37,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 49,
+    "y": 37,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 56,
+    "y": 37,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 1
+   },
+   {
+    "x": 60,
+    "y": 37,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 64,
+    "y": 37,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 52,
+    "y": 41,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 19,
+    "y": 42,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 54,
+    "y": 43,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 1
+   },
+   {
+    "x": 21,
+    "y": 44,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 1
+   },
+   {
+    "x": 52,
+    "y": 46,
+    "lvl": 7229,
+    "vt": null,
+    "sale": 0,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 19,
+    "y": 47,
+    "lvl": 601,
+    "vt": null,
+    "sale": 0,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 54,
+    "y": 48,
+    "lvl": 7233,
+    "vt": null,
+    "sale": 0,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 21,
+    "y": 49,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 52,
+    "y": 51,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 1
+   },
+   {
+    "x": 19,
+    "y": 52,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 54,
+    "y": 53,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 21,
+    "y": 54,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 52,
+    "y": 56,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 19,
+    "y": 57,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 54,
+    "y": 58,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 28,
+    "y": 60,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 44,
+    "y": 60,
+    "lvl": 7243,
+    "vt": null,
+    "sale": 0,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 20,
+    "y": 62,
+    "lvl": 602,
+    "vt": null,
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 30,
+    "y": 62,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 40,
+    "y": 62,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 46,
+    "y": 62,
+    "lvl": null,
+    "vt": null,
+    "sale": 1,
+    "front": 2,
+    "frontOK": 2
+   }
+  ],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "gy_lantern",
+    68,
+    38,
+    66,
+    37,
+    2
+   ],
+   [
+    "gy_web",
+    12,
+    35,
+    11,
+    37,
+    2
+   ],
+   [
+    "gy_bones",
+    47,
+    35,
+    46,
+    37,
+    2
+   ],
+   [
+    "gy_web",
+    62,
+    37,
+    63,
+    37,
+    1
+   ],
+   [
+    "gy_urn",
+    19,
+    44,
+    21,
+    43,
+    2
+   ],
+   [
+    "gy_bones",
+    19,
+    54,
+    21,
+    53,
+    2
+   ],
+   [
+    "gy_web",
+    52,
+    48,
+    54,
+    47,
+    2
+   ],
+   [
+    "gy_web",
+    52,
+    48,
+    50,
+    50,
+    2
+   ],
+   [
+    "gy_urn",
+    52,
+    50,
+    54,
+    50,
+    2
+   ],
+   [
+    "gy_bones",
+    52,
+    53,
+    54,
+    52,
+    2
+   ],
+   [
+    "gy_bones",
+    52,
+    53,
+    54,
+    55,
+    2
+   ],
+   [
+    "gy_bones",
+    54,
+    52,
+    56,
+    51,
+    2
+   ],
+   [
+    "gy_urn",
+    56,
+    21,
+    58,
+    23,
+    2
+   ],
+   [
+    "gy_bones",
+    43,
+    60,
+    45,
+    62,
+    2
+   ],
+   [
+    "sa_coffins",
+    31,
+    40,
+    33,
+    41,
+    2
+   ],
+   [
+    "gy_bench",
+    39,
+    40,
+    37,
+    41,
+    2
+   ],
+   [
+    "gy_fence",
+    23,
+    51,
+    23,
+    53,
+    2
+   ],
+   [
+    "gy_dead",
+    25,
+    67,
+    25,
+    66,
+    1
+   ],
+   [
+    "gy_stone2",
+    18,
+    41,
+    18,
+    40,
+    1
+   ],
+   [
+    "gy_dead",
+    16,
+    58,
+    14,
+    59,
+    2
+   ],
+   [
+    "gy_bones",
+    29,
+    48,
+    31,
+    46,
+    2
+   ],
+   [
+    "gy_bones",
+    29,
+    48,
+    29,
+    47,
+    1
+   ],
+   [
+    "gy_bones",
+    13,
+    49,
+    13,
+    48,
+    1
+   ],
+   [
+    "gy_dead",
+    25,
+    66,
+    27,
+    64,
+    2
+   ],
+   [
+    "gy_yew",
+    27,
+    52,
+    25,
+    50,
+    2
+   ],
+   [
+    "gy_stone1",
+    15,
+    65,
+    15,
+    66,
+    1
+   ],
+   [
+    "gy_bones",
+    31,
+    46,
+    29,
+    47,
+    2
+   ],
+   [
+    "gy_bones",
+    31,
+    57,
+    32,
+    59,
+    2
+   ],
+   [
+    "gy_fence",
+    14,
+    62,
+    12,
+    62,
+    2
+   ],
+   [
+    "gy_dead",
+    19,
+    66,
+    21,
+    66,
+    2
+   ],
+   [
+    "gy_bones",
+    62,
+    65,
+    63,
+    65,
+    1
+   ],
+   [
+    "gy_bones",
+    62,
+    65,
+    62,
+    67,
+    2
+   ],
+   [
+    "gy_fence",
+    65,
+    63,
+    67,
+    64,
+    2
+   ],
+   [
+    "gy_fence",
+    65,
+    63,
+    64,
+    62,
+    1
+   ],
+   [
+    "gy_bones",
+    64,
+    59,
+    66,
+    59,
+    2
+   ],
+   [
+    "gy_lean",
+    58,
+    64,
+    60,
+    66,
+    2
+   ],
+   [
+    "gy_web",
+    58,
+    67,
+    58,
+    65,
+    2
+   ],
+   [
+    "gy_bones",
+    63,
+    65,
+    62,
+    67,
+    2
+   ],
+   [
+    "gy_bones",
+    63,
+    65,
+    65,
+    64,
+    2
+   ],
+   [
+    "gy_fence",
+    64,
+    56,
+    65,
+    55,
+    1
+   ],
+   [
+    "gy_fence",
+    64,
+    56,
+    64,
+    55,
+    1
+   ],
+   [
+    "gy_wcross",
+    61,
+    65,
+    60,
+    67,
+    2
+   ],
+   [
+    "gy_fence",
+    65,
+    55,
+    64,
+    55,
+    1
+   ],
+   [
+    "gy_fence",
+    67,
+    64,
+    68,
+    63,
+    1
+   ],
+   [
+    "gy_fence",
+    67,
+    64,
+    66,
+    66,
+    2
+   ],
+   [
+    "gy_bones",
+    67,
+    63,
+    65,
+    64,
+    2
+   ],
+   [
+    "gy_dead",
+    61,
+    29,
+    61,
+    28,
+    1
+   ],
+   [
+    "gy_dead",
+    43,
+    9,
+    45,
+    10,
+    2
+   ],
+   [
+    "hay",
+    52,
+    28,
+    50,
+    29,
+    2
+   ],
+   [
+    "gy_dead",
+    67,
+    18,
+    66,
+    20,
+    2
+   ],
+   [
+    "gy_yew",
+    60,
+    29,
+    59,
+    31,
+    2
+   ],
+   [
+    "gy_dead",
+    46,
+    8,
+    45,
+    10,
+    2
+   ],
+   [
+    "gy_dead",
+    61,
+    28,
+    60,
+    26,
+    2
+   ],
+   [
+    "gy_stone2",
+    64,
+    44,
+    63,
+    42,
+    2
+   ],
+   [
+    "gy_yew",
+    25,
+    20,
+    23,
+    22,
+    2
+   ],
+   [
+    "gy_dead",
+    61,
+    9,
+    59,
+    11,
+    2
+   ]
+  ],
+  "dupNearN": 56,
+  "stack": [
+   [
+    "10,36",
+    "sign_sa7202+sign_sa7213"
+   ],
+   [
+    "26,36",
+    "sign_sa7206+sign_sa7215"
+   ],
+   [
+    "45,36",
+    "sign_sa7207+sign_sa7216"
+   ]
+  ],
+  "stackN": 3,
+  "enemyPile": [],
+  "doorFrontBlocked": [
+   [
+    56,
+    22,
+    56,
+    21,
+    "gy_urn"
+   ],
+   [
+    58,
+    24,
+    58,
+    23,
+    "gy_urn"
+   ],
+   [
+    56,
+    32,
+    56,
+    31,
+    "gy_urn"
+   ],
+   [
+    5,
+    35,
+    4,
+    35,
+    "gy_urn"
+   ],
+   [
+    64,
+    35,
+    63,
+    35,
+    "gy_urn"
+   ],
+   [
+    56,
+    37,
+    55,
+    37,
+    "gy_urn"
+   ],
+   [
+    54,
+    43,
+    54,
+    42,
+    "gy_urn"
+   ],
+   [
+    21,
+    44,
+    21,
+    43,
+    "gy_urn"
+   ],
+   [
+    52,
+    51,
+    52,
+    50,
+    "gy_urn"
+   ]
+  ],
+  "tightN": 98,
+  "tightByProp": [
+   [
+    68,
+    39
+   ],
+   [
+    59,
+    37
+   ],
+   [
+    59,
+    30
+   ],
+   [
+    68,
+    22
+   ],
+   [
+    60,
+    28
+   ],
+   [
+    55,
+    42
+   ],
+   [
+    68,
+    18
+   ],
+   [
+    53,
+    42
+   ],
+   [
+    68,
+    15
+   ],
+   [
+    59,
+    26
+   ],
+   [
+    57,
+    23
+   ],
+   [
+    68,
+    58
+   ],
+   [
+    65,
+    56
+   ],
+   [
+    66,
+    58
+   ],
+   [
+    63,
+    56
+   ],
+   [
+    55,
+    50
+   ],
+   [
+    56,
+    20
+   ],
+   [
+    56,
+    53
+   ],
+   [
+    53,
+    50
+   ],
+   [
+    67,
+    63
+   ],
+   [
+    65,
+    62
+   ],
+   [
+    55,
+    52
+   ],
+   [
+    50,
+    51
+   ],
+   [
+    56,
+    59
+   ],
+   [
+    37,
+    32
+   ],
+   [
+    66,
+    65
+   ],
+   [
+    33,
+    32
+   ],
+   [
+    64,
+    68
+   ],
+   [
+    31,
+    39
+   ],
+   [
+    33,
+    30
+   ],
+   [
+    61,
+    66
+   ],
+   [
+    68,
+    64
+   ],
+   [
+    60,
+    68
+   ],
+   [
+    56,
+    66
+   ],
+   [
+    59,
+    68
+   ],
+   [
+    31,
+    44
+   ],
+   [
+    20,
+    35
+   ],
+   [
+    50,
+    68
+   ],
+   [
+    46,
+    7
+   ],
+   [
+    20,
+    43
+   ],
+   [
+    20,
+    44
+   ],
+   [
+    43,
+    3
+   ],
+   [
+    29,
+    58
+   ],
+   [
+    28,
+    57
+   ],
+   [
+    23,
+    52
+   ],
+   [
+    20,
+    49
+   ],
+   [
+    9,
+    39
+   ],
+   [
+    30,
+    61
+   ],
+   [
+    36,
+    3
+   ],
+   [
+    18,
+    51
+   ],
+   [
+    18,
+    49
+   ],
+   [
+    3,
+    35
+   ],
+   [
+    19,
+    18
+   ],
+   [
+    32,
+    3
+   ],
+   [
+    18,
+    59
+   ],
+   [
+    17,
+    58
+   ],
+   [
+    27,
+    3
+   ],
+   [
+    26,
+    4
+   ],
+   [
+    25,
+    68
+   ],
+   [
+    18,
+    61
+   ]
+  ],
+  "_tight": [
+   [
+    65,
+    36
+   ],
+   [
+    64,
+    36
+   ],
+   [
+    68,
+    39
+   ],
+   [
+    61,
+    36
+   ],
+   [
+    60,
+    36
+   ],
+   [
+    59,
+    37
+   ],
+   [
+    63,
+    34
+   ],
+   [
+    57,
+    33
+   ],
+   [
+    59,
+    30
+   ],
+   [
+    57,
+    32
+   ],
+   [
+    68,
+    22
+   ],
+   [
+    60,
+    28
+   ],
+   [
+    55,
+    42
+   ],
+   [
+    49,
+    36
+   ],
+   [
+    68,
+    18
+   ],
+   [
+    48,
+    36
+   ],
+   [
+    53,
+    42
+   ],
+   [
+    68,
+    15
+   ],
+   [
+    59,
+    26
+   ],
+   [
+    45,
+    36
+   ],
+   [
+    57,
+    23
+   ],
+   [
+    68,
+    58
+   ],
+   [
+    44,
+    36
+   ],
+   [
+    65,
+    56
+   ],
+   [
+    43,
+    36
+   ],
+   [
+    66,
+    58
+   ],
+   [
+    63,
+    56
+   ],
+   [
+    55,
+    50
+   ],
+   [
+    56,
+    20
+   ],
+   [
+    56,
+    53
+   ],
+   [
+    53,
+    50
+   ],
+   [
+    67,
+    63
+   ],
+   [
+    65,
+    62
+   ],
+   [
+    55,
+    52
+   ],
+   [
+    50,
+    51
+   ],
+   [
+    56,
+    59
+   ],
+   [
+    37,
+    32
+   ],
+   [
+    66,
+    65
+   ],
+   [
+    33,
+    32
+   ],
+   [
+    64,
+    68
+   ],
+   [
+    31,
+    39
+   ],
+   [
+    33,
+    30
+   ],
+   [
+    61,
+    66
+   ],
+   [
+    68,
+    64
+   ],
+   [
+    60,
+    68
+   ],
+   [
+    56,
+    66
+   ],
+   [
+    26,
+    36
+   ],
+   [
+    59,
+    68
+   ],
+   [
+    25,
+    36
+   ],
+   [
+    24,
+    36
+   ],
+   [
+    31,
+    44
+   ],
+   [
+    23,
+    34
+   ],
+   [
+    20,
+    35
+   ],
+   [
+    50,
+    68
+   ],
+   [
+    46,
+    7
+   ],
+   [
+    15,
+    35
+   ],
+   [
+    14,
+    36
+   ],
+   [
+    20,
+    43
+   ],
+   [
+    15,
+    34
+   ],
+   [
+    13,
+    36
+   ],
+   [
+    20,
+    44
+   ],
+   [
+    43,
+    3
+   ],
+   [
+    10,
+    36
+   ],
+   [
+    9,
+    36
+   ],
+   [
+    8,
+    36
+   ],
+   [
+    29,
+    58
+   ],
+   [
+    28,
+    57
+   ],
+   [
+    23,
+    52
+   ],
+   [
+    20,
+    49
+   ],
+   [
+    9,
+    39
+   ],
+   [
+    7,
+    35
+   ],
+   [
+    7,
+    37
+   ],
+   [
+    6,
+    36
+   ],
+   [
+    30,
+    61
+   ],
+   [
+    7,
+    34
+   ],
+   [
+    7,
+    38
+   ],
+   [
+    5,
+    36
+   ],
+   [
+    36,
+    3
+   ],
+   [
+    18,
+    51
+   ],
+   [
+    18,
+    49
+   ],
+   [
+    3,
+    35
+   ],
+   [
+    19,
+    18
+   ],
+   [
+    32,
+    3
+   ],
+   [
+    18,
+    59
+   ],
+   [
+    17,
+    58
+   ],
+   [
+    27,
+    3
+   ],
+   [
+    26,
+    4
+   ],
+   [
+    25,
+    68
+   ],
+   [
+    18,
+    61
+   ],
+   [
+    25,
+    3
+   ],
+   [
+    20,
+    66
+   ],
+   [
+    19,
+    65
+   ],
+   [
+    21,
+    3
+   ],
+   [
+    13,
+    62
+   ],
+   [
+    14,
+    66
+   ],
+   [
+    13,
+    68
+   ],
+   [
+    3,
+    11
+   ],
+   [
+    5,
+    3
+   ]
+  ],
+  "decorN": 417,
+  "lights": 33,
+  "enemiesN": 29,
+  "itemsN": 20,
+  "kinds": 52
+ },
+ "601": {
+  "size": [
+   24,
+   15
+  ],
+  "name": "The Hollow Cellar",
+  "badRows": 0,
+  "start": [
+   2,
+   7,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [],
+  "openCells": 124,
+  "unreachGeom": [],
+  "unreachProp": [
+   [
+    22,
+    6
+   ],
+   [
+    22,
+    8
+   ]
+  ],
+  "unreachGeomN": 0,
+  "unreachPropN": 2,
+  "doors": [
+   {
+    "x": 0,
+    "y": 7,
+    "lvl": 600,
+    "vt": null,
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   }
+  ],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "barrel",
+    12,
+    3,
+    14,
+    3,
+    2
+   ]
+  ],
+  "dupNearN": 1,
+  "stack": [],
+  "stackN": 0,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 13,
+  "tightByProp": [
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    9
+   ],
+   [
+    6,
+    5
+   ],
+   [
+    11,
+    3
+   ],
+   [
+    11,
+    11
+   ],
+   [
+    13,
+    3
+   ],
+   [
+    19,
+    3
+   ],
+   [
+    21,
+    7
+   ],
+   [
+    19,
+    11
+   ]
+  ],
+  "_tight": [
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    9
+   ],
+   [
+    7,
+    7
+   ],
+   [
+    6,
+    5
+   ],
+   [
+    8,
+    7
+   ],
+   [
+    9,
+    7
+   ],
+   [
+    10,
+    7
+   ],
+   [
+    11,
+    3
+   ],
+   [
+    11,
+    11
+   ],
+   [
+    13,
+    3
+   ],
+   [
+    19,
+    3
+   ],
+   [
+    21,
+    7
+   ],
+   [
+    19,
+    11
+   ]
+  ],
+  "decorN": 25,
+  "lights": 8,
+  "enemiesN": 6,
+  "itemsN": 0,
+  "kinds": 9
+ },
+ "602": {
+  "size": [
+   29,
+   15
+  ],
+  "name": "The Sale Crypt",
+  "badRows": 0,
+  "start": [
+   2,
+   7,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [],
+  "openCells": 177,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [
+   {
+    "x": 0,
+    "y": 7,
+    "lvl": 600,
+    "vt": null,
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   }
+  ],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "gy_niche",
+    2,
+    5,
+    3,
+    6,
+    1
+   ],
+   [
+    "gy_bones",
+    23,
+    6,
+    25,
+    8,
+    2
+   ]
+  ],
+  "dupNearN": 2,
+  "stack": [],
+  "stackN": 0,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 18,
+  "tightByProp": [
+   [
+    8,
+    4
+   ],
+   [
+    8,
+    10
+   ],
+   [
+    9,
+    3
+   ],
+   [
+    9,
+    11
+   ],
+   [
+    12,
+    3
+   ],
+   [
+    12,
+    11
+   ],
+   [
+    15,
+    3
+   ],
+   [
+    15,
+    11
+   ],
+   [
+    18,
+    3
+   ],
+   [
+    18,
+    11
+   ],
+   [
+    21,
+    9
+   ],
+   [
+    22,
+    10
+   ],
+   [
+    27,
+    9
+   ],
+   [
+    26,
+    10
+   ]
+  ],
+  "_tight": [
+   [
+    6,
+    7
+   ],
+   [
+    7,
+    7
+   ],
+   [
+    8,
+    4
+   ],
+   [
+    8,
+    10
+   ],
+   [
+    9,
+    3
+   ],
+   [
+    9,
+    11
+   ],
+   [
+    12,
+    3
+   ],
+   [
+    12,
+    11
+   ],
+   [
+    15,
+    3
+   ],
+   [
+    15,
+    11
+   ],
+   [
+    19,
+    7
+   ],
+   [
+    18,
+    3
+   ],
+   [
+    20,
+    7
+   ],
+   [
+    18,
+    11
+   ],
+   [
+    21,
+    9
+   ],
+   [
+    22,
+    10
+   ],
+   [
+    27,
+    9
+   ],
+   [
+    26,
+    10
+   ]
+  ],
+  "decorN": 28,
+  "lights": 10,
+  "enemiesN": 7,
+  "itemsN": 1,
+  "kinds": 7
+ },
+ "603": {
+  "size": [
+   13,
+   21
+  ],
+  "name": "The Belfry of Sale",
+  "badRows": 0,
+  "start": [
+   6,
+   18,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [],
+  "openCells": 97,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [
+   {
+    "x": 6,
+    "y": 20,
+    "lvl": 600,
+    "vt": null,
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   }
+  ],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [],
+  "dupNearN": 0,
+  "stack": [],
+  "stackN": 0,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 14,
+  "tightByProp": [
+   [
+    3,
+    11
+   ],
+   [
+    7,
+    2
+   ],
+   [
+    5,
+    2
+   ],
+   [
+    8,
+    1
+   ],
+   [
+    6,
+    1
+   ],
+   [
+    9,
+    2
+   ],
+   [
+    4,
+    1
+   ],
+   [
+    3,
+    2
+   ]
+  ],
+  "_tight": [
+   [
+    6,
+    14
+   ],
+   [
+    6,
+    13
+   ],
+   [
+    6,
+    12
+   ],
+   [
+    3,
+    11
+   ],
+   [
+    6,
+    7
+   ],
+   [
+    6,
+    6
+   ],
+   [
+    6,
+    5
+   ],
+   [
+    7,
+    2
+   ],
+   [
+    5,
+    2
+   ],
+   [
+    8,
+    1
+   ],
+   [
+    6,
+    1
+   ],
+   [
+    9,
+    2
+   ],
+   [
+    4,
+    1
+   ],
+   [
+    3,
+    2
+   ]
+  ],
+  "decorN": 13,
+  "lights": 8,
+  "enemiesN": 5,
+  "itemsN": 0,
+  "kinds": 5
+ },
+ "7201": {
+  "size": [
+   23,
+   19
+  ],
+  "name": "The Bear Den",
+  "badRows": 0,
+  "start": [
+   8,
+   16,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [],
+  "openCells": 76,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [
+   {
+    "x": 8,
+    "y": 17,
+    "lvl": 7,
+    "vt": null,
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   }
+  ],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [],
+  "dupNearN": 0,
+  "stack": [],
+  "stackN": 0,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 3,
+  "tightByProp": [
+   [
+    14,
+    3
+   ]
+  ],
+  "_tight": [
+   [
+    8,
+    16
+   ],
+   [
+    9,
+    15
+   ],
+   [
+    14,
+    3
+   ]
+  ],
+  "decorN": 3,
+  "lights": 0,
+  "enemiesN": 2,
+  "itemsN": 8,
+  "kinds": 2
+ },
+ "7202": {
+  "size": [
+   11,
+   8
+  ],
+  "name": "Pennyworth's Provisions",
+  "badRows": 0,
+  "start": [
+   5,
+   6,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [
+   [
+    "decor",
+    "sacks",
+    10,
+    2,
+    ""
+   ]
+  ],
+  "missingImg": [],
+  "openCells": 54,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "wl2_smith_3",
+    1,
+    1,
+    2,
+    1,
+    1
+   ],
+   [
+    "wl2_smith_3",
+    8,
+    1,
+    9,
+    1,
+    1
+   ],
+   [
+    "wl2_smith_4",
+    3,
+    3,
+    4,
+    3,
+    1
+   ],
+   [
+    "wl2_smith_4",
+    4,
+    3,
+    6,
+    3,
+    2
+   ],
+   [
+    "wl2_smith_4",
+    6,
+    3,
+    7,
+    3,
+    1
+   ]
+  ],
+  "dupNearN": 5,
+  "stack": [
+   [
+    "1,1",
+    "gy_web+wl2_smith_3*"
+   ],
+   [
+    "9,1",
+    "gy_web+wl2_smith_3*"
+   ]
+  ],
+  "stackN": 2,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 7,
+  "tightByProp": [
+   [
+    5,
+    3
+   ],
+   [
+    8,
+    3
+   ],
+   [
+    9,
+    4
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    1,
+    4
+   ],
+   [
+    9,
+    2
+   ],
+   [
+    1,
+    2
+   ]
+  ],
+  "_tight": [
+   [
+    5,
+    3
+   ],
+   [
+    8,
+    3
+   ],
+   [
+    9,
+    4
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    1,
+    4
+   ],
+   [
+    9,
+    2
+   ],
+   [
+    1,
+    2
+   ]
+  ],
+  "decorN": 19,
+  "lights": 3,
+  "enemiesN": 0,
+  "itemsN": 0,
+  "kinds": 11
+ },
+ "7203": {
+  "size": [
+   23,
+   19
+  ],
+  "name": "The Moor Wolves\u2019 Cave",
+  "badRows": 0,
+  "start": [
+   8,
+   16,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [],
+  "openCells": 74,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [
+   {
+    "x": 8,
+    "y": 17,
+    "lvl": 19,
+    "vt": null,
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   }
+  ],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [],
+  "dupNearN": 0,
+  "stack": [],
+  "stackN": 0,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 7,
+  "tightByProp": [
+   [
+    20,
+    5
+   ]
+  ],
+  "_tight": [
+   [
+    8,
+    16
+   ],
+   [
+    10,
+    15
+   ],
+   [
+    11,
+    13
+   ],
+   [
+    11,
+    12
+   ],
+   [
+    9,
+    7
+   ],
+   [
+    8,
+    4
+   ],
+   [
+    20,
+    5
+   ]
+  ],
+  "decorN": 3,
+  "lights": 0,
+  "enemiesN": 3,
+  "itemsN": 7,
+  "kinds": 2
+ },
+ "7204": {
+  "size": [
+   13,
+   9
+  ],
+  "name": "Ironbrow's Armoury",
+  "badRows": 0,
+  "start": [
+   6,
+   7,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [],
+  "openCells": 77,
+  "unreachGeom": [],
+  "unreachProp": [
+   [
+    11,
+    1
+   ]
+  ],
+  "unreachGeomN": 0,
+  "unreachPropN": 1,
+  "doors": [],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "wl2_armour_0",
+    2,
+    1,
+    4,
+    1,
+    2
+   ],
+   [
+    "wl2_armour_0",
+    8,
+    1,
+    10,
+    1,
+    2
+   ],
+   [
+    "wl2_smith_4",
+    4,
+    3,
+    5,
+    3,
+    1
+   ],
+   [
+    "wl2_smith_4",
+    5,
+    3,
+    7,
+    3,
+    2
+   ],
+   [
+    "wl2_smith_4",
+    7,
+    3,
+    8,
+    3,
+    1
+   ]
+  ],
+  "dupNearN": 5,
+  "stack": [],
+  "stackN": 0,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 13,
+  "tightByProp": [
+   [
+    6,
+    3
+   ],
+   [
+    11,
+    7
+   ],
+   [
+    1,
+    6
+   ],
+   [
+    11,
+    5
+   ],
+   [
+    1,
+    4
+   ],
+   [
+    9,
+    1
+   ],
+   [
+    8,
+    2
+   ],
+   [
+    11,
+    3
+   ],
+   [
+    3,
+    1
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    7,
+    1
+   ],
+   [
+    5,
+    1
+   ],
+   [
+    1,
+    1
+   ]
+  ],
+  "_tight": [
+   [
+    6,
+    3
+   ],
+   [
+    11,
+    7
+   ],
+   [
+    1,
+    6
+   ],
+   [
+    11,
+    5
+   ],
+   [
+    1,
+    4
+   ],
+   [
+    9,
+    1
+   ],
+   [
+    8,
+    2
+   ],
+   [
+    11,
+    3
+   ],
+   [
+    3,
+    1
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    7,
+    1
+   ],
+   [
+    5,
+    1
+   ],
+   [
+    1,
+    1
+   ]
+  ],
+  "decorN": 18,
+  "lights": 3,
+  "enemiesN": 0,
+  "itemsN": 0,
+  "kinds": 9
+ },
+ "7205": {
+  "size": [
+   23,
+   19
+  ],
+  "name": "The Greendale Hoard",
+  "badRows": 0,
+  "start": [
+   8,
+   16,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [],
+  "openCells": 62,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [
+   {
+    "x": 8,
+    "y": 17,
+    "lvl": 32,
+    "vt": null,
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   }
+  ],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [],
+  "dupNearN": 0,
+  "stack": [],
+  "stackN": 0,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 8,
+  "tightByProp": [
+   [
+    5,
+    6
+   ]
+  ],
+  "_tight": [
+   [
+    8,
+    16
+   ],
+   [
+    9,
+    16
+   ],
+   [
+    10,
+    14
+   ],
+   [
+    11,
+    15
+   ],
+   [
+    10,
+    13
+   ],
+   [
+    9,
+    11
+   ],
+   [
+    10,
+    7
+   ],
+   [
+    5,
+    6
+   ]
+  ],
+  "decorN": 2,
+  "lights": 0,
+  "enemiesN": 0,
+  "itemsN": 9,
+  "kinds": 2
+ },
+ "7206": {
+  "size": [
+   13,
+   9
+  ],
+  "name": "Stroud and Daughter, Weaponsmiths",
+  "badRows": 0,
+  "start": [
+   6,
+   7,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [],
+  "openCells": 77,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "wl2_smith_2",
+    1,
+    1,
+    3,
+    1,
+    2
+   ],
+   [
+    "wl2_smith_2",
+    9,
+    1,
+    11,
+    1,
+    2
+   ],
+   [
+    "wl2_smith_4",
+    4,
+    3,
+    5,
+    3,
+    1
+   ],
+   [
+    "wl2_smith_4",
+    5,
+    3,
+    7,
+    3,
+    2
+   ],
+   [
+    "wl2_smith_4",
+    7,
+    3,
+    8,
+    3,
+    1
+   ]
+  ],
+  "dupNearN": 5,
+  "stack": [
+   [
+    "1,1",
+    "gy_web+wl2_smith_2*"
+   ],
+   [
+    "11,1",
+    "gy_web+wl2_smith_2*"
+   ]
+  ],
+  "stackN": 2,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 6,
+  "tightByProp": [
+   [
+    6,
+    3
+   ],
+   [
+    1,
+    6
+   ],
+   [
+    11,
+    4
+   ],
+   [
+    10,
+    1
+   ],
+   [
+    11,
+    2
+   ],
+   [
+    2,
+    1
+   ]
+  ],
+  "_tight": [
+   [
+    6,
+    3
+   ],
+   [
+    1,
+    6
+   ],
+   [
+    11,
+    4
+   ],
+   [
+    10,
+    1
+   ],
+   [
+    11,
+    2
+   ],
+   [
+    2,
+    1
+   ]
+  ],
+  "decorN": 16,
+  "lights": 4,
+  "enemiesN": 0,
+  "itemsN": 0,
+  "kinds": 9
+ },
+ "7207": {
+  "size": [
+   11,
+   8
+  ],
+  "name": "Marrowbone's Remedies",
+  "badRows": 0,
+  "start": [
+   5,
+   6,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [
+   [
+    "decor",
+    "sacks",
+    10,
+    2,
+    ""
+   ],
+   [
+    "decor",
+    "crate",
+    0,
+    1,
+    ""
+   ],
+   [
+    "decor",
+    "crate",
+    10,
+    1,
+    ""
+   ]
+  ],
+  "missingImg": [],
+  "openCells": 54,
+  "unreachGeom": [],
+  "unreachProp": [
+   [
+    1,
+    6
+   ]
+  ],
+  "unreachGeomN": 0,
+  "unreachPropN": 1,
+  "doors": [],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "crate",
+    1,
+    3,
+    0,
+    1,
+    2
+   ],
+   [
+    "crate",
+    1,
+    3,
+    2,
+    1,
+    2
+   ],
+   [
+    "crate",
+    1,
+    3,
+    2,
+    1,
+    2
+   ],
+   [
+    "wl2_armour_4",
+    1,
+    1,
+    3,
+    1,
+    2
+   ],
+   [
+    "crate",
+    0,
+    1,
+    2,
+    1,
+    2
+   ],
+   [
+    "crate",
+    0,
+    1,
+    2,
+    1,
+    2
+   ],
+   [
+    "crate",
+    2,
+    1,
+    2,
+    1,
+    0
+   ],
+   [
+    "crate",
+    2,
+    1,
+    4,
+    1,
+    2
+   ],
+   [
+    "crate",
+    2,
+    1,
+    4,
+    1,
+    2
+   ],
+   [
+    "crate",
+    4,
+    1,
+    6,
+    1,
+    2
+   ],
+   [
+    "wl2_armour_4",
+    7,
+    1,
+    9,
+    1,
+    2
+   ],
+   [
+    "crate",
+    6,
+    1,
+    8,
+    1,
+    2
+   ],
+   [
+    "crate",
+    6,
+    1,
+    8,
+    1,
+    2
+   ],
+   [
+    "crate",
+    8,
+    1,
+    8,
+    1,
+    0
+   ],
+   [
+    "crate",
+    8,
+    1,
+    10,
+    1,
+    2
+   ],
+   [
+    "crate",
+    8,
+    1,
+    10,
+    1,
+    2
+   ],
+   [
+    "wl2_smith_4",
+    4,
+    3,
+    6,
+    3,
+    2
+   ]
+  ],
+  "dupNearN": 17,
+  "stack": [
+   [
+    "1,1",
+    "gy_web+wl2_armour_4*"
+   ],
+   [
+    "9,1",
+    "gy_web+wl2_armour_4*"
+   ],
+   [
+    "2,1",
+    "crate*+crate*"
+   ],
+   [
+    "8,1",
+    "crate*+crate*"
+   ]
+  ],
+  "stackN": 4,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 5,
+  "tightByProp": [
+   [
+    5,
+    3
+   ],
+   [
+    1,
+    4
+   ],
+   [
+    6,
+    2
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    1,
+    2
+   ]
+  ],
+  "_tight": [
+   [
+    5,
+    3
+   ],
+   [
+    1,
+    4
+   ],
+   [
+    6,
+    2
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    1,
+    2
+   ]
+  ],
+  "decorN": 23,
+  "lights": 4,
+  "enemiesN": 0,
+  "itemsN": 0,
+  "kinds": 8
+ },
+ "7208": {
+  "size": [
+   23,
+   19
+  ],
+  "name": "The Hounds\u2019 Hollow",
+  "badRows": 0,
+  "start": [
+   8,
+   16,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [
+   "lantern"
+  ],
+  "openCells": 67,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [
+   {
+    "x": 8,
+    "y": 17,
+    "lvl": 520,
+    "vt": null,
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   }
+  ],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [],
+  "dupNearN": 0,
+  "stack": [],
+  "stackN": 0,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 6,
+  "tightByProp": [],
+  "_tight": [
+   [
+    7,
+    15
+   ],
+   [
+    9,
+    12
+   ],
+   [
+    9,
+    11
+   ],
+   [
+    9,
+    10
+   ],
+   [
+    10,
+    6
+   ],
+   [
+    10,
+    5
+   ]
+  ],
+  "decorN": 3,
+  "lights": 2,
+  "enemiesN": 3,
+  "itemsN": 10,
+  "kinds": 3
+ },
+ "7209": {
+  "size": [
+   11,
+   8
+  ],
+  "name": "The Dead Letter Scriptorium",
+  "badRows": 0,
+  "start": [
+   5,
+   6,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [
+   [
+    "decor",
+    "crate",
+    0,
+    1,
+    ""
+   ],
+   [
+    "decor",
+    "crate",
+    10,
+    1,
+    ""
+   ]
+  ],
+  "missingImg": [],
+  "openCells": 54,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "crate",
+    9,
+    3,
+    8,
+    1,
+    2
+   ],
+   [
+    "crate",
+    9,
+    3,
+    10,
+    1,
+    2
+   ],
+   [
+    "crate",
+    0,
+    1,
+    2,
+    1,
+    2
+   ],
+   [
+    "wl2_library_3",
+    2,
+    1,
+    3,
+    1,
+    1
+   ],
+   [
+    "wl2_library_3",
+    7,
+    1,
+    8,
+    1,
+    1
+   ],
+   [
+    "crate",
+    8,
+    1,
+    10,
+    1,
+    2
+   ],
+   [
+    "wl2_library_1",
+    4,
+    3,
+    6,
+    3,
+    2
+   ]
+  ],
+  "dupNearN": 7,
+  "stack": [
+   [
+    "1,1",
+    "gy_web+wl2_library_0*"
+   ],
+   [
+    "9,1",
+    "gy_web+wl2_library_0*"
+   ],
+   [
+    "2,1",
+    "crate*+wl2_library_3*"
+   ],
+   [
+    "8,1",
+    "wl2_library_3*+crate*"
+   ]
+  ],
+  "stackN": 4,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 6,
+  "tightByProp": [
+   [
+    5,
+    3
+   ],
+   [
+    9,
+    6
+   ],
+   [
+    1,
+    6
+   ],
+   [
+    9,
+    4
+   ],
+   [
+    9,
+    2
+   ],
+   [
+    5,
+    1
+   ]
+  ],
+  "_tight": [
+   [
+    5,
+    3
+   ],
+   [
+    9,
+    6
+   ],
+   [
+    1,
+    6
+   ],
+   [
+    9,
+    4
+   ],
+   [
+    9,
+    2
+   ],
+   [
+    5,
+    1
+   ]
+  ],
+  "decorN": 18,
+  "lights": 3,
+  "enemiesN": 0,
+  "itemsN": 0,
+  "kinds": 7
+ },
+ "7210": {
+  "size": [
+   9,
+   7
+  ],
+  "name": "The Gilded Eye, Jewellers",
+  "badRows": 0,
+  "start": [
+   4,
+   5,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [
+   [
+    "decor",
+    "crate",
+    0,
+    1,
+    ""
+   ],
+   [
+    "decor",
+    "crate",
+    8,
+    1,
+    ""
+   ]
+  ],
+  "missingImg": [],
+  "openCells": 35,
+  "unreachGeom": [],
+  "unreachProp": [
+   [
+    4,
+    1
+   ],
+   [
+    4,
+    3
+   ]
+  ],
+  "unreachGeomN": 0,
+  "unreachPropN": 2,
+  "doors": [],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "lamp",
+    1,
+    1,
+    2,
+    1,
+    1
+   ],
+   [
+    "crate",
+    0,
+    1,
+    2,
+    1,
+    2
+   ],
+   [
+    "crate",
+    0,
+    1,
+    1,
+    1,
+    1
+   ],
+   [
+    "crate",
+    2,
+    1,
+    1,
+    1,
+    1
+   ],
+   [
+    "crate",
+    2,
+    1,
+    3,
+    1,
+    1
+   ],
+   [
+    "crate",
+    1,
+    1,
+    3,
+    1,
+    2
+   ],
+   [
+    "crate",
+    3,
+    1,
+    5,
+    1,
+    2
+   ],
+   [
+    "lamp",
+    6,
+    1,
+    7,
+    1,
+    1
+   ],
+   [
+    "crate",
+    5,
+    1,
+    7,
+    1,
+    2
+   ],
+   [
+    "crate",
+    5,
+    1,
+    6,
+    1,
+    1
+   ],
+   [
+    "crate",
+    7,
+    1,
+    6,
+    1,
+    1
+   ],
+   [
+    "crate",
+    7,
+    1,
+    8,
+    1,
+    1
+   ],
+   [
+    "crate",
+    6,
+    1,
+    8,
+    1,
+    2
+   ],
+   [
+    "wl2_smith_4",
+    3,
+    3,
+    5,
+    3,
+    2
+   ]
+  ],
+  "dupNearN": 14,
+  "stack": [
+   [
+    "1,1",
+    "gy_web+lamp*+crate*"
+   ],
+   [
+    "7,1",
+    "gy_web+crate*+lamp*"
+   ],
+   [
+    "2,1",
+    "crate*+lamp*"
+   ],
+   [
+    "6,1",
+    "lamp*+crate*"
+   ]
+  ],
+  "stackN": 4,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 4,
+  "tightByProp": [
+   [
+    4,
+    5
+   ],
+   [
+    7,
+    5
+   ],
+   [
+    5,
+    2
+   ],
+   [
+    3,
+    2
+   ]
+  ],
+  "_tight": [
+   [
+    4,
+    5
+   ],
+   [
+    7,
+    5
+   ],
+   [
+    5,
+    2
+   ],
+   [
+    3,
+    2
+   ]
+  ],
+  "decorN": 21,
+  "lights": 5,
+  "enemiesN": 0,
+  "itemsN": 0,
+  "kinds": 6
+ },
+ "7211": {
+  "err": "no level"
+ },
+ "7212": {
+  "err": "no level"
+ },
+ "7213": {
+  "size": [
+   11,
+   8
+  ],
+  "name": "Crust and Cleaver",
+  "badRows": 0,
+  "start": [
+   5,
+   6,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [
+   [
+    "decor",
+    "sacks",
+    10,
+    2,
+    ""
+   ],
+   [
+    "decor",
+    "crate",
+    0,
+    1,
+    ""
+   ],
+   [
+    "decor",
+    "crate",
+    10,
+    1,
+    ""
+   ]
+  ],
+  "missingImg": [],
+  "openCells": 54,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "sacks",
+    1,
+    5,
+    1,
+    6,
+    1
+   ],
+   [
+    "wl2_bakery_0",
+    1,
+    1,
+    2,
+    1,
+    1
+   ],
+   [
+    "crate",
+    0,
+    1,
+    2,
+    1,
+    2
+   ],
+   [
+    "crate",
+    0,
+    1,
+    1,
+    1,
+    1
+   ],
+   [
+    "crate",
+    2,
+    1,
+    1,
+    1,
+    1
+   ],
+   [
+    "crate",
+    2,
+    1,
+    3,
+    1,
+    1
+   ],
+   [
+    "crate",
+    1,
+    1,
+    3,
+    1,
+    2
+   ],
+   [
+    "wl2_smith_3",
+    8,
+    1,
+    9,
+    1,
+    1
+   ],
+   [
+    "crate",
+    7,
+    1,
+    9,
+    1,
+    2
+   ],
+   [
+    "crate",
+    7,
+    1,
+    8,
+    1,
+    1
+   ],
+   [
+    "crate",
+    9,
+    1,
+    8,
+    1,
+    1
+   ],
+   [
+    "crate",
+    9,
+    1,
+    10,
+    1,
+    1
+   ],
+   [
+    "crate",
+    8,
+    1,
+    10,
+    1,
+    2
+   ]
+  ],
+  "dupNearN": 13,
+  "stack": [
+   [
+    "1,1",
+    "gy_web+wl2_bakery_0*+crate*"
+   ],
+   [
+    "9,1",
+    "gy_web+crate*+wl2_smith_3*"
+   ],
+   [
+    "2,1",
+    "crate*+wl2_bakery_0*"
+   ],
+   [
+    "8,1",
+    "wl2_smith_3*+crate*"
+   ]
+  ],
+  "stackN": 4,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 4,
+  "tightByProp": [
+   [
+    9,
+    6
+   ],
+   [
+    7,
+    2
+   ],
+   [
+    3,
+    2
+   ],
+   [
+    5,
+    1
+   ]
+  ],
+  "_tight": [
+   [
+    9,
+    6
+   ],
+   [
+    7,
+    2
+   ],
+   [
+    3,
+    2
+   ],
+   [
+    5,
+    1
+   ]
+  ],
+  "decorN": 22,
+  "lights": 3,
+  "enemiesN": 0,
+  "itemsN": 0,
+  "kinds": 8
+ },
+ "7214": {
+  "err": "no level"
+ },
+ "7215": {
+  "size": [
+   11,
+   8
+  ],
+  "name": "Vesper's Alembic",
+  "badRows": 0,
+  "start": [
+   5,
+   6,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [
+   [
+    "decor",
+    "barrel",
+    10,
+    2,
+    ""
+   ]
+  ],
+  "missingImg": [],
+  "openCells": 54,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "wl2_armour_2",
+    1,
+    1,
+    2,
+    1,
+    1
+   ],
+   [
+    "wl2_armour_2",
+    1,
+    1,
+    3,
+    1,
+    2
+   ],
+   [
+    "wl2_armour_2",
+    2,
+    1,
+    3,
+    1,
+    1
+   ],
+   [
+    "wl2_armour_2",
+    7,
+    1,
+    8,
+    1,
+    1
+   ],
+   [
+    "wl2_armour_2",
+    7,
+    1,
+    9,
+    1,
+    2
+   ],
+   [
+    "wl2_armour_2",
+    8,
+    1,
+    9,
+    1,
+    1
+   ],
+   [
+    "wl2_smith_4",
+    4,
+    3,
+    6,
+    3,
+    2
+   ]
+  ],
+  "dupNearN": 7,
+  "stack": [
+   [
+    "1,1",
+    "gy_web+wl2_armour_2*"
+   ],
+   [
+    "9,1",
+    "gy_web+wl2_armour_2*"
+   ]
+  ],
+  "stackN": 2,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 5,
+  "tightByProp": [
+   [
+    5,
+    3
+   ],
+   [
+    9,
+    5
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    6,
+    1
+   ],
+   [
+    4,
+    1
+   ]
+  ],
+  "_tight": [
+   [
+    5,
+    3
+   ],
+   [
+    9,
+    5
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    6,
+    1
+   ],
+   [
+    4,
+    1
+   ]
+  ],
+  "decorN": 17,
+  "lights": 4,
+  "enemiesN": 0,
+  "itemsN": 0,
+  "kinds": 10
+ },
+ "7299": {
+  "err": "no level"
+ },
+ "errs_?town=sale&lvl=90": [],
+ "9670": {
+  "size": [
+   64,
+   56
+  ],
+  "name": "The Barrow Hill",
+  "badRows": 0,
+  "start": [
+   3,
+   45,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [],
+  "openCells": 2460,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [
+   {
+    "x": 34,
+    "y": 12,
+    "lvl": 9671,
+    "vt": "stair",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 1,
+    "y": 45,
+    "lvl": null,
+    "vt": "road",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 62,
+    "y": 45,
+    "lvl": null,
+    "vt": "road",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   }
+  ],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "gy_lantern",
+    33,
+    13,
+    35,
+    13,
+    2
+   ],
+   [
+    "gy_rose",
+    33,
+    16,
+    35,
+    16,
+    2
+   ],
+   [
+    "barrel",
+    24,
+    43,
+    25,
+    43,
+    1
+   ],
+   [
+    "gy_bones",
+    32,
+    43,
+    30,
+    43,
+    2
+   ],
+   [
+    "gy_bones",
+    30,
+    43,
+    28,
+    43,
+    2
+   ],
+   [
+    "ww_sign",
+    33,
+    44,
+    34,
+    42,
+    2
+   ],
+   [
+    "gy_wcross",
+    20,
+    37,
+    20,
+    39,
+    2
+   ],
+   [
+    "gy_wcross",
+    20,
+    39,
+    20,
+    41,
+    2
+   ],
+   [
+    "gy_wcross",
+    20,
+    41,
+    20,
+    43,
+    2
+   ],
+   [
+    "gy_bones",
+    46,
+    48,
+    48,
+    48,
+    2
+   ],
+   [
+    "gy_bones",
+    46,
+    48,
+    47,
+    48,
+    1
+   ],
+   [
+    "gy_bones",
+    46,
+    48,
+    45,
+    50,
+    2
+   ],
+   [
+    "gy_bones",
+    48,
+    48,
+    47,
+    48,
+    1
+   ],
+   [
+    "gy_bones",
+    48,
+    48,
+    49,
+    47,
+    1
+   ],
+   [
+    "gy_bones",
+    47,
+    48,
+    49,
+    47,
+    2
+   ],
+   [
+    "gy_bones",
+    47,
+    48,
+    45,
+    50,
+    2
+   ],
+   [
+    "gy_lantern",
+    43,
+    36,
+    45,
+    34,
+    2
+   ],
+   [
+    "gy_lantern",
+    31,
+    22,
+    33,
+    20,
+    2
+   ],
+   [
+    "gy_stone1",
+    45,
+    27,
+    46,
+    29,
+    2
+   ],
+   [
+    "gy_slab",
+    43,
+    40,
+    45,
+    41,
+    2
+   ],
+   [
+    "gy_wcross",
+    23,
+    35,
+    25,
+    35,
+    2
+   ],
+   [
+    "gy_slab",
+    29,
+    35,
+    28,
+    37,
+    2
+   ],
+   [
+    "gy_stone1",
+    25,
+    16,
+    26,
+    18,
+    2
+   ],
+   [
+    "gy_stone1",
+    55,
+    49,
+    53,
+    51,
+    2
+   ],
+   [
+    "ltree2",
+    11,
+    38,
+    12,
+    39,
+    1
+   ],
+   [
+    "ltree2",
+    13,
+    34,
+    15,
+    34,
+    2
+   ],
+   [
+    "gy_dead",
+    5,
+    17,
+    6,
+    18,
+    1
+   ],
+   [
+    "gy_dead",
+    5,
+    17,
+    4,
+    16,
+    1
+   ],
+   [
+    "gy_dead",
+    26,
+    32,
+    25,
+    32,
+    1
+   ],
+   [
+    "gy_dead",
+    26,
+    32,
+    27,
+    34,
+    2
+   ],
+   [
+    "gy_dead",
+    23,
+    34,
+    25,
+    32,
+    2
+   ],
+   [
+    "ltree2",
+    44,
+    53,
+    45,
+    53,
+    1
+   ],
+   [
+    "ltree2",
+    16,
+    40,
+    18,
+    42,
+    2
+   ],
+   [
+    "ltree2",
+    16,
+    40,
+    18,
+    38,
+    2
+   ],
+   [
+    "ltree2",
+    16,
+    40,
+    18,
+    40,
+    2
+   ],
+   [
+    "gy_dead",
+    59,
+    52,
+    61,
+    52,
+    2
+   ],
+   [
+    "ltree2",
+    18,
+    29,
+    17,
+    31,
+    2
+   ],
+   [
+    "gy_dead",
+    16,
+    34,
+    16,
+    32,
+    2
+   ],
+   [
+    "gy_dead",
+    16,
+    34,
+    15,
+    36,
+    2
+   ],
+   [
+    "gy_dead",
+    16,
+    34,
+    16,
+    35,
+    1
+   ],
+   [
+    "gy_dead",
+    16,
+    34,
+    18,
+    36,
+    2
+   ],
+   [
+    "gy_dead",
+    7,
+    35,
+    9,
+    35,
+    2
+   ],
+   [
+    "gy_dead",
+    53,
+    53,
+    53,
+    52,
+    1
+   ],
+   [
+    "gy_dead",
+    57,
+    31,
+    59,
+    33,
+    2
+   ],
+   [
+    "ltree2",
+    18,
+    42,
+    18,
+    40,
+    2
+   ],
+   [
+    "gy_dead",
+    15,
+    30,
+    16,
+    32,
+    2
+   ],
+   [
+    "gy_dead",
+    15,
+    30,
+    13,
+    28,
+    2
+   ],
+   [
+    "ltree2",
+    17,
+    31,
+    17,
+    33,
+    2
+   ],
+   [
+    "gy_dead",
+    59,
+    33,
+    58,
+    35,
+    2
+   ],
+   [
+    "gy_dead",
+    56,
+    42,
+    57,
+    42,
+    1
+   ],
+   [
+    "gy_dead",
+    56,
+    42,
+    58,
+    41,
+    2
+   ],
+   [
+    "ltree2",
+    59,
+    13,
+    59,
+    14,
+    1
+   ],
+   [
+    "gy_dead",
+    6,
+    18,
+    4,
+    16,
+    2
+   ],
+   [
+    "gy_dead",
+    6,
+    18,
+    8,
+    18,
+    2
+   ],
+   [
+    "gy_dead",
+    13,
+    38,
+    15,
+    36,
+    2
+   ],
+   [
+    "gy_dead",
+    57,
+    42,
+    58,
+    41,
+    1
+   ],
+   [
+    "gy_dead",
+    50,
+    26,
+    51,
+    28,
+    2
+   ],
+   [
+    "gy_dead",
+    50,
+    26,
+    52,
+    25,
+    2
+   ],
+   [
+    "gy_dead",
+    46,
+    53,
+    48,
+    52,
+    2
+   ],
+   [
+    "gy_dead",
+    15,
+    36,
+    16,
+    35,
+    1
+   ],
+   [
+    "gy_dead",
+    11,
+    33,
+    9,
+    35,
+    2
+   ],
+   [
+    "gy_dead",
+    7,
+    48,
+    7,
+    50,
+    2
+   ],
+   [
+    "gy_dead",
+    7,
+    48,
+    5,
+    49,
+    2
+   ],
+   [
+    "gy_dead",
+    7,
+    48,
+    9,
+    48,
+    2
+   ],
+   [
+    "gy_dead",
+    7,
+    48,
+    9,
+    50,
+    2
+   ],
+   [
+    "gy_dead",
+    42,
+    23,
+    40,
+    22,
+    2
+   ],
+   [
+    "ltree2",
+    41,
+    20,
+    40,
+    20,
+    1
+   ],
+   [
+    "gy_dead",
+    25,
+    14,
+    24,
+    16,
+    2
+   ],
+   [
+    "gy_dead",
+    54,
+    27,
+    52,
+    25,
+    2
+   ],
+   [
+    "gy_dead",
+    54,
+    27,
+    56,
+    27,
+    2
+   ],
+   [
+    "gy_dead",
+    14,
+    19,
+    15,
+    18,
+    1
+   ],
+   [
+    "gy_dead",
+    18,
+    49,
+    17,
+    48,
+    1
+   ],
+   [
+    "ltree2",
+    18,
+    38,
+    18,
+    40,
+    2
+   ],
+   [
+    "ltree2",
+    18,
+    38,
+    17,
+    37,
+    1
+   ],
+   [
+    "gy_dead",
+    25,
+    32,
+    27,
+    34,
+    2
+   ],
+   [
+    "gy_dead",
+    48,
+    40,
+    48,
+    38,
+    2
+   ],
+   [
+    "gy_dead",
+    7,
+    50,
+    5,
+    49,
+    2
+   ],
+   [
+    "gy_dead",
+    7,
+    50,
+    9,
+    48,
+    2
+   ],
+   [
+    "gy_dead",
+    7,
+    50,
+    9,
+    50,
+    2
+   ],
+   [
+    "gy_dead",
+    54,
+    35,
+    54,
+    34,
+    1
+   ]
+  ],
+  "dupNearN": 195,
+  "stack": [],
+  "stackN": 0,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 86,
+  "tightByProp": [
+   [
+    6,
+    49
+   ],
+   [
+    8,
+    48
+   ],
+   [
+    4,
+    53
+   ],
+   [
+    9,
+    49
+   ],
+   [
+    8,
+    50
+   ],
+   [
+    7,
+    53
+   ],
+   [
+    12,
+    40
+   ],
+   [
+    8,
+    35
+   ],
+   [
+    10,
+    37
+   ],
+   [
+    4,
+    30
+   ],
+   [
+    2,
+    30
+   ],
+   [
+    15,
+    40
+   ],
+   [
+    14,
+    51
+   ],
+   [
+    18,
+    41
+   ],
+   [
+    14,
+    53
+   ],
+   [
+    20,
+    42
+   ],
+   [
+    18,
+    48
+   ],
+   [
+    17,
+    49
+   ],
+   [
+    17,
+    38
+   ],
+   [
+    19,
+    40
+   ],
+   [
+    2,
+    24
+   ],
+   [
+    14,
+    34
+   ],
+   [
+    15,
+    35
+   ],
+   [
+    12,
+    38
+   ],
+   [
+    21,
+    49
+   ],
+   [
+    19,
+    38
+   ],
+   [
+    18,
+    39
+   ],
+   [
+    11,
+    28
+   ],
+   [
+    15,
+    32
+   ],
+   [
+    16,
+    33
+   ],
+   [
+    17,
+    34
+   ],
+   [
+    18,
+    35
+   ],
+   [
+    18,
+    37
+   ],
+   [
+    8,
+    24
+   ],
+   [
+    20,
+    36
+   ],
+   [
+    21,
+    37
+   ],
+   [
+    20,
+    53
+   ],
+   [
+    2,
+    18
+   ],
+   [
+    27,
+    49
+   ],
+   [
+    5,
+    18
+   ],
+   [
+    18,
+    33
+   ],
+   [
+    8,
+    20
+   ],
+   [
+    28,
+    50
+   ],
+   [
+    7,
+    18
+   ],
+   [
+    24,
+    35
+   ],
+   [
+    30,
+    50
+   ],
+   [
+    26,
+    53
+   ],
+   [
+    28,
+    36
+   ],
+   [
+    9,
+    13
+   ],
+   [
+    5,
+    13
+   ],
+   [
+    15,
+    17
+   ],
+   [
+    4,
+    17
+   ],
+   [
+    36,
+    53
+   ],
+   [
+    13,
+    13
+   ],
+   [
+    16,
+    13
+   ],
+   [
+    40,
+    53
+   ],
+   [
+    46,
+    41
+   ],
+   [
+    48,
+    39
+   ],
+   [
+    25,
+    15
+   ],
+   [
+    48,
+    53
+   ]
+  ],
+  "_tight": [
+   [
+    6,
+    49
+   ],
+   [
+    8,
+    48
+   ],
+   [
+    4,
+    53
+   ],
+   [
+    9,
+    49
+   ],
+   [
+    8,
+    50
+   ],
+   [
+    7,
+    53
+   ],
+   [
+    12,
+    40
+   ],
+   [
+    8,
+    35
+   ],
+   [
+    10,
+    37
+   ],
+   [
+    4,
+    30
+   ],
+   [
+    2,
+    30
+   ],
+   [
+    15,
+    40
+   ],
+   [
+    14,
+    51
+   ],
+   [
+    18,
+    41
+   ],
+   [
+    14,
+    53
+   ],
+   [
+    20,
+    42
+   ],
+   [
+    18,
+    48
+   ],
+   [
+    17,
+    49
+   ],
+   [
+    17,
+    38
+   ],
+   [
+    19,
+    40
+   ],
+   [
+    2,
+    24
+   ],
+   [
+    14,
+    34
+   ],
+   [
+    15,
+    35
+   ],
+   [
+    12,
+    38
+   ],
+   [
+    21,
+    49
+   ],
+   [
+    19,
+    38
+   ],
+   [
+    18,
+    39
+   ],
+   [
+    11,
+    28
+   ],
+   [
+    15,
+    32
+   ],
+   [
+    16,
+    33
+   ],
+   [
+    17,
+    34
+   ],
+   [
+    18,
+    35
+   ],
+   [
+    18,
+    37
+   ],
+   [
+    8,
+    24
+   ],
+   [
+    20,
+    36
+   ],
+   [
+    21,
+    37
+   ],
+   [
+    20,
+    53
+   ],
+   [
+    2,
+    18
+   ],
+   [
+    27,
+    49
+   ],
+   [
+    5,
+    18
+   ],
+   [
+    18,
+    33
+   ],
+   [
+    8,
+    20
+   ],
+   [
+    28,
+    50
+   ],
+   [
+    7,
+    18
+   ],
+   [
+    24,
+    35
+   ],
+   [
+    30,
+    50
+   ],
+   [
+    26,
+    53
+   ],
+   [
+    28,
+    36
+   ],
+   [
+    9,
+    13
+   ],
+   [
+    5,
+    13
+   ],
+   [
+    15,
+    17
+   ],
+   [
+    4,
+    17
+   ],
+   [
+    36,
+    53
+   ],
+   [
+    13,
+    13
+   ],
+   [
+    16,
+    13
+   ],
+   [
+    40,
+    53
+   ],
+   [
+    46,
+    41
+   ],
+   [
+    48,
+    39
+   ],
+   [
+    25,
+    15
+   ],
+   [
+    48,
+    53
+   ],
+   [
+    25,
+    13
+   ],
+   [
+    52,
+    52
+   ],
+   [
+    51,
+    53
+   ],
+   [
+    28,
+    13
+   ],
+   [
+    41,
+    28
+   ],
+   [
+    37,
+    19
+   ],
+   [
+    42,
+    24
+   ],
+   [
+    53,
+    34
+   ],
+   [
+    40,
+    21
+   ],
+   [
+    60,
+    52
+   ],
+   [
+    59,
+    53
+   ],
+   [
+    61,
+    53
+   ],
+   [
+    48,
+    23
+   ],
+   [
+    40,
+    13
+   ],
+   [
+    52,
+    24
+   ],
+   [
+    55,
+    27
+   ],
+   [
+    56,
+    28
+   ],
+   [
+    61,
+    31
+   ],
+   [
+    57,
+    26
+   ],
+   [
+    58,
+    27
+   ],
+   [
+    59,
+    28
+   ],
+   [
+    45,
+    13
+   ],
+   [
+    46,
+    13
+   ],
+   [
+    61,
+    21
+   ],
+   [
+    54,
+    13
+   ],
+   [
+    59,
+    15
+   ]
+  ],
+  "decorN": 567,
+  "lights": 54,
+  "enemiesN": 29,
+  "itemsN": 9,
+  "kinds": 37
+ },
+ "9671": {
+  "size": [
+   29,
+   29
+  ],
+  "name": "The Barrow Stair",
+  "badRows": 0,
+  "start": [
+   14,
+   2,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [
+   "sign_gy"
+  ],
+  "openCells": 303,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [
+   {
+    "x": 14,
+    "y": 1,
+    "lvl": 9670,
+    "vt": "stair",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 14,
+    "y": 25,
+    "lvl": null,
+    "vt": "lock",
+    "sale": 0,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 14,
+    "y": 28,
+    "lvl": 9672,
+    "vt": "stair",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   }
+  ],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "hl_p_cage",
+    1,
+    10,
+    3,
+    10,
+    2
+   ],
+   [
+    "hl_p_cage",
+    1,
+    14,
+    3,
+    14,
+    2
+   ],
+   [
+    "gy_bones",
+    1,
+    12,
+    3,
+    13,
+    2
+   ],
+   [
+    "gy_sarc",
+    8,
+    21,
+    8,
+    22,
+    1
+   ],
+   [
+    "gy_sarc",
+    20,
+    21,
+    20,
+    22,
+    1
+   ]
+  ],
+  "dupNearN": 5,
+  "stack": [],
+  "stackN": 0,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 20,
+  "tightByProp": [
+   [
+    25,
+    13
+   ],
+   [
+    25,
+    10
+   ],
+   [
+    27,
+    13
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    8,
+    20
+   ],
+   [
+    2,
+    10
+   ],
+   [
+    2,
+    14
+   ],
+   [
+    27,
+    10
+   ],
+   [
+    27,
+    15
+   ],
+   [
+    3,
+    9
+   ],
+   [
+    1,
+    9
+   ],
+   [
+    3,
+    15
+   ],
+   [
+    1,
+    15
+   ],
+   [
+    26,
+    9
+   ],
+   [
+    20,
+    23
+   ],
+   [
+    8,
+    23
+   ]
+  ],
+  "_tight": [
+   [
+    24,
+    12
+   ],
+   [
+    4,
+    12
+   ],
+   [
+    25,
+    13
+   ],
+   [
+    25,
+    10
+   ],
+   [
+    27,
+    13
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    14,
+    26
+   ],
+   [
+    8,
+    20
+   ],
+   [
+    2,
+    10
+   ],
+   [
+    2,
+    14
+   ],
+   [
+    27,
+    10
+   ],
+   [
+    14,
+    27
+   ],
+   [
+    27,
+    15
+   ],
+   [
+    3,
+    9
+   ],
+   [
+    1,
+    9
+   ],
+   [
+    3,
+    15
+   ],
+   [
+    1,
+    15
+   ],
+   [
+    26,
+    9
+   ],
+   [
+    20,
+    23
+   ],
+   [
+    8,
+    23
+   ]
+  ],
+  "decorN": 48,
+  "lights": 16,
+  "enemiesN": 15,
+  "itemsN": 0,
+  "kinds": 10
+ },
+ "9672": {
+  "size": [
+   31,
+   32
+  ],
+  "name": "The Ossuary of the Roll",
+  "badRows": 0,
+  "start": [
+   15,
+   2,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [
+   "sign_gy"
+  ],
+  "openCells": 359,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [
+   {
+    "x": 15,
+    "y": 1,
+    "lvl": 9671,
+    "vt": "stair",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 15,
+    "y": 26,
+    "lvl": null,
+    "vt": "ringgate",
+    "sale": 0,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 15,
+    "y": 30,
+    "lvl": 9673,
+    "vt": "stair",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   }
+  ],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "gy_candles",
+    13,
+    3,
+    11,
+    5,
+    2
+   ],
+   [
+    "gy_candles",
+    17,
+    3,
+    19,
+    5,
+    2
+   ],
+   [
+    "gy_sarc",
+    11,
+    9,
+    13,
+    9,
+    2
+   ],
+   [
+    "gy_sarc",
+    17,
+    9,
+    19,
+    9,
+    2
+   ],
+   [
+    "gy_sarc",
+    24,
+    6,
+    26,
+    6,
+    2
+   ],
+   [
+    "gy_sarc",
+    24,
+    6,
+    24,
+    8,
+    2
+   ],
+   [
+    "gy_sarc",
+    24,
+    6,
+    26,
+    8,
+    2
+   ],
+   [
+    "gy_sarc",
+    26,
+    6,
+    24,
+    8,
+    2
+   ],
+   [
+    "gy_sarc",
+    26,
+    6,
+    26,
+    8,
+    2
+   ],
+   [
+    "gy_sarc",
+    24,
+    8,
+    26,
+    8,
+    2
+   ]
+  ],
+  "dupNearN": 10,
+  "stack": [],
+  "stackN": 0,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 35,
+  "tightByProp": [
+   [
+    17,
+    2
+   ],
+   [
+    13,
+    2
+   ],
+   [
+    20,
+    5
+   ],
+   [
+    18,
+    9
+   ],
+   [
+    12,
+    9
+   ],
+   [
+    10,
+    5
+   ],
+   [
+    20,
+    9
+   ],
+   [
+    10,
+    9
+   ],
+   [
+    23,
+    6
+   ],
+   [
+    24,
+    7
+   ],
+   [
+    23,
+    8
+   ],
+   [
+    24,
+    5
+   ],
+   [
+    25,
+    6
+   ],
+   [
+    26,
+    7
+   ],
+   [
+    25,
+    8
+   ],
+   [
+    24,
+    9
+   ],
+   [
+    26,
+    5
+   ],
+   [
+    26,
+    9
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    21,
+    13
+   ],
+   [
+    9,
+    13
+   ],
+   [
+    17,
+    25
+   ],
+   [
+    13,
+    25
+   ],
+   [
+    21,
+    25
+   ],
+   [
+    9,
+    25
+   ]
+  ],
+  "_tight": [
+   [
+    17,
+    2
+   ],
+   [
+    13,
+    2
+   ],
+   [
+    20,
+    5
+   ],
+   [
+    18,
+    9
+   ],
+   [
+    15,
+    10
+   ],
+   [
+    12,
+    9
+   ],
+   [
+    10,
+    5
+   ],
+   [
+    21,
+    7
+   ],
+   [
+    15,
+    11
+   ],
+   [
+    9,
+    7
+   ],
+   [
+    22,
+    7
+   ],
+   [
+    20,
+    9
+   ],
+   [
+    15,
+    12
+   ],
+   [
+    10,
+    9
+   ],
+   [
+    8,
+    7
+   ],
+   [
+    23,
+    6
+   ],
+   [
+    24,
+    7
+   ],
+   [
+    23,
+    8
+   ],
+   [
+    24,
+    5
+   ],
+   [
+    25,
+    6
+   ],
+   [
+    26,
+    7
+   ],
+   [
+    25,
+    8
+   ],
+   [
+    24,
+    9
+   ],
+   [
+    26,
+    5
+   ],
+   [
+    26,
+    9
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    21,
+    13
+   ],
+   [
+    9,
+    13
+   ],
+   [
+    17,
+    25
+   ],
+   [
+    13,
+    25
+   ],
+   [
+    15,
+    27
+   ],
+   [
+    15,
+    28
+   ],
+   [
+    21,
+    25
+   ],
+   [
+    15,
+    29
+   ],
+   [
+    9,
+    25
+   ]
+  ],
+  "decorN": 48,
+  "lights": 28,
+  "enemiesN": 12,
+  "itemsN": 0,
+  "kinds": 11
+ },
+ "9673": {
+  "size": [
+   33,
+   26
+  ],
+  "name": "The Bell Gallery",
+  "badRows": 0,
+  "start": [
+   16,
+   2,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [
+   "sign_gy"
+  ],
+  "openCells": 395,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [
+   {
+    "x": 16,
+    "y": 1,
+    "lvl": 9672,
+    "vt": "stair",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 16,
+    "y": 20,
+    "lvl": null,
+    "vt": "lock",
+    "sale": 0,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 16,
+    "y": 24,
+    "lvl": 9674,
+    "vt": "stair",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   }
+  ],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [],
+  "dupNearN": 0,
+  "stack": [
+   [
+    "7,6",
+    "gy_bell*+sign_gy"
+   ],
+   [
+    "12,6",
+    "wm_bell*+sign_gy"
+   ],
+   [
+    "17,6",
+    "gy_bell*+sign_gy"
+   ],
+   [
+    "22,6",
+    "gy_bell*+sign_gy"
+   ],
+   [
+    "27,6",
+    "gy_bell*+sign_gy"
+   ]
+  ],
+  "stackN": 5,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 16,
+  "tightByProp": [
+   [
+    28,
+    6
+   ],
+   [
+    29,
+    16
+   ],
+   [
+    3,
+    16
+   ],
+   [
+    30,
+    17
+   ],
+   [
+    2,
+    17
+   ],
+   [
+    30,
+    21
+   ],
+   [
+    29,
+    22
+   ],
+   [
+    10,
+    21
+   ],
+   [
+    9,
+    22
+   ]
+  ],
+  "_tight": [
+   [
+    28,
+    6
+   ],
+   [
+    16,
+    21
+   ],
+   [
+    16,
+    22
+   ],
+   [
+    16,
+    23
+   ],
+   [
+    26,
+    14
+   ],
+   [
+    6,
+    14
+   ],
+   [
+    26,
+    15
+   ],
+   [
+    6,
+    15
+   ],
+   [
+    29,
+    16
+   ],
+   [
+    3,
+    16
+   ],
+   [
+    30,
+    17
+   ],
+   [
+    2,
+    17
+   ],
+   [
+    30,
+    21
+   ],
+   [
+    29,
+    22
+   ],
+   [
+    10,
+    21
+   ],
+   [
+    9,
+    22
+   ]
+  ],
+  "decorN": 42,
+  "lights": 22,
+  "enemiesN": 14,
+  "itemsN": 0,
+  "kinds": 12
+ },
+ "9674": {
+  "size": [
+   35,
+   30
+  ],
+  "name": "The Silvered Cellars",
+  "badRows": 0,
+  "start": [
+   17,
+   2,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [
+   "sign_gy"
+  ],
+  "openCells": 355,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [
+   {
+    "x": 17,
+    "y": 1,
+    "lvl": 9673,
+    "vt": "stair",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 21,
+    "y": 17,
+    "lvl": null,
+    "vt": "lock",
+    "sale": 0,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 21,
+    "y": 26,
+    "lvl": 9675,
+    "vt": "stair",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   }
+  ],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "gy_web",
+    29,
+    11,
+    31,
+    13,
+    2
+   ]
+  ],
+  "dupNearN": 1,
+  "stack": [],
+  "stackN": 0,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 37,
+  "tightByProp": [
+   [
+    21,
+    8
+   ],
+   [
+    13,
+    8
+   ],
+   [
+    22,
+    9
+   ],
+   [
+    12,
+    9
+   ],
+   [
+    13,
+    22
+   ],
+   [
+    1,
+    11
+   ],
+   [
+    1,
+    13
+   ],
+   [
+    14,
+    26
+   ],
+   [
+    7,
+    22
+   ],
+   [
+    2,
+    22
+   ],
+   [
+    3,
+    27
+   ],
+   [
+    2,
+    26
+   ],
+   [
+    2,
+    28
+   ]
+  ],
+  "_tight": [
+   [
+    17,
+    5
+   ],
+   [
+    17,
+    6
+   ],
+   [
+    17,
+    7
+   ],
+   [
+    21,
+    8
+   ],
+   [
+    13,
+    8
+   ],
+   [
+    22,
+    9
+   ],
+   [
+    12,
+    9
+   ],
+   [
+    23,
+    12
+   ],
+   [
+    11,
+    12
+   ],
+   [
+    24,
+    12
+   ],
+   [
+    10,
+    12
+   ],
+   [
+    25,
+    12
+   ],
+   [
+    9,
+    12
+   ],
+   [
+    26,
+    12
+   ],
+   [
+    13,
+    17
+   ],
+   [
+    8,
+    12
+   ],
+   [
+    21,
+    18
+   ],
+   [
+    13,
+    18
+   ],
+   [
+    21,
+    19
+   ],
+   [
+    13,
+    19
+   ],
+   [
+    21,
+    20
+   ],
+   [
+    13,
+    20
+   ],
+   [
+    21,
+    21
+   ],
+   [
+    13,
+    21
+   ],
+   [
+    21,
+    22
+   ],
+   [
+    13,
+    22
+   ],
+   [
+    21,
+    23
+   ],
+   [
+    21,
+    24
+   ],
+   [
+    21,
+    25
+   ],
+   [
+    1,
+    11
+   ],
+   [
+    1,
+    13
+   ],
+   [
+    14,
+    26
+   ],
+   [
+    7,
+    22
+   ],
+   [
+    2,
+    22
+   ],
+   [
+    3,
+    27
+   ],
+   [
+    2,
+    26
+   ],
+   [
+    2,
+    28
+   ]
+  ],
+  "decorN": 41,
+  "lights": 31,
+  "enemiesN": 15,
+  "itemsN": 0,
+  "kinds": 8
+ },
+ "9675": {
+  "size": [
+   37,
+   28
+  ],
+  "name": "The Hall of Underhill",
+  "badRows": 0,
+  "start": [
+   18,
+   2,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [
+   "sign_gy"
+  ],
+  "openCells": 495,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [
+   {
+    "x": 18,
+    "y": 1,
+    "lvl": 9674,
+    "vt": "stair",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 34,
+    "y": 22,
+    "lvl": null,
+    "vt": "secret",
+    "sale": 0,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 36,
+    "y": 22,
+    "lvl": 9678,
+    "vt": "stair",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 18,
+    "y": 24,
+    "lvl": 9676,
+    "vt": "stair",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   }
+  ],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "gy_bench",
+    6,
+    23,
+    8,
+    23,
+    2
+   ],
+   [
+    "gy_bench",
+    8,
+    23,
+    10,
+    23,
+    2
+   ],
+   [
+    "gy_bench",
+    10,
+    23,
+    12,
+    23,
+    2
+   ]
+  ],
+  "dupNearN": 3,
+  "stack": [],
+  "stackN": 0,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 45,
+  "tightByProp": [
+   [
+    19,
+    8
+   ],
+   [
+    17,
+    8
+   ],
+   [
+    21,
+    8
+   ],
+   [
+    15,
+    8
+   ],
+   [
+    23,
+    8
+   ],
+   [
+    13,
+    8
+   ],
+   [
+    25,
+    8
+   ],
+   [
+    11,
+    8
+   ],
+   [
+    19,
+    15
+   ],
+   [
+    17,
+    15
+   ],
+   [
+    27,
+    8
+   ],
+   [
+    9,
+    8
+   ],
+   [
+    30,
+    6
+   ],
+   [
+    21,
+    15
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    6,
+    6
+   ],
+   [
+    31,
+    7
+   ],
+   [
+    23,
+    15
+   ],
+   [
+    13,
+    15
+   ],
+   [
+    5,
+    7
+   ],
+   [
+    25,
+    15
+   ],
+   [
+    11,
+    15
+   ],
+   [
+    27,
+    15
+   ],
+   [
+    9,
+    15
+   ],
+   [
+    11,
+    19
+   ],
+   [
+    10,
+    20
+   ],
+   [
+    31,
+    16
+   ],
+   [
+    30,
+    17
+   ],
+   [
+    6,
+    17
+   ],
+   [
+    5,
+    16
+   ],
+   [
+    8,
+    20
+   ],
+   [
+    7,
+    19
+   ],
+   [
+    31,
+    19
+   ],
+   [
+    24,
+    19
+   ],
+   [
+    14,
+    19
+   ],
+   [
+    33,
+    19
+   ],
+   [
+    32,
+    20
+   ],
+   [
+    24,
+    25
+   ],
+   [
+    32,
+    25
+   ],
+   [
+    33,
+    25
+   ]
+  ],
+  "_tight": [
+   [
+    19,
+    8
+   ],
+   [
+    17,
+    8
+   ],
+   [
+    21,
+    8
+   ],
+   [
+    15,
+    8
+   ],
+   [
+    23,
+    8
+   ],
+   [
+    13,
+    8
+   ],
+   [
+    25,
+    8
+   ],
+   [
+    11,
+    8
+   ],
+   [
+    19,
+    15
+   ],
+   [
+    17,
+    15
+   ],
+   [
+    27,
+    8
+   ],
+   [
+    9,
+    8
+   ],
+   [
+    30,
+    6
+   ],
+   [
+    21,
+    15
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    6,
+    6
+   ],
+   [
+    31,
+    7
+   ],
+   [
+    23,
+    15
+   ],
+   [
+    13,
+    15
+   ],
+   [
+    5,
+    7
+   ],
+   [
+    18,
+    19
+   ],
+   [
+    25,
+    15
+   ],
+   [
+    18,
+    20
+   ],
+   [
+    11,
+    15
+   ],
+   [
+    18,
+    21
+   ],
+   [
+    27,
+    15
+   ],
+   [
+    18,
+    22
+   ],
+   [
+    9,
+    15
+   ],
+   [
+    18,
+    23
+   ],
+   [
+    11,
+    19
+   ],
+   [
+    10,
+    20
+   ],
+   [
+    31,
+    16
+   ],
+   [
+    30,
+    17
+   ],
+   [
+    6,
+    17
+   ],
+   [
+    5,
+    16
+   ],
+   [
+    8,
+    20
+   ],
+   [
+    7,
+    19
+   ],
+   [
+    31,
+    19
+   ],
+   [
+    24,
+    19
+   ],
+   [
+    14,
+    19
+   ],
+   [
+    33,
+    19
+   ],
+   [
+    32,
+    20
+   ],
+   [
+    24,
+    25
+   ],
+   [
+    32,
+    25
+   ],
+   [
+    33,
+    25
+   ]
+  ],
+  "decorN": 55,
+  "lights": 28,
+  "enemiesN": 17,
+  "itemsN": 0,
+  "kinds": 13
+ },
+ "9676": {
+  "size": [
+   29,
+   36
+  ],
+  "name": "The Stair of Quiet",
+  "badRows": 0,
+  "start": [
+   14,
+   2,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [
+   "sign_gy"
+  ],
+  "openCells": 384,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [
+   {
+    "x": 14,
+    "y": 1,
+    "lvl": 9675,
+    "vt": "stair",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   },
+   {
+    "x": 14,
+    "y": 33,
+    "lvl": null,
+    "vt": "lock",
+    "sale": 0,
+    "front": 2,
+    "frontOK": 2
+   },
+   {
+    "x": 14,
+    "y": 35,
+    "lvl": 9677,
+    "vt": "stair",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   }
+  ],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "gy_candles",
+    5,
+    24,
+    3,
+    22,
+    2
+   ],
+   [
+    "gy_candles",
+    23,
+    24,
+    25,
+    22,
+    2
+   ],
+   [
+    "gy_sarc",
+    2,
+    18,
+    2,
+    20,
+    2
+   ],
+   [
+    "gy_sarc",
+    26,
+    18,
+    26,
+    20,
+    2
+   ]
+  ],
+  "dupNearN": 4,
+  "stack": [
+   [
+    "2,18",
+    "gy_sarc*+sign_gy"
+   ],
+   [
+    "26,18",
+    "gy_sarc*+sign_gy"
+   ]
+  ],
+  "stackN": 2,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 22,
+  "tightByProp": [
+   [
+    18,
+    6
+   ],
+   [
+    10,
+    6
+   ],
+   [
+    19,
+    7
+   ],
+   [
+    9,
+    7
+   ],
+   [
+    19,
+    12
+   ],
+   [
+    18,
+    13
+   ],
+   [
+    10,
+    13
+   ],
+   [
+    9,
+    12
+   ],
+   [
+    25,
+    18
+   ],
+   [
+    26,
+    19
+   ],
+   [
+    3,
+    18
+   ],
+   [
+    2,
+    19
+   ],
+   [
+    26,
+    22
+   ],
+   [
+    20,
+    28
+   ],
+   [
+    8,
+    28
+   ],
+   [
+    2,
+    22
+   ],
+   [
+    27,
+    18
+   ],
+   [
+    27,
+    20
+   ],
+   [
+    1,
+    18
+   ],
+   [
+    1,
+    20
+   ]
+  ],
+  "_tight": [
+   [
+    18,
+    6
+   ],
+   [
+    10,
+    6
+   ],
+   [
+    19,
+    7
+   ],
+   [
+    9,
+    7
+   ],
+   [
+    19,
+    12
+   ],
+   [
+    18,
+    13
+   ],
+   [
+    10,
+    13
+   ],
+   [
+    9,
+    12
+   ],
+   [
+    24,
+    20
+   ],
+   [
+    4,
+    20
+   ],
+   [
+    25,
+    18
+   ],
+   [
+    26,
+    19
+   ],
+   [
+    3,
+    18
+   ],
+   [
+    2,
+    19
+   ],
+   [
+    26,
+    22
+   ],
+   [
+    20,
+    28
+   ],
+   [
+    8,
+    28
+   ],
+   [
+    2,
+    22
+   ],
+   [
+    27,
+    18
+   ],
+   [
+    27,
+    20
+   ],
+   [
+    1,
+    18
+   ],
+   [
+    1,
+    20
+   ]
+  ],
+  "decorN": 38,
+  "lights": 28,
+  "enemiesN": 18,
+  "itemsN": 0,
+  "kinds": 9
+ },
+ "9677": {
+  "size": [
+   25,
+   24
+  ],
+  "name": "Maldrake's Sanctum",
+  "badRows": 0,
+  "start": [
+   12,
+   20,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [
+   "sign_gy"
+  ],
+  "openCells": 265,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [
+   {
+    "x": 12,
+    "y": 21,
+    "lvl": 9676,
+    "vt": "stair",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   }
+  ],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "gy_candles",
+    6,
+    8,
+    8,
+    8,
+    2
+   ],
+   [
+    "gy_candles",
+    8,
+    8,
+    10,
+    8,
+    2
+   ],
+   [
+    "gy_candles",
+    14,
+    8,
+    16,
+    8,
+    2
+   ],
+   [
+    "gy_candles",
+    16,
+    8,
+    18,
+    8,
+    2
+   ],
+   [
+    "gy_candles",
+    6,
+    14,
+    8,
+    14,
+    2
+   ],
+   [
+    "gy_candles",
+    8,
+    14,
+    10,
+    14,
+    2
+   ],
+   [
+    "gy_candles",
+    14,
+    14,
+    16,
+    14,
+    2
+   ],
+   [
+    "gy_candles",
+    16,
+    14,
+    18,
+    14,
+    2
+   ]
+  ],
+  "dupNearN": 8,
+  "stack": [],
+  "stackN": 0,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 16,
+  "tightByProp": [
+   [
+    15,
+    14
+   ],
+   [
+    9,
+    14
+   ],
+   [
+    19,
+    18
+   ],
+   [
+    5,
+    18
+   ],
+   [
+    17,
+    14
+   ],
+   [
+    7,
+    14
+   ],
+   [
+    20,
+    17
+   ],
+   [
+    4,
+    17
+   ],
+   [
+    15,
+    8
+   ],
+   [
+    9,
+    8
+   ],
+   [
+    17,
+    8
+   ],
+   [
+    7,
+    8
+   ],
+   [
+    19,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    20,
+    6
+   ],
+   [
+    4,
+    6
+   ]
+  ],
+  "_tight": [
+   [
+    15,
+    14
+   ],
+   [
+    9,
+    14
+   ],
+   [
+    19,
+    18
+   ],
+   [
+    5,
+    18
+   ],
+   [
+    17,
+    14
+   ],
+   [
+    7,
+    14
+   ],
+   [
+    20,
+    17
+   ],
+   [
+    4,
+    17
+   ],
+   [
+    15,
+    8
+   ],
+   [
+    9,
+    8
+   ],
+   [
+    17,
+    8
+   ],
+   [
+    7,
+    8
+   ],
+   [
+    19,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    20,
+    6
+   ],
+   [
+    4,
+    6
+   ]
+  ],
+  "decorN": 26,
+  "lights": 24,
+  "enemiesN": 0,
+  "itemsN": 0,
+  "kinds": 7
+ },
+ "9678": {
+  "size": [
+   21,
+   18
+  ],
+  "name": "The Secret Archive",
+  "badRows": 0,
+  "start": [
+   10,
+   14,
+   true
+  ],
+  "nan": [],
+  "offOrWall": [],
+  "missingImg": [
+   "sign_gy"
+  ],
+  "openCells": 221,
+  "unreachGeom": [],
+  "unreachProp": [],
+  "unreachGeomN": 0,
+  "unreachPropN": 0,
+  "doors": [
+   {
+    "x": 10,
+    "y": 15,
+    "lvl": 9675,
+    "vt": "stair",
+    "sale": 0,
+    "front": 1,
+    "frontOK": 1
+   }
+  ],
+  "doorNoFront": [],
+  "doorBadTarget": [],
+  "npcBlockedFront": [],
+  "itemUnreach": [],
+  "enemyUnreach": [],
+  "dupNear": [
+   [
+    "hl_p_shelf",
+    3,
+    2,
+    5,
+    2,
+    2
+   ],
+   [
+    "hl_p_shelf",
+    5,
+    2,
+    7,
+    2,
+    2
+   ],
+   [
+    "hl_p_shelf",
+    13,
+    2,
+    15,
+    2,
+    2
+   ],
+   [
+    "hl_p_shelf",
+    15,
+    2,
+    17,
+    2,
+    2
+   ]
+  ],
+  "dupNearN": 4,
+  "stack": [],
+  "stackN": 0,
+  "enemyPile": [],
+  "doorFrontBlocked": [],
+  "tightN": 12,
+  "tightByProp": [
+   [
+    17,
+    14
+   ],
+   [
+    3,
+    14
+   ],
+   [
+    18,
+    13
+   ],
+   [
+    2,
+    13
+   ],
+   [
+    11,
+    4
+   ],
+   [
+    9,
+    4
+   ],
+   [
+    14,
+    2
+   ],
+   [
+    6,
+    2
+   ],
+   [
+    16,
+    2
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    18,
+    2
+   ],
+   [
+    2,
+    2
+   ]
+  ],
+  "_tight": [
+   [
+    17,
+    14
+   ],
+   [
+    3,
+    14
+   ],
+   [
+    18,
+    13
+   ],
+   [
+    2,
+    13
+   ],
+   [
+    11,
+    4
+   ],
+   [
+    9,
+    4
+   ],
+   [
+    14,
+    2
+   ],
+   [
+    6,
+    2
+   ],
+   [
+    16,
+    2
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    18,
+    2
+   ],
+   [
+    2,
+    2
+   ]
+  ],
+  "decorN": 23,
+  "lights": 8,
+  "enemiesN": 0,
+  "itemsN": 0,
+  "kinds": 9
+ },
+ "errs_?town=vault&lvl=88": []
+}

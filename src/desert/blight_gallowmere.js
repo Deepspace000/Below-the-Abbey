@@ -25,7 +25,7 @@ ITEMDEF.blreevestaff={n:"The Reeve's Rod",k:'weapon',t:'Sword',ic:'sword',c:'#8a
 /* ---------- the pictures and the water ---------- */
 function blgArt(){
   if(BLG._art)return;
-  if(typeof gyFloorTone==='function'&&FLOORS.water&&!FLOORS.blf_water)try{gyFloorTone('blf_water','water',.95,[.6,.95,.9])}catch(e){console.error(e)}
+  if(typeof gyFloorTone==='function'&&FLOORS.water&&!FLOORS.blf_water)try{gyFloorTone('blf_water','water',1.4,[.7,1,.95])}catch(e){console.error(e)}
   if(!FLOORS.blf_water)FLOORS.blf_water=FLOORS.water||FLOORS.cobble;
   if(!FLOORS.blf_flood){if(typeof gyFloorTone==='function'&&FLOORS.water)try{gyFloorTone('blf_flood','water',.5,[.7,.9,.8])}catch(e){}if(!FLOORS.blf_flood)FLOORS.blf_flood=FLOORS.blf_water}
   for(const [k,h] of [['yar_boat_row',.55],[b14Dead('b14_greeds','greeds','saturate(.2) brightness(.5)'),.9],[b14Dead('b14_reeds','reeds','saturate(.12) brightness(.5)'),.85],['hgwm_reed0',1.5],['ww_crowtree',1.9],['ww_totem',1.2],['ww_sign',1.2],['ww_willow',2.6],['wm_boat',.8],['gy_ghost0',1.1],['gy_ghost1',1.1],['gy_ghost2',1.1],['lamp',1.5],['kh_oqstuff_9',.5]])if(NPC_H[k]===undefined)NPC_H[k]=h;
@@ -45,7 +45,7 @@ function blgTick(){
 {const _ys=yarSoundTick;yarSoundTick=function(){_ys.apply(this,arguments);try{if(blIs(LEVEL))blgTick()}catch(e){console.error('blg tick',e)}}}
 /* ---------- the creatures: the wisps ---------- */
 Object.assign(ENEMY_DEF,{
-  blwisp:{name:'Fen Wisp',hp:92,dmg:[9,15],hit:.88,w:blWw('guardB_3',.85),img:'wwi_wisp',xp:34,gold:[0,0],speed:2,fly:true,floatH:.35,verb:'scorches',bl:1,still:1,glow:.4,wake:'A pale green light lifts off the water and drifts towards you, sighing.'},
+  blwisp:{name:'Fen Wisp',hp:92,dmg:[9,15],hit:.88,w:blWw('guardB_3',.6),img:'wwi_wisp',xp:34,gold:[0,0],speed:2,fly:true,floatH:.35,verb:'scorches',bl:1,still:1,glow:.4,wake:'A pale green light lifts off the water and drifts towards you, sighing.'},
   blreeve:{name:'The Drowned Reeve',hp:430,dmg:[10,17],hit:.9,w:blW('crA_5',1.45),img:'gyi_giant',xp:760,gold:[0,0],speed:1,verb:'crushes',boss:true,aboveParty:0,bl:1,still:1,glow:.1,wake:'The Reeve of Gallowmere rises out of the black water in his hall, streaming, with a bronze rod in his hand and weed in his chain of office.'}});
 if(typeof NO_VARY!=='undefined')NO_VARY.push('blreeve');
 if(typeof BOSS_GOLD!=='undefined')BOSS_GOLD.blreeve=[3400,4200];
@@ -157,7 +157,7 @@ yrHook('blg_nan',d=>{const F=blF();
   if(qSt('blq12')==='active'&&blgSalt()>=3&&!F.saltGiven)return say('Nan Sallow looks at the three grey sacks, and her face goes soft. "Oh, you dear things," she says. "Give them here."',[['Give her the three sacks of salt.',()=>{F.saltGiven=1;sfx('win');msg('You give Nan Sallow the peat salt.','#ffe36a');return say('She hefts each sack in turn, and sniffs it, and puts it carefully on the shelf. "Bless you," she says. "That will keep the lot of us."',[BYE])}],['Not yet.',()=>null]]);
   return null});
 khNpc('blg_gibbet','The Gallows Tree','ww_crowtree',()=>say('A great black tree on the village green, with an iron cage hanging from a limb, and three ropes. A board nailed to the trunk says: TO WHOM IT MAY CONCERN. WHOEVER REFUSES THE TOLL. Under it, fresh paint: WE DID NOT. Nobody hangs here now. It is only that the tree has not forgotten.',[BYE]));
-khNpc('blg_hanged','A hanged scarecrow','ww_totem',()=>say('A scarecrow hung from a beam by its neck, in a drowned man\'s Sunday coat, with a placard: I DID NOT PAY. The straw of its face is green with damp, and somebody has put a clay pipe in its mouth, kindly.',[BYE]));
+khNpc('blg_hanged','The hanged',IMG.bl_hang2?'bl_hang2':'ww_totem',()=>say('Somebody hung them from the beam by their necks, in Sunday coats, and a placard says: I DID NOT PAY. The rope creaks. They have been there a long time, and the crows have lost interest.',[BYE]));
 khNpc('blg_bog','A bog body','gy_mound',d=>{const t=['A man lies in the peat, flat on his back, tanned dark as a saddle, with a rope still round his neck. Somebody has laid a few reeds over his face. He has been here a very long time, and he is in surprisingly good order.','A woman lies curled on her side in the black earth, with her knees drawn up and a plait of red hair still on her shoulder. Her hands are over her ears. The peat has kept every line of her face.','A boy lies in the peat, small and brown, in a wool cap. A reed has been placed in his hand. A stake at his foot says, in Nan Sallow\'s hand: SALTED.'];return say(t[(d.i|0)%3],[BYE])});
 khNpc('blg_well','The village well','ww_well',()=>say('A stone well with a little roof, in the middle of the green. The water in it is perfectly black and perfectly still. Written on the lid: DO NOT PAY. Somebody has crossed out DO NOT and written DID NOT.',[BYE]));
 khNpc('blg_tollhut','The toll hut','bl_hut',()=>say('A toll hut at the foot of the causeway, door nailed open. Inside, a table, and a ledger, and a very long list of names, each with a mark beside it. The marks are all the same: NO. The last name on the list is GALLOWMERE.',[BYE]));
@@ -195,7 +195,7 @@ function blgBuild(p){
   ell(66,13,7,5);                         // Heron Isle
   ell(28,12,8,6);                         // the Reeve's Isle
   ell(38,62,10,7);box(35,52,38,58);       // the south salt pans and their neck
-  box(49,48,50,48);box(62,17,62,18);box(28,17,28,18);   // the three piers
+  box(49,48,50,49);box(61,17,62,18);box(27,17,28,18);   // the three piers
   // the house stilts: a ring of water round each of the two stilt houses on the island, open at the front
   box(BLG_HOUSE_OSK.x0-1,BLG_HOUSE_OSK.y0-1,BLG_HOUSE_OSK.x1+1,BLG_HOUSE_OSK.y1+1);box(BLG_HOUSE_NAN.x0-1,BLG_HOUSE_NAN.y0-1,BLG_HOUSE_NAN.x1+1,BLG_HOUSE_NAN.y1+1);
   box(BLG_HOUSE_REEVE.x0-1,BLG_HOUSE_REEVE.y0-1,BLG_HOUSE_REEVE.x1+1,BLG_HOUSE_REEVE.y1+2);
@@ -203,17 +203,22 @@ function blgBuild(p){
   for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=ix(x,y);if(land[i]){fm[i]='0';hgt[i]=.3}else{fm[i]='5';hgt[i]=-.3;block[i]=1}}
   C.setF(74,28,87,62,'0');C.setF(2,28,14,62,'0');
   C.pth(50,38,74,39,'2');C.pth(14,38,22,39,'2');C.pth(22,38,50,39,'1');C.pth(75,37,87,39,'1');C.pth(2,37,13,39,'1');
-  C.pth(33,35,40,41,'3');C.pth(47,40,48,47,'1');C.pth(49,48,50,48,'2');C.pth(62,17,62,18,'2');C.pth(28,17,28,18,'2');C.pth(35,52,38,58,'1');C.pth(36,40,36,33,'1');C.pth(42,40,42,41,'1');C.pth(31,35,31,37,'1');
+  C.pth(33,35,40,41,'3');C.pth(47,40,48,47,'1');C.pth(49,48,50,49,'2');C.pth(61,17,62,18,'2');C.pth(27,17,28,18,'2');C.pth(35,52,38,58,'1');C.pth(36,40,36,33,'1');C.pth(42,40,42,41,'1');C.pth(31,35,31,37,'1');
   C.pth(28,13,28,16,'1');C.pth(62,12,62,16,'1');for(let y=58;y<=66;y++)for(let x=30;x<=46;x++)if(land[ix(x,y)]){fm[ix(x,y)]='4';C.path.add(x+','+y)}
   const wat=(x,y)=>!land[ix(x,y)],ok=(x,y)=>x>=X0&&y>=Y0&&x<=X1&&y<=Y1&&land[ix(x,y)]&&!C.used.has(x+','+y);
   C.gate('E',38);C.gate('W',38);
   // the houses: two stilt houses with enterable doors, a few shut ones
-  C.house(BLG_HOUSE_NAN);C.house(BLG_HOUSE_OSK);C.house(BLG_HOUSE_REEVE);
-  for(const h of [{x0:40,x1:41,y0:33,y1:34,face:'S',sty:'dtimber',roof:'thatch2',wh:2.1},{x0:26,x1:27,y0:42,y1:43,face:'N',sty:'dtimber',roof:'thatch2',wh:2.1},{x0:46,x1:47,y0:32,y1:33,face:'S',sty:'dtimber',roof:'thatch2',wh:2.1},{x0:30,x1:31,y0:44,y1:45,face:'N',sty:'dtimber',roof:'thatch2',wh:2.1}])C.house(Object.assign({lit:false},h));
+  // round 2: painted stilt houses (bl_stilt1, bl_stilt2) stand over hidden blocks; the Reeve's hall stays a stone house
+  if(IMG.bl_stilt2){Object.assign(BLG_HOUSE_NAN,{img:'bl_stilt2',w:3.7,wh:.2,door:[31,34]});Object.assign(BLG_HOUSE_OSK,{img:'bl_stilt2',w:3.7,wh:.2,door:[42,43],up:1,sy:42.9});C.picHouse(BLG_HOUSE_NAN);C.picHouse(BLG_HOUSE_OSK)}
+  else{C.house(BLG_HOUSE_NAN);C.house(BLG_HOUSE_OSK)}
+  C.house(BLG_HOUSE_REEVE);
+  for(const h of [{x0:40,x1:41,y0:33,y1:34,face:'S',sty:'dtimber',roof:'thatch2',wh:2.1},{x0:26,x1:27,y0:42,y1:43,face:'N',sty:'dtimber',roof:'thatch2',wh:2.1},{x0:46,x1:47,y0:32,y1:33,face:'S',sty:'dtimber',roof:'thatch2',wh:2.1},{x0:30,x1:31,y0:44,y1:45,face:'N',sty:'dtimber',roof:'thatch2',wh:2.1}]){
+    if(IMG.bl_stilt1){const up=h.face==='N';C.picHouse({img:'bl_stilt1',x0:h.x0,x1:h.x1,y0:h.y0,y1:h.y1,w:2.6,wh:.2,door:up?[h.x0,h.y0]:[h.x0,h.y1],up:up?1:0,sy:up?h.y0-.1:undefined})}
+    else C.house(Object.assign({lit:false},h))}
   for(const h of [BLG_HOUSE_NAN,BLG_HOUSE_OSK,BLG_HOUSE_REEVE]){for(const [x,y] of [[h.x0-1,h.y0-1],[h.x1+1,h.y0-1],[h.x0-1,h.y1+1],[h.x1+1,h.y1+1]])C.dec('gy_rpost',x,y,{block:true,sc:.9})}
   C.dec('gy_lantern',25,12,{block:true});C.light(25,12,C.pale);C.dec('gy_lantern',29,12,{block:true});C.light(29,12,C.warm);
   // the village green: the Gallows Tree, the hanged, the well, signs, lamps
-  C.dec('ww_crowtree',36,31,{block:true,npc:'blg_gibbet',sc:1.1});C.dec('ww_totem',34,32,{block:true,npc:'blg_hanged',sc:.9});C.dec('ww_totem',38,32,{block:true,npc:'blg_hanged',sc:.9});
+  C.dec('ww_crowtree',36,31,{block:true,npc:'blg_gibbet',sc:1.1});C.dec(IMG.bl_hang1?'bl_hang1':'ww_totem',34,32,{block:true,npc:'blg_hanged',sc:IMG.bl_hang1?1:.9});C.dec(IMG.bl_hang2?'bl_hang2':'ww_totem',38,32,{block:true,npc:'blg_hanged',sc:IMG.bl_hang2?1:.9});
   C.dec('ww_well',34,37,{block:true,npc:'blg_well',sc:.9});C.light(36,36,C.pale);C.light(33,40,C.pale);
   C.post(40,37,'bl_gm_v',[{n:'GALLOWMERE',d:0},{n:'A FREE VILLAGE',d:0}],'blg_sign_v','A signpost at the head of the village. The board reads GALLOWMERE, A FREE VILLAGE. Under it somebody has added: POPULATION 212. Under that, with a nail: 3.',{i:2});
   C.dec('ww_sign',45,37,{block:true,sc:.8,npc:'blg_sign_v'});
@@ -239,7 +244,7 @@ function blgBuild(p){
   [[8,14],[67,11],[38,33]].forEach(([x,y],i)=>{const set=(F.mk|0)&(1<<i);C.dec(blgMarkKey(i,!!set),x,y,{block:true,npc:'blg_marker',i});if(!set)C.dec(['gy_ghost0','gy_ghost1','gy_ghost2'][i],x+(i===2?-1:1),y+1,{block:true,npc:'blg_ghost'+i,sc:.9})});
   [[38,64],[8,56],[82,58]].forEach(([x,y],i)=>{if(!((F.salt|0)&(1<<i)))C.dec('kh_oqstuff_9',x,y,{block:true,npc:'blg_salt',i,sc:.9})});
   [[10,50],[6,52],[12,58],[8,46],[44,58],[41,64],[30,50],[78,52],[84,50],[70,12]].forEach(([x,y],i)=>C.dec('gy_mound',x,y,{block:true,npc:'blg_bog',i,sc:.7}));
-  b14GalDress(C,land,ix);
+  b14GalDress(C,land,ix);b34GalExtra(C);
   // reeds along every shore, grey and tall; drowned willows; scrub; pale lights over the water
   for(let y=Y0+1;y<=Y1-1;y++)for(let x=X0+1;x<=X1-1;x++){
     const i=ix(x,y),r=hs(x,y,61);

@@ -6,8 +6,8 @@ const vtDown=(to)=>()=>{vtMake(to);return LEVELS[to].start};          // the way
 const vtUp=(from)=>()=>{vtMake(from);return LEVELS[from]._vt.downAt};  // the way up arrives beside the stair down of the floor above
 const P_BRAZ=['hl_p_candle'];
 /* ===== 9671 THE BARROW STAIR: the way in, the Hall of Guards, the Warden's Hall and the first pale-silver lock ===== */
-VT_SPEC[9671]={W:29,H:29,diff:88,brick:'texGrey',rgb:[.95,.97,1.03],lcol:[1.5,.95,.55],torch:{fl:0,col:[1.5,.9,.45],name:'orange',css:'#e8923a'},fgain:.52,
-  rects:[[11,2,17,5],[13,6,15,8],[5,9,23,15],[4,12,4,12],[1,9,3,15],[24,12,24,12],[25,9,27,15],[13,16,15,18],[8,19,20,24],[14,26,14,27]],
+VT_SPEC[9671]={W:29,H:29,diff:88,brick:'texGrey',rgb:[.95,.97,1.03],lcol:[1.3,.85,.5],torch:{fl:0,col:[1.3,.8,.42],name:'orange',css:'#e8923a'},fgain:.52,wall:.86,
+  rects:[[11,2,17,5],[13,6,15,8],[5,9,23,15],[4,11,4,13],[1,9,3,15],[24,11,24,13],[25,9,27,15],[13,16,15,18],[8,19,20,24],[13,26,15,27]],
   doors:[{x:14,y:1,kind:'stair',to:VT.ID,at:()=>VT.hillBack,start:true},{x:14,y:25,kind:'lock',lock:'L1'},{x:14,y:28,kind:'stair',to:9672,at:vtDown(9672),down:true}],
   names:[{t:'The Vestibule',x:14,y:3,k:'place'},{t:'The Hall of Guards',x:14,y:12,k:'place'},{t:'The Cells',x:2,y:12,k:'place'},{t:"The Scribe's Alcove",x:26,y:12,k:'place'},{t:"The Warden's Hall",x:14,y:21,k:'place'},{t:'The First Lock',x:14,y:25,k:'place'}],
   dress(C){const {dec,sign,foe,light,trap}=C;
@@ -43,8 +43,8 @@ VT_SPEC[9671]={W:29,H:29,diff:88,brick:'texGrey',rgb:[.95,.97,1.03],lcol:[1.5,.9
 /* ===== 9672 THE OSSUARY OF THE ROLL: the Roll of Underhill and the ring of eight coffins ===== */
 const VT_RING={names:[['PIERS COBB','45, smith'],['EDDA MARL','9, the miller\'s daughter'],['NAN PELTER','40, midwife'],['BROTHER ALDER','52, priest of Underhill'],['OLD JOSS THATCHER','74'],['NELL BRIGHT','19, shepherdess'],['WAT BRAMBLE','33, ferryman'],['DAME ORLA FENN','68, widow']],
   pos:[[15,15],[19,16],[21,19],[19,22],[15,23],[11,22],[9,19],[11,16]],order:[1,4,2,6,7,0,5,3]};   // the order of death is the order to open them: Edda, Joss, Nan, Wat, Orla, Piers, Nell, Brother Alder
-VT_SPEC[9672]={W:31,H:32,diff:88,brick:'texBone',lcol:[1.35,1.2,.62],torch:{fl:4,col:[1.45,1.25,.4],name:'yellow',css:'#f2d23c'},fgain:.6,wall:.9,ftint:[.95,.95,.98],
-  rects:[[13,2,17,3],[14,4,16,4],[10,5,20,9],[8,7,9,7],[2,5,7,9],[21,7,22,7],[23,5,28,9],[15,10,15,12],[7,13,23,25],[15,27,15,29]],
+VT_SPEC[9672]={W:31,H:32,diff:88,brick:'texBone',lcol:[1,.84,.46],torch:{fl:4,col:[1.1,.88,.34],name:'yellow',css:'#f2d23c'},fgain:.6,wall:.54,ftint:[.95,.95,.98],
+  rects:[[13,2,17,3],[14,4,16,4],[10,5,20,9],[8,6,9,8],[2,5,7,9],[21,6,22,8],[23,5,28,9],[14,10,16,12],[7,13,23,25],[14,27,16,29]],
   doors:[{x:15,y:1,kind:'stair',to:9671,at:vtUp(9671),start:true},{x:15,y:26,kind:'ringgate'},{x:15,y:30,kind:'stair',to:9673,at:vtDown(9673),down:true}],
   names:[{t:'The Vestibule',x:15,y:3,k:'place'},{t:'The Reading Room',x:15,y:7,k:'place'},{t:"The Gravedigger's Rest",x:4,y:7,k:'place'},{t:'The Cold Store',x:26,y:7,k:'place'},{t:'The Ring of Coffins',x:15,y:19,k:'place'},{t:'The Coffin Gate',x:15,y:26,k:'place'}],
   dress(C){const {dec,sign,foe,light,trap}=C;
@@ -76,7 +76,7 @@ VT_SPEC[9672]={W:31,H:32,diff:88,brick:'texBone',lcol:[1.35,1.2,.62],torch:{fl:4
 const VT_BELLS={names:['The Miller\'s Bell','The Great Bell','The Child\'s Bell','The Priest\'s Bell','The Widow\'s Bell'],sub:['Cast for the mill, the deepest of the five','Cast last, and never rung alone','Cast for the youngest of the parish','Cast for the one who buried the rest','Cast for the ones who stayed behind'],
   xs:[7,12,17,22,27],order:[2,4,0,3,1],freq:[196,110,392,262,329]};   // the child, the widow, the miller, the priest, then the Great Bell
 VT_SPEC[9673]={W:33,H:26,diff:88,brick:'texBlack',lcol:[.5,.8,1.5],torch:{fl:3,col:[.45,.8,1.7],name:'blue',css:'#4f9cff'},fgain:.55,ftint:[.85,.92,1.1],ceil:'gyc_2',
-  rects:[[14,2,18,4],[15,5,17,5],[3,6,29,13],[15,14,17,15],[12,16,20,19],[16,21,16,23],[6,14,6,15],[2,16,10,22],[26,14,26,15],[24,16,30,22]],
+  rects:[[14,2,18,4],[15,5,17,5],[3,6,29,13],[15,14,17,15],[12,16,20,19],[15,21,17,23],[5,14,7,15],[2,16,10,22],[25,14,27,15],[24,16,30,22]],
   doors:[{x:16,y:1,kind:'stair',to:9672,at:vtUp(9672),start:true},{x:16,y:20,kind:'lock',lock:'L2'},{x:16,y:24,kind:'stair',to:9674,at:vtDown(9674),down:true}],
   names:[{t:'The Vestibule',x:16,y:3,k:'place'},{t:'The Bell Gallery',x:16,y:9,k:'place'},{t:"The Ringers' Room",x:6,y:19,k:'place'},{t:"The Founder's Loft",x:27,y:19,k:'place'},{t:"The Founder's Landing",x:16,y:17,k:'place'},{t:'The Second Lock',x:16,y:20,k:'place'}],
   dress(C){const {dec,sign,foe,light,trap}=C;
@@ -103,7 +103,7 @@ VT_SPEC[9673]={W:33,H:26,diff:88,brick:'texBlack',lcol:[.5,.8,1.5],torch:{fl:3,c
     C.setF(3,6,29,13,'3')}};
 /* ===== 9674 THE SILVERED CELLARS: where the Sovereign's silver was kept; three rooms each guard a sigil; the third lock wants all three ===== */
 VT_SPEC[9674]={W:35,H:30,diff:89,brick:'texGrey',rgb:[.9,1,1.22],lcol:[.78,.72,1.45],torch:{fl:2,col:[.56,.36,.74],name:'purple',css:'#b06cf0'},fgain:.58,ftint:[.9,.9,1.12],ceil:'gyc_1',
-  rects:[[15,2,19,4],[17,5,17,7],[12,8,22,16],[8,12,11,12],[1,8,7,16],[23,12,26,12],[27,8,33,16],[13,17,13,21],[2,22,14,28],[21,18,21,25]],
+  rects:[[15,2,19,4],[16,5,18,7],[12,8,22,16],[8,11,11,13],[1,8,7,16],[23,11,26,13],[27,8,33,16],[12,17,14,21],[2,22,14,28],[20,18,22,25]],
   doors:[{x:17,y:1,kind:'stair',to:9673,at:vtUp(9673),start:true},{x:21,y:17,kind:'lock',lock:'L3'},{x:21,y:26,kind:'stair',to:9675,at:vtDown(9675),down:true}],
   names:[{t:'The Vestibule',x:17,y:3,k:'place'},{t:'The Counting Hall',x:17,y:12,k:'place'},{t:'The Room of Needles',x:4,y:12,k:'place'},{t:"The Hounds' Den",x:30,y:12,k:'place'},{t:'The Silvered Hall',x:8,y:25,k:'place'},{t:'The Third Lock',x:21,y:17,k:'place'}],
   dress(C){const {dec,sign,foe,light,trap}=C;
@@ -135,7 +135,7 @@ VT_SPEC[9674]={W:35,H:30,diff:89,brick:'texGrey',rgb:[.9,1,1.22],lcol:[.78,.72,1
     C.setF(12,8,22,16,'3')}};
 /* ===== 9675 THE HALL OF UNDERHILL: the village sits down to supper; the old study and the red-eyed book ===== */
 VT_SPEC[9675]={W:37,H:28,diff:89,brick:'texRed',rgb:[.82,.66,.62],lcol:[1.5,.8,.48],torch:{fl:0,col:[1.5,.8,.4],name:'orange',css:'#e0803a'},fgain:.5,ftint:[1,.92,.9],ceil:'gyc_0',wall:.88,
-  rects:[[16,2,20,4],[17,5,19,5],[5,6,31,17],[9,18,10,18],[5,19,14,25],[17,18,19,18],[18,19,18,23],[27,18,28,18],[24,19,33,25],[35,22,35,22]],
+  rects:[[16,2,20,4],[17,5,19,5],[5,6,31,17],[9,18,10,18],[5,19,14,25],[17,18,19,18],[17,19,19,23],[27,18,28,18],[24,19,33,25],[35,21,35,23]],
   doors:[{x:18,y:1,kind:'stair',to:9674,at:vtUp(9674),start:true},{x:18,y:24,kind:'stair',to:9676,at:vtDown(9676),down:true},{x:34,y:22,kind:'secret',v:2},{x:36,y:22,kind:'stair',to:9678,at:vtDown(9678),secretStair:true}],
   names:[{t:'The Vestibule',x:18,y:3,k:'place'},{t:'The Hall of Underhill',x:18,y:11,k:'place'},{t:'The Chapel',x:9,y:22,k:'place'},{t:"Maldrake's Old Study",x:28,y:22,k:'place'}],
   dress(C){const {dec,sign,foe,light,trap}=C;
@@ -164,7 +164,7 @@ VT_SPEC[9675]={W:37,H:28,diff:89,brick:'texRed',rgb:[.82,.66,.62],lcol:[1.5,.8,.
     C.setF(5,6,31,17,'3')}};
 /* ===== 9676 THE STAIR OF QUIET: the last approach; the Hall of Plates; the Silver Warden and the lock of the Sanctum ===== */
 VT_SPEC[9676]={W:29,H:36,diff:89,brick:'texBlack',rgb:[.95,.92,1.1],lcol:[.7,.55,1.25],torch:{fl:2,col:[.56,.36,.74],name:'purple',css:'#b06cf0'},fgain:.52,ftint:[.9,.88,1.1],ceil:'gyc_2',
-  rects:[[12,2,16,4],[13,5,15,5],[9,6,19,13],[13,14,15,16],[5,17,23,24],[4,20,4,20],[1,18,3,22],[24,20,24,20],[25,18,27,22],[13,25,15,26],[8,27,20,32],[14,34,14,34]],
+  rects:[[12,2,16,4],[13,5,15,5],[9,6,19,13],[13,14,15,16],[5,17,23,24],[4,19,4,21],[1,18,3,22],[24,19,24,21],[25,18,27,22],[13,25,15,26],[8,27,20,32],[13,34,15,34]],
   doors:[{x:14,y:1,kind:'stair',to:9675,at:vtUp(9675),start:true},{x:14,y:33,kind:'lock',lock:'L4'},{x:14,y:35,kind:'stair',to:9677,at:vtDown(9677),down:true}],
   names:[{t:'The Vestibule',x:14,y:3,k:'place'},{t:'The Stair of Quiet',x:14,y:9,k:'place'},{t:'The Hall of Plates',x:14,y:20,k:'place'},{t:'The Western Vault',x:2,y:20,k:'place'},{t:'The Eastern Vault',x:26,y:20,k:'place'},{t:"The Silver Warden's Landing",x:14,y:29,k:'place'},{t:"The Sanctum Lock",x:14,y:33,k:'place'}],
   dress(C){const {dec,sign,foe,light,trap}=C;
@@ -190,21 +190,26 @@ VT_SPEC[9676]={W:29,H:36,diff:89,brick:'texBlack',rgb:[.95,.92,1.1],lcol:[.7,.55
     foe('vtsilver',14,30);foe('gypike',11,30);foe('gypike',17,30);foe('gybmage',14,28);
     C.setF(5,17,23,24,'3')}};
 /* ===== 9677 MALDRAKE'S SANCTUM ===== */
-VT_SPEC[9677]={W:25,H:24,diff:89,brick:'texBlack',rgb:[.92,.9,1.12],lcol:[.85,.9,1.5],torch:{fl:3,col:[.45,.8,1.7],name:'blue',css:'#4f9cff'},fgain:.5,ftint:[.9,.9,1.15],ceil:'gyc_2',niches:6,lampGap:6,
+VT_SPEC[9677]={W:25,H:24,diff:89,brick:'texBlack',rgb:[.92,.9,1.12],wall:1.7,amb:.05,lcol:[1.1,1.2,1.9],torch:{fl:3,col:[.45,.8,1.7],name:'blue',css:'#4f9cff'},fgain:.5,ftint:[.9,.9,1.15],ceil:'gyc_2',niches:6,lampGap:6,
   rects:[[9,2,15,4],[4,5,20,18],[11,19,13,20]],
   doors:[{x:12,y:21,kind:'stair',to:9676,at:vtUp(9676),start:true}],
   names:[{t:"Maldrake's Table",x:12,y:4,k:'place'},{t:'The Candles of Underhill',x:12,y:11,k:'place'},{t:'The Stair',x:12,y:20,k:'place'}],
   dress(C){const {dec,sign,foe,light,trap}=C;
-    dec('hl_p_desk',12,4,{block:true,npc:'vto_desk2',raw:true,sc:1.05});dec('hl_p_mirror',9,2,{block:true,npc:'vto_mirror',raw:true,sc:1});dec('hl_p_mirror',15,2,{block:true,npc:'vto_mirror',raw:true,sc:1});
-    dec('candles',10,2,{block:true,sc:.9});dec('candles',14,2,{block:true,sc:.9});light(12,3,[.9,.95,1.5]);light(10,3,[.85,.9,1.5]);light(14,3,[.85,.9,1.5]);
-    // the memorial: twelve candles for the twelve households, in two rows, each with a small stone
-    [[6,8],[8,8],[10,8],[14,8],[16,8],[18,8],[6,14],[8,14],[10,14],[14,14],[16,14],[18,14]].forEach(([x,y],i)=>{dec('candles',x,y,{block:true,sc:.5,npc:'vto_memorial',i,raw:true});light(x,y,[.95,.9,1.4])});
-    for(const [x,y] of [[5,6],[19,6],[5,17],[19,17]])dec('column',x,y,{block:true,sc:.75});for(const [x,y] of [[6,11],[18,11],[12,16]])dec('rose',x,y,{sc:.8,raw:true});
-    for(const [x,y] of [[12,9],[12,13],[7,11],[17,11]])light(x,y,[.85,.9,1.5]);
+    // THE FOCAL SET: the hall is an aisle of candles running up to a raised dais of pale floor; Maldrake stands on it under a cold light, the desk and the two dark mirrors behind him
+    dec('hl_p_desk',12,3,{block:true,npc:'vto_desk2',raw:true,sc:1.05});dec('hl_p_mirror',9,2,{block:true,npc:'vto_mirror',raw:true,sc:1});dec('hl_p_mirror',15,2,{block:true,npc:'vto_mirror',raw:true,sc:1});
+    dec('candles',10,3,{block:true,sc:.9});dec('candles',14,3,{block:true,sc:.9});
+    light(12,4,[1.5,1.7,2.4]);light(12,6,[1.5,1.6,2.3]);light(10,5,[.9,1,1.7]);light(14,5,[.9,1,1.7]);
+    // the memorial: twelve candles for the twelve households, four at the foot of the dais and eight in two files down the aisle, each with its small stone
+    [[9,8],[15,8],[9,5],[15,5],[9,10],[15,10],[9,12],[15,12],[9,14],[15,14],[9,16],[15,16]].forEach(([x,y],i)=>{dec('candles',x,y,{block:true,sc:.5,npc:'vto_memorial',i,raw:true});light(x,y,[.95,.9,1.4])});
+    // the dais: two angels at its steps, columns down the long walls, roses on the floor of the aisle
+    for(const [x,y] of [[8,7],[16,7]])dec('angel',x,y,{block:true,sc:1.05});
+    for(const [x,y] of [[5,6],[19,6],[5,10],[19,10],[5,14],[19,14],[5,17],[19,17]])dec('column',x,y,{block:true,sc:.8});
+    for(const [x,y] of [[6,12],[18,12],[12,17]])dec('rose',x,y,{sc:.8,raw:true});
+    for(const [x,y] of [[12,11],[12,15],[7,9],[17,9],[7,15],[17,15]])light(x,y,[.85,.9,1.5]);
     sign(6,18,[0,1],'UNDERHILL','Twelve households. Eighty-one souls.');
     // the one who waits
-    {const kp=KH_KEEPERS.vto_maldrake;if(kp){const d=dec('vti_maldrake',12,7,{block:false,npc:'vto_maldrake',raw:true});if(d){d.sc=1.05;d.k=khFaceKey('vti_maldrake')}}}
-    C.setF(4,5,20,18,'3')}};
+    {const kp=KH_KEEPERS.vto_maldrake;if(kp){const d=dec('vti_maldrake',12,6,{block:false,npc:'vto_maldrake',raw:true});if(d){d.sc=1.15;d.k=khFaceKey('vti_maldrake')}}}
+    C.setF(4,5,20,18,'3');C.setF(8,5,16,8,'1');C.setF(11,9,13,18,'2')}};
 /* ===== 9678 THE SECRET ARCHIVE ===== */
 VT_SPEC[9678]={W:21,H:18,diff:89,brick:'texBone',rgb:[1.05,1,.9],lcol:[1.4,1.05,.62],torch:{fl:0,col:[1.5,.9,.45],name:'orange',css:'#e8923a'},fgain:.58,ftint:[1,.96,.9],ceil:'gyc_3',niches:4,lampGap:5,
   rects:[[2,2,18,14]],

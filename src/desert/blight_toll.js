@@ -126,7 +126,7 @@ function bltBuild(p){
   C.dec('greensign',35,30,{block:true,npc:'blt_notice'});
   // the Wardens' graves, nine mounds in a railed row and six boards
   C.reserve(50,19,60,27);
-  for(let x=51;x<=59;x+=2)C.dec('gy_mound',x,24,{block:true,sc:.8});
+  for(let x=51;x<=59;x+=2)C.dec(x%4===1?'bl_barrow':'gy_mound',x,24,{block:true,sc:.8});
   for(let x=50;x<=60;x++){C.dec('bl_fence',x,22,{block:true,sc:.9});}
   BLT_GRAVES.forEach((g,i)=>{const k=blSlab('bl_wg'+i,[g[0].replace('WARDEN CAPTAIN ','').replace('WARDEN ',''),'WARDEN'],{h:.95,top:.2,span:.55});C.dec(k,i<5?51+i*2:55,i<5?23:26,{block:true,npc:'blt_wgrave',i})});
   for(const [x,y] of [[50,20],[60,20],[50,26],[60,26]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.pale)}
@@ -160,6 +160,7 @@ function bltBuild(p){
   for(const [x0,y0,x1,y1] of [[28,5,50,26],[14,38,34,58],[40,40,68,58],[4,5,10,27]])b14Furrows(C,x0,y0,x1,y1,.55);   // ploughed dead fields (round 1 to 4)
   C.dec('kh_ohgard1_5',30,12,{block:true,sc:.8});C.dec('kh_ohgard2_3',45,52,{block:true,sc:.8});
   b14TollDress(C);
+  b2Toll(C);
   b14Patches(C,{keep:(x,y)=>x>=35&&x<=53&&y>=26&&y<=37||x>=49&&x<=61&&y>=18&&y<=28});
   C.dress({trees:150,scrub:260,stones:20,bones:8,posts:5,keep:(x,y)=>(x>=35&&x<=53&&y>=26&&y<=37)||(y>=29&&y<=35)||(x>=49&&x<=61&&y>=18&&y<=28)});
   // the creatures: Dead Road Wardens on the road and in the yard, husks in the fields, bones at the shrine, a flock in the crow tree
@@ -206,9 +207,9 @@ function b14TollDress(C){
     ban=b14Dead('b14_banner','banner','saturate(.5) brightness(.75)',1.6),cage=b14Dead('b14_cage','ww_cagefull','saturate(.4) brightness(.7)',1.1),
     sacks=b14Dead('b14_sacks','sacks','saturate(.3) brightness(.6)',.7),gcart=b14Dead('b14_gcart','wl_prop1_5','saturate(.2) brightness(.55)',1.0);
   // the stocks in the yard, a wrecked cart each side of the yard, a barrel stack at the house, torn banners on poles at the yard gates, cages with bones hung at the toll bar
-  b14Place(C,[[stocks,38,34],[cart,33,34,{sc:1}],[gcart,56,34],['barrel',40,27,{sc:.9}],['barrel',41,27,{sc:.8}],['crate',45,27,{sc:.9}],[sacks,46,28,{sc:.9}],
-    [ban,36,31],[ban,36,33],[ban,52,31],[ban,52,33],[cage,51,29],[cage,51,35],['gy_lantern',41,28],['gy_lantern',43,28]]);
-  C.light(41,28,C.warm);C.light(43,28,C.warm);
+  b14Place(C,[[stocks,38,34],[cart,33,34,{sc:1}],[gcart,56,34],['barrel',40,27,{sc:.9}],['crate',41,27,{sc:.8}],['crate',45,27,{sc:.9}],[sacks,46,28,{sc:.9}],
+    [ban,36,30],[ban,36,34],[ban,52,30],[ban,52,34],[cage,51,29],[cage,51,35],['ww_cauldron',34,28,{sc:.7}]]);
+  C.light(41,28,C.warm);C.light(43,28,C.warm);b12Toll(C);
   for(const [x,y] of [[39,32],[44,31],[50,33],[34,32],[57,32],[26,33],[14,31],[62,31]])C.dec('gy_bones',x,y,{sc:.25});
   // the road verges: wrecked carts and crate stacks, every so often, never in the road
   for(const [x,y] of [[22,34],[30,30],[60,30],[66,30]])C.dec(x%2?cart:gcart,x,y,{block:true,sc:.9});

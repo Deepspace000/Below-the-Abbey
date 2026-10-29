@@ -21,7 +21,7 @@ ITEMDEF.blwatchring={n:'Ring of the Sale Watch',k:'ring',t:'Ring',ic:'ring',c:'#
 ITEMDEF.blwatchhelm={n:"Lamplighter's Hood",k:'head',t:'Helm',ic:'head',c:'#6a6458',armor:20,price:0,lvl:90,pas:{dmgPct:.06,dodge:.03,regen:.5},rar:1,gear:1,sw:.3,d:'A sooty grey hood with a flap that covers the face against lamp smoke. Joss Fenn wore it every night of his life. Armour 20, damage +6%, enemies miss 3% more, and wounds close steadily. Needs level 90.'};
 ITEMDEF.blpalesword={n:"The Pale Knight's Sword",k:'weapon',t:'Sword',ic:'sword',c:'#e8ecf4',dmg:[500,610],hit:.2,req:{str:74},lvl:90,price:0,rar:1,eff:{bleed:[.3,6,40],bossdmg:.38},dbl:.24,sw:.6,d:'A long pale sword that has never been sharpened and has never needed to be. The blade is the colour of the moon on a frozen pond. Wounds bleed, and bosses take 38% more. Needs level 90.'};
 /* ---------- the Pale Knight ---------- */
-Object.assign(ENEMY_DEF,{blpaleknight:{name:'The Pale Knight',hp:540,dmg:[12,19],hit:.9,w:blW('boss_2',2.3),img:'bl_paleknight',xp:960,gold:[0,0],speed:1,verb:'cleaves',boss:true,aboveParty:0,bl:1,still:0,glow:.2}});
+Object.assign(ENEMY_DEF,{blpaleknight:{name:'The Pale Knight',hp:540,dmg:[12,19],hit:.9,w:blW('boss_2',1.7),img:'bl_paleknight',xp:960,gold:[0,0],speed:1,verb:'cleaves',boss:true,aboveParty:0,bl:1,still:0,glow:.2}});
 if(typeof NO_VARY!=='undefined')NO_VARY.push('blpaleknight');
 if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('blpaleknight');
 if(typeof BOSS_GOLD!=='undefined')BOSS_GOLD.blpaleknight=[4000,4800];
@@ -29,7 +29,7 @@ if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^blpaleknight/,'frostbitten',
 /* ---------- the pictures ---------- */
 function blpArt(){
   if(BLP._art)return;
-  bl3Tint('bl_paleknight','gyp_boss_2','saturate(.15) brightness(1.5) contrast(.9)',2.1);
+  bl3Tint('bl_paleknight','gyp_boss_2','saturate(.15) brightness(1.5) contrast(.9)',1.65);
   bl3Tint('bl_paletower','wl_bldg1_4','saturate(.2) brightness(.8)',null);
   bl3Ghost('bl_g_dummy','kh_ohsold1_3');
   for(const [k,h] of [['b9_cart',.95],['kh_cart1_0',1.1],['gy_angel',1.95],['gy_lever',.9],['gy_igate',2.2],['gy_arch',2.5]])if(NPC_H[k]===undefined)NPC_H[k]=h;
@@ -156,6 +156,12 @@ khNpc('blp_ballista','A ballista','gy_lever',()=>say('A great timber crossbow on
 khNpc('blp_glass','The wall spyglass','gy_rune',()=>say('A brass spyglass on a post. Through it, to the west, past the roofs of Sale, a long white shine lies on the horizon, like a snowfield. In the foreground, quite clearly, a small chapel stands at the top of a street, and its door is shut.',[BYE]));
 khNpc('blp_stairs_up','The stair to the wall walk','gy_stair',()=>say('A stair in the thickness of the wall leads up to the wall walk.',[BYE]));
 /* ---------- the level ---------- */
+/* round 2: more of the watch in the rooms */
+const blpMen=(id,name,face,lines,o)=>khNpc(id,name,face,()=>yrLines(id,lines),o);
+blpMen('blp_g_w1','Watchman Dobb','kh_ohsold1_1',['Nights are quiet. Quiet is not the same as good. The captain says that and then she goes back to her map.','I have counted the lamps on the road every night for four years. There are four. There were five. I have not mentioned it.'],{sc:.95});
+blpMen('blp_g_w2','Watchman Corley, asleep on his feet','kh_ohsold1_4',['I am not asleep. I am resting my eyes in the direction of the door.','Wake me if anything happens. Wake me, in fact, if anything does not happen for long enough that it starts to feel like something.'],{sc:.95});
+blpMen('blp_w_w1','Watchman Hask','kh_ohsold1_2',['From up here you can see the whole west. It is white, past Sale, like a field of snow in summer. I try not to look. I look every day.','The ballista is oiled. The bolt is true. Nobody knows what we would shoot at. That is the point of a ballista, I suppose.'],{sc:.95});
+blpMen('blp_w_w2','Watchman Teale, with a kettle','kh_ohfolk6_0',['The kettle is the only warm thing on the wall. If you want to know who is really in charge, it is the kettle.','Pell talks to the glass. I talk to the kettle. Between the two of us, nobody is lonely.'],{sc:.95});
 function blpBuild(p){
   blpArt();
   const C=blKit({id:BLP.ID,W:BLP.W,H:BLP.H,name:p.name,lvl:90,start:{x:75,y:35,f:3},wind:.45});
@@ -163,12 +169,16 @@ function blpBuild(p){
   const {hs,block,fm,hgt}=C,F=blF(),W=BLP.W,H=BLP.H,ix=(x,y)=>y*W+x;
   C.hills(.12);b9Boundary(C,W,H);C.setF(2,2,77,67,'0');
   C.pth(2,34,77,36,'1');C.pth(2,33,5,37,'4');C.pth(40,34,57,36,'4');C.pth(46,34,56,36,'3');C.pth(11,34,13,36,'4');
-  C.flatten(2,28,77,42);
+  C.flatten(2,31,77,39);C.flatten(2,26,14,44);C.flatten(58,29,77,41);
+  // height variation (kit hills are gentle): long banks and knolls on both sides of the road and the ravine
+  {const bump=(cx,cy,r,a)=>{for(let y=Math.max(3,cy-r);y<=Math.min(66,cy+r);y++)for(let x=Math.max(3,cx-r);x<=Math.min(76,cx+r);x++){const d=Math.hypot(x-cx,y-cy)/r;if(d<1&&!(x>=44&&x<=58))hgt[ix(x,y)]+=a*(1-d*d)*(1-d*d)}};
+   for(const [x,y,r,a] of [[34,22,7,.7],[26,12,6,.6],[22,52,8,.8],[36,58,6,.55],[40,46,5,.45],[17,18,5,.5],[66,18,7,.7],[70,50,8,.8],[62,58,6,.6],[72,10,5,.5],[66,46,5,.45],[30,28,4,.4]])bump(x,y,r,a)}
   C.gate('E',35);C.gate('W',35);
   // the ravine: dry, deep, the whole height of the map; the bridge deck crosses it
   for(let y=3;y<=66;y++)for(let x=46;x<=56;x++){if(y>=34&&y<=36)continue;const edge=x===46||x===56;fm[ix(x,y)]=edge?'5':'6';hgt[ix(x,y)]=edge?-.5:-1.3;block[ix(x,y)]=1;C.used.add(x+','+y)}
   for(let y=3;y<=66;y++){for(const x of [45,57]){if(y>=33&&y<=37)continue;hgt[ix(x,y)]=-.1}}
-  for(let x=46;x<=56;x++){C.dec('b9_fence',x,33,{block:true,sc:.9});C.dec('b9_fence',x,37,{block:true,sc:.9})}
+  for(let x=46;x<=56;x++){if(x%2===0&&x!==46&&x!==56)continue;C.dec('b9_fence',x,33,{block:true,sc:.9});C.dec('b9_fence',x,37,{block:true,sc:.9})}   // round 2: posts with gaps, so the drop can be seen between them
+  for(const [x,y] of [[51,22],[51,28],[51,42],[51,48],[51,56],[51,12]])C.light(x,y,[.55,.85,1.25]);   // a cold glow far down in the ravine gives it depth
   for(const x of [47,51,55]){for(const y of [32,38]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.pale)}}
   for(const [x,y,i] of [[44,32,0],[58,32,1],[44,38,1],[58,38,0]])C.dec('gy_angel',x,y,{block:true,npc:'blp_angel'+i,sc:.9});
   // the Pale Knight stands on the bridge, a person until the party chooses
@@ -183,11 +193,13 @@ function blpBuild(p){
   C.house({x0:6,x1:12,y0:38,y1:43,face:'E',sty:'flint',roof:WL_ROOFS.b9slate?'b9slate':'slate',wh:3.6,to:BLP.WALK,door:[12,41]});
   for(const [x,y] of [[13,27],[13,31],[13,39],[13,43],[13,33],[13,37]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.warm)}
   C.dec('gy_arch',9,35,{block:false,sc:1.5});
-  C.dec('gy_rpost',6,33,{block:true,sc:1});C.dec('gy_rpost',6,37,{block:true,sc:1});C.dec('gy_rpost',4,34,{block:true,npc:'blp_toll',sc:1});C.dec('gy_rpost',4,36,{block:true,sc:1});
+  C.dec('gy_rpost',6,33,{block:true,sc:1});C.dec('gy_rpost',6,37,{block:true,sc:1});C.dec('gy_rpost',3,33,{block:true,npc:'blp_toll',sc:1});
   C.dec('kh_oqstuff_8',3,39,{block:true,sc:.8});C.dec('kh_oqstuff_9',3,31,{block:true,sc:.8});
   C.post(5,38,'bl_pb_w',[{n:'SALE',d:-1}],'blp_sign_w','',{i:5});
   C.light(3,33,C.warm);C.light(3,37,C.warm);C.light(7,35,C.warm);
   C.person('blp_pike',5,33,2);
+  if(IMG.wl2_hall_0){C.dec('wl2_hall_0',11,33,{block:true,sc:.95});C.dec('wl2_hall_0',11,37,{block:true,sc:.95})}   // round 2: the arch is flanked by the watch's banners and a barrel or two
+  C.dec('barrel',12,33,{block:true,sc:.9});C.dec('barrel',12,37,{block:true,sc:.9});C.dec('kh_oqstuff_6',4,31,{sc:.8});C.dec('barrel',4,39,{block:true,sc:.85});C.light(11,35,C.warm);
   // the wall is lettered with names, and the outside of it has a cairn, the glove, and the lamps
   for(const y of [10,16,22,46,52,58]){C.dec('bl_column',11,y,{block:true,npc:'blp_wall',sc:.9})}
   for(const y of [14,20,50,56]){C.dec('gy_lantern',12,y,{block:true});C.light(12,y,C.pale)}
@@ -204,11 +216,11 @@ function blpBuild(p){
   C.house({x0:64,x1:69,y0:25,y1:29,face:'S',sty:'flint',roof:WL_ROOFS.b9moss?'b9moss':'moss',wh:2.4,lit:false});
   C.dec('gy_web',63,30,{sc:.7});
   C.person('blp_piper',60,33,2);
-  C.milestone(72,33);
+  C.milestone(69,33);
   C.dec(blSlab('bl_mile10b',['SALE','1 STAGE'],{h:1.0,top:.2,span:.62}),74,37,{block:true,npc:'blp_mile'});
   C.post(74,33,'bl_pb_e',[{n:'THE PALE BRIDGE',d:-1},{n:'THE ROOKERY MILL',d:1}],'blp_sign_e','',{i:2});
   for(let x=60;x<=76;x+=5){C.dec('gy_lantern',x,38,{block:true});C.light(x,38,C.pale)}
-  for(let x=59;x<=76;x++){for(const y of [33,37]){if([72,74,60].includes(x))continue;if(hs(x,y,33)<.8)C.DB('bl_hedge'+((hs(x,y,35)*3)|0),x,y,{sc:.62+hs(x,y,34)*.22})}}
+  for(let x=59;x<=76;x++){for(const y of [33,37]){if([72,74,60,69].includes(x))continue;if(hs(x,y,33)<.8)C.DB('bl_hedge'+((hs(x,y,35)*3)|0),x,y,{sc:.62+hs(x,y,34)*.22})}}
   C.dress({trees:90,scrub:160,stones:12,bones:8,posts:6,keep:(x,y)=>(y>=31&&y<=39)||(x>=2&&x<=14&&y>=24&&y<=46)||(x>=44&&x<=58)||(x>=60&&x<=70&&y>=24&&y<=31)});
   // the creatures: the dead lands are the Sovereign's; the toll yard and the arch are the watch's and quiet
   C.foes([['bldeadwarden',20,34],['bldeadwarden',30,36],['bldeadwarden',38,35],['blghoul',22,30],['blghoul',34,42],['blghoul',28,26],['blhusk',16,28],['blhusk',24,50],['blhusk',36,56],['blhusk',40,24],['blbones',20,40],['blbones',32,34],['blbones',44,50],['blshade',26,20],['blshade',36,48],['blshade',18,56],['blbloat',30,60],['blhound',22,60],['blcrow',34,28],['blcrow',24,34],
@@ -234,7 +246,7 @@ function blpGuard(){
     build:C=>{const P=(n,x,y,o)=>bl3Prop(C,n,x,y,o);
       P('hearth',9,1,{h:1.3});P('clock',7,1,{h:1.1});P('weaponrack',2,1,{h:1.0});P('weaponrack',4,1,{h:1.0});P('banner',11,1,{h:1.5,block:false});
       P('counciltable',6,3,{h:.8});C.raw('gy_book',5,3,{npc:'blp_map',solid:1,deco:false,bob:.45,sc:1});C.raw('gy_book',7,3,{npc:'blp_ledger',solid:1,deco:false,bob:.45,sc:.9});
-      C.npc('blp_captain',6,5);
+      C.npc('blp_captain',6,5);C.npc('blp_g_w1',8,6);C.npc('blp_g_w2',4,7);
       P('bed',2,6,{h:.8});P('bed',2,7,{h:.8});P('cot',11,6,{h:.7});P('cot',11,7,{h:.7});
       C.raw('gy_chest',10,3,{npc:'blp_gatechest',solid:1,deco:false,sc:.9});
       P('candlerack',4,5,{h:1.0});P('coatrack',9,5,{h:1.0});P('waterbarrel',9,7,{h:.7});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_bones',5,7,{block:false,sc:.5})}})}
@@ -245,7 +257,7 @@ function blpWalk(){
     enemies:[],
     build:C=>{const P=(n,x,y,o)=>bl3Prop(C,n,x,y,o);
       C.raw('gy_lever',3,2,{npc:'blp_ballista',solid:1,deco:false,sc:1.3});C.raw('gy_rune',8,2,{npc:'blp_glass',solid:1,deco:false,sc:.9});
-      C.npc('blp_pell',5,4);
+      C.npc('blp_pell',5,4);C.npc('blp_w_w1',8,4);C.npc('blp_w_w2',3,6);
       for(const x of [0,10])C.raw('hl_p_window',x,4,{block:true,sc:1.0});
       P('weaponrack',9,5,{h:1.0});P('waterbarrel',2,6,{h:.7});P('candlerack',1,4,{h:1.0});C.raw('barrel',9,6,{block:true,sc:.9});
       C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_bones',6,6,{block:false,sc:.5})}})}

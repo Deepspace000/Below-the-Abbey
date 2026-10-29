@@ -10,18 +10,36 @@ ITEMDEF.glowOrb={n:'Glow Orb',k:'light',t:'Light',ic:'lantern',c:'#8ec8ff',light
   d:'A glowing orb that has been held in an iron frame for a very long time. It gives a steady, pale blue light, brighter than any torch.'};
 ITEMDEF.glowOrb.id='glowOrb';
 if(ITEMDEF.torch)ITEMDEF.torch.stack=1; // torches stack now; single torches already in a bag stay as they are, new ones join a stack, and Sort merges them
-/* the picture: the painted lantern with its reds and blues swapped, so the brass turns to cool steel and the flame to a blue glow (built when the lantern picture has loaded) */
+/* the picture: assets/icn_glowOrb.png (painted: a pale blue-white orb in an ornate iron and bronze cage). Until it has loaded, or if it is missing, the old stand-in is used: the painted lantern with red and blue swapped. */
+function orbSetIcon(im){IMG.icn_glowOrb=im;IMG.ic_glowOrb=im;IMG.it_glowOrb=im}
 function orbIcons(){
   try{
     if(IMG.icn_glowOrb||!IMG.icn_lantern)return;
     const s=IMG.icn_lantern,c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.drawImage(s,0,0);
     const im=x.getImageData(0,0,c.width,c.height),d=im.data;
     for(let i=0;i<d.length;i+=4){if(!d[i+3])continue;const r=d[i],g=d[i+1],b=d[i+2];d[i]=Math.min(255,b*.9+r*.1);d[i+1]=Math.min(255,g*.95+r*.12);d[i+2]=Math.min(255,r*1.08+g*.1)}
-    x.putImageData(im,0,0);IMG.icn_glowOrb=c;IMG.ic_glowOrb=c;IMG.it_glowOrb=c;
+    x.putImageData(im,0,0);orbSetIcon(c);IMG._orbStandIn=1;
   }catch(e){console.error('orbIcons',e)}
 }
+if(typeof loadImg==='function'){
+  loadImg('glow_orb_icon','assets/icn_glowOrb.png').then(()=>{if(IMG.glow_orb_icon&&IMG.glow_orb_icon.width)orbSetIcon(IMG.glow_orb_icon)});
+  loadImg('glow_orb_frame','assets/glow_orb_frame.png').then(()=>{if(IMG.glow_orb_frame&&typeof WM!=='undefined'&&WM.orbArt&&typeof wmOrbArt==='function'){WM.orbArt=false;wmOrbArt()}});
+  loadImg('glow_orb_frame_empty','assets/glow_orb_frame_empty.png');
+}
 {const _ii=itemIcon;itemIcon=function(d){if(d&&d.id==='glowOrb'&&!IMG.ic_glowOrb)orbIcons();return _ii.apply(this,arguments)}}
-{let t=setInterval(()=>{orbIcons();if(IMG.icn_glowOrb)clearInterval(t)},700)}
+{let t=setInterval(()=>{orbIcons();if(IMG.icn_glowOrb&&!IMG._orbStandIn)clearInterval(t)},700)}
+/* the orb frames of the well maze: the painted orb frame (assets/glow_orb_frame.png), with the glow turned to this floor's orb colour; the empty frame (glow_orb_frame_empty.png) once the orb has been taken. Falls back to the recoloured cage lantern while the pictures load. */
+if(typeof wmOrbArt==='function'&&typeof WM!=='undefined'&&WM.ORBS){const _wo=wmOrbArt;wmOrbArt=function(){
+  const src=IMG.glow_orb_frame,em=IMG.glow_orb_frame_empty;
+  if(!src||!src.width||!em||!em.width)return _wo.apply(this,arguments);
+  if(WM.orbArt)return;WM.orbArt=true;
+  const w=src.width,h=src.height;
+  const hsl=(r,g,b)=>{r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;let hh=0,ss=0;if(mx!==mn){const dd=mx-mn;ss=l>.5?dd/(2-mx-mn):dd/(mx+mn);hh=mx===r?(g-b)/dd+(g<b?6:0):mx===g?(b-r)/dd+2:(r-g)/dd+4;hh*=60}return [hh,ss,l]};
+  const rgb=(hh,ss,l)=>{const f=n=>{const k=(n+hh/30)%12,a=ss*Math.min(l,1-l);return l-a*Math.max(-1,Math.min(k-3,9-k,1))};return [f(0)*255,f(8)*255,f(4)*255]};
+  WM.ORBS.forEach((o,i)=>{
+    const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(src,0,0);const im=x.getImageData(0,0,w,h),d=im.data;
+    for(let q=0;q<d.length;q+=4){if(!d[q+3])continue;const [hh,ss,l]=hsl(d[q],d[q+1],d[q+2]);if(hh>170&&hh<250&&ss>.12&&l>.3){const k=rgb(o.hue,Math.min(1,Math.max(.85,ss*1.8*o.sat)),Math.min(.78,l));d[q]=k[0];d[q+1]=k[1];d[q+2]=k[2]}}
+    x.putImageData(im,0,0);IMG['wm_orbframe'+i]=c;NPC_H['wm_orbframe'+i]=.85;IMG['wm_orbframeE'+i]=em;NPC_H['wm_orbframeE'+i]=.85})}}
 /* ---------- the colour of the party's own light follows the best light being held ---------- */
 {const _u=update;update=function(dt){const r=_u.apply(this,arguments);
   try{let best=null,bl=0;for(const h of G.heroes||[]){if(!h.alive)continue;for(const k of ['main','off']){const it=h.eq&&h.eq[k],d=it&&idef(it);if(d&&d.k==='light'&&d.light>=bl){bl=d.light;best=d}}}

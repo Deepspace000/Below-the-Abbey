@@ -48,6 +48,8 @@ function blrArt(){
   if(!mk('blr_tent1',IMG.wl_prop1_3,'sepia(.5) saturate(.5) brightness(.6) hue-rotate(160deg)',1.7))IMG.blr_tent1=null;
   if(!mk('blr_stocks',IMG.wl_prop1_2,'sepia(.5) saturate(.7) brightness(.8)',1.15))IMG.blr_stocks=IMG.wl_prop1_2;
   if(!mk('blr_stew',IMG.propsA_0||IMG.ww_cauldron,'hue-rotate(-95deg) saturate(.85) brightness(.9)',.9))IMG.blr_stew=IMG.ww_cauldron;
+  /* round 2: the painted soldier's tent (assets/ds_blr_tent.png) replaces the filtered flower tent; the second colour is the same tent turned blue-grey */
+  if(IMG.blr_tent&&IMG.blr_tent.width){IMG.blr_tent0=IMG.blr_tent;NPC_H.blr_tent0=1.55;const t=IMG.blr_tent,c=document.createElement('canvas');c.width=t.width;c.height=t.height;const x=c.getContext('2d');try{x.filter='hue-rotate(150deg) saturate(.8) brightness(.9)'}catch(e){}x.drawImage(t,0,0);IMG.blr_tent1=c;NPC_H.blr_tent1=1.45;BLR._art=1;return}
   // the painted market tent with its flowers painted over in the dark of a tent mouth (a filter over the painting, nothing drawn)
   for(const k of ['blr_tent0','blr_tent1']){const c=IMG[k];if(!c||!c.getContext)continue;const x=c.getContext('2d');x.save();x.globalCompositeOperation='source-atop';
     const g=x.createLinearGradient(0,c.height*.4,0,c.height*.95);g.addColorStop(0,'rgba(18,12,8,0)');g.addColorStop(.12,'rgba(40,26,16,.68)');g.addColorStop(1,'rgba(26,17,11,.8)');x.fillStyle=g;x.fillRect(c.width*.2,c.height*.4,c.width*.6,c.height*.56);x.restore()}
@@ -67,6 +69,38 @@ const BLRS={nextH:0};
     if(LEVEL===BLR.ID){BLS.nextCrow=Math.max(BLS.nextCrow,now+45);BLS.nextToll=Math.max(BLS.nextToll,now+90)}else BLS.nextDrip=Math.max(BLS.nextDrip,now+99);
     if((LEVEL===BLR.ID||LEVEL===BLR.FORGE)&&now>BLRS.nextH){BLRS.nextH=now+3.2+Math.random()*3;const d=LEVEL===BLR.FORGE?1:Math.max(0,1-Math.hypot(G.P.x-62,G.P.y-14)/34);if(d>.05&&typeof wlsHammer==='function')wlsHammer(.5*d)}}}catch(e){console.error('blr sound',e)}
   return _ys.apply(this,arguments)}}
+/* ---------- ambient sound variation for places 5 and 6 (QA and atmosphere pass): small sounds of their own on slow random timers ---------- */
+const B56S={};
+function b56At(k,lo,hi){const now=AC.currentTime;if(!B56S[k])B56S[k]=now+lo*Math.random();if(now<B56S[k])return false;B56S[k]=now+lo+Math.random()*(hi-lo);return true}
+const b56Rand=a=>a[(Math.random()*a.length)|0];
+function b56Tick(){
+  if(!AC||!NB||!MASTER||G.state!=='play'||G.mute||!SNDOPT.amb)return;
+  const L=LEVEL,px=G.P.x,py=G.P.y;
+  if(L===9650){   // the orchard: wind in white branches, an apple dropping, bones rattling, a basket rustling, the bell far off
+    if(b56At('ow',9,18))nz(2.8,.05,'bandpass',420+Math.random()*200,220,0);
+    if(b56At('oa',24,48)){tone(110,62,.22,'sine',.1,0);nz(.07,.05,'lowpass',520,300,0);nz(.05,.03,'lowpass',400,300,.16)}
+    if(b56At('ob',17,36))for(let i=0;i<5;i++)tone(1900+Math.random()*500,1500,.03,'triangle',.022,i*.06+Math.random()*.03);
+    if(b56At('or',13,26))nz(.5,.025,'bandpass',3000,2300,0);
+    if(b56At('obl',50,95)&&Math.hypot(px-44,py-28)<34)blsToll(1,.3+.25*Math.max(0,1-Math.hypot(px-44,py-28)/34));
+    if(b56At('ofar',40,80)&&py>40){tone(150,95,.5,'sawtooth',.012,0);nz(.6,.012,'bandpass',900,500,.05)}   // something dragged a long way off in the crypt field
+  }else if(L===9651){if(b56At('sc',7,13)){tone(62,82,1.0,'sawtooth',.026,0);tone(82,58,.7,'sawtooth',.018,.9)}if(b56At('ss',15,30))nz(.25,.03,'bandpass',4200,3800,0)}
+  else if(L===9652){if(b56At('cs',8,16)){nz(.22,.03,'bandpass',4500,3500,0);nz(.18,.025,'bandpass',4700,3600,.28)}if(b56At('cg',20,40))tone(48,44,2.2,'sine',.04,0)}
+  else if(L===9653){if(b56At('xd',9,17))tone(52,50,3,'sine',.035,0);if(b56At('xw',22,45)){nz(1.4,.018,'bandpass',1700,1300,0)}if(b56At('xc',13,25))tone(1200,900,.05,'triangle',.02,0)}
+  else if(L===9654){if(b56At('hb',1.1,2.6)){const f=240+Math.random()*180;tone(f,f*1.8,.1,'sine',.03,0)}if(b56At('hc',3,8))nz(.04,.07,'highpass',3200,2800,0)}
+  else if(L===9655){if(b56At('wr',10,20))nz(2.2,.03,'lowpass',500,260,0);if(b56At('wc',9,16))tone(120,150,.45,'sawtooth',.018,0)}
+  else if(L===9660){   // the fort: sentries' steps, a dog, a flag, a pot, a far cough
+    if(b56At('lf',11,22))nz(.7,.03,'highpass',1800,2400,0);
+    if(b56At('ld',34,70)){tone(430,260,.13,'sawtooth',.035,0);tone(400,240,.14,'sawtooth',.03,.28)}
+    if(b56At('lp',16,34)){tone(880,820,.35,'triangle',.02,0);tone(1320,1200,.22,'triangle',.012,.02)}
+    if(b56At('ls',6,12)&&typeof playSmp==='function'){playSmp('step_stone'+(1+((Math.random()*4)|0)),.22,.88);setTimeout(()=>{try{playSmp('step_stone'+(1+((Math.random()*4)|0)),.2,.9)}catch(e){}},520)}
+    if(b56At('lv',45,90)){tone(190,130,.18,'sawtooth',.03,0);tone(180,120,.2,'sawtooth',.025,.3)}
+  }else if(L===9661){if(b56At('ic',2.5,6))nz(.04,.06,'highpass',3000,2500,0);if(b56At('im',14,28)){tone(2300,2000,.09,'triangle',.03,0);tone(3100,2600,.06,'triangle',.015,.04)}if(b56At('ii',30,60)){tone(300,330,.5,'sine',.015,0);tone(330,300,.6,'sine',.012,.5)}}
+  else if(L===9662){if(b56At('ac',10,20)){tone(2100,1800,.12,'triangle',.03,0);tone(1500,1300,.15,'triangle',.02,.1)}if(b56At('ar',24,45))nz(.35,.025,'bandpass',2600,2000,0)}
+  else if(L===9663){if(b56At('fs',9,18)){nz(.5,.05,'lowpass',900,300,0);tone(95,70,.3,'sawtooth',.02,.05)}if(b56At('fh',12,24)){tone(120,100,.1,'square',.03,0);tone(120,100,.1,'square',.025,.22)}if(b56At('fc',3,7))nz(.04,.06,'highpass',3000,2500,0)}
+  else if(L===9664){if(b56At('hp',16,32))nz(.5,.03,'bandpass',3800,3000,0);if(b56At('hf',12,24))nz(.04,.05,'highpass',3000,2600,0);if(b56At('hw',40,80)){tone(150,150,.22,'sine',.02,0)}}
+  else if(L===9665){if(b56At('nc',14,30)){tone(170,110,.16,'sawtooth',.03,0);tone(165,105,.16,'sawtooth',.026,.26)}if(b56At('ng',40,80)){tone(130,90,.9,'sawtooth',.016,0)}if(b56At('nd',18,34)&&typeof wwsDrip==='function')wwsDrip(.35)}
+  else if(L===9666){if(b56At('bw',5,11))nz(3.2,.06,'bandpass',700+Math.random()*300,300,0);if(b56At('bc',15,30))tone(70,66,2,'sine',.03,0);if(b56At('bf',20,40))tone(620,640,.22,'triangle',.012,0)}}
+{const _ys=yarSoundTick;yarSoundTick=function(){try{if(blIs(LEVEL)&&(LEVEL===9650||LEVEL===9660||(LEVEL>=9651&&LEVEL<=9655)||(LEVEL>=9661&&LEVEL<=9666)))b56Tick()}catch(e){console.error('b56 sound',e)}return _ys.apply(this,arguments)}}
 /* ---------- the people ---------- */
 const blrMen=(id,name,face,lines,o)=>khNpc(id,name,face,()=>yrLines(id,lines),o);
 khNpc('blr_marsh','Captain Eldred Marsh, of Oldhaven','kh_ohsold1_1',()=>{
@@ -255,6 +289,26 @@ function blrOpenStores(d){blrTop(d,blrStores(),'The Garrison Stores')}
 function blrOpenReserve(d){blrTop(d,blrReserve(),'The Garrison Reserve')}
 function blrOpenSmith(d){blrTop(d,blrSmith(),"Hale's Forge")}
 /* the level */
+const blrRead=(id,name,face,text)=>khNpc(id,name,face,()=>say(text,[BYE]));
+blrRead('blr_n_log','The sentry log','gy_book','The sentry log, held open with a stone. This week: nothing. The week before: nothing. Further back, in another hand: refugees, nine, one bitten. Under it, much smaller: the bitten were not let in. Under that, in the captain’s hand: they were let in. We do not speak of it.');
+blrRead('blr_n_rations','Ration board','gy_sign','A board nailed to a post by the stew pot. By order of Quartermaster Tolliver: one loaf a day, one ladle of stew, one torch to a tent. Torches are for the dark, not for company. Anyone caught burning one for company will be given a shorter one.');
+blrRead('blr_n_boot','A boot in the road','ww_boot','A single boot stands upright in the road, with a foot still in it to the ankle. A strip of blue cloth is tied round the top. Somebody from the fort came out this far and left a marker, and nobody since has had the nerve to move it.');
+blrRead('blr_n_slate','The slate on the bar','gy_sign','A slate on the bar. Prices were chalked up, then crossed out, then the word FREE was written over all of them. Under it: for the garrison, and for guests. Under that, in smaller letters: there is no beer left.');
+blrRead('blr_n_issue','The issue book','gy_book','The issue book of the armoury. Swords issued: forty. Swords returned: thirty one. Against the nine, one word each: lost. Shields issued: forty. Returned: eleven, all dented from the inside.');
+blrRead('blr_n_orders','Orders from Oldhaven','gy_book','Orders from Oldhaven, tied in red cord. Hold Lanternrest. Keep the road open. Expect relief within sixty days. In the margin, in turn, in different inks: day sixty. Day one hundred and twenty. Day two hundred. Day three hundred and one.');
+blrRead('blr_n_chart','The ward chart','gy_book','A ward chart pinned to a board. The column headed Bitten has eleven names. The column headed Recovered is empty. A newer column in fresher ink is headed Watching, and has five names, and one of them is the surgeon’s own.');
+blrRead('blr_n_watch','The beacon watch book','gy_book','The watch book of the beacon room. Night after night the same entry: no answer from the west. One entry stands apart: a light on the west road, three nights running, then not again.');
+/* round 2: ordinary people in the rooms, so that the fort has a crowd and not only its officers */
+blrMen('blr_i_corp','Corporal Dunmore, off duty','kh_ohsold1_0',['I have been off duty for nine hours. On this wall that is a long time. Nobody has come to tell me to stop.','The soup is cabbage. I do not mind the cabbage. I mind that I can tell what day it is by the cabbage.'],{sc:.95});
+blrMen('blr_i_pilgrim','A pilgrim from Gallowmere','kh_ohfolk3_2',['I walked from Gallowmere with a candle that would not go out. I do not know why. I have decided not to find out.','They let me in at the gate, and then asked if I was bitten, and then asked again, kindly, which was worse.'],{sc:.95});
+blrMen('blr_i_garrick','Old Garrick, a carter','kh_ohfolk4_2',['My cart is the one at the burnt wagon. Was. I came in on foot and I have not stopped being surprised about it.','Do not go west at night. Go at night if you must, but do not go west.'],{sc:.95});
+blrMen('blr_h_clerk','Clerk Ames','kh_ohfolk6_1',['I keep the muster roll. Forty names went out from Oldhaven. I have written a small cross by each one that has gone, in pencil, in case I am wrong.','If the Captain asks, I was not listening. If the Captain does not ask, I was listening a great deal.'],{sc:.95});
+blrMen('blr_h_rider','A dusty rider','kh_ohsold1_3',['I carry the post between here and Oldhaven, when there is a post. I have been here eleven days waiting for a reply the Captain has not written.','The road east is still open. That is the whole of my news, and I would like it to be more.'],{sc:.95});
+blrMen('blr_a_recruit','Recruit Pip','kh_ohsold1_1',['They gave me a sword on my first day. It is longer than my leg. I am told I will grow into it and I am told by a man who is very tall.','I polish things. It is the only part of the war I am good at so far.'],{sc:.9});
+blrMen('blr_a_vet','Sergeant Brask','kh_ohsold1_2',['Hold the wall. That is all the drill there is now. Hold the wall and eat what you are given.','I have been a soldier thirty years. I thought I had seen everything dead try. I was wrong, and I was wrong in a new way each week.'],{sc:1});
+blrMen('blr_f_boy','The smith’s boy','kh_ohfolk2_4',['I work the bellows. If I stop, the fire sulks, and if the fire sulks, Master Hale sulks, and then nobody has a good day.','The horses are not afraid of the dead. They are afraid of the quiet. I do not know what that means. I just work the bellows.'],{sc:.8});
+blrMen('blr_n_p1','A bitten soldier','kh_ohsold1_4',['It does not hurt. That is the part I do not like. It stopped hurting yesterday and the Surgeon watched me all night.','If I go quiet, tell them to put me on the wall and not in the camp. I would rather be useful.'],{sc:.95});
+blrMen('blr_n_p2','A refugee with a sling','kh_ohfolk5_3',['A crow did this. Not a plague crow, just a crow. I am told it was a plague crow. I think it was a crow.','The Surgeon says I will keep the arm. She says it the way you say a thing you are not sure of, but I am glad she says it.'],{sc:.95});
 function blrBuild(p){
   blrArt();
   const C=blKit({id:BLR.ID,W:BLR.W,H:BLR.H,name:p.name,lvl:87,start:{x:84,y:60,f:3},wind:.3});
@@ -263,13 +317,17 @@ function blrBuild(p){
   C.pth(2,59,87,61,'1');C.flatten(2,5,87,70);
   C.gate('E',60);C.gate('W',60);
   /* the fort: a wall ring two thick, corner towers, a gate in the south wall */
-  const wt=C.ch(gyTile('texGrey_1',3.0,{gain:.95,rgb:[.95,.97,.93],tag:'blrw'})),wt2=C.ch(gyTile('texGrey_2',3.0,{gain:.9,rgb:[.95,.95,.92],tag:'blrw2'})),tw=C.ch(gyTile('texGrey_1',4.3,{gain:1.0,rgb:[.98,.98,.94],tag:'blrt'}));
+  /* round 2: the wall is warm sandstone with a pale coping and dark notches for a battlement, and some tiles carry a lit arrow slit, so it stands out of the haze as the fort and not as more grey */
+  const blrCren=(withSlit)=>(x,w,Hp)=>{x.fillStyle='#1a140e';for(let i=0;i<4;i++)x.fillRect(i*32+8,0,16,26);x.fillStyle='#efe3c0';x.fillRect(0,26,128,6);x.fillStyle='rgba(30,20,10,.6)';x.fillRect(0,32,128,4);
+    for(let y=Math.round(Hp*.2);y<Hp;y+=Math.round(Hp*.2)){x.fillStyle='rgba(30,22,14,.35)';x.fillRect(0,y,128,3)}
+    if(withSlit){const sy=Math.round(Hp*.3);x.fillStyle='#24160a';x.fillRect(57,sy,14,46);x.fillStyle='#f6b858';x.fillRect(61,sy+5,6,36);x.fillStyle='#fff0b8';x.fillRect(63,sy+10,2,24)}};
+  const wt=C.ch(gyTile('texGrey_1',3.0,{gain:1.25,rgb:[1.18,1.06,.86],tag:'blrw',draw:blrCren(false)})),wt2=C.ch(gyTile('texGrey_2',3.0,{gain:1.2,rgb:[1.16,1.05,.86],tag:'blrw2',draw:blrCren(false)})),wts=C.ch(gyTile('texGrey_1',3.0,{gain:1.25,rgb:[1.18,1.06,.86],tag:'blrws',draw:blrCren(true)})),tw=C.ch(gyTile('texGrey_1',4.3,{gain:1.3,rgb:[1.2,1.08,.88],tag:'blrt',draw:blrCren(false)}));
   const FX0=18,FX1=70,FY0=6,FY1=46;
   for(let y=FY0;y<=FY1;y++)for(let x=FX0;x<=FX1;x++){
     if(!(x<FX0+2||x>FX1-2||y<FY0+2||y>FY1-2))continue;
     if(y>=FY1-1&&x>=43&&x<=45)continue;
     const tower=((x<FX0+4||x>FX1-4)&&(y<FY0+4||y>FY1-4))||((x>=40&&x<=42||x>=46&&x<=48)&&y>=FY1-1);
-    C.solid(x,y,tower?tw:(hs(x,y,8)<.5?wt:wt2))}
+    C.solid(x,y,tower?tw:((x+y)%3===0&&hs(x,y,9)<.5?wts:(hs(x,y,8)<.5?wt:wt2)))}
   C.setF(20,8,68,44,'4');
   C.reserve(FX0-1,FY0-1,FX1+1,FY1+1);   // nothing but what is placed by hand
   C.pth(43,14,45,45,'3');C.pth(21,29,67,31,'3');C.pth(43,47,45,58,'3');C.pth(41,47,47,52,'3');
@@ -281,7 +339,7 @@ function blrBuild(p){
   C.person('blr_gate1',42,43,2);C.person('blr_gate2',46,43,2);
   C.dec('greensign',41,41,{block:true,npc:'blr_notice'});
   C.post(44,57,'blr_fortpost',[{n:'LANTERNREST WAYSTATION',d:0},{n:'THE ROAD',d:2}],'blr_signFort','',{i:1});
-  const bn=blrBanner();if(bn){for(const [x,y] of [[39,43],[49,43],[43,15],[45,15],[20,29],[68,29]])C.dec(bn,x,y,{block:true,sc:.9})}
+  const bn=blrBanner();if(bn){for(const [x,y] of [[39,43],[49,43],[43,15],[45,15],[20,29],[68,29]])C.dec(x===45&&IMG.wl2_hall_1?'wl2_hall_1':bn,x,y,{block:true,sc:.9})}
   /* the yard: well, stocks, drill dummies, stew pot, the supply wagon, lamps */
   C.thing('ww_well','blr_well',52,20,{sc:1});C.light(52,22,WARM);
   C.thing('blr_stocks','blr_stocks',54,36,{sc:1});C.thing('ww_totem','blr_dummy',34,36,{sc:.8});C.thing('ww_totem','blr_dummy',36,38,{sc:.8});C.thing('blr_stew','blr_stew',38,19,{sc:1});C.light(38,21,WARM);
@@ -294,9 +352,21 @@ function blrBuild(p){
   for(const [x,y] of [[22,15],[66,15],[22,40],[66,40],[44,9]]){C.dec('gy_stair',x,y,{block:true,sc:.75})}
   C.person('blr_wall1',24,41,2);C.person('blr_wall2',64,41,2);
   /* tents: rows of soldier tents in the west and refugee tents in the east, with the stew pot and the well between */
-  const tents=[[24,18],[27,20],[30,23],[24,21],[26,34],[29,36],[32,34],[24,37],[28,40],[34,41],[58,20],[61,17],[64,20],[60,22],[57,34],[60,36],[63,34],[58,40],[62,40],[66,36]];
+  const tents=[[24,18],[27,20],[30,23],[24,21],[26,34],[29,36],[32,34],[24,37],[28,40],[34,41],[58,20],[61,17],[64,20],[60,23],[57,34],[60,36],[63,34],[58,40],[62,40],[66,36]];
   tents.forEach(([x,y],i)=>{if(!C.dec(IMG.blr_tent0&&i%3?'blr_tent'+((i%3)%2):'blr_tent0',x,y,{block:true,npc:'blr_tent',sc:.72,i}))console.error('tent',x,y)});
   tents.forEach(([x,y],i)=>{if(i%2===0)C.light(x,y+1,WARM)});
+  /* round 2: the wall is lit and flagged from the road side: a lamp every six squares at its foot, banners between, braziers at the gate, and the yard is stacked with the stores of a garrison */
+  for(let x=22;x<=66;x+=6){if(x>=38&&x<=50)continue;C.dec('gy_lantern',x,49,{block:true});C.light(x,49,WARM)}
+  for(const [x,y] of [[38,50],[50,50]]){C.dec('barrel',x,y,{block:true,sc:.95});C.dec('hay',x+(x<44?-2:2),y+1,{block:true,sc:.8})}
+  for(const [x,y,k] of [[22,22,'barrel'],[22,24,'hay'],[22,36,'barrel'],[22,38,'hay'],[66,22,'barrel'],[66,24,'hay'],[66,34,'barrel'],[66,36,'hay'],[30,12,'barrel'],[32,12,'hay'],[56,12,'hay'],[36,44,'barrel'],[52,44,'barrel'],[53,42,'hay'],[28,44,'hay'],[60,44,'hay']])C.dec(k,x,y,{block:true,sc:k==='hay'?1.0:.9});
+  for(const [x,y] of [[34,33],[54,28],[31,22],[60,26]])C.dec('kh_oqstuff_'+(5+((x+y)%4)),x,y,{sc:.8});
+  /* details: a ration board, the sentry log at the gate, a marker boot on the road, dogs in the camp, flags on the drill ground, spilled stores by the burnt wagon, a trail from the hollow */
+  C.dec('gy_sign',40,22,{block:true,npc:'blr_n_rations',sc:.8});
+  C.dec('gy_book',47,42,{block:true,npc:'blr_n_log',sc:1,bob:.2});
+  C.dec('ww_boot',60,62,{block:true,npc:'blr_n_boot',sc:.9});
+  C.dec('kh_oqdogs_3',38,41,{sc:1});C.dec('kh_oqdogs_2',57,28,{sc:1});C.dec('kh_oqflags_2',38,34,{block:true,sc:.9});
+  C.dec('kh_oqstuff_6',74,53,{sc:.8});C.dec('kh_oqstuff_4',78,54,{sc:.8});C.dec('gy_bones',77,50,{sc:.6});
+  for(const [x,y] of [[66,66],[67,65],[66,63]])C.dec('gy_bones',x,y,{sc:.55});
   /* people */
   C.person('blr_drill',33,38,2);C.person('blr_cook',39,22,2);C.person('blr_stable',62,16,2);
   C.person('blr_nell',60,30,2);C.person('blr_pell',22,14,2);
@@ -333,27 +403,27 @@ function blrInn(){
     back:{to:BLR.ID,x:f[0],y:f[1],f:2},
     lights:[[3,2],[11,2],[7,5],[2,8],[12,8]],lcol:{'3,2':BLR_LC,'11,2':BLR_LC,'7,5':[1.5,1.05,.55],'2,8':BLR_LC,'12,8':BLR_LC},col:[1.4,1.0,.6],
     build:C=>{
-      blrP(C,'hearth',7,1,{h:1.3});for(const x of [3,4,5,9,10,11])blrP(C,'bar',x,3,{});blrP(C,'potshelf',2,1,{h:1.2});blrP(C,'potshelf',3,1,{h:1.2});blrP(C,'potshelf',11,1,{h:1.2});blrP(C,'ale',1,2,{});blrP(C,'ale',13,4,{});
-      blrP(C,'longtable',3,6,{h:.7});blrP(C,'longtable',11,6,{h:.7});blrP(C,'longtable',7,8,{h:.7});blrP(C,'chandelier',7,5,{free:1});blrP(C,'lute',13,8,{});blrP(C,'waterbarrel',1,8,{h:.7});blrP(C,'cat',9,2,{h:.26});blrP(C,'dog',5,8,{h:.36});
-      C.npc('blr_inn',7,2);C.raw('gy_web',1,1,{block:false,sc:.4})}})}
+      blrP(C,'hearth',7,1,{h:1.3});for(const x of [3,4,5,9,10,11])blrP(C,'bar',x,3,{});blrP(C,'potshelf',2,1,{h:1.2});blrP(C,'herbrack',3,1,{h:1.1});blrP(C,'potshelf',11,1,{h:1.2});blrP(C,'ale',1,2,{});blrP(C,'ale',13,1,{});
+      blrP(C,'longtable',3,6,{h:.7});blrP(C,'longtable',11,6,{h:.7});blrP(C,'longtable',7,8,{h:.7});blrP(C,'chandelier',7,5,{free:1});blrP(C,'lute',13,8,{});blrP(C,'waterbarrel',1,8,{h:.7});blrP(C,'cat',9,2,{h:.26});blrP(C,'dog',5,8,{h:.36});C.raw('gy_sign',1,5,{npc:'blr_n_slate',solid:1,deco:false,sc:.9,bob:.2});C.raw('kh_oqstuff_6',12,8,{block:false,sc:.8});
+      C.npc('blr_inn',7,2);C.npc('blr_i_corp',5,5);C.npc('blr_i_pilgrim',9,5);C.npc('blr_i_garrick',12,5);C.raw('gy_web',1,1,{block:false,sc:.4})}})}
 function blrArmoury(){
   const f=BLR_ARMH.front;
   blRoom({id:BLR.ARM,name:'The Garrison Armoury',w:13,h:9,amb:.6,rating:87,floor:'wood',wall:'kh_ohwall1_0',
     back:{to:BLR.ID,x:f[0],y:f[1],f:2},
     lights:[[2,2],[10,2],[6,5]],lcol:{'2,2':BLR_LC,'10,2':BLR_LC,'6,5':[1.35,.98,.58]},col:[1.3,.95,.6],
     build:C=>{
-      for(const x of [2,4,8,10])blrP(C,'mannequin',x,1,{});blrP(C,'shields',6,1,{});for(const x of [4,5,7,8])blrP(C,'shopcounter',x,3,{});blrP(C,'weaponrack',11,4,{});blrP(C,'mannequin',1,5,{});blrP(C,'shields',1,3,{bob:.2});blrP(C,'anvil',11,6,{h:.45});
-      C.raw('gy_chest',11,2,{npc:'blr_reserve',solid:1,deco:false,sc:.9});C.raw('crate',1,7,{});C.raw('barrel',3,7,{});
-      C.npc('blr_tolliver',6,2)}})}
+      blrP(C,'mannequin',2,1,{});blrP(C,'weaponrack',4,1,{});blrP(C,'hangstand',8,1,{h:1.0});blrP(C,'mannequin',10,1,{});blrP(C,'shields',6,1,{});for(const x of [4,5,7,8])blrP(C,'shopcounter',x,3,{});blrP(C,'weaponrack',11,4,{});blrP(C,'mannequin',1,5,{});blrP(C,'shields',1,3,{bob:.2});blrP(C,'anvil',11,6,{h:.45});
+      C.raw('gy_chest',11,2,{npc:'blr_reserve',solid:1,deco:false,sc:.9});C.raw('crate',1,7,{});C.raw('barrel',3,7,{});C.raw('gy_book',9,6,{npc:'blr_n_issue',solid:1,deco:false,sc:.9,bob:.2});C.raw('gy_bones',9,7,{block:false,sc:.6});
+      C.npc('blr_tolliver',6,2);C.npc('blr_a_recruit',3,5);C.npc('blr_a_vet',8,5)}})}
 function blrForge(){
   const f=BLR_BARN.front;
   blRoom({id:BLR.FORGE,name:'The Stable and Forge',w:15,h:9,amb:.55,rating:87,floor:'wood',wall:'kh_ohwall1_0',
     back:{to:BLR.ID,x:f[0],y:f[1],f:2},
     lights:[[3,2],[7,2],[11,2],[6,6]],lcol:{'3,2':[1.5,1.05,.55],'7,2':[1.5,1.05,.55],'11,2':BLR_LC,'6,6':BLR_LC},col:[1.35,.98,.55],
     build:C=>{
-      blrP(C,'forge',7,1,{h:1.3});blrP(C,'anvil',5,3,{h:.55});for(const x of [2,3,11,12])blrP(C,'weaponrack',x,1,{});for(const x of [8,9,10])blrP(C,'shopcounter',x,3,{});blrP(C,'hangstand',13,4,{h:1.0});blrP(C,'shields',1,5,{});
-      for(const [x,y] of [[2,7],[3,7],[12,7],[13,7]])C.raw('hay',x,y,{block:true,sc:1.0});C.raw('barrel',13,2,{});C.raw('crate',1,3,{});
-      C.npc('blr_smith',6,3);C.npc('blr_stable',10,7)}})}
+      blrP(C,'forge',7,1,{h:1.3});blrP(C,'anvil',5,3,{h:.55});blrP(C,'weaponrack',2,1,{});blrP(C,'shields',3,1,{});blrP(C,'shelving',11,1,{h:1.0});blrP(C,'weaponrack',12,1,{});for(const x of [8,9,10])blrP(C,'shopcounter',x,3,{});blrP(C,'hangstand',13,4,{h:1.0});blrP(C,'shields',1,5,{});
+      for(const [x,y] of [[2,7],[12,7]])C.raw('hay',x,y,{block:true,sc:1.0});C.raw('barrel',3,7,{});C.raw('crate',13,7,{});C.raw('barrel',13,2,{});C.raw('crate',1,3,{});
+      C.raw('kh_oqdogs_0',5,6,{block:false,sc:1});C.raw('kh_oqstuff_4',7,7,{block:false,sc:.8});C.raw('gy_bones',11,5,{block:false,sc:.5});C.npc('blr_smith',6,3);C.npc('blr_stable',10,7);C.npc('blr_f_boy',9,5)}})}
 function blrHall(){
   const f=BLR_HALLH.front;
   blRoom({id:BLR.HALL,name:"The Captain's Hall",w:13,h:10,amb:.6,rating:87,floor:'wood',wall:'kh_ohwall1_2',
@@ -363,16 +433,18 @@ function blrHall(){
       blrP(C,'hearth',6,1,{h:1.3});blrP(C,'banner',3,1,{h:1.6,block:false});blrP(C,'banner',9,1,{h:1.6,block:false});blrP(C,'counciltable',6,5,{h:.8});blrP(C,'mayorchair',6,3,{h:1.0});
       blrP(C,'bookshelf',1,2,{h:1.1});blrP(C,'bookshelf',11,2,{h:1.1});blrP(C,'noticeboard',2,6,{h:.9,block:false});blrP(C,'coatrack',11,7,{h:1.0});blrP(C,'waterbarrel',1,8,{h:.7});
       C.raw('gy_candles',3,5,{block:true,sc:.8});C.raw('gy_candles',9,5,{block:true,sc:.8});
-      C.npc('blr_marsh',6,4)}})}
+      C.raw('gy_book',3,3,{npc:'blr_n_orders',solid:1,deco:false,sc:.9,bob:.2});C.raw('gy_bones',9,8,{block:false,sc:.5});C.raw('kh_oqstuff_6',4,7,{block:false,sc:.8});
+      C.npc('blr_marsh',6,4);C.npc('blr_h_clerk',9,4);C.npc('blr_h_rider',4,8)}})}
 function blrInfirmary(){
   const f=BLR_INFH.front;
   blRoom({id:BLR.INFIRM,name:'The Infirmary',w:13,h:9,amb:.6,rating:87,floor:'wood',wall:'kh_ohwall1_2',
     back:{to:BLR.ID,x:f[0],y:f[1],f:2},
     lights:[[2,2],[10,2],[6,5],[2,7],[10,7]],lcol:{'2,2':BLR_LC,'10,2':BLR_LC,'6,5':[1.35,.98,.58],'2,7':[1.0,1.1,.9],'10,7':BLR_LC},col:[1.25,1.0,.7],
     build:C=>{
-      blrP(C,'cot',2,3,{h:.55});blrP(C,'cot',2,5,{h:.55});blrP(C,'cot',10,3,{h:.55});blrP(C,'cot',10,5,{h:.55});blrP(C,'bed',7,3,{h:.7});blrP(C,'bed',9,6,{h:.7});
+      blrP(C,'cot',2,3,{h:.55});blrP(C,'bed',2,5,{h:.7});blrP(C,'bed',10,3,{h:.7});blrP(C,'cot',10,5,{h:.55});blrP(C,'bed',7,3,{h:.7});blrP(C,'bed',9,6,{h:.7});
       blrP(C,'herbrack',4,1,{h:1.1});blrP(C,'apothcab',6,1,{h:.95});blrP(C,'potshelf',8,1,{h:1.2});blrP(C,'cauldron',11,1,{h:.9});blrP(C,'waterbarrel',1,7,{h:.7});blrP(C,'shelving',12,5,{h:1.0});
-      C.npc('blr_surgeon',5,4)}});
+      C.raw('gy_book',7,7,{npc:'blr_n_chart',solid:1,deco:false,sc:.9,bob:.2});C.raw('kh_oqstuff_4',4,7,{block:false,sc:.7});
+      C.npc('blr_surgeon',5,4);C.npc('blr_n_p1',4,6);C.npc('blr_n_p2',11,6)}});
   blrDaceAdd()}
 function blrBeacon(){
   const f=BLR_BEACON.front;
@@ -381,6 +453,7 @@ function blrBeacon(){
     lights:[[2,2],[6,2],[4,3],[4,6]],lcol:{'2,2':[.75,1.1,.95],'6,2':[.75,1.1,.95],'4,3':blrF().beaconLit?[1.6,1.2,.6]:[.6,1.0,.9],'4,6':[1.3,.95,.6]},col:[1.1,.95,.8],
     build:C=>{
       C.raw('hearth',4,3,{block:true,npc:'blr_beacon',solid:1,deco:false,sc:1.0,hidden:true});blrP(C,'hearth',4,2,{h:1.5});blrP(C,'weaponrack',1,3,{h:.9});blrP(C,'bed',7,6,{h:.7});blrP(C,'waterbarrel',7,2,{h:.7});blrP(C,'noticeboard',2,1,{h:.9,block:false});
+      C.raw('gy_book',3,5,{npc:'blr_n_watch',solid:1,deco:false,sc:.9,bob:.2});C.raw('kh_oqstuff_6',6,5,{block:false,sc:.8});C.raw('gy_bones',7,4,{block:false,sc:.5});
       C.npc('blr_pell',2,6)}})}
 for(const [id,fn] of [[BLR.INN,blrInn],[BLR.ARM,blrArmoury],[BLR.FORGE,blrForge],[BLR.HALL,blrHall],[BLR.INFIRM,blrInfirmary],[BLR.BEACON,blrBeacon]])
   KH_LAZY[id]=()=>{if(!LEVELS[id]){if(!LEVELS[BLR.ID])KH_LAZY[BLR.ID]();fn()}return LEVELS[id]};

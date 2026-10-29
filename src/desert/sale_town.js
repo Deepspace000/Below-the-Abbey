@@ -132,7 +132,7 @@ function saBuild(){
   SA.dgid={};   // door gid per house id: {bar, open, texBar, texOpen}
   for(const h of houses){
     const sty=h.sty,wh=h.wh,front=(x,y)=>h.face==='N'?y===h.y0:h.face==='S'?y===h.y1:h.face==='E'?x===h.x1:x===h.x0;
-    const plain=ch(TM.make('plain',sty,wh).gid),plain2=ch(TM.make('plain2',sty,wh).gid),win=ch(TM.make(h.spk&&h.sp.kind!=='inn'?'shopfront':'window',sty,wh).gid),side=ch(TM.make('window',sty,wh).gid),gwin=ch(TM.make('gwin',sty,wh).gid);
+    const plain=ch(TM.make('plain',sty,wh).gid),plain2=ch(TM.make('plain2',sty,wh).gid),win=ch(TM.make(h.spk&&h.sp.kind!=='inn'?'shopfront':'window',sty,wh).gid),side=ch(TM.make('window',sty,wh).gid),gwin=ch(TM.make('slit',sty,wh).gid);
     const dtile=TM.make('door',sty,wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dtile.tex;
     const D={door:dgid,texOpen:dtile.tex,texBar:h.spk?saBarricadeTex(dtile.tex,wh,h.id):dtile.tex,house:h};SA.dgid[h.id]=D;
     const tgt=h.home==='rope'?SA.CELLAR:h.id;
@@ -225,6 +225,8 @@ function saBuild(){
   const C={W,H,rows,block,fm,hgt,sky,decor,lights,items,enemies,used,street,ch,TM,solid,free,dc,tryDc,solidDc,walk,near,person,pick,hs,lamp,foe,houses,pch,chars,lv,setF,isRoad,tree,bones,web};
   if(typeof saPlaceFolk==='function')saPlaceFolk(C);
   if(typeof saPlaceQuest==='function')saPlaceQuest(C);
+  // ---- the QA and atmosphere pass: readable notes, trails, small things, then no identical neighbours ----
+  try{saStoryPass(C)}catch(e){console.error('saStoryPass',e)}
   // ---- the level ----
   lv.rows=rows.map(r=>r.join(''));
   const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}lv.fmap=fmap;
@@ -268,3 +270,136 @@ function saArrive(n){
     try{if(typeof saZoneHint==='function')saZoneHint()}catch(e){}
   }
 }
+/* ==========================================================================
+   SALE: THE QA AND ATMOSPHERE PASS (prefix b7 / saStory). Readable notes on posts, small things lying about (a boot, a spilled cart, a cut bucket rope), trails (bread crumbs to the
+   Sanctuary, bones to the crypt stair, candle stubs up Bell Lane to the belfry), roses and candles at the barricaded doors, a warm cage lantern by each shop door, epitaph boards in the
+   dead quarter, then a clean-up: no two identical props within two squares of each other (the second one is swapped for a different piece, or dropped).
+   ========================================================================== */
+const SA_NOTES={
+  sa_n_gate:["TOLL BOARD","One coin a head for the gate. The collector's stool is still here, and so is his cup. There are no coins in it."],
+  sa_n_charnel:["CHARNEL ROW","Closed by order of the reeve. Nobody living past the post after dusk. Someone has scratched out the words 'after dusk'."],
+  sa_n_back:["BACK TRACK","To Hollin Farm and the gravedigger's cottage. The crypt stair is at the west end. Keep to the road."],
+  sa_n_bell:["BELL LANE","The belfry is locked. The bell rings with nobody on the rope. Do not climb the stair alone. Under this, in another hand: it is not locked any more."],
+  sa_n_farm:["HOLLIN FARM","Flour and eggs by the cart. Ring the bell at the gate. The bell has been taken down. The hook is still there."],
+  sa_n_sanct:["THE SANCTUARY","Closed from inside. Leave bread on the step. Do not knock."],
+  sa_n_tan:["TANNERS' LANE","Hides, rope and glue. The vats are still full. Nobody has been paid for nine years."],
+  sa_boot:["A boot","A child's left boot, lying on its side in the dust. The notice board says one boot was found. Nobody has come for it."],
+  sa_steps:["Crumbs on the step","Crumbs of fresh bread lie on the ground near the Sanctuary door. The loaf left here last night is gone."],
+  sa_cart2:["An overturned handcart","A handcart on its side with one wheel still turning. Rye flour is trampled flat across the track. Whoever pushed it left in a hurry, and left the load."],
+  sa_bucket:["A bucket","A wooden bucket beside the well. The rope has been cut, not frayed, and the cut end is clean."],
+  sa_rose:["A rose at the door","A dry red rose and a burnt-down candle on the ground by a boarded shop. Somebody comes here and leaves them. The wax is not old."],
+  sa_gibrope:["A coil of rope","A coil of good rope, left at the foot of the gibbet. It has never been used. The knot at the end is a hangman's knot."],
+  sa_ghostn:["A pale shape","A pale shape stands very still and looks at a house. It does not look at you, and it does not move when you wave."]};
+for(const id in SA_NOTES)khNpc(id,SA_NOTES[id][0],null,()=>say(SA_NOTES[id][0]+'\n\n'+SA_NOTES[id][1],[BYE]));
+const SA_EPI=[
+  "MARTHA PELL, baker's wife. Died the first winter. The bread went on without her.",
+  "HOB AND EDITH CARTER. Died in the same week and the same bed. A neighbour cut this board and spelled it wrong.",
+  "A CHILD, name not known. Found by the well. The reeve's clerk has marked her as 'ours'.",
+  "THE WATCH, EIGHT MEN. They held the east road for three days. One of them is not in this row.",
+  "JONAH SPRAT, tanner. He knew what was in the vats. Do not dig him up.",
+  "SISTER AGNES. She rang the bell for the dying, and then there was nobody left to ring it for."];
+SA_EPI.forEach((t,i)=>khNpc('sa_epi'+i,'A grave board',null,()=>say('A wooden board, grey with weather, with words cut into it.\n\n'+t,[BYE])));
+/* the shared clean-up: swap or drop a prop that has an identical twin within two squares. decor is the array; pools maps a key to the alternatives; skip(d) keeps a piece as it is. Returns what it did. */
+function b7Dedupe(decor,pools,skip,rad){
+  rad=rad||2;const kept=[],out={swapped:0,dropped:0},drop=new Set();
+  for(const d of decor){
+    if(skip&&skip(d)){kept.push(d);continue}
+    const clash=k=>kept.some(e=>e.k===k&&e!==d&&Math.max(Math.abs(e.x-d.x),Math.abs(e.y-d.y))<=rad);
+    if(clash(d.k)){
+      const pool=pools[d.k]||[];let alt=null;
+      for(let i=0;i<pool.length;i++){const a=pool[(((d.x*7+d.y*13)>>1)+i)%pool.length];if(IMG[a.k]&&!clash(a.k)){alt=a;break}}
+      if(alt){d.k=alt.k;if(alt.sc)d.sc=alt.sc;if(alt.b!==undefined&&!d.npc){if(alt.b){d.block=true;d.walk=false;delete d.deco}else{d.block=false;d.walk=true;d.deco=true}}out.swapped++}
+      else{drop.add(d);out.dropped++;continue}
+    }
+    kept.push(d)}
+  if(drop.size){for(let i=decor.length-1;i>=0;i--)if(drop.has(decor[i]))decor.splice(i,1)}
+  return out}
+const SA_POOLS={
+  gy_bones:[{k:'gy_rose',sc:.9,b:0},{k:'gy_mound',sc:.7,b:0},{k:'ww_boot',sc:1,b:0},{k:'gy_book',sc:1,b:0},{k:'wm_bucket',sc:1,b:0}],
+  gy_web:[{k:'ww_twig',sc:1,b:0},{k:'ww_twig2',sc:1,b:0},{k:'ww_hagstone',sc:1,b:0},{k:'gy_locket',sc:1,b:0},{k:'gy_ring',sc:1,b:0}],
+  gy_urn:[{k:'gy_ccross',sc:.8,b:1},{k:'gy_slab',sc:.9,b:1},{k:'hl_p_tomb',sc:1,b:1},{k:'gy_obelisk',sc:.55,b:1}],
+  gy_lantern:[{k:'wm_cage_lantern',sc:1.3,b:0}],
+  gy_dead:[{k:'gy_yew',sc:.9,b:1},{k:'ww_stump',sc:.9,b:1},{k:'ww_crowtree',sc:.8,b:1}],
+  gy_yew:[{k:'gy_dead',sc:.9,b:1},{k:'ww_stump',sc:.9,b:1},{k:'ww_crowtree',sc:.8,b:1}],
+  gy_stone1:[{k:'gy_stone2',sc:.85,b:1},{k:'gy_slab',sc:.85,b:1},{k:'gy_lean',sc:.9,b:1},{k:'gy_wcross',sc:.9,b:1},{k:'gy_ccross',sc:.7,b:1}],
+  gy_stone2:[{k:'gy_stone1',sc:.85,b:1},{k:'gy_slab',sc:.85,b:1},{k:'gy_lean',sc:.9,b:1},{k:'gy_wcross',sc:.9,b:1},{k:'gy_ccross',sc:.7,b:1}],
+  gy_lean:[{k:'gy_stone1',sc:.85,b:1},{k:'gy_slab',sc:.85,b:1},{k:'gy_stone2',sc:.85,b:1},{k:'gy_wcross',sc:.9,b:1}],
+  gy_wcross:[{k:'gy_stone1',sc:.85,b:1},{k:'gy_lean',sc:.9,b:1},{k:'gy_slab',sc:.85,b:1},{k:'gy_stone2',sc:.85,b:1}],
+  gy_slab:[{k:'gy_stone1',sc:.85,b:1},{k:'gy_lean',sc:.9,b:1},{k:'gy_wcross',sc:.9,b:1}],
+  gy_fence:[{k:'gy_lean',sc:.9,b:1},{k:'gy_wcross',sc:.9,b:1},{k:'gy_slab',sc:.8,b:1},{k:'gy_stone1',sc:.8,b:1}],
+  hay:[{k:'wm_crate',sc:1.2,b:1},{k:'wm_barrel',sc:1.2,b:1},{k:'cart',sc:1,b:1}],
+  gy_bench:[{k:'wm_crate',sc:1.1,b:1},{k:'wm_barrel_tall',sc:1,b:1}],
+  sa_coffins:[{k:'hl_p_coffin',sc:.9,b:1},{k:'gy_coffin',sc:.5,b:1}],
+  gy_candles:[{k:'hl_p_candle',sc:.7,b:0},{k:'gy_rose',sc:.9,b:0}],
+  gy_rpost:[{k:'ww_totem',sc:.5,b:1},{k:'wm_signpost',sc:.7,b:1}]};
+function saStoryPass(C){
+  const {near,decor,lights,tryDc,free,hs}=C,houses=C.houses;
+  const note=(k,id,x,y,r,o)=>{const q=near(x,y,r===undefined?3:r);if(!q)return null;const d={k,x:q[0],y:q[1],block:true,walk:false,npc:id,deco:false,sc:(o&&o.sc)||.9};if(o&&o._t)d._t=1;decor.push(d);C.used.add(q[0]+','+q[1]);return q};
+  const small=(k,x,y,r,o)=>{const q=near(x,y,r===undefined?2:r);if(!q)return null;const d=Object.assign({k,x:q[0],y:q[1],block:false,walk:true,deco:true,sc:1},o||{});decor.push(d);C.used.add(q[0]+','+q[1]);return q};
+  // keep the front squares of the Sanctuary, the belfry, the crypt stair and every shop door clear
+  for(const h of houses){if(h.front)C.used.add(h.front[0]+','+h.front[1])}
+  for(const [cx,cy] of [[34,30],[57,20],[20,61]])for(let dx=-1;dx<=1;dx++)C.used.add((cx+dx)+','+cy);
+  // the signposts
+  note('gy_sign','sa_n_gate',66,35,3,{sc:.8});note('gy_sign','sa_n_charnel',21,38,3,{sc:.8});note('gy_sign','sa_n_back',30,60,3,{sc:.8});note('gy_sign','sa_n_bell',58,29,3,{sc:.8});
+  note('gy_sign','sa_n_farm',62,53,3,{sc:.8});note('gy_sign','sa_n_sanct',31,29,3,{sc:.8});note('gy_sign','sa_n_tan',52,45,3,{sc:.8});
+  // small things that were left
+  note('ww_boot','sa_boot',32,33,2,{sc:1});
+  note('wm_mine_cart','sa_cart2',60,57,3,{sc:1});
+  {const w=decor.find(d=>d.k==='sa_well');if(w)note('wm_bucket','sa_bucket',w.x,w.y,2,{sc:1})}
+  note('ww_totem','sa_gibrope',37,34,2,{sc:.35});
+  // bread crumbs to the Sanctuary step, a thin trail every third square
+  for(const [x,y] of [[24,33],[28,31],[32,29]])small('ww_crumbs',x,y,0,{_t:1,sc:1.1});
+  note('ww_crumbs','sa_steps',36,31,1,{sc:1.2,_t:1});
+  // bones along Charnel Row toward the crypt stair, then a candle stub every third square up Bell Lane
+  [[22,42],[22,46],[22,50],[22,54],[22,58]].forEach(([x,y],i)=>small(['gy_bones','gy_mound','gy_book','gy_rose','gy_bones'][i],x,y,1,{_t:1,sc:.8}));
+  [[56,32],[58,29],[56,26],[58,23],[56,22]].forEach(([x,y],i)=>{const q=small('hl_p_candle',x,y,1,{_t:1,sc:.6});if(q&&i%2===0&&!lights.some(l=>Math.abs(l[0]-q[0])+Math.abs(l[1]-q[1])<3))lights.push([q[0],q[1]])});
+  // a rose and a candle at some barricaded doors, and a warm cage lantern by each shop door
+  let ro=0;for(const h of houses){if(!h.spk||!h.front)continue;
+    const [fx,fy]=h.front,dx=(h.face==='N'||h.face==='S')?1:0,dy=dx?0:1;
+    for(const s of [1,-1,2,-2]){const x=fx+dx*s,y=fy+dy*s;if(free(x,y)&&!lights.some(l=>Math.abs(l[0]-x)+Math.abs(l[1]-y)<2)){tryDc('wm_cage_lantern',x,y,{sc:1.3});lights.push([x,y]);break}}
+    if(ro<5&&hs(h.id,9,9)<.6){const q=near(fx+dx*2,fy+dy*2,1);if(q){note('gy_rose','sa_rose',q[0],q[1],0,{sc:1.1});ro++}}}
+  // grave boards in the dead quarter
+  [[12,42],[16,46],[10,52],[14,58],[24,48],[28,56]].forEach(([x,y],i)=>note('gy_nameplate','sa_epi'+i,x,y,3,{sc:.8}));
+  // pale shapes standing in the quiet streets (the Orange Spire's painted ghost)
+  [[14,34],[47,34],[27,38],[60,38]].forEach(([x,y],i)=>{const gk=IMG.sa_gv0?'sa_gv'+((i+1)%4):'hl_p_ghost',gs=IMG.sa_gv0?1:.8;if(i===0)note(gk,'sa_ghostn',x,y,2,{sc:gs});else small(gk,x,y,2,{sc:gs})});
+  saCharacter(C,note,small);
+  // the clean-up: nothing identical within two squares (the trail pieces go first, so the others yield to them)
+  {const t=decor.filter(d=>d._t),r=decor.filter(d=>!d._t);decor.length=0;for(const d of t)decor.push(d);for(const d of r)decor.push(d)}
+  const res=b7Dedupe(decor,SA_POOLS,d=>d.pic||d._t||(d.npc&&!/^sa_(n_|boot|steps|cart2|bucket|rose|epi|ghostn)/.test(d.npc))||/^sign_|^sa_planks|^sa_gh_|^sa_gibbet|^sa_fountain|^sa_cart$|^sa_well|^kh_/.test(d.k)||d.k==='gy_sign'||d.k==='hl_p_ghost'||/^sa_gv/.test(d.k)||d.k==='wm_cage_lantern');
+  for(const d of decor)delete d._t;
+  SA.story=res;
+}
+
+/* ==========================================================================
+   SALE ROUND 2: composition. Braziers for warm pools of light against the cold fog, houses with a character of their own, a west arch to end the long view of Candle Street,
+   a dead orchard, a churchyard and a burning ground in the empty back country, and things leaning on walls. Everything stands beside the roads, never in them.
+   ========================================================================== */
+function saCharacter(C,note,small){
+  const {decor,lights,tryDc,free,hs,houses,near}=C,solidDc=C.solidDc;
+  const glow=(x,y)=>{if(!lights.some(l=>Math.abs(l[0]-x)+Math.abs(l[1]-y)<3))lights.push([x,y])};
+  const brazier=(x,y)=>{const q=near(x,y,1);if(q&&tryDc('wm_brazier',q[0],q[1],{block:true,walk:false,sc:.8})){lights.push([q[0],q[1]]);return true}return false};
+  // braziers: the four corners of the square's middle, the crossroads, the gate and the end of Bell Lane
+  [[33,36],[37,36],[20,36],[53,36],[57,36],[64,36],[10,36],[20,60],[53,60],[57,22]].forEach(([x,y])=>{const dy=(y===36)?(hs(x,y,71)<.5?-1:1):0;brazier(x,y+dy)});
+  // the west end of Candle Street: a stone arch, shut, with a lamp either side, so that the street ends in something
+  {const ax=3,ay=36;
+   if(IMG.gy_arch&&!decor.some(d=>d.x===ax&&d.y===ay)){decor.push({k:'gy_arch',x:ax,y:ay,block:true,walk:false,deco:false,sc:1.25,npc:'sa_n_westarch'});C.used.add(ax+','+ay)}
+   for(const y of [35,37])tryDc('wm_cage_lantern',4,y,{sc:1.3});lights.push([4,35],[4,37])}
+  // a dead orchard behind the north houses: rows of dead trees with wide gaps, then a ring of gravestones
+  for(let row=0;row<3;row++)for(let x=6+row;x<=26;x+=4){const y=8+row*5;solidDc(((x+row)%3===0)?'gy_yew':'gy_dead',x,y,{sc:.85+hs(x,y,73)*.3})}
+  // a small churchyard in the north east: a fence ring and stones in rows with a cross in the middle
+  {const cx=47,cy=9;for(let x=cx-5;x<=cx+5;x+=2){solidDc('gy_fence',x,cy-4,{sc:.85});solidDc('gy_fence',x,cy+4,{sc:.85})}
+   for(let y=cy-2;y<=cy+2;y+=2){for(const x of [cx-3,cx-1,cx+1,cx+3])if(!(x===cx-1&&y===cy)&&!(x===cx+1&&y===cy))solidDc(['gy_stone1','gy_slab','gy_lean','gy_wcross','gy_stone2'][(x+y)&3],x,y,{sc:.75})}
+   solidDc('gy_ccross',cx,cy,{sc:1.1});solidDc('gy_yew',cx+6,cy+1,{sc:1});glow(cx,cy-3);tryDc('gy_candles',cx,cy+2,{sc:.6});}
+  // the burning ground in the west: a heap of mounds, a brazier and rakes, where the first dead were put
+  {const cx=10,cy=26;for(const [dx,dy] of [[-2,0],[2,0],[0,-2],[0,2],[-3,2],[3,-2]])tryDc('gy_mound',cx+dx,cy+dy,{block:true,walk:false,sc:.9});
+   brazier(cx,cy);for(const [dx,dy] of [[-1,1],[1,-1],[3,1]])tryDc('gy_bones',cx+dx,cy+dy,{sc:.8});tryDc('wm_tools',cx-4,cy,{block:true,walk:false,sc:.9})}
+  // character at the houses that are not shops: a ladder, a woodpile, a bucket and rope, a tool stand, a banner or a shrine against the wall
+  const CH=['wm_ladder','wm_crate','wm_tools','hl_p_banner','wm_barrel_tall','wm_noticeboard','gy_rose','hl_p_chains','wm_keg'];
+  for(const h of houses){if(h.spk||h.home)continue;if(!h.front)continue;const [fx,fy]=h.front,hz=(h.face==='N'||h.face==='S');
+    const k=CH[(hs(h.x0,h.y0,81)*CH.length)|0];const s=hs(h.x0,h.y0,82)<.5?1:-1;
+    const cells=[[hz?fx+s:fx,hz?fy:fy+s],[hz?fx-s:fx,hz?fy:fy-s]];
+    for(const [x,y] of cells){if(!free(x,y))continue;const tall=/ladder|banner|chains|noticeboard/.test(k);
+      if(tryDc(k,x,y,tall?{sc:.85}:{block:true,walk:false,sc:.8})){break}}}
+}
+function used(C,x,y){return C.used.has(x+','+y)}
+khNpc('sa_n_westarch','The west arch',null,()=>say('A stone arch at the west end of Candle Street, bricked up to the keystone. Chalked on the bricks, in many hands, are the names of people who went through before it was closed. The last name is not finished.',[BYE]));
