@@ -39,6 +39,20 @@ const PSP_CREATURES={};
  for(const n of [1,2,3,4])P('st_saint'+n,2.2,['gy_angel','lpstatue','statue'],{flip:n%2});
  /* S9 gate and fronts (builder 1 paints these; the stand-ins keep the maps working) */
  P('gate_great',4.6,['gy_crypt','gy_lych']);P('barbican_front',4.0,['gy_crypt','gy_mausoleum']);P('gatehouse_front',4.0,['gy_crypt','gy_mausoleum']);P('castle_front_tiles',4.0,['gy_crypt','gy_mausoleum']);
+ /* S10 the redesign kit (tools/PALE_SPIRE_REDESIGN.md): painted architecture and dressing. Painted pieces are assets/ps/<name>.webp (listed in assets/ps/manifest.json); until they exist these stand-ins show. Heights are in cells. */
+ for(const [n,h,src] of [
+  ['arch_high',4.2,['gy_crypt','gy_column']],['arch_low',2.6,['gy_crypt','gy_column']],['arch_ivy',3.6,['gy_crypt','gy_column']],['arch_iron',3.0,['gy_igate2','gy_igate']],['arch_stair',3.2,['gy_crypt','gy_column']],
+  ['window_great',3.6,['hl_p_window','gy_niche']],['window_rose',3.0,['hl_p_window','gy_niche']],['window_slit',2.4,['hl_p_window','gy_niche']],
+  ['stairs_moss',1.8,['gy_slab','gy_bench']],['stairs_curved',2.4,['gy_slab','gy_bench']],
+  ['alcove_weeper',2.6,['hl_p_alcove','gy_niche']],['alcove_monk',2.6,['hl_p_alcove','gy_niche']],['alcove_knight',2.6,['hl_p_alcove','gy_niche']],['alcove_maiden',2.6,['hl_p_alcove','gy_niche']],['alcove_empty',2.6,['hl_p_alcove','gy_niche']],
+  ['iron_fence_a',1.5,['fence','gy_fence']],['iron_fence_b',1.5,['fence','gy_fence']],['iron_gate_big',2.4,['gy_igate2','gy_igate']],['iron_rail',1.1,['fence','gy_fence']],
+  ['vine_a',3.0,['gy_ivy','ww_twig2']],['vine_b',3.0,['gy_ivy','ww_twig2']],['ivy_clump',1.0,['gy_ivy','ww_twig2']],['moss_rock',.7,['gy_stone1','gy_slab']],['rose_pale',1.2,['mw_rose','lbush0']],['rose_arch',3.0,['mw_rose','lbush0']],
+  ['clock_tower',5.0,['gy_crypt','gy_mausoleum']],['clock_face',1.8,['hl_p_mirror','hl_p_window']],['bell_big',2.4,['church_bell','gy_bell']],['bell_small',1.2,['church_bell','gy_bell']],['bell_frame',3.2,['church_bell','gy_bell']],
+  ['bridge_arch',2.8,['gy_crypt','gy_column']],['bridge_rail',1.2,['fence','gy_fence']],
+  ['schnoor_a',3.2,['gy_hut','gy_chapel']],['schnoor_b',3.2,['gy_hut','gy_chapel']],['schnoor_c',3.4,['gy_hut','gy_chapel']],['schnoor_d',3.0,['gy_hut','gy_chapel']],['schnoor_door',2.4,['gy_hut','gy_chapel']],
+  ['brick_wall_high',3.4,['gy_crypt','gy_mausoleum']],['brick_gable',3.6,['gy_crypt','gy_mausoleum']],['lantern_bracket',1.2,['gy_lantern','lantern']],['lantern_hanging',1.2,['gy_lantern','lantern']],
+  ['well_pale',1.3,['ww_well','gy_urn']],['cart_old',1.1,['kh_cart1_0','gy_slab']],['statue_plinth',2.2,['gy_angel','statue']],['urn_big',1.4,['gy_urn','urn']],['cobble_heap',.5,['gy_slab','gy_stone1']],
+  ['castle_view',9.0,['gy_crypt','gy_mausoleum']],['castle_view_near',9.0,['gy_crypt','gy_mausoleum']]])P(n,h,src);
  /* S7 people (living or ghosts); not tinted pale unless 'ghost' */
  for(const [n,s,g] of [['garrick','kh_ohfolk1_0'],['isaude','kh_ohfolk2_0'],['peck','kh_ohfolk3_0'],['sedge','kh_ohfolk4_0'],['calpurnia','kh_ohfolk5_0'],['harrow','kh_ohsold1_0'],['gaunt','kh_ohfolk6_0'],['stamford','kh_ohsold1_1'],['yseult','kh_ohfolk7_0'],
    ['porter','kh_ohfolk1_1'],['gardener','kh_ohfolk3_1'],['falconer','kh_ohfolk2_1',1],['chamberlain','kh_ohfolk4_1',1],['librarian','kh_ohfolk5_1',1],['courtier1','kh_ohfolk6_1',1],['courtier2','kh_ohfolk7_1',1],['courtier3','kh_ohfolk1_2',1],['courtier4','kh_ohfolk2_2',1],['courtier5','kh_ohfolk3_2',1],['courtier6','kh_ohfolk4_2',1]])

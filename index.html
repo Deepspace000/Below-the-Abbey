@@ -71473,7 +71473,7 @@ function bksRain(R,t,f,rd){
    going back; both halves are listed. `prov:1` means the far side is not built yet and the number is a promise for the later builder.
    `lock:'pskey2'` means the stair door needs the Second Floor Key (item id pskey2) in the bag; the key is kept after use.
    ========================================================================== */
-const PSP={REGION:'The Pale Lands',LO:9710,HI:9998,ENTRY:{id:9720,x:40,y:66,f:0}};
+const PSP={REGION:'The Pale Lands',LO:9710,HI:9998,ENTRY:{id:9720,x:32,y:52,f:0}};
 /* id of every level and block (a block of ten ids: the first is the main level, the rest are its rooms, floors or towers) */
 PSP.ID={DOOR:9710,APPROACH:9720,GATEHOUSE:9721,WINCH:9722,LODGE:9723,
   COURT:9730,GARDENER:9731,MEWS:9732,
@@ -71487,21 +71487,21 @@ PSP.ID={DOOR:9710,APPROACH:9720,GATEHOUSE:9721,WINCH:9722,LODGE:9723,
 const PSP_LV=(id,name,W,H,lvl,pkg,kind,o)=>Object.assign({id,name,W,H,lvl,pkg,kind,built:false},o||{});
 PSP.LEVELS=[
  PSP_LV(9710,'The Pale Door',48,40,100,0,'in',{note:'where Sale opens onto the Pale Lands; built later with the Sanctuary of Sale (7299)'}),
- PSP_LV(9720,'The Pale Approach',80,72,100,1,'out'),
- PSP_LV(9721,'The Great Gatehouse',40,32,100,1,'in'),
- PSP_LV(9722,'The Winch Loft',28,24,100,1,'in'),
- PSP_LV(9723,"The Porter's Lodge",24,20,100,1,'in',{rest:1}),
- PSP_LV(9730,'The Court of Statues',96,88,101,2,'out',{tele:[12,76]}),
- PSP_LV(9731,"The Gardener's Lodge",20,16,101,2,'in',{rest:1}),
- PSP_LV(9732,'The Mews and Stable',26,20,101,2,'in'),
- PSP_LV(9740,'The Ground Floor: the Great Halls',112,84,101,3,'in'),
- PSP_LV(9750,'The Ground Floor: Kitchens and Armoury',72,64,101,4,'in'),
- PSP_LV(9760,'The Ground Floor: Cloister, Chapel and Library',72,64,101,4,'in'),
+ PSP_LV(9720,'The Pale Approach',64,56,100,1,'out'),
+ PSP_LV(9721,'The Great Gatehouse',32,24,100,1,'in'),
+ PSP_LV(9722,'The Winch Loft',20,18,100,1,'in'),
+ PSP_LV(9723,"The Porter's Lodge",18,14,100,1,'in',{rest:1}),
+ PSP_LV(9730,'The Court of Statues',64,56,101,2,'out',{tele:[8,44]}),
+ PSP_LV(9731,"The Gardener's Lodge",16,14,101,2,'in',{rest:1}),
+ PSP_LV(9732,'The Mews and Stable',20,16,101,2,'in'),
+ PSP_LV(9740,'The Ground Floor: the Great Halls',64,48,101,3,'in'),
+ PSP_LV(9750,'The Ground Floor: Kitchens and Armoury',48,40,101,4,'in'),
+ PSP_LV(9760,'The Ground Floor: Cloister, Chapel and Library',48,40,101,4,'in'),
  PSP_LV(9770,'The Pale Orchard and Kitchen Garden',96,80,102,0,'out'),
  PSP_LV(9775,'The Yew Maze',64,64,102,0,'maze'),
- PSP_LV(9780,'The Undercroft Gaols',80,64,102,5,'in'),
- PSP_LV(9790,'The Deep Cells and the Cistern',80,64,103,5,'in'),
- PSP_LV(9800,'The Oubliette',72,64,104,5,'in'),
+ PSP_LV(9780,'The Undercroft Gaols',48,40,102,5,'in'),
+ PSP_LV(9790,'The Deep Cells and the Cistern',48,40,103,5,'in'),
+ PSP_LV(9800,'The Oubliette',40,36,104,5,'in'),
  PSP_LV(9810,'The Wine Cellar and Old Cistern',64,48,103,0,'in'),
  PSP_LV(9820,'The Second Floor: the State Rooms',112,84,103,0,'in'),
  PSP_LV(9830,'The Second Floor: the West Wing, State Bedchambers',72,64,104,0,'in'),
@@ -71524,61 +71524,62 @@ PSP.LEVELS=[
 /* links: PSP_L(fromId, [x,y], toId, [x,y,f], options) */
 PSP.LINKS=[];
 const PSP_L=(from,at,to,land,o)=>PSP.LINKS.push(Object.assign({from,at,to,land},o||{}));
-/* the Pale Door (Sale) to the Approach, and back (the door side is provisional) */
-PSP_L(9710,null,9720,[40,66,0],{name:'from Sale',prov:1});
-PSP_L(9720,[40,70],9710,[16,6,0],{name:'back to the Pale Door',prov:1});
+/* REDESIGN (30 Oct 2026, tools/PALE_SPIRE_REDESIGN.md): the castle is compact and vertical now; every map is smaller and these squares are the new contract.
+   Sale's WEST gate (level 600, built by package 1) leads to the Approach; there is no Pale Door level any more on the way (9710 stays unbuilt). `ext:1` = the other level is outside the Pale Spire range. */
+PSP.SALE={gate:[1,36],land:[4,36,1]};   // Sale (600): the gate tile and where the party lands when it comes back from the castle road
+PSP_L(9720,[32,54],600,[4,36,1],{name:'back to Sale',ext:1});
 /* package 1: approach, gatehouse, winch loft, porter's lodge */
-PSP_L(9720,[40,8],9721,[20,27,0],{name:'the Great Gate'});
-PSP_L(9721,[20,29],9720,[40,11,2],{name:'out of the gatehouse, south'});
-PSP_L(9721,[20,2],9730,[48,83,0],{name:'into the Court of Statues'});
-PSP_L(9730,[48,86],9721,[20,5,2],{name:'the courtyard gate'});
-PSP_L(9721,[34,9],9722,[4,12,1],{name:'stair up to the winch loft'});
-PSP_L(9722,[2,12],9721,[34,11,2],{name:'stair down to the east guardroom'});
-PSP_L(9721,[9,24],9723,[12,4,2],{name:"door to the Porter's Lodge"});
-PSP_L(9723,[12,2],9721,[9,22,0],{name:'door back to the west guardroom'});
+PSP_L(9720,[32,6],9721,[16,19,0],{name:'the Great Gate'});
+PSP_L(9721,[16,22],9720,[32,9,2],{name:'out of the gatehouse, south'});
+PSP_L(9721,[16,2],9730,[32,49,0],{name:'into the Court of Statues'});
+PSP_L(9730,[32,52],9721,[16,5,2],{name:'the courtyard gate'});
+PSP_L(9721,[26,8],9722,[4,9,1],{name:'stair up to the winch loft'});
+PSP_L(9722,[2,9],9721,[26,10,2],{name:'stair down to the east guardroom'});
+PSP_L(9721,[7,19],9723,[9,4,2],{name:"door to the Porter's Lodge"});
+PSP_L(9723,[9,2],9721,[7,17,0],{name:'door back to the west guardroom'});
 /* package 2: courtyard, lodge, mews, the four doors, the wall stairs (provisional) */
-PSP_L(9730,[14,62],9731,[10,12,0],{name:"the Gardener's Lodge"});
-PSP_L(9731,[10,14],9730,[14,64,2],{name:'out of the lodge'});
-PSP_L(9730,[82,64],9732,[12,16,0],{name:'the Mews and Stable'});
-PSP_L(9732,[12,18],9730,[82,66,2],{name:'out of the mews'});
-PSP_L(9730,[48,16],9740,[56,80,0],{name:'Door 1: the Great Door'});
-PSP_L(9740,[56,82],9730,[48,18,2],{name:'the Great Door, from inside'});
-PSP_L(9730,[28,16],9740,[28,80,0],{name:'Door 2: the Gallery Door'});
-PSP_L(9740,[28,82],9730,[28,18,2],{name:'the Gallery Door, from inside'});
-PSP_L(9730,[20,34],9750,[66,40,3],{name:'Door 3: the Kitchen Door'});
-PSP_L(9750,[69,40],9730,[22,34,1],{name:'the Kitchen Door, from inside'});
-PSP_L(9730,[76,34],9760,[5,50,1],{name:'Door 4: the Cloister Door'});
-PSP_L(9760,[2,50],9730,[74,34,3],{name:'the Cloister Door, from inside'});
-PSP_L(9730,[4,60],9850,[6,58,0],{name:'west wall stair up',prov:1});
-PSP_L(9850,[6,60],9730,[6,60,1],{name:'west wall stair down',prov:1});
-PSP_L(9730,[91,60],9850,[89,58,0],{name:'east wall stair up',prov:1});
-PSP_L(9850,[89,60],9730,[89,60,3],{name:'east wall stair down',prov:1});
+PSP_L(9730,[10,40],9731,[8,10,0],{name:"the Gardener's Lodge"});
+PSP_L(9731,[8,12],9730,[10,42,2],{name:'out of the lodge'});
+PSP_L(9730,[54,40],9732,[10,12,0],{name:'the Mews and Stable'});
+PSP_L(9732,[10,14],9730,[54,42,2],{name:'out of the mews'});
+PSP_L(9730,[32,10],9740,[32,44,0],{name:'Door 1: the Great Door'});
+PSP_L(9740,[32,46],9730,[32,12,2],{name:'the Great Door, from inside'});
+PSP_L(9730,[18,10],9740,[18,44,0],{name:'Door 2: the Gallery Door'});
+PSP_L(9740,[18,46],9730,[18,12,2],{name:'the Gallery Door, from inside'});
+PSP_L(9730,[12,24],9750,[42,22,3],{name:'Door 3: the Kitchen Door'});
+PSP_L(9750,[45,22],9730,[14,24,1],{name:'the Kitchen Door, from inside'});
+PSP_L(9730,[52,24],9760,[5,22,1],{name:'Door 4: the Cloister Door'});
+PSP_L(9760,[2,22],9730,[50,24,3],{name:'the Cloister Door, from inside'});
+PSP_L(9730,[3,34],9850,[6,58,0],{name:'west wall stair up',prov:1});
+PSP_L(9850,[6,60],9730,[5,34,1],{name:'west wall stair down',prov:1});
+PSP_L(9730,[60,34],9850,[89,58,0],{name:'east wall stair up',prov:1});
+PSP_L(9850,[89,60],9730,[58,34,3],{name:'east wall stair down',prov:1});
 /* ground floor: the three maps are joined inside */
-PSP_L(9740,[2,56],9750,[66,24,3],{name:'screens passage to the service wing'});
-PSP_L(9750,[69,24],9740,[5,56,1],{name:'service wing to the screens passage'});
-PSP_L(9740,[109,56],9760,[5,30,1],{name:'banqueting hall to the east wing'});
-PSP_L(9760,[2,30],9740,[106,56,3],{name:'east wing to the banqueting hall'});
+PSP_L(9740,[2,30],9750,[42,12,3],{name:'screens passage to the service wing'});
+PSP_L(9750,[45,12],9740,[5,30,1],{name:'service wing to the screens passage'});
+PSP_L(9740,[61,30],9760,[5,12,1],{name:'banqueting hall to the east wing'});
+PSP_L(9760,[2,12],9740,[58,30,3],{name:'east wing to the banqueting hall'});
 /* the three stairs to the second floor (all need the Second Floor Key; far sides provisional) */
-PSP_L(9740,[56,15],9820,[56,78,0],{name:'the Grand Stair',lock:'pskey2',prov:1});
-PSP_L(9820,[56,81],9740,[56,18,2],{name:'the Grand Stair, down',prov:1});
-PSP_L(9750,[8,4],9830,[8,8,2],{name:'the West Turret Stair',lock:'pskey2',prov:1});
-PSP_L(9830,[8,5],9750,[8,7,2],{name:'the West Turret Stair, down',prov:1});
-PSP_L(9760,[66,4],9840,[64,8,2],{name:'the East Turret Stair',lock:'pskey2',prov:1});
-PSP_L(9840,[64,5],9760,[66,7,2],{name:'the East Turret Stair, down',prov:1});
+PSP_L(9740,[32,5],9820,[56,78,0],{name:'the Grand Stair',lock:'pskey2',prov:1});
+PSP_L(9820,[56,81],9740,[32,8,2],{name:'the Grand Stair, down',prov:1});
+PSP_L(9750,[6,3],9830,[8,8,2],{name:'the West Turret Stair',lock:'pskey2',prov:1});
+PSP_L(9830,[8,5],9750,[6,6,2],{name:'the West Turret Stair, down',prov:1});
+PSP_L(9760,[42,3],9840,[64,8,2],{name:'the East Turret Stair',lock:'pskey2',prov:1});
+PSP_L(9840,[64,5],9760,[42,6,2],{name:'the East Turret Stair, down',prov:1});
 /* package 4 to package 5: the dungeon door and the stairs down through the dungeons */
-PSP_L(9750,[30,59],9780,[40,6,2],{name:'the Dungeon Door'});
-PSP_L(9780,[40,3],9750,[30,56,0],{name:'stair up to the kitchens'});
-PSP_L(9780,[66,60],9790,[66,6,2],{name:'stair down to the Deep Cells'});
-PSP_L(9790,[66,3],9780,[66,57,0],{name:'stair up to the Gaols'});
-PSP_L(9790,[14,60],9800,[14,6,2],{name:'stair down to the Oubliette'});
-PSP_L(9800,[14,3],9790,[14,57,0],{name:'stair up to the Deep Cells'});
+PSP_L(9750,[20,36],9780,[24,5,2],{name:'the Dungeon Door'});
+PSP_L(9780,[24,2],9750,[20,33,0],{name:'stair up to the kitchens'});
+PSP_L(9780,[40,36],9790,[40,5,2],{name:'stair down to the Deep Cells'});
+PSP_L(9790,[40,2],9780,[40,33,0],{name:'stair up to the Gaols'});
+PSP_L(9790,[8,36],9800,[8,5,2],{name:'stair down to the Oubliette'});
+PSP_L(9800,[8,2],9790,[8,33,0],{name:'stair up to the Deep Cells'});
 /* things every package needs to agree on */
-PSP.TELE={id:9730,at:[12,76]};                       // the one teleport stone of the first build (TELE_KEEP_HI gets 9730); every other level is noTele
+PSP.TELE={id:9730,at:[8,44]};                       // the one teleport stone of the first build (TELE_KEEP_HI gets 9730); every other level is noTele
 PSP.KEY2={item:'pskey2',name:'The Second Floor Key',flag:'key2',hiddenIn:9760};   // hidden in the sacristy of the chapel (package 4); G.flags.psp.key2 = true once taken
 PSP.REST=[9723,9731,9740,9750,9760];                 // levels that hold a quiet rest room (free rest, no creatures, warm candle light); the room names are in the plan
 /* test and jump links (?town=...&lvl=...): name -> [level, x, y, f]; the party level for a link is the level rating of the target, capped at 115 */
-PSP.JUMPS={palespire:[9720,40,66,0],palespire1:[9720,40,66,0],palespire2:[9730,48,83,0],palespire3:[9740,56,80,0],palespire4:[9750,66,40,3],
-  palespire5:[9760,5,50,1],palespire6:[9780,40,6,2],palespire7:[9790,66,6,2],palespire8:[9800,14,6,2],palespirekey:[9760,60,26,2]};
+PSP.JUMPS={palespire:[9720,32,52,0],palespire1:[9720,32,52,0],palespire2:[9730,32,49,0],palespire3:[9740,32,44,0],palespire4:[9750,42,22,3],
+  palespire5:[9760,5,22,1],palespire6:[9780,24,5,2],palespire7:[9790,40,5,2],palespire8:[9800,8,5,2],palespirekey:[9760,30,14,2]};
 /* small readers (no side effects) */
 const pspIs=n=>n>=PSP.LO&&n<=PSP.HI;
 const pspLevel=id=>PSP.LEVELS.find(l=>l.id===id)||null;
@@ -71627,6 +71628,20 @@ const PSP_CREATURES={};
  for(const n of [1,2,3,4])P('st_saint'+n,2.2,['gy_angel','lpstatue','statue'],{flip:n%2});
  /* S9 gate and fronts (builder 1 paints these; the stand-ins keep the maps working) */
  P('gate_great',4.6,['gy_crypt','gy_lych']);P('barbican_front',4.0,['gy_crypt','gy_mausoleum']);P('gatehouse_front',4.0,['gy_crypt','gy_mausoleum']);P('castle_front_tiles',4.0,['gy_crypt','gy_mausoleum']);
+ /* S10 the redesign kit (tools/PALE_SPIRE_REDESIGN.md): painted architecture and dressing. Painted pieces are assets/ps/<name>.webp (listed in assets/ps/manifest.json); until they exist these stand-ins show. Heights are in cells. */
+ for(const [n,h,src] of [
+  ['arch_high',4.2,['gy_crypt','gy_column']],['arch_low',2.6,['gy_crypt','gy_column']],['arch_ivy',3.6,['gy_crypt','gy_column']],['arch_iron',3.0,['gy_igate2','gy_igate']],['arch_stair',3.2,['gy_crypt','gy_column']],
+  ['window_great',3.6,['hl_p_window','gy_niche']],['window_rose',3.0,['hl_p_window','gy_niche']],['window_slit',2.4,['hl_p_window','gy_niche']],
+  ['stairs_moss',1.8,['gy_slab','gy_bench']],['stairs_curved',2.4,['gy_slab','gy_bench']],
+  ['alcove_weeper',2.6,['hl_p_alcove','gy_niche']],['alcove_monk',2.6,['hl_p_alcove','gy_niche']],['alcove_knight',2.6,['hl_p_alcove','gy_niche']],['alcove_maiden',2.6,['hl_p_alcove','gy_niche']],['alcove_empty',2.6,['hl_p_alcove','gy_niche']],
+  ['iron_fence_a',1.5,['fence','gy_fence']],['iron_fence_b',1.5,['fence','gy_fence']],['iron_gate_big',2.4,['gy_igate2','gy_igate']],['iron_rail',1.1,['fence','gy_fence']],
+  ['vine_a',3.0,['gy_ivy','ww_twig2']],['vine_b',3.0,['gy_ivy','ww_twig2']],['ivy_clump',1.0,['gy_ivy','ww_twig2']],['moss_rock',.7,['gy_stone1','gy_slab']],['rose_pale',1.2,['mw_rose','lbush0']],['rose_arch',3.0,['mw_rose','lbush0']],
+  ['clock_tower',5.0,['gy_crypt','gy_mausoleum']],['clock_face',1.8,['hl_p_mirror','hl_p_window']],['bell_big',2.4,['church_bell','gy_bell']],['bell_small',1.2,['church_bell','gy_bell']],['bell_frame',3.2,['church_bell','gy_bell']],
+  ['bridge_arch',2.8,['gy_crypt','gy_column']],['bridge_rail',1.2,['fence','gy_fence']],
+  ['schnoor_a',3.2,['gy_hut','gy_chapel']],['schnoor_b',3.2,['gy_hut','gy_chapel']],['schnoor_c',3.4,['gy_hut','gy_chapel']],['schnoor_d',3.0,['gy_hut','gy_chapel']],['schnoor_door',2.4,['gy_hut','gy_chapel']],
+  ['brick_wall_high',3.4,['gy_crypt','gy_mausoleum']],['brick_gable',3.6,['gy_crypt','gy_mausoleum']],['lantern_bracket',1.2,['gy_lantern','lantern']],['lantern_hanging',1.2,['gy_lantern','lantern']],
+  ['well_pale',1.3,['ww_well','gy_urn']],['cart_old',1.1,['kh_cart1_0','gy_slab']],['statue_plinth',2.2,['gy_angel','statue']],['urn_big',1.4,['gy_urn','urn']],['cobble_heap',.5,['gy_slab','gy_stone1']],
+  ['castle_view',9.0,['gy_crypt','gy_mausoleum']],['castle_view_near',9.0,['gy_crypt','gy_mausoleum']]])P(n,h,src);
  /* S7 people (living or ghosts); not tinted pale unless 'ghost' */
  for(const [n,s,g] of [['garrick','kh_ohfolk1_0'],['isaude','kh_ohfolk2_0'],['peck','kh_ohfolk3_0'],['sedge','kh_ohfolk4_0'],['calpurnia','kh_ohfolk5_0'],['harrow','kh_ohsold1_0'],['gaunt','kh_ohfolk6_0'],['stamford','kh_ohsold1_1'],['yseult','kh_ohfolk7_0'],
    ['porter','kh_ohfolk1_1'],['gardener','kh_ohfolk3_1'],['falconer','kh_ohfolk2_1',1],['chamberlain','kh_ohfolk4_1',1],['librarian','kh_ohfolk5_1',1],['courtier1','kh_ohfolk6_1',1],['courtier2','kh_ohfolk7_1',1],['courtier3','kh_ohfolk1_2',1],['courtier4','kh_ohfolk2_2',1],['courtier5','kh_ohfolk3_2',1],['courtier6','kh_ohfolk4_2',1]])
