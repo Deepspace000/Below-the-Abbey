@@ -76028,6 +76028,7 @@ function pscCurate(id,L){
   const near=(x,y)=>{if(open(x,y))return [x,y];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]])if(open(x+a,y+b))return [x+a,y+b];return null};
   // signs carry only the name of the place: no hint lines under it
   for(const d of L.decor||[])if(Array.isArray(d.txt)&&d.txt.length>1)d.txt[1]='';
+  L.decor=(L.decor||[]).filter(d=>!(Array.isArray(d.txt)&&/^(NO ARMS|MURDER HOLES ABOVE|A ROAD WARDEN)/.test(d.txt[0])));   // warnings and notices are not place names
   // key points: the start, every door of this level, every landing into it
   const keys=[];const add=p=>{if(p&&p[0]!=null){const q=near(Math.round(p[0]),Math.round(p[1]));if(q)keys.push(q)}};
   const st=L.start||{};add([st.x,st.y]);
