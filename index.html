@@ -71526,7 +71526,7 @@ function bksRain(R,t,f,rd){
    ========================================================================== */
 const PSP={REGION:'The Pale Lands',LO:9710,HI:9998,ENTRY:{id:9720,x:32,y:52,f:0}};
 /* id of every level and block (a block of ten ids: the first is the main level, the rest are its rooms, floors or towers) */
-PSP.ID={DOOR:9710,APPROACH:9720,GATEHOUSE:9721,WINCH:9722,LODGE:9723,
+PSP.ID={DOOR:9710,ROAD:9715,APPROACH:9720,GATEHOUSE:9721,WINCH:9722,LODGE:9723,
   COURT:9730,GARDENER:9731,MEWS:9732,
   HALLS:9740,WEST:9750,EAST:9760,ORCHARD:9770,YEWMAZE:9775,
   DUNG1:9780,DUNG2:9790,DUNG3:9800,CELLARS:9810,
@@ -71538,6 +71538,7 @@ PSP.ID={DOOR:9710,APPROACH:9720,GATEHOUSE:9721,WINCH:9722,LODGE:9723,
 const PSP_LV=(id,name,W,H,lvl,pkg,kind,o)=>Object.assign({id,name,W,H,lvl,pkg,kind,built:false},o||{});
 PSP.LEVELS=[
  PSP_LV(9710,'The Pale Door',48,40,100,0,'in',{note:'where Sale opens onto the Pale Lands; built later with the Sanctuary of Sale (7299)'}),
+ PSP_LV(9715,'The Crooked Road',48,64,100,0,'out',{note:'the road from the east postern of the Court of Statues to the Crooked Tower (the Never-Ending Tower, level id 1e9); ps_road.js'}),
  PSP_LV(9720,'The Pale Approach',64,56,100,1,'out'),
  PSP_LV(9721,'The Great Gatehouse',32,24,100,1,'in'),
  PSP_LV(9722,'The Winch Loft',20,18,100,1,'in'),
@@ -71588,6 +71589,10 @@ PSP_L(9721,[26,8],9722,[4,9,1],{name:'stair up to the winch loft'});
 PSP_L(9722,[2,9],9721,[26,10,2],{name:'stair down to the east guardroom'});
 PSP_L(9721,[7,19],9723,[9,4,2],{name:"door to the Porter's Lodge"});
 PSP_L(9723,[9,2],9721,[7,17,0],{name:'door back to the west guardroom'});
+/* the Crooked Road (ps_road.js): east postern of the Court of Statues -> road -> the Crooked Tower (NT.BASE = 1e9, arrive at NT.ENT.arrive {18,26,0}); the tower's own south gate leads back to 9715 (nt_map.js) */
+PSP_L(9730,[60,30],9715,[40,59,0],{name:'the East Postern, to the Crooked Road'});
+PSP_L(9715,[40,61],9730,[58,30,3],{name:'back to the East Postern'});
+PSP_L(9715,[30,4],1000000000,[18,26,0],{name:'the gate of the Crooked Tower',ext:1});
 /* package 2: courtyard, lodge, mews, the four doors, the wall stairs (provisional) */
 PSP_L(9730,[10,40],9731,[8,10,0],{name:"the Gardener's Lodge"});
 PSP_L(9731,[8,12],9730,[10,42,2],{name:'out of the lodge'});
@@ -71630,7 +71635,7 @@ PSP.KEY2={item:'pskey2',name:'The Second Floor Key',flag:'key2',hiddenIn:9800}; 
 PSP.REST=[9723,9731,9740,9750,9760];                 // levels that hold a quiet rest room (free rest, no creatures, warm candle light); the room names are in the plan
 /* test and jump links (?town=...&lvl=...): name -> [level, x, y, f]; the party level for a link is the level rating of the target, capped at 115 */
 PSP.JUMPS={palespire:[9720,32,52,0],palespire1:[9720,32,52,0],palespire2:[9730,32,49,0],palespire3:[9740,32,44,0],palespire4:[9750,42,22,3],
-  palespire5:[9760,5,22,1],palespire6:[9780,24,5,2],palespire7:[9790,40,5,2],palespire8:[9800,8,5,2],palespirekey:[9800,22,14,2]};
+  palespire5:[9760,5,22,1],palespire6:[9780,24,5,2],palespire7:[9790,40,5,2],palespire8:[9800,8,5,2],palespirekey:[9800,22,14,2],crookedroad:[9715,40,59,0]};
 /* small readers (no side effects) */
 const pspIs=n=>n>=PSP.LO&&n<=PSP.HI;
 const pspLevel=id=>PSP.LEVELS.find(l=>l.id===id)||null;
@@ -72598,7 +72603,7 @@ const PSG_ARR={9720:'The Pale Approach. A cobbled road climbs the crag in long s
    Everything that is a person, a statue or a creature uses pspPic(name) / 'ps_c_<id>' (ps_core.js), so painted pieces from assets/ps drop in with no code change.
    ========================================================================== */
 const PSC={ID:9730,LODGE:9731,MEWS:9732,W:64,H:56,R:101,TELE:[8,44],loops:{},lamps:[],benchUsed:false,
-  FRONTS:[[32,12],[18,12],[14,24],[50,24]],   // the four door fronts: no creature within 3 squares
+  FRONTS:[[32,12],[18,12],[14,24],[50,24],[58,30]],   // the four door fronts: no creature within 3 squares
   NECKS:[3,1,5,2,4]};   // the order of the five hydra necks (the plaque in the Weeping Alcove says it)
 const pscIs=n=>n>=9730&&n<=9739;
 const pscF=()=>{const F=pspF();return F.c||(F.c={necks:[],roses:0,taken:{}})};
@@ -73109,7 +73114,7 @@ function pscBase(info){
   for(const [x,y] of [[13,37],[13,38],[51,37],[51,38]])C.solid(x,y,ch(T.culvert));
   /* the doors of the contract: every link of this level, a door tile of its own */
   const clone=base=>{const gid=KH_NEXT_GID++;T_TILE[gid]=T_TILE[base];if(GY.col&&GY.col[base])GY.col[gid]=GY.col[base];return gid};
-  const DOORS={'32,10':T.great[1],'18,10':T.gallery[1],'12,24':T.kitchen,'52,24':T.cloister,'10,40':T.cloister,'54,40':T.kitchen,'3,34':T.grille,'60,34':T.grille,'32,52':T.gate};
+  const DOORS={'32,10':T.great[1],'18,10':T.gallery[1],'12,24':T.kitchen,'52,24':T.cloister,'10,40':T.cloister,'54,40':T.kitchen,'3,34':T.grille,'60,34':T.grille,'32,52':T.gate,'60,30':T.gate};
   const bind=l=>{const base=DOORS[l.at[0]+','+l.at[1]];if(!base)return;const gid=clone(base);C.solid(l.at[0],l.at[1],ch(gid));
     const d={lvl:l.to,get at(){if(!LEVELS[l.to]&&KH_LAZY[l.to])try{KH_LAZY[l.to]()}catch(e){console.error(e)}return {x:l.land[0],y:l.land[1],f:l.land[2]}},psc:1};
     if(l.prov)d.seal='The wall walk is closed. An iron grille is locked across the foot of the stair, and the lock is furred with green rust.';
@@ -75875,6 +75880,116 @@ if(typeof storyNext==='function'){const _sn=storyNext;storyNext=function(){try{c
 function pspItemsFill(){for(const id in PSP_ITEMS){if(ITEMDEF[id])continue;const q=PSP_ITEMS[id];ITEMDEF[id]={n:q.n,k:q.k||'quest',t:q.t||'Quest item',ic:q.ic||'ore',c:q.c||'#d0d0e0',stack:q.stack||1,price:0,sw:.2,d:q.d,psfill:1}}}
 pspItemsFill();
 
+/* ---- src/desert/ps_road.js ---- */
+/* ==========================================================================
+   THE PALE SPIRE: THE CROOKED ROAD (prefix pcr / PCR). Level 9715, outdoor, 48 x 64, rating 100.
+   The way from the Pale Spire to the Never-Ending Tower. From the east postern of the Court of Statues (9730, square 60,30) a five-wide road
+   winds north in switchbacks, through a bone field, past a rest shrine, a glade of crosses and a glade of leaning lamps, to the forecourt of the
+   Crooked Tower, where the gate (30,4) opens on the tower's entrance hall (NT.BASE, arrive at NT.ENT.arrive). The tower's south gate (nt_map.js) leads back here.
+   Contract: the links are in ps_ids.js (9730 <-> 9715, 9715 -> NT.BASE with ext:1). A party under level 100 is turned back at the tower gate (ntLevelOk in nt_map.js).
+   Look: dark gothic. Black stone walls, dead gnarled trees, overcast sky, bones, iron fences, leaning lamps, a rest shrine. No houses, no village props, no animals.
+   Rules kept: the middle three squares of the road stay empty (nothing stands on the route); solid props stand only five squares or more off the route centre line
+   (trees, stones) or on the edge row (fence and lamp pictures, which can be walked through); the few creatures stand in the glades, at least three squares off the route.
+   ========================================================================== */
+const PCR={ID:9715,W:48,H:64,
+  /* the centre line of the road, from the postern (south east) to the tower gate (north) */
+  ROUTE:[[40,60],[40,52],[10,52],[10,42],[38,42],[38,32],[12,32],[12,22],[30,22],[30,6]],
+  /* glades: [x0,y0,x1,y1,floor,name] */
+  GLADES:[[22,48,34,56,'gravel','The Bone Field'],[3,38,15,46,'flagdark','The Wayside Shrine'],[30,28,44,36,'gravel','The Glade of Crosses'],[4,18,18,26,'gravel','The Leaning Lamps'],[22,6,38,14,'flagdark','The Tower Forecourt']]};
+function pcrBuild(info){
+  const W=PCR.W,H=PCR.H;
+  const C=pspMake({id:9715,start:{x:40,y:59,f:0},walled:true,wall:'dark',wh:3.4,floor:'cobble',amb:.78,wind:.3});
+  const {rows,block}=C,hs=C.hs,PAL=PSP_PAL,SI=PAL.silver,GR=PAL.green,ix=(x,y)=>y*W+x;
+  const open=(x,y)=>rows[y]&&rows[y][x]==='.';
+  /* ---- the road: five wide, along the centre line ---- */
+  const R=PCR.ROUTE,cl=[];
+  for(let i=0;i<R.length-1;i++){const [ax,ay]=R[i],[bx,by]=R[i+1];
+    if(ax===bx){for(let y=Math.min(ay,by);y<=Math.max(ay,by);y++)cl.push([ax,y])}else{for(let x=Math.min(ax,bx);x<=Math.max(ax,bx);x++)cl.push([x,ay])}}
+  for(const [x,y] of cl){C.carve(x-2,y-2,x+2,y+2);C.setFloor(x-2,y-2,x+2,y+2,'cobble')}
+  for(const g of PCR.GLADES){C.carve(g[0],g[1],g[2],g[3]);C.setFloor(g[0],g[1],g[2],g[3],g[4])}
+  /* the line of the road itself in dressed flags, one square wide, so that the way reads from far off */
+  for(const [x,y] of cl)C.setFloorCell(x,y,'flagdark');
+  /* distance from the centre line (Chebyshev), for every open square */
+  const dist=new Float32Array(W*H).fill(99);
+  for(const [cx,cy] of cl)for(let y=Math.max(0,cy-6);y<=Math.min(H-1,cy+6);y++)for(let x=Math.max(0,cx-6);x<=Math.min(W-1,cx+6);x++){const d=Math.max(Math.abs(x-cx),Math.abs(y-cy));if(d<dist[ix(x,y)])dist[ix(x,y)]=d}
+  const D=(x,y)=>dist[ix(x,y)];
+  /* ---- the walls: black stone, moss, a little ivy ---- */
+  const near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
+  const SET=['dark','dark','ash','dark','moss','ash','dun','ivy','dark','ash'];
+  for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(open(x,y)||!near(x,y))continue;C.solid(x,y,C.ch(pspWallGid(SET[(hs(x,y,3)*SET.length)|0],(hs(x,y,4)*4)|0,3.4)))}
+  /* ---- the doors: the postern (south), the tower gate (north) ---- */
+  C.links({style:{'Postern':'gate','Tower':'great'}});
+  /* ---- dressing ---- */
+  const FENCE=['iron_fence_a','iron_fence_b'];
+  const lamp=(x,y,col)=>{if(!C.free(x,y))return;C.dec('gy_lantern',x,y,{block:false,sc:1.05});C.light(x,y,col||SI)};
+  const edge=(x,y)=>open(x,y)&&D(x,y)===2;                // the outer row of the road
+  const far=(x,y,d)=>open(x,y)&&D(x,y)>=(d||5)&&C.free(x,y);   // well off the route: solid props only here
+  const tree=(x,y,sc)=>{if(far(x,y,3))C.dec('gy_dead',x,y,{block:true,sc:sc||1.5+hs(x,y,7)*.7})};
+  /* the iron fence along the outer row, with gaps, and a leaning lamp every few squares (walk-through pictures) */
+  for(const [cx,cy] of cl){
+    for(const [dx,dy] of [[-2,0],[2,0],[0,-2],[0,2]]){const x=cx+dx,y=cy+dy;
+      if(!edge(x,y)||C.decor.some(d=>d.x===x&&d.y===y))continue;
+      const r=hs(x,y,21);
+      if(r<.5)C.prop(FENCE[(x+y)&1],x,y,{block:false,maxW:1.02});
+      else if(r<.58)C.dec('gy_dead',x,y,{block:false,sc:.9+hs(x,y,22)*.5});          // a bare twig tree you can brush past
+      else if(r<.66)C.dec('gy_bones',x,y,{block:false,sc:.7});
+      else if(r<.72)C.prop('moss_rock',x,y,{block:false})}}
+  cl.forEach(([x,y],i)=>{if(i%11===5){for(const [dx,dy] of [[-2,0],[2,0],[0,-2],[0,2]])if(edge(x+dx,y+dy)){lamp(x+dx,y+dy,i%22===5?SI:GR);break}}});
+  /* the glades: dead trees, stones, bones */
+  for(const g of PCR.GLADES){
+    const [x0,y0,x1,y1]=g;
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(!open(x,y)||!C.free(x,y))continue;const r=hs(x,y,31),d=D(x,y);
+      if(d>=3){
+        if(r<.10)tree(x,y);
+        else if(r<.13)C.dec('gy_bones',x,y,{block:false,sc:.8});
+        else if(r<.155&&g[5]!=='The Tower Forecourt')C.dec(['gy_stone1','gy_stone2','gy_ccross','gy_wcross'][(hs(x,y,32)*4)|0],x,y,{block:true,sc:.95})}}}
+  /* the Bone Field: skulls on posts and heaps of bones */
+  for(const [x,y] of [[24,50],[27,54],[31,50],[33,54],[23,55],[30,55]])if(far(x,y,3))C.prop('skull_pillar',x,y,{block:true});
+  for(let k=0;k<26;k++){const x=22+((hs(k,1,51)*13)|0),y=48+((hs(k,2,51)*9)|0);if(open(x,y)&&C.free(x,y))C.dec('gy_bones',x,y,{block:false,sc:.6+hs(k,3,51)*.5})}
+  /* the Glade of Crosses: rows of crosses and a great old tree */
+  for(let x=33;x<=43;x+=2)for(const y of [29,35])if(far(x,y,3))C.dec(['gy_ccross','gy_wcross','gy_stone1'][(x>>1)%3],x,y,{block:true,sc:1});
+  tree(42,29,2.3);tree(31,35,2.1);
+  /* the Leaning Lamps: lamps that lean over the road, a ring of them */
+  for(const [x,y] of [[5,19],[8,19],[11,19],[15,19],[5,25],[8,25],[15,25],[17,22],[5,22]])if(open(x,y))lamp(x,y,hs(x,y,9)<.5?SI:[.8,1.2,.6]);
+  C.sign(14,24,[0,1],'THE CROOKED ROAD','To the Crooked Tower, north');
+  /* the Wayside Shrine: a safe place with a bench, a warm lantern, a free rest */
+  {const x0=5,y=41,id='pcr_bench';
+    C.safe.push({rect:1,x0,y0:y,x1:x0+2,y1:y+1});
+    C.rests.push({x0,y0:y,x1:x0+2,y1:y+1,line:'A wayside shrine. A bench, a warm lantern, a loaf and a cup. Nothing hostile comes near.',name:'The Wayside Shrine'});
+    C.light(x0+1,y,C.warmCol);
+    if(!NPCS[id])khNpc(id,'A pilgrim bench','gy_bench',()=>say('A stone bench under a small shrine of the Pale Mother, with a lantern that does not flicker. The road behind you is long, and the one ahead is longer.',[['Rest a while.',()=>{try{restParty(true)}catch(e){}return null}],['Leave.',()=>null]]));
+    C.dec('gy_bench',x0+1,y+1,{block:true,npc:id,sc:1.1});C.dec(pspPic('lantern_red_a'),x0,y,{block:false});C.dec(pspPic('statue_plinth'),x0+2,y,{block:true})}
+  for(const [x,y] of [[5,39],[9,39],[13,39],[4,45],[14,45]])if(far(x,y,3))C.dec(pspPic('urn_big'),x,y,{block:true,sc:.9});
+  /* the tower forecourt: two lamps, two urns, a sign, the gate framed by an arch */
+  C.prop('arch_iron',30,5,{block:false});
+  for(const x of [26,34]){lamp(x,8,SI)}
+  for(const x of [24,36])C.prop('urn_big',x,7,{block:true});
+  for(const x of [23,37])C.prop('col_fluted',x,10,{block:true});
+  C.sign(28,6,[0,-1],'THE CROOKED TOWER','North of the Pale Spire. Level 100 and up');
+  C.vines(26,5,{});C.vines(34,5,{});
+  /* the postern end */
+  C.sign(38,59,[0,1],'THE CROOKED ROAD','North to the Crooked Tower');lamp(38,58,SI);lamp(42,58,SI);
+  /* a few chests in the glades */
+  for(const [x,y,t] of [[24,54,1],[41,34,1],[6,20,1]])if(far(x,y,3))C.chest(x,y,{tier:t});
+  /* ---- creatures: few, in the glades, at least three squares off the route ---- */
+  const spot=(x0,y0,x1,y1,seed)=>{for(let k=0;k<80;k++){const x=x0+((hs(k,seed,61)*(x1-x0+1))|0),y=y0+((hs(k,seed,62)*(y1-y0+1))|0);if(open(x,y)&&D(x,y)>=3&&C.free(x,y)&&!C.safe.some(z=>pspInZone(z,x,y,2)))return [x,y]}return null};
+  const FOE=(t,g,seed,wake)=>{const q=spot(g[0],g[1],g[2],g[3],seed);if(q)(wake?pspStatueWake:pspFoe)(C,t,q[0],q[1])};
+  const G=PCR.GLADES;
+  FOE('psguard',G[0],1);FOE('pshalberd',G[0],2);FOE('pssentinel',G[0],3,1);
+  FOE('psmourner',G[2],4);FOE('pssentinel',G[2],5,1);FOE('psguard',G[2],6);
+  FOE('psmourner',G[3],7);FOE('psguard',G[3],8);
+  FOE('pssentinel',G[4],9,1);FOE('pssentinel',G[4],10,1);
+  for(const e of C.enemies)e.lvl=100;
+  C.glow(7,SI);
+  const lv=C.finish({start:{x:40,y:59,f:0}});
+  lv.mapNames=[{t:'The East Postern',x:40,y:58,k:'place'},{t:'The Bone Field',x:28,y:52,k:'place'},{t:'The Wayside Shrine',x:7,y:42,k:'place'},{t:'The Glade of Crosses',x:37,y:32,k:'place'},{t:'The Leaning Lamps',x:10,y:22,k:'place'},{t:'The Tower Forecourt',x:30,y:10,k:'place'}];
+  return lv}
+pspRegister(9715,pcrBuild);
+/* the tower gate turns back a party below level 100 (ntLevelOk, nt_map.js) */
+{const _k=khBump;khBump=function(nx,ny,g){const d=KH_DOOR[g];
+  if(d&&d.psp&&d.psp.to===1000000000&&typeof ntLevelOk==='function'&&!ntLevelOk()){ntTooLow();return true}
+  return _k.apply(this,arguments)}}
+
 /* ---- src/desert/ps_maps.js ---- */
 /* ==========================================================================
    THE PALE SPIRE: PARCHMENT MAPS (package 6). One area map per level in the style of the Blighted Road and the Vault maps (drawn from the real rows, rooms numbered from mapNames, key at the right;
@@ -76271,7 +76386,7 @@ function ntPalette(n){
   const wall=ntHsv(hue,sat,val),wl=(wall[0]+wall[1]+wall[2])/3||.3;
   const norm=c=>{const l=(c[0]+c[1]+c[2])/3||.3;return c.map(v=>v/l)};   // a tint to multiply a grey stone with: mean 1, so the stone keeps its own lightness
   const tint=norm(ntHsv(hue,Math.min(.85,sat*1.1),Math.max(.55,val)));
-  const fh=(hue+(R()<.5?30:-30)+360)%360,ftint=norm(ntHsv(fh,sat*.6,.8));
+  const fh=(hue+(R()<.5?55:-55)+360)%360,ftint=norm(ntHsv(fh,sat*.5,.8));   // the floor leans away from the wall's hue, so a floor reads as stone under coloured walls
   const th=(hue+R.pick([-40,-20,0,20,40])+360)%360;   // the torch light is near the stone's own colour
   let best=NT_FLAMES[0],bd=999;for(const f of NT_FLAMES){const d=Math.min(Math.abs(f[1]-th),360-Math.abs(f[1]-th));if(d<bd){bd=d;best=f}}
   const lc=ntHsv(th,.55+R()*.3,1),lcol=lc.map(v=>+(v*1.4+.12).toFixed(3));
@@ -76850,6 +76965,12 @@ function ntBuildFloor(n){
   const occ=new Set(),decor=[],enemies=[],items=[],lights=[],lcol={},torches=[],V={lcol,col:P.lcol,torch:{fl:P.flame,col:P.lcol,red:P.flame===1},id};
   const reserved=new Set([plan.down.ix+','+plan.down.iy,plan.up.ix+','+plan.up.iy,plan.stone.x+','+plan.stone.y]);
   for(const k of reserved)occ.add(k);
+  /* the route from the arrival to the stairs up (a shortest walk): nothing stands on it, so no brazier, chest, urn or creature can block the way */
+  const route=new Set();
+  {let x=plan.up.ix,y=plan.up.iy,d=plan.dist[y*W+x];
+   for(let g=0;g<6000;g++){route.add(x+','+y);if(!(d>0))break;let moved=false;for(const [dx,dy] of NTG_D){const nx=x+dx,ny=y+dy;if(open(nx,ny)&&plan.dist[ny*W+nx]===d-1){x=nx;y=ny;d--;moved=true;break}}if(!moved)break}}
+  for(const k of route)occ.add(k);
+  V.route=route;
   const free=(x,y)=>open(x,y)&&!occ.has(x+','+y);
   /* the arrival square and the stone: a clear zone round them, where nothing stands and no creature is put */
   const SAFE=7,safeFrom=[[plan.down.ix,plan.down.iy],[plan.stone.x,plan.stone.y]];
@@ -77024,16 +77145,18 @@ function ntsTick(){
 
 /* ---- src/desert/nt_map.js ---- */
 /* ==========================================================================
-   THE NEVER-ENDING TOWER: THE WAY IN (prefix ntm). The entrance hall "The Crooked Tower" (level id NT.BASE), the great door (sealed with pale silver until the Pale Spire is finished),
+   THE NEVER-ENDING TOWER: THE WAY IN (prefix ntm). The entrance hall "The Crooked Tower" (level id NT.BASE), the great door (open to any party of level 100 or more),
    the place on the world map north of the Pale Spire, the teleport network (a handful of floors to choose from), the achievements, the stats line, the Go to area rows, the jump links
    (?town=neverending and ?town=neverending&floor=N), the parchment map of a floor.
-   ntUnlock() opens the tower; the Pale Spire's last boss is meant to call it (or set G.flags.psp.finished). Notes: tools/NT_NOTES.md
+   The tower is always open; the only gate is the party's level (NTM.MINLVL, see ntLevelOk). Notes: tools/NT_NOTES.md
    ========================================================================== */
-const NTM={JUMP_CAP:300,MILESTONES:[10,25,50,100,250,500,1000]};
+const NTM={MINLVL:100,JUMP_CAP:300,MILESTONES:[10,25,50,100,250,500,1000]};
 LEVEL_NAMES[NT.BASE]='The Crooked Tower';LEVEL_RATING[NT.BASE]=100;
 const ntF=()=>{const F=G.flags;return F.nt||(F.nt={deepest:0,best:{floor:0,level:0},ms:{}})};
-const ntUnlocked=()=>{const F=G.flags||{};return !!((F.psp&&F.psp.finished)||(F.nt&&(F.nt.open||F.nt.debug)))};
-function ntUnlock(){const f=ntF();if(!f.open){f.open=1;try{msg('Far to the north, a door of pale silver unlocks with a sound like a bell.','#d8e4ff');sfx('win')}catch(e){}}}
+const ntUnlocked=()=>true;   // the tower is always open; the level gate is ntLevelOk
+/* the party must be level 100 (the highest hero, like partyLevel everywhere else); the jump links set the debug flag and pass */
+const ntLevelOk=()=>partyLevel()>=NTM.MINLVL||!!NT.DEBUG||!!(G.flags&&G.flags.nt&&G.flags.nt.debug);
+function ntTooLow(){try{sfx('locked');msg('The way in is barred. Only a party of level '+NTM.MINLVL+' or more may enter the Crooked Tower.','#d8e4ff')}catch(e){}}
 /* ---------- the entrance hall ---------- */
 const NTE={W:38,H:30,door:{x0:17,x1:20,y:3},gate:{x0:18,x1:19,y:27}};
 function ntBuildEntrance(){
@@ -77052,7 +77175,7 @@ function ntBuildEntrance(){
   try{T=ntWallTiles(0,look);
     if(IMG.nt_tower_front)IMG.gyp_nt_tower_front=IMG.nt_tower_front;
     const fr=IMG.gyp_nt_tower_front?'nt_tower_front':'f_gothic';
-    for(let i=0;i<4;i++)gDoor.push(ntTile(0,'texGrey_0',2.3,{fac:{img:fr,i,n:4},gain:1.1,rgb:look.pal.wallTint,tag:'nt0d'+i,emit:.32}));
+    for(let i=0;i<4;i++)gDoor.push(ntTile(0,'texGrey_0',2.3,{fac:{img:fr,i,n:4},gain:1.1,rgb:look.pal.wallTint,tag:'nt0d'+i,emit:.6}));
     for(let i=0;i<2;i++)gGate.push(ntTile(0,'texGrey_0',2.3,{fac:{img:'gatesC_0',i,n:2},gain:1.1,rgb:look.pal.wallTint,tag:'nt0g'+i,emit:.25}))}finally{NT._making=false}
   const chars={},chMap=new Map();let nextCh=0x300;const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
   const near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
@@ -77080,10 +77203,11 @@ KH_LAZY[NT.BASE]=()=>{if(!NT.ready)return null;return ntBuildEntrance()};
 /* the great door and the south gate */
 {const _k=khBump;khBump=function(nx,ny,g){const d=KH_DOOR[g];
   if(d&&d.nt==='door'){
-    if(!ntUnlocked()){sfx('locked');msg('The great door is sealed with pale silver. No key opens it, and it will not move.','#d8e4ff');return true}
+    if(!ntLevelOk()){ntTooLow();return true}
     sfx('door');const {plan}=ntPlan(1);goToLevel(ntIdOf(1),{x:plan.down.ix,y:plan.down.iy,f:plan.down.f});return true}
   if(d&&d.nt==='exit'){
-    const to=typeof PSP!=='undefined'&&PSP.ENTRY?PSP.ENTRY:null;
+    /* the south gate leads to the Crooked Road (ps_road.js, level 9715), which runs back to the Pale Spire; arrive at its north end facing south */
+    const to=typeof PSP!=='undefined'&&PSP.ID&&PSP.ID.ROAD?{id:PSP.ID.ROAD,x:30,y:6,f:2}:null;
     if(to&&(LEVELS[to.id]||KH_LAZY[to.id])){sfx('door');goToLevel(to.id,{x:to.x,y:to.y,f:to.f});return true}
     sfx('bump');msg('The road south to the Pale Spire is lost in cold mist.','#b8c8e0');return true}
   return _k.apply(this,arguments)}}
@@ -77113,7 +77237,7 @@ function ntArrive(n,restored){
 /* ---------- the world map: a huge crooked tower north of the Pale Spire ---------- */
 if(typeof WMB_PLACES!=='undefined'&&typeof WORLD_LOCS!=='undefined'&&!WORLD_LOCS.some(l=>l.k==='neverending')){
   const P={k:'neverending',n:'The Never-Ending Tower',full:'The Never-Ending Tower',r:'100 and up',x:-906,y:98,ids:[],ic:'castle',pic:[['i_spire',0,0,36],['i_spire',3,-22,27],['i_spire',7,-38,19]],note:'a huge crooked tower, north of the Pale Spire',pale:1};
-  Object.defineProperty(P,'ids',{enumerable:true,configurable:true,get(){return (ntUnlocked()||NT.DEBUG)?[NT.BASE]:[]}});
+  Object.defineProperty(P,'ids',{enumerable:true,configurable:true,get(){return [NT.BASE]}});
   WMB_PLACES.push(P);
   const o={k:P.k,n:P.n,x:P.x,y:P.y,ic:P.ic,bl:P,planned:P.r,get lv(){return P.ids.filter(wmbHas)}};
   WORLD_LOCS.push(o);WMN_SPEC[P.k]=P.pic;
@@ -77160,12 +77284,11 @@ function ntTeleNode(sel,page){
 /* ---------- Go to area, and the jump to the tower ---------- */
 {const _gl=gotoListRaw;gotoListRaw=function(){const out=_gl.apply(this,arguments);
   try{if(!out.some(r=>r.n===NT.BASE)){out.push({h:'The Never-Ending Tower, north of the Pale Spire'});
-    out.push({n:NT.BASE,name:ntUnlocked()||NT.DEBUG?'The Crooked Tower':'The Crooked Tower (sealed)'});
-    if(ntUnlocked()||NT.DEBUG){LEVEL_RATING[ntIdOf(1)]=ntRatingOf(1);out.push({n:ntIdOf(1),name:'Floor 1'});const d=ntF().deepest;if(d>1){LEVEL_RATING[ntIdOf(d)]=ntRatingOf(d);out.push({n:ntIdOf(d),name:'Floor '+d+', the deepest reached'})}}}}catch(e){console.error(e)}
+    out.push({n:NT.BASE,name:'The Crooked Tower'});
+    {LEVEL_RATING[ntIdOf(1)]=ntRatingOf(1);out.push({n:ntIdOf(1),name:'Floor 1'});const d=ntF().deepest;if(d>1){LEVEL_RATING[ntIdOf(d)]=ntRatingOf(d);out.push({n:ntIdOf(d),name:'Floor '+d+', the deepest reached'})}}}}catch(e){console.error(e)}
   return out}}
 {const _j=jumpToLevel;jumpToLevel=function(n,target){
   if(ntIs(n)){
-    if(!ntUnlocked()&&!NT.DEBUG){try{sfx('locked');msg('The Crooked Tower is sealed with pale silver.','#d8e4ff')}catch(e){}return}
     target=Math.min(NTM.JUMP_CAP,Math.max(target||0,ntFloorOf(n)>0?ntRatingOf(ntFloorOf(n)):99))}
   return _j.call(this,n,target)}}
 /* called from jumpFromUrl (index.html): the party's level for ?town=neverending[&floor=N] (floor N: level 99 + N, but never above JUMP_CAP) */
@@ -77177,7 +77300,7 @@ function ntAreas(AREAS){
   const q=new URLSearchParams(location.search);
   Object.defineProperty(AREAS,'neverending',{enumerable:true,configurable:true,get(){
     const f=Math.max(0,parseInt(q.get('floor')||'0',10)||0);
-    const F=ntF();F.debug=1;   // a jump link bypasses the seal
+    const F=ntF();F.debug=1;   // a jump link bypasses the level gate
     if(f>0){const {plan}=ntPlan(f);return [ntIdOf(f),plan.down.ix,plan.down.iy,plan.down.f]}
     return [NT.BASE,18,24,0]}})}
 /* ---------- the parchment map of a floor ---------- */

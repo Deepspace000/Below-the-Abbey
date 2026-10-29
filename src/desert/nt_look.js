@@ -35,7 +35,7 @@ function ntPalette(n){
   const wall=ntHsv(hue,sat,val),wl=(wall[0]+wall[1]+wall[2])/3||.3;
   const norm=c=>{const l=(c[0]+c[1]+c[2])/3||.3;return c.map(v=>v/l)};   // a tint to multiply a grey stone with: mean 1, so the stone keeps its own lightness
   const tint=norm(ntHsv(hue,Math.min(.85,sat*1.1),Math.max(.55,val)));
-  const fh=(hue+(R()<.5?30:-30)+360)%360,ftint=norm(ntHsv(fh,sat*.6,.8));
+  const fh=(hue+(R()<.5?55:-55)+360)%360,ftint=norm(ntHsv(fh,sat*.5,.8));   // the floor leans away from the wall's hue, so a floor reads as stone under coloured walls
   const th=(hue+R.pick([-40,-20,0,20,40])+360)%360;   // the torch light is near the stone's own colour
   let best=NT_FLAMES[0],bd=999;for(const f of NT_FLAMES){const d=Math.min(Math.abs(f[1]-th),360-Math.abs(f[1]-th));if(d<bd){bd=d;best=f}}
   const lc=ntHsv(th,.55+R()*.3,1),lcol=lc.map(v=>+(v*1.4+.12).toFixed(3));

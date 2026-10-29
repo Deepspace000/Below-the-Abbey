@@ -13,7 +13,7 @@
    ========================================================================== */
 const PSP={REGION:'The Pale Lands',LO:9710,HI:9998,ENTRY:{id:9720,x:32,y:52,f:0}};
 /* id of every level and block (a block of ten ids: the first is the main level, the rest are its rooms, floors or towers) */
-PSP.ID={DOOR:9710,APPROACH:9720,GATEHOUSE:9721,WINCH:9722,LODGE:9723,
+PSP.ID={DOOR:9710,ROAD:9715,APPROACH:9720,GATEHOUSE:9721,WINCH:9722,LODGE:9723,
   COURT:9730,GARDENER:9731,MEWS:9732,
   HALLS:9740,WEST:9750,EAST:9760,ORCHARD:9770,YEWMAZE:9775,
   DUNG1:9780,DUNG2:9790,DUNG3:9800,CELLARS:9810,
@@ -25,6 +25,7 @@ PSP.ID={DOOR:9710,APPROACH:9720,GATEHOUSE:9721,WINCH:9722,LODGE:9723,
 const PSP_LV=(id,name,W,H,lvl,pkg,kind,o)=>Object.assign({id,name,W,H,lvl,pkg,kind,built:false},o||{});
 PSP.LEVELS=[
  PSP_LV(9710,'The Pale Door',48,40,100,0,'in',{note:'where Sale opens onto the Pale Lands; built later with the Sanctuary of Sale (7299)'}),
+ PSP_LV(9715,'The Crooked Road',48,64,100,0,'out',{note:'the road from the east postern of the Court of Statues to the Crooked Tower (the Never-Ending Tower, level id 1e9); ps_road.js'}),
  PSP_LV(9720,'The Pale Approach',64,56,100,1,'out'),
  PSP_LV(9721,'The Great Gatehouse',32,24,100,1,'in'),
  PSP_LV(9722,'The Winch Loft',20,18,100,1,'in'),
@@ -75,6 +76,10 @@ PSP_L(9721,[26,8],9722,[4,9,1],{name:'stair up to the winch loft'});
 PSP_L(9722,[2,9],9721,[26,10,2],{name:'stair down to the east guardroom'});
 PSP_L(9721,[7,19],9723,[9,4,2],{name:"door to the Porter's Lodge"});
 PSP_L(9723,[9,2],9721,[7,17,0],{name:'door back to the west guardroom'});
+/* the Crooked Road (ps_road.js): east postern of the Court of Statues -> road -> the Crooked Tower (NT.BASE = 1e9, arrive at NT.ENT.arrive {18,26,0}); the tower's own south gate leads back to 9715 (nt_map.js) */
+PSP_L(9730,[60,30],9715,[40,59,0],{name:'the East Postern, to the Crooked Road'});
+PSP_L(9715,[40,61],9730,[58,30,3],{name:'back to the East Postern'});
+PSP_L(9715,[30,4],1000000000,[18,26,0],{name:'the gate of the Crooked Tower',ext:1});
 /* package 2: courtyard, lodge, mews, the four doors, the wall stairs (provisional) */
 PSP_L(9730,[10,40],9731,[8,10,0],{name:"the Gardener's Lodge"});
 PSP_L(9731,[8,12],9730,[10,42,2],{name:'out of the lodge'});
@@ -117,7 +122,7 @@ PSP.KEY2={item:'pskey2',name:'The Second Floor Key',flag:'key2',hiddenIn:9800}; 
 PSP.REST=[9723,9731,9740,9750,9760];                 // levels that hold a quiet rest room (free rest, no creatures, warm candle light); the room names are in the plan
 /* test and jump links (?town=...&lvl=...): name -> [level, x, y, f]; the party level for a link is the level rating of the target, capped at 115 */
 PSP.JUMPS={palespire:[9720,32,52,0],palespire1:[9720,32,52,0],palespire2:[9730,32,49,0],palespire3:[9740,32,44,0],palespire4:[9750,42,22,3],
-  palespire5:[9760,5,22,1],palespire6:[9780,24,5,2],palespire7:[9790,40,5,2],palespire8:[9800,8,5,2],palespirekey:[9800,22,14,2]};
+  palespire5:[9760,5,22,1],palespire6:[9780,24,5,2],palespire7:[9790,40,5,2],palespire8:[9800,8,5,2],palespirekey:[9800,22,14,2],crookedroad:[9715,40,59,0]};
 /* small readers (no side effects) */
 const pspIs=n=>n>=PSP.LO&&n<=PSP.HI;
 const pspLevel=id=>PSP.LEVELS.find(l=>l.id===id)||null;

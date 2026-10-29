@@ -74,6 +74,12 @@ function ntBuildFloor(n){
   const occ=new Set(),decor=[],enemies=[],items=[],lights=[],lcol={},torches=[],V={lcol,col:P.lcol,torch:{fl:P.flame,col:P.lcol,red:P.flame===1},id};
   const reserved=new Set([plan.down.ix+','+plan.down.iy,plan.up.ix+','+plan.up.iy,plan.stone.x+','+plan.stone.y]);
   for(const k of reserved)occ.add(k);
+  /* the route from the arrival to the stairs up (a shortest walk): nothing stands on it, so no brazier, chest, urn or creature can block the way */
+  const route=new Set();
+  {let x=plan.up.ix,y=plan.up.iy,d=plan.dist[y*W+x];
+   for(let g=0;g<6000;g++){route.add(x+','+y);if(!(d>0))break;let moved=false;for(const [dx,dy] of NTG_D){const nx=x+dx,ny=y+dy;if(open(nx,ny)&&plan.dist[ny*W+nx]===d-1){x=nx;y=ny;d--;moved=true;break}}if(!moved)break}}
+  for(const k of route)occ.add(k);
+  V.route=route;
   const free=(x,y)=>open(x,y)&&!occ.has(x+','+y);
   /* the arrival square and the stone: a clear zone round them, where nothing stands and no creature is put */
   const SAFE=7,safeFrom=[[plan.down.ix,plan.down.iy],[plan.stone.x,plan.stone.y]];
