@@ -73642,7 +73642,7 @@ function pshTile(style,kind,v){
     if(kind==='ivy'){x.fillStyle='#2c5632';for(let i=0;i<150;i++){const px=(i*53)%w,py=h*(Math.pow(((i*37)%100)/100,1.5))*.85,r=3+((i*5)%5);x.globalAlpha=.9;x.beginPath();x.ellipse(px,py,r,r*.6,((i*3)%6)/2,0,6.3);x.fill()}
       x.fillStyle='#4c8248';for(let i=0;i<80;i++){x.beginPath();x.ellipse((i*71)%w,h*(((i*41)%100)/100)*.8,3,2,i,0,6.3);x.fill()}x.globalAlpha=1}
     if(kind==='plain'&&!S.wood&&!S.silk){const arch=(cx2,hw2,top2,bot2,al)=>{x.beginPath();x.moveTo(cx2-hw2,bot2);x.lineTo(cx2-hw2,top2+hw2*1.2);x.quadraticCurveTo(cx2-hw2,top2+hw2*.1,cx2,top2-hw2*.3);x.quadraticCurveTo(cx2+hw2,top2+hw2*.1,cx2+hw2,top2+hw2*1.2);x.lineTo(cx2+hw2,bot2);x.closePath();x.fillStyle='rgba(0,0,0,'+al+')';x.fill();x.strokeStyle=S.trim;x.globalAlpha=.55;x.lineWidth=3;x.stroke();x.globalAlpha=1};
-      if(!v){arch(w/2,40,h*.2,h-wain-2,.3);arch(w/2,26,h*.33,h-wain-2,.22)}else{arch(w*.27,22,h*.3,h-wain-2,.3);arch(w*.73,22,h*.3,h-wain-2,.3)}
+      // no blind arches: tall arched recesses read as doors that lead nowhere
       x.fillStyle='rgba(20,44,34,.45)';for(let i=0;i<26;i++){x.beginPath();x.ellipse((i*61)%w,h-wain-(i*7)%14,4+(i%3),2,i,0,6.3);x.fill()}}
     if(kind==='steps'){const n=9;for(let i=0;i<n;i++){const yy=h*.1+i*(h*.9/n);x.fillStyle='rgba(0,0,0,'+(.18+.03*i)+')';x.fillRect(0,yy,w,2);x.fillStyle='rgba(150,170,210,.16)';x.fillRect(0,yy+2,w,2)}x.fillStyle='rgba(30,40,70,.35)';x.fillRect(0,0,w,h*.1);x.fillStyle='rgba(2,6,12,.5)';x.fillRect(0,h-wain,w,wain);x.strokeStyle='#7088a8';x.lineWidth=3;x.strokeRect(2,2,w-4,h-4);
       x.fillStyle='#24402c';for(let i=0;i<40;i++){x.beginPath();x.ellipse((i*47)%w,h-(i*13)%(h*.5),5,3,i,0,6.3);x.fill()}}
@@ -73862,7 +73862,7 @@ function pshFurnish(S){
   const ghost=(id,pic,pts,o)=>{o=o||{};const k='ps_gh_'+id,pk=P(pic);if(IMG[pk]){IMG[k]=IMG[pk];NPC_H[k]=(NPC_H[pk]||1.7)*(o.sc||1)}
     decor.push({k,x:pts[0][0],y:pts[0][1],block:false,walk:true,deco:true,bob:.1});GH.push(Object.assign({id,pts,sp:.3,lines:null},o))};   // portraits and banners hang higher on the tall walls
   const guard=(x,y)=>{if(ENEMY_DEF.psguard)foe('psguard',x,y);else foe('psarmour',x,y)};
-  const mst=i=>{const n=['ps_st_chimera','ps_st_hydra','ps_st_judge','ps_st_headless','ps_st_bishop','ps_st_mourners','ps_st_veiled','ps_st_hound'][i%8];return IMG[n]&&!IMG[n]._ps?n:PSH.st(i)};
+  const mst=i=>{const n=['ps_st_chimera','ps_st_hydra','ps_st_judge','ps_st_headless','ps_st_bishop','ps_st_mourners','ps_st_veiled','ps_st_saint3'][i%8];return IMG[n]&&!IMG[n]._ps?n:PSH.st(i)};
   PSH.mst=mst;
   const pew=(x,y)=>put(P('furn_pew_black'),x,y,{block:true});
   for(const [n,h] of [['corbel_gargoyle_a',.75],['corbel_gargoyle_b',.65],['corbel_gargoyle_c',.75]])if(!PSP_PICS[n])PSP_PICS[n]=[h,['gy_slab','gy_bench'],{}];
@@ -73921,10 +73921,10 @@ function pshFurnish(S){
   foe('psarmour',47,42);foe('psarmour',55,44);foe('psarmour',60,42);foe('pscarver',51,43);foe('psdancer',45,44);foe('pscourtier',57,42);
   ghost('sculptor','p_ghost_sculptor',[[42,44],[58,44],[58,42],[42,42]],{sp:.28,lines:['Hold still. I am nearly done with your face.','Every one of them sat for me. They sat very still.']});
   /* ===== W. the Winter Bay: a small broken conservatory, vines and iron ===== */
-  for(let x=47;x<=57;x++){if(x===52||x===53)continue;mark(x,36,'bay');mark(x,40,'iron')}
+  for(let x=47;x<=57;x++){if(x===52||x===53)continue;mark(x,36,'win')}
   mark(47,40,'bay');mark(56,40,'bay');
-  put('fountain',52,38,{block:true});for(const [x,y] of [[49,39],[55,39]])put('gy_bench',x,y,{block:true});
-  for(const [x,y] of [[47,38],[58,38],[50,38],[55,38]])put('ps_urn_pale',x,y,{block:true});
+  put('ps_urn_big',52,38,{block:true});for(const [x,y] of [[49,39],[55,39]])put('gy_bench',x,y,{block:true});
+  for(const [x,y] of [[47,38],[58,38],[50,38],[55,38]])put('ps_urn_big',x,y,{block:true});
   for(const x of [49,51,54,56])put(P('rose_pale'),x,37,{});
   for(const x of [47,57])vine(x,37,N,'vine_a');
   foe('psfiend',50,39);foe('pscourtier',55,37);
@@ -73933,7 +73933,6 @@ function pshFurnish(S){
   /* ===== N. the Great Nave: tall, narrow, columns every two squares, aisles under a gallery ===== */
   for(let y=19,i=0;y<=37;y+=2,i++){col(29,y,i%3);col(35,y,(i+1)%3)}
   for(const y of [20,26,33]){mark(25,y,'win');mark(39,y-1,'win')}
-  for(const y of [19,22,28,35]){mark(25,y,'iron')}for(const y of [20,27,33,36]){mark(39,y,'iron')}
   for(const y of [21,27,32,36])mark(25,y,'face');for(const y of [23,29,25])mark(39,y,'face');
   for(const y of [21,27,31]){wall(PB(),[[26,y]],We,{bob:hi});wall(PB(),[[38,y]],Ea,{bob:hi})}
   for(const y of [20,26,32,36])gar(38,y,Ea);
@@ -73947,7 +73946,7 @@ function pshFurnish(S){
   hang(32,21,1.9);hang(32,26,2.0);hang(32,31,2.0);hang(32,36,1.9);
   for(const y of [20,28,34])lamp(27,y,V,1.5,120);
   for(const [x,y] of [[31,22],[33,26],[31,30],[33,34]])put(P('furn_candelabra_black'),x,y,{block:true});for(const [x,y] of [[33,22],[31,26],[33,30]])put(P('urn_big'),x,y,{block:true});
-  sign(29,38,So,'THE GREAT NAVE','Feast and dance of the old house');
+  sign(29,38,So,'THE GREAT NAVE','The great feast of the old house');
   foe('psdancer',31,25);foe('psdancer',33,29);
   foe('pscourtier',27,21);foe('pscourtier',37,31);foe('psservant',36,25);foe('psservant',28,34);
   foe('psarmour',33,36);foe('psarmour',31,20);foe('psarmour',37,23);foe('pscarver',27,29);
@@ -73970,7 +73969,7 @@ function pshFurnish(S){
   for(const x of [10,22])mark(x,18,'win');
   for(const x of [9,15,21])gar(x,27,So);
   for(const x of [10,24])vine(x,27,So,'vine_a');
-  sign(11,27,So,'THE DINING HALL','Dinner at seven');
+  sign(11,27,So,'THE DINING HALL','The table is still laid');
   hang(13,22,1.8);hang(19,24,1.8);
   foe('psservant',10,24);foe('psservant',22,21);foe('psservant',16,25);foe('pscourtier',19,22);foe('pscarver',23,25);foe('psarmour',9,25);
   // the dinner of the dead: diners at the table, a servant gliding along it with a tray
@@ -73982,7 +73981,7 @@ function pshFurnish(S){
   for(const x of [9,13,21])put(P('furn_sideboard'),x,29,{});
   thing('hl_p_rack','psh_keyboard',23,30);
   wall(pt(60),[[8,31],[14,31],[20,31]],So,{bob:hi});
-  pic('gy_hatch',15,31,So,{bob:.6});sign(17,31,So,'THE BUTTERY','The hatch is painted shut');
+  sign(17,31,So,'THE BUTTERY','The stair to the cellars is bricked up');
   sign(7,29,N,'THE SCREENS PASSAGE','West to the kitchens and armoury');
   sign(10,31,So,'STAIR','Up to the minstrels\' gallery');
   hang(13,30,1.6);hang(21,30,1.6);
@@ -74023,7 +74022,7 @@ function pshFurnish(S){
   for(const x of [12,16,20])vine(x,15,So,'vine_a');
   wall(pt(140),[[13,15],[17,15],[21,15]],So,{bob:hi});
   thing(P('furn_lectern_black'),'psh_stand1',11,7);thing('ps_p_lutenist','psh_lutenist',12,14);
-  sign(24,12,Ea,'THE MUSIC SALON','Dancing every night');
+  sign(24,12,Ea,'THE MUSIC SALON','The music has not stopped');
   for(const [x,y] of [[16,9],[20,12],[18,10]])hang(x,y,1.7,V);put(P('urn_big'),17,11,{block:true});put(P('furn_candelabra_black'),20,9,{block:true});put(P('furn_candelabra_black'),15,12,{block:true});
   for(const [x,y] of [[16,10],[20,10],[17,12],[19,9]])foe('psdancer',x,y);foe('pscourtier',23,7);
   decor.push((()=>{const k='ps_gh_harp',pk=P('p_ghost_lady');if(IMG[pk]){IMG[k]=IMG[pk];NPC_H[k]=NPC_H[pk]}GH.push({id:'harp',pts:[[13,11]],sp:0,lines:['It goes like this. And then it goes wrong.','I play it every night. No one comes to dance.'],music:1});return {k,x:13,y:11,block:false,walk:true,deco:true,bob:.04}})());
@@ -74034,7 +74033,7 @@ function pshFurnish(S){
   thing(P('furn_bed_canopy'),'psh_bed',6,6);put('chest',8,5,{block:true});
   for(const x of [5,7,9])mark(x,3,'win');
   pic(P('furn_mirror_gothic'),4,8,We,{bob:hi});wall(pt(160),[[4,6],[4,9]],We,{bob:hi});pic(pt(161),9,10,So,{bob:hi});
-  put(P('furn_candelabra_black'),4,10,{block:true});put(P('furn_candelabra_black'),8,10,{block:true});put('ps_urn_pale',9,5,{block:true});
+  put(P('furn_candelabra_black'),4,10,{block:true});put(P('furn_candelabra_black'),8,10,{block:true});put('ps_urn_big',9,5,{block:true});
   for(const [x,y] of [[5,8],[8,8],[6,4],[5,10],[9,9]])lamp(x,y,WM,1.9,140);
   put(P('furn_wardrobe'),9,6,{block:true});put(P('furn_cradle'),4,4,{block:true});put(P('furn_desk'),6,10,{block:true});put(P('furn_screen_tracery'),7,7,{block:true});put(P('furn_clock_grandfather'),9,4,{block:true});
   /* ===== I. the Grand Stair Hall ===== */
@@ -74044,7 +74043,7 @@ function pshFurnish(S){
   for(const x of [27,29])pic(P('alcove_knight'),x,6,N,{bob:.2});
   for(const x of [35,37])pic(P('alcove_maiden'),x,6,N,{bob:.2});
   col(31,17,0);col(33,17,0);
-  for(const y of [7,13])mark(25,y,'win');mark(25,10,'iron');mark(25,11,'face');
+  for(const y of [7,13])mark(25,y,'win');mark(25,10,'win');mark(25,11,'face');
   gar(26,7,We);gar(38,6,Ea);
   wall(pt(200),[[26,6]],We,{bob:hi});wall(pt(210),[[38,7]],Ea,{bob:hi});
   sign(32,6,N,'UP THE GRAND STAIR','The way to the state rooms. Ask the Chamberlain.');sign(38,8,Ea,'THE AUDIENCE CHAMBER','The Sovereign receives no one');
@@ -74229,7 +74228,7 @@ const PSH_PL=[
   ['QUEEN ISOLDE THE LATE','The nameplate reads QUEEN ISOLDE THE LATE, WHO WAS ALWAYS AFTER THE FEAST. Her stone hands are open, as if she were waiting for a cup.'],
   ['THE JUDGE OF HORNS','The nameplate reads THE JUDGE OF HORNS, WHO SAT AT THE OLD ASSIZE. A heavy statue with ram horns and a pair of scales, and one of the pans is missing.'],
   ['THE HEADLESS KNIGHT','The nameplate reads SIR EDMUND, WHO WOULD NOT BOW. The statue kneels and has no head at all. The neck has been cut smooth, and the cut has been polished.'],
-  ['THE HOUND OF THE HUNT','The nameplate reads BRAN, FIRST HOUND OF THE SOVEREIGN. The marble hound looks very alive, and has been set facing the door.']];
+  ['THE CHIMERA OF ASHE','The nameplate reads THE CHIMERA OF ASHE, TAKEN ALIVE IN THE OLD WARS. The stone beast has three heads, and every mouth has been carved open.']];
 PSH_PL.forEach((p,i)=>khNpc('psh_pl'+i,p[0],'ps_hst'+(i%5),()=>{const F=pshF();F.pl=F.pl||{};const first=!F.pl[i];F.pl[i]=1;return say(p[1]+(first&&qSt('psq12')==='active'?' ('+pshCount(F.pl)+' of 6 plinths read.)':''),[BYE])}));
 pshTalk('psh_anc1','A statue of an ancestor','ps_hst1','A tall statue on a plinth. The nameplate reads KING OSRIC THE FIRST, 220 YEARS BEFORE THE LAST. The stone face is calm. The eyes were once painted, and the paint has gone.');
 pshTalk('psh_anc2','A statue of an ancestor','ps_hst2','A statue of a queen with a crown of stone leaves. The nameplate reads QUEEN MAUD, MOTHER OF THE SOVEREIGN. Somebody has left a dry white rose at her feet, a long time ago.');
