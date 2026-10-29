@@ -33,6 +33,21 @@ function pscCurate(id,L){
   const near1=new Set();for(const v of path){const x=v%W,y=(v/W)|0;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)near1.add((y+b)*W+x+a)}
   const keepD=d=>d.pic||d.deco||d.npc||d.goldAmt||d.psKeep||!PSC_SMALL.test(String(d.k))||PSC_BIG.test(String(d.k));
   L.decor=(L.decor||[]).filter(d=>{if(keepD(d))return true;const v=Math.round(d.y)*W+Math.round(d.x);if(near1.has(v)){rep.props++;return false}return true});
+  // gaol levels: nothing decorative or domestic (mirrors, portraits, dust sheets, candle tables, sheeted windows)
+  if(id>=9780&&id<=9800){const bad=/mirror|portrait|dust_sheet|window_sheeted|candles_glow|st_mourners|st_bishop|bench/;L.decor=(L.decor||[]).filter(d=>{if(d.npc&&!/^psh_/.test(d.npc))return true;if(d.psKeep||d.goldAmt)return true;if(bad.test(String(d.k))){rep.props++;return false}if(/lantern_red|web_spider/.test(String(d.k))){const x=Math.round(d.x),y=Math.round(d.y);if(open(x,y)&&(open(x+1,y)?1:0)+(open(x-1,y)?1:0)+(open(x,y+1)?1:0)+(open(x,y-1)?1:0)<=2){rep.props++;return false}}return true})}
+  // every castle level: no free-standing blocking prop in a corridor cell (two or fewer open orthogonal neighbours). Removed, or (chests with gold) moved to the nearest roomy cell.
+  {const ON=(x,y)=>(open(x+1,y)?1:0)+(open(x-1,y)?1:0)+(open(x,y+1)?1:0)+(open(x,y-1)?1:0);
+   const keepK=/door|gate|arch|portcull|bridge|stair|sign|pillar|col_|wall/i;
+   const taken=new Set((L.decor||[]).filter(d=>d.block).map(d=>Math.round(d.x)+','+Math.round(d.y)));for(const e of L.enemies||[])taken.add(Math.round(e.x)+','+Math.round(e.y));
+   const room=(x,y)=>{if(!open(x,y)||taken.has(x+','+y)||near1.has(y*W+x))return false;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(!open(x+a,y+b))return false;return true};
+   const out=[];rep.corr=0;rep.corrMoved=0;
+   for(const d of L.decor||[]){
+     if(!d.block||d.pic||d.deco||d.npc||d.psKeep||keepK.test(String(d.k))){out.push(d);continue}
+     const x=Math.round(d.x),y=Math.round(d.y);if(!open(x,y)||ON(x,y)!==2||!(path.has(y*W+x)||(id>=9780&&id<=9800))){out.push(d);continue}
+     if(d.goldAmt){let best=null,bd=1e9;for(let r=1;r<=8&&!best;r++)for(let b=-r;b<=r;b++)for(let a=-r;a<=r;a++){if(Math.max(Math.abs(a),Math.abs(b))!==r||!room(x+a,y+b))continue;const h=Math.hypot(a,b);if(h<bd){bd=h;best=[x+a,y+b]}}
+       if(best){taken.delete(x+','+y);d.x=best[0];d.y=best[1];taken.add(best[0]+','+best[1]);rep.corrMoved++;out.push(d);continue}}
+     rep.corr++;(rep.rm||(rep.rm=[])).push([d.k,x,y])}
+   L.decor=out}
   // foes
   const dist=new Int16Array(W*H).fill(999),q=[];for(const v of path){dist[v]=0;q.push(v)}
   for(let i=0;i<q.length;i++){const v=q[i],x=v%W,y=(v/W)|0;if(dist[v]>=6)continue;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H)continue;const nv=ny*W+nx;if(dist[nv]>dist[v]+1){dist[nv]=dist[v]+1;q.push(nv)}}}
