@@ -581,7 +581,7 @@ function pshFurnish(S){
   ghost('trayA','p_ghost_diner',[[4,30],[22,30],[4,30]],{sp:.4,lines:['Mind your back, sir.']});
   ghost('trayB','p_ghost_maid',[[22,29],[5,29],[22,29]],{sp:.35,lines:['The soup is cold. It was always cold.']});
   /* ===== M. the Minstrels' Gallery (up the narrow stair): a balcony strip over the dining hall ===== */
-  for(let x=10;x<=23;x++)if(x!==22)put(P('iron_rail'),x,33,{});
+  for(const x of [11,15,19])put('ps_urn_pale',x,33,{block:true});
   for(const x of [12,17])col(x,34,2);
   put(P('furn_harpsichord_black'),10,35,{block:true});put(P('furn_chair_dining_black'),12,35,{block:true});put(P('furn_candelabra_black'),16,35,{block:true});
   for(const x of [9,13,19])mark(x,36,'face');
@@ -629,7 +629,7 @@ function pshFurnish(S){
   put(P('furn_wardrobe'),9,6,{block:true});put(P('furn_cradle'),4,4,{block:true});put(P('furn_desk'),6,10,{block:true});put(P('furn_screen_tracery'),7,7,{block:true});put(P('furn_clock_grandfather'),9,4,{block:true});
   /* ===== I. the Grand Stair Hall ===== */
   for(const x of [29,31,33,35])mark(x,5,'win');mark(30,5,'pilaster');mark(34,5,'pilaster');mark(28,5,'ivy');mark(36,5,'ivy');mark(27,5,'face');mark(37,5,'face');
-  for(let y=9;y<=16;y++){put('ps_balustrade',30,y,{block:true});put('ps_balustrade',34,y,{block:true})}
+  for(let y=9;y<=15;y+=2){col(30,y,y);col(34,y,y+1)}
   put(PSH.st(3),30,8,{block:true});put(PSH.st(5),34,8,{block:true});
   for(const x of [27,29])pic(P('alcove_knight'),x,6,N,{bob:.2});
   for(const x of [35,37])pic(P('alcove_maiden'),x,6,N,{bob:.2});
@@ -651,7 +651,6 @@ function pshFurnish(S){
   for(let x=42;x<=55;x++){if((x-42)%5===2)put(P('furn_candelabra_black'),x,30,{block:true});else put(P('furn_table_long_black'),x,30,{block:true,sc:.8})}
   for(let x=43;x<=55;x+=2){put(P('furn_chair_dining_black'),x,29,{block:true});put(P('furn_chair_dining_black'),x,31,{block:true})}
   thing(P('furn_chair_dining_black'),'psh_headchair',41,30);thing('hl_p_note','psh_sheet3',56,30,{sc:.5});
-  for(let x=41;x<=59;x++)if(x!==50&&x!==51)put('ps_balustrade',x,26,{block:true});
   for(const x of [43,47,55,59])pic(PB(),x,26,N,{bob:hi});
   for(const x of [41,45,49,53,57])mark(x,25,'win');
   for(const x of [42,52,58])mark(x,25,'face');
