@@ -54,7 +54,9 @@ function saPrep(){
   wlHeights();wlRoofs();wlStyles();gyAlias();saRoofs();
   for(const k in SA_STYLES){const t=SA_STYLES[k];OH_STY[k]={plain:'kh_ohwall1_0',alt:k==='sa_moss'?'kh_ohwall1_0':'kh_ohwall1_1',win:'kh_ohwall1_4',shop:'kh_ohwall1_4',door:'kh_ohwall1_5',win2:'kh_ohwall1_4',slit:'kh_ohwall1_3',tint:t,zoom:1.5,contrast:1.7}}
   // painted ghost villagers (assets/sa: gv0..gv3) stand in for the tinted folk when they exist
-  if(IMG.sa_gv0)SA_GHOSTFOLK.forEach((s,i)=>{const g=IMG['sa_gv'+(i%4)];if(g&&!IMG['sa_gh_'+i]){IMG['sa_gh_'+i]=g;NPC_H['sa_gh_'+i]=NPC_H['sa_gv'+(i%4)]||1.05}});
+  // gv0 an old woman with a candle, gv1 a baker, gv2 a little girl (only for the two girls, index 11), gv3 a hooded old man: each folk index gets a figure that fits the people who use it
+  const SA_GVMAP=[0,3,3,0,1,1,0,1,3,1,1,2];
+  if(IMG.sa_gv0)SA_GHOSTFOLK.forEach((s,i)=>{const n=SA_GVMAP[i]!==undefined?SA_GVMAP[i]:1,g=IMG['sa_gv'+n];if(g&&!IMG['sa_gh_'+i]){IMG['sa_gh_'+i]=g;NPC_H['sa_gh_'+i]=NPC_H['sa_gv'+n]||1.05}});
   SA_GHOSTFOLK.forEach((s,i)=>saGhost(s,'sa_gh_'+i));
   for(const i of [0,1,2]){if(IMG['gyp_ghost_'+i])NPC_H['sa_gl_'+i]=1.1}
   // the stand-ins for the pieces that are painted later: a boarded door is the iron fence, the gibbet and the dead fountain are the wooden post and a tall stone

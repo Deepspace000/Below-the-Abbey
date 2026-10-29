@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.705';
+const VERSION='3.706';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -42977,7 +42977,7 @@ function mpWorldFeatures(V,z){
   wmnRoads(V,z);wmnBridges(V,z);
 }
 function mpWorldNames(V,z){
-  const c=ctx,fx=(s,x,y,sz,col,sp)=>{c.save();c.font=`${sz}px ${FTITLE}`;if('letterSpacing' in c)c.letterSpacing=(sp||1)+'px';c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=3.4;c.strokeStyle='rgba(236,222,176,.7)';c.strokeText(s,x,y);c.fillStyle=col;c.fillText(s,x,y);c.restore()},
+  const c=ctx,fx=(s,x,y,sz,col,sp)=>{const rg=(typeof WMN_REG!=='undefined')&&WMN_REG.find(q=>q[0]===s);if(rg){x=rg[1];y=rg[2]}c.save();c.font=`${sz}px ${FTITLE}`;if('letterSpacing' in c)c.letterSpacing=(sp||1)+'px';c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=3.4;c.strokeStyle='rgba(236,222,176,.7)';c.strokeText(s,x,y);c.fillStyle=col;c.fillText(s,x,y);c.restore()},
     sea=(s,x,y,sz,col)=>{c.save();c.font=`italic ${sz}px ${FUI}`;if('letterSpacing' in c)c.letterSpacing='3px';c.textAlign='center';c.textBaseline='middle';c.fillStyle=col;c.fillText(s,x,y);c.restore()};
   const ink='rgba(50,36,18,.78)';   // names only: no notes under them (the one small line, Below the Abbey, is drawn by wmnSmallWords)
   fx('The Unknown Lands',476,-16,19,ink,1.5);
@@ -42988,7 +42988,7 @@ function mpWorldNames(V,z){
   fx('The Far West',-760,100,19,ink,1.5);
   fx('The Grey Downs',-575,176,15,ink,1);
   fx('The Eastern Lands',1230,16,19,ink,1.5);
-  sea('The Narrow Sea',836,24,21,'rgba(26,48,84,.78)');
+  sea('The Narrow Sea',836,-4,21,'rgba(26,48,84,.78)');
   sea('The Western Deep',-1215,110,16,'rgba(26,48,84,.7)');sea('The Southern Sea',380,450,17,'rgba(26,48,84,.7)');
 }
 function mpWorldCreatures(V,z){wmnCreatures(V,z)}
@@ -44010,7 +44010,7 @@ function hgdmpMini(){
   x.strokeStyle='#2a1a0c';x.lineWidth=.6;x.beginPath();for(let j=0;j<N;j+=2)for(let i=0;i<N;i+=2){if(rnd()<.5){x.moveTo(i*cell,j*cell);x.lineTo((i+2)*cell,j*cell)}else{x.moveTo(i*cell,j*cell);x.lineTo(i*cell,(j+2)*cell)}}x.stroke();
   x.strokeStyle='#2a1a0c';x.lineWidth=1.4;x.strokeRect(.7,.7,S-1.4,S-1.4);x.fillStyle='#f4ecd6';x.fillRect(S/2-3,S-5,6,5);x.strokeStyle='#2a1a0c';x.lineWidth=.8;x.strokeRect(S/2-3,S-5,6,5);
   return HGDMP.mini=c}
-{const _wi=mpWorldIco;mpWorldIco=function(l,x,y,z){if(l&&l.k==='deephollow'){const m=hgdmpMini(),c=ctx;c.save();c.imageSmoothingQuality='high';c.shadowColor='rgba(40,24,10,.45)';c.shadowBlur=3;c.drawImage(m,x-20,y-26,40,40);c.restore();return}return _wi.apply(this,arguments)}}
+{const _wi=mpWorldIco;mpWorldIco=function(l,x,y,z){if(l&&l.k==='deephollow'){const m=hgdmpMini(),c=ctx;c.save();c.imageSmoothingQuality='high';c.shadowColor='rgba(40,24,10,.45)';c.shadowBlur=3;c.globalAlpha=WM_DH.a;c.drawImage(m,x+WM_DH.ox,y+WM_DH.oy,WM_DH.s,WM_DH.s);c.restore();return}return _wi.apply(this,arguments)}}
 
 /* ---- src/desert/hgd_maps2.js ---- */
 /* ==========================================================================
@@ -48436,7 +48436,8 @@ const WMN_ICSPEC={town:'i_town',castle:'i_castle',abbey:'i_abbey',cave:'i_cave',
 function wmnSpec(l){return WMN_SPEC[l.k]||[[WMN_ICSPEC[l.ic]||'i_oaks',0,0,l.ic==='castle'||l.ic==='orangecastle'?40:28]]}
 /* the picture's footprint: its parts, how far down they are drawn, and its box (the bottom stands a little below the place's own point) */
 const WMN_FOOT={i_town:.88,i_seaside:.87,i_castle:.87,i_desertcity:.87,i_cave:.87,i_mine:.85,i_graves:.9,i_crypt:.92,i_oaks:.87,i_pines:.88,i_mountains:.77};   // how far down each picture its solid part goes (the rest is the faded ground): a name may stand over that
-const WMN_BOX={deephollow:[-21,-27,21,15]};   // places whose picture is drawn by another file: their box
+const WM_DH={s:96,ox:-48,oy:-62,a:.5};   // the Deeper Hollow's picture: its size on the map, where it starts from the place's spot, and how see-through it is
+const WMN_BOX={deephollow:[WM_DH.ox-1,WM_DH.oy-1,WM_DH.ox+WM_DH.s+1,WM_DH.oy+WM_DH.s+1]};   // places whose picture is drawn by another file: their box
 function wmnShape(l){
   if(WMN_BOX[l.k]){const b=WMN_BOX[l.k];return {parts:[],off:0,ib:[l.x+b[0],l.y+b[1],l.x+b[2],l.y+b[3]]}}
   const s=wmnSpec(l);if(!s.length)return {parts:[],off:0,ib:[l.x,l.y-12,l.x,l.y-4]};let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
@@ -48463,7 +48464,14 @@ function wmnSpread(){
       else{const d=oy/2+.1,s=(p.l.y+(p.y0+p.y1)/2)<=(q.l.y+(q.y0+q.y1)/2)?-1:1;p.l.y+=s*d;q.l.y-=s*d}
       for(const r of [p,q]){r.l.x=Math.max(r.l._x0-MAXD,Math.min(r.l._x0+MAXD,r.l.x));r.l.y=Math.max(r.l._y0-MAXD,Math.min(r.l._y0+MAXD,r.l.y))}}
     if(!moved)break}
-  for(const l of WORLD_LOCS){l.x=Math.round(l.x*2)/2;l.y=Math.round(l.y*2)/2}}
+  for(const l of WORLD_LOCS){l.x=Math.round(l.x*2)/2;l.y=Math.round(l.y*2)/2}
+  // the region titles: each stands as far up as it needs to, clear of every picture and name (and of the other titles), and a little more
+  const boxes=B.map(b=>[b.l.x+b.x0,b.l.y+b.y0,b.l.x+b.x1,b.l.y+b.y1]),done=[];
+  for(const r of WMN_REG){if(r[4]===undefined)r[4]=r[2];r[2]=r[4];
+    c.save();c.font=`${r[3]}px ${FTITLE}`;const w=c.measureText(r[0]).width+r[0].length*1.5+6;c.restore();const hh=r[3]*.7+8;
+    const hit=y=>{const a=[r[1]-w/2-8,y-hh,r[1]+w/2+8,y+hh];return boxes.some(q=>wmnHit(a,q))||done.some(q=>wmnHit(a,q))};
+    let y=r[2],n=0;while(hit(y)&&n<80){y-=4;n++}
+    if(n)y-=6;r[2]=y;done.push([r[1]-w/2-8,y-hh,r[1]+w/2+8,y+hh])}}
 function wmnLayout(){
   let fo=true;try{fo=!document.fonts||document.fonts.check("bold 10px 'IM Fell English SC'")}catch(e){}
   const key=(G.flags.autoScaleOn?1:0)+'|'+(fo?1:0)+'|'+WORLD_LOCS.length;if(WMN.lay&&WMN.layKey===key)return WMN.lay;
@@ -48572,7 +48580,7 @@ function wmnRoads(V,z){
   })}
 
 /* ---------- the rivers: long, winding, with side streams, and kept clear of every place, name and title ---------- */
-const WMN_SMALL=[['Below the Abbey',-60,163,8]];   // the small writing under The Hollow Lands
+const WMN_SMALL=[['Below the Abbey',-44,163,8]];   // the small writing under The Hollow Lands
 function wmnObstacles(){
   const lay=wmnLayout(),o=[];for(const k in lay){const L=lay[k];o.push(L.ib);if(L.rect)o.push([L.rect[0],L.rect[1],L.rect[2],L.rect[3]-6])}
   const c=ctx;for(const [t,x,y,sz] of WMN_REG){c.save();c.font=`${sz}px ${FTITLE}`;const w=c.measureText(t).width+t.length*1.5+6;c.restore();o.push([x-w/2,y-sz*.7,x+w/2,y+sz*.7])}
@@ -56864,11 +56872,11 @@ function wmwDungeonMarks(V,z){
 /* the eight towns of the Deeper Hollow as gold dots on its small maze, once the maze has been built (before that their places are not known) */
 function wmwTowns(l){
   const L=typeof LEVELS!=='undefined'&&LEVELS[475];if(!L||!L._hgdp||!L._hgdm)return;const W=L._hgdm.W,H=L._hgdm.H,c=ctx,z=mpWorldM.zz;
-  for(const q of L._hgdp.zones){if(q.type!=='safe'||q.town===undefined)continue;const x=l.x-20+q.x/W*40,y=l.y-26+q.y/H*40;
-    c.save();c.fillStyle='#e0b020';c.strokeStyle=wmwInk;c.lineWidth=.45;c.beginPath();c.arc(x,y,1.5,0,6.3);c.fill();c.stroke();
+  for(const q of L._hgdp.zones){if(q.type!=='safe'||q.town===undefined)continue;const x=l.x+WM_DH.ox+q.x/W*WM_DH.s,y=l.y+WM_DH.oy+q.y/H*WM_DH.s;
+    c.save();c.fillStyle='#e0b020';c.strokeStyle=wmwInk;c.lineWidth=.45;c.beginPath();c.arc(x,y,2.2,0,6.3);c.fill();c.stroke();
     if(z>=2.4&&q.name){c.font=`bold 3.2px ${FUI}`;c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=1.3;c.strokeStyle='rgba(238,226,190,.95)';c.strokeText(q.name,x,y+3.4);c.fillStyle='#3a2410';c.fillText(q.name,x,y+3.4)}c.restore()}}
 function wmwGateMark(l){ // the gate to the gardens, in the north wall of the maze: gold once the way is open, grey while it is shut
-  const c=ctx,open=!!(G.flags&&(G.flags.bswDead||G.flags.wkGate)),x=l.x,y=l.y-26;
+  const c=ctx,open=!!(G.flags&&(G.flags.bswDead||G.flags.wkGate)),x=l.x,y=l.y+WM_DH.oy;
   c.save();c.fillStyle=open?'#e0b020':'#8a8478';c.strokeStyle=wmwInk;c.lineWidth=.5;c.beginPath();c.moveTo(x-3,y+1.4);c.lineTo(x-3,y-1.6);c.arc(x,y-1.6,3,Math.PI,0);c.lineTo(x+3,y+1.4);c.closePath();c.fill();c.stroke();c.fillStyle='#1c1208';c.beginPath();c.moveTo(x-1.2,y+1.2);c.lineTo(x-1.2,y-1.2);c.arc(x,y-1.2,1.2,Math.PI,0);c.lineTo(x+1.2,y+1.2);c.closePath();c.fill();c.restore()}
 {const _w=mpWorldIco;mpWorldIco=function(l,x,y,z){_w.apply(this,arguments);try{if(l&&l.k==='deephollow'){wmwTowns(l);wmwGateMark(l)}}catch(e){}}}
 /* ---------- hooks: the drawing of each picture, and the dungeon marks over the desert dunes ---------- */
@@ -64814,7 +64822,9 @@ function saPrep(){
   wlHeights();wlRoofs();wlStyles();gyAlias();saRoofs();
   for(const k in SA_STYLES){const t=SA_STYLES[k];OH_STY[k]={plain:'kh_ohwall1_0',alt:k==='sa_moss'?'kh_ohwall1_0':'kh_ohwall1_1',win:'kh_ohwall1_4',shop:'kh_ohwall1_4',door:'kh_ohwall1_5',win2:'kh_ohwall1_4',slit:'kh_ohwall1_3',tint:t,zoom:1.5,contrast:1.7}}
   // painted ghost villagers (assets/sa: gv0..gv3) stand in for the tinted folk when they exist
-  if(IMG.sa_gv0)SA_GHOSTFOLK.forEach((s,i)=>{const g=IMG['sa_gv'+(i%4)];if(g&&!IMG['sa_gh_'+i]){IMG['sa_gh_'+i]=g;NPC_H['sa_gh_'+i]=NPC_H['sa_gv'+(i%4)]||1.05}});
+  // gv0 an old woman with a candle, gv1 a baker, gv2 a little girl (only for the two girls, index 11), gv3 a hooded old man: each folk index gets a figure that fits the people who use it
+  const SA_GVMAP=[0,3,3,0,1,1,0,1,3,1,1,2];
+  if(IMG.sa_gv0)SA_GHOSTFOLK.forEach((s,i)=>{const n=SA_GVMAP[i]!==undefined?SA_GVMAP[i]:1,g=IMG['sa_gv'+n];if(g&&!IMG['sa_gh_'+i]){IMG['sa_gh_'+i]=g;NPC_H['sa_gh_'+i]=NPC_H['sa_gv'+n]||1.05}});
   SA_GHOSTFOLK.forEach((s,i)=>saGhost(s,'sa_gh_'+i));
   for(const i of [0,1,2]){if(IMG['gyp_ghost_'+i])NPC_H['sa_gl_'+i]=1.1}
   // the stand-ins for the pieces that are painted later: a boarded door is the iron fence, the gibbet and the dead fountain are the wooden post and a tall stone
@@ -65241,7 +65251,7 @@ function saStoryPass(C){
   // grave boards in the dead quarter
   [[12,42],[16,46],[10,52],[14,58],[24,48],[28,56]].forEach(([x,y],i)=>note('gy_nameplate','sa_epi'+i,x,y,3,{sc:.8}));
   // pale shapes standing in the quiet streets (the Orange Spire's painted ghost)
-  [[14,34],[47,34],[27,38],[60,38]].forEach(([x,y],i)=>{const gk=IMG.sa_gv0?'sa_gv'+((i+1)%4):'hl_p_ghost',gs=IMG.sa_gv0?1:.8;if(i===0)note(gk,'sa_ghostn',x,y,2,{sc:gs});else small(gk,x,y,2,{sc:gs})});
+  [[14,34],[47,34],[27,38],[60,38]].forEach(([x,y],i)=>{const gk=IMG.sa_gv0?'sa_gv'+[1,3,0,1][i%4]:'hl_p_ghost',gs=IMG.sa_gv0?1:.8;if(i===0)note(gk,'sa_ghostn',x,y,2,{sc:gs});else small(gk,x,y,2,{sc:gs})});
   saCharacter(C,note,small);
   // the clean-up: nothing identical within two squares (the trail pieces go first, so the others yield to them)
   {const t=decor.filter(d=>d._t),r=decor.filter(d=>!d._t);decor.length=0;for(const d of t)decor.push(d);for(const d of r)decor.push(d)}

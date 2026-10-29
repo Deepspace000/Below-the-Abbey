@@ -37,7 +37,8 @@ const WMN_ICSPEC={town:'i_town',castle:'i_castle',abbey:'i_abbey',cave:'i_cave',
 function wmnSpec(l){return WMN_SPEC[l.k]||[[WMN_ICSPEC[l.ic]||'i_oaks',0,0,l.ic==='castle'||l.ic==='orangecastle'?40:28]]}
 /* the picture's footprint: its parts, how far down they are drawn, and its box (the bottom stands a little below the place's own point) */
 const WMN_FOOT={i_town:.88,i_seaside:.87,i_castle:.87,i_desertcity:.87,i_cave:.87,i_mine:.85,i_graves:.9,i_crypt:.92,i_oaks:.87,i_pines:.88,i_mountains:.77};   // how far down each picture its solid part goes (the rest is the faded ground): a name may stand over that
-const WMN_BOX={deephollow:[-21,-27,21,15]};   // places whose picture is drawn by another file: their box
+const WM_DH={s:96,ox:-48,oy:-62,a:.5};   // the Deeper Hollow's picture: its size on the map, where it starts from the place's spot, and how see-through it is
+const WMN_BOX={deephollow:[WM_DH.ox-1,WM_DH.oy-1,WM_DH.ox+WM_DH.s+1,WM_DH.oy+WM_DH.s+1]};   // places whose picture is drawn by another file: their box
 function wmnShape(l){
   if(WMN_BOX[l.k]){const b=WMN_BOX[l.k];return {parts:[],off:0,ib:[l.x+b[0],l.y+b[1],l.x+b[2],l.y+b[3]]}}
   const s=wmnSpec(l);if(!s.length)return {parts:[],off:0,ib:[l.x,l.y-12,l.x,l.y-4]};let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
@@ -64,7 +65,14 @@ function wmnSpread(){
       else{const d=oy/2+.1,s=(p.l.y+(p.y0+p.y1)/2)<=(q.l.y+(q.y0+q.y1)/2)?-1:1;p.l.y+=s*d;q.l.y-=s*d}
       for(const r of [p,q]){r.l.x=Math.max(r.l._x0-MAXD,Math.min(r.l._x0+MAXD,r.l.x));r.l.y=Math.max(r.l._y0-MAXD,Math.min(r.l._y0+MAXD,r.l.y))}}
     if(!moved)break}
-  for(const l of WORLD_LOCS){l.x=Math.round(l.x*2)/2;l.y=Math.round(l.y*2)/2}}
+  for(const l of WORLD_LOCS){l.x=Math.round(l.x*2)/2;l.y=Math.round(l.y*2)/2}
+  // the region titles: each stands as far up as it needs to, clear of every picture and name (and of the other titles), and a little more
+  const boxes=B.map(b=>[b.l.x+b.x0,b.l.y+b.y0,b.l.x+b.x1,b.l.y+b.y1]),done=[];
+  for(const r of WMN_REG){if(r[4]===undefined)r[4]=r[2];r[2]=r[4];
+    c.save();c.font=`${r[3]}px ${FTITLE}`;const w=c.measureText(r[0]).width+r[0].length*1.5+6;c.restore();const hh=r[3]*.7+8;
+    const hit=y=>{const a=[r[1]-w/2-8,y-hh,r[1]+w/2+8,y+hh];return boxes.some(q=>wmnHit(a,q))||done.some(q=>wmnHit(a,q))};
+    let y=r[2],n=0;while(hit(y)&&n<80){y-=4;n++}
+    if(n)y-=6;r[2]=y;done.push([r[1]-w/2-8,y-hh,r[1]+w/2+8,y+hh])}}
 function wmnLayout(){
   let fo=true;try{fo=!document.fonts||document.fonts.check("bold 10px 'IM Fell English SC'")}catch(e){}
   const key=(G.flags.autoScaleOn?1:0)+'|'+(fo?1:0)+'|'+WORLD_LOCS.length;if(WMN.lay&&WMN.layKey===key)return WMN.lay;
@@ -173,7 +181,7 @@ function wmnRoads(V,z){
   })}
 
 /* ---------- the rivers: long, winding, with side streams, and kept clear of every place, name and title ---------- */
-const WMN_SMALL=[['Below the Abbey',-60,163,8]];   // the small writing under The Hollow Lands
+const WMN_SMALL=[['Below the Abbey',-44,163,8]];   // the small writing under The Hollow Lands
 function wmnObstacles(){
   const lay=wmnLayout(),o=[];for(const k in lay){const L=lay[k];o.push(L.ib);if(L.rect)o.push([L.rect[0],L.rect[1],L.rect[2],L.rect[3]-6])}
   const c=ctx;for(const [t,x,y,sz] of WMN_REG){c.save();c.font=`${sz}px ${FTITLE}`;const w=c.measureText(t).width+t.length*1.5+6;c.restore();o.push([x-w/2,y-sz*.7,x+w/2,y+sz*.7])}

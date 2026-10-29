@@ -230,7 +230,7 @@ function mpWorldFeatures(V,z){
   wmnRoads(V,z);wmnBridges(V,z);
 }
 function mpWorldNames(V,z){
-  const c=ctx,fx=(s,x,y,sz,col,sp)=>{c.save();c.font=`${sz}px ${FTITLE}`;if('letterSpacing' in c)c.letterSpacing=(sp||1)+'px';c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=3.4;c.strokeStyle='rgba(236,222,176,.7)';c.strokeText(s,x,y);c.fillStyle=col;c.fillText(s,x,y);c.restore()},
+  const c=ctx,fx=(s,x,y,sz,col,sp)=>{const rg=(typeof WMN_REG!=='undefined')&&WMN_REG.find(q=>q[0]===s);if(rg){x=rg[1];y=rg[2]}c.save();c.font=`${sz}px ${FTITLE}`;if('letterSpacing' in c)c.letterSpacing=(sp||1)+'px';c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=3.4;c.strokeStyle='rgba(236,222,176,.7)';c.strokeText(s,x,y);c.fillStyle=col;c.fillText(s,x,y);c.restore()},
     sea=(s,x,y,sz,col)=>{c.save();c.font=`italic ${sz}px ${FUI}`;if('letterSpacing' in c)c.letterSpacing='3px';c.textAlign='center';c.textBaseline='middle';c.fillStyle=col;c.fillText(s,x,y);c.restore()};
   const ink='rgba(50,36,18,.78)';   // names only: no notes under them (the one small line, Below the Abbey, is drawn by wmnSmallWords)
   fx('The Unknown Lands',476,-16,19,ink,1.5);
@@ -241,7 +241,7 @@ function mpWorldNames(V,z){
   fx('The Far West',-760,100,19,ink,1.5);
   fx('The Grey Downs',-575,176,15,ink,1);
   fx('The Eastern Lands',1230,16,19,ink,1.5);
-  sea('The Narrow Sea',836,24,21,'rgba(26,48,84,.78)');
+  sea('The Narrow Sea',836,-4,21,'rgba(26,48,84,.78)');
   sea('The Western Deep',-1215,110,16,'rgba(26,48,84,.7)');sea('The Southern Sea',380,450,17,'rgba(26,48,84,.7)');
 }
 function mpWorldCreatures(V,z){wmnCreatures(V,z)}

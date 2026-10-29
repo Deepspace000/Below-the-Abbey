@@ -183,11 +183,11 @@ function wmwDungeonMarks(V,z){
 /* the eight towns of the Deeper Hollow as gold dots on its small maze, once the maze has been built (before that their places are not known) */
 function wmwTowns(l){
   const L=typeof LEVELS!=='undefined'&&LEVELS[475];if(!L||!L._hgdp||!L._hgdm)return;const W=L._hgdm.W,H=L._hgdm.H,c=ctx,z=mpWorldM.zz;
-  for(const q of L._hgdp.zones){if(q.type!=='safe'||q.town===undefined)continue;const x=l.x-20+q.x/W*40,y=l.y-26+q.y/H*40;
-    c.save();c.fillStyle='#e0b020';c.strokeStyle=wmwInk;c.lineWidth=.45;c.beginPath();c.arc(x,y,1.5,0,6.3);c.fill();c.stroke();
+  for(const q of L._hgdp.zones){if(q.type!=='safe'||q.town===undefined)continue;const x=l.x+WM_DH.ox+q.x/W*WM_DH.s,y=l.y+WM_DH.oy+q.y/H*WM_DH.s;
+    c.save();c.fillStyle='#e0b020';c.strokeStyle=wmwInk;c.lineWidth=.45;c.beginPath();c.arc(x,y,2.2,0,6.3);c.fill();c.stroke();
     if(z>=2.4&&q.name){c.font=`bold 3.2px ${FUI}`;c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=1.3;c.strokeStyle='rgba(238,226,190,.95)';c.strokeText(q.name,x,y+3.4);c.fillStyle='#3a2410';c.fillText(q.name,x,y+3.4)}c.restore()}}
 function wmwGateMark(l){ // the gate to the gardens, in the north wall of the maze: gold once the way is open, grey while it is shut
-  const c=ctx,open=!!(G.flags&&(G.flags.bswDead||G.flags.wkGate)),x=l.x,y=l.y-26;
+  const c=ctx,open=!!(G.flags&&(G.flags.bswDead||G.flags.wkGate)),x=l.x,y=l.y+WM_DH.oy;
   c.save();c.fillStyle=open?'#e0b020':'#8a8478';c.strokeStyle=wmwInk;c.lineWidth=.5;c.beginPath();c.moveTo(x-3,y+1.4);c.lineTo(x-3,y-1.6);c.arc(x,y-1.6,3,Math.PI,0);c.lineTo(x+3,y+1.4);c.closePath();c.fill();c.stroke();c.fillStyle='#1c1208';c.beginPath();c.moveTo(x-1.2,y+1.2);c.lineTo(x-1.2,y-1.2);c.arc(x,y-1.2,1.2,Math.PI,0);c.lineTo(x+1.2,y+1.2);c.closePath();c.fill();c.restore()}
 {const _w=mpWorldIco;mpWorldIco=function(l,x,y,z){_w.apply(this,arguments);try{if(l&&l.k==='deephollow'){wmwTowns(l);wmwGateMark(l)}}catch(e){}}}
 /* ---------- hooks: the drawing of each picture, and the dungeon marks over the desert dunes ---------- */

@@ -361,7 +361,7 @@ function saStoryPass(C){
   // grave boards in the dead quarter
   [[12,42],[16,46],[10,52],[14,58],[24,48],[28,56]].forEach(([x,y],i)=>note('gy_nameplate','sa_epi'+i,x,y,3,{sc:.8}));
   // pale shapes standing in the quiet streets (the Orange Spire's painted ghost)
-  [[14,34],[47,34],[27,38],[60,38]].forEach(([x,y],i)=>{const gk=IMG.sa_gv0?'sa_gv'+((i+1)%4):'hl_p_ghost',gs=IMG.sa_gv0?1:.8;if(i===0)note(gk,'sa_ghostn',x,y,2,{sc:gs});else small(gk,x,y,2,{sc:gs})});
+  [[14,34],[47,34],[27,38],[60,38]].forEach(([x,y],i)=>{const gk=IMG.sa_gv0?'sa_gv'+[1,3,0,1][i%4]:'hl_p_ghost',gs=IMG.sa_gv0?1:.8;if(i===0)note(gk,'sa_ghostn',x,y,2,{sc:gs});else small(gk,x,y,2,{sc:gs})});
   saCharacter(C,note,small);
   // the clean-up: nothing identical within two squares (the trail pieces go first, so the others yield to them)
   {const t=decor.filter(d=>d._t),r=decor.filter(d=>!d._t);decor.length=0;for(const d of t)decor.push(d);for(const d of r)decor.push(d)}
