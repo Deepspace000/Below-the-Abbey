@@ -522,7 +522,7 @@ PSD.SPEC[9800]={pt:'brick_dark',pg:2.4,prgb:[.82,.95,.88],brick:'texBlack',gain:
   for(let a=0;a<24;a++){const t=C.rng(a,13)*6.283,r=7+C.rng(a,15)*3,x=Math.round(22+Math.cos(t)*r*1.2),y=Math.round(21+Math.sin(t)*r*1.2);twig(x,y,.8)}
   /* the secret chamber behind the east wall */
   P('st_bishop',37,30,{block:true});dec('chest',34,28,{block:true,goldAmt:4200});dec('bones',36,29,{sc:.8});dec('web',37,28,{sc:.6});twig(35,31);light(35,30,[.9,1.35,1]);
-  psdMany(P,[['moss_rock',33,31,{}]]);}};
+  }};
 /* the secret door of the Oubliette and the crawl of the Gaols open the same way */
 PSD.SPEC[9800].doors.push({x:32,y:29,kind:'secret',key:'chamber',msg:'A slab of the wall is on a counterweight. It rolls aside with a sound like a long breath, and a small room of old bone lies behind it.'});
 

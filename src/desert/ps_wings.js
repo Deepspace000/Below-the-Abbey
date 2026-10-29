@@ -345,8 +345,8 @@ PSW_SPEC[9750]={W:48,H:40,diff:101,wh:3.4,lcol:pswCold,
     const wall=(nm,xs,y,wd)=>xs.forEach(x=>w(nm,x,y,wd));
     // ---- the West Turret: a round stair room, black stone, a spiral going up ----
     sign(5,4,[0,-1],'THE WEST TURRET','Stair to the second floor');
-    p('suit',3,5);p('suit',9,5);p('stairs_curved',6,9,{sc:1.1});p('cl_monk',3,9);p('candelabra',9,9);
-    w('c_psgargoyle',4,4,[0,-1]);w('c_psgargoyle',8,4,[0,-1]);w('banner_long_a',3,7,[-1,0]);w('ivy',9,8,[1,0]);w('window_slit',5,10,[0,1]);w('alcove_weeper',7,10,[0,1]);
+    p('suit',3,5);p('suit',9,5);p('cl_monk',3,9);p('candelabra',9,9);
+    w('c_psgargoyle',4,4,[0,-1]);w('c_psgargoyle',8,4,[0,-1]);w('banner_long_a',3,7,[-1,0]);w('window_slit',5,10,[0,1]);w('alcove_weeper',7,10,[0,1]);
     light(6,8,pswVerd);light(4,6,pswCold);foe('psarmour',8,8);
     // ---- the Forge bay: a raised hearth with steps, anvil, coals ----
     sign(12,4,[0,-1],'THE FORGE','Mind the coals');
@@ -357,7 +357,7 @@ PSW_SPEC[9750]={W:48,H:40,diff:101,wh:3.4,lcol:pswCold,
     sign(19,4,[0,-1],'THE ARMOURY','Weapons are returned to the rack');
     p('sword_rack',17,4);p('armoury_rack',18,4);p('sword_rack',21,4,{npc:'psw_dawnrack'});p('sword_rack',22,4,{npc:'psw_hilt1'});
     p('armoury_rack',19,7);p('armoury_rack',20,7);p('suit',17,10);p('suit',22,10);p('suit',17,5);p('brazier',22,5);p('table',18,9);
-    w('banner_long_b',22,6,[1,0]);w('ivy',17,6,[-1,0]);w('c_psgargoyle',19,10,[0,1]);w('c_psgargoyle',21,10,[0,1]);w('window_slit',20,4,[0,-1]);
+    w('banner_long_b',22,6,[1,0]);w('c_psgargoyle',19,10,[0,1]);w('c_psgargoyle',21,10,[0,1]);w('window_slit',20,4,[0,-1]);
     {const kp=KH_KEEPERS.psw_armourer;if(kp)dec(pswPic('ghost_librarian'),19,6,{npc:'psw_armourer',block:false,walkOk:1})}
     foe('psarmour',21,9);foe('psarmour',18,8);light(20,6,pswCold);light(18,9,pswVerd);
     // ---- the Guardroom ----
@@ -488,7 +488,7 @@ PSW_SPEC[9760]={W:48,H:40,diff:101,ceil:'tex_vault_ribbed',wh:3.4,lcol:pswCold,
     const wall=(nm,xs,y,wd)=>xs.forEach(x=>w(nm,x,y,wd));
     // ---- the Pilgrims' Hall: three narrow chambers one above the other, with low arches between them ----
     sign(4,9,[0,-1],"THE PILGRIMS' HALL",'Quiet, please');
-    p('alcove_monk',6,9);p('bench_moss',6,14);p('bench_moss',3,15);p('lamp',3,9);p('st_saint1',3,11);w('c_psgargoyle',5,9,[0,-1]);w('ivy',3,13,[-1,0]);w('banner_long_a',6,15,[1,0]);w('vine_a',3,16,[-1,0]);
+    p('alcove_monk',6,9);p('bench_moss',6,14);p('bench_moss',3,15);p('lamp',3,9);p('st_saint1',3,11);w('c_psgargoyle',5,9,[0,-1]);w('banner_long_a',6,15,[1,0]);w('vine_a',3,16,[-1,0]);
     p('arch_ivy',5,17,{block:false});p('arch_low',5,18,{block:false});foe('psmonk',4,15);light(5,14,pswCold);light(4,10,pswVerd);
     sign(3,21,[-1,0],'THE CLOISTER DOOR','Out to the Court of Statues');sign(3,19,[0,-1],'TO THE LIBRARY AND THE CHAPEL','Through the cloister');
     p('alcove_weeper',6,19);p('bench_moss',3,25);p('st_saint2',6,25);p('lamp',3,19);w('vine_b',3,23,[-1,0]);w('c_psgargoyle',3,27,[0,1]);foe('psmonk',5,26);foe('psmonk',4,24);light(5,25,pswCold);
@@ -535,8 +535,8 @@ PSW_SPEC[9760]={W:48,H:40,diff:101,ceil:'tex_vault_ribbed',wh:3.4,lcol:pswCold,
     pswBook(C,5,36,7);foe('psmonk',31,7);foe('psmonk',36,5);foe('psmonk',33,5);light(33,5,pswCold);light(30,7,pswVerd);light(36,7,pswVerd);
     // ---- the East Turret ----
     sign(40,4,[0,-1],'THE EAST TURRET','Stair to the second floor');
-    p('suit',39,4);p('suit',44,4);p('stairs_curved',44,7,{sc:1.1});p('furn_candelabra_black',39,8);p('cl_monk',44,8);
-    w('c_psgargoyle',41,4,[0,-1]);w('c_psgargoyle',43,4,[0,-1]);w('banner_long_b',39,7,[-1,0]);w('ivy',44,6,[1,0]);w('window_slit',40,8,[0,1]);foe('psarmour',40,7);light(41,7,pswVerd);light(43,5,pswCold);
+    p('suit',39,4);p('suit',44,4);p('furn_candelabra_black',39,8);p('cl_monk',44,8);
+    w('c_psgargoyle',41,4,[0,-1]);w('c_psgargoyle',43,4,[0,-1]);w('banner_long_b',39,7,[-1,0]);w('window_slit',40,8,[0,1]);foe('psarmour',40,7);light(41,7,pswVerd);light(43,5,pswCold);
     // ---- the Almonry (REST ROOM, warm) ----
     sign(41,10,[0,-1],'THE ALMONRY','A bed for pilgrims');
     p('furn_bed_canopy',39,12,{npc:'psw_bed2'});p('furn_bed_canopy',39,14);p('furn_bed_canopy',44,12);p('furn_cradle',40,11);p('chest',44,16);p('candle',40,15);p('rug',42,13,{walkOk:1});p('furn_chair_high',43,14,{});p('furn_sideboard',43,11);p('furn_wardrobe',44,14);
