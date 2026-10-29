@@ -53,3 +53,11 @@ def run_shots(only=None):
 
 if what == 'shots':
     run_shots(sys.argv[2:] or None)
+
+if what == 'struct':
+    with sync_playwright() as p:
+        b, pg, errs = boot(p)
+        log = pg.evaluate(open(os.path.join(HERE, 'psw_qtest.js'), encoding='utf-8').read())
+        for l in log: print(l)
+        bad = [l for l in log if l.startswith('FAIL')]
+        print('---', len(log), 'lines,', len(bad), 'FAIL'); print('console errors:', clean(errs)[:8]); b.close()

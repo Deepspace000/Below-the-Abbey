@@ -35,7 +35,7 @@ function pscArrive(n){PSC.benchUsed=false;PSC.springUsed=false;
   if(n===PSC.ID){const F=pscF();if(!F.seen){F.seen=1;try{msg('The Court of Statues. The grass is cut, the hedges are clipped, and everything that stands here is looking at you.','#c8c8e8')}catch(e){}}}
   try{bl3Apply(n)}catch(e){}}
 /* the light of the court: a still pale twilight, no night swing */
-{const _up=update;update=function(dt){_up.apply(this,arguments);try{if(pscIs(LEVEL)&&LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)G.day=.4}catch(e){}}}
+{const _up=update;update=function(dt){_up.apply(this,arguments);try{if(pscIs(LEVEL)&&LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)G.day=.82}catch(e){}}}
 {const _w=weatherNow;weatherNow=function(){
   if(pscIs(LEVEL)){const L=LEVELS[LEVEL];
     if(L&&L.outdoor)return {id:'mist',n:'Pale mist',fog:.014,haze:.3,dark:1,mix:.55,col:[176,170,214],text:'A thin silver mist lies on the grass. The sky is pale lilac and has no sun in it. Nothing moves, and everything looks.'};
@@ -585,7 +585,7 @@ function pscBuild(info){
     {t:"The Sculptor's Yard",x:69,y:74,k:'place'},{t:'The Hydra Pool',x:39,y:27,k:'place'},{t:'The Mirror Pond',x:60,y:27,k:'place'},{t:'The Lantern Bench',x:69,y:25,k:'place'},{t:'The Knot',x:24,y:69,k:'place'},{t:'The Orchard of Stone Fruit',x:63,y:57,k:'place'},
     {t:"The Gardener's Lodge",x:14,y:59,k:'place'},{t:'The Mews and Stable',x:82,y:61,k:'place'});
   const lv=C.finish({start:{x:48,y:83,f:0},col:[.88,1.0,1.3]});
-  lv.floorSet=PSC_FLOORSET.slice();lv.floor=lv.floorSet[0];lv.day=.4;lv.amb=.9;lv.ceilH=7;lv.name=info.name;lv.label=info.name;
+  lv.floorSet=PSC_FLOORSET.slice();lv.floor=lv.floorSet[0];lv.day=.82;lv.amb=.9;lv.ceilH=7;lv.name=info.name;lv.label=info.name;
   lv._psc={lcol:C.lcol,col:[.88,1.0,1.3]};lv.noTele=false;lv.tele=PSC.TELE;
   lv.sky=lv.sky||[];
   return lv}

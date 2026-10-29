@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.701';
+const VERSION='3.702';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -72444,7 +72444,7 @@ function pscArrive(n){PSC.benchUsed=false;PSC.springUsed=false;
   if(n===PSC.ID){const F=pscF();if(!F.seen){F.seen=1;try{msg('The Court of Statues. The grass is cut, the hedges are clipped, and everything that stands here is looking at you.','#c8c8e8')}catch(e){}}}
   try{bl3Apply(n)}catch(e){}}
 /* the light of the court: a still pale twilight, no night swing */
-{const _up=update;update=function(dt){_up.apply(this,arguments);try{if(pscIs(LEVEL)&&LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)G.day=.4}catch(e){}}}
+{const _up=update;update=function(dt){_up.apply(this,arguments);try{if(pscIs(LEVEL)&&LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)G.day=.82}catch(e){}}}
 {const _w=weatherNow;weatherNow=function(){
   if(pscIs(LEVEL)){const L=LEVELS[LEVEL];
     if(L&&L.outdoor)return {id:'mist',n:'Pale mist',fog:.014,haze:.3,dark:1,mix:.55,col:[176,170,214],text:'A thin silver mist lies on the grass. The sky is pale lilac and has no sun in it. Nothing moves, and everything looks.'};
@@ -72994,7 +72994,7 @@ function pscBuild(info){
     {t:"The Sculptor's Yard",x:69,y:74,k:'place'},{t:'The Hydra Pool',x:39,y:27,k:'place'},{t:'The Mirror Pond',x:60,y:27,k:'place'},{t:'The Lantern Bench',x:69,y:25,k:'place'},{t:'The Knot',x:24,y:69,k:'place'},{t:'The Orchard of Stone Fruit',x:63,y:57,k:'place'},
     {t:"The Gardener's Lodge",x:14,y:59,k:'place'},{t:'The Mews and Stable',x:82,y:61,k:'place'});
   const lv=C.finish({start:{x:48,y:83,f:0},col:[.88,1.0,1.3]});
-  lv.floorSet=PSC_FLOORSET.slice();lv.floor=lv.floorSet[0];lv.day=.4;lv.amb=.9;lv.ceilH=7;lv.name=info.name;lv.label=info.name;
+  lv.floorSet=PSC_FLOORSET.slice();lv.floor=lv.floorSet[0];lv.day=.82;lv.amb=.9;lv.ceilH=7;lv.name=info.name;lv.label=info.name;
   lv._psc={lcol:C.lcol,col:[.88,1.0,1.3]};lv.noTele=false;lv.tele=PSC.TELE;
   lv.sky=lv.sky||[];
   return lv}
@@ -73711,20 +73711,20 @@ const PSW_STAND={
   butcher_block:['wm_crate','',.62],pans_hanging:['wm_cage_lantern','saturate(.5)',.5],barrels:['wm_barrel','',.62],cask:['wm_cask','',.55],oven:['hgtb_furn_hearth','saturate(.15) brightness(.8) hue-rotate(210deg)',1.0],
   pews:['mi_pew','saturate(.5) hue-rotate(230deg) brightness(.95)',.8],altar:['mi_altar','saturate(.6) hue-rotate(220deg)',1.45],window_stained:['hl_p_window','',1.9],font:['mi_font','saturate(.6) hue-rotate(200deg)',1.0],
   reliquary_chest:['wm_chest','saturate(.5) brightness(1.4) hue-rotate(10deg)',.5],lectern:['hl_p_lectern','',.95],bookcase_tall:['hl_p_shelf','saturate(.6) hue-rotate(210deg) brightness(.9)',1.7],
-  bookcase_wm:['wm_bookshelf','',1.6],reading_desk:['hl_p_desk','',.8],globe:['hgtb_furn_books_globe','saturate(.4) hue-rotate(190deg)',.6],scroll_rack:['hl_p_rack','',.5],
+  bookcase_wm:['wm_bookshelf','',1.6],reading_desk:['hl_p_desk','',.8],globe:['hgtb_furn_books_globe','saturate(.4) hue-rotate(190deg)',.6],scroll_rack:['hgtb_furn_cabinet','saturate(.5) hue-rotate(200deg) brightness(.8)',.6],
   st_saint1:['mi_saint','saturate(.2) brightness(.95) hue-rotate(200deg)',1.7],st_saint2:['wm_statue','saturate(.25) brightness(1.5) hue-rotate(10deg)',1.55],st_saint3:['mi_angel','saturate(.15) brightness(1.1) hue-rotate(200deg)',1.8],st_saint4:['mi_saint','saturate(.15) brightness(.8) hue-rotate(220deg)',1.7],
   candelabra:['mi_candel','saturate(.5) hue-rotate(200deg)',1.45],chandelier:['mi_chand','saturate(.5) hue-rotate(200deg)',1.2],brazier:['wm_brazier','',.9],
   ghost_librarian:['hl_p_ghost','saturate(.4) hue-rotate(220deg)',1.15],ghost_chamberlain:['hl_p_ghost','saturate(.3) hue-rotate(160deg)',1.15],
-  armoury_rack:['hgstall_armour','',.9],sword_rack:['hl_p_rack','',.5],suit:['hl_p_armour','saturate(.25) brightness(1.35) hue-rotate(200deg)',1.05],
+  armoury_rack:['hgstall_armour','',.9],sword_rack:['hgstall_arms','',.9],suit:['hl_p_armour','saturate(.25) brightness(1.35) hue-rotate(200deg)',1.05],
   bed:['hgtb_furn_bed','saturate(.35) sepia(.5) hue-rotate(-10deg)',.55],cabinet:['hgtb_furn_cabinet','saturate(.25) hue-rotate(10deg) brightness(.8)',.55],table:['hgtb_table','saturate(.25) hue-rotate(10deg) brightness(.85)',.55],
   chair:['hgtb_chair','saturate(.3) brightness(.9)',.5],bucket:['wm_bucket','',.4],tools:['wm_tools','',.55],candle:['hl_p_candle','',.65],
-  plinth_statue:['wm_statue','saturate(.2) brightness(1.5) hue-rotate(5deg)',1.5],bench_moss:['hgtb_bench','saturate(.8) hue-rotate(60deg) brightness(.6)',.5],
+  cl_monk:['hgxstat6','saturate(.1) brightness(1.9)',1.5],cl_knight:['hgxstat0','saturate(.1) brightness(1.9)',1.6],cl_smith:['hgxstat1','saturate(.1) brightness(1.9)',1.5],cl_angel:['hgxstat2','saturate(.1) brightness(1.9)',1.7],cl_maiden:['hgxstat3','saturate(.1) brightness(1.9)',1.5],cl_girl:['hgxstat7','saturate(.1) brightness(1.9)',1.3],bench_moss:['gy_bench','sepia(.4) hue-rotate(50deg) saturate(1.7) brightness(1.0)',.55],
   desk:['hl_p_desk','',.8],note:['hl_p_note','',.5],chest:['wm_chest','',.5],coffer:['gy_chest','',.55],banner:['hl_p_banner','saturate(.5) hue-rotate(40deg)',1.3],tomb:['hl_p_tomb','',.8],
   hearth:['hgtb_furn_hearth','saturate(.3) hue-rotate(200deg) brightness(1.0)',1.2],cage:['hl_p_cage','',.8],clock:['hgtb_furn_clock','saturate(.3) hue-rotate(10deg)',1.0],mirror:['wm_mirror','',1.2],
-  well:['ww_well','saturate(.4) brightness(1.1) hue-rotate(200deg)',.9],lamp:['hgtb_lamp_tall','saturate(.4) hue-rotate(180deg)',1.3],basket:['hgtb_basket','',.4],jar:['hgtb_jar','',.5],vase:['vase0','saturate(.4) brightness(1.2)',.5],
-  fern:['hgt_fern','saturate(.6) brightness(.8)',.7],ivy:['hgt_vine_ivy','saturate(.7) brightness(.6)',1.0],shrub:['hgt_shrub','saturate(.5) brightness(.7) hue-rotate(20deg)',.8],bones:['gy_bones','',.35],
-  pond:['hgtb_tank_round','saturate(.6) hue-rotate(160deg) brightness(.7)',.5],lilies:['hgtb_plant_lacecoral','saturate(.5)',.4],flowers:['hgtb_plantbed','saturate(.35) hue-rotate(230deg)',.45],
-  tapestry:['hl_p_banner','saturate(.3) hue-rotate(200deg)',1.4],plaque:['hs_plaque','',.7],sack:['sack2','',.4],sacks:['sacks','',.5],keg:['wm_keg','',.55],crate:['wm_crate','',.5],pot:['yar_pots','',.5],
+  well:['ww_well','saturate(.4) brightness(1.1) hue-rotate(200deg)',.9],lamp:['hgtb_lamp_tall','saturate(.4) hue-rotate(180deg)',1.3],basket:['sack','',.4],jar:['vase1','',.5],vase:['vase0','saturate(.4) brightness(1.2)',.5],
+  fern:['hgt_fern','saturate(.6) brightness(.8)',.7],ivy:['hgt_vine_wisteria','saturate(.6) hue-rotate(60deg) brightness(.8)',1.3],shrub:['hgt_shrub','saturate(.5) brightness(.7) hue-rotate(20deg)',.8],bones:['gy_bones','',.35],
+  pond:['hgtb_tank_round','saturate(.6) hue-rotate(160deg) brightness(.7)',.5],lilies:['hgdf_plant7','',.6],flowers:['hgt_pearlbush','saturate(.5)',.6],flowers2:['hgtb_plant_lupin','saturate(.8) hue-rotate(20deg)',.8],flowers3:['wm_bellflower','',.7],rose:['gy_rose','',.4],
+  tapestry:['hl_p_banner','saturate(.3) hue-rotate(200deg)',1.4],plaque:['hs_plaque','',.7],sack:['sack2','',.4],sacks:['sacks','',.5],keg:['wm_keg','',.55],crate:['wm_crate','',.5],pot:['vase3','',.5],
   grill:['hl_p_chains','',1.3],stool:['hgtb_chair','saturate(.2) brightness(.7)',.4],rug:['hgtb_rug_lilac_runner','',.2],
 };
 function pswPic(name){
@@ -73735,6 +73735,8 @@ function pswPic(name){
   const src=IMG[d[0]];if(!src||!src.width)return null;
   if(d[1]){try{const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const x=c.getContext('2d');x.filter=d[1];x.drawImage(src,0,0);IMG[k]=c}catch(e){IMG[k]=src}}else IMG[k]=src;
   NPC_H[k]=d[2];return k}
+
+let PSW_STATN=0;const pswStat=()=>['cl_monk','cl_knight','cl_angel','cl_smith','cl_maiden','cl_girl'][(PSW_STATN++)%6];
 /* ---------- loading, arrival, doors, light ---------- */
 function pswLoad(){
   if(PSW.loading)return PSW.loading;
@@ -73805,13 +73807,13 @@ if(typeof CONTAINERS!=='undefined')for(const k of ['wm_chest','gy_chest','psw_co
     d.gold=(d.goldAmt||0)||3800+Math.floor(r(5)*3000);return items}
   return _lf.apply(this,arguments)}}
 /* ---------- floors and walls (made in code) ---------- */
-const PSW_STY={ash:{tex:'texGrey',g:1.5,rgb:[.97,.97,1.1],v:[0,0,0,3,3,5,5,1,2,4]},dark:{tex:'texGrey',g:1.08,rgb:[.9,.93,1.08],v:[1,1,2,2,4,0,3]},warm:{tex:'texBone',g:1.28,rgb:[1.12,1.0,.86],v:[0,1,2,3,4,5]},
+const PSW_STY={ash:{tex:'texGrey',g:1.5,rgb:[.97,.97,1.1],v:[0,0,0,3,3,5,5,1,2,4]},dark:{tex:'texGrey',g:1.3,rgb:[.9,.93,1.08],v:[1,1,2,2,4,0,3]},warm:{tex:'texBone',g:1.28,rgb:[1.12,1.0,.86],v:[0,1,2,3,4,5]},
   moss:{tex:'texGrey',g:1.0,rgb:[.8,1.05,.85],v:[0,1,3,4,5,2]},rib:{tex:'texBone',g:1.15,rgb:[.95,.92,1.1],v:[0,1,2,3,4,5]}};
 function pswFloors(){
   if(PSW._fl)return PSW._fl;gyFloors();
   const mk=(nm,fn)=>{if(FLOORS[nm])return nm;const N=128,d=new Uint8ClampedArray(N*N*4);for(let y=0;y<N;y++)for(let x=0;x<N;x++){const o=(y*N+x)*4,c=fn(x,y);d[o]=c[0];d[o+1]=c[1];d[o+2]=c[2];d[o+3]=255}FLOORS[nm]=d;return nm};
   const hh=(a,b,c)=>hash2(a,b,c);
-  const flag=gyFloorTone('pswf_flag','gyf_flag',1.2,[.93,.94,1.1]),dark=gyFloorTone('pswf_dark','gyf_flag',.6,[.86,.88,1.02]);
+  const flag=gyFloorTone('pswf_flag','gyf_flag',1.2,[.93,.94,1.1]),dark=gyFloorTone('pswf_dark','gyf_flag',.85,[.86,.88,1.02]);
   const cheq=mk('pswf_cheq',(x,y)=>{const w=((x>>6)+(y>>6))&1,v=hh(x>>1,y>>1,31)*22+hh(x>>3,y>>3,32)*18,e=Math.min(x&63,y&63,63-(x&63),63-(y&63));let b=w?[222,223,236]:[44,42,60];if(e<1.5)b=w?[170,170,190]:[20,18,30];return [b[0]+(w?-v:v),b[1]+(w?-v:v),b[2]+(w?-v:v*1.2)]});
   const carp=mk('pswf_carpet',(x,y)=>{const v=hh(x>>1,y>>1,41)*14,dm=Math.abs((x%32)-16)+Math.abs((y%32)-16),mark=dm<4?1:0,b=dm<8?[92,66,128]:[74,52,108];const e=Math.min(x&31,y&31);return [b[0]+v+mark*50,b[1]+v+mark*40,b[2]+v+mark*20+(e<1?10:0)]});
   const lawn=gyFloorTone('pswf_lawn','gyf_grass',.62,[.78,.98,.86]);
@@ -74039,19 +74041,19 @@ PSW_SPEC[9760]={W:72,H:64,diff:101,wh:2.3,lcol:pswCold,
     sign(4,28,[0,-1],"THE PILGRIMS' HALL",'Quiet, please');
     for(let y=32;y<=54;y+=4){dec('gy_column',5,y,{block:true,sc:1.05});dec('gy_column',9,y,{block:true,sc:1.05})}
     [36,44].forEach(y=>{p('bench_moss',3,y,{block:true});p('bench_moss',11,y+2,{block:true})});
-    [34,40,48,54].forEach((y,i)=>p(i%2?'st_saint1':'st_saint2',11,y,{block:true}));[38,46,52].forEach((y,i)=>p('plinth_statue',3,y,{block:true}));
+    [34,40,48,54].forEach((y,i)=>p(i%2?'st_saint1':'st_saint2',11,y,{block:true}));[38,46,52].forEach((y,i)=>p(pswStat(),3,y,{block:true}));
     p('lamp',3,32,{block:true});p('lamp',11,52,{block:true});p('ivy',3,41,{wd:[-1,0]});p('ivy',11,38,{wd:[1,0]});
     foe('psmonk',7,38);foe('psmonk',8,44);
     for(let y=30;y<=54;y+=6)light(7,y,pswCold);
     sign(3,34,[-1,0],'TO THE LIBRARY AND THE CHAPEL','Through the cloister');sign(3,48,[-1,0],'THE CLOISTER DOOR','Out to the Court of Statues');
     // ---- the Cloister Walk and the garth (ref: an ivy cloister, statues on plinths in the arches, mossy benches, wet cobbles, fog) ----
-    for(let i=0;i<5;i++){const y=38+i*5;dec('gy_column',16,y,{block:true,sc:1.1});dec('gy_column',36,y+2,{block:true,sc:1.1});p(i%2?'st_saint3':'plinth_statue',16,y+2,{block:true});p(i%2?'plinth_statue':'st_saint2',36,y,{block:true})}
-    for(let i=0;i<5;i++){const x=19+i*4;dec('gy_column',x,36,{block:true,sc:1.1});p(i%2?'plinth_statue':'st_saint1',x+2,36,{block:true});dec('gy_column',x+2,58,{block:true,sc:1.1});p(i%2?'st_saint2':'plinth_statue',x,58,{block:true})}
+    for(let i=0;i<5;i++){const y=38+i*5;dec('gy_column',16,y,{block:true,sc:1.1});dec('gy_column',36,y+2,{block:true,sc:1.1});p(i%2?'st_saint3':pswStat(),16,y+2,{block:true});p(i%2?pswStat():'st_saint2',36,y,{block:true})}
+    for(let i=0;i<5;i++){const x=19+i*4;dec('gy_column',x,36,{block:true,sc:1.1});p(i%2?pswStat():'st_saint1',x+2,36,{block:true});dec('gy_column',x+2,58,{block:true,sc:1.1});p(i%2?'st_saint2':pswStat(),x,58,{block:true})}
     [[15,38],[15,46],[15,54],[37,41],[37,49],[37,55]].forEach(([x,y],i)=>{p('bench_moss',x,y,{block:true})});
     [[20,35],[32,35],[22,59],[30,59]].forEach(([x,y])=>p('ivy',x,y,{wd:[0,y<40?-1:1]}));
     dec('gy_yew',26,47,{block:true,sc:.8});p('well',26,41,{block:true,npc:'psw_well2'});p('shrub',20,40,{block:true});p('shrub',32,40,{block:true});p('shrub',20,54,{block:true});p('fern',23,53,{});p('fern',29,43,{});p('flowers',32,45,{walkOk:1});p('flowers',21,45,{walkOk:1});
     // the grotto nook of the garth (ref: statue in an arch, stream into a lily pond, flowers white and bruise purple and one red)
-    p('plinth_statue',34,53,{block:true,sc:1.1});p('pond',33,55,{block:true});p('lilies',32,56,{walkOk:1});p('flowers',34,56,{walkOk:1});p('flowers',32,54,{walkOk:1});p('bench_moss',30,55,{block:true});p('vase',35,56,{});
+    p(pswStat(),34,53,{block:true,sc:1.1});p('pond',33,55,{block:true});p('lilies',32,56,{walkOk:1});p('flowers2',34,56,{walkOk:1});p('flowers3',32,54,{walkOk:1});p('rose',35,54,{walkOk:1});p('bench_moss',30,55,{block:true});p('vase',35,56,{});
     sign(30,34,[0,-1],'THE CLOISTER WALK','Walk in silence');
     pswBook(C,3,17,58);
     foe('psmonk',15,42);foe('psmonk',37,52);foe('psmonk',24,59);foe('psmonk',28,35);if(ENEMY_DEF.psmarblehound){foe('psmarblehound',26,52);foe('psmarblehound',22,43)}
@@ -74072,7 +74074,7 @@ PSW_SPEC[9760]={W:72,H:64,diff:101,wh:2.3,lcol:pswCold,
     // ---- the Chapter House ----
     sign(45,5,[0,-1],'THE CHAPTER HOUSE','Where the chapter sat');
     for(let x=45;x<=55;x+=2)p('bench_moss',x,14,{block:true});p('bench_moss',44,8,{block:true});p('bench_moss',44,11,{block:true});p('bench_moss',56,8,{block:true});p('bench_moss',56,11,{block:true});
-    p('lectern',50,11,{block:true,npc:'psw_chapterbook'});p('candelabra',47,9,{block:true});p('candelabra',53,9,{block:true});p('window_stained',48,5,{wd:[0,-1]});p('window_stained',52,5,{wd:[0,-1]});p('tomb',46,6,{block:true,sc:.9});p('lamp',55,6,{block:true});p('plinth_statue',55,13,{block:true});
+    p('lectern',50,11,{block:true,npc:'psw_chapterbook'});p('candelabra',47,9,{block:true});p('candelabra',53,9,{block:true});p('window_stained',48,5,{wd:[0,-1]});p('window_stained',52,5,{wd:[0,-1]});p('tomb',46,6,{block:true,sc:.9});p('lamp',55,6,{block:true});p(pswStat(),55,13,{block:true});
     {const k=pswPic('ghost_chamberlain'),kp=KH_KEEPERS.psw_chaplain;if(kp)dec(k,50,8,{npc:'psw_chaplain',walkOk:1})}
     pswBook(C,5,54,6);
     foe('psmonk',47,12);foe('psmonk',54,10);foe('psmonk',49,13);
@@ -74082,7 +74084,7 @@ PSW_SPEC[9760]={W:72,H:64,diff:101,wh:2.3,lcol:pswCold,
     p('bed',52,19,{block:true,npc:'psw_bed2'});p('bed',55,19,{block:true});p('chest',56,21,{block:true});p('candle',53,21,{block:true});p('rug',54,20,{walkOk:1});p('vase',51,21,{});p('chair',54,18,{});
     for(const [x,y] of [[54,19],[52,21]])light(x,y,pswWarm);
     // ---- the passage from the Chapter House to the chapel ----
-    for(let y=20;y<=30;y+=5)p(cyc(['plinth_statue','st_saint4'],y),45,y,{block:true});p('lamp',46,18,{block:true});p('lamp',46,32,{block:true});p('bench_moss',46,25,{block:true});
+    for(let y=20;y<=30;y+=5)p(cyc([pswStat(),'st_saint4'],y),45,y,{block:true});p('lamp',46,18,{block:true});p('lamp',46,32,{block:true});p('bench_moss',46,25,{block:true});
     light(45,22,pswCold);light(46,28,pswCold);sign(46,16,[0,-1],'TO THE CHAPEL','');
     // ---- the East Turret Room ----
     sign(60,5,[0,-1],'THE EAST TURRET','Stair to the second floor');
@@ -74108,7 +74110,7 @@ PSW_SPEC[9760]={W:72,H:64,diff:101,wh:2.3,lcol:pswCold,
     // ---- the Sacristy ----
     sign(60,22,[0,-1],'THE SACRISTY','Vestments and the sacred vessels');
     [59,61,63,65,67].forEach((x,i)=>p(cyc(['cabinet','bookcase_wm'],i),x,22,{block:true}));p('tapestry',58,27,{wd:[-1,0]});p('tapestry',68,27,{wd:[1,0]});p('candelabra',60,31,{block:true});p('candelabra',66,31,{block:true});p('table',66,24,{block:true});p('mirror',64,22,{wd:[0,-1]});p('chair',67,29,{});
-    dec(pswPic('reliquary_chest'),63,25,{block:true,npc:'psw_reliquary',sc:1.15});p('plinth_statue',67,25,{block:true});p('plinth_statue',59,29,{block:true});
+    dec(pswPic('reliquary_chest'),63,25,{block:true,npc:'psw_reliquary',sc:1.15});p(pswStat(),67,25,{block:true});p(pswStat(),59,29,{block:true});
     foe('pssacristan',64,28);
     for(const [x,y] of [[63,24],[62,28],[67,30],[59,25]])light(x,y,cyc([pswViolet,pswCold],x))}};
 /* ---------- things lying about (pickups), people, key flow, quests ---------- */
