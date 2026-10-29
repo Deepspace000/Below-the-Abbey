@@ -1,14 +1,16 @@
 /* ==========================================================================
-   THE NEVER-ENDING TOWER: THE WAY IN (prefix ntm). The entrance hall "The Crooked Tower" (level id NT.BASE), the great door (sealed with pale silver until the Pale Spire is finished),
+   THE NEVER-ENDING TOWER: THE WAY IN (prefix ntm). The entrance hall "The Crooked Tower" (level id NT.BASE), the great door (open to any party of level 100 or more),
    the place on the world map north of the Pale Spire, the teleport network (a handful of floors to choose from), the achievements, the stats line, the Go to area rows, the jump links
    (?town=neverending and ?town=neverending&floor=N), the parchment map of a floor.
-   ntUnlock() opens the tower; the Pale Spire's last boss is meant to call it (or set G.flags.psp.finished). Notes: tools/NT_NOTES.md
+   The tower is always open; the only gate is the party's level (NTM.MINLVL, see ntLevelOk). Notes: tools/NT_NOTES.md
    ========================================================================== */
-const NTM={JUMP_CAP:300,MILESTONES:[10,25,50,100,250,500,1000]};
+const NTM={MINLVL:100,JUMP_CAP:300,MILESTONES:[10,25,50,100,250,500,1000]};
 LEVEL_NAMES[NT.BASE]='The Crooked Tower';LEVEL_RATING[NT.BASE]=100;
 const ntF=()=>{const F=G.flags;return F.nt||(F.nt={deepest:0,best:{floor:0,level:0},ms:{}})};
-const ntUnlocked=()=>{const F=G.flags||{};return !!((F.psp&&F.psp.finished)||(F.nt&&(F.nt.open||F.nt.debug)))};
-function ntUnlock(){const f=ntF();if(!f.open){f.open=1;try{msg('Far to the north, a door of pale silver unlocks with a sound like a bell.','#d8e4ff');sfx('win')}catch(e){}}}
+const ntUnlocked=()=>true;   // the tower is always open; the level gate is ntLevelOk
+/* the party must be level 100 (the highest hero, like partyLevel everywhere else); the jump links set the debug flag and pass */
+const ntLevelOk=()=>partyLevel()>=NTM.MINLVL||!!NT.DEBUG||!!(G.flags&&G.flags.nt&&G.flags.nt.debug);
+function ntTooLow(){try{sfx('locked');msg('The way in is barred. Only a party of level '+NTM.MINLVL+' or more may enter the Crooked Tower.','#d8e4ff')}catch(e){}}
 /* ---------- the entrance hall ---------- */
 const NTE={W:38,H:30,door:{x0:17,x1:20,y:3},gate:{x0:18,x1:19,y:27}};
 function ntBuildEntrance(){
@@ -27,7 +29,7 @@ function ntBuildEntrance(){
   try{T=ntWallTiles(0,look);
     if(IMG.nt_tower_front)IMG.gyp_nt_tower_front=IMG.nt_tower_front;
     const fr=IMG.gyp_nt_tower_front?'nt_tower_front':'f_gothic';
-    for(let i=0;i<4;i++)gDoor.push(ntTile(0,'texGrey_0',2.3,{fac:{img:fr,i,n:4},gain:1.1,rgb:look.pal.wallTint,tag:'nt0d'+i,emit:.32}));
+    for(let i=0;i<4;i++)gDoor.push(ntTile(0,'texGrey_0',2.3,{fac:{img:fr,i,n:4},gain:1.1,rgb:look.pal.wallTint,tag:'nt0d'+i,emit:.6}));
     for(let i=0;i<2;i++)gGate.push(ntTile(0,'texGrey_0',2.3,{fac:{img:'gatesC_0',i,n:2},gain:1.1,rgb:look.pal.wallTint,tag:'nt0g'+i,emit:.25}))}finally{NT._making=false}
   const chars={},chMap=new Map();let nextCh=0x300;const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
   const near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
@@ -55,10 +57,11 @@ KH_LAZY[NT.BASE]=()=>{if(!NT.ready)return null;return ntBuildEntrance()};
 /* the great door and the south gate */
 {const _k=khBump;khBump=function(nx,ny,g){const d=KH_DOOR[g];
   if(d&&d.nt==='door'){
-    if(!ntUnlocked()){sfx('locked');msg('The great door is sealed with pale silver. No key opens it, and it will not move.','#d8e4ff');return true}
+    if(!ntLevelOk()){ntTooLow();return true}
     sfx('door');const {plan}=ntPlan(1);goToLevel(ntIdOf(1),{x:plan.down.ix,y:plan.down.iy,f:plan.down.f});return true}
   if(d&&d.nt==='exit'){
-    const to=typeof PSP!=='undefined'&&PSP.ENTRY?PSP.ENTRY:null;
+    /* the south gate leads to the Crooked Road (ps_road.js, level 9715), which runs back to the Pale Spire; arrive at its north end facing south */
+    const to=typeof PSP!=='undefined'&&PSP.ID&&PSP.ID.ROAD?{id:PSP.ID.ROAD,x:30,y:6,f:2}:null;
     if(to&&(LEVELS[to.id]||KH_LAZY[to.id])){sfx('door');goToLevel(to.id,{x:to.x,y:to.y,f:to.f});return true}
     sfx('bump');msg('The road south to the Pale Spire is lost in cold mist.','#b8c8e0');return true}
   return _k.apply(this,arguments)}}
@@ -88,7 +91,7 @@ function ntArrive(n,restored){
 /* ---------- the world map: a huge crooked tower north of the Pale Spire ---------- */
 if(typeof WMB_PLACES!=='undefined'&&typeof WORLD_LOCS!=='undefined'&&!WORLD_LOCS.some(l=>l.k==='neverending')){
   const P={k:'neverending',n:'The Never-Ending Tower',full:'The Never-Ending Tower',r:'100 and up',x:-906,y:98,ids:[],ic:'castle',pic:[['i_spire',0,0,36],['i_spire',3,-22,27],['i_spire',7,-38,19]],note:'a huge crooked tower, north of the Pale Spire',pale:1};
-  Object.defineProperty(P,'ids',{enumerable:true,configurable:true,get(){return (ntUnlocked()||NT.DEBUG)?[NT.BASE]:[]}});
+  Object.defineProperty(P,'ids',{enumerable:true,configurable:true,get(){return [NT.BASE]}});
   WMB_PLACES.push(P);
   const o={k:P.k,n:P.n,x:P.x,y:P.y,ic:P.ic,bl:P,planned:P.r,get lv(){return P.ids.filter(wmbHas)}};
   WORLD_LOCS.push(o);WMN_SPEC[P.k]=P.pic;
@@ -135,12 +138,11 @@ function ntTeleNode(sel,page){
 /* ---------- Go to area, and the jump to the tower ---------- */
 {const _gl=gotoListRaw;gotoListRaw=function(){const out=_gl.apply(this,arguments);
   try{if(!out.some(r=>r.n===NT.BASE)){out.push({h:'The Never-Ending Tower, north of the Pale Spire'});
-    out.push({n:NT.BASE,name:ntUnlocked()||NT.DEBUG?'The Crooked Tower':'The Crooked Tower (sealed)'});
-    if(ntUnlocked()||NT.DEBUG){LEVEL_RATING[ntIdOf(1)]=ntRatingOf(1);out.push({n:ntIdOf(1),name:'Floor 1'});const d=ntF().deepest;if(d>1){LEVEL_RATING[ntIdOf(d)]=ntRatingOf(d);out.push({n:ntIdOf(d),name:'Floor '+d+', the deepest reached'})}}}}catch(e){console.error(e)}
+    out.push({n:NT.BASE,name:'The Crooked Tower'});
+    {LEVEL_RATING[ntIdOf(1)]=ntRatingOf(1);out.push({n:ntIdOf(1),name:'Floor 1'});const d=ntF().deepest;if(d>1){LEVEL_RATING[ntIdOf(d)]=ntRatingOf(d);out.push({n:ntIdOf(d),name:'Floor '+d+', the deepest reached'})}}}}catch(e){console.error(e)}
   return out}}
 {const _j=jumpToLevel;jumpToLevel=function(n,target){
   if(ntIs(n)){
-    if(!ntUnlocked()&&!NT.DEBUG){try{sfx('locked');msg('The Crooked Tower is sealed with pale silver.','#d8e4ff')}catch(e){}return}
     target=Math.min(NTM.JUMP_CAP,Math.max(target||0,ntFloorOf(n)>0?ntRatingOf(ntFloorOf(n)):99))}
   return _j.call(this,n,target)}}
 /* called from jumpFromUrl (index.html): the party's level for ?town=neverending[&floor=N] (floor N: level 99 + N, but never above JUMP_CAP) */
@@ -152,7 +154,7 @@ function ntAreas(AREAS){
   const q=new URLSearchParams(location.search);
   Object.defineProperty(AREAS,'neverending',{enumerable:true,configurable:true,get(){
     const f=Math.max(0,parseInt(q.get('floor')||'0',10)||0);
-    const F=ntF();F.debug=1;   // a jump link bypasses the seal
+    const F=ntF();F.debug=1;   // a jump link bypasses the level gate
     if(f>0){const {plan}=ntPlan(f);return [ntIdOf(f),plan.down.ix,plan.down.iy,plan.down.f]}
     return [NT.BASE,18,24,0]}})}
 /* ---------- the parchment map of a floor ---------- */

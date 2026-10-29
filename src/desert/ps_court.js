@@ -10,7 +10,7 @@
    Everything that is a person, a statue or a creature uses pspPic(name) / 'ps_c_<id>' (ps_core.js), so painted pieces from assets/ps drop in with no code change.
    ========================================================================== */
 const PSC={ID:9730,LODGE:9731,MEWS:9732,W:64,H:56,R:101,TELE:[8,44],loops:{},lamps:[],benchUsed:false,
-  FRONTS:[[32,12],[18,12],[14,24],[50,24]],   // the four door fronts: no creature within 3 squares
+  FRONTS:[[32,12],[18,12],[14,24],[50,24],[58,30]],   // the four door fronts: no creature within 3 squares
   NECKS:[3,1,5,2,4]};   // the order of the five hydra necks (the plaque in the Weeping Alcove says it)
 const pscIs=n=>n>=9730&&n<=9739;
 const pscF=()=>{const F=pspF();return F.c||(F.c={necks:[],roses:0,taken:{}})};
@@ -521,7 +521,7 @@ function pscBase(info){
   for(const [x,y] of [[13,37],[13,38],[51,37],[51,38]])C.solid(x,y,ch(T.culvert));
   /* the doors of the contract: every link of this level, a door tile of its own */
   const clone=base=>{const gid=KH_NEXT_GID++;T_TILE[gid]=T_TILE[base];if(GY.col&&GY.col[base])GY.col[gid]=GY.col[base];return gid};
-  const DOORS={'32,10':T.great[1],'18,10':T.gallery[1],'12,24':T.kitchen,'52,24':T.cloister,'10,40':T.cloister,'54,40':T.kitchen,'3,34':T.grille,'60,34':T.grille,'32,52':T.gate};
+  const DOORS={'32,10':T.great[1],'18,10':T.gallery[1],'12,24':T.kitchen,'52,24':T.cloister,'10,40':T.cloister,'54,40':T.kitchen,'3,34':T.grille,'60,34':T.grille,'32,52':T.gate,'60,30':T.gate};
   const bind=l=>{const base=DOORS[l.at[0]+','+l.at[1]];if(!base)return;const gid=clone(base);C.solid(l.at[0],l.at[1],ch(gid));
     const d={lvl:l.to,get at(){if(!LEVELS[l.to]&&KH_LAZY[l.to])try{KH_LAZY[l.to]()}catch(e){console.error(e)}return {x:l.land[0],y:l.land[1],f:l.land[2]}},psc:1};
     if(l.prov)d.seal='The wall walk is closed. An iron grille is locked across the foot of the stair, and the lock is furred with green rust.';

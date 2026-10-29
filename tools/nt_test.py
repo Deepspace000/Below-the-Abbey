@@ -8,7 +8,7 @@ shops   the cycle covers every shop stock of the game; keepers exist, their stoc
 save    a game saved on floor 37 and in the entrance hall loads again in the same place with chests, items and the dead kept
 tele    the stone wakes when stepped on, the network lists the floors, the menu has the plus and minus buttons, the stones of floors are found by the world map
 dash    no em dash in any nt file, the notes or this test
-seal    the tower is sealed (map padlock, Go to row, door) until G.flags.psp.finished or ntUnlock(); stairs down from floor 1 reach the entrance
+seal    the tower is always open; the level gate (100) at the great door and the road gate, the jump flag passes; the south gate leads to the Crooked Road; stairs down from floor 1 reach the entrance
 mem     240 floors in a row: textures, built floors and the save stay bounded
 walk    the party walks a real path from the arrival to the stairs up on 10 floors of every layout kind with the real collision grid
 shots   screenshots of floors of different looks (default twelve)
@@ -85,6 +85,9 @@ BUILD_JS = """(floors) => {
       const seen = new Set([L.start.x + ',' + L.start.y]), q = [[L.start.x, L.start.y]];
       for (let i = 0; i < q.length; i++) { const [x, y] = q[i]; for (const [dx, dy] of [[0,-1],[1,0],[0,1],[-1,0]]) { const nx = x + dx, ny = y + dy, k = nx + ',' + ny; if (seen.has(k) || !open(nx, ny) || blk.has(k)) continue; seen.add(k); q.push([nx, ny]); } }
       if (!seen.has(pl.up.ix + ',' + pl.up.iy)) r.probs.push('up stairs not reachable');
+      if (V.route) { let onRoute = 0; for (const d of L.decor) if (d.block && V.route.has(d.x + ',' + d.y)) onRoute++; for (const e of L.enemies) if (V.route.has(e.x + ',' + e.y)) onRoute++;
+        if (onRoute) r.probs.push('props or creatures on the route to the stairs: ' + onRoute);
+        if (!V.route.has(pl.down.ix + ',' + pl.down.iy)) r.probs.push('route does not reach the arrival'); }
       if (!seen.has(L.tele.x + ',' + L.tele.y)) r.probs.push('stone not reachable');
       let unreach = 0; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (open(x, y) && !blk.has(x + ',' + y) && !seen.has(x + ',' + y)) unreach++;
       if (unreach) r.probs.push('unreachable squares ' + unreach);
@@ -410,32 +413,44 @@ def run_mem():
 
 
 def run_seal():
+    """The tower is always open; the only gate is the party's level (100). Jump links pass (debug flag)."""
     with sync_playwright() as p:
         b, pg, errs = boot(p, 'town=neverending')
-        # the jump link opened the tower; take the debug flag away and see the seal
+        # the jump link opened the way (party level 99, debug flag); take the debug flag away and test the level gate
         r = pg.evaluate("""() => { delete G.flags.nt.debug; delete G.flags.nt.open; delete G.flags.psp; const loc = WORLD_LOCS.find(l => l.k === 'neverending');
-           const rows = gotoListRaw().filter(r => r.n === NT.BASE).map(r => r.name); return {locked: !ntUnlocked(), lv: loc.lv.length, rows}; }""")
-        check('without the flag the tower is sealed on the map (padlock: no levels)', r['locked'] and r['lv'] == 0, r)
-        check('the Go to area row stays, marked sealed', r['rows'] and 'sealed' in r['rows'][0], r)
-        r = pg.evaluate("""() => { const L = LEVELS[LEVEL]; const g = L.chars[L.rows[NTE.door.y][NTE.door.x0]]; const before = LEVEL; khBump(NTE.door.x0, NTE.door.y, g); return {stay: LEVEL === before, msgs: G.msgs.map(m => m.text).slice(-2)}; }""")
-        check('the great door refuses and says it is sealed', r['stay'] and any('sealed' in m for m in r['msgs']), r)
-        pg.evaluate("() => { G.flags.psp = {finished: true}; }")
-        r = pg.evaluate("() => ({open: ntUnlocked(), lv: WORLD_LOCS.find(l => l.k === 'neverending').lv.length})")
-        check('G.flags.psp.finished opens the tower on the map', r['open'] and r['lv'] == 1, r)
+           const rows = gotoListRaw().filter(r => r.n === NT.BASE).map(r => r.name); return {open: ntUnlocked(), lv: loc.lv.length, rows, lvl: partyLevel()}; }""")
+        check('the tower is always open on the map (no padlock)', r['open'] and r['lv'] == 1, r)
+        check('the Go to area row is not marked sealed', r['rows'] and 'sealed' not in r['rows'][0], r)
+        r = pg.evaluate("""() => { const L = LEVELS[LEVEL]; const g = L.chars[L.rows[NTE.door.y][NTE.door.x0]]; const before = LEVEL; G.msgs.length = 0; khBump(NTE.door.x0, NTE.door.y, g); return {stay: LEVEL === before, lvl: partyLevel(), msgs: G.msgs.map(m => m.text)}; }""")
+        check('a party below level 100 is refused at the great door with a plain line', r['lvl'] < 100 and r['stay'] and any('level 100' in m for m in r['msgs']), r)
+        check('the refusal has no em dash and no "sealed"', not any((chr(8212) in m) or ('sealed' in m) for m in r['msgs']), r)
+        pg.evaluate("() => { for (const h of G.heroes) h.lvl = 100; }")
         pg.evaluate("""() => { const L = LEVELS[LEVEL]; const g = L.chars[L.rows[NTE.door.y][NTE.door.x0]]; khBump(NTE.door.x0, NTE.door.y, g); }""")
         pg.wait_for_function('() => LEVEL === NT.BASE + 1 && G.state === "play"', timeout=60000)
-        check('the great door then leads to floor 1', True)
-        pg.evaluate("() => { delete G.flags.psp; delete G.flags.nt.debug; ntUnlock(); }")
-        r = pg.evaluate("() => ntUnlocked()")
-        check('ntUnlock() opens the tower', r)
+        check('a level 100 party goes through the great door to floor 1', True)
         # the way back down from floor 1 is the entrance hall
         pg.evaluate("""() => { const pl = LEVELS[LEVEL]._nt.plan; khBump(pl.down.x, pl.down.y, G.grid[pl.down.y][pl.down.x]); }""")
         pg.wait_for_function('() => LEVEL === NT.BASE && G.state === "play"', timeout=60000)
         r = pg.evaluate("() => [G.P.x, G.P.y, G.P.f]")
         check('the stairs down from floor 1 lead into the entrance hall in front of the door', r == [18, 4, 2], r)
-        # the south gate: the Pale Spire approach when it exists
-        r = pg.evaluate("""() => { const L = LEVELS[LEVEL]; const g = L.chars[L.rows[NTE.gate.y][NTE.gate.x0]]; return !!(KH_DOOR[g] && KH_DOOR[g].nt === 'exit'); }""")
-        check('the south gate is an exit door', r)
+        # the south gate leads to the Crooked Road and back
+        pg.evaluate("""() => { const L = LEVELS[LEVEL]; const g = L.chars[L.rows[NTE.gate.y][NTE.gate.x0]]; khBump(NTE.gate.x0, NTE.gate.y, g); }""")
+        pg.wait_for_function('() => LEVEL === 9715 && G.state === "play"', timeout=90000)
+        r = pg.evaluate("() => [G.P.x, G.P.y, G.P.f]")
+        check('the south gate leads to the north end of the Crooked Road', r == [30, 6, 2], r)
+        # the road's tower gate: refuses below level 100, opens at 100
+        pg.evaluate("() => { delete G.flags.nt.debug; for (const h of G.heroes) h.lvl = 90; }")
+        r = pg.evaluate("""() => { const L = LEVELS[9715]; const g = L.chars[L.rows[4][30]]; G.msgs.length = 0; khBump(30, 4, g); return {stay: LEVEL === 9715, msgs: G.msgs.map(m => m.text)}; }""")
+        check('the road gate refuses a level 90 party', r['stay'] and any('level 100' in m for m in r['msgs']), r)
+        pg.evaluate("() => { for (const h of G.heroes) h.lvl = 100; }")
+        pg.evaluate("""() => { const L = LEVELS[9715]; const g = L.chars[L.rows[4][30]]; khBump(30, 4, g); }""")
+        pg.wait_for_function('() => LEVEL === NT.BASE && G.state === "play"', timeout=90000)
+        r = pg.evaluate("() => [G.P.x, G.P.y, G.P.f]")
+        check('a level 100 party enters the tower hall from the road', r == [18, 26, 0], r)
+        # a debug jump passes at party level 99
+        pg.evaluate("() => { for (const h of G.heroes) h.lvl = 99; G.flags.nt.debug = 1; }")
+        r = pg.evaluate("() => ntLevelOk()")
+        check('the jump link flag passes the level gate at 99', r)
         finish(errs)
 
 
