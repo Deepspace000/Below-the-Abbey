@@ -22,6 +22,7 @@ const PSH_GMAP=[['p_ghost_monk','priest'],['p_ghost_servant','butler'],['p_ghost
 for(const [n,src,h] of PSH_FURN)PSP_PICS[n]=[h,[src],{dark:1}];
 for(const [n,src,h] of PSH_GPICS)PSP_PICS[n]=[h,src,{ghost:1}];
 if(!PSP_PICS.window_stained_tall)PSP_PICS.window_stained_tall=[3.4,['hl_p_window'],{}];
+for(const [n,h] of [['corbel_gargoyle_a',.75],['corbel_gargoyle_b',.65],['corbel_gargoyle_c',.75]])if(!PSP_PICS[n])PSP_PICS[n]=[h,['gy_slab','gy_bench'],{}];
 PSP_PICS.banner_long_a=[3.0,['hl_p_banner'],{}];PSP_PICS.banner_long_b=[3.0,['hl_p_banner'],{}];PSP_PICS.tex_vault_ribbed=[1,['gy_slab'],{}];
 /* ---------- loading: the graveyard's stone, the Oldhaven people, and the few extra stand-in pictures ---------- */
 const PSH_EXTRA=[['ds_wm_statue','ds_wm_statue.png'],['ds_hgtb_furn_chandelier','ds_hgtb_furn_chandelier.png'],['ds_hgtb_table','ds_hgtb_table.png'],['ds_hgtb_chair','ds_hgtb_chair.png'],['ds_hgtb_furn_hearth','ds_hgtb_furn_hearth.png'],
@@ -405,6 +406,13 @@ function pshHaunt(o){
   const by=(a,b)=>a[a.length-1]-b[b.length-1];
   const spaced=(list,n,gap,use)=>{let c=0;const got=[];list.sort(by);for(const e of list){if(c>=n)break;if(got.some(q=>Math.hypot(q[0]-e[0],q[1]-e[1])<gap))continue;if(use(e,c)!==false){got.push(e);c++}}return c};
   const cnt=o.counts||{};
+  /* never seal a square: a blocking prop is refused when it would cut any square that can be reached now from the start (flood fill) */
+  const blockedSet=new Set(o.blocked?o.blocked():[]);
+  const reach=extra=>{const r=new Set(),q=[],sx=o.start[0],sy=o.start[1];if(!o.open(sx,sy))return r;r.add(sx+','+sy);q.push([sx,sy]);
+    for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of D4){const nx=x+a,ny=y+b,k=nx+','+ny;if(r.has(k)||k===extra||blockedSet.has(k)||!o.open(nx,ny))continue;r.add(k);q.push([nx,ny])}}return r};
+  let base=o.start?reach(null):null;
+  const canBlock=(x,y)=>{if(!base)return true;const k=x+','+y;if(blockedSet.has(k))return false;const r=reach(k);for(const c of base)if(c!==k&&!r.has(c))return false;return true};
+  const didBlock=(x,y)=>{if(!base)return;blockedSet.add(x+','+y);base=reach(null)};
   out.mirror=spaced(slots.slice(),cnt.mirror||0,6,(e,i)=>{const k=key('mirror',i);if(!k)return false;return o.wallPic(k,e[0],e[1],e[2],{bob:.5,mirror:i})});
   out.portrait=spaced(slots.slice(),cnt.portrait||0,3.2,(e,i)=>{const k=key('portrait',i+(o.pi||0));if(!k)return false;return o.wallPic(k,e[0],e[1],e[2],{bob:.6,portrait:i})});
   out.sheetwin=spaced(slots.slice(),cnt.sheetwin||0,4,(e,i)=>{const k=key('sheetwin',i);if(!k)return false;return o.wallPic(k,e[0],e[1],e[2],{bob:.5})});
@@ -412,7 +420,7 @@ function pshHaunt(o){
   out.redlamp=spaced(slots.slice(),cnt.redlamp||0,6.5,(e,i)=>{const k=key('redlamp',i);if(!k)return false;const r=o.wallPic(k,e[0],e[1],e[2],{bob:1.0});if(r&&o.light)o.light(e[0],e[1],PSH_RED);return r});
   out.cobthick=spaced(narrow.slice(),cnt.cobthick||0,5,(e,i)=>{const k=key('cobthick',i);if(!k)return false;return o.floorProp(k,e[0],e[1],{block:false,thick:1})});
   out.candles=spaced(floor.slice(),cnt.candles||0,5,(e,i)=>{const k=key('candles',i);if(!k)return false;const r=o.floorProp(k,e[0],e[1],{block:false,sc:.7});if(r&&o.light)o.light(e[0],e[1],[1.6,1.0,.45]);return r});
-  out.dust=spaced(floor.slice(),cnt.dust||0,4.5,(e,i)=>{const k=key('dust',i);if(!k)return false;return o.floorProp(k,e[0],e[1],{block:true})});
+  out.dust=spaced(floor.slice(),cnt.dust||0,4.5,(e,i)=>{const k=key('dust',i);if(!k||!canBlock(e[0],e[1]))return false;const r=o.floorProp(k,e[0],e[1],{block:true});if(r)didBlock(e[0],e[1]);return r});
   out.spider=spaced(corners.slice(),cnt.spider||0,9,(e,i)=>{const k=key('spider',i);if(!k)return false;return o.floorProp(k,e[0],e[1],{block:false,sc:.6})});
   return out}
 /* little tales told by a haunted mirror and an ancestor, for the interactive touches */
@@ -436,8 +444,9 @@ function pshFurnish(S){
   PSH.mst=mst;
   const pew=(x,y)=>put(P('furn_pew_black'),x,y,{block:true});
   for(const [n,h] of [['corbel_gargoyle_a',.75],['corbel_gargoyle_b',.65],['corbel_gargoyle_c',.75]])if(!PSP_PICS[n])PSP_PICS[n]=[h,['gy_slab','gy_bench'],{}];
-  const gar=(x,y,wd)=>{const d=pic(P('st_gargoyle'),x,y,wd,{bob:1.7});if(!d)return d;   // a gargoyle crouched high, on a visible stone corbel
-    const nm=['corbel_gargoyle_a','corbel_gargoyle_b','corbel_gargoyle_c'][(x*7+y*3)%3];decor.push({k:P(nm),x,y,block:false,walk:true,deco:true,wd:[wd[0],wd[1]],pic:1,bob:1.02});return d};
+  let garN=0;   // a gargoyle crouched on a visible stone corbel, low enough (1.55) to be seen from the floor; only the best 16 of the level are kept
+  const gar=(x,y,wd)=>{if(garN>=16||hs(x,y,17)>=.55)return null;const d=pic(P('st_gargoyle'),x,y,wd,{bob:1.55});if(!d)return d;garN++;
+    const nm=['corbel_gargoyle_a','corbel_gargoyle_b','corbel_gargoyle_c'][(x*7+y*3)%3];decor.push({k:P(nm),x,y,block:false,walk:true,deco:true,wd:[wd[0],wd[1]],pic:1,bob:.88});return d};
   const vine=(x,y,wd,n)=>pic(P(n||'vine_a'),x,y,wd,{bob:.9});
   const alc=(x,y,n)=>put(P(n),x,y,{block:true});
   /* ===== A. the Entrance Hall ===== */
@@ -472,7 +481,7 @@ function pshFurnish(S){
   foe('psfiend',9,44);foe('psfiend',14,44);foe('psfiend',21,45);foe('pscarver',12,45);foe('pscourtier',23,44);
   put('chest',15,41,{block:true,force:1});
   /* the painters' closet */
-  thing('hl_p_shelf','psh_pigments',4,39);thing(P('furn_lectern_black'),'psh_easel',6,39);put(P('furn_desk'),5,38,{block:true});lamp(5,40,CO,1.6,100);
+  thing('hl_p_shelf','psh_pigments',4,39);thing(P('furn_lectern_black'),'psh_easel',6,39);put(P('furn_desk'),4,38,{block:true});lamp(5,40,CO,1.6,100);
   ghost('child','p_ghost_child',[[5,44],[23,44],[5,43],[23,45]],{sp:.55,shy:1,lines:['Shh. Nurse will find us.','Do not tell nurse I was inside the frames.']});
   put(P('furn_clock_grandfather'),11,45,{block:true});put(P('furn_clock_grandfather'),20,45,{block:true});put(P('furn_screen_tracery'),9,45,{block:true});put(P('furn_lectern_black'),16,45,{block:true});
   /* ===== C. the Hall of Statues (with alcoves, columns and a winter bay behind) ===== */
@@ -666,7 +675,7 @@ function pshFurnish(S){
   foe('psofficer',43,22);
   /* ===== the long-abandoned house: sheets, webs, mirrors, ancestors, candles, red lanterns ===== */
   {const taken=new Set();for(const d of decor)if(d.wd)taken.add(d.x+','+d.y+','+d.wd[0]+','+d.wd[1]);let mi=0,pi=0;
-   pshHaunt({W:S.W,H:S.H,seed:9740,pi:3,open:(x,y)=>open(x,y),free:(x,y)=>S.fr(x,y)&&!S.keep.has(x+','+y),wall:(x,y,a,b)=>g[y+b]&&g[y+b][x+a]==='#'&&S.over[(x+a)+','+(y+b)]===undefined,taken:(x,y,a,b)=>taken.has(x+','+y+','+a+','+b),
+   pshHaunt({W:S.W,H:S.H,seed:9740,pi:3,start:[32,44],blocked:()=>decor.filter(d=>d.block).map(d=>d.x+','+d.y),open:(x,y)=>open(x,y),free:(x,y)=>S.fr(x,y)&&!S.keep.has(x+','+y),wall:(x,y,a,b)=>g[y+b]&&g[y+b][x+a]==='#'&&S.over[(x+a)+','+(y+b)]===undefined,taken:(x,y,a,b)=>taken.has(x+','+y+','+a+','+b),
      stand:{portrait:(i)=>pshPortrait(20+i)},
      counts:{mirror:9,portrait:16,sheetwin:9,cobcorner:20,cobthick:9,candles:14,redlamp:11,dust:9,spider:5},
      wallPic:(k,x,y,wd,o)=>{const oo={bob:o.bob};if(o.mirror!==undefined)oo.npc='psh_mir'+(mi++%12);else if(o.portrait!==undefined&&(pi++%2===0))oo.npc='psh_ancp'+(pi%8);const d=pic(k,x,y,wd,oo);return !!d},

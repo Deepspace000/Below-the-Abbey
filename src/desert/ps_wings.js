@@ -260,7 +260,8 @@ function pswMake(id){
   const setF=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(open(x,y))fm[y][x]=f};
   const fill=(x0,y0,x1,y1,fn)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)fn(x,y)};
   /* wall dressing: a thing hung on the wall beside floor cell x,y (wd = the way to the wall). Does not block. */
-  const w=(name,x,y,wd,o)=>p(name,x,y,Object.assign({wd},o||{}));
+  let garN=0;   // wall gargoyles sit on a visible painted corbel, low enough to be seen from the floor, and only the best 16 of a level are kept
+  const w=(name,x,y,wd,o)=>{if(name==='c_psgargoyle'){if(garN>=16||hs(x,y,17)>=.5)return null;const d=p(name,x,y,Object.assign({wd,bob:1.55},o||{}));if(d){garN++;const cn=['corbel_gargoyle_a','corbel_gargoyle_b','corbel_gargoyle_c'][(x*7+y*3)%3],ck=pspPic(cn);if(ck)dec(ck,x,y,{wd,bob:.88})}return d}return p(name,x,y,Object.assign({wd},o||{}))};
   /* an ambient ghost drifting slowly along a closed loop of open squares (a decor that the update hook moves), and a cold spot (a message when the party walks in) */
   const ghosts=[];V.ghosts=ghosts;V.ghostById={};V.cold=[];
   const GL={servant:'"Is it dinner? It is always almost dinner."',cook:'"The pot must not boil dry. Who is watching the pot?"',baker:'"The loaves are proving. Mind the draught."',armourer:'"Every blade back on its rack. Every one. I counted."',choir:'The voice is very far away, and very sad, and it does not stop.',monk:'"Silence. Please. Some of us are praying."',scholar:'"Shh. Overdue. Everything is overdue."',maid:'"Is the bed made? I made the bed."'};
@@ -276,7 +277,7 @@ function pswMake(id){
   S.dress(C);
   /* the long-abandoned house: sheets, webs, mirrors, ancestors, candles, red lanterns (shared dresser in ps_halls.js) */
   try{const taken=new Set();for(const d of decor)if(d.wd)taken.add(d.x+','+d.y+','+d.wd[0]+','+d.wd[1]);let mi=0;
-    pshHaunt({W,H,seed:id,pi:id%5,open,free:(x,y)=>free(x,y)&&!reserved.has(x+','+y),wall:(x,y,a,b)=>!open(x+a,y+b)&&!doorSq.some(q=>q[0]===x+a&&q[1]===y+b)&&rows[y+b]!==undefined&&rows[y+b][x+a]!=='.',taken:(x,y,a,b)=>taken.has(x+','+y+','+a+','+b),
+    pshHaunt({W,H,seed:id,pi:id%5,open,start:[start.x,start.y],blocked:()=>decor.filter(d=>d.block).map(d=>d.x+','+d.y),free:(x,y)=>free(x,y)&&!reserved.has(x+','+y),wall:(x,y,a,b)=>!open(x+a,y+b)&&!doorSq.some(q=>q[0]===x+a&&q[1]===y+b)&&rows[y+b]!==undefined&&rows[y+b][x+a]!=='.',taken:(x,y,a,b)=>taken.has(x+','+y+','+a+','+b),
       counts:S.haunt||{mirror:5,portrait:8,sheetwin:5,cobcorner:14,cobthick:6,candles:8,redlamp:6,dust:6,spider:3},
       wallPic:(k,x,y,wd,o)=>{const oo={wd,bob:o.bob};if(o.mirror!==undefined)oo.npc='psh_mir'+((mi++)%12);const d=dec(k,x,y,oo);if(d)taken.add(x+','+y+','+wd[0]+','+wd[1]);return !!d},
       floorProp:(k,x,y,o)=>!!dec(k,x,y,{block:!!o.block,sc:o.sc,walkOk:!o.block}),light:(x,y,c)=>light(x,y,c)})}catch(e){console.error('psw haunt',e)}
