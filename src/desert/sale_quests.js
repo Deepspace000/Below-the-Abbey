@@ -1,6 +1,6 @@
 /* ==========================================================================
    SALE: THE TEN TRUST QUESTS (ids sa1 to sa10, journal area "Sale"). Every shop of Sale is barricaded. The keeper answers through the boards ("Go away", then "Prove you are friends"), and gives the party one job.
-   Doing it takes the planks down (flag sa_open_<shop>, saApplyDoors in sale_town.js), opens the shop and changes the keeper's talk. Any order. Rewards are now generous in gold (ten times the first figures), ordinary in experience (shown before the doubling of QREW_MUL).
+   Doing it takes the planks down (flag sa_open_<shop>, saApplyDoors in sale_town.js), opens the shop and changes the keeper's talk. Any order. Rewards are now generous in gold (four times the first figures), ordinary in experience (shown before the doubling of QREW_MUL).
      sa1  Pennyworth's Provisions   collect: 3 flasks of lamp oil from the ruined houses of Charnel Row (dead quarter)
      sa2  Ironbrow's Armoury        kill: Sir Ranulf the Hollow, a named wight at the south end of Charnel Row
      sa3  Stroud and Daughter       kill: 8 ghouls (the dead quarter and Hollin Farm)
@@ -14,7 +14,7 @@
    ========================================================================== */
 QAREA_ORDER.splice(Math.max(0,QAREA_ORDER.indexOf('Wenlock'))+1,0,'Sale');
 const saF=()=>G.flags;
-const SA_REW={sa1:{gold:3000,xp:4000},sa2:{gold:5000,xp:6500},sa3:{gold:5000,xp:6000},sa4:{gold:6000,xp:7000},sa5:{gold:3000,xp:4500},sa6:{gold:4500,xp:5500},sa7:{gold:7000,xp:8000},sa8:{gold:3500,xp:4500},sa9:{gold:8000,xp:9000,items:['potion5']},sa10:{gold:4000,xp:5000}};
+const SA_REW={sa1:{gold:1200,xp:4000},sa2:{gold:2000,xp:6500},sa3:{gold:2000,xp:6000},sa4:{gold:2400,xp:7000},sa5:{gold:1200,xp:4500},sa6:{gold:1800,xp:5500},sa7:{gold:2800,xp:8000},sa8:{gold:1400,xp:4500},sa9:{gold:3200,xp:9000,items:['potion5']},sa10:{gold:1600,xp:5000}};
 function saQ(id,title,who,need,goal,desc,extra){
   const q=Object.assign({title,who,need,goal,reward:SA_REW[id]},extra||{});
   Object.defineProperty(q,'desc',{enumerable:true,get(){return typeof desc==='function'?desc():desc}});
