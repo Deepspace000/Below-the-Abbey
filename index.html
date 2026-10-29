@@ -76086,6 +76086,7 @@ const PST_MOVE=/barrel|crate|box|sack|cask|keg|lamp|lantern|brazier|candelabra|c
 const PST_KEEP=/furn_(?!chair|stool)|clock|wardrobe|screen|sideboard|table|chest|door|gate|arch|stair|sign|window|mirror|portrait|hearth|fireplace|bed|altar|statue|st_|col|pillar|tele|fountain|well|tomb|bell/i;
 function pstTidy(id,L){
   if(!L||L._tidied||!L.rows)return L;L._tidied=1;
+  for(const d of L.decor||[])if(!d.pic&&d.bob>0&&/armour/i.test(String(d.k)))d.bob=0;   // suits of armour stand on the floor
   const W=L.rows[0].length,H=L.rows.length,TB=(typeof TERRS!=='undefined'&&TERRS[id]&&TERRS[id].block)||null;
   const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&L.rows[y][x]==='.'&&!(TB&&TB[y*W+x]);
   const ORTH=[[1,0],[-1,0],[0,1],[0,-1]];
