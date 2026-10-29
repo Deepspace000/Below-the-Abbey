@@ -73135,7 +73135,7 @@ pspRegister(9731,pscLodge);pspRegister(9732,pscMews);
    Self contained: its own floor maker (pshBuild), wall tiles drawn in code from the graveyard's painted stone, stand-in pictures (made from existing pieces; painted pieces 'ps_<name>' win when they exist).
    Contract: tools/PALE_SPIRE_PLAN.md and src/desert/ps_ids.js (link squares are read from PSP.LINKS). Notes: tools/PALE_SPIRE_NOTES.md.
    ========================================================================== */
-const PSH={ID:9740,W:64,H:48,WH:4.2,ready:false,_wait:0};
+const PSH={ID:9740,W:64,H:48,WH:3.2,ready:false,_wait:0};
 const pshIs=n=>n===9740;
 const pshF=()=>{const F=G.flags;return F.psp||(F.psp={})};
 const PSH_COL={cold:[.78,1.12,.9],violet:[.5,1.02,.72],warm:[1.5,1.05,.55],gold:[.8,1.15,.75]};
@@ -73191,7 +73191,7 @@ function pshPics(){
   const S=(n,cv,h)=>pshSet(n,cv,h);
   S('col_fluted',pshFilt('ds_dpillar1','grayscale(1) brightness(.5) contrast(1.15) sepia(.45) hue-rotate(75deg)'),3.0);
   S('col_twist',pshFilt('hg_pillar','grayscale(1) brightness(.42) contrast(1.2) sepia(.55) hue-rotate(80deg)'),3.0);
-  S('col_silver',pshFilt('ds_wm_crystal_pillar','hue-rotate(115deg) saturate(.9) brightness(.62)'),2.9);
+  S('col_silver',pshFilt('ds_wm_crystal_pillar','hue-rotate(205deg) saturate(.9) brightness(.65)'),2.9);
   S('table_long',pshFilt('hl_p_feast','grayscale(.6) sepia(.4) hue-rotate(80deg) brightness(.55)'),.95);
   S('table_high',pshFilt('hl_p_feast','grayscale(.6) sepia(.4) hue-rotate(80deg) brightness(.55)',true),1.0);
   S('chair_high',pshFilt('ds_hgtb_chair','grayscale(.5) brightness(.6) sepia(.4) hue-rotate(80deg)'),1.0);
@@ -73301,6 +73301,9 @@ function pshTile(style,kind,v){
     const wain=h*.3;
     // wainscot band: darker lower part with a trim line
     x.fillStyle=S.band;x.fillRect(0,h-wain,w,wain);x.fillStyle=S.trim;x.globalAlpha=.55;x.fillRect(0,h-wain-2,w,3);x.globalAlpha=1;
+    if(!S.wood&&kind!=='steps'&&S.tex!=='texBone_0'){ // carved wainscot: two pointed panels and a frieze of little trefoils on the string course
+      x.strokeStyle=S.trim;x.globalAlpha=.42;x.lineWidth=2.5;for(let i=0;i<2;i++){const cx2=32+i*64,tp=h-wain+8,bt=h-6;x.beginPath();x.moveTo(cx2-22,bt);x.lineTo(cx2-22,tp+18);x.quadraticCurveTo(cx2-22,tp,cx2,tp-6);x.quadraticCurveTo(cx2+22,tp,cx2+22,tp+18);x.lineTo(cx2+22,bt);x.closePath();x.stroke();x.fillStyle='rgba(0,0,0,.25)';x.fill()}
+      x.globalAlpha=.5;x.fillStyle=S.trim;for(let i=0;i<8;i++){x.beginPath();x.arc(8+i*16,h-wain-9,3.2,0,6.3);x.fill()}x.globalAlpha=1}
     if(S.wood){x.fillStyle='rgba(40,22,10,.62)';x.fillRect(0,h-wain,w,wain);for(let i=0;i<4;i++){x.fillStyle='rgba(0,0,0,.4)';x.fillRect(i*32+1,h-wain+4,2,wain-8)}x.strokeStyle='rgba(200,160,100,.5)';x.strokeRect(6,h-wain+8,w-12,wain-16)}
     if(S.silk&&kind!=='win'){x.fillStyle=S.silk;x.globalAlpha=.5;x.fillRect(8,h*.12,w-16,h-wain-h*.12-10);x.globalAlpha=1;x.strokeStyle=S.trim;x.lineWidth=2;x.strokeRect(8,h*.12,w-16,h-wain-h*.12-10);x.strokeStyle='rgba(255,255,255,.12)';x.lineWidth=1;for(let i=1;i<6;i++){x.beginPath();x.moveTo(8+i*(w-16)/6,h*.12);x.lineTo(8+i*(w-16)/6,h-wain-10);x.stroke()}}
     if(kind==='win'||kind==='bay'||kind==='bay2'){
@@ -73318,6 +73321,9 @@ function pshTile(style,kind,v){
       x.strokeStyle='rgba(0,0,0,.5)';x.lineWidth=2;x.stroke()}
     if(kind==='ivy'){x.fillStyle='#2c5632';for(let i=0;i<150;i++){const px=(i*53)%w,py=h*(Math.pow(((i*37)%100)/100,1.5))*.85,r=3+((i*5)%5);x.globalAlpha=.9;x.beginPath();x.ellipse(px,py,r,r*.6,((i*3)%6)/2,0,6.3);x.fill()}
       x.fillStyle='#4c8248';for(let i=0;i<80;i++){x.beginPath();x.ellipse((i*71)%w,h*(((i*41)%100)/100)*.8,3,2,i,0,6.3);x.fill()}x.globalAlpha=1}
+    if(kind==='plain'&&!S.wood&&!S.silk){const arch=(cx2,hw2,top2,bot2,al)=>{x.beginPath();x.moveTo(cx2-hw2,bot2);x.lineTo(cx2-hw2,top2+hw2*1.2);x.quadraticCurveTo(cx2-hw2,top2+hw2*.1,cx2,top2-hw2*.3);x.quadraticCurveTo(cx2+hw2,top2+hw2*.1,cx2+hw2,top2+hw2*1.2);x.lineTo(cx2+hw2,bot2);x.closePath();x.fillStyle='rgba(0,0,0,'+al+')';x.fill();x.strokeStyle=S.trim;x.globalAlpha=.55;x.lineWidth=3;x.stroke();x.globalAlpha=1};
+      if(!v){arch(w/2,40,h*.2,h-wain-2,.3);arch(w/2,26,h*.33,h-wain-2,.22)}else{arch(w*.27,22,h*.3,h-wain-2,.3);arch(w*.73,22,h*.3,h-wain-2,.3)}
+      x.fillStyle='rgba(20,60,40,.5)';for(let i=0;i<26;i++){x.beginPath();x.ellipse((i*61)%w,h-wain-(i*7)%14,4+(i%3),2,i,0,6.3);x.fill()}}
     if(kind==='steps'){const n=9;for(let i=0;i<n;i++){const yy=h*.1+i*(h*.9/n);x.fillStyle='rgba(0,0,0,'+(.18+.03*i)+')';x.fillRect(0,yy,w,2);x.fillStyle='rgba(120,200,160,.16)';x.fillRect(0,yy+2,w,2)}x.fillStyle='rgba(30,70,50,.35)';x.fillRect(0,0,w,h*.1);x.fillStyle='rgba(2,10,8,.5)';x.fillRect(0,h-wain,w,wain);x.strokeStyle='#5aa888';x.lineWidth=3;x.strokeRect(2,2,w-4,h-4);
       x.fillStyle='#2c5a3c';for(let i=0;i<40;i++){x.beginPath();x.ellipse((i*47)%w,h-(i*13)%(h*.5),5,3,i,0,6.3);x.fill()}}
     if(kind==='iron'){const cx=w/2,top=h*.2,bot=h*.72,hw=32;x.beginPath();x.moveTo(cx-hw,bot);x.lineTo(cx-hw,top+hw);x.quadraticCurveTo(cx-hw,top,cx,top-hw*.4);x.quadraticCurveTo(cx+hw,top,cx+hw,top+hw);x.lineTo(cx+hw,bot);x.closePath();x.save();x.clip();x.fillStyle='#04100c';x.fillRect(0,0,w,h);
@@ -73452,7 +73458,7 @@ function pshBuild(){
     if(g[y][x]==='.'){s+='.';continue}
     const k=x+','+y;
     if(over[k]!==undefined){s+=ch(over[k]);continue}
-    const st=styleAt(x,y),kd=kindAt[k]||'plain',v=(hs(x,y,3)*2)|0;
+    const st=styleAt(x,y);let kd=kindAt[k]||'plain';const v=(hs(x,y,3)*2)|0;if(kd==='plain'&&hs(x,y,5)<.2&&st!=='lady'&&st!=='closet')kd='ivy';
     s+=ch(pshTile(st,kd,kd==='plain'?v:0))}rows.push(s)}
   // the door records: which tile number is which door
   for(const d of doorRec){const c=rows[d.at[1]][d.at[0]],gid=chars[c];KH_DOOR[gid]={psh:'link',link:d.link,get lvl(){return d.link.to},get at(){const q=d.link.land;return {x:q[0],y:q[1],f:q[2]}},kind:d.kind}}
@@ -73476,13 +73482,13 @@ function pshFurnish(S){
   const N=[0,-1],So=[0,1],Ea=[1,0],We=[-1,0],V=PSH_COL.violet,WM=PSH_COL.warm,CO=PSH_COL.cold;
   const P=n=>pspPic(n);
   const thing=(k,id,x,y,o)=>put(k,x,y,Object.assign({block:true,npc:id},o||{}));
-  const hang=(x,y,lt,col2)=>{put('ps_chandelier',x,y,{bob:2.7,over:true,sc:1});lamp(x,y,col2||CO,lt||1.7,150)};
+  const hang=(x,y,lt,col2)=>{put('ps_chandelier',x,y,{bob:1.75,over:true,sc:1});lamp(x,y,col2||CO,lt||1.7,150)};
   const wall=(k,list,wd,o)=>{for(const [x,y] of list)pic(k,x,y,wd,o)};
-  const hi=1.0;   // portraits and banners hang higher on the tall walls
+  const hi=.6;   // portraits and banners hang higher on the tall walls
   const guard=(x,y)=>{if(ENEMY_DEF.psguard)foe('psguard',x,y);else foe('psarmour',x,y)};
   const mst=i=>{const n=['ps_st_chimera','ps_st_hydra','ps_st_judge','ps_st_headless','ps_st_bishop','ps_st_mourners','ps_st_veiled','ps_st_hound'][i%8];return IMG[n]&&!IMG[n]._ps?n:PSH.st(i)};
   PSH.mst=mst;
-  const gar=(x,y,wd)=>pic(P('st_gargoyle'),x,y,wd,{bob:2.5});   // a gargoyle crouched high on a corbel
+  const gar=(x,y,wd)=>pic(P('st_gargoyle'),x,y,wd,{bob:1.7});   // a gargoyle crouched high on a corbel
   const vine=(x,y,wd,n)=>pic(P(n||'vine_a'),x,y,wd,{bob:.9});
   const alc=(x,y,n)=>put(P(n),x,y,{block:true});
   /* ===== A. the Entrance Hall ===== */
@@ -73660,7 +73666,7 @@ function pshFurnish(S){
   for(const y of [19,21,23])pic('ps_pt_hunt',60,y,Ea,{bob:hi});for(const x of [43,48,53,58])pic(x%2?'ps_banner_violet':'ps_pt_battle',x,24,So,{bob:hi});
   for(const x of [41,59])put('hl_p_cage',x,24,{block:true});
   for(const x of [41,46,55,59])mark(x,17,'face');
-  thing('chest','psh_bowchest',59,19);sign(46,24,So,'THE TROPHY AND HUNTING HALL','The Sovereign hunted here');
+  put('chest',59,19,{block:true});sign(46,24,So,'THE TROPHY AND HUNTING HALL','The Sovereign hunted here');
   for(const [x,y] of [[47,20],[53,22]])hang(x,y,1.8);
   foe('psantlered',50,19);foe('psarmour',43,22);foe('psarmour',58,22);foe('pscarver',57,19);
   for(const [x,y] of [[45,23],[55,23],[43,19],[57,21]])foe('pshhound',x,y);
