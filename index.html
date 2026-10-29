@@ -72146,7 +72146,7 @@ if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('psgatecaptain');
 if(typeof BOSS_GOLD!=='undefined')BOSS_GOLD.psgatecaptain=[4200,5200];
 if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^ps(guard|halberd|archer|sentinel)/,'shaken',.12],[/^psgatecaptain/,'shaken',.25]);
 /* pictures this package asks the art agent for (stand-ins until painted): the clock-tower gate, long banners, buttresses */
-for(const [n,h,src] of [['gate_clock',5.0,['gy_crypt','gy_mausoleum']],['banner_long_a',3.2,['hl_p_banner','mw_banner']],['banner_long_b',3.2,['hl_p_banner','mw_banner']],['buttress_a',3.6,['gy_column','gy_crypt']],['buttress_b',3.6,['gy_column','gy_crypt']]])PSP_PICS[n]=[h,src,{}];
+for(const [n,h,src] of [['gate_clock',5.0,['gy_crypt','gy_mausoleum']],['banner_long_a',3.2,['hl_p_banner','mw_banner']],['banner_long_b',3.2,['hl_p_banner','mw_banner']],['buttress_a',3.6,['gy_column','gy_crypt']],['buttress_b',3.6,['gy_column','gy_crypt']],['pillar_lantern',2.4,['gy_column','gy_crypt']],['skull_pillar',1.4,['gy_column','gy_crypt']]])if(!PSP_PICS[n])PSP_PICS[n]=[h,src,{}];
 /* the haunted dressing the owner asked for (painted pieces are dropped into assets/ps by the art agent; until then these show as darkened stand-ins) */
 for(const [n,h,src] of [['window_sheeted_a',2.4,['ps_window_slit','gy_crypt']],['window_sheeted_b',2.4,['ps_window_slit','gy_crypt']],['window_sheeted_c',2.4,['ps_window_slit','gy_crypt']],['bed_cobweb_a',2.6,['ps_bed_four','gy_crypt']],['bed_cobweb_b',2.6,['ps_bed_four','gy_crypt']],
   ['cobweb_corner_a',1.8,['gy_web','gy_crypt']],['cobweb_corner_b',1.8,['gy_web','gy_crypt']],['cobweb_thick_a',2.6,['gy_web','gy_crypt']],['cobweb_thick_b',2.6,['gy_web','gy_crypt']],['cobweb_thick_c',2.6,['gy_web','gy_crypt']],['web_spider',.6,['gy_web','gy_bones']],
@@ -72212,7 +72212,8 @@ function psgDrawCastle(W,H,near){
    Heights: leg k stands at LEG[k][1] (0.3 at the foot, 3.9 at the bridgehead, 4.4 on the forecourt). The castle view (kit sky) grows as the party climbs.
    ========================================================================== */
 const PSG_LEG=[[51,.3,6,36],[44,1.2,6,52],[37,2.1,12,52],[30,3.0,12,46],[23,3.9,30,46]];   // lane row y, ground height, x from, x to
-const PSG_CONN=[[6,7],[51,52],[12,13],[45,46]];                                              // connector columns between leg k and k+1
+const PSG_CONN=[[6,7],[51,52],[12,13],[45,46]];
+const PSG_GRAND=[31,33];                                                                       // the Pilgrim Steps: a broad stair straight up from the landing (x31..33, y46..50) to the second leg, so the arrival faces its way on                                              // connector columns between leg k and k+1
 function psgBuildApproach(info){
   const W=64,H=56;
   const C=pspMake({id:9720,start:{x:32,y:52,f:0},walled:true,wall:'dark',wh:4.4,floor:'cobble',amb:.82,wind:.25,castle:{at:[32,-40],far:93,near:49,lift:30,lift1:0,h0:70,h1:150,wm:1.9},terrace:true});
@@ -72232,13 +72233,15 @@ function psgBuildApproach(info){
   [[6,46,7,50,1.2,.3,45,51],[51,39,52,43,2.1,1.2,38,44],[12,32,13,36,3.0,2.1,31,37],[45,25,46,29,3.9,3.0,24,30]].forEach(([a,b,c,d,hN,hS,ry0,ry1])=>{carve(a,b,c,d,'flag');C.rise(a,ry0,c,ry1,hN,hS,'y')});
   /* bands between the legs: fence row, three pit rows, the retaining wall row */
   const band=k=>{const [y,h,x0,x1]=PSG_LEG[k],[y2,h2,u0,u1]=PSG_LEG[k+1];const a=Math.max(x0,u0),b=Math.min(x1,u1),cs=PSG_CONN[k];
-    const cells=[];for(let x=a;x<=b;x++){if(x>=cs[0]&&x<=cs[1])continue;cells.push(x)}return {y,h,y2,h2,cells}};
+    const cells=[];for(let x=a;x<=b;x++){if(x>=cs[0]&&x<=cs[1])continue;if(k===0&&x>=PSG_GRAND[0]&&x<=PSG_GRAND[1])continue;cells.push(x)}return {y,h,y2,h2,cells}};
   const B=[0,1,2,3].map(band);
   B.forEach(bd=>{for(const x of bd.cells){
     carve(x,bd.y-1,x,bd.y-1,'flagdark');unwalk(x,bd.y-1,x,bd.y-1);   // the fence cell
     carve(x,bd.y-4,x,bd.y-2,'wet');unwalk(x,bd.y-4,x,bd.y-2);        // the pit
     carve(x,bd.y-5,x,bd.y-5);                                       // (the retaining wall is painted back below)
   }});
+  /* the Pilgrim Steps: from the landing plaza straight up to leg 2 (six treads of .15, well under the .55 step limit), flanked by low walls so it reads as a stair */
+  carve(PSG_GRAND[0],46,PSG_GRAND[1],50,'flag');C.rise(PSG_GRAND[0],45,PSG_GRAND[1],51,1.2,.3,'y');
   /* ---- 2. the ravine, the Long Bridge, the Barbican forecourt ---- */
   C.ravine(4,16,59,21,1.5,'gravel');
   for(const x of [35,36,37,38,39,40,41,42,43,44,45,46]){carve(x,22,x,22,'flagdark');unwalk(x,22,x,22)}   // L5's fence over the ravine
@@ -72257,11 +72260,21 @@ function psgBuildApproach(info){
   carve(47,32,50,35,'flagdark');carve(48,36,48,36,'cobble');                  // B
   carve(18,25,23,28,'flagdark');carve(20,29,20,29,'cobble');                  // C
   carve(26,27,29,29,'flagdark');                                               // the cairn niche
+  /* the nooks stand at heights the party can really step to (the first build left nook A a 1.6 drop below the lane, so its chests could not be reached) */
+  const setH=(x0,y0,x1,y1,h)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)hgt[ix(x,y)]=h};
+  setH(40,48,44,50,.3);C.rise(42,45,42,48,1.2,.3,'y');                          // A: down a short stair from leg 2
+  setH(47,32,50,35,1.9);setH(48,36,48,36,2.0);                                  // B: a step down from leg 3
+  setH(18,25,23,28,2.8);setH(20,29,20,29,2.9);                                  // C: a step down from leg 4
+  setH(26,27,29,28,2.7);                                                         // the cairn niche
   /* ---- 4. the walls: every rock cell beside open ground is dressed, retaining walls are low ---- */
   const near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
-  const SET=['ash','ash','ash','brick','moss','ash','ivy','brick'];
+  /* the canyon walls are built in bays of five squares (a pier at the head of every bay, a blind window in the middle of every third, one kind of stone per bay and a different run of them down each side), not squares dealt at random */
+  const BAYS=['ash','moss','ash','brick','ivy','ash','brick','moss'];
   for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(open(x,y)||!near(x,y))continue;
-    const r=hs(x,y,9);let st=SET[(r*SET.length)|0];if(r>.89)st='win';paintWall(x,y,st,4.4)}
+    const u=x+y,bay=(u/5)|0,pos=u%5,base=BAYS[(bay*3+((y/9)|0))%BAYS.length];
+    let st=base,wh=4.4;if(pos===0)st='pier';else if(pos===2&&bay%3===1)st='win';else if(base==='ivy'&&pos===4)st='moss';
+    if(bay%4===2)wh=3.8;                                  // every fourth bay stands a little lower, so the skyline steps
+    paintWall(x,y,st,wh)}
   B.forEach(bd=>{for(const x of bd.cells){const wh=bd.h2-(bd.h-.7)+.6,r=hs(x,bd.y,12);
     paintWall(x,bd.y-5,r<.35?'ivy':r<.6?'moss':r<.8?'brick':'ash',wh)}});
   /* castle foundation wall on the north bank of the ravine (low, so the sky shows over it), and the gate wall with its towers */
@@ -72271,67 +72284,93 @@ function psgBuildApproach(info){
   for(let x=25;x<=39;x++)if(!open(x,7))paintWall(x,7,x%3===0?'win':'ash',(x>=29&&x<=35)?3.2:2.4);
   /* ---- 5. the doors (the contract table): back to Sale, the Great Gate ---- */
   C.links({style:{'Sale':'gate','Great Gate':'great'}});
-  /* ---- 6. dressing ---- */
+  /* ---- 6. dressing ---- THE PLAN: every leg is a lane two squares wide; the NORTH row (the lane's fence side) is the path and carries nothing that blocks and nothing tall; everything that stands is on the SOUTH row against the wall, in a rhythm
+     (buttress, statue niche, lantern post, arch, vine curtain, plinth, gnarled tree ...) that begins at a different place on every leg, with one landmark per leg and plain wall between. */
   const pit=(x,y)=>block[ix(x,y)]&&open(x,y);
   const lamp=(x,y,col)=>{C.dec('gy_lantern',x,y,{block:false});C.light(x,y,col||SI)};
   const FENCE=['iron_fence_a','iron_fence_b'];
+  const D=(k,x,y,o)=>C.free(x,y)?C.dec(k,x,y,o):null,T=k=>psgToned(k);
+  const post=(x,y,col)=>{C.prop('pillar_lantern',x,y,{block:false,sc:.8});C.light(x,y,col||[.9,.7,1.1])};   // a finished post with its own hanging lantern (instead of a bare column)
+  /* the pit bands: an iron fence along the lane, a lantern post in it now and then, sparse growth in the pit (clumps, not a carpet) */
   B.forEach((bd,k)=>{
     bd.cells.forEach((x,i)=>{
-      C.prop(FENCE[(x+k)&1],x,bd.y-1,{block:false,maxW:1.02});
+      if(i%9===4&&x>bd.cells[0]+1&&x<bd.cells[bd.cells.length-1]-1){post(x,bd.y-1,[.6,.85,1.0])}
+      else C.prop(FENCE[(x+k)&1],x,bd.y-1,{block:false,maxW:1.02});
+      const cl=hs((x/3)|0,bd.y,40)<.5;                                   // clumps three squares wide, every other clump bare
       for(let y=bd.y-4;y<=bd.y-2;y++){const r=hs(x,y,41);
-        if(r<.16)C.prop('rose_pale',x,y,{block:false,sc:.9+hs(x,y,42)*.4});
-        else if(r<.27)C.prop('ivy_clump',x,y,{block:false});
-        else if(r<.34)C.prop('moss_rock',x,y,{block:false});
-        else if(r<.38)C.dec('gy_bones',x,y,{block:false,sc:.7});
-        else if(r<.42)C.dec('gy_dead',x,y,{block:false,sc:.9+hs(x,y,43)*.4})}
-      if(hs(x,bd.y,44)<.34)C.picture(hs(x,bd.y,45)<.5?'vine_a':'vine_b',x,bd.y-4,[0,-1]);   // vines hang down the retaining wall
-      if(i%9===4){C.alcove(x,bd.y-4,['alcove_weeper','alcove_monk','alcove_knight','alcove_maiden'][(i+k)&3],[0,-1])}
-      if(i%8===2){lamp(x,bd.y-1);}
+        if(cl&&r<.3)C.prop('rose_pale',x,y,{block:false,sc:.9+hs(x,y,42)*.4});
+        else if(cl&&r<.42)C.prop('ivy_clump',x,y,{block:false});
+        else if(!cl&&r<.07)C.prop('moss_rock',x,y,{block:false});
+        else if(r>.97)C.dec('gy_bones',x,y,{block:false,sc:.7});
+        else if(r>.94)C.dec('gy_dead',x,y,{block:false,sc:.9+hs(x,y,43)*.4})}
+      if(i%14===9)C.dec(T('gy_dead'),x,bd.y-3,{block:false,sc:1.6+hs(x,bd.y,46)*.4});   // a gnarled yew growing out of the pit, seen over the fence
+      if(x%4===1&&hs((x/4)|0,bd.y,44)<.3)C.picture(hs(x,bd.y,45)<.5?'vine_a':'vine_b',x,bd.y-4,[0,-1]);   // a vine curtain down the retaining wall, here and there
+      if(i%13===6){C.alcove(x,bd.y-4,['alcove_weeper','alcove_monk','alcove_knight','alcove_maiden'][(i+k)&3],[0,-1])}
       if(i%11===5)C.light(x,bd.y-3,[.35,.9,.5])});   // a cold glow far down in the pit
   });
+  /* the Pilgrim Steps: parapets of iron fence down both sides, an arch over the first flight, a lantern post at each foot, nothing on the stair itself */
+  for(const x of [PSG_GRAND[0]-1,PSG_GRAND[1]+1])for(let y=46;y<=50;y++)C.prop(FENCE[(x+y)&1],x,y,{block:false,maxW:1.02});
+  C.archway(32,48,'arch_high');post(PSG_GRAND[0]-1,51,[1.1,.95,.7]);post(PSG_GRAND[1]+1,51,[1.1,.95,.7]);
   for(let x=35;x<=46;x++)C.prop(FENCE[x&1],x,22,{block:false,maxW:1.02});
   for(let x=5;x<=58;x+=3){if(x>=28&&x<=36)continue;C.prop('rose_pale',x,17+((x/3)&3),{block:false,sc:.8})}     // the ravine: wild roses on its ledges
   for(let x=6;x<=58;x+=5){if(x>=26&&x<=38)continue;C.dec('gy_dead',x,18+((x/5)&3),{block:false,sc:1+hs(x,5,2)*.4})}
   for(const x of [10,18,26,38,46,54])C.light(x,19,[.3,.8,.5]);
-  /* the plaza: Pilgrim's Landing */
-    C.prop('st_veiled',30,53,{block:true});C.prop('st_headless',34,53,{block:true});
+  /* the plaza: Pilgrim's Landing (the statue pair, the two signs, the waymark; the middle stays clear from the door to the foot of the steps) */
+  C.prop('st_veiled',30,53,{block:true});C.prop('st_headless',34,53,{block:true});
   C.sign(33,53,[0,1],'THE PALE ROAD','To the castle of the Pale Sovereign');C.sign(31,53,[0,1],'SALE','Back through the west gate');
-  lamp(28,50);lamp(36,50);lamp(28,53,SI);lamp(36,53,SI);
+  lamp(28,51);lamp(36,50);
   C.vines(29,53,{});C.vines(35,53,{});C.prop('urn_big',28,53,{block:true});C.prop('urn_big',36,53,{block:true});
   C.grave(36,51,'psg_waymark',['THE PALE SPIRE','CASTLE OF THE','PALE SOVEREIGN'],{h:1.25,npc:'psg_waymark'});
-  /* L1 */
-  C.archway(24,51,'arch_ivy');C.archway(14,52,'arch_iron');
-  for(const x of [10,18,22])C.alcove(x,52,['alcove_monk','alcove_weeper','alcove_empty'][x%3],[0,1]);
-  lamp(8,51);lamp(26,52);lamp(16,51);C.prop('st_hand',20,51,{block:true});
-  /* connector 1 */
-  C.archway(6,48,'arch_stair');C.vineWall(6,46,6,50,[-1,0]);C.vines(7,47,{});lamp(7,49);
-  /* L2 */
-  C.archway(15,44,'arch_high');C.archway(30,45,'arch_ivy');C.archway(44,44,'arch_low');
-  C.prop('well_pale',24,45,{block:true});C.prop('cart_old',38,45,{block:true});
-  for(const x of [9,20,34,47])C.alcove(x,45,['alcove_maiden','alcove_knight','alcove_empty','alcove_weeper'][(x>>2)&3],[0,1]);
-  C.vineWall(8,44,10,44,[0,-1]);lamp(12,44);lamp(27,45);lamp(41,44);lamp(48,45);C.prop('st_gargoyle',32,44,{block:true});
-  /* connector 2 */
-  C.archway(51,41,'arch_stair');C.vineWall(52,39,52,43,[1,0]);C.vines(51,40,{});lamp(51,42);
-  /* L3 */
-  C.archway(20,37,'arch_high');C.archway(40,38,'arch_ivy');C.archway(47,37,'arch_low');
-  for(const x of [15,25,36,43])C.alcove(x,38,['alcove_knight','alcove_maiden','alcove_weeper','alcove_monk'][(x>>1)&3],[0,1]);
-  lamp(18,38);lamp(34,37);lamp(44,38);C.prop('statue_plinth',24,38,{block:true});C.prop('rose_arch',38,37,{block:false});
-  /* connector 3 */
-  C.archway(12,34,'arch_stair');C.vineWall(12,32,12,36,[-1,0]);C.vines(13,33,{});lamp(13,35);
-  /* L4 */
-  C.archway(17,30,'arch_ivy');C.archway(38,31,'arch_high');
-  for(const x of [14,22,33,42])C.alcove(x,31,['alcove_empty','alcove_knight','alcove_maiden','alcove_monk'][(x>>1)&3],[0,1]);
-  lamp(16,30);lamp(31,31);lamp(40,30);C.vineWall(14,30,16,30,[0,-1]);C.prop('st_veiled',34,31,{block:true});
+  /* the connectors: a stair arch, vines on the wall and one lantern each */
+  for(const [cx,cy,wd,vx,vy,lx,ly2] of [[6,48,[-1,0],7,47,7,49],[51,41,[1,0],51,40,51,42],[12,34,[-1,0],13,33,13,35],[45,27,[1,0],45,26,46,28]]){C.archway(cx,cy,'arch_stair');C.vineWall(wd[0]<0?cx:cx+1,cy-2,wd[0]<0?cx:cx+1,cy+2,wd);C.vines(vx,vy,{});lamp(lx,ly2)}
+  /* the rhythm engine: along the south wall of each leg, kinds in a fixed order, spaced four to six squares, skipping the reserved places */
+  const SEQ=['butt','alc','post','arch','butt','vine','alc','plin','tree','butt','post','alc'],STEP=[4,5,4,6,5,4,5];
+  const ALC=['alcove_knight','alcove_weeper','alcove_maiden','alcove_monk','alcove_empty'],ARC=['arch_ivy','arch_high','arch_low','arch_iron'];
+  const RES=[[0,28,99],[1,PSG_GRAND[0]-2,PSG_GRAND[1]+2],[1,34,38],[1,40,44],[3,23,27],[2,45,49],[4,29,35]];   // [leg, from x, to x]: the plaza, the foot of the steps, the wayside shrine, nook A's door, the high shrine, nook B's door, the bridgehead
+  PSG_LEG.forEach(([ly,h,x0,x1],k)=>{const sy=ly+1,conn=[].concat(k>0?[PSG_CONN[k-1]]:[],k<4?[PSG_CONN[k]]:[]);let x=x0+2+k*2,i=k*5,n=0;
+    while(x<=x1-2){
+      const bad=conn.some(c=>x>=c[0]-2&&x<=c[1]+2)||RES.some(r=>r[0]===k&&x>=r[1]&&x<=r[2])||!open(x,sy)||(k===0&&x>=28);
+      if(!bad){const kind=SEQ[i%SEQ.length];i++;n++;
+        if(kind==='butt')C.prop(x%2?'buttress_a':'buttress_b',x,sy,{block:false});
+        else if(kind==='alc')C.alcove(x,sy,ALC[(x+k)%ALC.length],[0,1]);
+        else if(kind==='post'){post(x,sy)}
+        else if(kind==='arch'){C.archway(x,sy,ARC[(k+n)%ARC.length]);C.light(x,sy,[.5,.9,.8])}
+        else if(kind==='vine'){C.vineWall(x-1,sy,x+1,sy,[0,1]);C.vines(x,sy,{})}
+        else if(kind==='plin'){C.prop('statue_plinth',x,sy,{block:true})}
+        else if(kind==='tree'){D(pspPic('moss_rock'),x,sy,{block:false,sc:.6})}}
+      x+=STEP[(i+k)%STEP.length]}});
+  /* ---- 6b. the five legs, each with one landmark and its own light ---- */
+  /* leg 1: the ruined shrine to the west: a saint on a plinth between two lantern posts, a pale rose, fallen stone, a warm light */
+  C.prop('statue_plinth',16,52,{block:true});C.prop('st_saint2',16,52,{block:true,sc:.8,bob:1.6});post(13,52,[1.4,1,.6]);post(19,52,[1.4,1,.6]);
+  C.prop('rose_pale',14,52,{block:false,sc:1.1});C.prop('rose_pale',18,52,{block:false,sc:.95});C.light(16,51,[1.6,1.1,.6]);
+  lamp(10,51);
+  /* leg 2: the graveyard, a few stones and crosses spaced unevenly, two old yews, green mist */
+  [[12,'gy_ccross'],[18,'gy_stone1'],[27,'gy_tomb'],[41,'gy_wcross'],[47,'gy_stone2']].forEach(([x,k],i)=>D(T(k),x,45,{block:false,sc:.95+(i%2)*.1}));
+    C.light(18,44,[.5,1.1,.7]);C.light(40,45,[.5,1.1,.7]);
+  /* leg 3: the aqueduct leg: three stone arches span the lane, cold blue light, the gully bridge in the middle */
+  for(const x of [17,26,45])D(pspPic('bridge_arch'),x,x%2?37:38,{block:false});C.light(24,37,[.6,.9,1.3]);C.light(44,38,[.6,.9,1.3]);
+  /* leg 4: the statue avenue, five saints and judges on the south wall with plain wall between */
+  [[15,'st_veiled'],[20,'st_bishop'],[27,'st_judge'],[36,'st_mourners'],[42,'st_hand']].forEach(([x,n])=>D(pspPic(n),x,31,{block:true}));C.light(21,30,SI);C.light(37,30,SI);
+  for(const [x,y] of [[4,16],[4,21],[59,16],[59,21],[4,18],[59,18]])C.dec(pspPic('moss_rock'),x,y,{block:false});   // (the ravine corners are not chest spots)
+  C.fence(31,16,31,21,{sc:1.1});C.fence(33,16,33,21,{sc:1.1});   // the Long Bridge: iron parapets both sides
+  /* leg 5: the drowned terrace: wet flags, moss and urns on the south wall, cyan light */
+  C.setFloor(34,23,46,24,'wet');for(const x of [35,41,45])D(pspPic(x%2?'moss_rock':'ivy_clump'),x,23,{block:false});for(const x of [38,43])D(pspPic('urn_big'),x,24,{block:true,sc:.9});C.light(36,23,[.5,1.3,1.3]);C.light(44,24,[.5,1.3,1.3]);
+  /* the lanes' own lights, one lantern at each end of a long leg */
+  lamp(8,51);lamp(8,45);lamp(48,45);lamp(14,38);lamp(50,38);lamp(14,31);lamp(44,31);lamp(31,24);lamp(43,24);
+  /* two wayside shrines (a calm safe zone, a bench, a lantern, a free rest), a third and two thirds of the way up */
+  const shrine=(x0,y,name,line)=>{const id='psg_bench_'+x0+'_'+y;C.safe.push({rect:1,x0,y0:y,x1:x0+2,y1:y+1});C.rests.push({x0,y0:y,x1:x0+2,y1:y+1,line,name});
+    C.light(x0+1,y,C.warmCol);if(!NPCS[id])khNpc(id,'A pilgrim bench','gy_bench',()=>say('A stone bench under a small shrine of the Pale Mother, with a lantern that does not flicker. Somebody has left a loaf and a cup of water. The cold stays on the road.',[['Rest here (free).',()=>{G.talk=null;restParty(true);return say('You rest a while on the bench. Everyone wakes healed and fed.',[BYE])}],BYE]));
+    C.dec('gy_bench',x0+1,y+1,{block:true,npc:id,sc:1.1});D(pspPic('lantern_red_a'),x0,y,{block:false});D(pspPic('statue_plinth'),x0+2,y+1,{block:true})};   // (bench and plinth both on the south row: the north row of the lane stays open)
+  shrine(35,44,'The Wayside Shrine','A wayside shrine. A bench, a warm lantern, a loaf and a cup. Nothing hostile comes near.');
+  shrine(24,30,'The High Shrine','A second shrine, higher up the road. A bench and a lantern. Nothing hostile comes near.');
   /* the cairn niche (quest psq1) */
   C.thing('gy_mound','psg_cairn',27,28,{sc:1.6});
   for(const [dx,dy,k] of [[-1,0,'bl_stone1'],[1,1,'bl_lean'],[0,-1,'bl_stone2']])C.dec(k,27+dx,28+dy,{block:true,sc:.7});
   C.picture('alcove_weeper',27,27,[0,-1]);lamp(26,29);C.vines(29,27,{});
-  /* connector 4 */
-  C.archway(45,27,'arch_stair');C.vineWall(46,25,46,29,[1,0]);C.vines(45,26,{});lamp(46,28);
   /* L5 and the bridgehead */
-  C.archway(38,23,'arch_ivy');C.archway(32,22,'arch_high');
+  C.archway(32,22,'arch_high');
   for(const x of [34,41,44])C.alcove(x,24,['alcove_knight','alcove_weeper','alcove_maiden'][x%3],[0,1]);
-  lamp(31,24);lamp(36,23);lamp(43,24);C.vines(31,22,{});C.vines(33,22,{});C.prop('urn_big',31,23,{block:true});C.prop('urn_big',33,23,{block:true});
+  C.vines(31,22,{});C.vines(33,22,{});C.prop('urn_big',31,23,{block:true});C.prop('urn_big',33,23,{block:true});
   C.sign(30,23,[-1,0],'THE LONG BRIDGE','Keep to the middle. The rail is old.');
   /* the Long Bridge: lamps on the rails, a statue at each end, arches below the deck are drawn by the kit */
   for(const y of [17,20]){C.dec('gy_lantern',31,y,{block:false});C.light(31,y,GR);C.dec('gy_lantern',33,y,{block:false});C.light(33,y,GR)}
@@ -72350,35 +72389,12 @@ function psgBuildApproach(info){
   C.prop('gate_clock',32,8,{block:false,sc:.55});C.prop('castle_view',32,7,{block:false,sc:.65});if(!IMG[pspPic('gate_clock')]||IMG[pspPic('gate_clock')]._ps){C.prop('clock_face',32,7,{block:false,bob:2.3});C.prop('banner_long_a',31,7,{block:false,bob:.3});C.prop('banner_long_b',33,7,{block:false,bob:.3})}C.light(32,8,PAL.brassHi?[1.1,.8,.45]:SI);
   C.vineWall(26,8,28,8,[0,-1]);C.vineWall(36,8,38,8,[0,-1]);C.light(27,11,GR);C.light(37,11,GR);
   psgHaunt(C,[['red','lantern_red_a',30,9],['red','lantern_red_b',34,9],['red','lantern_red_a',31,16],['red','lantern_red_b',33,16],['red','lantern_red_a',30,23],['red','lantern_red_b',35,51],['red','lantern_red_a',29,51],['prop','cobweb_thick_a',32,9]]);
-  /* canyon street: buttresses lean against the lane walls, spaced along each leg */
-  for(const [y,xs] of [[52,[10,14,24]],[45,[10,18,26,36,42,48]],[38,[14,22,30,45,50]],[31,[14,20,26,32,41,44]],[24,[33,39,45]]])for(const x of xs)C.prop(x%2?'buttress_a':'buttress_b',x,y,{block:false});
-  /* ---- 6b. the five legs, each with its own landmark and light ---- */
-  const D=(k,x,y,o)=>C.free(x,y)?C.dec(k,x,y,o):null,T=k=>psgToned(k);
-  /* leg 1: the ruined shrine (broken columns, a candelabrum, rubble, warm amber light) */
-  for(const x of [15,27])C.prop('col_fluted',x,52,{block:true});C.prop('col_fluted',8,52,{block:false,sc:.9});for(const x of [11,16,21])C.prop('cobble_heap',x,51,{block:false});C.prop('candelabra_tall',15,52,{block:false});C.light(15,52,[1.6,1.1,.6]);C.light(10,51,[1.4,1,.6]);
-  /* leg 2: the graveyard (crosses, stones, a dead yew, green mist) */
-  [12,15,19,22,27,35,41,44,49].forEach((x,i)=>{D(T(['gy_ccross','gy_stone1','gy_wcross','gy_tomb','gy_stone2'][i%5]),x,45,{block:false,sc:.95});if(i%3===0)D(T('gy_dead'),x+1,44,{block:false,sc:1.3})});
-  C.light(18,44,[.5,1.1,.7]);C.light(40,45,[.5,1.1,.7]);
-  /* leg 3: the aqueduct leg (stone arches span the lane, cold blue light) */
-  for(const x of [15,26,34,44])D(pspPic('bridge_arch'),x,x%2?37:38,{block:false});C.light(24,37,[.6,.9,1.3]);C.light(44,38,[.6,.9,1.3]);
-  /* leg 4: the statue avenue (a line of saints and judges down the south side) */
-  [15,19,24,29,35,39,43].forEach((x,i)=>D(pspPic(['st_veiled','st_bishop','st_judge','st_mourners','st_headless','st_hand','st_veiled'][i]),x,31,{block:true}));C.light(21,30,SI);C.light(37,30,SI);
-  for(const [x,y] of [[4,16],[4,21],[59,16],[59,21],[4,18],[59,18]])C.dec(pspPic('moss_rock'),x,y,{block:false});   // (the ravine corners are not chest spots)
-  C.fence(31,16,31,21,{sc:1.1});C.fence(33,16,33,21,{sc:1.1});   // the Long Bridge: iron parapets both sides
-  /* leg 5: the drowned terrace (wet flags, still pools of moss, urns, cyan light) */
-  C.setFloor(34,23,46,24,'wet');for(const x of [35,38,42,45])D(pspPic(x%2?'moss_rock':'ivy_clump'),x,24,{block:false});for(const x of [37,40,44])D(pspPic('urn_big'),x,23,{block:true,sc:.9});C.light(36,23,[.5,1.3,1.3]);C.light(44,24,[.5,1.3,1.3]);
-  /* two wayside shrines (a calm safe zone, a bench, a lantern, a free rest), a third and two thirds of the way up */
-  const shrine=(x0,y,name,line)=>{const id='psg_bench_'+x0+'_'+y;C.safe.push({rect:1,x0,y0:y,x1:x0+2,y1:y+1});C.rests.push({x0,y0:y,x1:x0+2,y1:y+1,line,name});
-    C.light(x0+1,y,C.warmCol);if(!NPCS[id])khNpc(id,'A pilgrim bench','gy_bench',()=>say('A stone bench under a small shrine of the Pale Mother, with a lantern that does not flicker. Somebody has left a loaf and a cup of water. The cold stays on the road.',[['Rest here (free).',()=>{G.talk=null;restParty(true);return say('You rest a while on the bench. Everyone wakes healed and fed.',[BYE])}],BYE]));
-    C.dec('gy_bench',x0+1,y+1,{block:true,npc:id,sc:1.1});D(pspPic('lantern_red_a'),x0,y,{block:false});D(pspPic('statue_plinth'),x0+2,y,{block:true})};
-  shrine(35,44,'The Wayside Shrine','A wayside shrine. A bench, a warm lantern, a loaf and a cup. Nothing hostile comes near.');
-  shrine(24,30,'The High Shrine','A second shrine, higher up the road. A bench and a lantern. Nothing hostile comes near.');
   /* ---- 7. hidden nooks ---- */
   C.vines(42,46,{});C.vines(42,47,{});C.prop('alcove_empty',42,48,{block:false});
   C.alcove(41,48,'alcove_weeper',[0,-1]);C.alcove(43,48,'alcove_monk',[0,-1]);C.chest(42,50,{tier:1});C.light(42,49,GR);C.prop('st_hand',40,49,{block:true});C.prop('urn_big',44,49,{block:true});
   C.vines(48,36,{});C.alcove(48,32,'alcove_knight',[0,-1]);C.alcove(49,32,'alcove_maiden',[0,-1]);C.chest(50,35,{tier:1});C.light(48,34,GR);C.prop('st_gargoyle',47,34,{block:true});C.vineWall(47,33,47,35,[-1,0]);
   C.vines(20,29,{});C.alcove(19,25,'alcove_weeper',[0,-1]);C.alcove(22,25,'alcove_empty',[0,-1]);C.chest(23,28,{tier:1});C.light(20,27,GR);
-  C.prop('col_twist',19,27,{block:true});C.prop('col_twist',22,27,{block:true});C.prop('statue_plinth',20,25,{block:true});
+  C.prop('pillar_lantern',19,27,{block:true});C.prop('pillar_lantern',22,27,{block:true});C.prop('statue_plinth',20,25,{block:true});
   /* ---- 8. the people and the things ---- */
   const nearWalk=(x,y)=>{for(let r=0;r<=3;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const a=x+dx,b=y+dy;if(C.free(a,b)&&!block[ix(a,b)])return [a,b]}return null};
   const TOK=[[35,52,'gy_ring'],[10,51,'gy_locket'],[7,48,'gy_ring'],[20,45,'gy_book'],[44,48,'gy_bell'],[40,38,'gy_locket'],[50,34,'gy_ring'],[38,31,'gy_ring'],[26,12,'gy_book']];

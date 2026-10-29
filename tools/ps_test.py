@@ -6,7 +6,7 @@ links   every PSP.LINKS entry whose from-level is built: the portal square is a 
 reach   flood fill from every arrival (locks and the sacristy lever counted open): no open square is cut off; no creature in a safe zone, a rest room or within 8 of the Waystone; rest rooms hold no creature
 key     the stair doors: each lock:'pskey2' link is an iron door that refuses without the key, and with it either goes through or says the far side is sealed; pskey2 is defined; the Second Floor Key flag
 quests  every quest psq1 to psq38 that is defined has a title, a giver, a reward, the Pale Lands area, a ring (QRF.T) and a giver mark; lists the undefined ones
-walk    the party walks (teleport squares) from the arrival of each built level to each of its door tiles through the real grid (G.grid) and back
+walk    the party walks from the arrival of each built level to each of its door tiles and back through the real rules: G.grid, solid decor (cellBlocked), terrace block cells and, on terraced levels, the step limit (terrStepOK); terraced levels are walked for real with doMove
 save    a game saved in each built level loads again in the same level
 dash    no em dash in any ps file, the notes or the manifest
 shots   screenshots of each built level (and the ids given)
@@ -187,17 +187,34 @@ def run_quests():
         b.close()
 
 
+WALK_JS = """async (id) => { const o = {bad: [], doors: 0}; const L = LEVELS[id];
+  const W = MW, H = MH, D = [[0,-1],[1,0],[0,1],[-1,0]];
+  // the REAL rules of a step: the grid, solid decor (cellBlocked), the terrace block cells and, on a terraced level, the step limit between two cells' heights (terrStepOK, TERR_MAXSTEP)
+  const ok = (x, y, nx, ny) => nx >= 0 && ny >= 0 && nx < W && ny < H && G.grid[ny][nx] === 0 && !(typeof cellBlocked === 'function' && cellBlocked(nx, ny)) && !(TERR_BLOCK && TERR_BLOCK[ny * W + nx]) && terrStepOK(x, y, nx, ny);
+  const par = new Map([[G.P.x + ',' + G.P.y, null]]), q = [[G.P.x, G.P.y]];
+  for (let i = 0; i < q.length; i++) { const [x, y] = q[i]; for (const [a, b] of D) { const nx = x + a, ny = y + b, k = nx + ',' + ny; if (!par.has(k) && ok(x, y, nx, ny)) { par.set(k, x + ',' + y); q.push([nx, ny]) } } }
+  o.reached = par.size; o.terr = !!TERR_STEP;
+  if (TERR_STEP) { let mx = 0; for (const k of par.keys()) { const [x, y] = k.split(',').map(Number); for (const [a, b] of D) { const nx = x + a, ny = y + b; if (par.has(nx + ',' + ny)) mx = Math.max(mx, Math.abs(TERR_STEP.h[ny * W + nx] - TERR_STEP.h[y * W + x])) } } o.maxStep = +mx.toFixed(2); if (mx > TERR_MAXSTEP + 1e-3) o.bad.push('a walkable step of ' + mx.toFixed(2) + ' is over the limit') }
+  const links = PSP.LINKS.filter(l => l.from === id && l.at), goals = [];
+  for (const l of links) { o.doors++; const [x, y] = l.at; const nb = D.map(([a, b]) => [x + a, y + b]).filter(([a, b]) => par.has(a + ',' + b)); if (!nb.length) o.bad.push('door ' + l.at + ' not reached from the start'); else goals.push(nb[0]) }
+  // walk it for real: doMove along the shortest path to each door, with the creatures set aside, and back to the start (this finds a stair that is too steep, or a prop on a tread)
+  const savedE = G.enemies; G.enemies = []; const sx = G.P.x, sy = G.P.y, sf = G.P.f;
+  const walk = async (tgt) => { const tk = tgt[0] + ',' + tgt[1]; const path = []; const pp = new Map([[G.P.x + ',' + G.P.y, null]]), qq = [[G.P.x, G.P.y]];
+    for (let i = 0; i < qq.length; i++) { const [x, y] = qq[i]; for (const [a, b] of D) { const nx = x + a, ny = y + b, k = nx + ',' + ny; if (!pp.has(k) && ok(x, y, nx, ny)) { pp.set(k, x + ',' + y); qq.push([nx, ny]) } } }
+    if (!pp.has(tk)) return 'no path'; for (let k = tk; k; k = pp.get(k)) path.unshift(k.split(',').map(Number));
+    for (let i = 1; i < path.length; i++) { const [px, py] = path[i], f = D.findIndex(d => d[0] === px - G.P.x && d[1] === py - G.P.y); G.P.f = f; G.P.angT = (f - 1) * Math.PI / 2; G.C.a = G.P.angT; doMove(0); if (G.P.x !== px || G.P.y !== py) return 'stuck at ' + G.P.x + ',' + G.P.y + ' wanting ' + px + ',' + py + ': ' + ((G.msgs || []).slice(-1)[0] || {}).text }
+    return 'ok' };
+  if (TERR_STEP) for (const g of goals) { const a = await walk(g); if (a !== 'ok') { o.bad.push('walk to door ' + g + ' ' + a); break } const b = await walk([sx, sy]); if (b !== 'ok') { o.bad.push('walk back from door ' + g + ' ' + b); break } }
+  G.enemies = savedE; G.P.x = sx; G.P.y = sy; G.P.f = sf; return o }"""
+
+
 def run_walk():
     with sync_playwright() as p:
         b, pg, errs = boot(p)
         for id_ in only(pg.evaluate(BUILT)):
             enter(pg, id_)
-            r = pg.evaluate("""(id) => { const L = LEVELS[id], o = {bad: [], doors: 0};
-          const W = G.grid[0].length, H = G.grid.length; const reach = new Set([G.P.x + ',' + G.P.y]); const q = [[G.P.x, G.P.y]];
-          for (let i = 0; i < q.length; i++) { const [x, y] = q[i]; for (const [a, b] of [[1,0],[-1,0],[0,1],[0,-1]]) { const nx = x + a, ny = y + b, k = nx + ',' + ny; if (reach.has(k) || nx < 0 || ny < 0 || nx >= W || ny >= H || G.grid[ny][nx] !== 0 || (typeof cellBlocked === 'function' && cellBlocked(nx, ny))) continue; reach.add(k); q.push([nx, ny]) } }
-          for (const l of PSP.LINKS.filter(l => l.from === id && l.at)) { o.doors++; const [x, y] = l.at; const nb = [[1,0],[-1,0],[0,1],[0,-1]].some(([a, b]) => reach.has((x + a) + ',' + (y + b))); if (!nb && !PSP.LINKS.some(t => t.to === id && t.land && t.land[0] === l.at[0])) o.bad.push('door ' + l.at + ' not reached from the start') }
-          o.reached = reach.size; return o }""", id_)
-            check('walk %d (%d squares, %d doors)' % (id_, r['reached'], r['doors']), not r['bad'], r['bad'])
+            r = pg.evaluate(WALK_JS, id_)
+            check('walk %d (%d squares, %d doors%s)' % (id_, r['reached'], r['doors'], ', terraced, highest step %s, walked for real' % r.get('maxStep') if r['terr'] else ''), not r['bad'], r['bad'])
         check('no page errors', not real(errs), real(errs)[:8])
         b.close()
 
