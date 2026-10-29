@@ -17,7 +17,7 @@ const BKS={off:false,lv:0,ready:false,pan:null,back:null,pan32:null,back32:null,
   next:0,strike:null,thunderQ:[],strikes:0,thunders:0,f:0,hold:null,force:null,   // test hooks: force=[wet 0/1, strength], hold=flash ms
   rainSrc:null,rainG:null,hissSrc:null,hissG:null,hissF:null,lampK:0,lampN:0,fr:0,wind:0,
   reduced:(()=>{try{return !!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)}catch(e){return false}})()};
-const bksIs=n=>(n>=9610&&n<=9709)||n===600||n===9720;   // 9720 = the Pale Approach (Pale Spire package 1): same sky engine, bruised violet with a red tinge, kept dry by ps_gate.js
+const bksIs=n=>(n>=9610&&n<=9709)||n===600;   // (9720, the Pale Approach, now has the kit sky of ps_kit.js)
 /* a room of the road above ground (not the Vault's floors, not a cellar or a crypt): the rain is heard through the roof */
 function bksIndoor(){
   if(BKS.off||typeof LEVEL==='undefined'||G.state!=='play'||!BKS.arrived||!(LEVEL>=9610&&LEVEL<=9709)||(LEVEL>=9671&&LEVEL<=9678))return false;
