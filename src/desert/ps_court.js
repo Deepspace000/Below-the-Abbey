@@ -289,7 +289,7 @@ Object.assign(ENEMY_DEF,{
   pshedger:pscE('pshedger',{name:'Hollow Gardener',hp:66,dmg:[7,12],verb:'shears',xp:32,wander:true,roam:6}),
   psthornsprite:pscE('psthornsprite',{name:'Thorn Sprite',hp:30,dmg:[5,9],speed:2,verb:'pricks',xp:24,pscs:1,wake:'Something small and green uncurls from the hedge, holding a thorn like a spear.'}),
   psmoth:pscE('psmoth',{name:'Pale Moth Swarm',hp:34,dmg:[4,8],speed:2,fly:true,floatH:.3,verb:'dusts',xp:28,pscs:1,wake:'The white flowers lift off their stems. They were moths, and now they are in your eyes.',blind:1}),
-  psraven:pscE('psraven',{name:'Pale Raven',hp:40,dmg:[6,10],speed:2,fly:true,floatH:.3,verb:'stabs',xp:28,pscfeather:1}),
+  psraven:pscE('psraven',{name:'Pale Raven',hp:40,dmg:[6,10],speed:2,fly:false,floatH:0,verb:'stabs',xp:28,pscfeather:1}),
   /* the five slow wanderers (hp is a size: bosses are about 0.5 to 0.7 of Maldrake scaled up, tuned by eye) */
   pscolossus:pscE('pscolossus',{name:'The Weeping Colossus',hp:560,dmg:[11,17],hit:.9,verb:'crushes',xp:900,boss:true,aboveParty:0,pscwalk:1}),
   psgargmother:pscE('psgargmother',{name:'Mother Gargoyle',hp:450,dmg:[9,15],hit:.9,speed:2,fly:true,floatH:.3,verb:'rakes',xp:800,boss:true,aboveParty:0,pscwalk:1}),
