@@ -353,14 +353,14 @@ const PSD_GREEN=[.7,1.2,.85],PSD_FIRE=[.6,1.35,.75],PSD_DIM=[.55,1.0,.75],PSD_FR
 function psdGate(C,key,x,y,who,note){
   const nid='psd_cell'+key;PSD.cells[key]={who,note,x,y,level:C.id};
   if(!NPCS[nid]){const pn=who&&NPCS[who];khNpc(nid,pn?pn.name:'A cell door',pn?pn.img:'gy_igate2',d=>psdGateTalk(key,d))}
-  return C.P('cell_door',x,y,{block:true,npc:nid,sc:.7,raw:true})}
+  return C.P('cell_door',x,y,{block:true,npc:nid,sc:.9,raw:true})}
 /* a living prisoner behind the gate (the picture is p_<name>) */
 function psdPerson(C,who,pic,x,y){return C.P('p_'+pic,x,y,{block:true,npc:who,raw:true,sc:1})}
 /* a cell furnished. The gate is at (gx,gy); the cell runs three squares away from it in the direction (dx,dy). */
 function psdCell(C,key,gx,gy,dx,dy,who,pic,note,extra){
   const px=-dy,py=dx,at=k=>[gx+dx*k,gy+dy*k],mid=at(2),back=at(3);
   psdGate(C,key,gx,gy,who,note);
-  C.P('straw_bed',back[0]-px,back[1]-py,{});C.P(['bucket_well','chains','barrels','cage','bones'][((gx*7+gy*3)>>1)%5],back[0]+px,back[1]+py,{sc:.6});
+  C.P('straw_bed',back[0]-px,back[1]-py,{});C.P(['bucket_well','chains','bones'][((gx*7+gy*3)>>1)%3],back[0]+px,back[1]+py,{sc:.55});
   if(who){psdPerson(C,who,pic,mid[0],mid[1]);C.light(mid[0],mid[1],PSD_FRIEND)}
   if(extra)extra(C,mid[0],mid[1],back,at)}
 /* a rest nook for each dungeon floor: a straw pallet, a candle, a warm pool of light, no foe within a few squares; the party sleeps free */
@@ -493,10 +493,10 @@ PSD.SPEC[9800]={pt:'brick_dark',pg:2.1,prgb:[.55,.92,.72],brick:'texBlack',gain:
   /* the shaft foot: far above, one grey shaft of light; roots hang down the walls */
   sign(7,3,[0,-1],'THE OUBLIETTE','What is put down here is forgotten');
   psdRest(C,[[10,5],[6,5],[9,6],[7,6]],'The shaft foot');
-  dec('gy_nameplate',5,5,{block:true,npc:'psd_stone4',sc:1,raw:true});dec('bench',11,5,{sc:.8});P('brazier',12,4,{});light(12,4,PSD_FIRE);P('chains',5,3,{});dec('web',4,3,{sc:.55});dec('bones',10,8,{sc:.8});P('moss_rock',6,8,{});twig(9,7,.9);
-  light(8,5,[.9,1.4,1.05]);light(8,7,[.8,1.3,1]);P('st_mourners',4,8,{block:true});
+  dec('gy_nameplate',5,5,{block:true,npc:'psd_stone4',sc:1,raw:true});P('brazier',12,4,{});light(12,4,PSD_FIRE);P('chains',5,3,{});dec('web',4,3,{sc:.55});dec('bones',10,8,{sc:.4});P('moss_rock',6,8,{});twig(9,7,.9);
+  light(8,5,[.9,1.4,1.05]);light(8,7,[.8,1.3,1]);
   /* the winding way */
-  P('chains',8,9,{});dec('bones',9,10,{sc:.7});twig(11,10);light(9,9,PSD_DIM);light(13,10,PSD_DIM);
+  P('chains',8,9,{});twig(11,10);light(9,9,PSD_DIM);light(13,10,PSD_DIM);
   /* the ring passage: bones in drifts, shackle posts, green fires at the corners */
   const who=[['psd_gaunt','gaunt'],['psd_stamford','stamford'],['psd_yseult','yseult']];
   const defs=[{who:0},{who:1},{note:'The door opens. A man in the remains of a uniform is sitting against the back wall with his sword across his knees. It is a very good sword, and he has not let go of it. Under him is a small chest.',chest:1},
@@ -504,24 +504,24 @@ PSD.SPEC[9800]={pt:'brick_dark',pg:2.1,prgb:[.55,.92,.72],brick:'texBlack',gain:
     {who:2},{note:"The door opens on a heap of straw, a woman's shawl and a tin cup full of bone dust. A small chest stands in the straw.",chest:1},{note:'The cell is cold in a way that has nothing to do with the stone. Something in the corner is waiting for you to speak first.',foe:'pscellghost'}];
   const cells=[[12,15,-1],[12,19,-1],[12,23,-1],[12,27,-1],[32,15,1],[32,19,1],[32,23,1]];
   cells.forEach(([gx,gy,dx],i)=>{const cd=defs[i],w=cd.who!==undefined?who[cd.who]:null;
-    psdCell(C,'9800_'+i,gx,gy,dx,0,w?w[0]:null,w?w[1]:null,cd.note,(C,mx,my)=>{if(cd.chest)dec('chest',mx,my+1,{block:true});if(cd.foe)foe(cd.foe,mx,my)})});
+    psdCell(C,'9800_'+i,gx,gy,dx,0,w?w[0]:null,w?w[1]:null,cd.note,(C,mx,my)=>{if(cd.chest)dec('chest',mx,my+1,{block:true,sc:.6});if(cd.foe)foe(cd.foe,mx,my)})});
   for(const [x,y] of [[14,12],[30,12],[14,30],[30,30]]){P('brazier',x,y,{block:true});light(x,y,PSD_FIRE)}
   psdMany(light,[[22,12,PSD_DIM],[22,30,PSD_DIM],[14,21,PSD_DIM],[30,21,PSD_DIM],[17,12,[.9,1.35,1]],[27,12,[.9,1.35,1]],[17,30,[.9,1.35,1]],[27,30,[.9,1.35,1]]]);
-  psdMany(P,[['shackled_skeleton',14,17,{}],['shackled_skeleton',30,25,{}],['shackled_skeleton',14,25,{}],['shackled_skeleton',30,17,{}],['chains',22,12,{}],['chains',22,30,{}]]);
+  psdMany(P,[['shackled_skeleton',14,17,{sc:.65}],['shackled_skeleton',30,25,{sc:.65}],['shackled_skeleton',14,25,{sc:.65}],['shackled_skeleton',30,17,{sc:.65}],['chains',22,12,{}],['chains',22,30,{}]]);
   foe('psbonecrawl',20,12);foe('psbonecrawl',26,12);foe('psbonecrawl',14,21);foe('psbonecrawl',30,21);foe('psbonecrawl',22,31);foe('psbonecrawl',17,31);
   foe('psshackle',14,15);foe('psshackle',30,27);foe('psshackle',14,28);foe('pscellghost',18,12);foe('pscellghost',30,15);foe('pscellghost',26,31);
   /* the pit */
   /* the vault of the Second Floor Key: a strongbox on a dais at the north end of the pit, chains, a faint violet glow that can be seen from the ring passage */
-  P('dais_steps',22,18,{});P('reliquary_chest',22,17,{block:true,npc:'psd_strongbox',sc:1.15});P('chains',21,17,{});P('chains',23,17,{});P('candelabra_tall',21,18,{block:true,sc:.8});P('candelabra_tall',23,18,{block:true,sc:.8});
+  P('dais_steps',22,18,{});P('reliquary_chest',22,17,{block:true,npc:'psd_strongbox',sc:.7});P('chains',21,17,{});P('chains',23,17,{});
   light(22,18,[.9,.75,1.9]);light(22,16,[.7,.6,1.5]);
-  foe('pshunger',22,21);dec('chest',22,25,{block:true,goldAmt:9000,sc:1});
+  foe('pshunger',22,21);dec('chest',22,25,{block:true,goldAmt:9000,sc:.6});
   psdMany(P,[['shackled_skeleton',20,22,{}],['shackled_skeleton',24,22,{}],['shackled_skeleton',20,16,{}],['shackled_skeleton',24,16,{}]]);
-  for(const [x,y] of [[19,17],[25,17],[19,25],[25,25],[18,21],[26,21]])dec('bones',x,y,{sc:.9});
+  for(const [x,y] of [[19,17],[25,17],[19,25],[25,25],[18,21],[26,21]])dec('bones',x,y,{sc:.45});
   psdMany(light,[[22,19,[.7,1.2,.85]],[22,24,[.7,1.2,.85]]]);
-  for(let a=0;a<46;a++){const t=C.rng(a,3)*6.283,r=7+C.rng(a,5)*3,x=Math.round(22+Math.cos(t)*r*1.2),y=Math.round(21+Math.sin(t)*r*1.2);dec('bones',x,y,{sc:.6+C.rng(a,7)*.4})}
+  for(let a=0;a<18;a++){const t=C.rng(a,3)*6.283,r=7+C.rng(a,5)*3,x=Math.round(22+Math.cos(t)*r*1.2),y=Math.round(21+Math.sin(t)*r*1.2);if(x===22||y===21)continue;dec('bones',x,y,{sc:.3+C.rng(a,7)*.2})}
   for(let a=0;a<24;a++){const t=C.rng(a,13)*6.283,r=7+C.rng(a,15)*3,x=Math.round(22+Math.cos(t)*r*1.2),y=Math.round(21+Math.sin(t)*r*1.2);twig(x,y,.8)}
   /* the secret chamber behind the east wall */
-  P('st_bishop',37,30,{block:true});dec('chest',34,28,{block:true,goldAmt:4200});dec('bones',36,29,{sc:.8});dec('web',37,28,{sc:.6});twig(35,31);light(35,30,[.9,1.35,1]);
+  dec('chest',34,28,{block:true,goldAmt:4200,sc:.6});dec('bones',36,29,{sc:.4});dec('web',37,28,{sc:.6});twig(35,31);light(35,30,[.9,1.35,1]);
   }};
 /* the secret door of the Oubliette and the crawl of the Gaols open the same way */
 PSD.SPEC[9800].doors.push({x:32,y:29,kind:'secret',key:'chamber',msg:'A slab of the wall is on a counterweight. It rolls aside with a sound like a long breath, and a small room of old bone lies behind it.'});
