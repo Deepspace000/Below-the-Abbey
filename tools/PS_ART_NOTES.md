@@ -51,3 +51,10 @@ Palette now (owner, round 2): black and charcoal stone, slate blue-grey, cold te
 * h2b: lantern_red_a (h=1.2), lantern_red_b (h=2.0)
 * h2: dust_sheet_furniture_a (h=1.3), dust_sheet_furniture_b (h=1.3), web_spider (h=1.4), cobweb_corner_a (h=2.0), cobweb_corner_b (h=2.0), cobweb_thick_a (h=3.0), cobweb_thick_b (h=2.4), cobweb_thick_c (h=1.2), candles_glow_c (h=1.0), candles_glow_d (h=2.2)
 * anc: portrait_ancestor_1 (h=2.2), portrait_ancestor_2 (h=2.2), portrait_ancestor_3 (h=2.2), portrait_ancestor_4 (h=2.2), portrait_ancestor_5 (h=2.2), portrait_ancestor_6 (h=2.2), portrait_ancestor_7 (h=2.2), portrait_ancestor_8 (h=2.2)
+
+## Corbels (wall mounts for st_gargoyle)
+* corbel_gargoyle_a (grotesque face, 530x400, h 0.75 so it is 1.0 cell wide), corbel_gargoyle_b (stepped leaf corbel, h 0.65), corbel_gargoyle_c (skull face, h 0.75), wall_ledge_a (string course, 732x163, h 0.22 for 1.0 cell wide), wall_bracket_iron (black iron scroll bracket, side profile, h 0.75). Stone corbels show a little of their top face; place the gargoyle on the top edge.
+
+
+## Level-100 gear icons
+* All 26 assets/icn_pg_*.png (128x128, transparent) from tools/PS_GEAR_ICONS.md are painted with tools/ingest_icon.py. Weapons are drawn diagonally (tip upper right) to match the existing icn_ files; armour, shields and rings are front view. python tools/inject.py was NOT run (it edits index.html, outside my files): run it to rebuild ICN_FILES.

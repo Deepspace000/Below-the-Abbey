@@ -435,7 +435,9 @@ function pshFurnish(S){
   const mst=i=>{const n=['ps_st_chimera','ps_st_hydra','ps_st_judge','ps_st_headless','ps_st_bishop','ps_st_mourners','ps_st_veiled','ps_st_hound'][i%8];return IMG[n]&&!IMG[n]._ps?n:PSH.st(i)};
   PSH.mst=mst;
   const pew=(x,y)=>put(P('furn_pew_black'),x,y,{block:true});
-  const gar=(x,y,wd)=>pic(P('st_gargoyle'),x,y,wd,{bob:1.7});   // a gargoyle crouched high on a corbel
+  for(const [n,h] of [['corbel_gargoyle_a',.75],['corbel_gargoyle_b',.65],['corbel_gargoyle_c',.75]])if(!PSP_PICS[n])PSP_PICS[n]=[h,['gy_slab','gy_bench'],{}];
+  const gar=(x,y,wd)=>{const d=pic(P('st_gargoyle'),x,y,wd,{bob:1.7});if(!d)return d;   // a gargoyle crouched high, on a visible stone corbel
+    const nm=['corbel_gargoyle_a','corbel_gargoyle_b','corbel_gargoyle_c'][(x*7+y*3)%3];decor.push({k:P(nm),x,y,block:false,walk:true,deco:true,wd:[wd[0],wd[1]],pic:1,bob:1.02});return d};
   const vine=(x,y,wd,n)=>pic(P(n||'vine_a'),x,y,wd,{bob:.9});
   const alc=(x,y,n)=>put(P(n),x,y,{block:true});
   /* ===== A. the Entrance Hall ===== */

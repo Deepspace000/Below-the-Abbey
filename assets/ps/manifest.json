@@ -2289,5 +2289,45 @@
 "h": 3.4,
 "kind": "sprite",
 "sheet": "g4"
+},
+"corbel_gargoyle_a": {
+"file": "corbel_gargoyle_a.webp",
+"w": 530,
+"px_h": 400,
+"h": 0.75,
+"kind": "sprite",
+"sheet": "cb"
+},
+"corbel_gargoyle_b": {
+"file": "corbel_gargoyle_b.webp",
+"w": 611,
+"px_h": 400,
+"h": 0.65,
+"kind": "sprite",
+"sheet": "cb"
+},
+"corbel_gargoyle_c": {
+"file": "corbel_gargoyle_c.webp",
+"w": 549,
+"px_h": 400,
+"h": 0.75,
+"kind": "sprite",
+"sheet": "cb"
+},
+"wall_ledge_a": {
+"file": "wall_ledge_a.webp",
+"w": 732,
+"px_h": 163,
+"h": 0.22,
+"kind": "sprite",
+"sheet": "cb"
+},
+"wall_bracket_iron": {
+"file": "wall_bracket_iron.webp",
+"w": 537,
+"px_h": 400,
+"h": 0.75,
+"kind": "sprite",
+"sheet": "cb"
 }
 }
