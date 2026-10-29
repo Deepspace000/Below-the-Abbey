@@ -3741,7 +3741,7 @@ function giveJumpGear(target){
 }
 function jumpFromUrl(){
   const q=new URLSearchParams(location.search);let town=(q.get('town')||'').toLowerCase();town=/^(blight|palespire)\d*$/.test(town)?town:town.replace(/[^a-z]/g,'');if(!town)return;
-  const target=Math.max(1,Math.min(/^palespire/.test(town)?115:/^blight/.test(town)||town==='sale'?90:town==='witchwood'?82:town==='blackswill'||town==='gardens'?80:40,parseInt(q.get('lvl')||(/^palespire/.test(town)?'100':/^blight/.test(town)?'84':'8'),10)||8)); // blight1 to blight10: the Blighted Road (blight_road.js)
+  const target=(typeof ntJumpLevel==='function'&&ntJumpLevel(town,q))||Math.max(1,Math.min(/^palespire/.test(town)?115:/^blight/.test(town)||town==='sale'?90:town==='witchwood'?82:town==='blackswill'||town==='gardens'?80:40,parseInt(q.get('lvl')||(/^palespire/.test(town)?'100':/^blight/.test(town)?'84':'8'),10)||8)); // blight1 to blight10: the Blighted Road (blight_road.js)
   backupAuto();
   const sv=readSave('auto')||readSave('prev');
   if(sv&&!['oldhaven','oakwood','landpath','pilgrim','monastery','monasterygate','hollowland','orangetower','orangeboss','hollowgrass','kraken'].includes(town)){restore(sv)}
@@ -3769,6 +3769,7 @@ function jumpFromUrl(){
   try{for(const tk of ['wenlock','yarrim','thornwick','ironhill','anaea'])for(const c of ['','cellar'])Object.defineProperty(AREAS,'infested'+tk+c,{enumerable:true,configurable:true,get(){return infSpot(c?'cellar':'house',tk)}})}catch(e){console.error(e)} // the same in the other towns: ?town=infestedwenlock&lvl=8 (infested.js)
   try{if(typeof pspAreas==='function')pspAreas(AREAS)}catch(e){console.error(e)} // the Pale Spire: ?town=palespire .. palespire8, palespirekey (ps_glue.js)
   try{if(typeof blAreas==='function')blAreas(AREAS)}catch(e){console.error(e)} // the ten places of the Blighted Road (blight_road.js)
+  try{if(typeof ntAreas==='function')ntAreas(AREAS)}catch(e){console.error(e)} // the Never-Ending Tower: ?town=neverending and ?town=neverending&floor=N (nt_map.js)
   try{Object.defineProperty(AREAS,'blackswill',{enumerable:true,configurable:true,get(){return bswSpot()}})}catch(e){console.error(e)} // the Black Swill's island (blackswill.js)
   try{for(const w of ['vault','vaultboss'])Object.defineProperty(AREAS,w,{enumerable:true,configurable:true,get(){return typeof vtSpot==='function'?vtSpot(w):[9670,30,44,0]}})}catch(e){console.error(e)} // the Vault of Maldrake: ?town=vault (the garrison picket on the Barrow Hill), ?town=vaultboss (the Sanctum); the party's level comes from vault_story.js (vtSpot)
   if(!AREAS[town]&&town.length>=4){const m=Object.keys(AREAS).filter(k=>k.startsWith(town)||town.startsWith(k));if(m.length===1)town=m[0]} // near-misses like whitedune find the right area
@@ -75061,6 +75062,975 @@ function pspTick(){
   if(id>=9780&&id<=9800){if(D('d',3,7))pssDrip(.6+Math.random()*.4);if(D('c',12,26))pssChain(.7);if(D('m',26,50))pssMoan(.6);if(D('r',14,30))pssRats(.8);if(id===9790&&D('wt',6,12))pssWater(.8);return}
   if(D('p',20,40))pssPad(.6)}
 {const _ys=yarSoundTick;yarSoundTick=function(){_ys.apply(this,arguments);try{pspTick()}catch(e){console.error('psp tick',e)}}}
+
+/* ---- src/desert/nt_look.js ---- */
+/* ==========================================================================
+   THE NEVER-ENDING TOWER: THE LOOK (prefix nt / NT). Every floor of the tower has its own colour and its own look. All of it is worked out from the floor number alone,
+   so a floor looks the same every time it is built and nothing but flags has to be saved.
+   ntRng(seed)            a small seeded random generator (mulberry32)
+   ntPalette(n)           hue, saturation, brightness; wall tint, floor tint, ceiling tint, flame, fog, light colour
+   ntLook(n)              the look set: wall family and pattern, floor kinds, ceiling, wall height, ambient light, fog, name
+   ntWallTiles(n,look)    the wall tiles of a floor (gyTile with a code pattern drawn on the painted stone), stairs, accent tiles
+   ntFloorSet(n,look)     the floor textures of a floor
+   Notes: tools/NT_NOTES.md
+   ========================================================================== */
+const NT={BASE:1e9,TOP:1e15,ready:false,loading:null,SHOP_EVERY:7,GUARD_EVERY:10,DEBUG:false};
+/* the numbers: floor n has the level id BASE+n; floor 0 is the entrance hall, "The Crooked Tower" */
+const ntIs=n=>typeof n==='number'&&n>=NT.BASE&&n<NT.TOP;
+const ntFloorOf=n=>n-NT.BASE;
+const ntIdOf=f=>NT.BASE+f;
+const ntRatingOf=f=>99+f;
+function ntSeed(n,salt){   // a 32 bit seed from a floor number (floors can be far above 2^32) and a salt
+  const lo=n%4294967296,hi=Math.floor(n/4294967296);
+  let h=Math.imul(lo^0x9e3779b9,0x85ebca6b)^Math.imul(hi+0x7f4a7c15,0xc2b2ae35)^Math.imul((salt|0)+0x165667b1,0x27d4eb2f);
+  h^=h>>>15;h=Math.imul(h,0x2c1b3c6d);h^=h>>>12;h=Math.imul(h,0x297a2d39);h^=h>>>15;return h>>>0}
+function ntRng(seed){let a=seed>>>0;const f=()=>{a=(a+0x6D2B79F5)|0;let t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296};
+  f.int=(lo,hi)=>lo+Math.floor(f()*(hi-lo+1));f.pick=a=>a[Math.floor(f()*a.length)];f.chance=p=>f()<p;return f}
+function ntHsv(h,s,v){h=((h%360)+360)%360;const c=v*s,x=c*(1-Math.abs((h/60)%2-1)),m=v-c;let r=0,g=0,b=0;
+  if(h<60){r=c;g=x}else if(h<120){r=x;g=c}else if(h<180){g=c;b=x}else if(h<240){g=x;b=c}else if(h<300){r=x;b=c}else{r=c;b=x}return [r+m,g+m,b+m]}
+/* ---------- the colour of a floor ---------- */
+const NT_HUEWORDS=['Crimson','Vermilion','Amber','Saffron','Golden','Olive','Moss','Verdant','Emerald','Jade','Verdigris','Teal','Cyan','Azure','Cobalt','Sapphire','Indigo','Violet','Amethyst','Orchid','Magenta','Rose','Cerise','Scarlet'];
+const NT_MODS=[['Pale',.5,.95],['Deep',.85,.62],['Dusky',.5,.6],['Bright',.95,.95],['Ashen',.3,.8],['Smoky',.4,.55],['Rich',.8,.8]];
+/* flames: 0 orange, 1 red, 2 purple, 3 blue, 4 yellow; their hue in degrees */
+const NT_FLAMES=[[0,28],[1,2],[2,285],[3,215],[4,52]];
+function ntPalette(n){
+  const R=ntRng(ntSeed(n,11));
+  const hue=((n*137.508)+R()*18)%360;           // the golden angle: any two floors that follow each other are far apart in hue
+  const mod=NT_MODS[Math.floor(R()*NT_MODS.length)],useMod=R()<.55;
+  const sat=useMod?mod[1]:.42+R()*.38,val=useMod?mod[2]:.66+R()*.3;
+  const wall=ntHsv(hue,sat,val),wl=(wall[0]+wall[1]+wall[2])/3||.3;
+  const norm=c=>{const l=(c[0]+c[1]+c[2])/3||.3;return c.map(v=>v/l)};   // a tint to multiply a grey stone with: mean 1, so the stone keeps its own lightness
+  const tint=norm(ntHsv(hue,Math.min(.85,sat*1.1),Math.max(.55,val)));
+  const fh=(hue+(R()<.5?30:-30)+360)%360,ftint=norm(ntHsv(fh,sat*.6,.8));
+  const th=(hue+R.pick([-40,-20,0,20,40])+360)%360;   // the torch light is near the stone's own colour
+  let best=NT_FLAMES[0],bd=999;for(const f of NT_FLAMES){const d=Math.min(Math.abs(f[1]-th),360-Math.abs(f[1]-th));if(d<bd){bd=d;best=f}}
+  const lc=ntHsv(th,.55+R()*.3,1),lcol=lc.map(v=>+(v*1.4+.12).toFixed(3));
+  const name=NT_HUEWORDS[Math.floor(hue/15)%24];
+  const modName=useMod?mod[0]:null;
+  return {hue,sat,val,wallTint:tint,floorTint:ftint,ceilTint:norm(ntHsv((hue+20)%360,sat*.5,.7)),flame:best[0],flameHue:best[1],lcol,fog:ntHsv(hue,sat*.45,.55),name,modName,css:'rgb('+wall.map(v=>Math.round(v*255)).join(',')+')',lightness:wl}}
+/* ---------- the look set ---------- */
+const NT_KINDS=['dense','semi','sparse','spiral','cross','ring','caves'];
+const NT_KIND_WORDS={dense:['Warrens','Labyrinth','Tangle','Maze'],semi:['Galleries','Chambers','Cloisters','Passages'],sparse:['Halls','Vaults','Colonnades','Atria'],spiral:['Spiral','Coil','Winding Stair'],cross:['Crossways','Transepts','Four Wings'],ring:['Circuit','Orbit','Round'],caves:['Grottoes','Caverns','Hollows']};
+const NT_WALLS=['texGrey','texBone','texBlack','texRed'];
+const NT_PATTERNS=['ashlar','brick','panels','flutes','studs','lattice','runes','herring','planks','scales','chevrons','rough'];
+const NT_FLOORKINDS=['gyf_flag','gyf_slate','gyf_cobble','gyf_gravel','gyf_bone','gyf_dirt'];
+const NT_CEILS=['gyc_0','gyc_1','gyc_2','gyc_3','gyc_crypt'];
+/* the layout kind of a floor: a seeded pick, never the same as the picked kind of the floor before it */
+function ntKindOf(n){ if(n===1)return 'semi';   // even floors draw from one set of kinds and odd floors from the other, so two floors that follow each other never share a kind
+  const r=ntRng(ntSeed(n,3))();
+  if(n%2===0)return r<.4?'dense':r<.6?'spiral':r<.8?'ring':'caves';
+  return r<.4?'semi':r<.8?'sparse':'cross'}
+function ntLook(n){
+  const R=ntRng(ntSeed(n,17)),P=ntPalette(n),kind=ntKindOf(n);
+  const pk=n>1?ntPalette(n-1):null;
+  let wallBase=R.pick(NT_WALLS);
+  if(wallBase==='texRed'&&!(P.hue<40||P.hue>320))wallBase='texGrey';   // the red stone only where the floor is red anyway
+  let pat=Math.floor(R()*NT_PATTERNS.length);
+  if(n>1){const pp=ntSeed(n-1,19)%NT_PATTERNS.length;if(pat===pp)pat=(pat+1+Math.floor(R()*5))%NT_PATTERNS.length}
+  const look={n,kind,pal:P,wallBase,wallVar:Math.floor(R()*6),pattern:NT_PATTERNS[pat],patN:pat,
+    floorA:R.pick(NT_FLOORKINDS),floorB:R.pick(NT_FLOORKINDS),floorKind:R.pick(['checker','diamond','stripe','plain']),ceil:R.pick(NT_CEILS),
+    wh:+(1.35+R()*.5).toFixed(2),amb:+(.07+R()*.06).toFixed(3),fogDen:+(R()*.5).toFixed(2),lamp:P.lcol};
+  look.name='Floor '+n+': The '+(P.modName?P.modName+' ':'')+P.name+' '+R.pick(NT_KIND_WORDS[kind]);
+  look.short='The '+(P.modName?P.modName+' ':'')+P.name+' '+R.pick(NT_KIND_WORDS[kind]);
+  look.pk=pk;return look}
+/* two floors one after the other differ if their hues are far apart or their patterns and stone differ: used by the tests */
+function ntLooksDiffer(a,b){
+  const dh=Math.min(Math.abs(a.pal.hue-b.pal.hue),360-Math.abs(a.pal.hue-b.pal.hue));
+  return dh>=50&&(a.pattern!==b.pattern||a.wallBase!==b.wallBase||a.kind!==b.kind)}
+/* ---------- the patterns drawn on the wall stone (a canvas 128 across, tiling sideways) ---------- */
+function ntDrawPattern(x,w,h,pat,rr){
+  x.save();x.lineCap='butt';
+  const dark='rgba(0,0,0,.42)',lite='rgba(255,255,255,.16)',line=(x0,y0,x1,y1,c,lw)=>{x.strokeStyle=c;x.lineWidth=lw||1;x.beginPath();x.moveTo(x0,y0);x.lineTo(x1,y1);x.stroke()};
+  const vseg=(p)=>{for(let k=0;k<3;k++){}};
+  if(pat==='ashlar'){const ch=32;for(let y=0,r=0;y<h;y+=ch,r++){line(0,y,w,y,dark,1.6);line(0,y+1.6,w,y+1.6,lite,1);const off=(r%2)*32;for(let xx=off;xx<w+64;xx+=64){const xc=xx%w;line(xc,y,xc,y+ch,dark,1.6)}}}
+  else if(pat==='brick'){const bh=10,bw=32;for(let y=0,r=0;y<h;y+=bh,r++){line(0,y,w,y,dark,1);const off=(r%2)*(bw/2);for(let xx=off;xx<w+bw;xx+=bw){const xc=xx%w;line(xc,y,xc,y+bh,dark,1)}}}
+  else if(pat==='panels'){const pw=64;for(let xx=0;xx<w;xx+=pw){const ph=h*.8,y0=(h-ph)/2;x.strokeStyle=dark;x.lineWidth=2;x.strokeRect(xx+8,y0,pw-16,ph);x.strokeStyle=lite;x.lineWidth=1;x.strokeRect(xx+11,y0+3,pw-22,ph-6)}}
+  else if(pat==='flutes'){for(let xx=4;xx<w;xx+=16){line(xx,0,xx,h,dark,3);line(xx+3,0,xx+3,h,lite,2)}}
+  else if(pat==='studs'){for(let y=16;y<h;y+=32)for(let xx=16;xx<w;xx+=32){x.fillStyle=lite;x.beginPath();x.arc(xx,y,4,0,6.3);x.fill();x.fillStyle=dark;x.beginPath();x.arc(xx+1.5,y+1.5,3,0,6.3);x.fill()}for(let y=0;y<h;y+=64)line(0,y,w,y,dark,2)}
+  else if(pat==='lattice'){for(let k=-h;k<w+h;k+=32){line(k,0,k+h,h,dark,1.5);line(k,h,k+h,0,dark,1.5)}}
+  else if(pat==='runes'){for(let y=0;y<h;y+=32){line(0,y,w,y,dark,1)}
+    for(let y=8,r=0;y<h-8;y+=32,r++)for(let xx=10;xx<w;xx+=32){const t=(rr(r*7+xx)*4)|0;x.strokeStyle='rgba(255,255,255,.55)';x.lineWidth=1.8;x.beginPath();
+      if(t===0){x.moveTo(xx,y);x.lineTo(xx+10,y+14);x.moveTo(xx+10,y);x.lineTo(xx,y+14)}else if(t===1){x.moveTo(xx+5,y);x.lineTo(xx+5,y+16);x.moveTo(xx,y+5);x.lineTo(xx+10,y+5)}else if(t===2){x.arc(xx+5,y+8,6,0,6.3)}else{x.moveTo(xx,y+14);x.lineTo(xx+5,y);x.lineTo(xx+10,y+14)}x.stroke()}}
+  else if(pat==='herring'){for(let y=0;y<h;y+=16){for(let xx=0;xx<w;xx+=16){line(xx,y,xx+8,y+8,dark,1.4);line(xx+8,y+8,xx+16,y,dark,1.4)}}}
+  else if(pat==='planks'){for(let xx=0;xx<w;xx+=21.33){line(xx,0,xx,h,dark,2);line(xx+2,0,xx+2,h,lite,1)}for(let k=0;k<6;k++){const px=rr(k+3)*w,py=rr(k+9)*h;x.fillStyle='rgba(0,0,0,.3)';x.beginPath();x.ellipse(px,py,3,5,0,0,6.3);x.fill()}}
+  else if(pat==='scales'){for(let y=0,r=0;y<h+16;y+=12,r++)for(let xx=-(r%2)*8;xx<w+16;xx+=16){x.strokeStyle=dark;x.lineWidth=1.2;x.beginPath();x.arc(xx,y,8,0,Math.PI);x.stroke()}}
+  else if(pat==='chevrons'){for(let y=0;y<h+24;y+=24){x.strokeStyle=dark;x.lineWidth=3;x.beginPath();x.moveTo(0,y);for(let xx=0;xx<=w;xx+=32){x.lineTo(xx+16,y-12);x.lineTo(xx+32,y)}x.stroke();x.strokeStyle=lite;x.lineWidth=1.4;x.beginPath();x.moveTo(0,y+3);for(let xx=0;xx<=w;xx+=32){x.lineTo(xx+16,y-9);x.lineTo(xx+32,y+3)}x.stroke()}}
+  else{for(let k=0;k<140;k++){x.fillStyle=rr(k+50)<.5?'rgba(0,0,0,.22)':'rgba(255,255,255,.1)';x.fillRect(rr(k)*w,rr(k+300)*h,2+rr(k+7)*4,1+rr(k+11)*3)}}
+  x.restore()}
+/* ---------- the tiles of a floor ---------- */
+const NT_TILES=new Map();      // floor -> {gids:[], texIds:[], keys:[]}: what a floor made, so that it can be given back
+function ntOwn(n){let o=NT_TILES.get(n);if(!o){o={gids:[],keys:[]};NT_TILES.set(n,o)}return o}
+function ntTile(n,tex,wh,opt){const gid=gyTile(tex,wh,opt);const o=ntOwn(n);if(!o.gids.includes(gid))o.gids.push(gid);return gid}
+function ntWallTiles(n,look){
+  const P=look.pal,wh=look.wh,tag='nt'+n,rr0=ntRng(ntSeed(n,23)),rr=k=>{const a=Math.sin((k+1)*12.9898+n*78.233)*43758.5453;return a-Math.floor(a)};
+  const rgb=P.wallTint,gain=look.wallBase==='texBlack'?1.9:look.wallBase==='texBone'?1.0:look.wallBase==='texRed'?1.1:1.15;
+  const vs=[0,1,2,3,4,5].map(i=>(look.wallVar+i)%6),plain=[],mk=(v,extra,ntag)=>ntTile(n,look.wallBase+'_'+v,wh,Object.assign({gain,rgb,tag:tag+ntag,draw:(x,w,h)=>{ntDrawPattern(x,w,h,look.pattern,k=>rr(k+v*13));if(extra)extra(x,w,h)}},{}));
+  for(let i=0;i<4;i++)plain.push(mk(vs[i],null,'p'+i));
+  const rim=[mk(vs[4],(x,w,h)=>{x.fillStyle='rgba(0,0,0,.18)';x.fillRect(0,h-14,w,14)},'r0'),mk(vs[5],(x,w,h)=>{x.fillStyle='rgba(255,255,255,.1)';x.fillRect(0,0,w,10)},'r1')];
+  return {plain,rim,far:plain[0],wh,tag}}
+/* the stairs: the painted stair picture set in the floor's own stone */
+function ntStairTile(n,look,up){
+  const P=look.pal;
+  return ntTile(n,look.wallBase+'_0',look.wh,{fac:{img:up?'stairFix_1':'stairFix_0',i:0,n:1},gain:1.1,rgb:P.wallTint,tag:'nt'+n+(up?'su':'sd'),emit:.2})}
+/* an alcove with a lit candle, set in a wall now and then */
+function ntNicheTile(n,look){
+  const P=look.pal,c=P.lcol.map(v=>Math.round(Math.min(1,v/1.6)*255));
+  return ntTile(n,look.wallBase+'_0',look.wh,{fac:{img:'cryptD_3',i:0,n:1},gain:.95,rgb:P.wallTint,tag:'nt'+n+'nic',emit:.14,draw:(x,w,h)=>{
+    x.globalCompositeOperation='lighter';const gr=x.createRadialGradient(64,h-62,2,64,h-62,46);gr.addColorStop(0,'rgba('+c.join(',')+',.3)');gr.addColorStop(1,'rgba('+c.join(',')+',0)');x.fillStyle=gr;x.fillRect(0,h-120,w,120);x.globalCompositeOperation='source-over'}})}
+/* ---------- floors and ceilings ---------- */
+const NT_FLOORS=new Map();     // floor -> names of the FLOORS / CEILS made for it
+function ntOwnF(n){let o=NT_FLOORS.get(n);if(!o){o=[];NT_FLOORS.set(n,o)}return o}
+function ntMadeFloor(n,out,data){FLOORS[out]=data;ntOwnF(n).push(out);return out}
+function ntToneFloor(n,out,src,g,t){
+  if(FLOORS[out])return out;const b=FLOORS[src];if(!b)return null;const d=new Uint8ClampedArray(b.length);
+  for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,b[i]*g*t[0]);d[i+1]=Math.min(255,b[i+1]*g*t[1]);d[i+2]=Math.min(255,b[i+2]*g*t[2]);d[i+3]=255}
+  return ntMadeFloor(n,out,d)}
+/* a floor drawn in code: squares, diamonds or stripes of two tones of the floor's colour, with a seam between */
+function ntPatternFloor(n,out,kind,c1,c2){
+  const N=128,d=new Uint8ClampedArray(N*N*4),S=32;
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    let a=0,e=0;
+    if(kind==='checker'){a=(((x/S|0)+(y/S|0))&1);e=Math.min(x%S,y%S,S-1-(x%S),S-1-(y%S))}
+    else if(kind==='diamond'){const u=(x+y)%64,v=(x-y+128)%64;a=((((x+y)/64|0)+((x-y+128)/64|0))&1);e=Math.min(u,v,63-u,63-v)}
+    else{a=((x/16|0)&1);e=Math.min(x%16,15-(x%16))}
+    const nz=(((x*374761393+y*668265263)>>>0)%1000)/1000-.5,c=a?c1:c2,k=1+nz*.12-(e<1.5?.45:0)-(e<3&&e>=1.5?-.08:0),o=(y*N+x)*4;
+    d[o]=Math.min(255,c[0]*k);d[o+1]=Math.min(255,c[1]*k);d[o+2]=Math.min(255,c[2]*k);d[o+3]=255}
+  return ntMadeFloor(n,out,d)}
+function ntFloorSet(n,look){
+  const P=look.pal,t=P.floorTint,lum=look.wallBase==='texBlack'?.5:.58;
+  const a=ntToneFloor(n,'ntf'+n+'a',look.floorA,lum,t)||'gyf_flag',b=ntToneFloor(n,'ntf'+n+'b',look.floorB,lum*1.15,[t[1],t[2],t[0]].map((v,i)=>(v+t[i])/2))||a;
+  const wetSrc=FLOORS[a]?a:'gyf_flag';let wet=wetSrc;try{wet=gyFloorWet('ntf'+n+'w',wetSrc,P.lcol.map(v=>Math.min(1,v/1.5)),n%97+3);if(wet!==wetSrc)ntOwnF(n).push(wet)}catch(e){}
+  const c1=[150*t[0]*lum*1.3,150*t[1]*lum*1.3,150*t[2]*lum*1.3],c2=[c1[0]*.55,c1[1]*.55,c1[2]*.55];
+  const pat=look.floorKind==='plain'?b:ntPatternFloor(n,'ntf'+n+'p',look.floorKind,c1,c2);
+  return [a,b,wet,pat,a,b]}
+function ntCeil(n,look){
+  const out='ntc'+n;if(CEILS[out])return out;const src=CEILS[look.ceil]||CEILS.gyc_crypt;if(!src)return look.ceil;const t=look.pal.ceilTint,d=new Uint8ClampedArray(src.length),g=.8;
+  for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,src[i]*g*t[0]);d[i+1]=Math.min(255,src[i+1]*g*t[1]);d[i+2]=Math.min(255,src[i+2]*g*t[2]);d[i+3]=255}
+  CEILS[out]=d;ntOwnF(n).push('C:'+out);return out}
+/* a floor far from the party gives its textures back (the floors are endless, the memory is not) */
+NT.freeTex=[];
+function ntRelease(n){
+  const o=NT_TILES.get(n);
+  if(o){for(const gid of o.gids){const id=T_TILE[gid];if(id!==undefined){if(TEX[id]){TEX[id].d=null;TEX[id].e=null}NT.freeTex.push(id);delete T_TILE[gid]}delete KH_DOOR[gid];if(GY.col)delete GY.col[gid]}
+    for(const k of Object.keys(GY.tiles)){const m=k.match(/nt(\d+)[a-z]+\d?$/);if(m&&+m[1]===n)delete GY.tiles[k]}
+    NT_TILES.delete(n)}
+  const f=NT_FLOORS.get(n);if(f){for(const nm of f){if(nm.startsWith('C:'))delete CEILS[nm.slice(2)];else delete FLOORS[nm]}NT_FLOORS.delete(n)}}
+/* tile numbers freed by ntRelease are used again by the next floor */
+{const _at=addTex;addTex=function(d,e){if(NT.freeTex.length&&NT._making){const id=NT.freeTex.pop();TEX[id]={d,e:e||null};return id}return _at.apply(this,arguments)}}
+
+/* ---- src/desert/nt_gen.js ---- */
+/* ==========================================================================
+   THE NEVER-ENDING TOWER: THE LAYOUTS (prefix ntg). ntGen(n, look) makes the plan of floor n from the floor number alone: a grid of open (1) and closed (0) squares,
+   the arrival square with the stairs down beside it, the stairs up far away, the teleport stone, the rooms, the dead ends, and (every 7th floor) a shop room.
+   Kinds: dense (a perfect maze with a few loops), semi (a maze with 4 to 9 rooms carved in), sparse (many rooms of different shapes, short corridors, pillared halls),
+   spiral (rings with one opening each), cross (a maze or halls in four wings), ring (a wide circuit round a maze), caves (cellular caves).
+   Nothing here uses the game: the plan is pure data, so it can be built and tested anywhere. Notes: tools/NT_NOTES.md
+   ========================================================================== */
+const NTG_D=[[0,-1],[1,0],[0,1],[-1,0]];
+function ntgGrid(W,H){return {W,H,a:new Uint8Array(W*H)}}
+const ntgAt=(G,x,y)=>x>=0&&y>=0&&x<G.W&&y<G.H&&G.a[y*G.W+x]===1;
+const ntgSet=(G,x,y,v)=>{if(x>=1&&y>=1&&x<G.W-1&&y<G.H-1)G.a[y*G.W+x]=v};
+function ntgRect(G,x0,y0,x1,y1,v){for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)ntgSet(G,x,y,v===undefined?1:v)}
+/* a maze on the lattice of odd squares, inside a mask (a function x,y -> bool, or null for the whole plan). The growing tree: newest-first with probability pNew, else a random cell,
+   so that pNew near 1 makes long winding corridors and pNew near 0 makes many short branches. */
+function ntgMaze(G,R,mask,pNew,box){
+  const W=G.W,H=G.H,bx0=box?box[0]:1,by0=box?box[1]:1,bx1=box?box[2]:W-2,by1=box?box[3]:H-2;
+  const ok=(x,y)=>x>=bx0&&y>=by0&&x<=bx1&&y<=by1&&x%2===1&&y%2===1&&(!mask||mask(x,y));
+  const seen=new Set(),key=(x,y)=>y*W+x,cells=[];
+  let sx=-1,sy=-1;
+  for(let t=0;t<200&&sx<0;t++){const x=(R.int(bx0,bx1)|1),y=(R.int(by0,by1)|1);if(ok(x,y)){sx=x;sy=y}}
+  if(sx<0)for(let y=by0|1;y<=by1&&sx<0;y+=2)for(let x=bx0|1;x<=bx1;x+=2)if(ok(x,y)){sx=x;sy=y;break}
+  if(sx<0)return [];
+  // a mask may be in several pieces: grow from each piece in turn
+  const grow=(x0,y0)=>{
+    const list=[[x0,y0]];seen.add(key(x0,y0));ntgSet(G,x0,y0,1);cells.push([x0,y0]);
+    while(list.length){
+      const i=R()<pNew?list.length-1:Math.floor(R()*list.length),[x,y]=list[i];
+      const nb=[];for(const [dx,dy] of NTG_D){const nx=x+dx*2,ny=y+dy*2;if(ok(nx,ny)&&!seen.has(key(nx,ny)))nb.push([nx,ny,dx,dy])}
+      if(!nb.length){list.splice(i,1);continue}
+      const [nx,ny,dx,dy]=nb[Math.floor(R()*nb.length)];
+      ntgSet(G,x+dx,y+dy,1);ntgSet(G,nx,ny,1);seen.add(key(nx,ny));list.push([nx,ny]);cells.push([nx,ny])}};
+  grow(sx,sy);
+  for(let y=by0|1;y<=by1;y+=2)for(let x=bx0|1;x<=bx1;x+=2)if(ok(x,y)&&!seen.has(key(x,y)))grow(x,y);
+  return cells}
+/* braid: dead ends are opened into a neighbouring corridor with probability p (a maze with loops) */
+function ntgBraid(G,R,p){
+  const W=G.W,H=G.H;
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){
+    if(!ntgAt(G,x,y))continue;
+    let n=0;for(const [dx,dy] of NTG_D)if(ntgAt(G,x+dx,y+dy))n++;
+    if(n!==1||!R.chance(p))continue;
+    const c=[];for(const [dx,dy] of NTG_D){if(ntgAt(G,x+dx,y+dy))continue;const ax=x+dx*2,ay=y+dy*2;if(ntgAt(G,ax,ay)&&ax>0&&ay>0&&ax<W-1&&ay<H-1)c.push([dx,dy])}
+    if(c.length){const [dx,dy]=c[Math.floor(R()*c.length)];ntgSet(G,x+dx,y+dy,1)}}}
+/* shapes of rooms: they return the list of squares [x,y] */
+function ntgShape(R,kind,w,h){
+  const o=[],cx=(w-1)/2,cy=(h-1)/2;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    let ok=true;
+    if(kind==='ellipse')ok=((x-cx)/(w/2))**2+((y-cy)/(h/2))**2<=1.02;
+    else if(kind==='plus')ok=(Math.abs(x-cx)<=w/6+.6)||(Math.abs(y-cy)<=h/6+.6);
+    else if(kind==='ell')ok=!(x>=w/2&&y<h/2);
+    else if(kind==='oct'){const m=Math.min(w,h)/3;ok=!(x+y<m||(w-1-x)+y<m||x+(h-1-y)<m||(w-1-x)+(h-1-y)<m)}
+    else if(kind==='tee')ok=y<h/3||Math.abs(x-cx)<=w/6+.6;
+    if(ok)o.push([x,y])}
+  return o}
+const NTG_SHAPES=['rect','rect','rect','ellipse','plus','ell','oct','tee'];
+/* pillars in a room: columns on a lattice with the given stride, so that no stretch of open floor is wide */
+function ntgPillars(G,R,sq,x0,y0,w,h,stride){
+  const inSet=new Set(sq.map(([x,y])=>(y+y0)*G.W+(x+x0))),ox=R.int(0,stride-1),oy=R.int(0,stride-1);
+  for(const [x,y] of sq){
+    if((x+ox)%stride!==Math.floor(stride/2)||(y+oy)%stride!==Math.floor(stride/2))continue;
+    const gx=x+x0,gy=y+y0;let edge=false;
+    for(const [dx,dy] of NTG_D)if(!inSet.has((gy+dy)*G.W+(gx+dx)))edge=true;   // never against a wall
+    if(!edge)G.a[gy*G.W+gx]=0}}
+/* a window of 8 by 8 open squares is broken up by a pillar (or two): no open floor is wider than about 7 */
+function ntgBreakOpen(G,R,S){
+  S=S||8;const W=G.W,H=G.H;let guard=0,placed=0;
+  while(guard++<40){
+    const P=new Int32Array((W+1)*(H+1));
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++)P[(y+1)*(W+1)+x+1]=P[y*(W+1)+x+1]+P[(y+1)*(W+1)+x]-P[y*(W+1)+x]+G.a[y*W+x];
+    const full=(x,y)=>P[(y+S)*(W+1)+x+S]-P[y*(W+1)+x+S]-P[(y+S)*(W+1)+x]+P[y*(W+1)+x]===S*S;
+    let any=false;
+    for(let y=1;y+S<=H-1;y++)for(let x=1;x+S<=W-1;x++){
+      if(!full(x,y))continue;any=true;
+      const px=x+Math.floor(S/2)-1+R.int(0,1),py=y+Math.floor(S/2)-1+R.int(0,1);G.a[py*W+px]=0;placed++;
+      // a second pillar in a wider hall so that the next window along does not need its own at once
+      y+=2;break}
+    if(!any)break}
+  return placed}
+/* the largest connected part is kept; the rest is filled in */
+function ntgKeepLargest(G){
+  const W=G.W,H=G.H,lab=new Int32Array(W*H).fill(-1),sizes=[];
+  for(let i=0;i<W*H;i++){
+    if(G.a[i]!==1||lab[i]>=0)continue;
+    const id=sizes.length;let n=0;const st=[i];lab[i]=id;
+    while(st.length){const c=st.pop();n++;const x=c%W,y=(c/W)|0;
+      for(const [dx,dy] of NTG_D){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;const j=ny*W+nx;if(G.a[j]===1&&lab[j]<0){lab[j]=id;st.push(j)}}}
+    sizes.push(n)}
+  if(sizes.length<=1)return;
+  let best=0;for(let i=1;i<sizes.length;i++)if(sizes[i]>sizes[best])best=i;
+  for(let i=0;i<W*H;i++)if(G.a[i]===1&&lab[i]!==best)G.a[i]=0}
+/* join separate parts with a straight cut (used where a plan can leave parts apart) */
+function ntgJoin(G,R){
+  for(let guard=0;guard<30;guard++){
+    const W=G.W,H=G.H,lab=new Int32Array(W*H).fill(-1);let comps=0;const reps=[];
+    for(let i=0;i<W*H;i++){if(G.a[i]!==1||lab[i]>=0)continue;const st=[i];lab[i]=comps;reps.push(i);
+      while(st.length){const c=st.pop(),x=c%W,y=(c/W)|0;for(const [dx,dy] of NTG_D){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;const j=ny*W+nx;if(G.a[j]===1&&lab[j]<0){lab[j]=comps;st.push(j)}}}comps++}
+    if(comps<=1)return;
+    // join component 0 to the nearest other: dig between the two nearest squares
+    let bd=1e9,ba=null,bb=null;
+    const A=[],B=[];for(let i=0;i<W*H;i++)if(G.a[i]===1){(lab[i]===0?A:B).push(i)}
+    for(let t=0;t<2500;t++){const a=A[Math.floor(R()*A.length)],b=B[Math.floor(R()*B.length)],d=Math.abs(a%W-b%W)+Math.abs(((a/W)|0)-((b/W)|0));if(d<bd){bd=d;ba=a;bb=b}}
+    let x=ba%W,y=(ba/W)|0;const tx=bb%W,ty=(bb/W)|0;
+    while(x!==tx){x+=x<tx?1:-1;ntgSet(G,x,y,1)}while(y!==ty){y+=y<ty?1:-1;ntgSet(G,x,y,1)}}}
+/* a corridor between two squares: along x then y (or y then x), one wide, now and then two */
+function ntgCorridor(G,R,ax,ay,bx,by,wide){
+  let x=ax,y=ay;const xf=R()<.5,seg=(x0,y0,x1,y1)=>{const sx=Math.sign(x1-x0),sy=Math.sign(y1-y0);let cx=x0,cy=y0;
+    for(;;){ntgSet(G,cx,cy,1);if(wide){ntgSet(G,cx+(sy?1:0),cy+(sx?1:0),1)}if(cx===x1&&cy===y1)break;if(cx!==x1)cx+=sx;else cy+=sy}};
+  if(xf){seg(ax,ay,bx,ay);seg(bx,ay,bx,by)}else{seg(ax,ay,ax,by);seg(ax,by,bx,by)}}
+/* ---------- the kinds ---------- */
+function ntgDense(G,R,P){ntgMaze(G,R,null,P.pNew);ntgBraid(G,R,P.braid);
+  const k=R.int(0,2);for(let i=0;i<k;i++){const w=R.pick([3,3,5]),h=R.pick([3,3,5]),x=R.int(2,G.W-w-3)|1,y=R.int(2,G.H-h-3)|1;ntgRect(G,x,y,x+w-1,y+h-1,1);P.rooms.push({x0:x,y0:y,x1:x+w-1,y1:y+h-1,kind:'cell'})}}
+function ntgSemi(G,R,P){
+  ntgMaze(G,R,null,P.pNew);ntgBraid(G,R,P.braid);
+  const k=R.int(4,9);let tries=0;
+  while(P.rooms.length<k&&tries++<300){
+    const w=R.pick([3,5,5,7,7,9]),h=R.pick([3,5,5,7,9]),x=R.int(2,G.W-w-3)|1,y=R.int(2,G.H-h-3)|1;
+    if(P.rooms.some(r=>x<r.x1+3&&x+w-1>r.x0-3&&y<r.y1+3&&y+h-1>r.y0-3))continue;
+    const kind=R.pick(['rect','rect','ellipse','oct']);const sq=ntgShape(R,kind,w,h);
+    for(const [dx,dy] of sq)ntgSet(G,x+dx,y+dy,1);
+    if(w>=7&&h>=7)ntgPillars(G,R,sq,x,y,w,h,3);
+    P.rooms.push({x0:x,y0:y,x1:x+w-1,y1:y+h-1,kind})}}
+function ntgSparse(G,R,P){
+  const W=G.W,H=G.H,target=R.int(11,22),rooms=P.rooms;let tries=0;
+  while(rooms.length<target&&tries++<900){
+    const big=R()<.2,w=big?R.int(11,20):R.int(4,12),h=big?R.int(8,13):R.int(4,10),x=R.int(2,W-w-3),y=R.int(2,H-h-3);
+    if(x<2||y<2)continue;
+    if(rooms.some(r=>x<r.x1+3&&x+w-1>r.x0-3&&y<r.y1+3&&y+h-1>r.y0-3))continue;
+    const kind=big?'rect':R.pick(NTG_SHAPES);const sq=ntgShape(R,kind,w,h);
+    for(const [dx,dy] of sq)ntgSet(G,x+dx,y+dy,1);
+    if(Math.min(w,h)>=6)ntgPillars(G,R,sq,x,y,w,h,big?4:3);
+    rooms.push({x0:x,y0:y,x1:x+w-1,y1:y+h-1,kind,big})}
+  // connect them: each room to its nearest already joined room (a spanning tree of short corridors), then a few more for loops
+  const mid=r=>[Math.floor((r.x0+r.x1)/2),Math.floor((r.y0+r.y1)/2)],joined=[0];
+  const exit=(r,tx,ty)=>{   // a square just inside the room on the side facing the target
+    const [mx,my]=mid(r);let x=mx,y=my;const dx=tx-mx,dy=ty-my;if(Math.abs(dx)>Math.abs(dy)){x=dx>0?r.x1:r.x0}else{y=dy>0?r.y1:r.y0}
+    // the nearest open square of the room to that edge point
+    return [x,y]};
+  const link=(a,b,wide)=>{const [bx,by]=mid(rooms[b]);const [ax,ay]=exit(rooms[a],bx,by);const [cx,cy]=mid(rooms[a]);const [ex,ey]=exit(rooms[b],cx,cy);ntgCorridor(G,R,ax,ay,ex,ey,wide)};
+  const rest=[];for(let i=1;i<rooms.length;i++)rest.push(i);
+  while(rest.length){
+    let bd=1e9,bi=-1,bj=-1;
+    for(const i of rest)for(const j of joined){const [ax,ay]=mid(rooms[i]),[bx,by]=mid(rooms[j]),d=Math.abs(ax-bx)+Math.abs(ay-by);if(d<bd){bd=d;bi=i;bj=j}}
+    link(bi,bj,R()<.15);joined.push(bi);rest.splice(rest.indexOf(bi),1)}
+  for(let k=0;k<R.int(3,6);k++){const a=R.int(0,rooms.length-1),b=R.int(0,rooms.length-1);if(a!==b)link(a,b,false)}
+  P.pad=true}
+function ntgSpiral(G,R,P){
+  const W=G.W,H=G.H,cw=R.pick([1,2,2,3]);let k=0,x0=1,y0=1,x1=W-2,y1=H-2;const rings=[];
+  while(x1-x0>=cw*2+4&&y1-y0>=cw*2+4){
+    rings.push([x0,y0,x1,y1]);
+    for(let t=0;t<cw;t++){for(let x=x0;x<=x1;x++){ntgSet(G,x,y0+t,1);ntgSet(G,x,y1-t,1)}for(let y=y0;y<=y1;y++){ntgSet(G,x0+t,y,1);ntgSet(G,x1-t,y,1)}}
+    x0+=cw+1;y0+=cw+1;x1-=cw+1;y1-=cw+1;k++}
+  // an opening from each ring to the next: on a different side each time, so that the way winds round
+  for(let i=0;i<rings.length-1;i++){const [a0,b0,a1,b1]=rings[i],side=i%4,gap=cw;
+    for(let t=0;t<=cw;t++){
+      if(side===0){const x=Math.floor((a0+a1)/2)+(i%3)-1;ntgSet(G,x,b0+cw+t-(t===cw?0:0),1);ntgSet(G,x,b0+cw,1)}
+      else if(side===1){const y=Math.floor((b0+b1)/2)+(i%3)-1;ntgSet(G,a1-cw-0,y,1);ntgSet(G,a1-cw,y,1)}
+      else if(side===2){const x=Math.floor((a0+a1)/2)-(i%3)+1;ntgSet(G,x,b1-cw,1)}
+      else{const y=Math.floor((b0+b1)/2)-(i%3)+1;ntgSet(G,a0+cw,y,1)}}}
+  const last=rings[rings.length-1];if(last){const rx0=last[0]+cw+1,ry0=last[1]+cw+1,rx1=last[2]-cw-1,ry1=last[3]-cw-1;if(rx1>rx0&&ry1>ry0){ntgRect(G,rx0,ry0,rx1,ry1,1);P.rooms.push({x0:rx0,y0:ry0,x1:rx1,y1:ry1,kind:'rect',centre:true})}}
+  // a few cuts through the walls between rings, so that there is more than one way round
+  for(let c=0;c<R.int(3,7);c++){const r=R.int(0,Math.max(0,rings.length-2)),q=rings[r];if(!q)continue;const side=R.int(0,3),t=R.int(0,1000)/1000;
+    if(side===0)ntgSet(G,Math.floor(q[0]+2+t*(q[2]-q[0]-4)),q[1]+cw,1);else if(side===1)ntgSet(G,q[2]-cw,Math.floor(q[1]+2+t*(q[3]-q[1]-4)),1);
+    else if(side===2)ntgSet(G,Math.floor(q[0]+2+t*(q[2]-q[0]-4)),q[3]-cw,1);else ntgSet(G,q[0]+cw,Math.floor(q[1]+2+t*(q[3]-q[1]-4)),1)}
+  P.spiral=true}
+function ntgCross(G,R,P){
+  const W=G.W,H=G.H,bw=R.pick([11,13,15]),cx=Math.floor(W/2),cy=Math.floor(H/2);
+  const inMask=(x,y)=>Math.abs(x-cx)<=bw/2||Math.abs(y-cy)<=bw/2;
+  if(R()<.55){ntgMaze(G,R,inMask,P.pNew);ntgBraid(G,R,P.braid)}
+  else{   // four wings of halls
+    const mk=(x,y,w,h,kind)=>{const sq=ntgShape(R,kind,w,h);for(const [dx,dy] of sq)ntgSet(G,x+dx,y+dy,1);if(Math.min(w,h)>=6)ntgPillars(G,R,sq,x,y,w,h,3);P.rooms.push({x0:x,y0:y,x1:x+w-1,y1:y+h-1,kind})};
+    mk(cx-6,cy-6,13,13,'oct');
+    for(const [dx,dy] of NTG_D){let d=8+R.int(0,2);while(d<Math.min(W,H)/2-8){const w=dx?R.int(7,10):R.int(5,9),h=dx?R.int(5,9):R.int(7,10);
+        const x=dx>0?cx+d:dx<0?cx-d-w+1:cx-Math.floor(w/2),y=dy>0?cy+d:dy<0?cy-d-h+1:cy-Math.floor(h/2);mk(x,y,w,h,R.pick(['rect','ellipse','plus']));
+        for(let t=0;t<2;t++){ntgSet(G,dx?cx+(dx>0?d-1:-d+1):cx,dx?cy:cy+(dy>0?d-1:-d+1),1)}d+=Math.max(w,h)+2}}
+    // straight halls along the axes
+    for(let x=2;x<W-2;x++)ntgSet(G,x,cy,1);for(let y=2;y<H-2;y++)ntgSet(G,cx,y,1);P.pad=true}}
+function ntgRing(G,R,P){
+  const W=G.W,H=G.H,rw=R.pick([3,3,5]),m=2;
+  ntgRect(G,m,m,W-1-m,m+rw-1,1);ntgRect(G,m,H-m-rw,W-1-m,H-1-m,1);ntgRect(G,m,m,m+rw-1,H-1-m,1);ntgRect(G,W-m-rw,m,W-1-m,H-1-m,1);
+  const inner=[m+rw+1,m+rw+1,W-m-rw-2,H-m-rw-2];
+  ntgMaze(G,R,null,P.pNew,inner);ntgBraid(G,R,P.braid);
+  for(let k=0;k<4;k++){const side=k,t=R.int(8,Math.max(9,Math.min(W,H)-9));
+    if(side===0)ntgRect(G,t,m+rw,t,m+rw+1,1);else if(side===1)ntgRect(G,W-m-rw-2,t,W-m-rw-1,t,1);else if(side===2)ntgRect(G,t,H-m-rw-2,t,H-m-rw-1,1);else ntgRect(G,m+rw,t,m+rw+1,t,1)}
+  // the pillars of the circuit: a column every few squares, so that it is a colonnade
+  for(let x=m+2;x<W-m-2;x+=4){if(rw>=5){ntgSet(G,x,m+2,0);ntgSet(G,x,H-m-3,0)}}
+  for(let y=m+2;y<H-m-2;y+=4){if(rw>=5){ntgSet(G,m+2,y,0);ntgSet(G,W-m-3,y,0)}}
+  P.rooms.push({x0:m,y0:m,x1:m+rw-1,y1:m+rw-1,kind:'rect'})}
+function ntgCaves(G,R,P){
+  const W=G.W,H=G.H,fill=.5+R()*.06;let a=new Uint8Array(W*H);
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)a[y*W+x]=R()<fill?1:0;
+  for(let it=0;it<4;it++){const b=new Uint8Array(W*H);
+    for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){let n=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)n+=a[(y+dy)*W+x+dx];b[y*W+x]=(n>=5)?1:0}
+    a=b}
+  G.a=a;for(let x=0;x<W;x++){G.a[x]=0;G.a[(H-1)*W+x]=0}for(let y=0;y<H;y++){G.a[y*W]=0;G.a[y*W+W-1]=0}
+  // thin walls between the caverns are the pillars; the open parts are joined at the end (ntgKeepLargest, ntgJoin)
+  P.caves=true}
+/* ---------- a plan ---------- */
+const NTG_SIZE={dense:[41,75],semi:[45,85],sparse:[44,80],spiral:[51,71],cross:[53,79],ring:[55,79],caves:[48,80]};
+function ntgDims(R,kind){const s=NTG_SIZE[kind];let W=R.int(s[0],s[1]),H=R.int(s[0],s[1]);if(kind==='spiral'||kind==='ring'){H=Math.min(H,W+6);W=Math.min(W,H+6)}
+  if(kind==='dense'||kind==='semi'||kind==='cross'){W|=1;H|=1}return [W,H]}
+function ntGen(n,look){
+  const R=ntRng(ntSeed(n,41)),kind=look.kind;
+  let [W,H]=ntgDims(R,kind);
+  const shop=n>0&&n%NT.SHOP_EVERY===0,SH=shop?10:0;     // a shop floor has a strip at the foot of the plan for the shop room
+  if(shop){H+=SH;if(kind==='dense'||kind==='semi'||kind==='cross')H|=1}
+  const G=ntgGrid(W,H),P={rooms:[],pNew:.45+R()*.5,braid:kind==='dense'?.25+R()*.3:.05+R()*.2,kind};
+  const sub=ntgGrid(W,H-SH);G.a=new Uint8Array(W*H);
+  // the plan is made on the upper part; the shop strip is carved afterwards
+  const Gp={W,H:H-SH,a:new Uint8Array(W*(H-SH))};
+  ({dense:ntgDense,semi:ntgSemi,sparse:ntgSparse,spiral:ntgSpiral,cross:ntgCross,ring:ntgRing,caves:ntgCaves})[kind](Gp,R,P);
+  ntgKeepLargest(Gp);if(P.pad||P.caves||kind==='sparse')ntgJoin(Gp,R);
+  ntgBreakOpen(Gp,R,8);ntgKeepLargest(Gp);
+  G.a.set(Gp.a);
+  // the border is solid
+  for(let x=0;x<W;x++){G.a[x]=0;G.a[(H-1)*W+x]=0}for(let y=0;y<H;y++){G.a[y*W]=0;G.a[y*W+W-1]=0}
+  const out={n,kind,W,H,G,rooms:P.rooms,shop:null,P};
+  if(shop)ntgShopRoom(G,R,out,H-SH);
+  ntgStairs(G,R,out);
+  return out}
+/* the shop room: in the foot strip, with a door cut up to the nearest open square of the plan */
+function ntgShopRoom(G,R,out,y0){
+  const W=G.W,w=R.pick([9,11]),h=6,x=R.int(3,W-w-4),y=y0+2;
+  // clear the strip
+  for(let yy=y0;yy<G.H-1;yy++)for(let xx=1;xx<W-1;xx++)G.a[yy*W+xx]=0;
+  ntgRect(G,x,y,x+w-1,y+h-1,1);
+  // dig up from the middle of the top edge until an open square is met
+  const mx=x+Math.floor(w/2);let cy=y-1,guard=0;while(cy>1&&!ntgAt(G,mx,cy)&&guard++<40){ntgSet(G,mx,cy,1);cy--}
+  if(!ntgAt(G,mx,cy)||cy<=1){}
+  out.shop={x0:x,y0:y,x1:x+w-1,y1:y+h-1,door:{x:mx,y:y-1}}}
+/* the stairs: down beside the arrival square, up at the far end; a teleport stone near the arrival */
+function ntgBfs(G,sx,sy){
+  const W=G.W,H=G.H,d=new Int32Array(W*H).fill(-1),q=[sy*W+sx];d[sy*W+sx]=0;
+  for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [dx,dy] of NTG_D){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;const j=ny*W+nx;if(G.a[j]===1&&d[j]<0){d[j]=d[c]+1;q.push(j)}}}
+  return d}
+function ntgDoorSpots(G,minY,maxY){   // wall squares with exactly one open neighbour and a way on behind that neighbour
+  const W=G.W,out=[];
+  for(let y=Math.max(0,minY);y<Math.min(G.H,maxY);y++)for(let x=0;x<W;x++){
+    if(G.a[y*W+x]===1)continue;let n=0,dir=-1;
+    for(let f=0;f<4;f++)if(ntgAt(G,x+NTG_D[f][0],y+NTG_D[f][1])){n++;dir=f}
+    if(n!==1)continue;
+    const ix=x+NTG_D[dir][0],iy=y+NTG_D[dir][1];let m=0;for(const [dx,dy] of NTG_D)if(ntgAt(G,ix+dx,iy+dy))m++;
+    if(m<2)continue;
+    out.push({x,y,ix,iy,f:dir})}      // f: the way to face standing at the inner square with the door behind you
+  return out}
+function ntgStairs(G,R,out){
+  const W=G.W,H=G.H,limY=out.shop?out.shop.y0-3:H;
+  const spots=ntgDoorSpots(G,0,limY);
+  if(!spots.length)throw new Error('nt: no place for stairs on floor '+out.n);
+  const a=spots[Math.floor(R()*spots.length)];
+  const d=ntgBfs(G,a.ix,a.iy);let mx=0;for(let i=0;i<d.length;i++)if(d[i]>mx)mx=d[i];
+  const far=spots.filter(s=>d[s.iy*W+s.ix]>=mx*.82&&Math.abs(s.x-a.x)+Math.abs(s.y-a.y)>12);
+  const pool=far.length?far:spots.filter(s=>d[s.iy*W+s.ix]>=mx*.6&&s!==a);
+  const b=(pool.length?pool:spots.filter(s=>s!==a))[Math.floor(R()*(pool.length?pool.length:Math.max(1,spots.length-1)))]||spots[spots.length-1];
+  out.down={x:a.x,y:a.y,ix:a.ix,iy:a.iy,f:a.f};out.up={x:b.x,y:b.y,ix:b.ix,iy:b.iy,f:b.f};
+  // the stone: three or four steps from the arrival, not in the line of the stair
+  const cand=[];for(let i=0;i<d.length;i++)if(d[i]>=3&&d[i]<=5){const x=i%W,y=(i/W)|0;if(!(x===out.up.ix&&y===out.up.iy))cand.push([x,y,d[i]])}
+  const c=cand.length?cand[Math.floor(R()*cand.length)]:[a.ix,a.iy,0];
+  out.stone={x:c[0],y:c[1]};out.dist=d;out.maxDist=mx}
+/* a text picture of a plan for the tests and the notes */
+function ntgAscii(o){const W=o.W,H=o.H,rows=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++){let c=o.G.a[y*W+x]?'.':'#';if(o.down&&x===o.down.x&&y===o.down.y)c='v';if(o.up&&x===o.up.x&&y===o.up.y)c='^';if(o.stone&&x===o.stone.x&&y===o.stone.y)c='T';s+=c}rows.push(s)}return rows.join('\n')}
+
+/* ---- src/desert/nt_foes.js ---- */
+/* ==========================================================================
+   THE NEVER-ENDING TOWER: CREATURES, LOOT AND SHOPS (prefix ntf / NTF).
+   The creatures are the game's own, drawn from themed families (the graveyard, the blighted road, Sale, the witch wood, the hollow castle, the desert, the wild, the hives, the Pale Spire).
+   A floor mixes two to four families chosen by its seed; every creature stands at the level of its floor. Bosses, wanderers, quest creatures and minis are never used.
+   Every tenth floor has a guardian: a creature of the floor's pool made much stronger: five times the health, half as much damage again (ENEMY_DEF 'ntg_<type>').
+   Shops: every 7th floor has a safe shop room; NT_SHOPS is the fixed cycle through every kind of shop in the game.
+   ========================================================================== */
+const NT_FAMS=[
+  {k:'graveyard',n:'the dead of the graveyard',types:['gyskel','gypike','gybmage','gyghoul','gyzombie','gygiant','gywraith','gyshade','gybanshee','gyrats','gyhound','gyrat','gyraven']},
+  {k:'blight',n:'the Blighted Road',types:['bldeadwarden','blhusk','blghoul','blbones','blbloat','blcrow','blshade','blhound','blscare','blpicker','blbrother','blringer']},
+  {k:'sale',n:'the town of Sale',types:['saskel','sapike','sabmage','saghoul','sazombie','sagiant','sawight','saraven']},
+  {k:'witchwood',n:'the witch wood',types:['wwscare','wwhound','wwspider','wwtoad','wwgolem','wwcrows','wwrevenant','wwroot','wwwisp','wwcrow']},
+  {k:'hollow',n:'the hollow castle',types:['hlgoblin','hlslime','hlorc','hlhands','hlghost','hlwitch','hljester','hlmadman','hlwight','hlvictim','hlbutcher','hlphantom','hlheadless','hlbanshee','hlvampire','hlduke','hlwerewolf','hlwarlord','hlshifter','hlchoir','hlabom']},
+  {k:'desert',n:'the deserts',types:['scorpion','dwolf','nomad','nomad2','vulture','cobra','mummy','pservant','dskeleton']},
+  {k:'wild',n:'the wild',types:['rat','bat','skel','wolf','bandit','archer','hunter','hitman','guard','spectre','spectre2','ghost','bear','slime','assassin','ashguard','rguard']},
+  {k:'hives',n:'the hives',types:['hgwasp','hglarva','hggolem','hgdgrub','hgdguard','hgdgolem','hgdslug','hgdjelly','hgdworm','hgdbug','hgdspider','hgdbeetle']},
+  {k:'marsh',n:'the marsh',types:['hgins0','hgins1','hgins2','hgins3','hgins4','hgins5','hgins6','hgins7','hgmlocust','hgmmosquito','hgmhorsefly','hgmdragonfly','hgmhornet','hgmcricket','hgmtoad','hgmbeetle','hgwcroc','hgweel']},
+  {k:'amethyst',n:'the amethyst well',types:['wmslime','wmbat','wmcrab','wmspider','wmcultist','wmbeetle','wmfungus','wmwraith','wmgolem']},
+  {k:'pale',n:'the Pale Spire',types:['psguard','pshalberd','psarcher','pssentinel','psgargoyle','pschimera','pshydra','psmourner','psjudge','psthornsprite','psmoth','psraven','psarmour','psservant','pscourtier','psdancer','pscarver','pshhound','pscook','pskrat','psarmourer','psmonk','pschorister','psbookwraith','psink','psturnkey','psflayed','psshackle','pscellghost']}
+];
+/* a creature may be used if it is an ordinary one that stands at the level of its place and has a picture */
+function ntfOk(t){
+  const d=ENEMY_DEF[t];if(!d||!d.name||!d.img||!IMG[d.img])return false;
+  if(d.boss||d.aboveParty>0||d.partyLevel||d.wander||d.roam||d.patrol||d.mini||d.act||d.shot||d.quest||d.fixedLevel)return false;
+  if(typeof isBossy==='function'&&isBossy(t))return false;
+  if(/mimic|bogey/i.test(t+d.name))return false;
+  return true}
+function ntfFamilies(){   // the families that can be drawn now (at least three usable creatures)
+  const out=[];for(const f of NT_FAMS){const ok=f.types.filter(ntfOk);if(ok.length>=3)out.push({k:f.k,n:f.n,types:ok})}return out}
+/* the pool of a floor: two to four families, and the creatures of those families */
+function ntfPool(n,look,fams){
+  const R=ntRng(ntSeed(n,61)),all=(fams||ntfFamilies()).slice();
+  for(let i=all.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[all[i],all[j]]=[all[j],all[i]]}
+  const k=Math.min(all.length,R.int(2,4)),use=all.slice(0,k),types=[];for(const f of use)for(const t of f.types)types.push(t);
+  return {fams:use.map(f=>f.k),types}}
+/* a guardian: the strongest-looking creature of the pool made much stronger. It is a copy of the ordinary creature in ENEMY_DEF. */
+function ntfGuardian(type){
+  const id='ntg_'+type;if(ENEMY_DEF[id])return id;const d=ENEMY_DEF[type];
+  ENEMY_DEF[id]=Object.assign({},d,{name:'Guardian '+d.name.replace(/^The /,''),hp:Math.round(d.hp*5),dmg:[Math.round(d.dmg[0]*1.5),Math.round(d.dmg[1]*1.6)],hit:Math.min(.93,(d.hit||.85)+.05),w:(d.w||.7)*1.45,xp:d.xp*12,boss:true,aboveParty:0,ntg:1,glow:Math.max(d.glow||0,.3)});
+  if(typeof NO_VARY!=='undefined')NO_VARY.push(id);
+  if(typeof BOSS_GOLD!=='undefined')BOSS_GOLD[id]=[2000,4000];
+  return id}
+/* ---------- the loot ---------- */
+const NTF_CHESTS=['gy_chest','gy_chest','chest','vase0','vase1','vase2','vase3'];
+function ntfGold(L,mul,r){const g=Math.round(L*40*(.6+r*1.4)*(mul||1));return Math.min(g,2e9)}
+{const _lf=lootFor;lootFor=function(d){
+  if(ntIs(LEVEL)&&d&&d.k&&(NTF_CHESTS.includes(d.k)||d.k==='treasure')){
+    const L=LEVEL_RATING[LEVEL]||99,F=ntFloorOf(LEVEL),r=q=>hash2(d.x,d.y,900+q+(F%9973)),items=[],add=(id,n)=>{if(ITEMDEF[id])items.push({id,n:ITEMDEF[id].stack?(n||1):1})};
+    const big=!!d.ntBig,mul=big?6:d.k==='treasure'?.5:1;
+    for(let q=0;q<2+(big?2:0)+(r(30)<.4?1:0);q++)add(potionFor(r(10+q)),1);
+    add('supermana',1+(big?2:0));if(r(2)<.6||big)add('elixir',1);
+    for(let q=0;q<1+(big?2:0);q++){const a=typeof armourDrop==='function'?armourDrop(r(20+q)):null;if(a)add(a)}
+    if(typeof ringFor==='function'&&(r(3)<.5||big))add(ringFor(r(4),Math.min(60,L)));
+    if(r(5)<.5||big){const g=GEMS[Math.min(GEMS.length-1,Math.floor(Math.pow(r(6),.5)*GEMS.length))];add('gem_'+g[0],1)}
+    d.gold=ntfGold(L,mul,r(7));return items}
+  return _lf.apply(this,arguments)}}
+if(typeof CONTAINERS!=='undefined')for(const k of ['gy_chest'])if(!CONTAINERS.includes(k))CONTAINERS.push(k);
+/* ---------- the shops: a fixed cycle through every kind of shop in the game ---------- */
+/* key, shop name, keeper's trade, KH_STOCK key, face. The first ten are the ordinary trades; then the other stocks of the game. */
+const NT_SHOPS=[
+  ['general','The General Store','general store keeper','sa_general','kh_ohfolk2_5'],
+  ['armoury','The Armoury','armourer','sa_armour','kh_ohsold1_0'],
+  ['weapons','The Weaponsmith','weaponsmith','sa_weapons','kh_ohfolk4_0'],
+  ['apothecary','The Apothecary','apothecary','sa_apothecary','kh_ohfolk3_1'],
+  ['books','The Bookseller','bookseller','sa_books','kh_ohfolk5_0'],
+  ['jeweller','The Jeweller','jeweller','sa_jeweller','kh_ohfolk5_5'],
+  ['tailor','The Tailor','tailor','sa_tailor','kh_ohfolk1_3'],
+  ['butcher','The Butcher','butcher','sa_butcher','kh_ohfolk2_2'],
+  ['baker','The Bakery','baker','food','kh_npc2_4'],
+  ['alchemist','The Alchemist','alchemist','sa_alchemist','kh_ohfolk5_4'],
+  ['inn','The Inn and Tavern','innkeeper','sa_tavern','kh_ohfolk3_5'],
+  ['trader','The Trading Post','trader','trader','kh_ohfolk4_3'],
+  ['smith','The Sun Forge','smith','arms','kh_npc5_4'],
+  ['guardarm','The Guard Armoury','sergeant','armour','kh_npc3_0'],
+  ['sword','The Swordsmith','swordsmith','sword','kh_ohfolk6_2'],
+  ['armour2','The Mailmaker','mailmaker','armour2','kh_ohsold1_2'],
+  ['potion','The Philtre Shop','potion seller','potion','kh_npc2_2'],
+  ['potion2','The Strong Potions','potion seller','potion2','kh_npc4_5'],
+  ['wlipotion','The Brewer','brewer','wli_potion','kh_ohfolk5_1'],
+  ['scroll','The Silver Quill','scribe','scroll','kh_npc2_3'],
+  ['wliscroll','The Scroll Room','scribe','wli_scrolls','kh_ohfolk5_3'],
+  ['wliweap','The Armed Guild','weaponmaster','wli_weapons','kh_ohfolk4_1'],
+  ['wliarm','The Plate Hall','plate maker','wli_armour','kh_ohsold1_1'],
+  ['wligen','The Village Store','shopkeeper','wli_general','kh_ohfolk2_4'],
+  ['green','The Greengrocer','greengrocer','wli_green','kh_ohfolk2_0'],
+  ['wlibutch','The Meat Shop','butcher','wli_butcher','kh_ohfolk2_3'],
+  ['wlibake','The Village Bakery','baker','wli_bakery','kh_ohfolk2_1'],
+  ['wlitail','The Cloth Shop','tailor','wli_tailor','kh_ohfolk1_1'],
+  ['cobbler','The Cobbler','cobbler','wli_cobbler','kh_ohfolk1_5'],
+  ['chandler','The Chandler','chandler','wli_chandler','kh_ohfolk3_0'],
+  ['cooper','The Cooper','cooper','wli_cooper','kh_ohfolk4_5'],
+  ['herbs','The Herbalist','herbalist','wli_herbs','kh_ohfolk3_3'],
+  ['sea','The Sea Goods Store','ship chandler','seagoods','kh_ohfolk4_2'],
+  ['fishmonger','The Fishmonger','fishmonger','fishmonger','kh_ohfolk2_5'],
+  ['tackle','The Bait and Tackle Shop','angler','fsh_bait','kh_ohfolk4_4'],
+  ['fruit','The Fruit Stall','fruiterer','wls_fruit','kh_ohfolk1_0'],
+  ['spice','The Spice Stall','spice merchant','wls_spice','kh_npc2_1'],
+  ['pots','The Potters','potter','wls_pots','kh_ohfolk1_2'],
+  ['cloth','The Cloth Stall','cloth seller','wls_cloth','kh_ohfolk1_4'],
+  ['kgeneral','The Khemetra General Store','general merchant','general','kh_npc1_0']
+];
+/* stock keys that the cycle leaves out because another entry of the cycle already sells much the same things (the tests read this) */
+const NT_SHOP_SKIP=['fish1','fish2','fish3','wls_jewels','wls_fish','wls_veg','wls_melon','wls_jars','wls_sacks'];
+const NT_KEEPER_NAMES=['Orla','Bram','Wenna','Tobias','Hester','Lorcan','Mabyn','Osric','Petra','Garrick','Isolde','Dunstan','Rhosyn','Aldous','Edda','Cormac','Linnet','Hob','Sibyl','Fenn'];
+function ntShopOf(n){const i=Math.floor(n/NT.SHOP_EVERY)-1;return NT_SHOPS[((i%NT_SHOPS.length)+NT_SHOPS.length)%NT_SHOPS.length]}
+const NT_KEEP={};
+function ntKeeper(i){   // the person behind the counter of shop number i of the cycle: a khNpc whose talk opens the shop
+  const S=NT_SHOPS[i],id='nt_k_'+S[0];if(NT_KEEP[id])return id;NT_KEEP[id]=1;
+  const name=NT_KEEPER_NAMES[(i*7)%NT_KEEPER_NAMES.length]+', the '+S[2];
+  const stock=()=>{const f=KH_STOCK[S[3]];const r=typeof f==='function'?f():f;return (r||[]).filter(q=>ITEMDEF[q[0]])};
+  const root=d=>{
+    const L=LEVEL_RATING[LEVEL]||100;
+    if(S[0]==='inn'){const cost=100+L*2;
+      return say('The Inn and Tavern. Nothing in the tower can reach this room: the stair guards keep to their own landings. A bed costs '+cost+' gold, and you wake mended and fed.',[
+        ['Take rooms ('+cost+' gold)',()=>{if(G.gold<cost)return say('That is '+cost+' gold. I cannot go lower.',[BYE]);G.gold-=cost;restParty(true);return say('You sleep behind a barred door. Everyone wakes healed and fed.',[BYE])}],
+        ['Buy a meal or a drink',()=>{openShop(d,stock(),S[1]);return null}],BYE])}
+    return say('Welcome. This is '+S[1].toLowerCase().replace(/^the /,'the ')+', and it is safe here. Look at what I have, and take your time.',[['Browse the wares',()=>{openShop(d,stock(),S[1]);return null}],
+      ['What is this place?',()=>say('A shop on floor '+ntFloorOf(LEVEL)+' of the Never-Ending Tower. A shop opens on every seventh floor. The stair guards leave this room alone.',[BYE])],BYE])};
+  khNpc(id,name,S[4],root);return id}
+function ntShopIndex(n){const i=Math.floor(n/NT.SHOP_EVERY)-1;return ((i%NT_SHOPS.length)+NT_SHOPS.length)%NT_SHOPS.length}
+
+/* ---- src/desert/nt_core.js ---- */
+/* ==========================================================================
+   THE NEVER-ENDING TOWER: THE FLOORS (prefix ntc / ntBuild...). Floor n (1, 2, 3, ...) is level id NT.BASE + n, rated 99 + n (floor 1 is level 100). Floor 0 is the entrance hall (nt_map.js).
+   A floor is made from its number alone (ntLook, ntGen, a seeded random generator), the first time the party goes there, and again whenever it is needed (a saved game, a teleport): so
+   nothing but flags is saved. What the party changes (chests opened, items taken, the dead, shop stock) is kept in G.lst by the game, which works because the order of everything a floor holds
+   is the same every time it is built. Floors far from the party are given back (LEVELS, textures): the tower has no end, the memory has.
+   Stairs: the arrival square of every floor stands in front of its stairs DOWN (a door tile in the wall); the stairs UP are at the far end of the plan.
+   Files: nt_look.js (colours, looks, tiles), nt_gen.js (plans), nt_foes.js (creatures, loot, shops), nt_core.js (this), nt_map.js (entrance hall, world map, achievements, jump links).
+   ========================================================================== */
+const NTC={plans:new Map(),live:new Set(),keep:3,loading:null};
+function ntPlan(n){
+  let p=NTC.plans.get(n);if(p)return p;
+  const look=ntLook(n);p={look,plan:ntGen(n,look)};NTC.plans.set(n,p);
+  if(NTC.plans.size>48){const k=NTC.plans.keys().next().value;NTC.plans.delete(k)}
+  return p}
+/* ---------- loading the pictures: the graveyard, the witch wood, the town of Wenlock and Oldhaven's folk, Sale, the Pale Spire ---------- */
+function ntLoadOwn(){return fetch('assets/nt/manifest.json?v='+VERSION).then(r=>r.json()).catch(()=>({})).then(man=>{NT.man=man||{};return Promise.all(Object.keys(NT.man).map(k=>loadImg('nt_'+k,'assets/nt/'+NT.man[k].file).then(()=>{if(NT.man[k].h)NPC_H['nt_'+k]=NT.man[k].h}).catch(()=>0)))})}
+function ntLoad(){
+  if(NT.loading)return NT.loading;
+  NT.loading=(async()=>{
+    const tryDo=async(f,nm)=>{try{await f()}catch(e){console.error('ntLoad '+nm,e)}};
+    await tryDo(()=>wlLoad(),'wl');
+    await tryDo(()=>gyLoad(),'gy');
+    await tryDo(()=>khLoadAssets(),'kh');
+    if(typeof saLoad==='function')await tryDo(()=>saLoad(),'sa');
+    if(typeof pspLoadOwn==='function'&&typeof pspPics==='function')await tryDo(async()=>{await pspLoadOwn();pspPics()},'psp');
+    if(typeof wwLoad==='function')await tryDo(()=>wwLoad(),'ww');
+    await tryDo(()=>ntLoadOwn(),'own');
+    try{gyAlias()}catch(e){}
+    try{gyFlames()}catch(e){}
+    NT.ready=true})();
+  return NT.loading}
+/* ---------- the floor ---------- */
+function ntSafeBlock(a,W,H,x,y){   // can a solid thing stand on this open square without cutting the plan in two? (its open neighbours stay joined within the 3 by 3)
+  const open=(i,j)=>i>=0&&j>=0&&i<W&&j<H&&a[j*W+i]===1&&!(i===x&&j===y);
+  const cells=[];for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++)if((i||j)&&open(x+i,y+j))cells.push([i,j]);
+  const nb=cells.filter(([i,j])=>Math.abs(i)+Math.abs(j)===1);if(nb.length<=1)return true;
+  const seen=new Set([nb[0].join()]),q=[nb[0]];
+  for(let k=0;k<q.length;k++){const [i,j]=q[k];for(const [di,dj] of NTG_D){const c=[i+di,j+dj];if(!cells.some(z=>z[0]===c[0]&&z[1]===c[1])||seen.has(c.join()))continue;seen.add(c.join());q.push(c)}}
+  return nb.every(c=>seen.has(c.join()))}
+/* wall torches: every wall square that has an open square beside it is a candidate; rooms first, then bends, then corridors; none nearer than 2.3 squares (3.0 in a one-wide corridor) to another */
+function ntTorchSpots(open,W,H,skip,hs){
+  const out=[],cand=[];
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){
+    if(open(x,y)||(skip&&skip(x,y)))continue;
+    for(let f=0;f<4;f++){const nx=x+NTG_D[f][0],ny=y+NTG_D[f][1];if(!open(nx,ny))continue;
+      const d4=NTG_D.filter(([ax,ay])=>open(nx+ax,ny+ay)).length,nar=(!open(nx-1,ny)&&!open(nx+1,ny))||(!open(nx,ny-1)&&!open(nx,ny+1));
+      cand.push({x,y,f,nar,nx,ny,pri:d4>=3?1:d4===2?2:3,h:hs(x,y,f*7)})}}
+  cand.sort((p,q)=>p.pri-q.pri||p.h-q.h);
+  const gapR=2.3,gapN=3.0,grid=new Map(),cell=4;   // the gap is measured between the squares the torches light, so that the two sides of a thin wall have torches of their own
+  const nearT=(c,gp)=>{const gx=Math.floor(c.nx/cell),gy=Math.floor(c.ny/cell);for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++){const l=grid.get((gx+i)+','+(gy+j));if(l)for(const t of l)if(Math.hypot(t[0]-c.nx,t[1]-c.ny)<gp)return true}return false};
+  for(const c of cand){const gp=c.nar?gapN:gapR;if(nearT(c,gp))continue;out.push([c.x,c.y,c.f,c.nar?1:0]);const k=Math.floor(c.nx/cell)+','+Math.floor(c.ny/cell);(grid.get(k)||grid.set(k,[]).get(k)).push([c.nx,c.ny])}
+  return out}
+function ntBuildFloor(n){
+  const id=ntIdOf(n);if(LEVELS[id])return LEVELS[id];
+  if(n<1)throw new Error('nt: floor '+n);
+  if(!NT.ready)throw new Error('nt: pictures not loaded');
+  gyAlias();
+  const {look,plan}=ntPlan(n),P=look.pal,W=plan.W,H=plan.H,a=plan.G.a,R=ntRng(ntSeed(n,71)),hs=(x,y,c)=>hash2(x,y,c+(n%99991));
+  const rating=ntRatingOf(n);
+  NT._making=true;let T,gDown,gUp,gNic;
+  try{T=ntWallTiles(n,look);gDown=ntStairTile(n,look,false);gUp=ntStairTile(n,look,true);gNic=ntNicheTile(n,look)}finally{NT._making=false}
+  const chars={},chMap=new Map();let nextCh=0x300;const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
+  const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&a[y*W+x]===1;
+  const near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
+  const PL=T.plain.map(ch),RIM=T.rim.map(ch),FAR=ch(T.far);
+  const rows=[];
+  for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++){
+    if(open(x,y)){s+='.';continue}
+    if(!near(x,y)){s+=FAR;continue}
+    s+=hs(x,y,3)<.18?RIM[(hs(x,y,4)*RIM.length)|0]:PL[(hs(x,y,5)*PL.length)|0]}rows.push(s)}
+  const put=(x,y,c)=>{rows[y]=rows[y].slice(0,x)+c+rows[y].slice(x+1)};
+  put(plan.down.x,plan.down.y,ch(gDown));put(plan.up.x,plan.up.y,ch(gUp));
+  KH_DOOR[gDown]={nt:'down'};KH_DOOR[gUp]={nt:'up'};
+  const occ=new Set(),decor=[],enemies=[],items=[],lights=[],lcol={},torches=[],V={lcol,col:P.lcol,torch:{fl:P.flame,col:P.lcol,red:P.flame===1},id};
+  const reserved=new Set([plan.down.ix+','+plan.down.iy,plan.up.ix+','+plan.up.iy,plan.stone.x+','+plan.stone.y]);
+  for(const k of reserved)occ.add(k);
+  const free=(x,y)=>open(x,y)&&!occ.has(x+','+y);
+  /* the arrival square and the stone: a clear zone round them, where nothing stands and no creature is put */
+  const SAFE=7,safeFrom=[[plan.down.ix,plan.down.iy],[plan.stone.x,plan.stone.y]];
+  const inSafe=(x,y)=>safeFrom.some(([sx,sy])=>Math.hypot(sx-x,sy-y)<=SAFE);
+  const shop=plan.shop,inShop=(x,y)=>shop&&x>=shop.x0-1&&x<=shop.x1+1&&y>=shop.y0-1&&y<=shop.y1+1;
+  const nearShopDoor=(x,y)=>shop&&Math.hypot(x-shop.door.x,y-shop.door.y)<10;
+  /* ---- wall torches: lots of them, along the corridors and round the rooms ---- */
+  V.torches=torches.push(...ntTorchSpots(open,W,H,(x,y)=>(x===plan.down.x&&y===plan.down.y)||(x===plan.up.x&&y===plan.up.y),hs))&&torches;
+  /* ---- candle niches: a few alcoves cut into the walls ---- */
+  {const tk=new Set(torches.map(t=>t[0]+','+t[1])),cand=[];
+   for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(open(x,y)||rows[y][x]==='.'||tk.has(x+','+y))continue;
+     if((x===plan.down.x&&y===plan.down.y)||(x===plan.up.x&&y===plan.up.y))continue;
+     const ns=NTG_D.filter(([ax,ay])=>open(x+ax,y+ay));if(ns.length!==1)continue;const [ax,ay]=ns[0];
+     if(torches.some(t=>Math.hypot(t[0]-x,t[1]-y)<1.6))continue;cand.push({x,y,nx:x+ax,ny:y+ay,h:hs(x,y,95)})}
+   cand.sort((p,q)=>p.h-q.h);const nic=[];
+   for(const c of cand){if(nic.length>=Math.round(W*H/260))break;if(nic.some(m=>Math.hypot(m.x-c.x,m.y-c.y)<5))continue;nic.push(c);put(c.x,c.y,ch(gNic));lights.push([c.nx,c.ny]);lcol[c.nx+','+c.ny]=P.lcol}}
+  /* ---- the squares: rooms, dead ends, corridors ---- */
+  const cells=[],dead=[];
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!open(x,y))continue;cells.push([x,y]);
+    let c=0;for(const [dx,dy] of NTG_D)if(open(x+dx,y+dy))c++;if(c===1)dead.push([x,y])}
+  const d8=(x,y)=>{let c=0;for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++)if((i||j)&&open(x+i,y+j))c++;return c};
+  /* ---- floors ---- */
+  const fm=[];for(let y=0;y<H;y++)fm.push(new Array(W).fill('0'));
+  for(const r of plan.rooms){const slot=(r.big||r.centre||r.kind==='oct')&&look.floorKind!=='plain'?'3':'1';for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)if(open(x,y))fm[y][x]=slot}
+  if(shop)for(let y=shop.y0;y<=shop.y1;y++)for(let x=shop.x0;x<=shop.x1;x++)fm[y][x]='3';
+  for(const [x,y] of cells)if(fm[y][x]==='0'&&hs(x,y,41)<.06)fm[y][x]='2';
+  /* ---- braziers: standing fires in the rooms and at the corners of the way ---- */
+  {const want=Math.max(4,Math.round(cells.length/70)),list=cells.slice();
+   for(let i=list.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[list[i],list[j]]=[list[j],list[i]]}
+   const placed=[];
+   for(const [x,y] of list){if(placed.length>=want)break;
+     if(occ.has(x+','+y)||inShop(x,y)||d8(x,y)<5||d8(x,y)>7)continue;
+     let wallAdj=false;for(const [dx,dy] of NTG_D)if(!open(x+dx,y+dy))wallAdj=true;if(!wallAdj)continue;
+     if(placed.some(p=>Math.hypot(p[0]-x,p[1]-y)<6))continue;
+     if(Math.hypot(x-plan.down.ix,y-plan.down.iy)<3||Math.hypot(x-plan.up.ix,y-plan.up.iy)<3||Math.hypot(x-plan.stone.x,y-plan.stone.y)<2)continue;
+     if(!ntSafeBlock(a,W,H,x,y))continue;
+     placed.push([x,y]);occ.add(x+','+y);decor.push({k:'brazier',x,y,block:true,sc:1});lights.push([x,y]);lcol[x+','+y]=P.lcol.map(v=>v*1.1)}}
+  /* ---- the shop room ---- */
+  if(shop){
+    const si=ntShopIndex(n),S=NT_SHOPS[si],kid=ntKeeper(si),kp=KH_KEEPERS[kid],cx=Math.floor((shop.x0+shop.x1)/2),ky=shop.y0+1;
+    decor.push({k:khFaceKey(kp.face),x:cx,y:ky,block:true,npc:kid,sc:kp.sc||1});occ.add(cx+','+ky);
+    for(const [dx,k] of [[-2,'wm_barrel'],[2,'sacks'],[-3,'sacks'],[3,'wm_barrel']]){const x=cx+dx;if(x>=shop.x0&&x<=shop.x1&&IMG[k]&&ntSafeBlock(a,W,H,x,ky)){decor.push({k,x,y:ky,block:true,sc:.9});occ.add(x+','+ky)}}
+    for(const x of [shop.x0,shop.x1]){lights.push([x,shop.y0+1]);lcol[x+','+(shop.y0+1)]=[1.6,1.1,.6]}
+    lights.push([cx,shop.y1-1]);lcol[cx+','+(shop.y1-1)]=[1.5,1.05,.6];
+    V.shop={x:cx,y:ky,name:S[1],idx:si}}
+  /* ---- chests, jars and a few loose things ---- */
+  let chests=0;
+  {const budget=Math.max(4,Math.round(cells.length/42)),cand=dead.concat(cells.filter(([x,y])=>d8(x,y)>=6&&hs(x,y,61)<.05));
+   for(const [x,y] of cand){if(chests>=budget)break;
+     if(!free(x,y)||inShop(x,y)||inSafe(x,y)||(Math.hypot(x-plan.up.ix,y-plan.up.iy)<3)||!ntSafeBlock(a,W,H,x,y))continue;
+     if(dead.some(q=>q[0]===x&&q[1]===y)&&hs(x,y,62)>.7)continue;
+     const k=NTF_CHESTS[(hs(x,y,63)*NTF_CHESTS.length)|0];if(!IMG[k]&&!IMG['gy_chest'])continue;
+     occ.add(x+','+y);decor.push({k:IMG[k]?k:'gy_chest',x,y,block:true,sc:k==='gy_chest'?.8:k.startsWith('vase')?.9:1});chests++}}
+  /* ---- the creatures ---- */
+  const poolSel=ntfPool(n,look,NT._fams),pool=poolSel.types;
+  const reachDist=plan.dist;
+  const kindDen={dense:.012,semi:.010,sparse:.0075,spiral:.009,cross:.009,ring:.009,caves:.011}[look.kind];
+  const grp={dense:[1,2],semi:[1,3],sparse:[2,4],spiral:[1,3],cross:[1,3],ring:[1,3],caves:[1,3]}[look.kind];
+  {const total=Math.max(6,Math.round(cells.length*kindDen)),spots=cells.filter(([x,y])=>free(x,y)&&!inSafe(x,y)&&!inShop(x,y)&&!nearShopDoor(x,y)&&reachDist[y*W+x]>=8);
+   for(let i=spots.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[spots[i],spots[j]]=[spots[j],spots[i]]}
+   let made=0,si=0;
+   while(made<total&&si<spots.length){
+     const [x,y]=spots[si++];if(!free(x,y))continue;
+     const size=R.int(grp[0],grp[1]);let t=pool[Math.floor(R()*pool.length)];
+     for(let g=0;g<size&&made<total;g++){
+       const q=g===0?[x,y]:(()=>{for(const [dx,dy] of NTG_D){const nx=x+dx*g,ny=y+dy*g;if(free(nx,ny)&&!inSafe(nx,ny))return [nx,ny]}return null})();
+       if(!q)break;if(!free(q[0],q[1]))continue;
+       enemies.push({t:g&&R()<.4?pool[Math.floor(R()*pool.length)]:t,x:q[0],y:q[1],lvl:rating});occ.add(q[0]+','+q[1]);made++}}}
+  /* ---- the guard on the stairs up (and on every tenth floor a guardian and a great chest) ---- */
+  {const ux=plan.up.ix,uy=plan.up.iy,gs=cells.filter(([x,y])=>free(x,y)&&!inSafe(x,y)&&!inShop(x,y)&&Math.hypot(x-ux,y-uy)>=2&&Math.hypot(x-ux,y-uy)<=6);
+   const k=Math.min(gs.length,3+(n%3));for(let i=0;i<k;i++){const j=Math.floor(R()*gs.length),[x,y]=gs.splice(j,1)[0];if(!free(x,y))continue;enemies.push({t:pool[Math.floor(R()*pool.length)],x,y,lvl:rating});occ.add(x+','+y)}
+   if(n%NT.GUARD_EVERY===0){
+     let best=pool[0],bs=-1;for(const t of pool){const d=ENEMY_DEF[t],s=d.hp*(d.dmg[0]+d.dmg[1]);if(s>bs){bs=s;best=t}}
+     const gid=ntfGuardian(best),gcell=cells.find(([x,y])=>free(x,y)&&!inSafe(x,y)&&Math.hypot(x-ux,y-uy)>=3&&Math.hypot(x-ux,y-uy)<=7);
+     if(gcell){enemies.push({t:gid,x:gcell[0],y:gcell[1],lvl:rating});occ.add(gcell[0]+','+gcell[1])}
+     const cc=cells.find(([x,y])=>free(x,y)&&Math.hypot(x-ux,y-uy)>=2&&Math.hypot(x-ux,y-uy)<=4&&ntSafeBlock(a,W,H,x,y));
+     if(cc){occ.add(cc[0]+','+cc[1]);decor.push({k:IMG.gy_chest?'gy_chest':'chest',x:cc[0],y:cc[1],block:true,sc:1.1,goldAmt:Math.min(2e9,Math.round(rating*40*6*(1+R())))});chests++}}}
+  /* ---- nothing may cut the plan in two: while a square cannot be reached, the solid props round it are taken away ---- */
+  for(let pass=0;pass<30;pass++){
+    const blk=new Set();for(const d of decor)if(d.block)blk.add(d.x+','+d.y);
+    const seen=new Set([plan.down.ix+','+plan.down.iy]),q=[[plan.down.ix,plan.down.iy]];
+    for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [dx,dy] of NTG_D){const nx=x+dx,ny=y+dy,k=nx+','+ny;if(seen.has(k)||!open(nx,ny)||blk.has(k))continue;seen.add(k);q.push([nx,ny])}}
+    const lost=cells.filter(([x,y])=>!seen.has(x+','+y)&&!blk.has(x+','+y));
+    if(!lost.length)break;
+    let victim=null,bd=1e9;
+    for(const d of decor){if(!d.block||d.npc)continue;for(const [x,y] of lost){const dd=Math.abs(d.x-x)+Math.abs(d.y-y);if(dd<bd){bd=dd;victim=d}}}
+    if(!victim)break;decor.splice(decor.indexOf(victim),1);occ.delete(victim.x+','+victim.y);if(victim.k!=='brazier')chests--}
+  /* ---- gems, potions and bones on the ground ---- */
+  {const nG=Math.max(3,Math.round(cells.length/55)),spots=cells.filter(([x,y])=>free(x,y)&&!inSafe(x,y)&&!inShop(x,y));
+   for(let i=spots.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[spots[i],spots[j]]=[spots[j],spots[i]]}
+   let g=0;for(const [x,y] of spots){if(g>=nG)break;const u=Math.pow(R(),.55),gem=GEMS[Math.min(GEMS.length-1,Math.floor(u*GEMS.length))];items.push({k:'gem_'+gem[0],x,y});occ.add(x+','+y);g++}
+   let p=0;for(let i=g;i<spots.length&&p<Math.max(2,Math.round(cells.length/180));i++){const [x,y]=spots[i];if(occ.has(x+','+y))continue;items.push({k:'potion',x,y});occ.add(x+','+y);p++}
+   const dress=['gy_bones','gy_web','gy_urn'].filter(k=>IMG[k]);
+   if(dress.length)for(let i=0;i<spots.length;i+=9){const [x,y]=spots[i];if(occ.has(x+','+y))continue;decor.push({k:dress[(hs(x,y,77)*dress.length)|0],x,y,block:false,walk:true,deco:true,sc:.7})}}
+  const fmS=fm.map(r=>r.join(''));
+  const fSet=ntFloorSet(n,look),ceil=ntCeil(n,look);
+  const L={rows,chars,fmap:fmS,floorSet:fSet,floor:fSet[0],floor2:fSet[1],ceil,ceilH:look.wh,start:{x:plan.down.ix,y:plan.down.iy,f:plan.down.f},enemies,items,decor,lights,portals:[],day:0,amb:look.amb,torchGap:1e9,
+    noExtras:true,tele:{x:plan.stone.x,y:plan.stone.y},name:look.name,label:look.name,teleName:look.name,diff:rating,mapNames:[],_nt:V,_gems:1};
+  V.look=look;V.plan=plan;V.pool=poolSel;V.chests=chests;V.rating=rating;
+  LEVELS[id]=L;LEVEL_RATING[id]=rating;NTC.live.add(n);
+  return L}
+/* a floor far from the party is given back */
+function ntEvict(cur){
+  for(const f of [...NTC.live]){if(Math.abs(f-cur)<=NTC.keep)continue;const id=ntIdOf(f);if(LEVEL===id)continue;
+    delete LEVELS[id];ntRelease(f);NTC.live.delete(f)}}
+/* ---------- going in, going up and down ---------- */
+{const _g=goToLevel;goToLevel=function(n,entry){
+  if(ntIs(n)){
+    if(!NT.ready&&!NT._wait){NT._wait=1;try{msg('The tower stairs lead on...','#c8d0e8')}catch(e){}ntLoad().then(()=>{NT._wait=0;goToLevel(n,entry)});return}
+    if(!LEVELS[n]){try{ntEnsure(n)}catch(e){console.error('nt build',n,e)}}}
+  const dead=ntIs(n)&&G.lst&&G.lst[n]&&G.lst[n].dead?new Set(G.lst[n].dead):null;
+  const r=_g.call(this,n,entry);
+  try{if(ntIs(n)){
+    if(dead&&G.enemies)G.enemies=G.enemies.filter(e=>!(e.id<ENEMY_SPAWNS.length&&dead.has(e.id)));   // the fallen stay down
+    ntArrive(n)}}catch(e){console.error('ntArrive',e)}
+  return r}}
+function ntEnsure(n){const f=ntFloorOf(n);if(LEVELS[n])return LEVELS[n];if(f===0&&typeof ntBuildEntrance==='function')return ntBuildEntrance();return ntBuildFloor(f)}
+{const _j=jumpToLevel;jumpToLevel=function(n,target){
+  if(ntIs(n)&&!NT.ready&&!NT._wait){NT._wait=1;ntLoad().then(()=>{NT._wait=0;jumpToLevel(n,target)});return}
+  if(ntIs(n)&&!LEVELS[n])ntEnsure(n);
+  return _j.apply(this,arguments)}}
+{const _r=restore;restore=function(sv){
+  if(sv&&ntIs(sv.level)){
+    if(!NT.ready&&!NT._wait){NT._wait=1;ntLoad().then(()=>{NT._wait=0;restore(sv)});return}
+    if(!LEVELS[sv.level])ntEnsure(sv.level);
+    if(typeof LEVELS[44]!=='undefined'&&LEVELS[44]&&LEVELS[44].stub){return restoreNow(sv)}   // the tower does not need the golden city
+  }
+  return _r.apply(this,arguments)}}
+{const _rn=restoreNow;restoreNow=function(sv){const r=_rn.apply(this,arguments);try{if(ntIs(LEVEL))ntArrive(LEVEL,true)}catch(e){console.error('nt restore',e)}return r}}
+{const _wd=wdDoorLevel;wdDoorLevel=function(n){return _wd.apply(this,arguments)||ntIs(n)}}
+/* a teleport to a floor that is not built (after a reload, or far away): built first */
+{const _tp=teleportTo;teleportTo=function(n){
+  if(ntIs(n)){
+    if(!NT.ready){if(!NT._wait){NT._wait=1;ntLoad().then(()=>{NT._wait=0;teleportTo(n)})}return}
+    if(!LEVELS[n])try{ntEnsure(n)}catch(e){console.error(e);return}}
+  return _tp.apply(this,arguments)}}
+function ntStairGo(dir){
+  const f=ntFloorOf(LEVEL),t=f+dir;if(t<0)return;
+  if(t===0){sfx('door');const at=NT.ENT&&NT.ENT.back?NT.ENT.back:{x:18,y:4,f:2};goToLevel(NT.BASE,at);return}
+  const {plan}=ntPlan(t),s=dir>0?plan.down:plan.up;
+  sfx('door');goToLevel(ntIdOf(t),{x:s.ix,y:s.iy,f:s.f})}
+{const _k=khBump;khBump=function(nx,ny,g){const d=KH_DOOR[g];
+  if(d&&d.nt==='up'){ntStairGo(1);return true}
+  if(d&&d.nt==='down'){ntStairGo(-1);return true}
+  return _k.apply(this,arguments)}}
+/* ---------- the look in the game: no weather inside, torches of the floor's flame, lamps of its colour ---------- */
+{const _w=weatherNow;weatherNow=function(){if(ntIs(LEVEL))return null;return _w.apply(this,arguments)}}
+{const _sl=setupLights;setupLights=function(){
+  const r=_sl.apply(this,arguments);
+  try{if(ntIs(LEVEL)){const L=LEVELS[LEVEL],V=L&&L._nt;if(V){
+      for(const l of LIGHTS){if(!l.free||l.lamp)continue;const key=Math.floor(l.x)+','+Math.floor(l.y);l.col=V.lcol[key]||V.col;l.kI=1.7;l.range2=150;l.calm=true}
+      if(V.torches&&V.torch){gyFlames();const T=V.torch;
+        for(const [x,y,f,nar] of V.torches){const d=NTG_D[f],O=nar?.035:TORCH_OUT;
+          LIGHTS.push({x:x+.5+d[0]*(.5+O),y:y+.5+d[1]*(.5+O),ph:hash2(x,y,5)*6.28,key:(y*MW+x)*4+f,taken:false,red:!!T.red,fl:T.fl,col:T.col,o:O,nar:!!nar,range2:180,kI:1.6})}}}}}catch(e){console.error('nt lights',e)}
+  return r}}
+/* ---------- sound: the vault's drips, creaks and moans, and a different voice for each kind of plan ---------- */
+const NTS={n:{}};
+function ntsTick(){
+  if(!AC||!NB||!MASTER||G.state!=='play'||G.mute||!ntIs(LEVEL)||!SNDOPT.amb||typeof vtsDrip!=='function')return;
+  const now=AC.currentTime,V=LEVELS[LEVEL]&&LEVELS[LEVEL]._nt,kind=V&&V.look?V.look.kind:'dense',N=NTS.n;
+  const due=(k,lo,hi)=>{if(N[k]===undefined||N[k]-now>hi+5){N[k]=now+Math.random()*hi;return false}if(now<=N[k])return false;N[k]=now+lo+Math.random()*(hi-lo);return true};
+  if(due('drip',3,9))vtsDrip(.4+Math.random()*.4);
+  if(due('creak',14,34))vtsCreak(.45);
+  if(due('moan',26,60))vtsMoan(.4);
+  const per={dense:['chn','stp'],semi:['page','hush'],sparse:['stn','stp'],spiral:['bell','hush'],cross:['gust','stn'],ring:['hush','bell'],caves:['drip2','moan2']}[kind]||[];
+  for(const p of per){
+    if(p==='chn'&&due('chn',12,30))vtsChain(.6);else if(p==='stp'&&due('stp',16,36))vtsSteps(.5);else if(p==='page'&&due('page',14,34))vtsPage(.6);
+    else if(p==='hush'&&due('hush',16,36))vtsHush(.7);else if(p==='stn'&&due('stn',20,44))vtsStone(.6);else if(p==='bell'&&due('bell',22,40))vtsBell(.3);
+    else if(p==='gust'&&due('gust',14,32))vtsGust(.5);else if(p==='drip2'&&due('drip2',2,5))vtsDrip(.7);else if(p==='moan2'&&due('moan2',18,40))vtsMoan(.5)}}
+{const _ys=yarSoundTick;yarSoundTick=function(){_ys.apply(this,arguments);try{ntsTick()}catch(e){console.error('nts',e)}}}
+/* the floors have no names in the list of places (there are endless floors): the parchment map is drawn by nt_map.js */
+
+/* ---- src/desert/nt_map.js ---- */
+/* ==========================================================================
+   THE NEVER-ENDING TOWER: THE WAY IN (prefix ntm). The entrance hall "The Crooked Tower" (level id NT.BASE), the great door (sealed with pale silver until the Pale Spire is finished),
+   the place on the world map north of the Pale Spire, the teleport network (a handful of floors to choose from), the achievements, the stats line, the Go to area rows, the jump links
+   (?town=neverending and ?town=neverending&floor=N), the parchment map of a floor.
+   ntUnlock() opens the tower; the Pale Spire's last boss is meant to call it (or set G.flags.psp.finished). Notes: tools/NT_NOTES.md
+   ========================================================================== */
+const NTM={JUMP_CAP:300,MILESTONES:[10,25,50,100,250,500,1000]};
+LEVEL_NAMES[NT.BASE]='The Crooked Tower';LEVEL_RATING[NT.BASE]=100;
+const ntF=()=>{const F=G.flags;return F.nt||(F.nt={deepest:0,best:{floor:0,level:0},ms:{}})};
+const ntUnlocked=()=>{const F=G.flags||{};return !!((F.psp&&F.psp.finished)||(F.nt&&(F.nt.open||F.nt.debug)))};
+function ntUnlock(){const f=ntF();if(!f.open){f.open=1;try{msg('Far to the north, a door of pale silver unlocks with a sound like a bell.','#d8e4ff');sfx('win')}catch(e){}}}
+/* ---------- the entrance hall ---------- */
+const NTE={W:38,H:30,door:{x0:17,x1:20,y:3},gate:{x0:18,x1:19,y:27}};
+function ntBuildEntrance(){
+  if(LEVELS[NT.BASE])return LEVELS[NT.BASE];
+  if(!NT.ready)throw new Error('nt: pictures not loaded');
+  gyAlias();
+  const W=NTE.W,H=NTE.H,a=new Uint8Array(W*H),open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&a[y*W+x]===1,hs=(x,y,c)=>hash2(x,y,c+4141);
+  for(let y=4;y<=26;y++)for(let x=2;x<=35;x++)a[y*W+x]=1;
+  for(let y=5;y<=25;y++)for(const x of [8,13,24,29]){if(y%6===3)a[y*W+x]=0}   // columns
+  for(let y=8;y<=22;y+=7)for(const x of [4,5,32,33])a[y*W+x]=0;
+  for(let x=NTE.door.x0;x<=NTE.door.x1;x++)a[3*W+x]=0;   // the door tiles are walls
+  const look={n:0,wallBase:'texGrey',wallVar:1,pattern:'ashlar',wh:2.3,amb:.07,
+    pal:{hue:225,sat:.12,val:.9,wallTint:[.92,.98,1.16],floorTint:[.88,.93,1.12],ceilTint:[.85,.9,1.1],flame:3,lcol:[.75,.95,1.65],name:'Silver'}};
+  look.pal.ceilTint=[.85,.9,1.1];
+  NT._making=true;let T,gDoor=[],gGate=[],gStone;
+  try{T=ntWallTiles(0,look);
+    if(IMG.nt_tower_front)IMG.gyp_nt_tower_front=IMG.nt_tower_front;
+    const fr=IMG.gyp_nt_tower_front?'nt_tower_front':'f_gothic';
+    for(let i=0;i<4;i++)gDoor.push(ntTile(0,'texGrey_0',2.3,{fac:{img:fr,i,n:4},gain:1.1,rgb:look.pal.wallTint,tag:'nt0d'+i,emit:.32}));
+    for(let i=0;i<2;i++)gGate.push(ntTile(0,'texGrey_0',2.3,{fac:{img:'gatesC_0',i,n:2},gain:1.1,rgb:look.pal.wallTint,tag:'nt0g'+i,emit:.25}))}finally{NT._making=false}
+  const chars={},chMap=new Map();let nextCh=0x300;const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
+  const near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
+  const PL=T.plain.map(ch),FAR=ch(T.far),rows=[];
+  for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++){if(open(x,y)){s+='.';continue}s+=near(x,y)?PL[(hs(x,y,5)*PL.length)|0]:FAR}rows.push(s)}
+  const put=(x,y,c)=>{rows[y]=rows[y].slice(0,x)+c+rows[y].slice(x+1)};
+  for(let i=0;i<4;i++){put(NTE.door.x0+i,NTE.door.y,ch(gDoor[i]));KH_DOOR[gDoor[i]]={nt:'door'}}
+  for(let i=0;i<2;i++){put(NTE.gate.x0+i,NTE.gate.y,ch(gGate[i]));KH_DOOR[gGate[i]]={nt:'exit'}}
+  const decor=[],lights=[],lcol={},V={lcol,col:look.pal.lcol,torch:{fl:3,col:look.pal.lcol,red:false}};
+  V.torches=ntTorchSpots(open,W,H,(x,y)=>y===NTE.door.y||y===NTE.gate.y,hs);
+  const dec=(k,x,y,o)=>{o=o||{};if(!IMG[k]||!open(x,y))return;decor.push(Object.assign({k,x,y,block:!!o.block,walk:!o.block,deco:!o.block,sc:o.sc||1},o.block?{}:{}))};
+  for(const [x,y] of [[16,5],[21,5],[10,5],[27,5],[3,5],[34,5],[10,24],[27,24]]){if(open(x,y)){decor.push({k:'brazier',x,y,block:true,sc:1});lights.push([x,y]);lcol[x+','+y]=look.pal.lcol}}
+  decor.push({k:'sign_gy',x:18,y:6,block:false,wd:[0,-1],txt:['THE NEVER-ENDING TOWER','Each floor is one level higher than the last'],sc:1});
+  decor.push({k:'sign_gy',x:19,y:24,block:false,wd:[0,1],txt:['THE CROOKED TOWER','North of the Pale Spire'],sc:1});
+  for(const [x,y] of [[6,12],[6,18],[31,12],[31,18]])dec('gy_slab',x,y,{block:true,sc:.9});
+  const fm=[];for(let y=0;y<H;y++)fm.push('0'.repeat(W).split(''));
+  for(let y=4;y<=26;y++)for(let x=2;x<=35;x++){if(x>=15&&x<=22&&y<=12)fm[y][x]='3';else if(x>=17&&x<=20)fm[y][x]='1'}
+  const fSet=ntFloorSet(0,look),ceil=ntCeil(0,look);
+  const L={rows,chars,fmap:fm.map(r=>r.join('')),floorSet:fSet,floor:fSet[0],floor2:fSet[1],ceil,ceilH:2.3,start:{x:18,y:24,f:0},enemies:[],items:[],decor,lights,portals:[],day:0,amb:.07,torchGap:1e9,noExtras:true,
+    tele:{x:21,y:23},name:'The Crooked Tower',label:'The Crooked Tower',diff:100,mapNames:[],_nt:V,_gems:1,_entrance:1};
+  LEVELS[NT.BASE]=L;
+  NT.ENT={back:{x:18,y:4,f:2},arrive:{x:18,y:26,f:0}};
+  return L}
+KH_LAZY[NT.BASE]=()=>{if(!NT.ready)return null;return ntBuildEntrance()};
+/* the great door and the south gate */
+{const _k=khBump;khBump=function(nx,ny,g){const d=KH_DOOR[g];
+  if(d&&d.nt==='door'){
+    if(!ntUnlocked()){sfx('locked');msg('The great door is sealed with pale silver. No key opens it, and it will not move.','#d8e4ff');return true}
+    sfx('door');const {plan}=ntPlan(1);goToLevel(ntIdOf(1),{x:plan.down.ix,y:plan.down.iy,f:plan.down.f});return true}
+  if(d&&d.nt==='exit'){
+    const to=typeof PSP!=='undefined'&&PSP.ENTRY?PSP.ENTRY:null;
+    if(to&&(LEVELS[to.id]||KH_LAZY[to.id])){sfx('door');goToLevel(to.id,{x:to.x,y:to.y,f:to.f});return true}
+    sfx('bump');msg('The road south to the Pale Spire is lost in cold mist.','#b8c8e0');return true}
+  return _k.apply(this,arguments)}}
+/* ---------- arrival: the deepest floor, the milestones ---------- */
+function ntArrive(n,restored){
+  const f=ntFloorOf(n),F=ntF();
+  if(!restored)ntEvict(f);
+  if(f<1)return
+  if(f>F.deepest){
+    F.deepest=f;F.best={floor:f,level:partyLevel()};
+    if(!restored&&f>1)try{msg('New deepest floor: Floor '+f+', level '+partyLevel()+'.','#ffe36a');sfx('win')}catch(e){}}
+  for(const m of NTM.MILESTONES)if(f>=m&&!F.ms[m]){F.ms[m]=1;if(!restored)try{msg('ACHIEVEMENT: Floor '+m+' of the Never-Ending Tower.','#ffe36a');sfx('win')}catch(e){}}}
+/* the achievements page: the tower's own part at the end of the list */
+{const _al=achList;achList=function(){
+  const r=_al.apply(this,arguments);
+  try{const F=(G.flags&&G.flags.nt)||{deepest:0,best:{floor:0,level:0},ms:{}};
+    r.out.push({h:'The Never-Ending Tower'});
+    r.out.push({n:F.deepest?'Deepest: Floor '+F.deepest+', level '+(F.best&&F.best.level||ntRatingOf(F.deepest)):'Not yet entered',s:F.deepest>0});
+    for(const m of NTM.MILESTONES)r.out.push({n:'Reached floor '+m,s:!!(F.ms&&F.ms[m])})}catch(e){console.error(e)}
+  return r}}
+{const _ss=statSections;statSections=function(){
+  const secs=_ss.apply(this,arguments);
+  try{const F=(G.flags&&G.flags.nt)||{deepest:0,best:{floor:0,level:0}};
+    const road=secs.find(s=>s[0]==='THE ROAD');
+    if(road)road[1].push(['Never-Ending Tower',F.deepest?'Floor '+stN(F.deepest)+', level '+stN(F.best.level||ntRatingOf(F.deepest)):'not yet'])}catch(e){console.error(e)}
+  return secs}}
+/* ---------- the world map: a huge crooked tower north of the Pale Spire ---------- */
+if(typeof WMB_PLACES!=='undefined'&&typeof WORLD_LOCS!=='undefined'&&!WORLD_LOCS.some(l=>l.k==='neverending')){
+  const P={k:'neverending',n:'The Never-Ending Tower',full:'The Never-Ending Tower',r:'100 and up',x:-906,y:98,ids:[],ic:'castle',pic:[['i_spire',0,0,36],['i_spire',3,-22,27],['i_spire',7,-38,19]],note:'a huge crooked tower, north of the Pale Spire',pale:1};
+  Object.defineProperty(P,'ids',{enumerable:true,configurable:true,get(){return (ntUnlocked()||NT.DEBUG)?[NT.BASE]:[]}});
+  WMB_PLACES.push(P);
+  const o={k:P.k,n:P.n,x:P.x,y:P.y,ic:P.ic,bl:P,planned:P.r,get lv(){return P.ids.filter(wmbHas)}};
+  WORLD_LOCS.push(o);WMN_SPEC[P.k]=P.pic;
+  if(typeof WORLD_ROADS!=='undefined'&&!WORLD_ROADS.some(r=>r.join()==='palespire,neverending'))WORLD_ROADS.push(['palespire','neverending'])}
+/* floors of the tower belong to the tower on the map */
+{const _tl=teleLocOf;teleLocOf=function(n,d){if(ntIs(n))return WORLD_LOCS.find(l=>l.k==='neverending')||null;return _tl.apply(this,arguments)}}
+if(typeof WMW_INTERIOR!=='undefined'){const _wi=WMW_INTERIOR;}
+/* ---------- the teleport network: a handful of floors, and plus and minus buttons ---------- */
+function ntWoken(){return Object.keys(G.flags.teles||{}).map(Number).filter(n=>ntIs(n)&&G.flags.teles[n]).map(ntFloorOf).filter(f=>f>=0).sort((a,b)=>a-b)}
+function ntNearWoken(list,target,dir){   // the woken floor nearest to target in the direction (dir>0: at or above, dir<0: at or below); null if none
+  if(dir>0){for(const f of list)if(f>=target)return f}else{for(let i=list.length-1;i>=0;i--)if(list[i]<=target)return list[i]}return null}
+/* a sensible handful: the entrance, floor 1, the highest woken, the ten floors round the current one, and multiples of 10 and 25 up to the highest */
+function ntHandful(){
+  const w=ntWoken(),set=new Set(),hi=w.length?w[w.length-1]:0,cur=ntIs(LEVEL)?ntFloorOf(LEVEL):0;
+  for(const f of w){if(f===0||f===1||f===hi||(Math.abs(f-cur)<=10)||f%25===0||(f%10===0&&f<=hi))set.add(f)}
+  return [...set].sort((a,b)=>a-b)}
+{const _lat=teleLevelsAt;teleLevelsAt=function(loc){
+  if(loc&&loc.k==='neverending')return ntHandful().map(ntIdOf);
+  return _lat.apply(this,arguments)}}
+function ntTeleNode(sel,page){
+  const w=ntWoken();if(!w.length)return say('The stone does not answer.',[BYE]);
+  const hi=w[w.length-1];sel=Math.max(w[0],Math.min(hi,sel));if(!w.includes(sel))sel=ntNearWoken(w,sel,-1)||w[0];
+  const cur=ntIs(LEVEL)?ntFloorOf(LEVEL):-1,nm=f=>f===0?'the entrance hall':'floor '+f;
+  const opts=[];
+  opts.push(['Go to '+nm(sel)+(sel>0?' (level '+ntRatingOf(sel)+')':''),()=>{if(sel===cur){return say('You are already there.',[BYE])}teleportTo(ntIdOf(sel));return null}]);
+  const step=(label,t,dir)=>{const f=ntNearWoken(w,t,dir);if(f!==null&&f!==sel)opts.push([label+': '+nm(f),()=>ntTeleNode(f,page)])};
+  if(page===1){
+    step('100 floors up',sel+100,1);step('100 floors down',sel-100,-1);step('1000 floors up',sel+1000,1);step('1000 floors down',sel-1000,-1);
+    step('The highest woken stone',hi,-1);step('Floor 1',1,1);
+    opts.push(['Back.',()=>ntTeleNode(sel,0)])}
+  else{
+    step('Next stone up',sel+1,1);step('Next stone down',sel-1,-1);step('About 10 floors up',sel+10,1);step('About 10 floors down',sel-10,-1);
+    if(hi>=100)opts.push(['Longer leaps...',()=>ntTeleNode(sel,1)]);
+    opts.push(['Stay here.',()=>null])}
+  return say('The Never-Ending Tower. Woken stones: '+w.length+'. The highest is on floor '+hi+'. Where to?',opts)}
+{const _tf=teleFromMap;teleFromMap=function(k){
+  if(k==='neverending'){
+    if(!teleOn()){G.wnote={text:'Stand on a woken teleporter to travel.',t:G.time};return}
+    const w=ntWoken();if(!w.length)return;
+    if(w.length===1&&ntIs(LEVEL)&&w[0]===ntFloorOf(LEVEL)){G.wnote={text:'You are already here.',t:G.time};return}
+    G.overview=false;G.world=false;G.teleMode=false;
+    G.talk={d:{k:'teleporter'},n:{name:'Teleporter'},node:ntTeleNode(w[w.length-1],0),t:G.time,btns:[]};G.hold=null;G.queued=null;return}
+  return _tf.apply(this,arguments)}}
+/* ---------- Go to area, and the jump to the tower ---------- */
+{const _gl=gotoListRaw;gotoListRaw=function(){const out=_gl.apply(this,arguments);
+  try{if(!out.some(r=>r.n===NT.BASE)){out.push({h:'The Never-Ending Tower, north of the Pale Spire'});
+    out.push({n:NT.BASE,name:ntUnlocked()||NT.DEBUG?'The Crooked Tower':'The Crooked Tower (sealed)'});
+    if(ntUnlocked()||NT.DEBUG){LEVEL_RATING[ntIdOf(1)]=ntRatingOf(1);out.push({n:ntIdOf(1),name:'Floor 1'});const d=ntF().deepest;if(d>1){LEVEL_RATING[ntIdOf(d)]=ntRatingOf(d);out.push({n:ntIdOf(d),name:'Floor '+d+', the deepest reached'})}}}}catch(e){console.error(e)}
+  return out}}
+{const _j=jumpToLevel;jumpToLevel=function(n,target){
+  if(ntIs(n)){
+    if(!ntUnlocked()&&!NT.DEBUG){try{sfx('locked');msg('The Crooked Tower is sealed with pale silver.','#d8e4ff')}catch(e){}return}
+    target=Math.min(NTM.JUMP_CAP,Math.max(target||0,ntFloorOf(n)>0?ntRatingOf(ntFloorOf(n)):99))}
+  return _j.call(this,n,target)}}
+/* called from jumpFromUrl (index.html): the party's level for ?town=neverending[&floor=N] (floor N: level 99 + N, but never above JUMP_CAP) */
+function ntJumpLevel(town,q){
+  if(town!=='neverending')return 0;
+  const f=Math.max(0,parseInt(q.get('floor')||'0',10)||0),lvl=parseInt(q.get('lvl')||'0',10);
+  return Math.min(NTM.JUMP_CAP,lvl>0?lvl:f>0?99+f:99)}
+function ntAreas(AREAS){
+  const q=new URLSearchParams(location.search);
+  Object.defineProperty(AREAS,'neverending',{enumerable:true,configurable:true,get(){
+    const f=Math.max(0,parseInt(q.get('floor')||'0',10)||0);
+    const F=ntF();F.debug=1;   // a jump link bypasses the seal
+    if(f>0){const {plan}=ntPlan(f);return [ntIdOf(f),plan.down.ix,plan.down.iy,plan.down.f]}
+    return [NT.BASE,18,24,0]}})}
+/* ---------- the parchment map of a floor ---------- */
+if(typeof mplInstall==='function'){
+  const ntmDraw=(c,x,L,api)=>{
+    const R=L.rows,W=R[0].length,H=R.length,F=api.fit(W,H),s=F.s,X=F.X,Y=F.Y,PX=F.ox,PY=F.oy,PW=W*s,PH=H*s,INK=MPL.INK,V=L._nt||{},look=V.look,pal=look&&look.pal;
+    const wallC=pal?'rgb('+pal.wallTint.map(v=>Math.round(Math.min(255,v*90))).join(',')+')':'#5a5a68',floorC=pal?'rgb('+pal.floorTint.map(v=>Math.round(Math.min(255,v*185))).join(',')+')':'#c8c4d0';
+    x.save();x.shadowColor='rgba(40,30,10,.5)';x.shadowBlur=14;x.shadowOffsetX=3;x.shadowOffsetY=5;x.fillStyle='#2a2430';x.fillRect(PX-1.6,PY-1.6,PW+3.2,PH+3.2);x.restore();
+    x.save();x.beginPath();x.rect(PX,PY,PW,PH);x.clip();
+    const SN=G.seen||[],seen=(i,j)=>!!(SN[j]&&SN[j][i]);   // only what the party has seen is drawn
+    for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(!seen(cx,cy))continue;x.fillStyle=R[cy][cx]==='.'?floorC:wallC;x.fillRect(X(cx)-.1,Y(cy)-.1,s+.2,s+.2)}
+    x.strokeStyle=INK;x.lineWidth=.5;x.beginPath();
+    for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(R[cy][cx]!=='.'||!seen(cx,cy))continue;const X0=X(cx),Y0=Y(cy),w=(i,j)=>!(R[j]&&R[j][i]==='.');
+      if(w(cx,cy-1)){x.moveTo(X0,Y0);x.lineTo(X0+s,Y0)}if(w(cx,cy+1)){x.moveTo(X0,Y0+s);x.lineTo(X0+s,Y0+s)}if(w(cx-1,cy)){x.moveTo(X0,Y0);x.lineTo(X0,Y0+s)}if(w(cx+1,cy)){x.moveTo(X0+s,Y0);x.lineTo(X0+s,Y0+s)}}
+    x.stroke();
+    if(V.plan){const d=V.plan.down,u=V.plan.up,st=V.plan.stone;
+      if(seen(u.x,u.y)){x.fillStyle='#d8b050';x.fillRect(X(u.x)+s*.1,Y(u.y)+s*.1,s*.8,s*.8)}if(seen(d.x,d.y)){x.fillStyle='#8aa0d8';x.fillRect(X(d.x)+s*.1,Y(d.y)+s*.1,s*.8,s*.8)}
+      if(seen(st.x,st.y)){x.fillStyle='#8ad0f0';x.beginPath();x.arc(X(st.x+.5),Y(st.y+.5),Math.max(1.2,s*.4),0,6.3);x.fill()}}
+    x.restore();
+    api.title(x,L.name||'The Never-Ending Tower','',12,5);api.compass(x,50,262,15);
+    {const a=6,b=46,w=92,h=22;api.panel(x,a,b,w,h);api.text(x,'Rating '+(L.diff||100),a+w/2,b+8,5.6,'#4a2a6a');api.text(x,'Gold: up. Blue: down. Light disc: stone.',a+w/2,b+17,4.4,INK)}};
+  mplInstall({get name(){let n=0;const S=G.seen;if(S)for(const r of S)for(let i=0;i<r.length;i+=3)if(r[i])n++;return 'nt'+n},levels:{includes:n=>ntIs(n)},draw:ntmDraw,tint:[3,2,6],foot:'You are the yellow arrow. Gold square: stairs up. Blue square: stairs down. Pale disc: the teleport stone.'})}
+if(typeof mpmgiKind==='function'){const _k=mpmgiKind;mpmgiKind=function(lv){return ntIs(lv)?'dungeon':_k.apply(this,arguments)}}
 
 /* ---- src/desert/blight_titans.js ---- */
 /* ==========================================================================
