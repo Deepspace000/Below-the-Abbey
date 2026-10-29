@@ -1,107 +1,53 @@
-# Pale Spire art notes (dark gothic palette: black stone, verdigris copper green)
+# Pale Spire art notes
 
-Painted pieces are in assets/ps/ (manifest.json), bosses of the Blighted Road in assets/tt/ (tt0 to tt5, no manifest). Cut with tools/ingest_ps.py; bosses with tools/ingest_tt.py. Sheets are generated on magenta in Gemini; for sheets with faint cell lines use cells= with an inset.
+Palette now (owner, round 2): black and charcoal stone, slate blue-grey, cold teal moonlight and mist, aged brass, orange-brown banners, candle and RED lantern glow as accents, verdigris only as small accents. Creatures, ghosts and people are gaunt, withered and evil. Painted pieces are in assets/ps/ (manifest.json lists w, px_h and h in cells); the six giants of the Blighted Road are in assets/tt/tt0..tt5.webp (no manifest). Tools: tools/ingest_ps.py (cutter; unmix=i,j makes glow and ghost cells translucent), tools/ingest_tt.py (giants), tools/cells.py (inset cells= helper), tools/retone_ps.py (hue shift of green to teal-blue).
 
-## Painted (name, file, height in cells)
-* castle_view, castle_view.webp, h=9.0
-* castle_view_near, castle_view_near.webp, h=9.0
-* arch_high, arch_high.webp, h=4.2
-* arch_low, arch_low.webp, h=2.6
-* arch_ivy, arch_ivy.webp, h=3.6
-* arch_iron, arch_iron.webp, h=3.0
-* arch_stair, arch_stair.webp, h=3.2
-* window_great, window_great.webp, h=3.6
-* window_rose, window_rose.webp, h=3.0
-* window_slit, window_slit.webp, h=2.4
-* stairs_moss, stairs_moss.webp, h=0.9
-* clock_tower, clock_tower.webp, h=5.0
-* clock_face, clock_face.webp, h=1.8
-* bell_big, bell_big.webp, h=2.4
-* bell_small, bell_small.webp, h=1.2
-* bell_frame, bell_frame.webp, h=3.2
-* bridge_arch, bridge_arch.webp, h=2.8
-* bridge_rail, bridge_rail.webp, h=1.2
-* well_pale, well_pale.webp, h=1.3
-* lantern_bracket, lantern_bracket.webp, h=1.2
-* schnoor_a, schnoor_a.webp, h=3.2
-* schnoor_b, schnoor_b.webp, h=3.2
-* schnoor_c, schnoor_c.webp, h=3.4
-* schnoor_d, schnoor_d.webp, h=3.0
-* schnoor_door, schnoor_door.webp, h=2.4
-* brick_wall_high, brick_wall_high.webp, h=3.4
-* brick_gable, brick_gable.webp, h=3.6
-* alcove_weeper, alcove_weeper.webp, h=2.6
-* alcove_monk, alcove_monk.webp, h=2.6
-* alcove_knight, alcove_knight.webp, h=2.6
-* alcove_maiden, alcove_maiden.webp, h=2.6
-* alcove_empty, alcove_empty.webp, h=2.6
-* iron_fence_a, iron_fence_a.webp, h=1.5
-* iron_fence_b, iron_fence_b.webp, h=1.5
-* iron_gate_big, iron_gate_big.webp, h=2.4
-* iron_rail, iron_rail.webp, h=1.1
-* vine_a, vine_a.webp, h=3.0
-* vine_b, vine_b.webp, h=3.0
-* ivy_clump, ivy_clump.webp, h=0.8
-* moss_rock, moss_rock.webp, h=0.9
-* rose_pale, rose_pale.webp, h=1.2
-* rose_arch, rose_arch.webp, h=3.0
-* cart_old, cart_old.webp, h=1.1
-* statue_plinth, statue_plinth.webp, h=2.2
-* urn_big, urn_big.webp, h=1.4
-* cobble_heap, cobble_heap.webp, h=0.5
-* st_mourners, st_mourners.webp, h=2.4
-* st_chimera, st_chimera.webp, h=2.0
-* st_weepgiant, st_weepgiant.webp, h=3.2
-* st_hydra, st_hydra.webp, h=2.6
-* st_judge, st_judge.webp, h=2.6
-* st_gargoyle, st_gargoyle.webp, h=1.4
-* st_headless, st_headless.webp, h=1.8
-* st_hound, st_hound.webp, h=1.1
-* st_veiled, st_veiled.webp, h=2.0
-* st_hand, st_hand.webp, h=1.6
-* st_bishop, st_bishop.webp, h=2.4
-* st_fountain, st_fountain.webp, h=3.4
-* col_fluted, col_fluted.webp, h=3.4
-* col_twist, col_twist.webp, h=3.4
-* col_silver, col_silver.webp, h=3.4
-* chandelier, chandelier.webp, h=1.6
-* table_long, table_long.webp, h=1.3
-* table_high, table_high.webp, h=1.5
-* chair_high, chair_high.webp, h=1.9
-* banner_violet, banner_violet.webp, h=3.0
-* hearth_cold, hearth_cold.webp, h=2.6
-* candelabra_tall, candelabra_tall.webp, h=2.2
-* bed_four, bed_four.webp, h=2.6
-* lantern_hanging, lantern_hanging.webp, h=1.2
-* tex_ashlar, tex_ashlar.jpg, h=256 (texture 256)
-* tex_ashlar_moss, tex_ashlar_moss.jpg, h=256 (texture 256)
-* tex_ivy_wall, tex_ivy_wall.jpg, h=256 (texture 256)
-* tex_brick_dark, tex_brick_dark.jpg, h=256 (texture 256)
-* tex_timber_plaster, tex_timber_plaster.jpg, h=256 (texture 256)
-* tex_cobble, tex_cobble.jpg, h=256 (texture 256)
-* tex_flagstone, tex_flagstone.jpg, h=256 (texture 256)
-* tex_cobble_wet, tex_cobble_wet.jpg, h=256 (texture 256)
-* tex_gravel, tex_gravel.jpg, h=256 (texture 256)
-* tex_marble, tex_marble.jpg, h=256 (texture 256)
-* tex_vault_ceiling, tex_vault_ceiling.jpg, h=256 (texture 256)
-* tex_beam_ceiling, tex_beam_ceiling.jpg, h=256 (texture 256)
-* c_psguard, c_psguard.webp, h=1.8
-* c_pshalberd, c_pshalberd.webp, h=2.0
-* c_psarcher, c_psarcher.webp, h=1.7
-* c_pssentinel, c_pssentinel.webp, h=2.1
-* c_psgatecaptain, c_psgatecaptain.webp, h=2.2
-* c_psmarblehound, c_psmarblehound.webp, h=1.0
-* c_pshedger, c_pshedger.webp, h=1.8
-* c_psfalconer, c_psfalconer.webp, h=1.8
-* c_psarmour, c_psarmour.webp, h=1.9
-* c_psservant, c_psservant.webp, h=1.7
-* c_pscourtier, c_pscourtier.webp, h=1.8
-* c_psdancer, c_psdancer.webp, h=1.8
+## Names builders asked for (all painted)
+* Castle: castle_view (wide skyline, 1922x1000, h 9, transparent, no sky; the gate arch is open), castle_view_near (clock-tower gate arch seen large, 1435x1000, h 9), gate_clock (same arch picture as a walk-through arch, h 6), clock_face (h 1.8), banner_long_a, banner_long_b (h 4), bat_flock (h 3), moon_crescent (h 3), tex_sky_night (1024x512 seamless wide night sky, teal-blue, jpg, kind tex).
+* Gate and fronts: gate_great, barbican_front, gatehouse_front, castle_front_tiles, door_great, door_oak, door_ironbound, door_dungeon, door_stair, door_arch, stairs_moss, stairs_curved (a spiral stair tower), window_stained_tall, window_stained.
+* Black gothic furniture: furn_sideboard, furn_organ, furn_chair_high, furn_fireplace_tall, furn_wardrobe, furn_cradle, furn_bed_canopy, furn_bookcase, furn_desk, furn_screen_tracery, furn_pulpit, furn_altarpiece, furn_throne_black (also as throne), furn_table_long_black, furn_chair_dining_black, furn_candelabra_black, furn_clock_grandfather, furn_mirror_gothic, furn_pew_black, furn_lectern_black; harpsichord (a clean side view, not strictly front), tex_vault_ceiling (ribbed vault texture; a seamless 256 tile, so not a true ref16 vault).
+* Haunted dressing: window_sheeted_a/b/c, bed_cobweb_a/b, mirror_haunted_a (empty room), _b (ghost face), _c (wrong figure), candles_glow_a/b/c/d, lantern_red_a (hanging), lantern_red_b (post), dust_sheet_furniture_a/b, web_spider, cobweb_corner_a/b, cobweb_thick_a (arch curtain), _b (drape), _c (horizontal web), portrait_ancestor_1..8 (h 2.2).
+* Ghosts: p_ghost_lady, p_ghost_gentleman, p_ghost_child, p_ghost_housekeeper, p_ghost_maid, p_ghost_dancer, p_ghost_soldier, p_ghost_priest (all gaunt), p_ghost_jester, ghost_baker, ghost_armourer, ghost_monk, ghost_scholar, ghost_choir, ghost_cook, ghost_servant. p_ghost_butler is the older, less gaunt picture (no gaunt butler yet).
+* People p_* (garrick, isaude, peck, sedge, calpurnia, harrow, gaunt, stamford, yseult, porter, gardener, falconer, chamberlain, librarian, courtier1..6). The prisoners and porter and gardener are weary but human; Harrow, Stamford, Calpurnia are not as gaunt as the ghosts.
+* All creatures c_ps* of PSP_CREATURES are painted (gaunt). Colossus is cut at the feet by the sheet edge.
+* Kitchen, dungeon, chapel, library props: cauldron_big, spit_hearth, butcher_block, pans_hanging, barrels, oven, cell_door, chains, iron_maiden, stocks, brazier, rack, valve_wheel, straw_bed, shackled_skeleton, cage, bucket_well, dais_steps, suit_armour, trophy_stag, altar, font, reliquary_chest, pews, lectern, bookcase_tall, reading_desk, globe, scroll_rack, st_saint1..4, skull_pillar, sconce_black, pillar_lantern, table_books, stair_spiral_iron.
+* Statues st_*, columns col_*, table_long, table_high, chair_high, chandelier, banner_violet, hearth_cold, candelabra_tall, bed_four, lantern_hanging, arch_*, window_*, alcoves, iron fences, vines, roses, moss_rock, cart_old, statue_plinth, urn_big, cobble_heap, schnoor_*, brick_*, textures tex_*.
 
-## Bosses (assets/tt)
-* tt0 Gorsemaw, tt1 Mother Sallowtide, tt2 Hobb Crookspine, tt3 Brannock the Stitched, tt4 Old Nine-Hands (draws 8 arms, not 9), tt5 Old White Eyes (redone: a naked bloated boil-covered giant with milky white eyes, no suit or hat). Tall webp, about 1:1.35, bottom of the feet at the bottom edge.
+## Known weak spots
+* The earlier pieces were cut in the first (green copper) palette; clock_tower, well_pale, arch_high, alcove_*, st_*, window_*, chandelier, lanterns were hue-shifted towards teal-blue with tools/retone_ps.py, but the walls tex_ashlar_moss and ivy are still green by nature.
+* st_chimera, st_hound, c_psmarblehound, cart_old, harpsichord are side views.
+* castle_view_near and the 3 gate pieces: gate arches are see-through (transparent), by design.
 
-## Notes
-* castle_view and castle_view_near are cut-outs on a transparent background with NO sky (the game supplies the overcast sky). castle_view_near has its top tower tips slightly cut by the frame; the gate hole was filled dark.
-* st_chimera, st_hound, c_psmarblehound, cart_old are side views (four-legged or a cart); everything else is front on.
-* Not yet painted (still stand-ins): overcast cloud sky texture, dais_steps, suit_armour, throne, harpsichord, paintings pt_*, S5 service and dungeon props, S6 chapel and library props, S7 people p_*, the other creatures c_* (only guard, halberdier, archer, sentinel, gate captain, marble hound, hedger, falconer, hollow armour, servant, courtier, dancer are done), S8 doors, S9 gate and fronts.
+## Full list by sheet
+* csv: castle_view (h=9.0)
+* cvn: castle_view_near (h=9.0), gate_clock (h=6.0)
+* a1: arch_high (h=4.2), arch_low (h=2.6), arch_ivy (h=3.6), arch_iron (h=3.0), arch_stair (h=3.2), window_great (h=3.6), window_rose (h=3.0), window_slit (h=2.4)
+* r2b: stairs_moss (h=1.6), gate_great (h=4.6), barbican_front (h=4.0), gatehouse_front (h=4.0), castle_front_tiles (h=4.0), door_great (h=3.4), door_oak (h=2.4), door_ironbound (h=2.4), door_dungeon (h=2.2), door_stair (h=2.4), stairs_curved (h=3.0), door_arch (h=2.6)
+* a2: clock_tower (h=5.0), bell_big (h=2.4), bell_small (h=1.2), bell_frame (h=3.2), bridge_arch (h=2.8), bridge_rail (h=1.2), well_pale (h=1.3), lantern_bracket (h=1.2)
+* r2a: clock_face (h=1.8), banner_long_a (h=4.0), banner_long_b (h=4.0), bat_flock (h=3.0), moon_crescent (h=3.0), window_stained_tall (h=3.6), window_stained (h=3.2)
+* a3: schnoor_a (h=3.2), schnoor_b (h=3.2), schnoor_c (h=3.4), schnoor_d (h=3.0), schnoor_door (h=2.4), brick_wall_high (h=3.4), brick_gable (h=3.6)
+* a4: alcove_weeper (h=2.6), alcove_monk (h=2.6), alcove_knight (h=2.6), alcove_maiden (h=2.6), alcove_empty (h=2.6), iron_fence_a (h=1.5), iron_fence_b (h=1.5), iron_gate_big (h=2.4), iron_rail (h=1.1)
+* a5: vine_a (h=3.0), vine_b (h=3.0), ivy_clump (h=0.8), moss_rock (h=0.9), rose_pale (h=1.2), rose_arch (h=3.0), cart_old (h=1.1), statue_plinth (h=2.2), urn_big (h=1.4), cobble_heap (h=0.5)
+* s1: st_mourners (h=2.4), st_chimera (h=2.0), st_weepgiant (h=3.2), st_hydra (h=2.6), st_judge (h=2.6), st_gargoyle (h=1.4), st_headless (h=1.8), st_hound (h=1.1), st_veiled (h=2.0), st_hand (h=1.6), st_bishop (h=2.4), st_fountain (h=3.4)
+* s3: col_fluted (h=3.4), col_twist (h=3.4), col_silver (h=3.4), chandelier (h=1.6), table_long (h=1.3), table_high (h=1.5), chair_high (h=1.9), banner_violet (h=3.0), hearth_cold (h=2.6), candelabra_tall (h=2.2), bed_four (h=2.6), lantern_hanging (h=1.2)
+* tx: tex_ashlar (h=256), tex_ashlar_moss (h=256), tex_ivy_wall (h=256), tex_brick_dark (h=256), tex_timber_plaster (h=256), tex_cobble (h=256), tex_flagstone (h=256), tex_cobble_wet (h=256), tex_gravel (h=256), tex_marble (h=256), tex_vault_ceiling (h=256), tex_beam_ceiling (h=256)
+* s2a: c_psguard (h=1.8), c_pshalberd (h=2.0), c_pssentinel (h=2.1), c_psgatecaptain (h=2.2), c_psmarblehound (h=1.0), c_pshedger (h=1.8), c_psarmour (h=1.9)
+* g3: c_psarcher (h=1.7), c_psservant (h=1.7), c_pscourtier (h=1.8), c_psdancer (h=1.8), c_psleech (h=1.0), c_psdrowned (h=1.7), c_pscellghost (h=1.6), c_psbonecrawl (h=1.5), c_psquestioner (h=2.1), c_psstairwarden (h=3.0), c_psantlered (h=2.4), c_psdrowngaoler (h=2.6)
+* g4: c_psfalconer (h=1.8), c_pscolossus (h=3.4), c_psthornwarden (h=3.0), c_psossian (h=1.9), c_pshoundmaster (h=1.9), c_pshunger (h=3.4)
+* sky: tex_sky_night (h=512)
+* f1: furn_sideboard (h=1.8), furn_organ (h=3.0), furn_chair_high (h=2.0), furn_fireplace_tall (h=2.8), furn_wardrobe (h=2.8), furn_cradle (h=1.1), furn_bed_canopy (h=2.6), furn_bookcase (h=2.8), furn_desk (h=1.4), furn_screen_tracery (h=2.2), furn_pulpit (h=2.6), furn_altarpiece (h=2.4), bookcase_tall (h=2.6), reading_desk (h=1.0)
+* f2: furn_throne_black (h=2.6), furn_table_long_black (h=1.3), furn_chair_dining_black (h=1.5), furn_candelabra_black (h=2.2), furn_clock_grandfather (h=2.4), furn_mirror_gothic (h=2.2), furn_pew_black (h=1.2), furn_lectern_black (h=1.4), throne (h=2.4), pews (h=1.0), lectern (h=1.3)
+* g5: p_ghost_lady (h=1.8), p_ghost_gentleman (h=1.8), p_ghost_child (h=1.2), p_ghost_maid (h=1.7), p_ghost_soldier (h=1.8), p_ghost_priest (h=1.8), p_ghost_dancer (h=1.8), p_ghost_housekeeper (h=1.7), ghost_baker (h=1.7), ghost_armourer (h=1.8), ghost_monk (h=1.8), ghost_scholar (h=1.8)
+* gh: p_ghost_butler (h=1.8)
+* pt: pt_king (h=2.2), pt_queen (h=2.2), pt_prince (h=1.6), pt_battle (h=2.0), pt_hunt (h=2.0), pt_feast (h=2.0), pt_pale_lands (h=2.0), pt_ancestors (h=1.8), pt_empty (h=2.2), pt_isaude (h=2.0), pt_gallery8 (h=1.6)
+* s5: cauldron_big (h=1.3), spit_hearth (h=2.0), butcher_block (h=0.9), pans_hanging (h=1.0), barrels (h=0.9), oven (h=1.8), cell_door (h=2.2), chains (h=2.0), iron_maiden (h=2.0), stocks (h=1.0), brazier (h=1.2)
+* s5b: rack (h=1.6), valve_wheel (h=1.1), straw_bed (h=0.45), shackled_skeleton (h=1.4), cage (h=1.6), bucket_well (h=0.9), dais_steps (h=0.5), suit_armour (h=2.0), trophy_stag (h=1.0), altar (h=1.5), font (h=1.1), reliquary_chest (h=0.8)
+* s6: harpsichord (h=1.3), globe (h=1.0), scroll_rack (h=1.6), st_saint1 (h=2.2), st_saint2 (h=2.2), st_saint3 (h=2.2), st_saint4 (h=2.2), skull_pillar (h=1.4), sconce_black (h=0.9), pillar_lantern (h=2.4), table_books (h=0.9), stair_spiral_iron (h=3.0)
+* s7: p_garrick (h=1.7), p_isaude (h=1.8), p_peck (h=1.4), p_sedge (h=1.9), p_calpurnia (h=1.7), p_harrow (h=1.8), p_gaunt (h=1.8), p_stamford (h=1.7), p_yseult (h=1.7), p_porter (h=1.7), p_gardener (h=1.6), p_falconer (h=1.8)
+* gh2: p_chamberlain (h=1.8), p_librarian (h=1.8), p_courtier1 (h=1.7), p_courtier2 (h=1.8), p_courtier3 (h=1.8), p_courtier4 (h=1.8), p_courtier5 (h=1.7), p_courtier6 (h=1.8), p_ghost_jester (h=1.8), ghost_choir (h=1.8), ghost_cook (h=1.7), ghost_servant (h=1.4)
+* g1: c_psgargoyle (h=1.4), c_pschimera (h=2.0), c_pshydra (h=2.6), c_psmourner (h=2.2), c_psjudge (h=2.6), c_psthornsprite (h=0.6), c_psmoth (h=0.9), c_psraven (h=1.0), c_psgargmother (h=2.2), c_psfiend (h=1.7), c_pscarver (h=1.9), c_psmonk (h=1.8)
+* g2: c_pscook (h=1.8), c_pskrat (h=0.9), c_psarmourer (h=1.9), c_psbakeghost (h=1.7), c_pschorister (h=1.5), c_psbookwraith (h=1.9), c_psink (h=0.8), c_psteward (h=2.3), c_pssacristan (h=2.1), c_psturnkey (h=1.9), c_psflayed (h=1.7), c_psshackle (h=1.8)
+* h1: window_sheeted_a (h=3.0), window_sheeted_b (h=2.8), window_sheeted_c (h=3.0), mirror_haunted_a (h=2.6), mirror_haunted_b (h=2.6), mirror_haunted_c (h=2.6), bed_cobweb_a (h=2.6), bed_cobweb_b (h=2.6), candles_glow_a (h=2.2), candles_glow_b (h=1.4)
+* h2b: lantern_red_a (h=1.2), lantern_red_b (h=2.0)
+* h2: dust_sheet_furniture_a (h=1.3), dust_sheet_furniture_b (h=1.3), web_spider (h=1.4), cobweb_corner_a (h=2.0), cobweb_corner_b (h=2.0), cobweb_thick_a (h=3.0), cobweb_thick_b (h=2.4), cobweb_thick_c (h=1.2), candles_glow_c (h=1.0), candles_glow_d (h=2.2)
+* anc: portrait_ancestor_1 (h=2.2), portrait_ancestor_2 (h=2.2), portrait_ancestor_3 (h=2.2), portrait_ancestor_4 (h=2.2), portrait_ancestor_5 (h=2.2), portrait_ancestor_6 (h=2.2), portrait_ancestor_7 (h=2.2), portrait_ancestor_8 (h=2.2)

@@ -1,0 +1,2293 @@
+{
+"castle_view": {
+"file": "castle_view.webp",
+"w": 1922,
+"px_h": 1000,
+"h": 9.0,
+"kind": "sprite",
+"sheet": "csv"
+},
+"castle_view_near": {
+"file": "castle_view_near.webp",
+"w": 1435,
+"px_h": 1000,
+"h": 9.0,
+"kind": "sprite",
+"sheet": "cvn"
+},
+"arch_high": {
+"file": "arch_high.webp",
+"w": 405,
+"px_h": 512,
+"h": 4.2,
+"kind": "sprite",
+"sheet": "a1"
+},
+"arch_low": {
+"file": "arch_low.webp",
+"w": 657,
+"px_h": 426,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "a1"
+},
+"arch_ivy": {
+"file": "arch_ivy.webp",
+"w": 586,
+"px_h": 512,
+"h": 3.6,
+"kind": "sprite",
+"sheet": "a1"
+},
+"arch_iron": {
+"file": "arch_iron.webp",
+"w": 439,
+"px_h": 512,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "a1"
+},
+"arch_stair": {
+"file": "arch_stair.webp",
+"w": 412,
+"px_h": 512,
+"h": 3.2,
+"kind": "sprite",
+"sheet": "a1"
+},
+"window_great": {
+"file": "window_great.webp",
+"w": 350,
+"px_h": 512,
+"h": 3.6,
+"kind": "sprite",
+"sheet": "a1"
+},
+"window_rose": {
+"file": "window_rose.webp",
+"w": 484,
+"px_h": 465,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "a1"
+},
+"window_slit": {
+"file": "window_slit.webp",
+"w": 330,
+"px_h": 491,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "a1"
+},
+"stairs_moss": {
+"file": "stairs_moss.webp",
+"w": 514,
+"px_h": 446,
+"h": 1.6,
+"kind": "sprite",
+"sheet": "r2b"
+},
+"clock_tower": {
+"file": "clock_tower.webp",
+"w": 180,
+"px_h": 512,
+"h": 5.0,
+"kind": "sprite",
+"sheet": "a2"
+},
+"clock_face": {
+"file": "clock_face.webp",
+"w": 551,
+"px_h": 691,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "r2a"
+},
+"bell_big": {
+"file": "bell_big.webp",
+"w": 465,
+"px_h": 512,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "a2"
+},
+"bell_small": {
+"file": "bell_small.webp",
+"w": 411,
+"px_h": 501,
+"h": 1.2,
+"kind": "sprite",
+"sheet": "a2"
+},
+"bell_frame": {
+"file": "bell_frame.webp",
+"w": 500,
+"px_h": 512,
+"h": 3.2,
+"kind": "sprite",
+"sheet": "a2"
+},
+"bridge_arch": {
+"file": "bridge_arch.webp",
+"w": 620,
+"px_h": 350,
+"h": 2.8,
+"kind": "sprite",
+"sheet": "a2"
+},
+"bridge_rail": {
+"file": "bridge_rail.webp",
+"w": 598,
+"px_h": 308,
+"h": 1.2,
+"kind": "sprite",
+"sheet": "a2"
+},
+"well_pale": {
+"file": "well_pale.webp",
+"w": 377,
+"px_h": 512,
+"h": 1.3,
+"kind": "sprite",
+"sheet": "a2"
+},
+"lantern_bracket": {
+"file": "lantern_bracket.webp",
+"w": 458,
+"px_h": 512,
+"h": 1.2,
+"kind": "sprite",
+"sheet": "a2"
+},
+"schnoor_a": {
+"file": "schnoor_a.webp",
+"w": 295,
+"px_h": 467,
+"h": 3.2,
+"kind": "sprite",
+"sheet": "a3"
+},
+"schnoor_b": {
+"file": "schnoor_b.webp",
+"w": 274,
+"px_h": 451,
+"h": 3.2,
+"kind": "sprite",
+"sheet": "a3"
+},
+"schnoor_c": {
+"file": "schnoor_c.webp",
+"w": 267,
+"px_h": 449,
+"h": 3.4,
+"kind": "sprite",
+"sheet": "a3"
+},
+"schnoor_d": {
+"file": "schnoor_d.webp",
+"w": 255,
+"px_h": 398,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "a3"
+},
+"schnoor_door": {
+"file": "schnoor_door.webp",
+"w": 421,
+"px_h": 400,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "a3"
+},
+"brick_wall_high": {
+"file": "brick_wall_high.webp",
+"w": 737,
+"px_h": 359,
+"h": 3.4,
+"kind": "sprite",
+"sheet": "a3"
+},
+"brick_gable": {
+"file": "brick_gable.webp",
+"w": 520,
+"px_h": 419,
+"h": 3.6,
+"kind": "sprite",
+"sheet": "a3"
+},
+"alcove_weeper": {
+"file": "alcove_weeper.webp",
+"w": 344,
+"px_h": 512,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "a4"
+},
+"alcove_monk": {
+"file": "alcove_monk.webp",
+"w": 351,
+"px_h": 512,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "a4"
+},
+"alcove_knight": {
+"file": "alcove_knight.webp",
+"w": 351,
+"px_h": 512,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "a4"
+},
+"alcove_maiden": {
+"file": "alcove_maiden.webp",
+"w": 358,
+"px_h": 512,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "a4"
+},
+"alcove_empty": {
+"file": "alcove_empty.webp",
+"w": 420,
+"px_h": 512,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "a4"
+},
+"iron_fence_a": {
+"file": "iron_fence_a.webp",
+"w": 596,
+"px_h": 469,
+"h": 1.5,
+"kind": "sprite",
+"sheet": "a4"
+},
+"iron_fence_b": {
+"file": "iron_fence_b.webp",
+"w": 611,
+"px_h": 466,
+"h": 1.5,
+"kind": "sprite",
+"sheet": "a4"
+},
+"iron_gate_big": {
+"file": "iron_gate_big.webp",
+"w": 625,
+"px_h": 506,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "a4"
+},
+"iron_rail": {
+"file": "iron_rail.webp",
+"w": 543,
+"px_h": 185,
+"h": 1.1,
+"kind": "sprite",
+"sheet": "a4"
+},
+"vine_a": {
+"file": "vine_a.webp",
+"w": 479,
+"px_h": 512,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "a5"
+},
+"vine_b": {
+"file": "vine_b.webp",
+"w": 232,
+"px_h": 512,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "a5"
+},
+"ivy_clump": {
+"file": "ivy_clump.webp",
+"w": 595,
+"px_h": 230,
+"h": 0.8,
+"kind": "sprite",
+"sheet": "a5"
+},
+"moss_rock": {
+"file": "moss_rock.webp",
+"w": 457,
+"px_h": 357,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "a5"
+},
+"rose_pale": {
+"file": "rose_pale.webp",
+"w": 398,
+"px_h": 340,
+"h": 1.2,
+"kind": "sprite",
+"sheet": "a5"
+},
+"rose_arch": {
+"file": "rose_arch.webp",
+"w": 508,
+"px_h": 512,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "a5"
+},
+"cart_old": {
+"file": "cart_old.webp",
+"w": 559,
+"px_h": 276,
+"h": 1.1,
+"kind": "sprite",
+"sheet": "a5"
+},
+"statue_plinth": {
+"file": "statue_plinth.webp",
+"w": 461,
+"px_h": 500,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "a5"
+},
+"urn_big": {
+"file": "urn_big.webp",
+"w": 447,
+"px_h": 475,
+"h": 1.4,
+"kind": "sprite",
+"sheet": "a5"
+},
+"cobble_heap": {
+"file": "cobble_heap.webp",
+"w": 593,
+"px_h": 242,
+"h": 0.5,
+"kind": "sprite",
+"sheet": "a5"
+},
+"st_mourners": {
+"file": "st_mourners.webp",
+"w": 396,
+"px_h": 543,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "s1"
+},
+"st_chimera": {
+"file": "st_chimera.webp",
+"w": 443,
+"px_h": 496,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "s1"
+},
+"st_weepgiant": {
+"file": "st_weepgiant.webp",
+"w": 360,
+"px_h": 562,
+"h": 3.2,
+"kind": "sprite",
+"sheet": "s1"
+},
+"st_hydra": {
+"file": "st_hydra.webp",
+"w": 484,
+"px_h": 527,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "s1"
+},
+"st_judge": {
+"file": "st_judge.webp",
+"w": 327,
+"px_h": 560,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "s1"
+},
+"st_gargoyle": {
+"file": "st_gargoyle.webp",
+"w": 415,
+"px_h": 515,
+"h": 1.4,
+"kind": "sprite",
+"sheet": "s1"
+},
+"st_headless": {
+"file": "st_headless.webp",
+"w": 378,
+"px_h": 455,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "s1"
+},
+"st_hound": {
+"file": "st_hound.webp",
+"w": 293,
+"px_h": 525,
+"h": 1.1,
+"kind": "sprite",
+"sheet": "s1"
+},
+"st_veiled": {
+"file": "st_veiled.webp",
+"w": 238,
+"px_h": 555,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "s1"
+},
+"st_hand": {
+"file": "st_hand.webp",
+"w": 459,
+"px_h": 545,
+"h": 1.6,
+"kind": "sprite",
+"sheet": "s1"
+},
+"st_bishop": {
+"file": "st_bishop.webp",
+"w": 496,
+"px_h": 558,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "s1"
+},
+"st_fountain": {
+"file": "st_fountain.webp",
+"w": 502,
+"px_h": 557,
+"h": 3.4,
+"kind": "sprite",
+"sheet": "s1"
+},
+"col_fluted": {
+"file": "col_fluted.webp",
+"w": 153,
+"px_h": 524,
+"h": 3.4,
+"kind": "sprite",
+"sheet": "s3"
+},
+"col_twist": {
+"file": "col_twist.webp",
+"w": 136,
+"px_h": 532,
+"h": 3.4,
+"kind": "sprite",
+"sheet": "s3"
+},
+"col_silver": {
+"file": "col_silver.webp",
+"w": 157,
+"px_h": 532,
+"h": 3.4,
+"kind": "sprite",
+"sheet": "s3"
+},
+"chandelier": {
+"file": "chandelier.webp",
+"w": 414,
+"px_h": 513,
+"h": 1.6,
+"kind": "sprite",
+"sheet": "s3"
+},
+"table_long": {
+"file": "table_long.webp",
+"w": 554,
+"px_h": 260,
+"h": 1.3,
+"kind": "sprite",
+"sheet": "s3"
+},
+"table_high": {
+"file": "table_high.webp",
+"w": 555,
+"px_h": 312,
+"h": 1.5,
+"kind": "sprite",
+"sheet": "s3"
+},
+"chair_high": {
+"file": "chair_high.webp",
+"w": 233,
+"px_h": 441,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "s3"
+},
+"banner_violet": {
+"file": "banner_violet.webp",
+"w": 254,
+"px_h": 473,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "s3"
+},
+"hearth_cold": {
+"file": "hearth_cold.webp",
+"w": 453,
+"px_h": 526,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "s3"
+},
+"candelabra_tall": {
+"file": "candelabra_tall.webp",
+"w": 176,
+"px_h": 499,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "s3"
+},
+"bed_four": {
+"file": "bed_four.webp",
+"w": 459,
+"px_h": 482,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "s3"
+},
+"lantern_hanging": {
+"file": "lantern_hanging.webp",
+"w": 175,
+"px_h": 490,
+"h": 1.2,
+"kind": "sprite",
+"sheet": "s3"
+},
+"tex_ashlar": {
+"file": "tex_ashlar.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "tx"
+},
+"tex_ashlar_moss": {
+"file": "tex_ashlar_moss.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "tx"
+},
+"tex_ivy_wall": {
+"file": "tex_ivy_wall.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "tx"
+},
+"tex_brick_dark": {
+"file": "tex_brick_dark.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "tx"
+},
+"tex_timber_plaster": {
+"file": "tex_timber_plaster.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "tx"
+},
+"tex_cobble": {
+"file": "tex_cobble.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "tx"
+},
+"tex_flagstone": {
+"file": "tex_flagstone.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "tx"
+},
+"tex_cobble_wet": {
+"file": "tex_cobble_wet.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "tx"
+},
+"tex_gravel": {
+"file": "tex_gravel.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "tx"
+},
+"tex_marble": {
+"file": "tex_marble.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "tx"
+},
+"tex_vault_ceiling": {
+"file": "tex_vault_ceiling.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "tx"
+},
+"tex_beam_ceiling": {
+"file": "tex_beam_ceiling.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "tx"
+},
+"c_psguard": {
+"file": "c_psguard.webp",
+"w": 241,
+"px_h": 543,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "s2a"
+},
+"c_pshalberd": {
+"file": "c_pshalberd.webp",
+"w": 260,
+"px_h": 550,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "s2a"
+},
+"c_psarcher": {
+"file": "c_psarcher.webp",
+"w": 410,
+"px_h": 547,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "g3"
+},
+"c_pssentinel": {
+"file": "c_pssentinel.webp",
+"w": 202,
+"px_h": 545,
+"h": 2.1,
+"kind": "sprite",
+"sheet": "s2a"
+},
+"c_psgatecaptain": {
+"file": "c_psgatecaptain.webp",
+"w": 328,
+"px_h": 538,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "s2a"
+},
+"c_psmarblehound": {
+"file": "c_psmarblehound.webp",
+"w": 319,
+"px_h": 370,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "s2a"
+},
+"c_pshedger": {
+"file": "c_pshedger.webp",
+"w": 310,
+"px_h": 506,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "s2a"
+},
+"c_psfalconer": {
+"file": "c_psfalconer.webp",
+"w": 369,
+"px_h": 700,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "g4"
+},
+"c_psarmour": {
+"file": "c_psarmour.webp",
+"w": 220,
+"px_h": 535,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "s2a"
+},
+"c_psservant": {
+"file": "c_psservant.webp",
+"w": 251,
+"px_h": 543,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "g3"
+},
+"c_pscourtier": {
+"file": "c_pscourtier.webp",
+"w": 353,
+"px_h": 546,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "g3"
+},
+"c_psdancer": {
+"file": "c_psdancer.webp",
+"w": 503,
+"px_h": 546,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "g3"
+},
+"gate_clock": {
+"file": "gate_clock.webp",
+"w": 1435,
+"px_h": 1000,
+"h": 6.0,
+"kind": "sprite",
+"sheet": "cvn"
+},
+"banner_long_a": {
+"file": "banner_long_a.webp",
+"w": 303,
+"px_h": 700,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "r2a"
+},
+"banner_long_b": {
+"file": "banner_long_b.webp",
+"w": 308,
+"px_h": 680,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "r2a"
+},
+"bat_flock": {
+"file": "bat_flock.webp",
+"w": 599,
+"px_h": 409,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "r2a"
+},
+"moon_crescent": {
+"file": "moon_crescent.webp",
+"w": 524,
+"px_h": 554,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "r2a"
+},
+"window_stained_tall": {
+"file": "window_stained_tall.webp",
+"w": 289,
+"px_h": 700,
+"h": 3.6,
+"kind": "sprite",
+"sheet": "r2a"
+},
+"tex_sky_night": {
+"file": "tex_sky_night.jpg",
+"w": 1024,
+"h": 512,
+"kind": "tex",
+"sheet": "sky"
+},
+"furn_sideboard": {
+"file": "furn_sideboard.webp",
+"w": 463,
+"px_h": 382,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "f1"
+},
+"furn_organ": {
+"file": "furn_organ.webp",
+"w": 365,
+"px_h": 515,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "f1"
+},
+"furn_chair_high": {
+"file": "furn_chair_high.webp",
+"w": 206,
+"px_h": 493,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "f1"
+},
+"furn_fireplace_tall": {
+"file": "furn_fireplace_tall.webp",
+"w": 385,
+"px_h": 480,
+"h": 2.8,
+"kind": "sprite",
+"sheet": "f1"
+},
+"furn_wardrobe": {
+"file": "furn_wardrobe.webp",
+"w": 305,
+"px_h": 509,
+"h": 2.8,
+"kind": "sprite",
+"sheet": "f1"
+},
+"furn_cradle": {
+"file": "furn_cradle.webp",
+"w": 342,
+"px_h": 445,
+"h": 1.1,
+"kind": "sprite",
+"sheet": "f1"
+},
+"furn_bed_canopy": {
+"file": "furn_bed_canopy.webp",
+"w": 372,
+"px_h": 516,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "f1"
+},
+"furn_bookcase": {
+"file": "furn_bookcase.webp",
+"w": 265,
+"px_h": 509,
+"h": 2.8,
+"kind": "sprite",
+"sheet": "f1"
+},
+"furn_desk": {
+"file": "furn_desk.webp",
+"w": 352,
+"px_h": 367,
+"h": 1.4,
+"kind": "sprite",
+"sheet": "f1"
+},
+"furn_screen_tracery": {
+"file": "furn_screen_tracery.webp",
+"w": 389,
+"px_h": 460,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "f1"
+},
+"furn_pulpit": {
+"file": "furn_pulpit.webp",
+"w": 229,
+"px_h": 521,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "f1"
+},
+"furn_altarpiece": {
+"file": "furn_altarpiece.webp",
+"w": 443,
+"px_h": 499,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "f1"
+},
+"furn_throne_black": {
+"file": "furn_throne_black.webp",
+"w": 254,
+"px_h": 593,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "f2"
+},
+"furn_table_long_black": {
+"file": "furn_table_long_black.webp",
+"w": 649,
+"px_h": 356,
+"h": 1.3,
+"kind": "sprite",
+"sheet": "f2"
+},
+"furn_chair_dining_black": {
+"file": "furn_chair_dining_black.webp",
+"w": 211,
+"px_h": 517,
+"h": 1.5,
+"kind": "sprite",
+"sheet": "f2"
+},
+"furn_candelabra_black": {
+"file": "furn_candelabra_black.webp",
+"w": 162,
+"px_h": 588,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "f2"
+},
+"furn_clock_grandfather": {
+"file": "furn_clock_grandfather.webp",
+"w": 155,
+"px_h": 604,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "f2"
+},
+"furn_mirror_gothic": {
+"file": "furn_mirror_gothic.webp",
+"w": 264,
+"px_h": 589,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "f2"
+},
+"furn_pew_black": {
+"file": "furn_pew_black.webp",
+"w": 606,
+"px_h": 341,
+"h": 1.2,
+"kind": "sprite",
+"sheet": "f2"
+},
+"furn_lectern_black": {
+"file": "furn_lectern_black.webp",
+"w": 181,
+"px_h": 607,
+"h": 1.4,
+"kind": "sprite",
+"sheet": "f2"
+},
+"throne": {
+"file": "throne.webp",
+"w": 254,
+"px_h": 593,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "f2"
+},
+"p_ghost_lady": {
+"file": "p_ghost_lady.webp",
+"w": 377,
+"px_h": 640,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "g5"
+},
+"p_ghost_gentleman": {
+"file": "p_ghost_gentleman.webp",
+"w": 137,
+"px_h": 640,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "g5"
+},
+"p_ghost_child": {
+"file": "p_ghost_child.webp",
+"w": 184,
+"px_h": 556,
+"h": 1.2,
+"kind": "sprite",
+"sheet": "g5"
+},
+"p_ghost_maid": {
+"file": "p_ghost_maid.webp",
+"w": 244,
+"px_h": 640,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "g5"
+},
+"p_ghost_butler": {
+"file": "p_ghost_butler.webp",
+"w": 316,
+"px_h": 640,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "gh"
+},
+"p_ghost_soldier": {
+"file": "p_ghost_soldier.webp",
+"w": 141,
+"px_h": 640,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "g5"
+},
+"p_ghost_priest": {
+"file": "p_ghost_priest.webp",
+"w": 232,
+"px_h": 632,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "g5"
+},
+"p_ghost_dancer": {
+"file": "p_ghost_dancer.webp",
+"w": 377,
+"px_h": 570,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "g5"
+},
+"gate_great": {
+"file": "gate_great.webp",
+"w": 499,
+"px_h": 556,
+"h": 4.6,
+"kind": "sprite",
+"sheet": "r2b"
+},
+"barbican_front": {
+"file": "barbican_front.webp",
+"w": 553,
+"px_h": 300,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "r2b"
+},
+"gatehouse_front": {
+"file": "gatehouse_front.webp",
+"w": 553,
+"px_h": 356,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "r2b"
+},
+"castle_front_tiles": {
+"file": "castle_front_tiles.webp",
+"w": 568,
+"px_h": 344,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "r2b"
+},
+"door_great": {
+"file": "door_great.webp",
+"w": 340,
+"px_h": 515,
+"h": 3.4,
+"kind": "sprite",
+"sheet": "r2b"
+},
+"door_oak": {
+"file": "door_oak.webp",
+"w": 293,
+"px_h": 428,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "r2b"
+},
+"door_ironbound": {
+"file": "door_ironbound.webp",
+"w": 319,
+"px_h": 450,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "r2b"
+},
+"door_dungeon": {
+"file": "door_dungeon.webp",
+"w": 338,
+"px_h": 420,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "r2b"
+},
+"door_stair": {
+"file": "door_stair.webp",
+"w": 267,
+"px_h": 449,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "r2b"
+},
+"stairs_curved": {
+"file": "stairs_curved.webp",
+"w": 268,
+"px_h": 501,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "r2b"
+},
+"door_arch": {
+"file": "door_arch.webp",
+"w": 554,
+"px_h": 371,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "r2b"
+},
+"pt_king": {
+"file": "pt_king.webp",
+"w": 418,
+"px_h": 543,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "pt"
+},
+"pt_queen": {
+"file": "pt_queen.webp",
+"w": 451,
+"px_h": 545,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "pt"
+},
+"pt_prince": {
+"file": "pt_prince.webp",
+"w": 305,
+"px_h": 346,
+"h": 1.6,
+"kind": "sprite",
+"sheet": "pt"
+},
+"pt_battle": {
+"file": "pt_battle.webp",
+"w": 543,
+"px_h": 392,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "pt"
+},
+"pt_hunt": {
+"file": "pt_hunt.webp",
+"w": 525,
+"px_h": 273,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "pt"
+},
+"pt_feast": {
+"file": "pt_feast.webp",
+"w": 537,
+"px_h": 285,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "pt"
+},
+"pt_pale_lands": {
+"file": "pt_pale_lands.webp",
+"w": 776,
+"px_h": 313,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "pt"
+},
+"pt_ancestors": {
+"file": "pt_ancestors.webp",
+"w": 871,
+"px_h": 311,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "pt"
+},
+"pt_empty": {
+"file": "pt_empty.webp",
+"w": 342,
+"px_h": 418,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "pt"
+},
+"pt_isaude": {
+"file": "pt_isaude.webp",
+"w": 372,
+"px_h": 474,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "pt"
+},
+"pt_gallery8": {
+"file": "pt_gallery8.webp",
+"w": 462,
+"px_h": 418,
+"h": 1.6,
+"kind": "sprite",
+"sheet": "pt"
+},
+"cauldron_big": {
+"file": "cauldron_big.webp",
+"w": 379,
+"px_h": 455,
+"h": 1.3,
+"kind": "sprite",
+"sheet": "s5"
+},
+"spit_hearth": {
+"file": "spit_hearth.webp",
+"w": 478,
+"px_h": 395,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "s5"
+},
+"butcher_block": {
+"file": "butcher_block.webp",
+"w": 324,
+"px_h": 414,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "s5"
+},
+"pans_hanging": {
+"file": "pans_hanging.webp",
+"w": 442,
+"px_h": 443,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "s5"
+},
+"barrels": {
+"file": "barrels.webp",
+"w": 446,
+"px_h": 373,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "s5"
+},
+"oven": {
+"file": "oven.webp",
+"w": 394,
+"px_h": 441,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "s5"
+},
+"cell_door": {
+"file": "cell_door.webp",
+"w": 315,
+"px_h": 420,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "s5"
+},
+"chains": {
+"file": "chains.webp",
+"w": 85,
+"px_h": 530,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "s5"
+},
+"iron_maiden": {
+"file": "iron_maiden.webp",
+"w": 262,
+"px_h": 476,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "s5"
+},
+"stocks": {
+"file": "stocks.webp",
+"w": 382,
+"px_h": 412,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "s5"
+},
+"brazier": {
+"file": "brazier.webp",
+"w": 222,
+"px_h": 386,
+"h": 1.2,
+"kind": "sprite",
+"sheet": "s5"
+},
+"rack": {
+"file": "rack.webp",
+"w": 539,
+"px_h": 219,
+"h": 1.6,
+"kind": "sprite",
+"sheet": "s5b"
+},
+"valve_wheel": {
+"file": "valve_wheel.webp",
+"w": 326,
+"px_h": 418,
+"h": 1.1,
+"kind": "sprite",
+"sheet": "s5b"
+},
+"straw_bed": {
+"file": "straw_bed.webp",
+"w": 520,
+"px_h": 206,
+"h": 0.45,
+"kind": "sprite",
+"sheet": "s5b"
+},
+"shackled_skeleton": {
+"file": "shackled_skeleton.webp",
+"w": 437,
+"px_h": 478,
+"h": 1.4,
+"kind": "sprite",
+"sheet": "s5b"
+},
+"cage": {
+"file": "cage.webp",
+"w": 175,
+"px_h": 447,
+"h": 1.6,
+"kind": "sprite",
+"sheet": "s5b"
+},
+"bucket_well": {
+"file": "bucket_well.webp",
+"w": 379,
+"px_h": 399,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "s5b"
+},
+"dais_steps": {
+"file": "dais_steps.webp",
+"w": 538,
+"px_h": 159,
+"h": 0.5,
+"kind": "sprite",
+"sheet": "s5b"
+},
+"suit_armour": {
+"file": "suit_armour.webp",
+"w": 212,
+"px_h": 501,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "s5b"
+},
+"trophy_stag": {
+"file": "trophy_stag.webp",
+"w": 363,
+"px_h": 506,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "s5b"
+},
+"altar": {
+"file": "altar.webp",
+"w": 471,
+"px_h": 421,
+"h": 1.5,
+"kind": "sprite",
+"sheet": "s5b"
+},
+"font": {
+"file": "font.webp",
+"w": 271,
+"px_h": 349,
+"h": 1.1,
+"kind": "sprite",
+"sheet": "s5b"
+},
+"reliquary_chest": {
+"file": "reliquary_chest.webp",
+"w": 460,
+"px_h": 256,
+"h": 0.8,
+"kind": "sprite",
+"sheet": "s5b"
+},
+"pews": {
+"file": "pews.webp",
+"w": 606,
+"px_h": 341,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "f2"
+},
+"lectern": {
+"file": "lectern.webp",
+"w": 181,
+"px_h": 607,
+"h": 1.3,
+"kind": "sprite",
+"sheet": "f2"
+},
+"bookcase_tall": {
+"file": "bookcase_tall.webp",
+"w": 265,
+"px_h": 509,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "f1"
+},
+"reading_desk": {
+"file": "reading_desk.webp",
+"w": 352,
+"px_h": 367,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "f1"
+},
+"window_stained": {
+"file": "window_stained.webp",
+"w": 289,
+"px_h": 700,
+"h": 3.2,
+"kind": "sprite",
+"sheet": "r2a"
+},
+"harpsichord": {
+"file": "harpsichord.webp",
+"w": 472,
+"px_h": 374,
+"h": 1.3,
+"kind": "sprite",
+"sheet": "s6"
+},
+"globe": {
+"file": "globe.webp",
+"w": 250,
+"px_h": 342,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "s6"
+},
+"scroll_rack": {
+"file": "scroll_rack.webp",
+"w": 277,
+"px_h": 361,
+"h": 1.6,
+"kind": "sprite",
+"sheet": "s6"
+},
+"st_saint1": {
+"file": "st_saint1.webp",
+"w": 147,
+"px_h": 391,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "s6"
+},
+"st_saint2": {
+"file": "st_saint2.webp",
+"w": 146,
+"px_h": 394,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "s6"
+},
+"st_saint3": {
+"file": "st_saint3.webp",
+"w": 148,
+"px_h": 384,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "s6"
+},
+"st_saint4": {
+"file": "st_saint4.webp",
+"w": 160,
+"px_h": 399,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "s6"
+},
+"skull_pillar": {
+"file": "skull_pillar.webp",
+"w": 130,
+"px_h": 395,
+"h": 1.4,
+"kind": "sprite",
+"sheet": "s6"
+},
+"sconce_black": {
+"file": "sconce_black.webp",
+"w": 173,
+"px_h": 295,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "s6"
+},
+"pillar_lantern": {
+"file": "pillar_lantern.webp",
+"w": 170,
+"px_h": 387,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "s6"
+},
+"table_books": {
+"file": "table_books.webp",
+"w": 238,
+"px_h": 301,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "s6"
+},
+"stair_spiral_iron": {
+"file": "stair_spiral_iron.webp",
+"w": 248,
+"px_h": 404,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "s6"
+},
+"p_garrick": {
+"file": "p_garrick.webp",
+"w": 210,
+"px_h": 640,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "s7"
+},
+"p_isaude": {
+"file": "p_isaude.webp",
+"w": 396,
+"px_h": 640,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "s7"
+},
+"p_peck": {
+"file": "p_peck.webp",
+"w": 193,
+"px_h": 572,
+"h": 1.4,
+"kind": "sprite",
+"sheet": "s7"
+},
+"p_sedge": {
+"file": "p_sedge.webp",
+"w": 280,
+"px_h": 640,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "s7"
+},
+"p_calpurnia": {
+"file": "p_calpurnia.webp",
+"w": 288,
+"px_h": 640,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "s7"
+},
+"p_harrow": {
+"file": "p_harrow.webp",
+"w": 307,
+"px_h": 640,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "s7"
+},
+"p_gaunt": {
+"file": "p_gaunt.webp",
+"w": 182,
+"px_h": 640,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "s7"
+},
+"p_stamford": {
+"file": "p_stamford.webp",
+"w": 308,
+"px_h": 640,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "s7"
+},
+"p_yseult": {
+"file": "p_yseult.webp",
+"w": 220,
+"px_h": 640,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "s7"
+},
+"p_porter": {
+"file": "p_porter.webp",
+"w": 249,
+"px_h": 640,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "s7"
+},
+"p_gardener": {
+"file": "p_gardener.webp",
+"w": 241,
+"px_h": 640,
+"h": 1.6,
+"kind": "sprite",
+"sheet": "s7"
+},
+"p_falconer": {
+"file": "p_falconer.webp",
+"w": 305,
+"px_h": 640,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "s7"
+},
+"p_chamberlain": {
+"file": "p_chamberlain.webp",
+"w": 207,
+"px_h": 405,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "gh2"
+},
+"p_librarian": {
+"file": "p_librarian.webp",
+"w": 157,
+"px_h": 403,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "gh2"
+},
+"p_courtier1": {
+"file": "p_courtier1.webp",
+"w": 178,
+"px_h": 405,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "gh2"
+},
+"p_courtier2": {
+"file": "p_courtier2.webp",
+"w": 270,
+"px_h": 399,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "gh2"
+},
+"p_courtier3": {
+"file": "p_courtier3.webp",
+"w": 184,
+"px_h": 394,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "gh2"
+},
+"p_courtier4": {
+"file": "p_courtier4.webp",
+"w": 150,
+"px_h": 406,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "gh2"
+},
+"p_courtier5": {
+"file": "p_courtier5.webp",
+"w": 164,
+"px_h": 401,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "gh2"
+},
+"p_courtier6": {
+"file": "p_courtier6.webp",
+"w": 218,
+"px_h": 401,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "gh2"
+},
+"p_ghost_jester": {
+"file": "p_ghost_jester.webp",
+"w": 217,
+"px_h": 392,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "gh2"
+},
+"ghost_choir": {
+"file": "ghost_choir.webp",
+"w": 216,
+"px_h": 398,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "gh2"
+},
+"ghost_cook": {
+"file": "ghost_cook.webp",
+"w": 187,
+"px_h": 395,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "gh2"
+},
+"ghost_servant": {
+"file": "ghost_servant.webp",
+"w": 150,
+"px_h": 396,
+"h": 1.4,
+"kind": "sprite",
+"sheet": "gh2"
+},
+"c_psgargoyle": {
+"file": "c_psgargoyle.webp",
+"w": 491,
+"px_h": 410,
+"h": 1.4,
+"kind": "sprite",
+"sheet": "g1"
+},
+"c_pschimera": {
+"file": "c_pschimera.webp",
+"w": 409,
+"px_h": 427,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "g1"
+},
+"c_pshydra": {
+"file": "c_pshydra.webp",
+"w": 401,
+"px_h": 435,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "g1"
+},
+"c_psmourner": {
+"file": "c_psmourner.webp",
+"w": 333,
+"px_h": 436,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "g1"
+},
+"c_psjudge": {
+"file": "c_psjudge.webp",
+"w": 214,
+"px_h": 458,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "g1"
+},
+"c_psthornsprite": {
+"file": "c_psthornsprite.webp",
+"w": 139,
+"px_h": 357,
+"h": 0.6,
+"kind": "sprite",
+"sheet": "g1"
+},
+"c_psmoth": {
+"file": "c_psmoth.webp",
+"w": 365,
+"px_h": 317,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "g1"
+},
+"c_psraven": {
+"file": "c_psraven.webp",
+"w": 331,
+"px_h": 351,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "g1"
+},
+"c_psgargmother": {
+"file": "c_psgargmother.webp",
+"w": 467,
+"px_h": 442,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "g1"
+},
+"c_psfiend": {
+"file": "c_psfiend.webp",
+"w": 308,
+"px_h": 393,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "g1"
+},
+"c_pscarver": {
+"file": "c_pscarver.webp",
+"w": 192,
+"px_h": 437,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "g1"
+},
+"c_psmonk": {
+"file": "c_psmonk.webp",
+"w": 206,
+"px_h": 452,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "g1"
+},
+"c_pscook": {
+"file": "c_pscook.webp",
+"w": 248,
+"px_h": 532,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "g2"
+},
+"c_pskrat": {
+"file": "c_pskrat.webp",
+"w": 394,
+"px_h": 272,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "g2"
+},
+"c_psarmourer": {
+"file": "c_psarmourer.webp",
+"w": 302,
+"px_h": 535,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "g2"
+},
+"c_psbakeghost": {
+"file": "c_psbakeghost.webp",
+"w": 432,
+"px_h": 536,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "g2"
+},
+"c_pschorister": {
+"file": "c_pschorister.webp",
+"w": 183,
+"px_h": 512,
+"h": 1.5,
+"kind": "sprite",
+"sheet": "g2"
+},
+"c_psbookwraith": {
+"file": "c_psbookwraith.webp",
+"w": 357,
+"px_h": 522,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "g2"
+},
+"c_psink": {
+"file": "c_psink.webp",
+"w": 189,
+"px_h": 332,
+"h": 0.8,
+"kind": "sprite",
+"sheet": "g2"
+},
+"c_psteward": {
+"file": "c_psteward.webp",
+"w": 261,
+"px_h": 540,
+"h": 2.3,
+"kind": "sprite",
+"sheet": "g2"
+},
+"c_pssacristan": {
+"file": "c_pssacristan.webp",
+"w": 239,
+"px_h": 529,
+"h": 2.1,
+"kind": "sprite",
+"sheet": "g2"
+},
+"c_psturnkey": {
+"file": "c_psturnkey.webp",
+"w": 240,
+"px_h": 530,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "g2"
+},
+"c_psflayed": {
+"file": "c_psflayed.webp",
+"w": 250,
+"px_h": 530,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "g2"
+},
+"c_psshackle": {
+"file": "c_psshackle.webp",
+"w": 346,
+"px_h": 501,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "g2"
+},
+"c_psleech": {
+"file": "c_psleech.webp",
+"w": 354,
+"px_h": 499,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "g3"
+},
+"c_psdrowned": {
+"file": "c_psdrowned.webp",
+"w": 280,
+"px_h": 541,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "g3"
+},
+"c_pscellghost": {
+"file": "c_pscellghost.webp",
+"w": 352,
+"px_h": 473,
+"h": 1.6,
+"kind": "sprite",
+"sheet": "g3"
+},
+"c_psbonecrawl": {
+"file": "c_psbonecrawl.webp",
+"w": 551,
+"px_h": 407,
+"h": 1.5,
+"kind": "sprite",
+"sheet": "g3"
+},
+"c_psquestioner": {
+"file": "c_psquestioner.webp",
+"w": 286,
+"px_h": 549,
+"h": 2.1,
+"kind": "sprite",
+"sheet": "g3"
+},
+"c_psstairwarden": {
+"file": "c_psstairwarden.webp",
+"w": 278,
+"px_h": 552,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "g3"
+},
+"c_psantlered": {
+"file": "c_psantlered.webp",
+"w": 365,
+"px_h": 551,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "g3"
+},
+"c_psdrowngaoler": {
+"file": "c_psdrowngaoler.webp",
+"w": 393,
+"px_h": 546,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "g3"
+},
+"p_ghost_housekeeper": {
+"file": "p_ghost_housekeeper.webp",
+"w": 205,
+"px_h": 640,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "g5"
+},
+"ghost_baker": {
+"file": "ghost_baker.webp",
+"w": 231,
+"px_h": 640,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "g5"
+},
+"ghost_armourer": {
+"file": "ghost_armourer.webp",
+"w": 256,
+"px_h": 628,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "g5"
+},
+"ghost_monk": {
+"file": "ghost_monk.webp",
+"w": 244,
+"px_h": 640,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "g5"
+},
+"ghost_scholar": {
+"file": "ghost_scholar.webp",
+"w": 240,
+"px_h": 640,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "g5"
+},
+"window_sheeted_a": {
+"file": "window_sheeted_a.webp",
+"w": 265,
+"px_h": 467,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "h1"
+},
+"window_sheeted_b": {
+"file": "window_sheeted_b.webp",
+"w": 462,
+"px_h": 441,
+"h": 2.8,
+"kind": "sprite",
+"sheet": "h1"
+},
+"window_sheeted_c": {
+"file": "window_sheeted_c.webp",
+"w": 279,
+"px_h": 457,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "h1"
+},
+"mirror_haunted_a": {
+"file": "mirror_haunted_a.webp",
+"w": 258,
+"px_h": 468,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "h1"
+},
+"mirror_haunted_b": {
+"file": "mirror_haunted_b.webp",
+"w": 268,
+"px_h": 473,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "h1"
+},
+"mirror_haunted_c": {
+"file": "mirror_haunted_c.webp",
+"w": 261,
+"px_h": 402,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "h1"
+},
+"bed_cobweb_a": {
+"file": "bed_cobweb_a.webp",
+"w": 495,
+"px_h": 419,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "h1"
+},
+"bed_cobweb_b": {
+"file": "bed_cobweb_b.webp",
+"w": 506,
+"px_h": 410,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "h1"
+},
+"candles_glow_a": {
+"file": "candles_glow_a.webp",
+"w": 205,
+"px_h": 452,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "h1"
+},
+"candles_glow_b": {
+"file": "candles_glow_b.webp",
+"w": 319,
+"px_h": 418,
+"h": 1.4,
+"kind": "sprite",
+"sheet": "h1"
+},
+"lantern_red_a": {
+"file": "lantern_red_a.webp",
+"w": 157,
+"px_h": 504,
+"h": 1.2,
+"kind": "sprite",
+"sheet": "h2b"
+},
+"lantern_red_b": {
+"file": "lantern_red_b.webp",
+"w": 91,
+"px_h": 486,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "h2b"
+},
+"dust_sheet_furniture_a": {
+"file": "dust_sheet_furniture_a.webp",
+"w": 500,
+"px_h": 370,
+"h": 1.3,
+"kind": "sprite",
+"sheet": "h2"
+},
+"dust_sheet_furniture_b": {
+"file": "dust_sheet_furniture_b.webp",
+"w": 524,
+"px_h": 269,
+"h": 1.3,
+"kind": "sprite",
+"sheet": "h2"
+},
+"web_spider": {
+"file": "web_spider.webp",
+"w": 185,
+"px_h": 354,
+"h": 1.4,
+"kind": "sprite",
+"sheet": "h2"
+},
+"cobweb_corner_a": {
+"file": "cobweb_corner_a.webp",
+"w": 435,
+"px_h": 465,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "h2"
+},
+"cobweb_corner_b": {
+"file": "cobweb_corner_b.webp",
+"w": 410,
+"px_h": 464,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "h2"
+},
+"cobweb_thick_a": {
+"file": "cobweb_thick_a.webp",
+"w": 267,
+"px_h": 517,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "h2"
+},
+"cobweb_thick_b": {
+"file": "cobweb_thick_b.webp",
+"w": 480,
+"px_h": 501,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "h2"
+},
+"cobweb_thick_c": {
+"file": "cobweb_thick_c.webp",
+"w": 509,
+"px_h": 340,
+"h": 1.2,
+"kind": "sprite",
+"sheet": "h2"
+},
+"candles_glow_c": {
+"file": "candles_glow_c.webp",
+"w": 289,
+"px_h": 442,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "h2"
+},
+"candles_glow_d": {
+"file": "candles_glow_d.webp",
+"w": 177,
+"px_h": 502,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "h2"
+},
+"portrait_ancestor_1": {
+"file": "portrait_ancestor_1.webp",
+"w": 448,
+"px_h": 640,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "anc"
+},
+"portrait_ancestor_2": {
+"file": "portrait_ancestor_2.webp",
+"w": 448,
+"px_h": 640,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "anc"
+},
+"portrait_ancestor_3": {
+"file": "portrait_ancestor_3.webp",
+"w": 448,
+"px_h": 640,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "anc"
+},
+"portrait_ancestor_4": {
+"file": "portrait_ancestor_4.webp",
+"w": 449,
+"px_h": 640,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "anc"
+},
+"portrait_ancestor_5": {
+"file": "portrait_ancestor_5.webp",
+"w": 452,
+"px_h": 640,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "anc"
+},
+"portrait_ancestor_6": {
+"file": "portrait_ancestor_6.webp",
+"w": 452,
+"px_h": 640,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "anc"
+},
+"portrait_ancestor_7": {
+"file": "portrait_ancestor_7.webp",
+"w": 451,
+"px_h": 640,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "anc"
+},
+"portrait_ancestor_8": {
+"file": "portrait_ancestor_8.webp",
+"w": 451,
+"px_h": 640,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "anc"
+},
+"c_pscolossus": {
+"file": "c_pscolossus.webp",
+"w": 548,
+"px_h": 700,
+"h": 3.4,
+"kind": "sprite",
+"sheet": "g4"
+},
+"c_psthornwarden": {
+"file": "c_psthornwarden.webp",
+"w": 334,
+"px_h": 700,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "g4"
+},
+"c_psossian": {
+"file": "c_psossian.webp",
+"w": 348,
+"px_h": 700,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "g4"
+},
+"c_pshoundmaster": {
+"file": "c_pshoundmaster.webp",
+"w": 355,
+"px_h": 700,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "g4"
+},
+"c_pshunger": {
+"file": "c_pshunger.webp",
+"w": 778,
+"px_h": 700,
+"h": 3.4,
+"kind": "sprite",
+"sheet": "g4"
+}
+}
