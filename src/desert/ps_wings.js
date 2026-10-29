@@ -80,8 +80,11 @@ const PSW_STAND={
 /* ambient ghosts: translucent stand-ins (a painted ghost_<name> or p_ghost_<name> in assets/ps wins) */
 const PSW_GHOST={ghost_servant:[['gyi_ghost1','hl_p_ghost'],1.6],ghost_cook:[['gyi_ghost0','hl_p_ghost'],1.6],ghost_baker:[['gyi_ghost0','hl_p_ghost'],1.6],ghost_armourer:[['hl_p_armour','hl_p_ghost'],1.7],ghost_choir:[['gyi_banshee','gyi_ghost2','hl_p_ghost'],1.5],ghost_monk:[['gyi_ghost2','hl_p_ghost'],1.6],ghost_scholar:[['gyi_ghost1','hl_p_ghost'],1.6],ghost_maid:[['gyi_ghost0','hl_p_ghost'],1.5]};
 for(const n in PSW_GHOST)if(typeof PSP_PICS!=='undefined'&&!PSP_PICS[n])PSP_PICS[n]=[PSW_GHOST[n][1],PSW_GHOST[n][0],{ghost:1}];
+/* every ambient ghost wears one of the painted gaunt p_ghost_* pieces (no folk or stand-in sprites) */
+const PSW_GMAP={ghost_servant:'butler',ghost_cook:'maid',ghost_baker:'gentleman',ghost_armourer:'soldier',ghost_choir:'child',ghost_monk:'priest',ghost_scholar:'gentleman',ghost_maid:'maid',ghost_librarian:'lady',ghost_chamberlain:'butler'};
 function pswPic(name){
   const pnt=n=>IMG[n]&&!IMG[n]._ps;
+  {const gk='ps_p_ghost_'+PSW_GMAP[name];if(PSW_GMAP[name]&&pnt(gk)){NPC_H[gk]=NPC_H[gk]||1.8;return gk}}
   if(PSW_GHOST[name]&&!pnt('ps_'+name)&&!pnt('ps_p_'+name)){const k='psw_'+name;if(IMG[k])return k;const src=PSW_GHOST[name][0].map(n=>IMG[n]).find(i=>i&&i.width);if(!src)return null;
     try{const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const x=c.getContext('2d');x.globalAlpha=.5;x.filter='brightness(1.2) saturate(.4) hue-rotate(185deg)';x.drawImage(src,0,0);IMG[k]=c}catch(e){IMG[k]=src}NPC_H[k]=PSW_GHOST[name][1];return k}
   if(PSW_GHOST[name]&&pnt('ps_p_'+name)){NPC_H['ps_p_'+name]=NPC_H['ps_p_'+name]||PSW_GHOST[name][1];return 'ps_p_'+name}
@@ -128,7 +131,7 @@ function pswArrive(n){
     if(d.psw==='secret'){const F=pswF();if(F.sacristyOpen){if(G.grid[ny][nx]!==0)G.grid[ny][nx]=0;return true}sfx('bump');msg('Plain cold wall. Nothing else.','#a8a8b8');return true}
     if(d.psw==='lock'){
       const F=pswF(),lk=d.link;F.stairBumped=1;
-      if(!bagCount('pskey2')){sfx('locked');msg('An iron-bound door with a silver lock. It will not move. The key must be somewhere on this floor.','#c8d0e8');return true}
+      if(!bagCount('pskey2')){sfx('locked');msg('An iron-bound double door with a great silver lock, chained and padlocked. It will not move. The key is not on this floor. Look below.','#c8d0e8');try{pspClue(1)}catch(e){}return true}
       const lv=pspLevel(lk.to);
       if(lv&&lv.built){sfx('door');goToLevel(lk.to,{x:lk.land[0],y:lk.land[1],f:lk.land[2]});return true}
       sfx('door');msg('The Second Floor Key turns in the silver lock. The door opens on a dark stair, but the way up is sealed by a fall of pale stone. The upper floors of the Pale Spire are not open yet.','#cfd8f0');return true}
@@ -271,6 +274,12 @@ function pswMake(id){
   const cold=(x,y,r,t)=>V.cold.push({x,y,r:r||2,t:t||'A cold spot. Your breath shows, and something brushes past you that is not there.'});
   const C={id,S,W,H,g,rows,open,free,dec,p,w,sign,foe,light,setF,fill,decor,enemies,lights,lcol,occ,V,items,reserved,hs,hh,ghost,cold};
   S.dress(C);
+  /* the long-abandoned house: sheets, webs, mirrors, ancestors, candles, red lanterns (shared dresser in ps_halls.js) */
+  try{const taken=new Set();for(const d of decor)if(d.wd)taken.add(d.x+','+d.y+','+d.wd[0]+','+d.wd[1]);let mi=0;
+    pshHaunt({W,H,seed:id,pi:id%5,open,free:(x,y)=>free(x,y)&&!reserved.has(x+','+y),wall:(x,y,a,b)=>!open(x+a,y+b)&&!doorSq.some(q=>q[0]===x+a&&q[1]===y+b)&&rows[y+b]!==undefined&&rows[y+b][x+a]!=='.',taken:(x,y,a,b)=>taken.has(x+','+y+','+a+','+b),
+      counts:S.haunt||{mirror:5,portrait:8,sheetwin:5,cobcorner:14,cobthick:6,candles:8,redlamp:6,dust:6,spider:3},
+      wallPic:(k,x,y,wd,o)=>{const oo={wd,bob:o.bob};if(o.mirror!==undefined)oo.npc='psh_mir'+((mi++)%12);const d=dec(k,x,y,oo);if(d)taken.add(x+','+y+','+wd[0]+','+wd[1]);return !!d},
+      floorProp:(k,x,y,o)=>!!dec(k,x,y,{block:!!o.block,sc:o.sc,walkOk:!o.block}),light:(x,y,c)=>light(x,y,c)})}catch(e){console.error('psw haunt',e)}
   /* ---- wall torches: sickly green-white and verdigris in the cold rooms, orange in the warm ones ---- */
   const torches=[],warmAt=(x,y)=>(S.warm||[]).some(r=>x>=r[0]-1&&x<=r[2]+1&&y>=r[1]-1&&y<=r[3]+1);
   {const blk=new Set();for(const d of decor)if(d.block)blk.add(d.x+','+d.y);const cand=[];
@@ -598,13 +607,13 @@ for(let i=1;i<=5;i++)pswTake('psw_book'+i,'A strayed book','book'+i,'psbook'+i,[
 pswTake('psw_ladle',"Peck's ladle",'ladle','psladle','A long iron ladle hangs on a nail by the great hearth, its handle worn pale and smooth. Cook Ansel Peck used it for thirty years. A name is scratched on the bowl: PECK.','The nail by the hearth is empty now.','Take the ladle.',"You take Peck's ladle.");
 pswTake('psw_dawnrack','A weapon rack','dawn','psdawnwarden','On this rack hangs one sword that is brighter than the rest, with a plain hilt and a tag in a careful hand: STAMFORD. DAWNWARDEN. KEEP SAFE. It does not look as if anyone has touched it.','The rack is empty where the bright sword hung.','Take Dawnwarden.','You take Dawnwarden. It is very light for such a long blade.');
 /* ---------- text: notes, books, plaques ---------- */
-const PSW_LEDGER="The Steward's ledger lies open on the desk, in a neat dry hand. Most of the page is lists of bread, wine and candles delivered. At the bottom: 'Keys to the upper floors, all returned to the Sacristan at dusk, as always. The Sacristan keeps them in the chapel. He says nobody should ask where.'";
-const PSW_KEYSHELF="A cabinet with forty small hooks, each with a brass tag: LARDER, CELLAR, ARMOURY, WINE, and so on. The hooks are empty, except one. The tag reads UNDERCROFT and the key is not for sale, but nobody is here to mind. The three hooks marked UPPER STAIRS are bare.";
-const PSW_HABIT="A thin book in grey cloth, titled The Sacristan's Habit, written by a monk of the chapel. Most of it is about vestments and washing. One page is marked with a ribbon: 'Brother Aldous would never leave the keys in the vestry or the cellar. He kept them where the candles are, and told nobody. He said the one who needs them will look at the candles.'";
+const PSW_LEDGER="The Steward's ledger lies open on the desk, in a neat dry hand. Most of the page is lists of bread, wine and candles delivered. At the bottom: 'Keys to the upper floors, sent below with the guard at dusk, to be kept where nobody climbs. The Sacristan has the receipt.'";
+const PSW_KEYSHELF="A cabinet with forty small hooks, each with a brass tag: LARDER, CELLAR, ARMOURY, WINE, and so on. The hooks are empty, except one. The tag reads UNDERCROFT and the key is not for sale, but nobody is here to mind. The three hooks marked UPPER STAIRS are bare. Under them somebody has chalked one word: BELOW.";
+const PSW_HABIT="A thin book in grey cloth, titled The Sacristan's Habit, written by a monk of the chapel. Most of it is about vestments and washing. One page is marked with a ribbon: 'Brother Aldous would not keep the upper keys in the chapel. He had them sent down with the guards to the oubliette, the pit at the bottom of the dungeons, where nobody would climb for them. He wrote it all in his journal and hid the journal where the candles are.'";
 const PSW_PLAQUE="A brass plaque beside the font. The letters say: THE ORDER OF THE CANDLES. 'Start at the west end of the south wall. Then the west end of the north wall. Then the middle of the north wall. Then the middle of the south wall. Then the east end of the north wall. Last, the east end of the south wall. Light them in this order and the choir will rest. Light them out of order and every flame goes out.'";
-khNpc('psw_ledger',"The Steward's ledger",'hl_p_note',()=>say(PSW_LEDGER,[BYE]));
-khNpc('psw_keyshelf','A cabinet of key hooks','hl_p_note',()=>say(PSW_KEYSHELF,[BYE]));
-khNpc('psw_habit',"A reading desk",'hl_p_lectern',()=>{pswF().habitRead=1;return say(PSW_HABIT,[BYE])});
+khNpc('psw_ledger',"The Steward's ledger",'hl_p_note',()=>{try{pspClue(2)}catch(e){}return say(PSW_LEDGER,[BYE])});
+khNpc('psw_keyshelf','A cabinet of key hooks','hl_p_note',()=>{try{pspClue(2)}catch(e){}return say(PSW_KEYSHELF,[BYE])});
+khNpc('psw_habit',"A reading desk",'hl_p_lectern',()=>{pswF().habitRead=1;try{pspClue(3)}catch(e){}return say(PSW_HABIT,[BYE])});
 khNpc('psw_candleplaque','A brass plaque','hl_p_note',()=>say(PSW_PLAQUE,[BYE]));
 khNpc('psw_lectern','A great lectern','hl_p_lectern',()=>say('A great book lies open on the lectern, a catalogue of the library in tiny hand. Each line has a shelf mark. Many of the marks have been struck through and a note added: MISSING. A different, firmer hand has written across the foot of the page: THE LIBRARIAN WOULD LIKE THEM BACK.',[BYE]));
 khNpc('psw_chapterbook','A lectern','hl_p_lectern',()=>say('The chapter book of the Pale Spire lies open at the last entry. It reads: "The Chapter met, as it always meets. The Sovereign did not attend. Nobody was surprised." The ink stops there.',[BYE]));
@@ -625,12 +634,12 @@ khNpc('psw_bracket','A candle bracket','mi_candel',()=>{const F=pswF();
     sfx('door');try{if(AC&&!G.mute){nz(1.8,.05,'lowpass',160,70,0);tone(50,42,1.8,'sine',.04,0)}}catch(e){}
     msg('You pull the candle stand. Somewhere in the north wall, stone grinds on stone, and a door that was a plain wall a moment ago swings open.','#e8e0ff');G.talk=null;return null}],BYE])});
 khNpc('psw_reliquary',"The Sacristan's reliquary",'wm_chest',()=>{const F=pswF();
-  if(F.key2||bagCount('pskey2'))return say('The reliquary chest stands open. On a grey cloth lies the print of a long key, and nothing else.',[BYE]);
+  if(F.journalTaken)return say('The reliquary chest stands open. On a grey cloth lies the print of a small book, and nothing else.',[BYE]);
   const alive=G.enemies&&G.enemies.some(e=>e.t==='pssacristan'&&e.hp>0);
   if(alive&&!F.sacristanDead)return say('A reliquary chest of pale wood with silver bands. The lid will not lift. Something that was a man stands guard over it, and he is watching you.',[BYE]);
-  return say('The lid of the reliquary lifts. Inside, on a grey cloth, lies a tall silver key with a violet stone in the bow.',[['Take the key.',()=>{
-    F.key2=true;if(!bagAdd(mkItem('pskey2')))G.items.push({k:'pskey2',x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false});
-    sfx('key');msg('You take the Second Floor Key. It opens the three stair doors to the second floor.','#ffe36a');G.talk=null;return null}],BYE])});
+  return say('The lid of the reliquary lifts. Inside, on a grey cloth, lies a small book bound in grey, and a purse of old gold. The book is the Sacristan\'s journal.',[['Take the journal and the gold.',()=>{
+    F.journalTaken=1;G.gold=(G.gold||0)+6000;try{if(!bagAdd(mkItem('potion6')))G.items.push({k:'potion6',x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false})}catch(e){}
+    sfx('key');msg('You take the Sacristan\'s journal and 6,000 gold. The last entry reads: the upper keys were sent down with the guards to the oubliette, to be kept where nobody climbs.','#ffe36a');try{pspClue(3)}catch(e){}G.talk=null;return null}],BYE])});
 /* ---------- candles (psq23) ---------- */
 function pswCandle(i){
   khNpc('psw_cand'+i,'A chapel candle stand','mi_candel',()=>{const F=pswF();
@@ -661,7 +670,7 @@ function pswChoirRest(){if(G.enemies)G.enemies=G.enemies.filter(e=>e.t!=='pschor
 /* ---------- people ---------- */
 function pswPeople(){
   if(PSW._ppl)return;PSW._ppl=1;
-  const gl=pswPic('ghost_librarian')||'hl_p_ghost',gc=pswPic('ghost_chamberlain')||'hl_p_ghost',fk=['kh_ohfolk3_0','kh_ohfolk2_0','peasantF','peasantM'].find(k=>IMG[k])||'priest';
+  const gl=pswPic('ghost_librarian')||'hl_p_ghost',gc=pswPic('ghost_chamberlain')||'hl_p_ghost',fk=pswPic('ghost_maid')||'priest';
   khNpc('psw_dorcas','Dorcas Fenne, kitchen maid',fk,()=>qNode('psq20',DLG20),{q:'psq20'});
   khNpc('psw_armourer','The Armourer',gl,()=>qNode('psq21',DLG21),{q:'psq21'});
   khNpc('psw_librarian','The Librarian',gl,()=>qNode('psq22',DLG22),{q:'psq22'});

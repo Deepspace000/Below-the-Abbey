@@ -113,11 +113,11 @@ PSP_L(9790,[8,36],9800,[8,5,2],{name:'stair down to the Oubliette'});
 PSP_L(9800,[8,2],9790,[8,33,0],{name:'stair up to the Deep Cells'});
 /* things every package needs to agree on */
 PSP.TELE={id:9730,at:[8,44]};                       // the one teleport stone of the first build (TELE_KEEP_HI gets 9730); every other level is noTele
-PSP.KEY2={item:'pskey2',name:'The Second Floor Key',flag:'key2',hiddenIn:9760};   // hidden in the sacristy of the chapel (package 4); G.flags.psp.key2 = true once taken
+PSP.KEY2={item:'pskey2',name:'The Second Floor Key',flag:'key2',hiddenIn:9800};   // lies in a strongbox in the pit of the Oubliette, behind the Hunger (ps_dungeon.js); G.flags.psp.key2 = true once taken
 PSP.REST=[9723,9731,9740,9750,9760];                 // levels that hold a quiet rest room (free rest, no creatures, warm candle light); the room names are in the plan
 /* test and jump links (?town=...&lvl=...): name -> [level, x, y, f]; the party level for a link is the level rating of the target, capped at 115 */
 PSP.JUMPS={palespire:[9720,32,52,0],palespire1:[9720,32,52,0],palespire2:[9730,32,49,0],palespire3:[9740,32,44,0],palespire4:[9750,42,22,3],
-  palespire5:[9760,5,22,1],palespire6:[9780,24,5,2],palespire7:[9790,40,5,2],palespire8:[9800,8,5,2],palespirekey:[9760,30,14,2]};
+  palespire5:[9760,5,22,1],palespire6:[9780,24,5,2],palespire7:[9790,40,5,2],palespire8:[9800,8,5,2],palespirekey:[9800,22,14,2]};
 /* small readers (no side effects) */
 const pspIs=n=>n>=PSP.LO&&n<=PSP.HI;
 const pspLevel=id=>PSP.LEVELS.find(l=>l.id===id)||null;
