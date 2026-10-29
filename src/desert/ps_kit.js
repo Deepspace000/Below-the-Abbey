@@ -45,7 +45,7 @@ function pspWallGid(style,v,wh){
     case 'dun':gid=gyTile('texBlack_'+(v%5),wh,{gain:1.3,rgb:[.7,.84,.78],tag:'psd'+v});break;
     case 'dark':gid=pspTex('ashlar',null)?g('pst_ashlar',{gain:1.6,tag:'pskP'+v,draw:wet}):gyTile('texBlack_'+(v%5),wh,{gain:.85,rgb:[.7,.82,.76],tag:'psk'+v});break;
     case 'bone':gid=gyTile('texBone_'+(1+v%4),wh,{gain:1.0,rgb:[.86,.92,.84],tag:'psb'+v});break;
-    case 'brick':if(pspTex('brick_dark')!=='pst_brick_dark'){gid=g('texBlack_'+(v%5),{gain:1.35,rgb:[.78,.78,.7],tag:'psbr'+v,draw:(x,w,h)=>{x.strokeStyle='rgba(10,16,12,.55)';x.lineWidth=1.5;for(let yy=0,r=0;yy<h;yy+=14,r++){x.beginPath();x.moveTo(0,yy);x.lineTo(w,yy);x.stroke();for(let xx=(r%2)*16;xx<w;xx+=32){x.beginPath();x.moveTo(xx,yy);x.lineTo(xx,yy+14);x.stroke()}}wet(x,w,h)}});break}gid=g('pst_brick_dark',{gain:1.15,rgb:[.92,.86,.95],tag:'psbrP'+v,draw:wet});break;
+    case 'brick':if(pspTex('brick_dark')!=='pst_brick_dark'){gid=g('texBlack_'+(v%5),{gain:1.35,rgb:[.78,.78,.7],tag:'psbr'+v,draw:(x,w,h)=>{x.strokeStyle='rgba(10,16,12,.55)';x.lineWidth=1.5;for(let yy=0,r=0;yy<h;yy+=14,r++){x.beginPath();x.moveTo(0,yy);x.lineTo(w,yy);x.stroke();for(let xx=(r%2)*16;xx<w;xx+=32){x.beginPath();x.moveTo(xx,yy);x.lineTo(xx,yy+14);x.stroke()}}wet(x,w,h)}});break}gid=g('pst_brick_dark',{gain:1.15,rgb:[.84,.9,1.0],tag:'psbrP'+v,draw:wet});break;
     case 'panel':if(pspTex('timber_plaster')==='pst_timber_plaster'){gid=g('pst_timber_plaster',{gain:.62,rgb:[.8,.78,.9],tag:'pspP'+v,draw:wet});break}gid=g('texBone_'+(1+v%3),{gain:.5,rgb:[.7,.8,.62],tag:'psp'+v,draw:(x,w,h)=>{x.globalAlpha=.6;x.fillStyle='#10201a';for(let i=0;i<2;i++){const px=8+i*60;x.fillRect(px,h*.18,52,h*.5);x.fillStyle='#1c342a';x.fillRect(px+4,h*.18+4,44,h*.5-8);x.fillStyle='#10201a'}x.globalAlpha=1;x.fillStyle=P.brass;x.fillRect(0,h*.7,w,3)}});break;
     case 'win':gid=g(pspTex('ashlar','texBlack_2'),{tag:'psw'+v,draw:(x,w,h)=>{const top=h-h*.9,bot=h-34,x0=48,x1=80;x.save();pspPointed(x,x0-6,x1+6,top-6,bot+6,36);x.fillStyle=P.copper;x.fill();pspPointed(x,x0,x1,top,bot,34);const gr=x.createLinearGradient(0,top,0,bot);gr.addColorStop(0,P.glass[1]);gr.addColorStop(.5,P.glass[0]);gr.addColorStop(1,P.glass[2]);x.fillStyle=gr;x.fill();x.clip();
       x.strokeStyle=P.bone;x.lineWidth=2.4;x.beginPath();x.moveTo(64,top);x.lineTo(64,bot);for(let yy=top+36;yy<bot;yy+=38){x.moveTo(x0,yy);x.lineTo(x1,yy)}x.stroke();
@@ -61,7 +61,9 @@ function pspWallGid(style,v,wh){
 function pspDoorGid(style,wh){
   const k='door_'+style+'|'+wh;if(PSPK.tiles[k]!==undefined)return PSPK.tiles[k];let gid;const P=PSP_PAL;
   const frame=(x,w,h,x0,x1,top,ap,fill)=>{pspPointed(x,x0-9,x1+9,top-9,h,ap+4);x.fillStyle='#10181a';x.fill();x.strokeStyle=P.copper;x.lineWidth=3;x.stroke();pspPointed(x,x0,x1,top,h,ap);x.fillStyle=fill;x.fill()};
-  if(style==='stair')gid=gyTile('texBlack_1',wh,{fac:{img:'stairFix_0',i:0,n:1},gain:1.2,rgb:[.8,1,.9],tag:'psstair'+wh,emit:.3});
+  const DP={great:'door_great',oak:'door_oak',iron:'door_ironbound',dungeon:'door_dungeon',stair:'door_stair'}[style];
+  if(DP&&typeof IMG!=='undefined'&&IMG['ps_'+DP]&&IMG['ps_'+DP].width){IMG['gyp_psd_'+DP]=IMG['ps_'+DP];gid=gyTile(pspTex('ashlar','texBlack_2'),wh,{fac:{img:'psd_'+DP,i:0,n:1},gain:1.8,rgb:[.9,1,1.08],tag:'psdp'+style+wh,emit:.34})}
+  else if(style==='stair')gid=gyTile('texBlack_1',wh,{fac:{img:'stairFix_0',i:0,n:1},gain:1.2,rgb:[.8,1,.9],tag:'psstair'+wh,emit:.3});
   else if(style==='gate')gid=gyTile('texBlack_1',wh,{fac:{img:'gatesC_0',i:0,n:1},gain:1.0,rgb:[.7,1,.85],tag:'psgate'+wh,emit:.3});
   else gid=gyTile('texBlack_2',wh,{gain:1.2,rgb:[.76,.92,.82],tag:'psdoor'+style,draw:(x,w,h)=>{
     const big=style==='great',x0=big?14:24,x1=big?114:104,dh=Math.min(h-6,128*(big?2.9:2.15)),top=h-dh;
@@ -155,7 +157,7 @@ function pspMake(plan){
   C.statue=(x,y,name,o)=>C.prop(name,x,y,o);
   C.column=(x,y,design,o)=>C.prop('col_'+(design||'fluted'),x,y,o);
   C.sign=(x,y,wd,a,b)=>{if(!C.isOpen(x,y))return null;const d={k:'sign_gy',x,y,block:false,wd,txt:[a,b||''],sc:1};C.decor.push(d);return d};
-  C.chest=(x,y,o)=>{o=o||{};const d=C.dec('gy_chest',x,y,{block:true,sc:1.1});if(d){d.goldAmt=o.gold||0;if(o.tier!==undefined)d.i=o.tier}return d};
+  C.chest=(x,y,o)=>{o=o||{};const d=C.dec('gy_chest',x,y,{block:true,sc:.7});if(d){d.goldAmt=o.gold||0;if(o.tier!==undefined)d.i=o.tier}return d};
   C.cand=(x,y,col)=>{const d=C.prop('candelabra_tall',x,y,{block:false});C.light(x,y,col||C.silver);return d};
   C.glow=(gap,col)=>{const have=C.lights.slice(),g=gap||5.5;for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(rows[y][x]!=='.')continue;if(have.every(l=>Math.hypot(l[0]-x,l[1]-y)>=g)){have.push([x,y]);C.lights.push([x,y]);C.lcol[x+','+y]=col||C.lcolDef}}};
   /* links */
@@ -312,7 +314,7 @@ function pspSkyFrame(){
   const cs=P.castle,C=G.C,px=C.x+.5,py=C.y+.5,TAU=Math.PI*2,t=G.time;
   const x=PSPK.cx;x.clearRect(0,0,1024,256);x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';
   const col=az=>((((az/TAU)%1)+1)%1*1024+t*11)%1024;                    // the engine drifts the sky sideways: pieces are drawn against the drift
-  const put=(img,cu,vc,wRows,alpha)=>{if(!img||!img.width)return;const h=wRows,w=h*img.width/img.height*.57;x.globalAlpha=alpha===undefined?1:alpha;for(const o of [-1024,0,1024])x.drawImage(img,cu-w/2+o,vc-h/2,w,h);x.globalAlpha=1};
+  const put=(img,cu,vc,wRows,alpha,wm)=>{if(!img||!img.width)return;const h=wRows,w=h*img.width/img.height*.57*(wm||1);x.globalAlpha=alpha===undefined?1:alpha;for(const o of [-1024,0,1024])x.drawImage(img,cu-w/2+o,vc-h/2,w,h);x.globalAlpha=1};
   // the moon over the shoulder of the castle, and a flock of bats that drifts round the sky
   const baseAz=cs?Math.atan2(cs.at[1]-py,cs.at[0]-px):-Math.PI/2;
   put(IMG[pspPic('moon_crescent')],col(baseAz+.5),64,50);
@@ -321,7 +323,7 @@ function pspSkyFrame(){
     const dist=Math.hypot(cs.at[0]-px,cs.at[1]-py),prog=Math.max(0,Math.min(1,(cs.far-dist)/(cs.far-cs.near)));          // 0 at the foot of the climb, 1 at the barbican
     const H=Math.round((cs.h0||38)+((cs.h1||106)-(cs.h0||38))*prog*prog*(3-2*prog)),near=prog>.45,mix=Math.max(0,Math.min(1,(prog-.35)/.2));   // rows tall on screen (the sky shows about 105 rows above the horizon)
     const lift=Math.round((cs.lift||0)*(1-prog)+(cs.lift1||0)*prog),base=150-lift,cu=col(baseAz);
-    const draw=(img,alpha)=>put(img,cu,base-H/2+Math.round(H*.02),H,alpha);
+    const draw=(img,alpha)=>put(img,cu,base-H/2+Math.round(H*.02),H,alpha,cs.wm||1);
     draw(pspCastleImg(false),near?1-mix:1);if(near)draw(pspCastleImg(true),mix);
     // distance haze: the castle is a cold shadow in the teal mist far off, and clears as the party climbs
     x.globalCompositeOperation='source-atop';
@@ -344,7 +346,7 @@ function pspKitHelpers(C,plan){
     if(o.arches){const n=horiz?x1-x0+1:y1-y0+1;for(let i=1;i<n-1;i+=2){const x=horiz?x0+i:x0,y=horiz?y0:y0+i;C.dec(pspPic('arch_low'),x,y,{block:false})}}};
   C.fence=(x0,y0,x1,y1,o)=>{o=o||{};let n=0;for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){C.used.delete(x+','+y);C.prop((o.pic||'iron_fence_')+((n++&1)?'a':'b'),x,y,{block:o.block===true,sc:o.sc||1,maxW:1.02})}};
   C.vines=(x,y,o)=>C.prop((o&&o.name)||(hs(x,y,5)<.5?'vine_a':'vine_b'),x,y,Object.assign({block:false},o||{}));
-  C.vineWall=(x0,y0,x1,y1,wd)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(C.isOpen(x,y))C.picture(hs(x,y,6)<.5?'vine_a':'vine_b',x,y,wd)};
+  C.vineWall=(x0,y0,x1,y1,wd)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(C.isOpen(x,y)&&hs(x,y,7)>.45)C.picture(hs(x,y,6)<.5?'vine_a':'vine_b',x,y,wd)};
   C.archway=(x,y,name,o)=>C.prop(name||'arch_high',x,y,Object.assign({block:false},o||{}));
   C.alcove=(x,y,name,wd)=>C.picture(name||'alcove_weeper',x,y,wd);
   if(plan.castle){C.castle=plan.castle}

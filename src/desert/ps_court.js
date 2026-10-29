@@ -64,7 +64,7 @@ function pscFloors(){
   tone('psf_cobble','gyf_cobble',.56,[.8,.92,1.05]);
   tone('psf_flag','gyf_flag',.9,[.8,.92,1.05]);
   tone('psf_bed','gyf_dirt',.42,[.6,.8,.62]);
-  tone('psf_lawn','gyf_grass',.72,[.68,1.05,.76]);
+  tone('psf_lawn','gyf_grass',.5,[.62,.86,.8]);
   tone('psf_wet','gyf_cobble',.44,[.66,.82,.98]);
   pscPaintFloors();
   if(typeof gyFloorWet==='function'&&FLOORS.psf_wet)try{const w=gyFloorWet('psf_wetx','psf_wet',[.36,.5,.62],23);if(FLOORS[w])FLOORS.psf_wet=FLOORS[w]}catch(e){}
@@ -81,7 +81,7 @@ function pscFloors(){
 /* ---------- wall tiles painted in code: black timbered houses, brick, the castle front, the clock tower, doors, the curtain wall ---------- */
 const PSC_TEX=['texBlack_0','texBlack_1','texBlack_2','texBlack_3','texBlack_4'];
 function pscTile(key,wh,draw,o){o=o||{};const tex=o.tex||PSC_TEX[(key.length+(o.v||0))%5];return gyTile(tex,wh,Object.assign({gain:o.gain||1.6,rgb:o.rgb||[.78,.92,1.05],tag:'psc'+key,draw},o.fac?{fac:o.fac}:{}))}
-function pscIvy(x,W,Hp,seed,amt,maxLen,fromBottom){const R=blRng(seed),K=PSC_K.ivy;
+function pscIvy(x,W,Hp,seed,amt,maxLen,fromBottom){const R=blRng(seed),K=PSC_K.ivy;amt=Math.ceil(amt*.45);
   for(let k=0;k<amt;k++){let px=R()*W,len=Hp*(.12+R()*(maxLen||.5));const pts=[[px,fromBottom?Hp:0]],dir=fromBottom?-1:1;
     x.strokeStyle='#142419';x.lineWidth=1.2+R()*1.6;x.beginPath();x.moveTo(px,fromBottom?Hp+2:-2);
     for(let s=1;s<=8;s++){px+=(R()-.5)*10;const py=(fromBottom?Hp:0)+dir*len*s/8;pts.push([px,py]);x.lineTo(px,py)}x.stroke();
@@ -249,7 +249,7 @@ function pscFacadeTiles(){
   const tw=(k,wh,paint)=>pscTile('tw'+k,wh,(x,W,Hp)=>{const K=PSC_K;pscAshlar(x,W,Hp,800+k);pscCopper(x,W,0,50);for(const yy of [.25,.45,.68]){x.fillStyle=K.stone2;x.fillRect(0,Hp*yy,W,8);x.fillStyle=K.stoneLt;x.fillRect(0,Hp*yy,W,3)}paint&&paint(x,W,Hp,K);pscIvy(x,W,Hp,810+k,10,.6,true);pscMossBase(x,W,Hp,820+k,26)},{v:k});
   T.tower=[tw(0,9.4,(x,W,Hp)=>{pscLancet(x,64,Hp*.55,22,130,false,true)}),tw(1,9.4,(x,W,Hp)=>{pscFace(x,64,Hp*.38,20,3);pscLancet(x,64,Hp*.7,22,110,true)}),tw(2,9.4,(x,W,Hp)=>{pscLancet(x,36,Hp*.4,20,120,false,true);pscLancet(x,92,Hp*.4,20,120,true)})];
   /* the clock: a big black dial with gold-green numerals across three tiles */
-  T.clock=[0,1,2].map(i=>pscTile('ck'+i,9.6,pscBig(i,3,(x,W,Hp)=>{const K=PSC_K,cx=W/2,cy=Hp*.42;pscAshlar(x,W,Hp,830);pscCopper(x,W,0,56);
+  T.clock=[0,1,2].map(i=>pscTile('ck'+i,9.6,pscBig(i,3,(x,W,Hp)=>{const K=PSC_K,cx=W/2,cy=Hp*.66;pscAshlar(x,W,Hp,830);pscCopper(x,W,0,56);
     x.fillStyle=K.stone2;x.beginPath();x.arc(cx,cy,176,0,6.3);x.fill();x.strokeStyle=K.cop;x.lineWidth=12;x.stroke();x.fillStyle='#0a100d';x.beginPath();x.arc(cx,cy,156,0,6.3);x.fill();
     x.strokeStyle='#d8b86a';x.lineWidth=5;x.fillStyle='#d8b86a';for(let h=0;h<12;h++){const a=h*Math.PI/6;x.beginPath();x.moveTo(cx+Math.cos(a)*128,cy+Math.sin(a)*128);x.lineTo(cx+Math.cos(a)*(h%3?144:112),cy+Math.sin(a)*(h%3?144:112));x.stroke()}
     x.lineWidth=11;x.strokeStyle='#e8d098';x.beginPath();x.moveTo(cx,cy);x.lineTo(cx-6,cy-96);x.stroke();x.lineWidth=7;x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+104,cy+48);x.stroke();x.beginPath();x.arc(cx,cy,12,0,6.3);x.fillStyle=K.cop;x.fill();
@@ -484,11 +484,11 @@ function pscBase(info){
   const W=64,H=56,C=blKit({id:9730,W,H,name:info.name,lvl:101,tele:PSC.TELE,start:{x:32,y:49,f:0}});
   const ch=C.ch,hs=C.hs,rows=C.rows,block=C.block,fm=C.fm,hgt=C.hgt,int=Math.floor;
   const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&g[y][x]!=='#';
-  const P=(k,x,y,o)=>C.free(x,y)?C.dec(k,x,y,o):null;                        // a prop on a free open cell
+  const P=(k,x,y,o)=>{if(typeof k==='string'&&!IMG[k]&&IMG['ps_'+k])k='ps_'+k;return C.free(x,y)?C.dec(k,x,y,o):null};                        // a prop on a free open cell
   const B=(k,x,y,o)=>P(k,x,y,Object.assign({block:true},o||{}));             // a solid prop
   const S=(name,x,y,o)=>B(pspPic(name),x,y,Object.assign({sc:1},o||{}));    // a statue (or any painted piece) that blocks
   const Q=(name,x,y,o)=>P(pspPic(name),x,y,o);                               // a painted piece that can be walked through
-  const hang=(name,x,y,wd,bob,o)=>{const u=C.used.has(x+','+y);const d=C.dec(pspPic(name),x,y,Object.assign({wd,bob},o||{}));if(!u)C.used.delete(x+','+y);return d};   // a picture hung flat on the wall beside the cell
+  const hang=(name,x,y,wd,bob,o)=>{if(/^vine_/.test(name)&&hs(x,y,91)<.55)return null;const u=C.used.has(x+','+y);const d=C.dec(pspPic(name),x,y,Object.assign({wd,bob},o||{}));if(!u)C.used.delete(x+','+y);return d};   // a picture hung flat on the wall beside the cell
   const Fl=(x0,y0,x1,y1,f)=>C.setF(x0,y0,x1,y1,f);
   const lampAt=(x,y,col)=>{if(C.isOpen(x,y)){C.lamp(x,y,col||PSC_SICK);PSC.lamps.push([x,y])}};
   PSC.lamps=[];
@@ -714,7 +714,7 @@ function pscBuild(info){
      const [dx,dy]=sides[0];if(C.lights&&C.lights.some(l=>l[0]===x&&l[1]===y))continue;
      hang(SCH[n++%SCH.length],x,y,[dx,dy],-.3)}}
   /* ===== the creatures ===== */
-  const ok=(x,y)=>!pscSafe(x,y,9)&&!pscNearFront(x,y,3)&&rows[y]&&rows[y][x]==='.';
+  const ok=(x,y)=>Math.hypot(x-32,y-49)>=12&&!pscSafe(x,y,9)&&!pscNearFront(x,y,3)&&rows[y]&&rows[y][x]==='.';
   const foe=(t,x,y,rad)=>{const q=C.near(x,y,rad||3,false);if(q&&ok(q[0],q[1]))C.foe(t,q[0],q[1])};
   for(const k in wakers){const [x,y]=k.split(',').map(Number);if(ok(x,y))C.foe(wakers[k],x,y)}
   const WK=[['psgargoyle',[[10,12],[46,12],[54,11],[28,12]]],['pschimera',[[20,18],[36,27],[46,34],[40,41]]],['pshydra',[[19,24],[47,42]]],['psmourner',[[57,31],[24,30]]],['psjudge',[[20,32],[38,26],[32,41]]]];
@@ -727,12 +727,12 @@ function pscBuild(info){
   /* the five wanderers, each on a loop of open ground (PSC.loops) */
   PSC.loops.pscolossus=[[30,28],[34,28],[34,32],[30,32]];
   PSC.loops.psgargmother=[[9,12],[30,11],[55,12],[30,12]];
-  PSC.loops.psthornwarden=[[28,43],[29,46],[26,47],[25,49],[28,49],[29,47]];
-  PSC.loops.psossian=[[36,44],[44,44],[44,47],[36,47]];
+  PSC.loops.psthornwarden=[[24,33],[22,31],[19,33],[22,35]];
+  PSC.loops.psossian=[[45,43],[45,47],[42,47],[42,44]];
   PSC.loops.pshoundmaster=[[40,17],[37,17],[37,29],[44,30],[37,29],[37,17]];
-  C.foe('pscolossus',30,28);C.foe('psgargmother',9,12);C.foe('psthornwarden',28,43);C.foe('psossian',36,44);C.foe('pshoundmaster',40,17);
+  C.foe('pscolossus',30,28);C.foe('psgargmother',9,12);C.foe('psthornwarden',24,33);C.foe('psossian',45,43);C.foe('pshoundmaster',40,17);
   foe('pshoundhm',38,17,1);foe('pshoundhm',37,19,1);
-  for(const e of C.enemies)if(e.t==='pscolossus'||e.t==='psgargmother'||e.t==='psthornwarden'||e.t==='psossian'||e.t==='pshoundmaster')e.lvl=102;
+  for(const e of C.enemies)e.lvl=(e.t==='pscolossus'||e.t==='psgargmother'||e.t==='psthornwarden'||e.t==='psossian'||e.t==='pshoundmaster')?102:Math.max(100,Math.min(102,Math.round(100+2*(50-e.y)/36)));
   /* map names for the parchment sheet */
   C.mapNames.push({t:'The Great Door',x:32,y:12,k:'place'},{t:'The Gallery Door',x:18,y:12,k:'place'},{t:'The Kitchen Door',x:14,y:24,k:'place'},{t:'The Cloister Door',x:50,y:24,k:'place'},{t:'The Clock Tower',x:32,y:23,k:'place'},{t:'The Fountain Square',x:32,y:30,k:'place'},{t:'The Courtyard Gate',x:32,y:49,k:'place'},
     {t:'The Waystone Nook',x:8,y:44,k:'place'},{t:'The Weeping Alcove',x:24,y:33,k:'place'},{t:'The Rose Garden',x:26,y:46,k:'place'},{t:'The Gargoyle Arbour',x:25,y:17,k:'place'},{t:'The Hound Kennel',x:57,y:48,k:'place'},{t:"The Headless Knights' Corner",x:50,y:48,k:'place'},
@@ -768,6 +768,10 @@ function pscLodge(info){
       const hang=(n,x,y,wd,bob)=>raw(pspPic(n),x,y,{block:false,wd,pic:1,bob:bob||0});
       hang('portrait_ancestor_1',9,1,[0,-1],.8);hang('portrait_ancestor_2',1,5,[-1,0],.8);hang('mirror_haunted_a',14,6,[1,0]);hang('window_sheeted_a',3,1,[0,-1],0);hang('cobweb_corner_a',1,1,[0,-1]);hang('cobweb_corner_b',14,1,[0,-1]);hang('cobweb_corner_a',14,11,[1,0]);
       raw(pspPic('candles_glow_a'),6,4,{block:false});raw(pspPic('candles_glow_b'),8,4,{block:false});raw(pspPic('web_spider'),1,2,{block:false});
+      const wd=(n,x,y,sc)=>raw(pspPic(n),x,y,{sc:sc||.9});
+      for(const x of [3,4,5,10,11,12])wd('furn_screen_tracery',x,8,.8);wd('furn_bookcase',1,5,.9);wd('furn_bookcase',1,6,.9);wd('furn_wardrobe',13,7,.85);wd('furn_cradle',4,11,.8);
+      for(const [x,y] of [[5,10],[11,10],[4,3],[12,4]])wd('col_twist',x,y,.8);raw(pspPic('arch_low'),7,8,{block:false});raw(pspPic('arch_low'),8,8,{block:false});
+      raw(pspPic('urn_big'),12,11,{sc:.8});raw(pspPic('candelabra_tall'),9,6,{block:false});
       npc('psc_gardener',8,3)}});
   PSC.chest['9731:2,10']={pot:3,mana:2,elixir:1,gold:900};
   const L=LEVELS[PSC.LODGE];pscWidenRoom(L,16,14);pscRoomDoor(L,l);L.diff=L.rating=101;L.noExtras=true;LEVEL_RATING[PSC.LODGE]=101;return L}
@@ -791,7 +795,8 @@ function pscMews(info){
       hang('cobweb_corner_a',1,1,[0,-1]);hang('cobweb_corner_b',18,1,[0,-1]);hang('window_sheeted_b',8,1,[0,-1],0);hang('portrait_ancestor_3',12,1,[0,-1],.8);hang('mirror_haunted_c',1,5,[-1,0]);
       raw(pspPic('lantern_red_a'),4,4,{block:false});raw(pspPic('lantern_red_b'),16,4,{block:false});raw(pspPic('web_spider'),18,2,{block:false});
       for(const [x,y] of [[5,8],[5,9],[5,11],[5,12],[14,8],[14,9],[14,11],[14,12]]){const k=pspPic((x+y)&1?'iron_fence_a':'iron_fence_b'),im=IMG[k],w=im&&im.width?(NPC_H[k]||1.5)*im.width/im.height:1;raw(k,x,y,{sc:Math.min(1,1/w)})}
-      for(const [x,y] of [[8,7],[12,7],[8,10],[12,10],[6,6],[14,6]])raw(pspPic('col_twist'),x,y,{sc:.9});
+      for(const [x,y] of [[3,5],[4,5],[6,5],[7,5],[12,5],[13,5],[15,5],[16,5],[16,12],[17,12]]){const k=pspPic((x+y)&1?'iron_fence_a':'iron_fence_b'),im=IMG[k],w=im&&im.width?(NPC_H[k]||1.5)*im.width/im.height:1;raw(k,x,y,{sc:Math.min(1,1/w)})}
+      for(const [x,y] of [[8,3],[12,3],[8,7],[12,7],[6,6],[14,6]])raw(pspPic('col_twist'),x,y,{sc:.9});
       raw(pspPic('arch_low'),10,6,{block:false});raw(pspPic('arch_iron'),10,9,{block:false});raw(pspPic('urn_big'),2,4,{sc:.9});raw(pspPic('urn_big'),17,5,{sc:.9});
       npc('psc_falconer',10,4)}});
   const L=LEVELS[PSC.MEWS];pscWidenRoom(L,20,16);pscRoomDoor(L,l);L.diff=L.rating=101;L.noExtras=true;LEVEL_RATING[PSC.MEWS]=101;return L}
