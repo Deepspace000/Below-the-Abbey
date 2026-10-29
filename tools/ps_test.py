@@ -116,6 +116,7 @@ def run_links():
 REACH_JS = """(args) => { const [id, thru] = args; if (!LEVELS[id]) KH_LAZY[id](); const L = LEVELS[id], W = L.rows[0].length, H = L.rows.length, o = {bad: []};
   const bs = new Set(); for (const d of L.decor) if ((d.block || (d.npc && d.solid)) && !/^psd_cell/.test(d.npc || '')) bs.add(d.x + ',' + d.y);   // a cell gate opens when the party speaks to it
   const starts = [[L.start.x, L.start.y]]; for (const l of PSP.LINKS) if (l.to === id && l.land) starts.push([l.land[0], l.land[1]]);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const c = L.rows[y][x]; const d = c !== '.' && KH_DOOR[L.chars[c]]; if (d && d.psh === 'warp' && d.A && d.B) { starts.push([d.A[0], d.A[1]]); starts.push([d.B[0], d.B[1]]) } }   // a stair warp joins its two landings
   const door = (x, y) => { const c = L.rows[y][x]; const d = c !== '.' && KH_DOOR[L.chars[c]]; return !!(d && (d.psh === 'warp' || d.psh === 'closet' || d.psh === 'niche' || d.psw === 'secret')) };   // doors inside a level that open for the party (closet key, lever, hidden niches, the warp to the lady's room); level changes and sealed doors stay shut
   const TB = (TERRS[id] && TERRS[id].block) || null; const tb = (x, y) => !!(TB && TB[y * W + x]);   // open to the eye but closed to the feet (pits, ravines, fence cells)
   const seen = new Set(); const q = []; for (const s of starts) { const k = s[0] + ',' + s[1]; if (!seen.has(k)) { seen.add(k); q.push(s) } }
