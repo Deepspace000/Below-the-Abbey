@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.730';
+const VERSION='3.731';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -42936,9 +42936,18 @@ const mpWorldM={ready:false,zz:1,fontOK:false};
 const mpWorldInk='#2a1a0c';
 const mpWorldTints={sand:'#dcc088',red:'#cf8a60',blue:'#a4b8cc',white:'#efe9da',gold:'#e0b850',violet:'#a98cbb'};
 const mpWorldSm=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t)};
-const mpWorldCxo=y=>714+10*Math.sin(y*.045)+6*Math.sin(y*.13+1)-8*mpWorldSm((y-190)/20);   // the west shore of the Narrow Sea
-const mpWorldCxe=y=>1140+8*Math.sin(y*.04+2)+5*Math.sin(y*.11);                              // the east shore
-const mpWorldNs=x=>-150-7*Math.sin(x*.05)-4*Math.sin(x*.17);                                  // the north shore, where the two lands join
+const mpWorldGb=(y,y0,s,h)=>h*Math.exp(-((y-y0)*(y-y0))/(2*s*s));                              // a headland (positive h) or a bay (negative h) on a coast
+const mpWorldRc=(u,R)=>u>=R?0:u<=0?R:R-Math.sqrt(Math.max(0,R*R-(R-u)*(R-u)));                  // a rounded corner of radius R: how far the shore stands back at distance u from the corner
+/* the three shores of the Narrow Sea: a ragged coast with headlands that jut out, bays and inlets, and rounded corners (no right angles). Every shore only ever moves OUT into the sea from the old straight line (never back into the land), so the towns on the shore and the islands in the sea keep their places. */
+const mpWorldCxo=y=>714+10*Math.sin(y*.045)+6*Math.sin(y*.13+1)-8*mpWorldSm((y-190)/20)                // the west shore of the Narrow Sea
+  +Math.max(0,16+9*Math.sin(y*.031+.7)+6*Math.sin(y*.083+2.2)+3*Math.sin(y*.19+.4)+mpWorldGb(y,-75,9,62)+mpWorldGb(y,-5,10,-14)+mpWorldGb(y,250,10,74)+mpWorldGb(y,315,8,52)+mpWorldGb(y,205,9,-14))
+  +mpWorldRc(y+150,70);
+const mpWorldCxe=y=>1140+8*Math.sin(y*.04+2)+5*Math.sin(y*.11)                                           // the east shore
+  -Math.max(0,18+9*Math.sin(y*.027+1.4)+6*Math.sin(y*.071+.3)+3*Math.sin(y*.17+2.8)+mpWorldGb(y,-60,10,84)+mpWorldGb(y,0,9,-14)+mpWorldGb(y,60,9,50)+mpWorldGb(y,110,10,-20)+mpWorldGb(y,160,11,96)+mpWorldGb(y,215,9,-16)+mpWorldGb(y,265,10,70))
+  -mpWorldRc(y+150,70);
+const mpWorldNs=x=>-150-7*Math.sin(x*.05)-4*Math.sin(x*.17)                                             // the north shore, where the two lands join
+  +Math.max(0,14+8*Math.sin(x*.029+.2)+5*Math.sin(x*.078+1.9)+3*Math.sin(x*.21+.9)+mpWorldGb(x,800,8,52)+mpWorldGb(x,855,9,-12)+mpWorldGb(x,905,10,76)+mpWorldGb(x,960,9,-12)+mpWorldGb(x,1015,9,56))
+  +mpWorldRc(x-714,70)+mpWorldRc(1140-x,70);
 const mpWorldLw=b=>Math.max(b,.8/mpWorldM.zz);                                                // ink never thins out when zoomed far out
 
 /* a smooth line through points: midpoint quadratics (p is a Path2D or the context) */
@@ -42966,9 +42975,9 @@ function mpWorldInit(){
   const P=[[-1500,-900]],C=[];let n=0;const jt=()=>(H(n++,3,41)-.5)*1.7,add=(x,y)=>{const q=[x+jt(),y+jt()];P.push(q);C.push(q)};
   for(let y=-700;y<=352;y+=7)add(west(y),y);
   for(let x=-1060;x<=700;x+=9)add(x,south(x));
-  for(let y=352;y>=-150;y-=6)add(mpWorldCxo(y),y);
-  for(let x=mpWorldCxo(-150)+8;x<mpWorldCxe(-150);x+=8)add(x,mpWorldNs(x));
-  for(let y=-150;y<=640;y+=6)add(mpWorldCxe(y),y);
+  for(let y=352;y>=-150;y-=3)add(mpWorldCxo(y),y);
+  for(let x=mpWorldCxo(-150)+4;x<mpWorldCxe(-150);x+=4)add(x,mpWorldNs(x));
+  for(let y=-150;y<=640;y+=3)add(mpWorldCxe(y),y);
   P.push([1900,640],[1900,-900]);
   M.landP=new Path2D();mpWorldSmoothPath(M.landP,P,true);
   M.waterP=new Path2D();M.waterP.rect(-1700,-1000,3900,1800);M.waterP.addPath(M.landP);
