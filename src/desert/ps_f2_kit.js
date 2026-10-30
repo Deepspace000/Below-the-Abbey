@@ -28,7 +28,7 @@ const F2B={
     text:'The sun beats down on the sand. The air shimmers with heat, and there is no wind.'},
   9826:{k:'swamp',sky:{top:[38,48,44],mid:[78,94,80],low:[118,130,104]},cloud:1.0,fog:[92,106,84,.034],amb:.62,lcol:[.85,1.1,.7],wn:'Bog mist',fx:null,
     text:'A thick green mist lies on the black water. Frogs croak, and the mud bubbles and stinks.'},
-  9827:{k:'nightmare',sky:{top:[8,0,6],mid:[56,10,16],low:[116,30,24]},cloud:.7,fog:[44,10,16,.03],amb:.42,lcol:[1.3,.55,.5],wn:'Red dark',fx:null,
+  9827:{k:'nightmare',sky:{top:[8,0,6],mid:[56,10,16],low:[116,30,24]},cloud:.7,fog:[30,6,10,.018],haze:0,amb:.5,lcol:[1.3,.55,.5],wn:'Red dark',fx:null,
     text:'The sky is the colour of a bruise, and the air is thick and still. Things move just out of sight.'}};
 /* ---------- floors: f2 names to engine FLOORS keys (some re-toned here) ---------- */
 const F2_FLMAKE={snow:['scree',1.62,[.97,1.0,1.07]],snowpath:['wwf_dirt',1.05,[.9,.94,1.02]],bogwater:['water',.55,[.62,.8,.55]],canal:['water',.82,[.8,.95,1.0]],
@@ -61,7 +61,7 @@ function f2SkyArr(id){
   return _sf.apply(this,arguments)}}
 /* the air: each room's own mist, light and weather effect (snow falling, heat shimmer) */
 {const _w=weatherNow;weatherNow=function(){
-  if(f2Is(LEVEL)){const B=F2B[LEVEL];return {id:'fog',n:B.wn,fog:B.fog[3],haze:.25,dark:0,mix:.4,col:B.fog.slice(0,3),text:B.text,fx:B.fx||null}}
+  if(f2Is(LEVEL)){const B=F2B[LEVEL];return {id:'fog',n:B.wn,fog:B.fog[3],haze:B.haze===undefined?.25:B.haze,dark:0,mix:.4,col:B.fog.slice(0,3),text:B.text,fx:B.fx||null}}
   return _w.apply(this,arguments)}}
 /* ---------- the mist wall: the edge of every illusion. Pale silver mist with cracks where the black stone of the castle shows through (made in code, like the castle walls) ---------- */
 function f2MistGid(v,wh){
