@@ -39,7 +39,7 @@ JS = r"""() => {
     const seen = new Map();
     for (const d of L.decor || []) {
       const k = String(d.k), x = Math.round(d.x), y = Math.round(d.y);
-      if (d.pic && d.wd) {
+      if (d.pic && d.wd && !d.span) {   // a span (ps_f2_kit.js f2Span: a bridge, a boat or fog as a free-standing painted plane) is not a wall picture
         const bx = x + d.wd[0], by = y + d.wd[1];
         if ((open(bx, by) || bx < 0 || by < 0 || bx >= W || by >= H) && !/cell_door|iron_gate|bridge_rail|iron_rail/.test(k)) add('NOWALL', d);
         else if (isDoor(bx, by)) add('OVERDOOR', d);

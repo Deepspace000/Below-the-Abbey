@@ -8,7 +8,7 @@
    The Sleeper's table: seven hollows; placing a piece takes it from the bag (psf2F().placed). With all seven placed the Sleeper wakes (F.woke), speaks, and the quest is ready;
    the Dreamkeeper hands out the reward (once, by the quest) and F.done is set. A sealed iron stair at the east end of the gallery is the way to the third floor (not open yet).
    ========================================================================== */
-const PSF2H={ID:9820,W:56,H:44,WH:3.2,TABLE:[28,22],KEEPER:[26,35],STAIR3:[52,5]};
+const PSF2H={ID:9820,W:56,H:44,WH:3.2,TABLE:[28,22],KEEPER:[28,36],STAIR3:[52,5]};
 /* painted pieces wanted (assets/ps/<name>.webp replaces the stand-in with no code change) */
 {const P=(n,h,src,o)=>{PSP_PICS[n]=[h,src,o||{}]};
  P('f2_dreamkeeper',1.0,['ps_p_librarian','kh_ohfolk6_0'],{keep:1});
@@ -110,7 +110,7 @@ function psf2HubBuild(info){
   cand(36,38,[1.3,1.0,.6]);
   // the Stair Landing: the Dreamkeeper beside the stair, candelabra, banners
   C.used.delete(PSF2H.KEEPER.join(','));C.dec(pspPic('f2_dreamkeeper'),PSF2H.KEEPER[0],PSF2H.KEEPER[1],{block:true,npc:'psf2_keeper'});
-  C.light(26,35,[1.2,1.0,.7]);cand(25,40);cand(31,40);for(const x of [25,31])pic('banner_long_a',x,34,[0,-1]);
+  C.setFloor(27,35,29,36,'h_dais');C.light(28,36,[1.35,1.15,1.3]);cand(26,36);cand(30,36);cand(25,40);cand(31,40);   // he stands on a violet carpet between two candelabra, straight ahead of the stairfor(const x of [25,31])pic('banner_long_a',x,34,[0,-1]);
   pic('window_great',32,36,[1,0]);pic('window_great',24,39,[-1,0]);
   // no creatures on this floor's hub: it is a safe hall
   pspSafeRect(C,2,2,W-3,H-3);
@@ -128,6 +128,13 @@ function psf2HubBuild(info){
   return lv}
 pspRegister(PSF2H.ID,psf2HubBuild);
 /* ---------- the people and the things to touch ---------- */
+/* the first time the party comes up the stair, the Dreamkeeper speaks to them at once */
+pspOnArrive((n,restored)=>{if(n!==PSF2H.ID||restored)return;const F=psf2F();F.talked=F.talked||{};if(F.talked.keeper)return;F.talked.keeper=1;
+  PSF2H.greetAt=G.time+1.2});
+/* the greeting waits until any cutscene of the arrival (the party's talk about the doors) has finished, and until no other talk is open */
+{const _u=update;update=function(dt){const r=_u.apply(this,arguments);
+  try{if(PSF2H.greetAt&&typeof LEVEL!=='undefined'){if(LEVEL!==PSF2H.ID)PSF2H.greetAt=0;else if(G.cut||G.talk||G.state!=='play')PSF2H.greetAt=Math.max(PSF2H.greetAt,G.time+.8);else if(G.time>=PSF2H.greetAt){PSF2H.greetAt=0;const d=(G.decor||[]).find(q=>q.npc==='psf2_keeper');if(d)startTalk(d)}}}catch(e){console.error('psf2 keeper',e);PSF2H.greetAt=0}
+  return r}}
 khNpc('psf2_keeper','The Dreamkeeper','ps_f2_dreamkeeper',()=>say("Welcome to the second floor of the Pale Spire. This is the Hall of Illusions. I am the Dreamkeeper. I keep the doors, and I keep the Sleeper's table.",[
   ['What is this place?',()=>say("The Hall of Illusions. There are seven doors off this hall: five in the gallery to the north, one at the end of the West Arm and one at the end of the East Arm. Each door opens into a world that is not real: a forest, an island, a cabin in the snow, a city of canals, a desert, a swamp and a nightmare. They look real. The creatures in them bite like real creatures. But they are made of mist, and at the edge of each one the mist wall shows the castle stone through the cracks.",[BYE])],
   ['Who is the Sleeper?',()=>say("She was the Sovereign's dreamer. Her dreams were so strong that the castle built rooms for them. One night the Sovereign took her apart, piece by piece, and hid each piece in one of her own dreams, so that she could never wake and tell what she knew. Her table is in the middle of the hall. It is empty.",[BYE])],

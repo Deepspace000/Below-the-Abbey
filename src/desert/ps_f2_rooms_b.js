@@ -91,8 +91,8 @@ function f2WaterBuild(){
   for(const [x,y] of [[20,7],[28,7]]){C.dec(pspPic('f2_lamp3'),x,y,{block:false});C.light(x,y,[2.0,1.35,.7])}
   for(const [x,y] of [[19,6],[29,6]])C.dec(pspPic('f2_flagpole'),x,y,{block:true,sc:.62});
   for(const [x,y,w] of [[27.3,5.6,1.2],[18.6,8.4,1.1],[20.4,30.8,1.1],[30.5,32.4,1.2]])f2Span(C,pspPic('f2_pigeons'),x,y,0,1,w,0);
-  f2Mover(C,pspPic('f2_pigeons_fly'),[[16,9],[24,5],[32,9],[24,8],[16,9]],.9,{bob:2.6});
-  f2Mover(C,pspPic('f2_pigeons_fly'),[[6,30],[40,31]],1.1,{pingpong:true,bob:2.9,sc:.8});
+  f2Mover(C,pspPic('f2_pigeons_fly'),[[16,9],[24,5],[32,9],[24,8],[16,9]],.9,{bob:2.6}).fly=1;
+  f2Mover(C,pspPic('f2_pigeons_fly'),[[6,30],[40,31]],1.1,{pingpong:true,bob:2.9,sc:.8}).fly=1;
   for(const [x,y] of [[16,5],[32,5]])C.dec(pspPic('f2_wellhead2'),x,y,{block:true,sc:.9});
   for(const [x,y] of [[15,3],[33,3],[15,9],[33,9]])C.dec(pspPic('f2_urn_flowers'),x,y,{block:true,sc:.8});
   C.dec(pspPic('f2_w_lantern2'),29,3,{wd:[0,-1],block:false,bob:1.0});C.light(29,3,[1.9,1.3,.65]);

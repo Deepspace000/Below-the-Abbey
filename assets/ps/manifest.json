@@ -2492,11 +2492,11 @@
 },
 "f2_dreamkeeper": {
 "file": "f2_dreamkeeper.webp",
-"w": 172,
-"px_h": 512,
-"h": 1.0,
+"w": 177,
+"px_h": 471,
+"h": 1.05,
 "kind": "sprite",
-"sheet": "f2a"
+"sheet": "v7k"
 },
 "f2_bier": {
 "file": "f2_bier.webp",
@@ -3636,5 +3636,13 @@
 "h": 1.2,
 "kind": "sprite",
 "sheet": "v6c"
+},
+"f2_br_sighs2": {
+"file": "f2_br_sighs2.webp",
+"w": 981,
+"px_h": 417,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "v7s"
 }
 }
