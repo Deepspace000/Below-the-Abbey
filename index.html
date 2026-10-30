@@ -76445,6 +76445,14 @@ function psovDraw(){
 {const _h=hudRight;hudRight=function(){const r=_h.apply(this,arguments);try{if(PSOV.tog)btn('psovtog',PSOV.tog[0],PSOV.tog[1],PSOV.tog[2],PSOV.tog[3])}catch(e){}return r}}
 {const _hb=handleBtn;handleBtn=function(id){if(id==='psovtog'){PSOV.on=!PSOV.on;try{localStorage.setItem('abbeyPsOv',PSOV.on?'1':'0')}catch(e){}try{sfx('equip')}catch(e){}return}return _hb.apply(this,arguments)}}
 
+/* ---- src/desert/ps_fog.js ---- */
+/* ps_fog.js: the cloud cover (fog of war) on the maps. The engine only clouds outdoor levels; the castle's rooms are indoor levels, so their maps showed everything at once.
+   The owner's rule: most rooms are clouded until explored, only peaceful towns are clear. Every Pale Spire level (indoor or outdoor) and every Never-Ending Tower floor now has it,
+   unless the player has switched Fog of war off in the gameplay menu. */
+{const _f=mplFogOn;mplFogOn=function(L){
+  try{if(L&&L.rows&&!(G.flags&&G.flags.noFog)&&((typeof pspIs==='function'&&pspIs(LEVEL))||(typeof ntIs==='function'&&ntIs(LEVEL))))return true}catch(e){}
+  return _f.apply(this,arguments)}}
+
 /* ---- src/desert/ps_flush.js ---- */
 /* ps_flush.js: castle wall pictures lie flush on the wall (Pale Spire, every level of PSP.LEVELS).
    The engine draws a wall picture (decor pic:1 with wd) as a flat plane at .47 of a cell from the middle of its square, 0.03 in front of the wall face, floating at bob .45 by default, as wide as its
