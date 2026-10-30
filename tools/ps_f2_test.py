@@ -91,10 +91,10 @@ def main():
               T.bump(24, 8); await T.wait(200); if (Math.round(G.P.x) !== F2_SNOW.IN[0] || Math.round(G.P.y) !== F2_SNOW.IN[1]) o.push('cabin door in ' + G.P.x + ',' + G.P.y);
               T.bump(41, 8); await T.wait(200); if (Math.round(G.P.x) !== 24 || Math.round(G.P.y) !== 9) o.push('cabin door out ' + G.P.x + ',' + G.P.y); return o }""",
             9824: """async () => { const o = []; const R = () => f2S(9824); const f0 = T.foes();
-              T.bump(24, 2); if (T.bag('psf_chest')) o.push('chest through a locked door');
+              const D = F2_WATER.DOOR; T.bump(D[0], D[1]); if (T.bag('psf_chest')) o.push('chest through a locked door');
               T.opt('f2w_mask_moon', /Hang/); if (R().open) o.push('wrong mask opened'); if (T.foes() <= f0) o.push('wrong mask woke nothing');
               T.opt('f2w_mask_plague', /Hang/); if (!R().open) o.push('right mask did not open');
-              T.bump(24, 2); if (T.bag('psf_chest') !== 1) o.push('chest ' + T.bag('psf_chest')); T.bump(24, 2); if (T.bag('psf_chest') !== 1) o.push('chest twice'); return o }""",
+              T.bump(D[0], D[1]); if (T.bag('psf_chest') !== 1) o.push('chest ' + T.bag('psf_chest')); T.bump(D[0], D[1]); if (T.bag('psf_chest') !== 1) o.push('chest twice'); return o }""",
             9825: """async () => { const o = []; const R = () => f2S(9825); const at = s => F2_DESERT.PLATES.find(p => p[2] === s); const f0 = T.foes();
               F2.step[9825](...at('scarab')); F2.step[9825](...at('sun').slice(0, 2)); if ((R().seq || []).length) o.push('wrong plate did not reset'); if (T.foes() <= f0) o.push('wrong plate released nothing');
               if (T.opts('f2d_sarc').some(t => /Take/.test(t))) o.push('sarcophagus open too early');

@@ -2988,5 +2988,653 @@
 "h": 256,
 "kind": "tex",
 "sheet": "f2j"
+},
+"f2_br_rialto": {
+"file": "f2_br_rialto.webp",
+"w": 1024,
+"px_h": 392,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "v1a"
+},
+"f2_br_sighs": {
+"file": "f2_br_sighs.webp",
+"w": 1024,
+"px_h": 453,
+"h": 1.8,
+"kind": "sprite",
+"sheet": "v1b"
+},
+"f2_br_foot": {
+"file": "f2_br_foot.webp",
+"w": 973,
+"px_h": 382,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "v1c"
+},
+"f2_fa_pinkgoth": {
+"file": "f2_fa_pinkgoth.webp",
+"w": 275,
+"px_h": 471,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v1d"
+},
+"f2_fa_ochreloggia": {
+"file": "f2_fa_ochreloggia.webp",
+"w": 332,
+"px_h": 471,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v1d"
+},
+"f2_fa_redshutter": {
+"file": "f2_fa_redshutter.webp",
+"w": 241,
+"px_h": 471,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v1d"
+},
+"f2_fa_whitebaroque": {
+"file": "f2_fa_whitebaroque.webp",
+"w": 256,
+"px_h": 467,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v1e"
+},
+"f2_fa_bluegreen": {
+"file": "f2_fa_bluegreen.webp",
+"w": 232,
+"px_h": 455,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v1e"
+},
+"f2_fa_redbrick": {
+"file": "f2_fa_redbrick.webp",
+"w": 250,
+"px_h": 469,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v1e"
+},
+"f2_fw_creamgoth": {
+"file": "f2_fw_creamgoth.webp",
+"w": 332,
+"px_h": 480,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v1f"
+},
+"f2_fw_ochre": {
+"file": "f2_fw_ochre.webp",
+"w": 271,
+"px_h": 445,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v1f"
+},
+"f2_fw_pinkloggia": {
+"file": "f2_fw_pinkloggia.webp",
+"w": 333,
+"px_h": 480,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v1f"
+},
+"f2_doge_wall": {
+"file": "f2_doge_wall.webp",
+"w": 309,
+"px_h": 458,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v2a"
+},
+"f2_doge_portal": {
+"file": "f2_doge_portal.webp",
+"w": 165,
+"px_h": 355,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v2a"
+},
+"f2_campanile": {
+"file": "f2_campanile.webp",
+"w": 112,
+"px_h": 484,
+"h": 8.0,
+"kind": "sprite",
+"sheet": "v2a"
+},
+"f2_church_front": {
+"file": "f2_church_front.webp",
+"w": 368,
+"px_h": 402,
+"h": 5.0,
+"kind": "sprite",
+"sheet": "v2b"
+},
+"f2_church_dome": {
+"file": "f2_church_dome.webp",
+"w": 346,
+"px_h": 412,
+"h": 5.0,
+"kind": "sprite",
+"sheet": "v2b"
+},
+"f2_putto": {
+"file": "f2_putto.webp",
+"w": 165,
+"px_h": 452,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "v2c"
+},
+"f2_saint": {
+"file": "f2_saint.webp",
+"w": 146,
+"px_h": 452,
+"h": 2.3,
+"kind": "sprite",
+"sheet": "v2c"
+},
+"f2_wellhead": {
+"file": "f2_wellhead.webp",
+"w": 268,
+"px_h": 447,
+"h": 1.6,
+"kind": "sprite",
+"sheet": "v2c"
+},
+"f2_lioncol": {
+"file": "f2_lioncol.webp",
+"w": 135,
+"px_h": 470,
+"h": 4.2,
+"kind": "sprite",
+"sheet": "v2c"
+},
+"f2_urn_flowers": {
+"file": "f2_urn_flowers.webp",
+"w": 241,
+"px_h": 454,
+"h": 1.6,
+"kind": "sprite",
+"sheet": "v2c"
+},
+"f2_pole2": {
+"file": "f2_pole2.webp",
+"w": 54,
+"px_h": 458,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "v2c"
+},
+"f2_gond_a": {
+"file": "f2_gond_a.webp",
+"w": 449,
+"px_h": 142,
+"h": 0.8,
+"kind": "sprite",
+"sheet": "v2d"
+},
+"f2_gond_b": {
+"file": "f2_gond_b.webp",
+"w": 449,
+"px_h": 204,
+"h": 1.2,
+"kind": "sprite",
+"sheet": "v2d"
+},
+"f2_maskstall": {
+"file": "f2_maskstall.webp",
+"w": 312,
+"px_h": 262,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "v2d"
+},
+"f2_fishstall": {
+"file": "f2_fishstall.webp",
+"w": 341,
+"px_h": 285,
+"h": 1.6,
+"kind": "sprite",
+"sheet": "v2d"
+},
+"f2_banner_lion": {
+"file": "f2_banner_lion.webp",
+"w": 268,
+"px_h": 310,
+"h": 1.5,
+"kind": "sprite",
+"sheet": "v2d"
+},
+"f2_lamp3": {
+"file": "f2_lamp3.webp",
+"w": 145,
+"px_h": 312,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "v2d"
+},
+"f2_w_balcony": {
+"file": "f2_w_balcony.webp",
+"w": 273,
+"px_h": 213,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "v2e"
+},
+"f2_w_flowerbox": {
+"file": "f2_w_flowerbox.webp",
+"w": 339,
+"px_h": 272,
+"h": 0.6,
+"kind": "sprite",
+"sheet": "v2e"
+},
+"f2_w_shrine": {
+"file": "f2_w_shrine.webp",
+"w": 251,
+"px_h": 377,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "v2e"
+},
+"f2_w_arms": {
+"file": "f2_w_arms.webp",
+"w": 283,
+"px_h": 356,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "v2e"
+},
+"f2_w_mask": {
+"file": "f2_w_mask.webp",
+"w": 270,
+"px_h": 327,
+"h": 0.7,
+"kind": "sprite",
+"sheet": "v2e"
+},
+"f2_w_lantern": {
+"file": "f2_w_lantern.webp",
+"w": 224,
+"px_h": 390,
+"h": 1.1,
+"kind": "sprite",
+"sheet": "v2e"
+},
+"f2_sky_venice": {
+"file": "f2_sky_venice.webp",
+"w": 1024,
+"px_h": 182,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "v2g"
+},
+"f2_gondola2": {
+"file": "f2_gondola2.webp",
+"w": 888,
+"px_h": 275,
+"h": 1.25,
+"kind": "sprite",
+"sheet": "v2h"
+},
+"f2_tex_masegni": {
+"file": "f2_tex_masegni.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "v2f"
+},
+"f2_tex_herring": {
+"file": "f2_tex_herring.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "v2f"
+},
+"f2_tex_chequer": {
+"file": "f2_tex_chequer.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "v2f"
+},
+"f2_tex_canal": {
+"file": "f2_tex_canal.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "v2f"
+},
+"f2_doge_wing": {
+"file": "f2_doge_wing.webp",
+"w": 941,
+"px_h": 444,
+"h": 4.4,
+"kind": "sprite",
+"sheet": "v3a"
+},
+"f2_doge_portal2": {
+"file": "f2_doge_portal2.webp",
+"w": 424,
+"px_h": 731,
+"h": 6.5,
+"kind": "sprite",
+"sheet": "v3b"
+},
+"f2_illgate": {
+"file": "f2_illgate.webp",
+"w": 476,
+"px_h": 757,
+"h": 4.4,
+"kind": "sprite",
+"sheet": "v3c"
+},
+"f2_plaque_blank": {
+"file": "f2_plaque_blank.webp",
+"w": 858,
+"px_h": 425,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "v3d"
+},
+"f2_wellhead2": {
+"file": "f2_wellhead2.webp",
+"w": 251,
+"px_h": 205,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "v3e"
+},
+"f2_bench": {
+"file": "f2_bench.webp",
+"w": 335,
+"px_h": 150,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "v3e"
+},
+"f2_bricole": {
+"file": "f2_bricole.webp",
+"w": 174,
+"px_h": 432,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "v3e"
+},
+"f2_fountain": {
+"file": "f2_fountain.webp",
+"w": 250,
+"px_h": 378,
+"h": 1.5,
+"kind": "sprite",
+"sheet": "v3e"
+},
+"f2_hatstall": {
+"file": "f2_hatstall.webp",
+"w": 291,
+"px_h": 353,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "v3e"
+},
+"f2_glassstall": {
+"file": "f2_glassstall.webp",
+"w": 291,
+"px_h": 349,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "v3e"
+},
+"f2_gondola_e": {
+"file": "f2_gondola_e.webp",
+"w": 619,
+"px_h": 160,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "v3f"
+},
+"f2_pole_blue": {
+"file": "f2_pole_blue.webp",
+"w": 58,
+"px_h": 426,
+"h": 2.5,
+"kind": "sprite",
+"sheet": "v3f"
+},
+"f2_pole_green": {
+"file": "f2_pole_green.webp",
+"w": 59,
+"px_h": 426,
+"h": 2.5,
+"kind": "sprite",
+"sheet": "v3f"
+},
+"f2_w_balcony2": {
+"file": "f2_w_balcony2.webp",
+"w": 354,
+"px_h": 240,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "v3f"
+},
+"f2_w_lantern2": {
+"file": "f2_w_lantern2.webp",
+"w": 186,
+"px_h": 366,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "v3f"
+},
+"f2_w_niche": {
+"file": "f2_w_niche.webp",
+"w": 225,
+"px_h": 422,
+"h": 1.5,
+"kind": "sprite",
+"sheet": "v3f"
+},
+"f2_fa_istrian": {
+"file": "f2_fa_istrian.webp",
+"w": 338,
+"px_h": 424,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v3g"
+},
+"f2_fa_blue": {
+"file": "f2_fa_blue.webp",
+"w": 207,
+"px_h": 407,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v3g"
+},
+"f2_fa_ochrebal": {
+"file": "f2_fa_ochrebal.webp",
+"w": 286,
+"px_h": 422,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v3g"
+},
+"f2_tex_piazza": {
+"file": "f2_tex_piazza.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "v3h"
+},
+"f2_tex_curb": {
+"file": "f2_tex_curb.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "v3h"
+},
+"f2_tex_cobdark": {
+"file": "f2_tex_cobdark.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "v3h"
+},
+"f2_tex_trachyte": {
+"file": "f2_tex_trachyte.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "v3h"
+},
+"f2_fa_rosegoth": {
+"file": "f2_fa_rosegoth.webp",
+"w": 277,
+"px_h": 467,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v4a"
+},
+"f2_fa_ochrebalc": {
+"file": "f2_fa_ochrebalc.webp",
+"w": 285,
+"px_h": 467,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v4a"
+},
+"f2_fa_sage": {
+"file": "f2_fa_sage.webp",
+"w": 260,
+"px_h": 467,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v4a"
+},
+"f2_pigeons": {
+"file": "f2_pigeons.webp",
+"w": 294,
+"px_h": 90,
+"h": 0.3,
+"kind": "sprite",
+"sheet": "v4b"
+},
+"f2_pigeons_fly": {
+"file": "f2_pigeons_fly.webp",
+"w": 236,
+"px_h": 238,
+"h": 0.6,
+"kind": "sprite",
+"sheet": "v4b"
+},
+"f2_flagpole": {
+"file": "f2_flagpole.webp",
+"w": 119,
+"px_h": 512,
+"h": 4.2,
+"kind": "sprite",
+"sheet": "v4b"
+},
+"f2_washing": {
+"file": "f2_washing.webp",
+"w": 574,
+"px_h": 138,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "v4b"
+},
+"f2_flowercart": {
+"file": "f2_flowercart.webp",
+"w": 241,
+"px_h": 256,
+"h": 1.2,
+"kind": "sprite",
+"sheet": "v4b"
+},
+"f2_obelisk": {
+"file": "f2_obelisk.webp",
+"w": 84,
+"px_h": 361,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "v5a"
+},
+"f2_bollards": {
+"file": "f2_bollards.webp",
+"w": 316,
+"px_h": 231,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "v5a"
+},
+"f2_sandolo": {
+"file": "f2_sandolo.webp",
+"w": 456,
+"px_h": 86,
+"h": 0.7,
+"kind": "sprite",
+"sheet": "v5a"
+},
+"f2_trough": {
+"file": "f2_trough.webp",
+"w": 496,
+"px_h": 203,
+"h": 0.8,
+"kind": "sprite",
+"sheet": "v5a"
+},
+"f2_angel": {
+"file": "f2_angel.webp",
+"w": 139,
+"px_h": 338,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "v5a"
+},
+"f2_lamp1": {
+"file": "f2_lamp1.webp",
+"w": 90,
+"px_h": 357,
+"h": 2.5,
+"kind": "sprite",
+"sheet": "v5a"
+},
+"f2_mistwisp": {
+"file": "f2_mistwisp.webp",
+"w": 969,
+"px_h": 386,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "v5b"
+},
+"f2_portal_wide": {
+"file": "f2_portal_wide.webp",
+"w": 662,
+"px_h": 512,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "v6a"
+},
+"f2_maskwall": {
+"file": "f2_maskwall.webp",
+"w": 350,
+"px_h": 792,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "v6b"
+},
+"f2_fogbands": {
+"file": "f2_fogbands.webp",
+"w": 1016,
+"px_h": 229,
+"h": 1.2,
+"kind": "sprite",
+"sheet": "v6c"
 }
 }
