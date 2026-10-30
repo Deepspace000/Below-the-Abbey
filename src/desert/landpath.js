@@ -247,10 +247,17 @@ function lpBuild(s){
     else{ // instead the face of the house is dressed: a shuttered window and climbing roses either side of the door
       decor.push({k:'mw_shutter',x:MX(x0-1),y:y0,wd:[mir?-1:1,0],pic:1,block:false,walk:true,deco:true,bob:.8},{k:'mw_ivy',x:MX(x0-1),y:y1,wd:[mir?-1:1,0],pic:1,block:false,walk:true,deco:true,bob:0})}
     if(kind==='church'){sky.push({x:mir?W-(x1+1.5):x1+1.5,y:y0+1,k:'kh_ohtower1_'+(2+(b.i%2)),w:3.4,z:wh-.03});
-      // the churchyard behind the church: graves in rows, an iron fence, a few crosses
-      for(let gy=y0-1;gy<=y1+1;gy+=2)for(let gx=x1+4;gx<=x1+10;gx+=2){if(hs(gx,gy,sd+8)<.82){const k=hs(gx,gy,sd+9)<.25?'cross':hs(gx,gy,sd+9)<.6?'grave':'grave2';decor.push({k,x:MX(gx),y:gy,block:true,deco:true,sc:1});used.add(K(gx,gy))}}
-      for(let gx=x1+3;gx<=x1+11;gx++){if(hs(gx,1,sd+10)<.95){for(const gy of [y0-2,y1+2]){decor.push({k:'ironfence',x:MX(gx),y:gy,block:true,deco:true});used.add(K(gx,gy))}}}
-      for(let gy=y0-1;gy<=y1+1;gy++)for(const gx of [x1+3,x1+11]){decor.push({k:'ironfence',x:MX(gx),y:gy,block:true,deco:true});used.add(K(gx,gy))}
+      // the churchyard behind the church: graves in rows, an iron fence, a few crosses. It is nine squares across; where the slope or the line of trees
+      // along the east edge of the map would cut through it, it lies on the north side of the church instead (turned a quarter round), so no grave or
+      // fence stands inside a wall. A gap in the fence on the side towards the church lets the party walk in and read the stones.
+      const yOK=(xa,xb,ya,yb)=>{if(xa<2||xb>W-7||ya<2||yb>H-3)return false;for(let y=ya;y<=yb;y++)for(let x=xa;x<=xb;x++)if(rows[y][MX(x)]!=='.'||block[I(x,y)])return false;return true};
+      const east=yOK(x1+3,x1+11,y0-2,y1+2),north=!east&&yOK(x0-1,x0+7,y0-11,y0-3); // u runs along the church, v away from it (v=0 or v=8 is the fence on the church side)
+      const T2=east?(u,v)=>[x1+3+v,y0-2+u]:north?(u,v)=>[x0-1+u,y0-11+v]:(u,v)=>[x0-1+u,y1+3+v],gate=east?[ym-(y0-2),0]:north?[4,8]:[4,0];
+      for(let u=1;u<=7;u+=2)for(let v=1;v<=7;v+=2){const [gx,gy]=T2(u,v);if(hs(gx,gy,sd+8)<.82){const k=hs(gx,gy,sd+9)<.25?'cross':hs(gx,gy,sd+9)<.6?'grave':'grave2';decor.push({k,x:MX(gx),y:gy,block:true,deco:true,sc:1});used.add(K(gx,gy))}}
+      for(let v=0;v<=8;v++){if(hs(T2(0,v)[0],1,sd+10)<.95||!east){for(const u of [0,8]){const [gx,gy]=T2(u,v);decor.push({k:'ironfence',x:MX(gx),y:gy,block:true,deco:true});used.add(K(gx,gy))}}}
+      for(let u=1;u<=7;u++)for(const v of [0,8]){if(u===gate[0]&&v===gate[1])continue;const [gx,gy]=T2(u,v);decor.push({k:'ironfence',x:MX(gx),y:gy,block:true,deco:true});used.add(K(gx,gy))}
+      for(let u=0;u<=8;u++)for(let v=0;v<=8;v++){const [gx,gy]=T2(u,v);used.add(K(gx,gy));carve.add(K(gx,gy))} // the dense woods leave the churchyard open
+      {const [gx,gy]=T2(gate[0],gate[1]);for(let d=1;d<=2;d++){const q=east?[gx-d,gy]:north?[gx,gy+d]:[gx,gy-d];carve.add(K(q[0],q[1]))}} // and the two squares in front of its gate
     }
     for(let y=y0-1;y<=y1+1;y++)for(let x=x0-1;x<=x1+1;x++)used.add(K(x,y));
     LEVEL_NAMES[rid]=b.name;
@@ -319,14 +326,16 @@ function lpBuild(s){
   for(const cl of clearings){ // the green spaces, with huge oaks
     if(cl.skip)continue;const cy=cl.y,GYc=GY(cy);
     const oaks=cl.side>0?[[cl.cx-2,cy-1],[cl.cx+2,cy+1],[cl.cx,cy-3]]:[[xc[cy]-6,cy-1],[xc[cy]-9,cy+2]];
-    oaks.forEach(([x,y],j)=>{if(x<1||used.has(K(x,y)))return;used.add(K(x,y));decor.push({k:OAKS[(j+(GYc%5))%5],x:MX(x),y,block:true,sc:mount?1.3:1.7,ox:0,oy:0})});
+    oaks.forEach(([x,y],j)=>{if(x<1||x>W-7||used.has(K(x,y))||rows[y][MX(x)]!=='.')return;used.add(K(x,y));/* never inside the rock of the pass or the slope at the east edge */decor.push({k:OAKS[(j+(GYc%5))%5],x:MX(x),y,block:true,sc:mount?1.3:1.7,ox:0,oy:0})});
     for(let q=0;q<26;q++){const x=(cl.cx||xc[cy]-7)+Math.round((hs(q,GYc,gsd+60)-.5)*9),y=cy+Math.round((hs(q,GYc,gsd+61)-.5)*9);const sc=scenery.length;flower(x,y,.6);void sc}
-    const bx=(cl.cx||xc[cy]-7)+3,by=cy+2;if(BENCH&&!used.has(K(bx,by))){used.add(K(bx,by));decor.push({npc:'lp_bench',k:BENCH,x:MX(bx),y:by,block:false,walk:true,deco:true})}
+    let bx=Math.min((cl.cx||xc[cy]-7)+3,W-7);const by=cy+2,benchOK=x=>!used.has(K(x,by))&&rows[by][MX(x)]==='.'&&!block[I(x,by)]&&Math.abs(x-xc[by])>=3;
+    if(!benchOK(bx))for(let q=bx-1;q>xc[by]+2;q--)if(benchOK(q)){bx=q;break} // in the mountains the green space can lie inside the rock: the bench then stands at the nearest open grass towards the path
+    if(BENCH&&benchOK(bx)){used.add(K(bx,by));decor.push({npc:'lp_bench',k:BENCH,x:MX(bx),y:by,block:false,walk:true,deco:true})}
   }
   /* ---- the knights who ride along, and the ends of the stretch ---- */
   const walkers=[],kp=KH_KEEPERS.lp_knight;
   if(kp&&s%2===(leg==='W'?0:1)){const y0=safeLo+20+((hs(sd,70,70)*(safeHi-safeLo-200))|0),y1=Math.min(safeHi-10,y0+110);
-    for(const j of [0,1]){const kd={k:khFaceKey(kp.face),x:MX(xc[y0]+2),y:y0,block:false,walk:true,npc:'lp_knight',sc:kp.sc||1,lw:walkers.length,lr:'k'},hd={k:IMG.oh_horse?'oh_horse':'ltree0',x:MX(xc[y0]+3),y:y0,block:false,walk:true,deco:true,sc:1,lw:walkers.length,lr:'h'};
+    for(const j of [0,1]){const yj=y0+j*45,oj=j?2:-2,kd={k:khFaceKey(kp.face),x:MX(xc[yj]+oj),y:yj,block:false,walk:true,npc:'lp_knight',sc:kp.sc||1,lw:walkers.length,lr:'k'},hd={k:IMG.oh_horse?'oh_horse':'ltree0',x:MX(xc[yj]+oj+(oj>0?1:-1)),y:yj,block:false,walk:true,deco:true,sc:1,lw:walkers.length,lr:'h'}; // each knight starts where its ride begins (the second 45 rows on), so the two never stand on one square
       decor.push(kd,hd);walkers.push({kd,hd,y0,y1,t:j*45,dir:j?1:-1,off:j?2:-2})}}
   // pilgrims and travellers on the way, walking slowly up and down their stretch
   for(let q=0;q<2;q++){const pg=(q===0&&s%3===1)?LP_PILG[6]:LP_PILG[(hs(s,q,sd+95)*(LP_PILG.length-1))|0],y0=safeLo+10+((hs(s,q+7,sd+96)*(safeHi-safeLo-170))|0),y1=Math.min(safeHi-5,y0+90+((hs(q,s,sd+97)*60)|0));

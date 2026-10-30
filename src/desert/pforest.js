@@ -79,6 +79,7 @@ function pfPrep(n){
   const fmS=Array.isArray(L.fmap)?L.fmap:null,nearRoad=(x,y)=>{if(!fmS)return false;for(let dy=-3;dy<=3;dy++){const r=fmS[y+dy];if(!r)continue;for(let dx=-3;dx<=3;dx++){const f=r[x+dx];if(f==='1'||f==='3')return true}}return false}; // the road is the floor type '1', and its edge '3'
   const edgeMemo=new Map(),edgeAt=y=>{if(edgeMemo.has(y))return edgeMemo.get(y);let m=W;for(let dy=-2;dy<=2;dy++)for(let x=56;x<m;x++)if(blk.has(x+','+(y+dy))){m=x;break}edgeMemo.set(y,m);return m}; // where the trees begin on a row
   // each clearing is a round of open ground about 6 squares across, about a third full of trees: solid ones, and soft ones you can walk through (never on a path)
+  const newAt=new Set();
   for(const [cx,cy] of deepNodes){const OAKS=['ltree0','ltree4','ltree8','ltree12','ltree19'],disc=[],mine=[];
     for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){if(dx*dx+dy*dy>11)continue;const x=cx+dx,y=cy+dy;if(!walk(x,y))continue;cut(x,y);if(!cellsAll.has(x+','+y))disc.push([x,y])}
     const want=Math.round(disc.length*.32);let placed=0;
@@ -86,7 +87,8 @@ function pfPrep(n){
       if(x<edgeAt(y)+4||nearRoad(x,y))continue; // never out on the road or its verge: only back in the forest
       if(Math.abs(x-cx)+Math.abs(y-cy)<1||cellsAll.has(x+','+y)||cellsAll.has((x+1)+','+y)&&cellsAll.has((x-1)+','+y))continue; // keep the middle and the paths clear
       if(mine.some(m=>Math.abs(m[0]-x)<=1&&Math.abs(m[1]-y)<=1))continue; // spaced out: no two trees side by side
-      mine.push([x,y]);
+      if(newAt.has(x+','+y))continue; // two clearings can overlap: one new tree to a square
+      mine.push([x,y]);newAt.add(x+','+y);
       const soft=hs(x,y,670)<.4;L.decor.push({k:soft?(hs(x,y,671)<.5?'pt_birch':'pt_willow'):OAKS[(hs(x,y,672)*5)|0],x,y,block:!soft,walk:soft||undefined,pfNew:1,sc:soft?.8+hs(x,y,673)*.3:.85+hs(x,y,674)*.4});placed++}}
   L._pfTools={cells:cellsAll,weave,walk,cut};L._pfPaths=cellsAll; // the squares of every trail and weaving path: pfDense fills them with trees you can walk through
   // wolves: now and then one waits deep on a trail
@@ -107,6 +109,10 @@ function pfPrep(n){
     }
   }
   for(const d of clear){d.block=false;d.sc=.0001;d.pfCut=1} // the trees on a trail are made invisible, not removed, so saved decor keeps its places in the list
+  {const occ=new Set(L.decor.map(d=>d.x+','+d.y)); // a new tree of a clearing never grows out of the rock of a cave: it moves to open ground beside it, or is hidden
+   for(const d of L.decor)if(d.pfNew&&L.rows[d.y]&&L.rows[d.y][d.x]!=='.'){let to=null;
+     for(let r=1;r<=2&&!to;r++)for(let dy=-r;dy<=r&&!to;dy++)for(let dx=-r;dx<=r;dx++){const x=d.x+dx,y=d.y+dy,k=x+','+y;if(walk(x,y)&&!occ.has(k)&&!cellsAll.has(k)){to=[x,y];break}}
+     if(to){occ.add(to[0]+','+to[1]);d.x=to[0];d.y=to[1]}else{d.block=false;d.sc=.0001;d.pfCut=1}}}
   L.enemies=L.enemies.filter(e=>e.t!=='wolf'||(L.rows[e.y]&&L.rows[e.y][e.x]==='.'));
 }
 /* ---------- the thick woods along the sea: the whole east side is forest, with only a sliver of it open ---------- */
@@ -253,7 +259,7 @@ function pfFoodChest(g,W,H,sx,sy,decor,items,used,sd,extra){ // a chest of food 
   const cells=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(g[y][x]==='.'&&!used.has(key(x,y))&&!base.has(key(x,y))&&Math.abs(x-sx)+Math.abs(y-sy)>3)cells.push([x,y]);
   cells.sort((a,b)=>hash2(a[0],a[1],sd+765)-hash2(b[0],b[1],sd+765));
   for(const [cx,cy] of cells.slice(0,260)){const seen=new Set([key(sx,sy)]),q=[[sx,sy]];for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const k=key(x+dx,y+dy);if(g[y+dy]&&g[y+dy][x+dx]==='.'&&!base.has(k)&&k!==key(cx,cy)&&!seen.has(k)){seen.add(k);q.push([x+dx,y+dy])}}}
-    if(targets.every(([tx,ty])=>seen.has(key(tx,ty))||base.has(key(tx,ty))&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>seen.has(key(tx+dx,ty+dy))))){used.add(key(cx,cy));decor.push(Object.assign({k:'chest',x:cx,y:cy,block:true,food:pfFood(sd)},extra||{}));return true}}
+    if([[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>seen.has(key(cx+dx,cy+dy)))&&targets.every(([tx,ty])=>seen.has(key(tx,ty))||base.has(key(tx,ty))&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>seen.has(key(tx+dx,ty+dy))))){used.add(key(cx,cy));decor.push(Object.assign({k:'chest',x:cx,y:cy,block:true,food:pfFood(sd)},extra||{}));return true}}
   return false}
 function pfCaveBuild(ci){
   const W=23,H=19,kind=PF_KINDS[ci],hs=hash2,sd=ci*17+5,g=[];
@@ -450,6 +456,7 @@ function pfRuinProps(g,W,H,sx,sy,keepCells,used,decor,items,enemies,id){
   const want=22+((hash2(id,1,771)*10)|0),KINDS=['rs_statue0','rs_statue1','rs_col0','rs_col1','rs_col1','rs_brick0','rs_brick1','rs_brick2','rs_brick2'],placed=[];
   for(const k of cand){if(placed.length>=want)break;const [x,y]=k.split(',').map(Number);
     if(placed.some(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)<2))continue; // spread out, throughout the halls
+    {const o=(a,b)=>open.has(key(x+a,y+b)),e=o(1,0),w=o(-1,0),s=o(0,1),n=o(0,-1);if((e&&w&&!s&&!n)||(s&&n&&!e&&!w))continue} // never in a straight passage one square wide
     blocked.add(k);const r=reach();let ok=true;for(const [tx,ty] of targets){const kk=key(tx,ty);if(!(r.has(kk)||base.has(kk)&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>r.has(key(tx+dx,ty+dy))))){ok=false;break}}
     if(!ok){blocked.delete(k);continue}
     placed.push([x,y]);const h=hash2(x,y,772);

@@ -31,7 +31,7 @@ khNpc('mon_scribe',MON_FOLK.scribe[1],MON_FOLK.scribe[2],()=>{const M=MONF();M.m
 khNpc('mon_bees',MON_FOLK.bees[1],MON_FOLK.bees[2],()=>{const M=MONF();M.met.mon_bees=1;if(qSt('mq4')==='done')return say('The bees are quiet today. They know the honey went to a good cause.',[BYE]);return qNode('mq4',MOND.mq4)},{q:'mq4'});
 khNpc('mon_cellar',MON_FOLK.cellar[1],MON_FOLK.cellar[2],()=>{if(qSt('mq6')==='done')return say('The cellar is warm, the wine is calm and the barrels are in their rows. I could kiss you. I will not, but I could.',[BYE]);return qNode('mq6',MOND.mq6)},{q:'mq6'});
 khNpc('mon_bellman',MON_FOLK.bell[1],MON_FOLK.bell[2],()=>{if(qSt('mq9')==='done')return say('I heard it from my bed. It sounded better than when I ring it.',[BYE]);return qNode('mq9',MOND.mq9)},{q:'mq9'});
-khNpc('mon_bell','The monastery bell','memorial',()=>{const M=MONF();
+khNpc('mon_bell','The monastery bell','bl_bell',()=>{const M=MONF();
   const ring=()=>{try{playSmp('church_bell1',.7,1)}catch(e){try{sfx('level')}catch(x){}}M.bell=1;msg('The bell rings out over the grounds, and the valley answers.','#e8d890');return say('A single, clear note rolls out over the gardens, over the wall and down the mountain. Somewhere a bird answers it.',[BYE])};
   return say('A great bronze bell hangs from an oak frame at the foot of the church, with a rope worn smooth by many hands.',[['Ring the bell.',ring],['Leave it.',()=>null]])});
 khNpc('mon_abbot',MON_FOLK.abbot[1],MON_FOLK.abbot[2],()=>{
