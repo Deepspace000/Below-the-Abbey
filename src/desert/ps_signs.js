@@ -25,6 +25,30 @@ function pssignMake(d,flip){
   const c0=mk(false);c0.alt=mk(true);return PSSIGN_CACHE[id]=c0}
 {const _s=shopSign;shopSign=function(d){if(d&&d.k==='sign_gy'&&d.txt&&pssignOn()){try{const c=pssignMake(d);if(c)return c}catch(e){console.error('ps sign',e)}}return _s.apply(this,arguments)}}
 
+/* the castle sign is a flat plaque on the wall. The engine hangs a sign as a shop blade sign (board standing out from the wall, its face along the wall's direction), which is edge-on when the party looks straight at the wall it
+   is fixed to: a 15 pixel speck from the end of a corridor, invisible from three squares. In the castle every sign_gy is turned into a flat wall picture (drawn in true perspective like a painting): full face from the front, narrower
+   at an angle, always one size (about 0.95 of a cell wide, as wide as a door leaf), at the same height. */
+const PSSIGN_FLAT={};
+function pssignFlat(nm){
+  if(PSSIGN_FLAT[nm])return PSSIGN_FLAT[nm];
+  const w=384,h=128;
+  return PSSIGN_FLAT[nm]=mkCanvas(w,h,x=>{
+    const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'#0b0f15');g.addColorStop(1,'#05070b');
+    x.fillStyle='#1c242c';x.fillRect(0,0,w,h);                              // iron frame
+    x.fillStyle='#050608';x.fillRect(4,4,w-8,h-8);x.fillStyle='#3b4a56';x.fillRect(8,8,w-16,2);x.fillRect(8,h-10,w-16,2);   // rim light
+    x.fillStyle=g;x.fillRect(10,10,w-20,h-20);
+    x.fillStyle='#53636f';for(const[px,py]of[[18,18],[w-18,18],[18,h-18],[w-18,h-18]]){x.beginPath();x.arc(px,py,4.5,0,7);x.fill()}   // rivets
+    x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';
+    const mw=w-76,fam='Georgia,serif';let fs=h*.42,sx=1;x.font=`bold ${fs}px ${fam}`;let tw=x.measureText(nm).width;
+    if(tw>mw){sx=Math.max(.6,mw/tw);tw*=sx}while(tw>mw&&fs>14){fs-=2;x.font=`bold ${fs}px ${fam}`;tw=x.measureText(nm).width*sx}
+    x.save();x.translate(w/2,h/2+2);x.scale(sx,1);x.lineWidth=Math.max(3,fs*.14);x.strokeStyle='rgba(2,4,8,.95)';x.strokeText(nm,0,0);x.fillStyle='#d6e2ea';x.fillText(nm,0,0);x.restore();
+  })}
+{const _sl=spriteList;spriteList=function(){const L=_sl.apply(this,arguments);
+  if(pssignOn()&&!window.PSSIGN_FLATOFF)for(const s of L){const d=s.decor;if(!d||d.k!=='sign_gy'||!s.hang||!d.txt||!d.wd)continue;
+    try{const nm=String(d.txt[0]);s.img=pssignFlat(nm);const k=s.hang;s.hang=null;s.mount=null;s.flat=[k[0],k[1]];s.pic=1;
+      s.x=d.x+.5+k[0]*.47;s.y=d.y+.5+k[1]*.47;s.w=.95;s.bob=Math.max(.3,Math.min(.62,CEILH-.5))}catch(e){console.error('ps sign flat',e)}}
+  return L}}
+
 /* the wall torches: the engine draws one painted torch (wtorch0..2, an iron bracket and a cloth-wrapped head, orange-brown) on every wall torch. In the castle they are re-toned to black iron and pewter, and put back
    when the party leaves the castle. */
 const PSS_TORCH={};

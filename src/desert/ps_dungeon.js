@@ -492,7 +492,7 @@ PSD.SPEC[9790]={pt:'ashlar_moss',pg:1.9,prgb:[.74,.9,.86],brick:'texBlack',gain:
   P('valve_wheel',9,21,{block:true,npc:'psd_wheel0',raw:true,sc:.9});P('valve_wheel',25,30,{block:true,npc:'psd_wheel1',raw:true,sc:.9});P('valve_wheel',43,21,{block:true,npc:'psd_wheel2',raw:true,sc:.9});
   dec('gy_nameplate',10,24,{block:true,npc:'psd_stone3',sc:1,raw:true});
   P('brazier',11,20,{block:true});P('brazier',41,24,{block:true});P('brazier',22,31,{block:true});P('brazier',28,31,{block:true});for(const [x,y] of [[11,20],[41,24],[22,31],[28,31]])light(x,y,PSD_FIRE);
-  sign(29,16,[0,-1],'THE CISTERN','Three wheels hold back the water');
+  sign(29,16,[0,1],'THE CISTERN','Three wheels hold back the water');
   psdMany(dec,[['bones',24,29,{sc:.7}],['bones',42,22,{sc:.7}],['bones',9,24,{sc:.7}],]);
   psdMany(light,[[18,22,[.5,1.1,.9]],[32,22,[.5,1.1,.9]],[25,26,[.5,1.1,.9]],[7,28,[.5,1.1,.9]],[40,27,[.5,1.1,.9]],[25,22,[.55,1.2,.95]]]);
   twig(8,23);twig(44,23);twig(27,31,.9);
