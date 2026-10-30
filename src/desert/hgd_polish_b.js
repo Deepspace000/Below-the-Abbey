@@ -164,7 +164,7 @@ function hgpbBuild(L){
      const seenN={},out=[];lines.sort((p,q)=>p[2]-q[2]);for(const l of lines){if(seenN[l[1]])continue;seenN[l[1]]=1;out.push(l)}
      if(out.length<2)continue;const pn=precOf(x,y),head=M.prec[pn]?M.prec[pn].name.toUpperCase()+'. ':'';
      const txt='SIGNPOST. '+head+out.slice(0,3).sort((p,q)=>p[0]-q[0]).map(l=>compass[l[0]]+': '+l[1]+', about '+(Math.max(5,Math.round(l[2]/5)*5))+' paces.').join(' ');
-     const pk='hpbp'+posts.length,pnm=M.prec[pn]?M.prec[pn].name:'The Hollow';HGPB_LET[pk]=[Math.max(4,Math.min(7,bio[y*W+x])),...out.slice(0,2).map(l=>compass[l[0]][0]+'  '+hpbShort(l[1]))];NPC_H[pk]=1.5;
+     const pk='hpbp'+posts.length,pnm=M.prec[pn]?M.prec[pn].name:'The Hollow';HGPB_LET[pk]=[Math.max(4,Math.min(7,bio[y*W+x])),...out.slice(0,2).map(l=>compass[l[0]][0]+'  '+hpbShort(l[1]))];NPC_H[pk]=1.2;
      posts.push([x,y]);L.decor.push({k:pk,x,y,wd:[D4[wi][0],D4[wi][1]],pic:1,block:false,walk:true,deco:true,npc:'hgdb_post',pbt:txt,label:'Signpost: '+hpbShort(pnm,14),bob:0,lift:.62,_pbv:1});log.posts++}}
   // ---- a lamp at the end of the longest straight way of every precinct (something to walk towards) ----
   {const best={};for(const [x,y] of deadEnds){const t=tail(x,y);if(t.length<2)continue;const pi=precOf(x,y);if(pi<12)continue;

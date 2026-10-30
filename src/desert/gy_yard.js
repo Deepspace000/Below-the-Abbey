@@ -173,13 +173,13 @@ function gyYardBuild(){
      if(dmin<=2&&r<.36)D(ST[(hs(x,y,32)*ST.length)|0],x,y,{block:true,sc:.9+hs(x,y,33)*.2});
      else if(dmin<=3&&BUSH.length&&r<.7)D(BUSH[(hs(x,y,34)*BUSH.length)|0],x,y,{block:false,sc:.8+hs(x,y,35)*.6});
      else if(dmin>=3&&r<.55)DB(TR[(hs(x,y,36)*TR.length)|0],x,y,{sc:.95+hs(x,y,37)*.4})}}
-  // ---- THE AVENUE OF VAULTS (north east): a cobbled lane between two rows of tomb fronts, under an arch ----
+  // ---- THE AVENUE OF VAULTS (north east): a cobbled lane between two rows of tomb fronts (the free-standing arch at its closed north end, a doorway to nowhere, is gone) ----
   {pth(51,9,53,34,'5');
    for(let y=11;y<=33;y++)for(const x of [50,54]){let gid=gyTile('texGrey_0',3.4,{fac:{img:['f_vault','f_classical','f_gothic'][(((y-11)/3)|0)%3],i:(y-11)%3,n:3,fit:1},gain:1.0});
      if(x===50&&y===22){gid=gyTile('texGrey_0',3.4,{fac:{img:'stairFix_0',i:0,n:1},gain:1.0,rgb:[1,1,1.00042]});KH_DOOR[gid]={lvl:542,get at(){return {x:3,y:9,f:1}},gy:'avenue'}}   // one of the tomb fronts is a stair down to the vaults beneath the Avenue
      rows[y][x]=ch(gid);block[y*W+x]=1;path.add(x+','+y)}
    for(let x=51;x<=53;x++){rows[9][x]=ch(gyTile('texGrey_0',3.4,{fac:{img:'f_vault',i:x-51,n:3,fit:1},gain:1.0,rgb:[1,1,1+(x-51)*.00007]}));block[9*W+x]=1}   // the closed north end of the Avenue: a plain stone front, not a black void
-   dec('arch',52,10,{sc:1.45});for(const x of [51,53])for(const y of [18,26])lamp(x,y);
+   for(const x of [51,53])for(const y of [18,26])lamp(x,y);
    for(const y of [14,22,30]){if(free(52,y)&&false)dec('lantern',52,y)}
    for(const y of [12,19,27])for(const x of [49,55]){if(free(x,y))DB(['ltree20','ltree21','ltree12'][(hs(x,y,38)*3)|0],x,y,{sc:1.1})}}
   // ---- THE AUTUMN CORNER (south): red and gold maples over a few stones in the grass ----
@@ -258,9 +258,7 @@ function gyYardBuild(){
   // lanterns along the main paths
   for(let x=6;x<=64;x+=8){for(const y of [34,36])if(free(x,y)&&!(x>=28&&x<=42)){if(DB('lantern',x,y))lights.push([x,y]);break}}
   for(let y=6;y<=64;y+=8){for(const x of [34,36])if(free(x,y)&&!(y>=28&&y<=42)){if(DB('lantern',x,y))lights.push([x,y]);break}}
-  // fine, small cobwebs stretched between two grave stones (the square between a pair of stones two apart)
-  {const st=decor.filter(d=>d.block&&/^gy_(stone1|stone2|lean|slab|wcross|ccross|tomb|obelisk|column)$/.test(d.k)),at=new Map();for(const d of st)at.set(d.x+','+d.y,d);let n=0;
-   for(const d of st)for(const [a,b] of [[2,0],[0,2]]){const o=at.get((d.x+a)+','+(d.y+b)),x=d.x+a/2,y=d.y+b/2;if(o&&free(x,y)&&!path.has(x+','+y)&&hs(x,y,27)<.6&&n<70){D('web',x,y,{sc:.5});n++}}}
+  // (no cobwebs between the grave stones: a web hangs only in a real corner of a wall, and the yard is open air)
   for(let x=14;x<=56;x+=10){lamp(x,7);lamp(x,63)}
   for(const g of GY_Y.doors){for(let k=1;k<=3;k++)lamp(g.x+(g.x>35?-1:1),g.y+(g.y<35?k*5:-k*5))}
   // ---- grass, flowers and clover everywhere there is no path: soft, bright and peaceful ----
@@ -287,6 +285,7 @@ function gyYardBuild(){
       for(let i=decor.length-1;i>=0;i--){const d=decor[i];if(d.block&&kill.has(d.x+','+d.y)&&!d.npc){decor.splice(i,1);moved++}}   // a stone or tree that walls off a pocket is taken away (never made walk-through)
       for(const d of decor)if(d.block&&d.npc&&kill.has(d.x+','+d.y)&&(d.npc==='gyo_stone')){d.block=false;d.walk=true;d.deco=false;moved++}}
     lv._gy.softened=moved}
+  try{wlTidy(lv,{id:GY.ID,town:1,only:[2,6],noWebs:1,arches:'remove'})}catch(e){console.error('wlTidy yard',e)}   // no webs in the open air, no loose arches (wenlock_polish.js)
   LEVELS[GY.ID]=lv;
   {const NN=W*H;for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(rows[y][x]!=='.')block[y*W+x]=1;try{TERRS[GY.ID]=yarTerrain(W,H,hgt,rk,block)}catch(e){console.error(e)}}
   return lv}

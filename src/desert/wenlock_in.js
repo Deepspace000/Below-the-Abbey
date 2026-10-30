@@ -249,6 +249,7 @@ function wlinBuild(D,name,b,C){
   if(!D.keeper&&!D.res)b.keeper=null;
   const r=_kr.call(this,b,lvl,back);
   try{wlinPost(r.level,D,L,b,lvl)}catch(e){console.error('wlinPost',e)}
+  try{wlTidy(r.level,{id:lvl})}catch(e){console.error('wlTidy',lvl,e)}   // the castle standard: nothing in the walls, hangings flat on the wall, nobody boxed in (wenlock_polish.js)
   r.level.wlin=name;return r}}
 function wlinPost(level,D,L,b,lvl){
   const W=level.rows[0].length,H=level.rows.length,rows=level.rows.map(r=>r.split(''));

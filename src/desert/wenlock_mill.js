@@ -68,7 +68,7 @@ WLIR('dovecote',{w:7,h:7,look:'mill',amb:.66,lights:[[2,2],[4,2],[3,4]],keeper:n
   folk:[['wlm_dove1',2,3],['wlm_dove2',3,5],['wlm_dove3',4,5],['wlm_dovestuck',5,4]],win:[[3,0],[0,3],[6,3]],raw:[['sacks',1,4],['crate',5,5]]});
 /* one door of the town, one room */
 function wlmMake(id,room,name,front,out,keeper){
-  wlmPieces();
+  wlmPieces();try{wlTrimFoot('wl2_mill_0')}catch(e){}   // the millstone stands on the floor (its picture had empty rows under it)
   const b={id:'wlin'+id,wlin:room,name,room:'home',keeper:keeper||null,floor:'wood',wallImg:'kh_ohwall1_2'};
   const R=khRoom(b,id,{to:WL.ID,x:front[0],y:front[1],f:out});LEVELS[id]=R.level;LEVELS[id].diff=80;LEVEL_NAMES[id]=name;LEVEL_RATING[id]=80;return R.level;
 }
