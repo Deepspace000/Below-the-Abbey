@@ -119,6 +119,7 @@ function vtMake(id){
   const L={rows,chars,fmap:fmS,floorSet:fSet,floor:fb0,floor2:fb1,ceil:S.ceil||'gyc_crypt',ceilH:WH,start,enemies,items,decor,lights,portals:[],day:0,amb:S.amb===undefined?.02:S.amb,torchGap:1e9,noTele:true,noExtras:true,
     name:VT.NAMES[id],label:VT.NAMES[id],diff:S.diff,mapNames:names,_vt:V};
   V.start=start;V.floorsN=fSet.length;
+  try{V.tidy=saTidy(L,{id})}catch(e){console.error('vault tidy',id,e)}
   LEVELS[id]=L;LEVEL_NAMES[id]=VT.NAMES[id];LEVEL_RATING[id]=S.diff;
   if(miss.length)console.warn('vt '+id+' missed: '+miss.join(' '));
   return L}

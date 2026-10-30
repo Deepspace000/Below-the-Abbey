@@ -142,7 +142,7 @@ VT_SPEC[9675]={W:37,H:28,diff:89,brick:'texRed',rgb:[.82,.66,.62],lcol:[1.5,.8,.
     sign(17,2,[0,-1],'THE HALL OF UNDERHILL','Where the village sat down to supper');dec('candles',16,4,{block:true,sc:.75});dec('candles',20,4,{block:true,sc:.75});light(18,3,[1.5,.85,.5]);
     // the long tables, and the dead of Underhill still sitting at them
     const T=[10,14,18,22,26];for(const x of T){dec('hl_p_candle',x,8,{block:true,sc:.65,raw:true});dec('hl_p_candle',x,15,{block:true,sc:.65,raw:true})}
-    let v=0;for(const x of [8,12,16,20,24,28]){dec('zombie',x,8,{block:true,npc:'vto_villager',i:v++,sc:.95,raw:true});dec('zombie',x,15,{block:true,npc:'vto_villager',i:v++,sc:.95,raw:true})}
+    let v=0;for(const x of [8,12,16,20,24,28]){dec('zombie',x,8,{block:true,npc:'vto_villager',i:v++,sc:.82,raw:true});dec('zombie',x,15,{block:true,npc:'vto_villager',i:v++,sc:.82,raw:true})}
     for(const [x,y] of [[6,7],[30,7],[6,16],[30,16]])dec('candles',x,y,{block:true,sc:.8});
     for(const [x,y] of [[8,10],[14,11],[20,11],[26,10],[8,13],[14,13],[20,13],[26,13],[31,11]])light(x,y,[1.5,.85,.5]);for(const [x,y] of [[5,6],[31,6],[5,17],[31,17],[18,9]])dec('web',x,y,{sc:.55});
     for(const [x,y] of [[11,12],[24,12]])dec('bones',x,y,{sc:.9});
