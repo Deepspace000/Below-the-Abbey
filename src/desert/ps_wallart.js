@@ -54,6 +54,8 @@ function pswaHang(id,L){
       const key=Math.round(d.x)+','+Math.round(d.y)+','+d.wd[0]+','+d.wd[1];
       if(frameAt.has(key)){rep.overlapFix++;continue}frameAt.set(key,d)}
     out3.push(d)}
-  L.decor=out3;L._wallart=rep;return L}
+  // the Pale Approach: nothing painted on the far walls in line with the Pilgrim Steps (x 30 to 34): the engine draws a far wall picture through the dark stair risers, so a statue seems to float behind the steps
+  if(id===9720){const keep=out3.filter(d=>!(d.pic&&d.wd&&/alcove|st_|statue|saint|weep|mourn/i.test(String(d.k))&&Math.abs(Math.round(d.x)-32)<=2&&Math.round(d.y)<46));rep.stairLine=out3.length-keep.length;L.decor=keep}else L.decor=out3;
+  L._wallart=rep;return L}
 {for(const info of PSP.LEVELS){const id=info.id,orig=KH_LAZY[id];if(!orig||orig._pswa)continue;
   const w=()=>{const lv=orig();const L=LEVELS[id]||lv;try{pswaHang(id,L)}catch(e){console.error('ps wallart',id,e)}return LEVELS[id]||lv};w._pswa=1;KH_LAZY[id]=w}}
