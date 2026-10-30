@@ -20,7 +20,7 @@ const F2B={
     text:'A soft morning mist hangs between the trees. Birds sing somewhere. Everything here is a little too perfect.'},
   9822:{k:'island',sky:{top:[40,104,196],mid:[110,168,228],low:[206,226,240]},cloud:1.05,fog:[186,208,228,.008],amb:1.05,lcol:[1.15,1.1,.95],wn:'Sea air',fx:null,
     text:'A warm wind blows off the sea. The sun is bright, and the waves come in slow and even, always the same.'},
-  9823:{k:'snow',sky:{top:[150,164,184],mid:[190,200,212],low:[226,230,236]},cloud:1.15,fog:[214,222,232,.03],amb:.92,lcol:[.95,1.0,1.12],wn:'Snow',fx:'snow',
+  9823:{k:'snow',sky:{top:[150,164,184],mid:[190,200,212],low:[226,230,236]},cloud:1.15,fog:[214,222,232,.02],amb:.95,lcol:[.95,1.0,1.12],wn:'Snow',fx:'snow',
     text:'Snow falls without a sound. It is bitterly cold, and the light is grey and even.'},
   9824:{k:'water',sky:{top:[40,42,92],mid:[188,120,124],low:[248,190,132]},cloud:.95,fog:[196,160,156,.014],amb:.9,lcol:[1.35,1.0,.7],wn:'Evening haze',fx:null,
     text:'The canals lie still under a pink evening sky. Water laps at the steps, and somewhere a bell rings the hour.'},
@@ -31,7 +31,7 @@ const F2B={
   9827:{k:'nightmare',sky:{top:[8,0,6],mid:[56,10,16],low:[116,30,24]},cloud:.7,fog:[44,10,16,.03],amb:.42,lcol:[1.3,.55,.5],wn:'Red dark',fx:null,
     text:'The sky is the colour of a bruise, and the air is thick and still. Things move just out of sight.'}};
 /* ---------- floors: f2 names to engine FLOORS keys (some re-toned here) ---------- */
-const F2_FLMAKE={snow:['whiteSand',1.02,[.95,.98,1.04]],snowpath:['wwf_dirt',1.25,[.92,.96,1.05]],bogwater:['water',.55,[.62,.8,.55]],canal:['water',.82,[.8,.95,1.0]],
+const F2_FLMAKE={snow:['scree',1.62,[.97,1.0,1.07]],snowpath:['wwf_dirt',1.05,[.9,.94,1.02]],bogwater:['water',.55,[.62,.8,.55]],canal:['water',.82,[.8,.95,1.0]],
   seawater:['bluewater',1.0,[1,1,1]],blood:['redsand2',.6,[.9,.6,.6]],ash:['blf_ash',.7,[.9,.85,.9]]};
 function f2FloorKey(n){
   const m=F2_FLMAKE[n];if(!m)return FLOORS[n]?n:'grass';
@@ -66,18 +66,24 @@ function f2SkyArr(id){
 /* ---------- the mist wall: the edge of every illusion. Pale silver mist with cracks where the black stone of the castle shows through (made in code, like the castle walls) ---------- */
 function f2MistGid(v,wh){
   const k='mist'+v+'|'+wh;if(F2.tiles[k]!==undefined)return F2.tiles[k];
+  if(IMG.ps_f2_tex_mist&&IMG.ps_f2_tex_mist.width){IMG.gyp_f2_tex_mist=IMG.ps_f2_tex_mist;return F2.tiles[k]=gyTile('f2_tex_mist',wh,{gain:1.05,rgb:[.95,.98,1.03],tag:'f2mistP'+(v%3),draw:(x,w,h)=>{const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'rgba(225,232,240,.35)');g.addColorStop(1,'rgba(225,232,240,0)');x.fillStyle=g;x.fillRect(0,0,w,h)}})}   // the painted mist (Gemini), cracks and all
   return F2.tiles[k]=gyTile('texBlack_'+(v%5),wh,{gain:1.0,rgb:[.92,.97,1.04],tag:'f2mist'+v,draw:(x,w,h)=>{
     const hs=(a,b,c)=>hash2(a,b,c+7300+v*13),m=document.createElement('canvas');m.width=w;m.height=h;const mx=m.getContext('2d');
     const gr=mx.createLinearGradient(0,0,0,h);gr.addColorStop(0,'rgba(200,210,222,.72)');gr.addColorStop(.6,'rgba(214,222,232,.9)');gr.addColorStop(1,'rgba(226,232,240,.96)');mx.fillStyle=gr;mx.fillRect(0,0,w,h);
     for(let n=0;n<40;n++){const px=hs(n,1,1)*w,py=hs(n,2,1)*h,r=16+hs(n,3,1)*34;const g2=mx.createRadialGradient(px,py,1,px,py,r);const a=.1+hs(n,4,1)*.2;g2.addColorStop(0,'rgba(245,248,252,'+a+')');g2.addColorStop(1,'rgba(245,248,252,0)');mx.fillStyle=g2;mx.fillRect(px-r,py-r,r*2,r*2)}
-    // the cracks: jagged lines cut through the mist, so the black stone shows
-    mx.globalCompositeOperation='destination-out';mx.lineCap='round';mx.lineJoin='round';
-    const cracks=[];for(let c=0;c<2+((hs(c,9,2)*2)|0);c++){let px=8+hs(c,5,2)*(w-16),py=h*(.1+hs(c,6,2)*.5);const pts=[[px,py]];for(let s=0;s<7;s++){px+=(hs(c,s,3)-.5)*30;py+=10+hs(c,s,4)*26;px=Math.max(2,Math.min(w-2,px));pts.push([px,py])}cracks.push(pts)}
-    for(const pts of cracks){mx.lineWidth=5;mx.beginPath();mx.moveTo(pts[0][0],pts[0][1]);for(const p of pts)mx.lineTo(p[0],p[1]);mx.stroke();
-      const b=pts[3];mx.lineWidth=2.5;mx.beginPath();mx.moveTo(b[0],b[1]);mx.lineTo(b[0]+(hs(b[0],1,5)-.5)*40,b[1]+18);mx.stroke()}
-    mx.globalCompositeOperation='source-over';
-    for(const pts of cracks){mx.strokeStyle='rgba(250,252,255,.7)';mx.lineWidth=1.2;mx.beginPath();mx.moveTo(pts[0][0]-3,pts[0][1]);for(const p of pts)mx.lineTo(p[0]-3,p[1]);mx.stroke()}
-    x.drawImage(m,0,0)}})}
+    // soft veils of brighter mist drifting down the face
+    for(let n=0;n<6;n++){const px=hs(n,7,1)*w,vw=10+hs(n,8,1)*26,g3=mx.createLinearGradient(px-vw,0,px+vw,0);g3.addColorStop(0,'rgba(255,255,255,0)');g3.addColorStop(.5,'rgba(255,255,255,'+(.08+hs(n,9,1)*.14)+')');g3.addColorStop(1,'rgba(255,255,255,0)');mx.fillStyle=g3;mx.fillRect(px-vw,0,vw*2,h)}
+    // the cracks: wide jagged rifts through the mist where the black castle stone shows
+    mx.lineCap='round';mx.lineJoin='round';
+    const cracks=[];const nc=1+((hs(v,9,2)*3)|0);for(let c=0;c<nc;c++){let px=14+hs(c,5,2)*(w-28),py=h*(.05+hs(c,6,2)*.45);const pts=[[px,py]];for(let s=0;s<8;s++){px+=(hs(c,s,3)-.5)*34;py+=12+hs(c,s,4)*28;px=Math.max(6,Math.min(w-6,px));pts.push([px,py])}cracks.push(pts)}
+    const path=pts=>{mx.beginPath();mx.moveTo(pts[0][0],pts[0][1]);for(const p of pts)mx.lineTo(p[0],p[1])};
+    for(const pts of cracks){mx.strokeStyle='rgba(150,165,185,.55)';mx.lineWidth=16;path(pts);mx.stroke();   // a cold halo where the mist thins
+      mx.globalCompositeOperation='destination-out';mx.lineWidth=9;path(pts);mx.stroke();const b=pts[3];mx.lineWidth=4;mx.beginPath();mx.moveTo(b[0],b[1]);mx.lineTo(b[0]+(hs(b[0],1,5)-.5)*44,b[1]+22);mx.stroke();mx.globalCompositeOperation='source-over'}
+    x.drawImage(m,0,0);
+    // inside the rifts the stone is black and wet
+    x.save();x.globalCompositeOperation='destination-over';x.restore();
+    for(const pts of cracks){x.strokeStyle='rgba(6,8,12,.55)';x.lineWidth=5;x.beginPath();x.moveTo(pts[0][0],pts[0][1]);for(const p of pts)x.lineTo(p[0],p[1]);x.stroke();
+      x.strokeStyle='rgba(235,242,250,.75)';x.lineWidth=1.3;x.beginPath();x.moveTo(pts[0][0]-5,pts[0][1]);for(const p of pts)x.lineTo(p[0]-5,p[1]);x.stroke()}}})}
 /* ---------- re-toned copies of existing painted creatures and props (the original pictures are not touched) ---------- */
 const F2_TINT=[ // new key, source key, canvas filter, overlay colour (source-atop) or null
   ['f2i_snowwolf','wolf','grayscale(.85) brightness(1.55) contrast(.92)','rgba(200,222,255,.22)'],
@@ -205,7 +211,7 @@ function f2Room(S){
   const core=new Uint8Array(W*H),path=new Uint8Array(W*H);C.core=core;C.pathM=path;
   const mark=(x,y,a)=>{if(x>=2&&y>=2&&x<=W-3&&y<=H-3){core[ix(x,y)]=1;if(a)a[ix(x,y)]=1}};
   const rw=S.rw===undefined?1:S.rw;
-  const line=(R)=>{for(let i=0;i<R.length-1;i++){const [ax,ay]=R[i],[bx,by]=R[i+1],len=Math.max(Math.abs(bx-ax),Math.abs(by-ay));for(let t=0;t<=len;t++){const x=Math.round(ax+(bx-ax)*t/len),y=Math.round(ay+(by-ay)*t/len);for(let dy=-rw;dy<=rw;dy++)for(let dx=-rw;dx<=rw;dx++)mark(x+dx,y+dy,path)}}};
+  const line=(R0)=>{const R=R0.p||R0,w=R0.rw===undefined?rw:R0.rw;for(let i=0;i<R.length-1;i++){const [ax,ay]=R[i],[bx,by]=R[i+1],len=Math.max(Math.abs(bx-ax),Math.abs(by-ay));for(let t=0;t<=len;t++){const x=Math.round(ax+(bx-ax)*t/len),y=Math.round(ay+(by-ay)*t/len);for(let dy=-w;dy<=w;dy++)for(let dx=-w;dx<=w;dx++)mark(x+dx,y+dy,path)}}};
   for(const R of (S.routes||[S.route]))if(R)line(R);
   for(const c of S.clear||[]){const [x0,y0,x1,y1,,,ell]=c,cx=(x0+x1)/2,cy=(y0+y1)/2,rx=(x1-x0)/2+.5,ry=(y1-y0)/2+.5;for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(ell&&((x-cx)/rx)**2+((y-cy)/ry)**2>1.05)continue;mark(x,y)}}
   for(let y=33;y<=37;y++)for(let x=21;x<=27;x++)mark(x,y);
@@ -214,7 +220,7 @@ function f2Room(S){
   for(let pass=0;pass<2;pass++){const ys=[...Array(H).keys()],xs=[...Array(W).keys()];if(pass){ys.reverse();xs.reverse()}const nb=pass?[[1,0],[1,1],[0,1],[-1,1]]:[[-1,0],[-1,-1],[0,-1],[1,-1]];
     for(const y of ys)for(const x of xs)for(const [a,b] of nb){const nx=x+a,ny=y+b;if(nx>=0&&ny>=0&&nx<W&&ny<H&&E[ix(nx,ny)]+1<E[ix(x,y)])E[ix(x,y)]=E[ix(nx,ny)]+1}}
   C.E=E;
-  const band=S.band||[2,5],lim=(x,y)=>band[0]+Math.floor(vn(x,y,6,41)*(band[1]-band[0]+1)*.9+vn(x,y,3,42)*1.2);
+  const band=S.band||[2,5],lim=S.noBand?(()=>0):(x,y)=>band[0]+Math.floor(vn(x,y,6,41)*(band[1]-band[0]+1)*.9+vn(x,y,3,42)*1.2);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
     const ring=x<2||y<2||x>W-3||y>H-3;
     if(ring){C.mist(x,y);continue}
@@ -232,18 +238,27 @@ function f2Room(S){
     C.used.delete('23,37');C.sign(23,37,[0,1],'THE HALL OF ILLUSIONS')};
   // filler: blocking props in the open band (never on the core), denser further out
   C.fill=(keys,o)=>{o=o||{};for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){
-    if(!C.open(x,y)||!C.free(x,y)||core[ix(x,y)]||(S.keep&&S.keep(x,y)))continue;const e=E[ix(x,y)],cl=vn(x,y,4,51)*1.1+.45,p=Math.min(.95,(e===1?(o.p1||.15):e===2?(o.p2||.5):e===3?(o.p3||.8):.92)*cl);
+    if(!C.open(x,y)||!C.free(x,y)||core[ix(x,y)]||(S.keep&&S.keep(x,y)))continue;const e=E[ix(x,y)],cl=vn(x,y,4,51)*1.1+.45,p=Math.min(.95,(e===1?(o.p1||.25):e===2?(o.p2||.62):e===3?(o.p3||.85):.93)*cl);
     if(hs(x,y,52)<p){const k=keys[(hs(x,y,8)*keys.length)|0],d=C.dec(k,x,y,{block:true,sc:(o.sc||1)*(.85+hs(x,y,7)*.35)});if(d){d.ox=(hs(x,y,53)-.5)*.6;d.oy=(hs(x,y,54)-.5)*.4}}}};
   C.scrub=(keys,p,o)=>{o=o||{};for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!C.open(x,y)||!C.free(x,y)||(path[ix(x,y)]&&!o.onPath)||(S.keep&&S.keep(x,y)))continue;if(hs(x,y,55)<p)C.dec(keys[(hs(x,y,56)*keys.length)|0],x,y,{block:false,sc:(o.sc||1)*(.7+hs(x,y,57)*.6)})}};
   // a spot for a creature or a chest inside a rect, off the path, free, not near the arrival
-  C.spot=(x0,y0,x1,y1,seed,o)=>{o=o||{};for(let k=0;k<120;k++){const x=x0+((hs(k,seed,61)*(x1-x0+1))|0),y=y0+((hs(k,seed,62)*(y1-y0+1))|0);
-    if(!C.open(x,y)||!C.free(x,y)||(path[ix(x,y)]&&!o.path)||Math.hypot(x-24,y-35)<7||C.safe.some(z=>pspInZone(z,x,y,1)))continue;return [x,y]}return null};
-  C.foes=(list,rect,seed)=>{let n=0;list.forEach((t,i)=>{const q=C.spot(rect[0],rect[1],rect[2],rect[3],seed*31+i);if(q&&f2Foe(C,t,q[0],q[1]))n++});return n};
+  const nearPath=(x,y,r)=>{for(let b=-r;b<=r;b++)for(let a=-r;a<=r;a++){const xx=x+a,yy=y+b;if(xx>=0&&yy>=0&&xx<W&&yy<H&&path[ix(xx,yy)])return true}return false};C.nearPath=nearPath;
+  C.spot=(x0,y0,x1,y1,seed,o)=>{o=o||{};const pr=o.pr===undefined?2:o.pr;for(let k=0;k<160;k++){const x=x0+((hs(k,seed,61)*(x1-x0+1))|0),y=y0+((hs(k,seed,62)*(y1-y0+1))|0);
+    if(!C.open(x,y)||!C.free(x,y)||(o.ok&&!o.ok(x,y))||(!o.path&&nearPath(x,y,k<120?pr:0))||Math.hypot(x-24,y-35)<7||C.safe.some(z=>pspInZone(z,x,y,1)))continue;return [x,y]}return null};
+  // a big tree right beside a walkable square is kept small and pushed back (a canopy on the next square fills the whole view)
+  C.capTrees=(rx,cap)=>{const blk=new Set(C.decor.filter(d=>d.block).map(d=>d.x+','+d.y)),walk=(x,y)=>C.open(x,y)&&!blk.has(x+','+y);
+    for(const d of C.decor){if(!d.block||!rx.test(String(d.k)))continue;const nb=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]].filter(([a,b])=>walk(d.x+a,d.y+b));if(!nb.length)continue;
+      const h=NPC_H[d.k]||3,c=(cap||2.4)/h;if((d.sc||1)>c)d.sc=+c.toFixed(3);d.ox=Math.max(-.35,Math.min(.35,-nb.reduce((t,q)=>t+q[0],0)*.2));d.oy=Math.max(-.35,Math.min(.35,-nb.reduce((t,q)=>t+q[1],0)*.2))}};
+  // a lettered stone slab (a plaque of a puzzle): the picture is made once
+  C.plaque=(x,y,key,lines,npc,text,o)=>{const k=blSlab(key,lines,{h:1.0,top:.16,span:.66});if(npc&&!NPCS[npc])khNpc(npc,'A carved plaque',k,()=>say(text,[BYE]));C.used.delete(x+','+y);return C.dec(k,x,y,Object.assign({block:true,npc,sc:.9},o||{}))};
+  // a door in a wall that takes the party to another square of the same map (into a cabin, out of it)
+  C.warp=(x,y,style,to,msgText)=>{const b=style==='house'?null:pspDoorGid(style||'oak',wh),g=KH_NEXT_GID++;if(b!=null){T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b]}KH_DOOR[g]={psf2:'warp',to,A:to,B:to,msg:msgText};(C.warpTo=C.warpTo||[]).push(to);C.solid(x,y,C.ch(g));C.used.add(x+','+y);return g};
+  C.foes=(list,rect,seed,o)=>{let n=0;list.forEach((t,i)=>{const q=C.spot(rect[0],rect[1],rect[2],rect[3],seed*31+i,o);if(q&&f2Foe(C,t,q[0],q[1]))n++});return n};
   C.chestAt=(x,y,tier)=>{C.used.delete(x+','+y);return C.chest(x,y,{tier:tier===undefined?1:tier})};
   // finish: no sealed pockets, lights, the level's air
   C.done=o=>{o=o||{};
     {const bs=new Set();for(const d of C.decor)if(d.block)bs.add(d.x+','+d.y);
-     const reach=new Uint8Array(W*H),q=[ix(24,35)];reach[q[0]]=1;
+     const reach=new Uint8Array(W*H),q=[ix(24,35)];reach[q[0]]=1;for(const [a,b] of C.warpTo||[]){if(!reach[ix(a,b)]){reach[ix(a,b)]=1;q.push(ix(a,b))}}
      for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||reach[ix(nx,ny)]||!C.open(nx,ny)||bs.has(nx+','+ny))continue;reach[ix(nx,ny)]=1;q.push(ix(nx,ny))}}
      for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++)if(C.open(x,y)&&!reach[ix(x,y)]&&!bs.has(x+','+y)){C.mist(x,y);for(let i=C.decor.length-1;i>=0;i--)if(C.decor[i].x===x&&C.decor[i].y===y)C.decor.splice(i,1);for(let i=C.lights.length-1;i>=0;i--)if(C.lights[i][0]===x&&C.lights[i][1]===y)C.lights.splice(i,1);for(let i=C.enemies.length-1;i>=0;i--)if(C.enemies[i].x===x&&C.enemies[i].y===y)C.enemies.splice(i,1)}}
     C.glow(o.glow||7,B.lcol);
@@ -252,5 +267,25 @@ function f2Room(S){
     try{if(typeof pswaHang==='function')pswaHang(id,lv)}catch(e){console.error('f2 wallart',e)}
     return lv};
   return C}
+/* stepping onto a square (pressure plates): F2.step[id](x,y) is called whenever the party's square changes in that room */
+F2.step={};F2.last='';
+{const _u=update;update=function(dt){const r=_u.apply(this,arguments);
+  try{if(typeof LEVEL!=='undefined'&&F2.step[LEVEL]&&G.state==='play'&&G.P){const x=Math.round(G.P.x),y=Math.round(G.P.y),k=LEVEL+':'+x+','+y;if(k!==F2.last){F2.last=k;F2.step[LEVEL](x,y)}}}catch(e){console.error('f2 step',e)}
+  return r}}
+/* a painted piece of a sheet used as a wall face across n tiles (gyTile fac fit) */
+function f2FacGid(img,i,n,wh,o){o=o||{};const k='fac'+img+i+'/'+n+'|'+wh+(o.fit===false?'nf':'');if(F2.tiles[k]!==undefined)return F2.tiles[k];if(!IMG[img]||!IMG[img].width)return null;IMG['gyp_'+img]=IMG[img];
+  return F2.tiles[k]=gyTile(o.tex||'texBlack_2',wh,{fac:o.fit===false?{img,i,n}:{img,i,n,fit:true,at:o.at},gain:o.gain||1.0,rgb:o.rgb||[1,1,1],tag:'f2fac'+img,emit:o.emit===undefined?.12:o.emit})}
+/* a painted texture (assets/ps, kind tex) as a floor of the engine (128 x 128) */
+function f2TexFloor(key,out,g,tn){if(FLOORS[out])return out;const im=IMG[key];if(!im||!im.width)return null;try{const N=128,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.drawImage(im,0,0,N,N);const s=x.getImageData(0,0,N,N).data,d=new Uint8ClampedArray(N*N*4);
+  for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,s[i]*(g||1)*(tn?tn[0]:1));d[i+1]=Math.min(255,s[i+1]*(g||1)*(tn?tn[1]:1));d[i+2]=Math.min(255,s[i+2]*(g||1)*(tn?tn[2]:1));d[i+3]=255}FLOORS[out]=d;return out}catch(e){return null}}
+/* the in-map doors (C.warp) */
+function f2MoveTo(a){G.talk=null;G.P.x=a[0];G.P.y=a[1];G.P.f=a[2];G.P.angT=(a[2]-1)*Math.PI/2;G.C={x:a[0],y:a[1],a:G.P.angT};try{reveal()}catch(e){}}
+{const _k=khBump;khBump=function(nx,ny,g){const d=KH_DOOR[g];
+  if(d&&d.psf2==='warp'){sfx('door');f2MoveTo(d.to);if(d.msg)msg(d.msg,'#e8dcc0');return true}
+  return _k.apply(this,arguments)}}
+/* puzzle sounds: a bright chime for a right step, a soft low one for a wrong step, a rising run when a puzzle opens */
+function f2Chime(kind,i){try{if(!AC||G.mute)return;if(kind==='ok'){const f=[523,659,784,988,1175][i%5];tone(f,f,.9,'sine',.05,0);tone(f*2,f*2,.6,'sine',.015,0)}
+  else if(kind==='bad'){tone(220,180,1.1,'sine',.05,0);tone(165,140,1.2,'sine',.03,.1)}
+  else{[523,659,784,1047].forEach((f,k)=>{tone(f,f,1.2,'sine',.045,k*.16);tone(f*1.5,f*1.5,.8,'sine',.012,k*.16)})}}catch(e){}}
 /* every arrival in a room: say where the party is the first time, apply the puzzle state */
 pspOnArrive((n,restored)=>{if(!f2Is(n))return;const S=f2S(n);if(!S.seen&&!restored){S.seen=1;try{msg(F2B[n].text,'#d8e4f0')}catch(e){}}});

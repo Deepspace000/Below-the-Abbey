@@ -83,6 +83,7 @@ function psf2HubBuild(info){
   // the Sleeper's table at the crossing
   C.used.delete('28,22');C.dec(pspPic('f2_bier'),28,22,{block:true,npc:'psf2_table',sc:1});
   C.light(28,22,[.85,.95,1.3]);
+  {C.used.delete('28,24');const d=C.dec(pspPic('f2_sleeper_up'),28,24,{block:false,npc:'psf2_sleeper'});if(d)d.hidden=true}
   // the arms: columns in rows (aisles), alcoves with statues, candles
   for(const x of [8,11,14,17,20]){prop('col_fluted',x,20);prop('col_fluted',x,24)}
   for(const x of [36,39,42,45,48]){prop('col_twist',x,20);prop('col_twist',x,24)}
@@ -138,7 +139,8 @@ khNpc('psf2_story','The story of the Sleeper','ps_lectern',()=>say("A plaque on 
 /* the table: seven hollows, one for each piece; place what you carry; with all seven the Sleeper wakes */
 function psf2Table(){
   const F=psf2F();
-  if(F.woke)return say("The Sleeper sits on the edge of her table, pale and whole. She says: You put me back together. Thank you. I can see the stair now, the one to the third floor. It is still shut, and the one who shut it is up there. When it opens, I will show you the way. Go and tell the Dreamkeeper. He has waited longer than I have.",[BYE]);
+  if(F.woke)return say("The Sleeper's table. The pale cloth lies smooth over the black stone, and the seven hollows are empty again. The Sleeper stands beside it.",[BYE]);
+  if(psf2Placed()>=7)return say("The Sleeper lies whole on her table, pale and still, with her eyes shut. She is breathing.",[['Wake her.',()=>{psf2Wake();G.talk=null;return null}],BYE]);
   const list=PSF2.PARTS.map(p=>p.toUpperCase()+': '+(F.placed[p]?'in place':'empty')).join('. ');
   const carry=PSF2.PARTS.filter(p=>!F.placed[p]&&bagCount(PSF2.ITEMS[p])>0);
   const opts=[];
@@ -147,18 +149,19 @@ function psf2Table(){
   return say("A long table of black stone on a low dais, with a pale cloth over it. Seven hollows are cut in the stone in the shape of a person. "+list+'. ('+psf2Placed()+' of 7.)',opts)}
 function psf2Place(p){const F=psf2F();if(F.placed[p]||bagCount(PSF2.ITEMS[p])<=0)return false;bagRemove(PSF2.ITEMS[p],1);F.placed[p]=1;F.got[p]=1;return true}
 function psf2PlaceAll(){
-  const F=psf2F();let n=0;for(const p of PSF2.PARTS)if(psf2Place(p))n++;
+  let n=0;for(const p of PSF2.PARTS)if(psf2Place(p))n++;
   if(!n)return 0;
   try{sfx('key')}catch(e){}
-  if(psf2Placed()<7){msg('You lay '+(n>1?n+' pieces':'the piece')+' in the hollows of the table. '+psf2Placed()+' of 7 are in place.','#ffe36a');psf2Apply();return n}
-  F.woke=1;psf2Apply();
-  try{sfx('level')}catch(e){}
-  msg('The last piece settles into its hollow. The cloth stirs, and the Sleeper sits up and opens her eyes. Speak to her.','#ffe36a');
-  return n}
-/* the live level follows the flags: the table shows the empty bier or the woken Sleeper */
+  if(psf2Placed()<7)msg('You lay '+(n>1?n+' pieces':'the piece')+' in the hollows of the table. '+psf2Placed()+' of 7 are in place.','#ffe36a');
+  else{try{sfx('level')}catch(e){}msg('The last piece settles into its hollow, and the pieces are one body. The Sleeper lies whole on her table, and she is breathing.','#ffe36a')}
+  psf2Apply();return n}
+function psf2Wake(){const F=psf2F();if(F.woke||psf2Placed()<7)return false;F.woke=1;f2Chime('open');msg('The Sleeper opens her eyes, sits up, and steps down from the table.','#ffe36a');psf2Apply();return true}
+khNpc('psf2_sleeper','The Sleeper','ps_f2_sleeper_up',()=>say("Thank you. I was in pieces in my own dreams for a very long time, and I could hear every one of you walking through them. I am the Sleeper. I dreamed the seven rooms of this floor for the Sovereign, until I would not dream for her any more. The stair to the third floor is behind the iron door at the east end of the gallery. It is still shut, and the one who shut it is up there. When it opens, I will show you the way. Now go and tell the Dreamkeeper. He has waited longer than I have.",[BYE]));
+/* the live level follows the flags: the empty bier, the whole Sleeper lying on it, then the woken Sleeper standing beside it */
 function psf2Apply(){
-  if(LEVEL!==PSF2H.ID||!G.decor)return;const F=psf2F(),[tx,ty]=PSF2H.TABLE;
-  for(const d of G.decor)if(d.npc==='psf2_table'){const k=F.woke?pspPic('f2_sleeper'):pspPic('f2_bier');if(d.k!==k)d.k=k}}
+  if(LEVEL!==PSF2H.ID||!G.decor)return;const F=psf2F(),whole=psf2Placed()>=7;
+  for(const d of G.decor){if(d.npc==='psf2_table'){const k=whole&&!F.woke?pspPic('f2_sleeper'):pspPic('f2_bier');if(d.k!==k)d.k=k}
+    if(d.npc==='psf2_sleeper'){d.hidden=!F.woke;d.found=!F.woke;d.block=!!F.woke}}}
 pspOnArrive(n=>{if(n===PSF2H.ID)try{psf2Apply()}catch(e){console.error('psf2Apply',e)}});
 /* the stair to the third floor (stub) */
 {const _k=khBump;khBump=function(nx,ny,g){const d=KH_DOOR[g];
@@ -171,7 +174,7 @@ if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push('pg_dreamcrown',...PSF2.P
 PGR.PLACE.push(['pg_dreamcrown',9820,'quest','psq40']);
 {const S=[['',()=>psf2All(),[]],['',()=>psf2Placed()>=7&&!!psf2F().woke,['psf2_table']]];
  Object.defineProperty(S[0],'0',{get:()=>'Find the seven pieces of the Sleeper in the seven illusion rooms off the Hall of Illusions: the hand, the foot, the face, the chest, the legs, the heart and the brain. '+psf2Count()+' of 7 found.'});
- Object.defineProperty(S[1],'0',{get:()=>"Lay all seven pieces on the Sleeper's table in the middle of the Hall of Illusions. "+psf2Placed()+' of 7 in place.'});
+ Object.defineProperty(S[1],'0',{get:()=>psf2Placed()>=7?"Wake the Sleeper: speak to her on her table in the middle of the Hall of Illusions.":"Lay all seven pieces on the Sleeper's table in the middle of the Hall of Illusions. "+psf2Placed()+' of 7 in place.'});
  yrQ('psq40',"The Sleeper's Pieces",'The Dreamkeeper, in the Hall of Illusions',S,{gold:15000,xp:90000,items:['pg_dreamcrown','elixir','elixir','supermana']});
  QAREA.psq40=PSP.REGION}
 if(typeof QRF!=='undefined'){const N=(l,...ids)=>({lvl:l,npc:ids});
