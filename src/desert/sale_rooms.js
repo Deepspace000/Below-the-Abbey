@@ -101,7 +101,7 @@ function saMakeRoom(h){
   if(h.spk){const sp=h.sp;name=sp.name;b={id:'sain'+id,wlin:'sa_'+sp.key,name,room:'shop',keeper:'sa_k_'+sp.key,floor:'wood',wallImg:'kh_ohwall1_0'}}
   else{const H=SA_HOMES[h.home];name=H.name;const vn=wlinHomeVariant(H.scene,id);if(!WLIN_ROOMS[vn]._sa){WLIN_ROOMS[vn]._sa=1;const R=WLIN_ROOMS[vn];R.amb=Math.max(.24,R.amb*.5);R.raw=(R.raw||[]).concat([['gy_web',1,1,{block:false,walk:true,deco:true,sc:.6}],['gy_web',R.w-2,1,{block:false,walk:true,deco:true,sc:.55}],['gy_bones',R.w>>1,R.h-2,{block:false,walk:true,deco:true,sc:.6}],['gy_candles',2,R.h-2,{block:false,walk:true,deco:true,sc:.5}]])}
     b={id:'sain'+id,wlin:vn,name,room:'home',keeper:H.keeper,floor:'wood',wallImg:'kh_ohwall1_0'}}
-  const R=khRoom(b,id,back);LEVELS[id]=R.level;LEVELS[id].diff=90;LEVEL_NAMES[id]=name;LEVEL_RATING[id]=90;return R.level}
+  const R=khRoom(b,id,back);LEVELS[id]=R.level;try{saTidy(R.level,{id})}catch(e){console.error('sale tidy',id,e)}LEVELS[id].diff=90;LEVEL_NAMES[id]=name;LEVEL_RATING[id]=90;return R.level}
 for(const h of SA_HOUSES)if(h.spk||(h.home&&h.home!=='rope'))KH_LAZY[h.id]=()=>{if(!LEVELS[h.id])saMakeRoom(h)};
 /* ---- the three small levels ---- */
 const SA_MPOOLS={gy_bones:[{k:'gy_rose',sc:.9,b:0},{k:'gy_mound',sc:.7,b:0},{k:'wm_bucket',sc:1,b:0}],gy_web:[{k:'ww_twig',sc:1,b:0},{k:'ww_hagstone',sc:1,b:0}],barrel:[{k:'crate',sc:1,b:1},{k:'sacks',sc:1,b:1},{k:'wm_barrel',sc:1,b:1}],crate:[{k:'barrel',sc:1,b:1},{k:'sacks',sc:1,b:1},{k:'wm_crate',sc:1,b:1}],sacks:[{k:'barrel',sc:1,b:1},{k:'crate',sc:1,b:1}],
@@ -131,6 +131,7 @@ function saMini(id,S){
   try{b7Dedupe(decor,SA_MPOOLS,d=>!!d.npc)}catch(e){console.error('mini dedupe',e)}
   const cf=FLOORS[S.floor]?S.floor:'gyf_flag',L={rows,chars,floor:cf,ceil:CEILS.gyc_crypt?'gyc_crypt':'beam',ceilH:WH+1,start:{x:S.start.x,y:S.start.y,f:S.start.f},enemies,items,decor,lights,portals:[],day:0,amb:S.amb||.2,torchGap:1e9,noTele:true,noExtras:true,
     name:S.name,label:S.name,diff:90,mapNames:S.names||[]};
+  try{saTidy(L,{id})}catch(e){console.error('sale tidy',id,e)}
   LEVELS[id]=L;LEVEL_NAMES[id]=S.name;LEVEL_RATING[id]=90;return L}
 const saRopeHouse=()=>SA_HOUSES.find(h=>h.home==='rope');
 /* 601: the Hollow Cellar. A low cellar under the Ropewalk Cottage: an entry chamber, a passage, a long chamber, and a nook at the east end where three living people have been hiding for a month. */

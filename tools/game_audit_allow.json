@@ -2,6 +2,8 @@
   "about": "Findings of tools/game_audit.py that are known and accepted. Each entry needs a reason; matched findings are still counted and listed in the report under 'Allowed', never hidden. Fields: code (or '*'), area (substring of the area name or key), level (number or 'A-B,C'), key (regex on the decor or creature key), x, y, reason.",
   "entries": [
     {"code": "OVERDOOR", "area": "Sale", "level": 600, "key": "^sa_planks", "reason": "Sale: planks nailed across the boarded-up doors, drawn on the door square on purpose"},
+    {"code": "NPC_TALL", "area": "Sale", "level": 600, "key": "^sa_gibbet$", "reason": "Sale: the gibbet in Gibbet Square is a wooden structure the party can look at (npc id for its text), not a person"},
+    {"code": "FLOAT", "area": "Sale", "level": "7210,7216", "key": "^lamp$", "reason": "Sale: the inn's and the jeweller's chandelier (decor 'lamp' drawn with lk wl2_inn_4, a chandelier on chains), hung from the ceiling on purpose (seen in the game: the chains reach the ceiling)"},
     {"code": "NPC_UNREACH", "level": 9740, "x": 4, "y": 39, "reason": "Pale Spire Great Halls: the Painters' Closet (4..6,38..41) opens with the brass key (same secret tools/ps_test.py reach allows)"},
     {"code": "NPC_UNREACH", "level": 9740, "x": 6, "y": 39, "reason": "Pale Spire Great Halls: the Painters' Closet (4..6,38..41) opens with the brass key (same secret tools/ps_test.py reach allows)"},
     {"code": "ONEWAY", "level": 9715, "key": "door", "x": 30, "y": 4, "reason": "the Crooked Road gate into the Never-Ending Tower: the tower's own south gate leads back (tools/ps_test.py dest checks it)"}

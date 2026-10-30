@@ -64815,9 +64815,110 @@ function saStubBuild(id){
   if(LEVELS[id])return LEVELS[id];
   const R=khRoom({id:'sastub'+id,name:'The Blighted Road',room:'ruin',keeper:null,enemies:[]},id,{to:SA.ID,x:SA.START.x,y:SA.START.y,f:3});
   const L=R.level;L.diff=90;L.noExtras=true;L.decor=L.decor.filter(d=>!d.npc);L.decor.push({k:'cairn',x:5,y:4,block:true,npc:'sa_stub'});
-  LEVELS[id]=L;return L}
+  saTidy(L,{id});LEVELS[id]=L;return L}
 for(const i of SA.STUBS)KH_LAZY[i]=()=>saStubBuild(i);
 for(let i=SA.RESERVED[0];i<=SA.RESERVED[1];i++)KH_LAZY[i]=()=>saStubBuild(i);
+/* ==========================================================================
+   THE TIDY PASS (the castle standard) for every level of Sale (600 to 619, 7200 to 7299) and of the Vault of Maldrake (9670 to 9679). Each builder calls saTidy(L) once on its
+   finished level, before anything else sees it:
+   1. a free-standing piece inside a wall square steps into the room when the square in front is free, else it goes (the hidden footprint blocks of the Wenlock rooms just go);
+      the same piece twice on one square is kept once;
+   2. a web is only ever in a real corner: it moves to the nearest open square with two walls (within two squares, one outdoors), hangs flat on one of them under the top of the
+      wall (a wall picture, pic with wd), and goes when there is no corner near; the painted web is the graveyard's, cropped (sa_web) so that the stray bone beside it is gone;
+   3. a sign whose wall side is open is turned to a real wall of its square, or moved to the nearest square that has one; a sign never sits on a door or a window;
+   4. a tapestry or banner standing free beside a wall (hanging in the air half a square in front of it) becomes a flat wall picture on that wall, under its top;
+   5. a person boxed in by the hidden footprint of a counter gets the one square in front of them back, so that they can be talked to.
+   The pictures that this pass hangs (webs, tapestries) are drawn flush on the wall face and at their own scale (the engine sizes a wall picture by its NPC_H alone): see the
+   spriteList wrap below, which only acts on these levels and only on pieces marked _sat.
+   ========================================================================== */
+const SAT_D4=[[0,-1],[1,0],[0,1],[-1,0]];
+const SAT_WALLPIC=/wl2_hall_[01]$|tapestry|banner|portrait|painting|picture|frame|plaque|mirror|kitchenshelf|shrine/i;
+const satOn=n=>saIs(n)||(n>=9670&&n<=9679);
+function satWeb(){
+  if(IMG.sa_web)return 'sa_web';const im=IMG.gy_web;if(!im||!im.width)return 'gy_web';
+  const x0=Math.round(im.width*.2),c=document.createElement('canvas');c.width=im.width-x0;c.height=im.height;c.getContext('2d').drawImage(im,x0,0,c.width,c.height,0,0,c.width,c.height);
+  IMG.sa_web=c;NPC_H.sa_web=NPC_H.gy_web||1.2;return 'sa_web'}
+/* the engine sizes a wall picture by NPC_H alone (decor.sc is ignored), so a picture hung at a smaller scale gets its own key: the same painting with a smaller NPC_H */
+function satKey(k,sc){
+  if(!IMG[k]||!sc||Math.abs(sc-1)<.02)return k;const key='sat_'+k+'_'+Math.round(sc*100);
+  if(!IMG[key]){IMG[key]=IMG[k];NPC_H[key]=(NPC_H[k]||.6)*sc}return key}
+function saTidy(L,o){
+  o=o||{};if(!L||!L.rows||!L.decor||L._sat)return L&&L._sat;
+  const W=L.rows[0].length,H=L.rows.length,rep={moved:0,inwall:0,dup:0,web:0,webGone:0,sign:0,signGone:0,pic:0,npc:0};L._sat=rep;
+  const inb=(x,y)=>x>=0&&y>=0&&x<W&&y<H,open=(x,y)=>inb(x,y)&&L.rows[y][x]==='.';
+  const gid=(x,y)=>{const c=L.rows[y][x];return L.chars&&L.chars[c]!==undefined?L.chars[c]:undefined};
+  const winG=new Set();try{if(typeof BGR_WIN!=='undefined')for(const g in BGR_WIN)winG.add(+g);if(typeof WLIN_WIN!=='undefined')for(const k in WLIN_WIN)if(WLIN_WIN[k]!==null)winG.add(WLIN_WIN[k])}catch(e){}
+  const isDoor=(x,y)=>{const g=gid(x,y);return g!==undefined&&((typeof KH_DOOR!=='undefined'&&!!KH_DOOR[g])||(g>=30&&g<100))};
+  const isWall=(x,y)=>inb(x,y)&&!open(x,y)&&!isDoor(x,y);
+  const isWin=(x,y)=>{const g=gid(x,y);return g!==undefined&&winG.has(g)};
+  let ceil=L.ceilH||2.2;try{if(o.id!==undefined&&typeof ceilFor==='function')ceil=ceilFor(o.id,L)||ceil}catch(e){}
+  const wallH=(x,y)=>{try{const t=TEX[T_TILE[gid(x,y)]];if(t&&t.wh)return Math.min(t.wh,o.town?99:ceil)}catch(e){}return ceil};
+  const isWeb=d=>/(^|_)web/i.test(String(d.k))&&!d.npc;
+  // 1. pieces in wall squares, and twins
+  const solidAt=new Set();for(const d of L.decor)if(d.block&&!d.pic&&Number.isInteger(d.x)&&Number.isInteger(d.y))solidAt.add(d.x+','+d.y);
+  const seen=new Set(),keep=[];
+  for(const d of L.decor){
+    if(!Number.isInteger(d.x)||!Number.isInteger(d.y)){keep.push(d);continue}
+    const key=d.k+'|'+d.x+','+d.y+'|'+(d.pic?1:0)+'|'+(d.wd?d.wd.join(','):'')+'|'+(d.npc||'');
+    if(seen.has(key)){rep.dup++;continue}seen.add(key);
+    if(!d.pic&&!d.wd&&!d.npc&&inb(d.x,d.y)&&!open(d.x,d.y)&&!isDoor(d.x,d.y)){
+      if(d.hidden||isWeb(d)){rep.inwall++;continue}
+      const n=SAT_D4.map(([a,b])=>[d.x+a,d.y+b]).find(([a,b])=>open(a,b)&&!solidAt.has(a+','+b)&&!keep.some(e=>e.x===a&&e.y===b&&!e.pic&&!e.hidden));
+      if(n){solidAt.delete(d.x+','+d.y);d.x=n[0];d.y=n[1];if(d.block)solidAt.add(n[0]+','+n[1]);rep.moved++}else{rep.inwall++;continue}}
+    keep.push(d)}
+  L.decor=keep;
+  // the wall faces that already hold a picture or a sign (webs may share)
+  const face=new Set();const fk=(x,y,w)=>x+','+y+','+w[0]+','+w[1];
+  for(const d of L.decor)if(d.wd&&(d.pic||d.txt)&&!isWeb(d))face.add(fk(d.x,d.y,d.wd));
+  const ring=(x,y,r,fn)=>{for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const v=fn(x+dx,y+dy);if(v)return v}return null};
+  // 2. webs into corners
+  const R=o.town?1:2,wk=satWeb(),out=[];
+  for(const d of L.decor){
+    if(!isWeb(d)||(d.pic&&d.wd&&isWall(d.x+d.wd[0],d.y+d.wd[1]))){out.push(d);continue}
+    let best=null;
+    for(let r=0;r<=R&&!best;r++)best=ring(Math.round(d.x),Math.round(d.y),r,(x,y)=>{if(!open(x,y))return null;const w=SAT_D4.filter(([a,b])=>isWall(x+a,y+b)&&!isWin(x+a,y+b));
+      if(w.length<2||!w.some(q=>q[0])||!w.some(q=>q[1]))return null;const pick=w.find(q=>!face.has(fk(x,y,q)))||w[0];return [x,y,pick]});
+    if(!best){rep.webGone++;continue}
+    const [x,y,wd]=best,kk=satKey(wk,Math.min(d.sc||.55,.6)),h=NPC_H[kk]||.66;delete d.sc;
+    Object.assign(d,{k:kk,x,y,wd:[wd[0],wd[1]],pic:1,block:false,walk:true,deco:true,_sat:1,bob:Math.max(.15,Math.min(1.75,wallH(x+wd[0],y+wd[1]))-h-.03)});   // under the top of the wall, and never so high that the party cannot see itdelete d.solid;delete d.hidden;
+    rep.web++;out.push(d)}
+  L.decor=out;
+  // 3. signs on real walls
+  const sgOut=[];
+  for(const d of L.decor){
+    if(!(d.txt&&d.wd)||!Number.isInteger(d.x)||!Number.isInteger(d.y)||(isWall(d.x+d.wd[0],d.y+d.wd[1])&&!isWin(d.x+d.wd[0],d.y+d.wd[1]))){sgOut.push(d);continue}
+    face.delete(fk(d.x,d.y,d.wd));let best=null;
+    for(let r=0;r<=2&&!best;r++)best=ring(d.x,d.y,r,(x,y)=>{if(!open(x,y))return null;const dirs=[d.wd].concat(SAT_D4.filter(q=>q[0]!==d.wd[0]||q[1]!==d.wd[1]));
+      const w=dirs.find(q=>isWall(x+q[0],y+q[1])&&!isWin(x+q[0],y+q[1])&&!face.has(fk(x,y,q)));return w?[x,y,w]:null});
+    if(!best){rep.signGone++;continue}
+    d.x=best[0];d.y=best[1];d.wd=[best[2][0],best[2][1]];face.add(fk(d.x,d.y,d.wd));rep.sign++;sgOut.push(d)}
+  L.decor=sgOut;
+  // 4. lifted wall pieces become wall pictures
+  for(const d of L.decor){
+    if(d.pic||d.wd||d.npc||d.lk||!SAT_WALLPIC.test(String(d.k))||!IMG[d.k])continue;
+    const ok=(x,y,a,b)=>open(x,y)&&isWall(x+a,y+b)&&!isWin(x+a,y+b)&&!face.has(fk(x,y,[a,b]));
+    let at=null;
+    for(const [a,b] of SAT_D4){if(!isWall(d.x+a,d.y+b))continue;   // the wall it hangs beside; over a window or a taken face it slides along the wall
+      for(const t of [0,1,-1,2,-2]){const x=d.x+(a?0:t),y=d.y+(b?0:t);if(ok(x,y,a,b)){at=[x,y,a,b];break}}if(at)break}
+    if(!at)continue;
+    const top=wallH(at[0]+at[2],at[1]+at[3])-.04;let sc=d.sc||1,hh=(NPC_H[d.k]||1)*sc;
+    if(hh>top-.04){sc*=(top-.04)/hh;hh=(NPC_H[d.k]||1)*sc}   // a hanging taller than the wall is made to fit under its top
+    d.k=satKey(d.k,sc);delete d.sc;d.x=at[0];d.y=at[1];d.pic=1;d.wd=[at[2],at[3]];d.block=false;d.walk=true;d._sat=1;d.bob=Math.max(0,Math.min(d.bob||0,top-hh));
+    face.add(fk(d.x,d.y,d.wd));rep.pic++}
+  // 5. people boxed in by hidden footprint blocks
+  if(L.start){
+    const reach=()=>{const bs=new Set();for(const d of L.decor)if((d.block||d.solid)&&!d.pic&&Number.isInteger(d.x))bs.add(d.x+','+d.y);
+      const s=new Set([L.start.x+','+L.start.y]),q=[[L.start.x,L.start.y]];for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of SAT_D4){const nx=x+a,ny=y+b,k=nx+','+ny;if(s.has(k)||!open(nx,ny)||bs.has(k))continue;s.add(k);q.push([nx,ny])}}return s};
+    let S=reach();
+    for(const p of L.decor){if(!p.npc||p.pic||p.hidden||!Number.isInteger(p.x))continue;const nb=SAT_D4.map(([a,b])=>[p.x+a,p.y+b]);if(nb.some(([x,y])=>S.has(x+','+y)))continue;
+      for(const [x,y] of nb){const hid=L.decor.filter(e=>e.hidden&&e.x===x&&e.y===y);if(!hid.length)continue;if(!SAT_D4.some(([a,b])=>S.has((x+a)+','+(y+b))))continue;
+        L.decor=L.decor.filter(e=>!hid.includes(e));rep.npc++;S=reach();break}}}
+  return rep}
+/* the pictures this pass hung lie flush on the wall face (.497 of a square from the middle, as in the castle) and at their own scale */
+{const _sl=spriteList;spriteList=function(){const out=_sl.apply(this,arguments);
+  try{if(typeof LEVEL!=='undefined'&&satOn(LEVEL))for(const s of out){const d=s.decor;if(!d||!d._sat||!s.pic||!d.wd)continue;
+    s.x=d.x+.5+d.wd[0]*.497;s.y=d.y+.5+d.wd[1]*.497}}catch(e){console.error('sale tidy sprites',e)}
+  return out}}
 
 /* ---- src/desert/sale_art.js ---- */
 /* ==========================================================================
@@ -65069,7 +65170,8 @@ function saBuild(){
   if(typeof PSP!=='undefined'){const gh=2.6,pil=ch(TM.make('plain','sa_black',gh).gid),gc=pch(2),gx=PSP.SALE.gate[0],gy=PSP.SALE.gate[1];
     solid(gx,gy-1,pil);solid(gx,gy+1,pil);rows[gy][gx]=gc;block[gy*W+gx]=0;rows[gy][gx+1]='.';block[gy*W+gx+1]=0;
     lv.portals[2]={to:PSP.ENTRY.id,x:PSP.ENTRY.x,y:PSP.ENTRY.y,f:PSP.ENTRY.f,tex:'sagate'};
-    for(const y of [gy-2,gy+2]){if(solidDc('gy_lantern',3,y))lights.push([3,y])}}
+    for(const y of [gy-2,gy+2]){if(solidDc('gy_lantern',3,y))lights.push([3,y])}
+    for(let x=gx+1;x<=gx+3;x++)used.add(x+','+gy)}   // the way to the gate stays clear
   // ---- the buildings ----
   const STYS=['sa_slate','sa_moss','sa_black','sa_bone','sa_brick','sa_ash'],houses=SA_HOUSES;
   houses.forEach((h,k)=>{
@@ -65082,6 +65184,7 @@ function saBuild(){
   for(const h of houses){
     const sty=h.sty,wh=h.wh,front=(x,y)=>h.face==='N'?y===h.y0:h.face==='S'?y===h.y1:h.face==='E'?x===h.x1:x===h.x0;
     const plain=ch(TM.make('plain',sty,wh).gid),plain2=ch(TM.make('plain2',sty,wh).gid),win=ch(TM.make(h.spk&&h.sp.kind!=='inn'?'shopfront':'window',sty,wh).gid),side=ch(TM.make('window',sty,wh).gid),gwin=ch(TM.make('slit',sty,wh).gid);
+    h._plain=plain;
     const dtile=TM.make('door',sty,wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dtile.tex;
     const D={door:dgid,texOpen:dtile.tex,texBar:h.spk?saBarricadeTex(dtile.tex,wh,h.id):dtile.tex,house:h};SA.dgid[h.id]=D;
     const tgt=h.home==='rope'?SA.CELLAR:h.id;
@@ -65107,7 +65210,9 @@ function saBuild(){
     for(const sgn of [1,-1]){const sx=horizontal?h.front[0]+sgn:h.front[0],sy=horizontal?h.front[1]:h.front[1]+sgn,wallCell=horizontal?[sx,h.face==='S'?h.y1:h.y0]:[h.face==='E'?h.x1:h.x0,sy];
       if(rows[wallCell[1]]&&rows[wallCell[1]][wallCell[0]]==='.')continue;
       if(!free(sx,sy)&&!isRoad(sx,sy))continue;
-      decor.push({k:'sign_sa'+h.id,x:sx,y:sy,block:false,wd:h.wall,txt:[(h.name.length>24?h.name.split(',')[0]:h.name).toUpperCase()],sc:.7,bob:(h.wall[0]+h.wall[1])>0?.4:.26});break}}
+      decor.push({k:'sign_sa'+h.id,x:sx,y:sy,block:false,wd:h.wall,txt:[(h.name.length>24?h.name.split(',')[0]:h.name).toUpperCase()],sc:.7,bob:(h.wall[0]+h.wall[1])>0?.4:.26});
+      if(h._plain&&h.sp.kind==='inn')rows[wallCell[1]][wallCell[0]]=h._plain;   // the inn's sign hangs on plain wall, never over a window (blight_growths.js puts lit windows on window tiles; the shops have shop fronts)
+      break}}
   // ---- the Sanctuary: a gothic chapel front, five squares wide, three of them the (barred) door ----
   {const C=SA_CHAPEL,wh=3.6,cp=ch(TM.make('plain','sa_ash',wh).gid),cw=ch(TM.make('window','sa_ash',wh).gid);
     SA.sanct=[];
@@ -65127,7 +65232,7 @@ function saBuild(){
     for(let y=B.y0;y<=B.y1;y++)for(let x=B.x0;x<=B.x1;x++)solid(x,y,x===B.door[0]&&y===B.door[1]?ch(dgid):(x+y)%2?bw:bp);
     const tw=wlPick('church_tower','kh_ohtower1_4','kh_ohtower1_1');if(tw)sky.push({x:57.5,y:17.6,k:tw,w:5.4,z:wh-.03,big:1});
     for(let y=B.y0-2;y<=B.y1+1;y++)for(let x=B.x0-1;x<=B.x1+1;x++)used.add(x+','+y);
-    decor.push({k:'sign_sabelfry',x:B.front[0]+1,y:B.front[1],block:false,wd:[0,-1],txt:['THE BELFRY'],sc:.7,bob:.3})}
+    decor.push({k:'sign_sabelfry',x:B.front[0]+1,y:B.front[1],block:false,wd:[0,-1],txt:['THE BELFRY'],sc:.7,bob:.3});rows[B.front[1]-1][B.front[0]+1]=bp}
   // ---- the crypt stair, at the south end of Charnel Row: an arch in the Back Track's south wall of stone ----
   {const G0=SA_CRYPTGATE,wh=2.6,cp=ch(TM.make('plain','sa_black',wh).gid);
     for(let x=G0.x-2;x<=G0.x+2;x++)for(const y of [62,63]){if(rows[y][x]==='.')solid(x,y,cp)}
@@ -65183,6 +65288,7 @@ function saBuild(){
     {t:'The Sanctuary',x:34,y:26.5,k:'place'},{t:'The Belfry',x:57,y:16.5,k:'place'},{t:'The Dead Quarter',x:15,y:52,k:'place'},{t:'Hollin Farm',x:63,y:62,k:'place'},{t:'The Crypt',x:20,y:64.5,k:'place'}];
   {for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=chars[rows[y][x]];if(c>=30&&c<100)block[y*W+x]=0}}
   SA.houses=houses;SA.street=street;
+  try{SA.tidy=saTidy(lv,{town:1,id:SA.ID})}catch(e){console.error('sale tidy',e)}
   LEVELS[SA.ID]=lv;LEVEL_NAMES[SA.ID]='Sale';
   {const T=yarTerrain(W,H,hgt,rk,block);TERRS[SA.ID]=T}
   return true}
@@ -65328,11 +65434,9 @@ function saCharacter(C,note,small){
   const glow=(x,y)=>{if(!lights.some(l=>Math.abs(l[0]-x)+Math.abs(l[1]-y)<3))lights.push([x,y])};
   const brazier=(x,y)=>{const q=near(x,y,1);if(q&&tryDc('wm_brazier',q[0],q[1],{block:true,walk:false,sc:.8})){lights.push([q[0],q[1]]);return true}return false};
   // braziers: the four corners of the square's middle, the crossroads, the gate and the end of Bell Lane
-  [[33,36],[37,36],[20,36],[53,36],[57,36],[64,36],[10,36],[20,60],[53,60],[57,22]].forEach(([x,y])=>{const dy=(y===36)?(hs(x,y,71)<.5?-1:1):0;brazier(x,y+dy)});
-  // the west end of Candle Street: a stone arch, shut, with a lamp either side, so that the street ends in something
-  {const ax=3,ay=36;
-   if(IMG.gy_arch&&!decor.some(d=>d.x===ax&&d.y===ay)){decor.push({k:'gy_arch',x:ax,y:ay,block:true,walk:false,deco:false,sc:1.25,npc:'sa_n_westarch'});C.used.add(ax+','+ay)}
-   for(const y of [35,37])tryDc('wm_cage_lantern',4,y,{sc:1.3});lights.push([4,35],[4,37])}
+  [[33,36],[37,36],[20,36],[53,36],[57,36],[64,36],[10,36],[20,60],[53,60],[56,24]].forEach(([x,y])=>{const dy=(y===36)?(hs(x,y,71)<.5?-1:1):0;brazier(x,y+dy)});
+  // the west end of Candle Street ends in the west gate to the Pale Spire (the old bricked-up arch stood on the gate's only approach square and is gone); a lamp either side of the street
+  {for(const y of [35,37])tryDc('wm_cage_lantern',4,y,{sc:1.3});lights.push([4,35],[4,37])}
   // a dead orchard behind the north houses: rows of dead trees with wide gaps, then a ring of gravestones
   for(let row=0;row<3;row++)for(let x=6+row;x<=26;x+=4){const y=8+row*5;solidDc(((x+row)%3===0)?'gy_yew':'gy_dead',x,y,{sc:.85+hs(x,y,73)*.3})}
   // a small churchyard in the north east: a fence ring and stones in rows with a cross in the middle
@@ -65457,7 +65561,7 @@ function saMakeRoom(h){
   if(h.spk){const sp=h.sp;name=sp.name;b={id:'sain'+id,wlin:'sa_'+sp.key,name,room:'shop',keeper:'sa_k_'+sp.key,floor:'wood',wallImg:'kh_ohwall1_0'}}
   else{const H=SA_HOMES[h.home];name=H.name;const vn=wlinHomeVariant(H.scene,id);if(!WLIN_ROOMS[vn]._sa){WLIN_ROOMS[vn]._sa=1;const R=WLIN_ROOMS[vn];R.amb=Math.max(.24,R.amb*.5);R.raw=(R.raw||[]).concat([['gy_web',1,1,{block:false,walk:true,deco:true,sc:.6}],['gy_web',R.w-2,1,{block:false,walk:true,deco:true,sc:.55}],['gy_bones',R.w>>1,R.h-2,{block:false,walk:true,deco:true,sc:.6}],['gy_candles',2,R.h-2,{block:false,walk:true,deco:true,sc:.5}]])}
     b={id:'sain'+id,wlin:vn,name,room:'home',keeper:H.keeper,floor:'wood',wallImg:'kh_ohwall1_0'}}
-  const R=khRoom(b,id,back);LEVELS[id]=R.level;LEVELS[id].diff=90;LEVEL_NAMES[id]=name;LEVEL_RATING[id]=90;return R.level}
+  const R=khRoom(b,id,back);LEVELS[id]=R.level;try{saTidy(R.level,{id})}catch(e){console.error('sale tidy',id,e)}LEVELS[id].diff=90;LEVEL_NAMES[id]=name;LEVEL_RATING[id]=90;return R.level}
 for(const h of SA_HOUSES)if(h.spk||(h.home&&h.home!=='rope'))KH_LAZY[h.id]=()=>{if(!LEVELS[h.id])saMakeRoom(h)};
 /* ---- the three small levels ---- */
 const SA_MPOOLS={gy_bones:[{k:'gy_rose',sc:.9,b:0},{k:'gy_mound',sc:.7,b:0},{k:'wm_bucket',sc:1,b:0}],gy_web:[{k:'ww_twig',sc:1,b:0},{k:'ww_hagstone',sc:1,b:0}],barrel:[{k:'crate',sc:1,b:1},{k:'sacks',sc:1,b:1},{k:'wm_barrel',sc:1,b:1}],crate:[{k:'barrel',sc:1,b:1},{k:'sacks',sc:1,b:1},{k:'wm_crate',sc:1,b:1}],sacks:[{k:'barrel',sc:1,b:1},{k:'crate',sc:1,b:1}],
@@ -65487,6 +65591,7 @@ function saMini(id,S){
   try{b7Dedupe(decor,SA_MPOOLS,d=>!!d.npc)}catch(e){console.error('mini dedupe',e)}
   const cf=FLOORS[S.floor]?S.floor:'gyf_flag',L={rows,chars,floor:cf,ceil:CEILS.gyc_crypt?'gyc_crypt':'beam',ceilH:WH+1,start:{x:S.start.x,y:S.start.y,f:S.start.f},enemies,items,decor,lights,portals:[],day:0,amb:S.amb||.2,torchGap:1e9,noTele:true,noExtras:true,
     name:S.name,label:S.name,diff:90,mapNames:S.names||[]};
+  try{saTidy(L,{id})}catch(e){console.error('sale tidy',id,e)}
   LEVELS[id]=L;LEVEL_NAMES[id]=S.name;LEVEL_RATING[id]=90;return L}
 const saRopeHouse=()=>SA_HOUSES.find(h=>h.home==='rope');
 /* 601: the Hollow Cellar. A low cellar under the Ropewalk Cottage: an entry chamber, a passage, a long chamber, and a nook at the east end where three living people have been hiding for a month. */
@@ -67171,6 +67276,7 @@ function vtMake(id){
   const L={rows,chars,fmap:fmS,floorSet:fSet,floor:fb0,floor2:fb1,ceil:S.ceil||'gyc_crypt',ceilH:WH,start,enemies,items,decor,lights,portals:[],day:0,amb:S.amb===undefined?.02:S.amb,torchGap:1e9,noTele:true,noExtras:true,
     name:VT.NAMES[id],label:VT.NAMES[id],diff:S.diff,mapNames:names,_vt:V};
   V.start=start;V.floorsN=fSet.length;
+  try{V.tidy=saTidy(L,{id})}catch(e){console.error('vault tidy',id,e)}
   LEVELS[id]=L;LEVEL_NAMES[id]=VT.NAMES[id];LEVEL_RATING[id]=S.diff;
   if(miss.length)console.warn('vt '+id+' missed: '+miss.join(' '));
   return L}
@@ -67338,7 +67444,7 @@ VT_SPEC[9675]={W:37,H:28,diff:89,brick:'texRed',rgb:[.82,.66,.62],lcol:[1.5,.8,.
     sign(17,2,[0,-1],'THE HALL OF UNDERHILL','Where the village sat down to supper');dec('candles',16,4,{block:true,sc:.75});dec('candles',20,4,{block:true,sc:.75});light(18,3,[1.5,.85,.5]);
     // the long tables, and the dead of Underhill still sitting at them
     const T=[10,14,18,22,26];for(const x of T){dec('hl_p_candle',x,8,{block:true,sc:.65,raw:true});dec('hl_p_candle',x,15,{block:true,sc:.65,raw:true})}
-    let v=0;for(const x of [8,12,16,20,24,28]){dec('zombie',x,8,{block:true,npc:'vto_villager',i:v++,sc:.95,raw:true});dec('zombie',x,15,{block:true,npc:'vto_villager',i:v++,sc:.95,raw:true})}
+    let v=0;for(const x of [8,12,16,20,24,28]){dec('zombie',x,8,{block:true,npc:'vto_villager',i:v++,sc:.82,raw:true});dec('zombie',x,15,{block:true,npc:'vto_villager',i:v++,sc:.82,raw:true})}
     for(const [x,y] of [[6,7],[30,7],[6,16],[30,16]])dec('candles',x,y,{block:true,sc:.8});
     for(const [x,y] of [[8,10],[14,11],[20,11],[26,10],[8,13],[14,13],[20,13],[26,13],[31,11]])light(x,y,[1.5,.85,.5]);for(const [x,y] of [[5,6],[31,6],[5,17],[31,17],[18,9]])dec('web',x,y,{sc:.55});
     for(const [x,y] of [[11,12],[24,12]])dec('bones',x,y,{sc:.9});

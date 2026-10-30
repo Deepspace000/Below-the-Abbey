@@ -125,7 +125,8 @@ function saBuild(){
   if(typeof PSP!=='undefined'){const gh=2.6,pil=ch(TM.make('plain','sa_black',gh).gid),gc=pch(2),gx=PSP.SALE.gate[0],gy=PSP.SALE.gate[1];
     solid(gx,gy-1,pil);solid(gx,gy+1,pil);rows[gy][gx]=gc;block[gy*W+gx]=0;rows[gy][gx+1]='.';block[gy*W+gx+1]=0;
     lv.portals[2]={to:PSP.ENTRY.id,x:PSP.ENTRY.x,y:PSP.ENTRY.y,f:PSP.ENTRY.f,tex:'sagate'};
-    for(const y of [gy-2,gy+2]){if(solidDc('gy_lantern',3,y))lights.push([3,y])}}
+    for(const y of [gy-2,gy+2]){if(solidDc('gy_lantern',3,y))lights.push([3,y])}
+    for(let x=gx+1;x<=gx+3;x++)used.add(x+','+gy)}   // the way to the gate stays clear
   // ---- the buildings ----
   const STYS=['sa_slate','sa_moss','sa_black','sa_bone','sa_brick','sa_ash'],houses=SA_HOUSES;
   houses.forEach((h,k)=>{
@@ -138,6 +139,7 @@ function saBuild(){
   for(const h of houses){
     const sty=h.sty,wh=h.wh,front=(x,y)=>h.face==='N'?y===h.y0:h.face==='S'?y===h.y1:h.face==='E'?x===h.x1:x===h.x0;
     const plain=ch(TM.make('plain',sty,wh).gid),plain2=ch(TM.make('plain2',sty,wh).gid),win=ch(TM.make(h.spk&&h.sp.kind!=='inn'?'shopfront':'window',sty,wh).gid),side=ch(TM.make('window',sty,wh).gid),gwin=ch(TM.make('slit',sty,wh).gid);
+    h._plain=plain;
     const dtile=TM.make('door',sty,wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dtile.tex;
     const D={door:dgid,texOpen:dtile.tex,texBar:h.spk?saBarricadeTex(dtile.tex,wh,h.id):dtile.tex,house:h};SA.dgid[h.id]=D;
     const tgt=h.home==='rope'?SA.CELLAR:h.id;
@@ -163,7 +165,9 @@ function saBuild(){
     for(const sgn of [1,-1]){const sx=horizontal?h.front[0]+sgn:h.front[0],sy=horizontal?h.front[1]:h.front[1]+sgn,wallCell=horizontal?[sx,h.face==='S'?h.y1:h.y0]:[h.face==='E'?h.x1:h.x0,sy];
       if(rows[wallCell[1]]&&rows[wallCell[1]][wallCell[0]]==='.')continue;
       if(!free(sx,sy)&&!isRoad(sx,sy))continue;
-      decor.push({k:'sign_sa'+h.id,x:sx,y:sy,block:false,wd:h.wall,txt:[(h.name.length>24?h.name.split(',')[0]:h.name).toUpperCase()],sc:.7,bob:(h.wall[0]+h.wall[1])>0?.4:.26});break}}
+      decor.push({k:'sign_sa'+h.id,x:sx,y:sy,block:false,wd:h.wall,txt:[(h.name.length>24?h.name.split(',')[0]:h.name).toUpperCase()],sc:.7,bob:(h.wall[0]+h.wall[1])>0?.4:.26});
+      if(h._plain&&h.sp.kind==='inn')rows[wallCell[1]][wallCell[0]]=h._plain;   // the inn's sign hangs on plain wall, never over a window (blight_growths.js puts lit windows on window tiles; the shops have shop fronts)
+      break}}
   // ---- the Sanctuary: a gothic chapel front, five squares wide, three of them the (barred) door ----
   {const C=SA_CHAPEL,wh=3.6,cp=ch(TM.make('plain','sa_ash',wh).gid),cw=ch(TM.make('window','sa_ash',wh).gid);
     SA.sanct=[];
@@ -183,7 +187,7 @@ function saBuild(){
     for(let y=B.y0;y<=B.y1;y++)for(let x=B.x0;x<=B.x1;x++)solid(x,y,x===B.door[0]&&y===B.door[1]?ch(dgid):(x+y)%2?bw:bp);
     const tw=wlPick('church_tower','kh_ohtower1_4','kh_ohtower1_1');if(tw)sky.push({x:57.5,y:17.6,k:tw,w:5.4,z:wh-.03,big:1});
     for(let y=B.y0-2;y<=B.y1+1;y++)for(let x=B.x0-1;x<=B.x1+1;x++)used.add(x+','+y);
-    decor.push({k:'sign_sabelfry',x:B.front[0]+1,y:B.front[1],block:false,wd:[0,-1],txt:['THE BELFRY'],sc:.7,bob:.3})}
+    decor.push({k:'sign_sabelfry',x:B.front[0]+1,y:B.front[1],block:false,wd:[0,-1],txt:['THE BELFRY'],sc:.7,bob:.3});rows[B.front[1]-1][B.front[0]+1]=bp}
   // ---- the crypt stair, at the south end of Charnel Row: an arch in the Back Track's south wall of stone ----
   {const G0=SA_CRYPTGATE,wh=2.6,cp=ch(TM.make('plain','sa_black',wh).gid);
     for(let x=G0.x-2;x<=G0.x+2;x++)for(const y of [62,63]){if(rows[y][x]==='.')solid(x,y,cp)}
@@ -239,6 +243,7 @@ function saBuild(){
     {t:'The Sanctuary',x:34,y:26.5,k:'place'},{t:'The Belfry',x:57,y:16.5,k:'place'},{t:'The Dead Quarter',x:15,y:52,k:'place'},{t:'Hollin Farm',x:63,y:62,k:'place'},{t:'The Crypt',x:20,y:64.5,k:'place'}];
   {for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=chars[rows[y][x]];if(c>=30&&c<100)block[y*W+x]=0}}
   SA.houses=houses;SA.street=street;
+  try{SA.tidy=saTidy(lv,{town:1,id:SA.ID})}catch(e){console.error('sale tidy',e)}
   LEVELS[SA.ID]=lv;LEVEL_NAMES[SA.ID]='Sale';
   {const T=yarTerrain(W,H,hgt,rk,block);TERRS[SA.ID]=T}
   return true}
@@ -384,11 +389,9 @@ function saCharacter(C,note,small){
   const glow=(x,y)=>{if(!lights.some(l=>Math.abs(l[0]-x)+Math.abs(l[1]-y)<3))lights.push([x,y])};
   const brazier=(x,y)=>{const q=near(x,y,1);if(q&&tryDc('wm_brazier',q[0],q[1],{block:true,walk:false,sc:.8})){lights.push([q[0],q[1]]);return true}return false};
   // braziers: the four corners of the square's middle, the crossroads, the gate and the end of Bell Lane
-  [[33,36],[37,36],[20,36],[53,36],[57,36],[64,36],[10,36],[20,60],[53,60],[57,22]].forEach(([x,y])=>{const dy=(y===36)?(hs(x,y,71)<.5?-1:1):0;brazier(x,y+dy)});
-  // the west end of Candle Street: a stone arch, shut, with a lamp either side, so that the street ends in something
-  {const ax=3,ay=36;
-   if(IMG.gy_arch&&!decor.some(d=>d.x===ax&&d.y===ay)){decor.push({k:'gy_arch',x:ax,y:ay,block:true,walk:false,deco:false,sc:1.25,npc:'sa_n_westarch'});C.used.add(ax+','+ay)}
-   for(const y of [35,37])tryDc('wm_cage_lantern',4,y,{sc:1.3});lights.push([4,35],[4,37])}
+  [[33,36],[37,36],[20,36],[53,36],[57,36],[64,36],[10,36],[20,60],[53,60],[56,24]].forEach(([x,y])=>{const dy=(y===36)?(hs(x,y,71)<.5?-1:1):0;brazier(x,y+dy)});
+  // the west end of Candle Street ends in the west gate to the Pale Spire (the old bricked-up arch stood on the gate's only approach square and is gone); a lamp either side of the street
+  {for(const y of [35,37])tryDc('wm_cage_lantern',4,y,{sc:1.3});lights.push([4,35],[4,37])}
   // a dead orchard behind the north houses: rows of dead trees with wide gaps, then a ring of gravestones
   for(let row=0;row<3;row++)for(let x=6+row;x<=26;x+=4){const y=8+row*5;solidDc(((x+row)%3===0)?'gy_yew':'gy_dead',x,y,{sc:.85+hs(x,y,73)*.3})}
   // a small churchyard in the north east: a fence ring and stones in rows with a cross in the middle
