@@ -95,7 +95,7 @@ function pscBricks(x,W,Hp,seed,y0,y1){if(pscPaintTex(x,W,Hp,'ashlar',y0,y1,seed*
   x.save();x.beginPath();x.rect(0,y0,W,y1-y0);x.clip();x.fillStyle=PSC_K.mort;x.fillRect(0,y0,W,y1-y0);
   for(let y=y1-17,r=0;y>y0-17;y-=17,r++)for(let bx=-(r%2)*20;bx<W;bx+=40){x.fillStyle=cols[(R()*6)|0];x.fillRect(bx+1,y+1,38,15);if(R()<.16){x.fillStyle='rgba(70,120,70,.4)';x.fillRect(bx+1,y+1,38,4)}}
   x.restore()}
-function pscMossBase(x,W,Hp,seed,h){const R=blRng(seed);for(let k=0;k<W/3;k++){const px=R()*W,r=3+R()*7;x.fillStyle=R()<.5?'rgba(52,96,52,.8)':'rgba(34,70,40,.85)';x.beginPath();x.ellipse(px,Hp-R()*h,r,r*.6,0,0,6.3);x.fill()}}
+function pscMossBase(x,W,Hp,seed,h){const R=blRng(seed);for(let k=0;k<W/3;k++){const px=R()*W,r=3+R()*7;x.fillStyle=R()<.5?'rgba(40,56,48,.75)':'rgba(26,40,34,.8)';x.beginPath();x.ellipse(px,Hp-R()*h,r,r*.6,0,0,6.3);x.fill()}}
 /* a tall thin pointed (lancet) window with green glass, mullion and tracery; bot = y of its sill */
 function pscLancet(x,cx,bot,ww,hh,glow,dark){const top=bot-hh,g=x.createLinearGradient(0,top,0,bot);
   if(dark){g.addColorStop(0,'#0e1c18');g.addColorStop(1,'#050a08')}else{g.addColorStop(0,glow?'#e0b868':'#46687c');g.addColorStop(.5,glow?'#b07c34':'#26465a');g.addColorStop(1,glow?'#7a4a1c':'#122430')}
@@ -341,7 +341,7 @@ const pscGone=d=>{if(d){d.found=true;d.hidden=true;d.block=false}};
 const pscTint=(key,src,filter,h)=>{if(IMG[key])return key;if(!bl3Tint(key,src,filter,h))return src;return key};
 const pscDecorOf=id=>G.decor&&G.decor.find(d=>d.npc===id);
 const pscHeal=(f)=>{try{G.heroes.forEach(h=>{if(h.alive)h.hp=Math.min(h.max,h.hp+Math.ceil(h.max*f))})}catch(e){}};
-khNpc('psc_gardener','Hobb Ashby, the gardener','ps_c_pshedger',d=>{
+khNpc('psc_gardener','Hobb Ashby, the gardener','ps_p_gardener',d=>{
   const F=pscF();
   return say(F.hobb?"Sit down, sit down. There is hot water on the stove and the bed is made. Nobody has ever come into the lodge to hurt me, and I have never worked out why. I do not ask.":"Oh! A living face. Come in and shut the door, the draught is bad for the seedlings. I am Hobb Ashby, gardener to the Pale Sovereign, and I have not been told to stop, so I have not stopped. The roses want cutting, the hedges want clipping, and the statues want something I cannot name.",
     [['Rest by the stove (free).',()=>{F.hobb=1;G.talk=null;restParty(true);return say('You sleep in the lodge by the stove. Nothing comes in. You wake warm and healed.',[BYE])}],
@@ -495,7 +495,8 @@ function pscBase(info){
   for(const [x,y] of [[13,37],[13,38],[51,37],[51,38]])C.solid(x,y,ch(T.culvert));
   /* the doors of the contract: every link of this level, a door tile of its own */
   const clone=base=>{const gid=KH_NEXT_GID++;T_TILE[gid]=T_TILE[base];if(GY.col&&GY.col[base])GY.col[gid]=GY.col[base];return gid};
-  const DOORS={'32,10':T.great[1],'18,10':T.gallery[1],'12,24':T.kitchen,'52,24':T.cloister,'10,40':T.cloister,'54,40':T.kitchen,'3,34':T.grille,'60,34':T.grille,'32,52':T.gate,'60,30':T.gate};
+  const sealed=pspDoorGid('iron',4.8);   // the sealed wall-stair doors are the castle's own ironbound door set in the wall (the old tile was a flat amber arch)
+  const DOORS={'32,10':T.great[1],'18,10':T.gallery[1],'12,24':T.kitchen,'52,24':T.cloister,'10,40':T.cloister,'54,40':T.kitchen,'3,34':sealed,'60,34':sealed,'32,52':T.gate,'60,30':T.gate};
   const bind=l=>{const base=DOORS[l.at[0]+','+l.at[1]];if(!base)return;const gid=clone(base);C.solid(l.at[0],l.at[1],ch(gid));
     const d={lvl:l.to,get at(){if(!LEVELS[l.to]&&KH_LAZY[l.to])try{KH_LAZY[l.to]()}catch(e){console.error(e)}return {x:l.land[0],y:l.land[1],f:l.land[2]}},psc:1};
     if(l.prov)d.seal='The wall walk is closed. An iron grille is locked across the foot of the stair, and the lock is furred with green rust.';
@@ -531,7 +532,7 @@ function pscBuild(info){
   const hedge=(x,y,kind)=>{if(g[y][x]==='.'&&rows[y][x]==='.'&&!C.used.has(x+','+y)){C.solid(x,y,C.ch(HG[kind||'high'][int(hs(x,y,9)*4)]));g[y][x]='h';fm[y*W+x]='4'}};
   const NAMES=['st_mourners','st_chimera','st_hydra','st_judge','st_gargoyle','st_headless','st_judge','st_veiled','st_hand','st_bishop'];
   const wakers={};const reserveWake=(t,x,y)=>{wakers[x+','+y]=t};
-  const plaque=(x,y,key,lines,text)=>{const id='psc_pl_'+key,k=blSlab('psc_slab_'+key,lines,{h:.95,top:.18,span:.62});if(!NPCS[id])khNpc(id,'A plaque',k,()=>say(text,[BYE]));return C.thing(k,id,x,y,{sc:1})};
+  const plaque=(x,y,key,lines,text)=>{const wd=[[0,-1],[1,0],[0,1],[-1,0]].find(([a,b])=>C.rows[y+b]&&C.rows[y+b][x+a]!=='.');if(!wd||!C.isOpen(x,y))return null;const d={k:'sign_gy',x,y,block:false,wd,txt:[lines[0],lines[1]||''],sc:1};C.decor.push(d);return d};   // a name plate on the wall (it was a stone slab standing in the lane)
   /* ===== the dressing of every lane: lanterns on brackets (a lit lantern every seventh square), ivy and vines hung on the walls, alcoves with creepy statues set into the wall ===== */
   const isDoorCell=(x,y)=>{const c=rows[y]&&rows[y][x];return c&&c!=='.'&&KH_DOOR[C.chars[c]]};
   const wallAt=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&g[y][x]==='#'&&!isDoorCell(x,y);
@@ -716,43 +717,46 @@ function pscRoomDoor(L,l){   // the room maker's plain exit square becomes a doo
   const ch='d';L.chars=Object.assign({},L.chars||{});L.chars[ch]=gid;
   const r=L.rows[l.at[1]];L.rows[l.at[1]]=r.slice(0,l.at[0])+ch+r.slice(l.at[0]+1)}
 function pscLodge(info){
-  if(typeof pspPics==='function')pspPics();
-  const l=pspLinkAt(9731,8,12);
-  const W2=[1.5,1.05,.55];
-  blRoom({id:PSC.LODGE,name:info.name,w:16,h:13,amb:.7,rating:101,floor:'wood',wall:'ps_tex_ashlar',
-    back:{to:l.to,x:l.land[0],y:l.land[1],f:l.land[2]},
-    lights:[[2,2],[13,2],[8,5],[2,9],[13,9]],lcol:{'2,2':W2,'13,2':W2,'8,5':W2,'2,9':[1.4,1.0,.6],'13,9':[1.4,1.0,.6]},col:[1.4,1.0,.6],
-    build:({put,raw,npc})=>{
-      /* a gardener's lodge: everything stands on the floor against a wall; only wall pieces (wd) hang, and only on a real wall cell (the walls are x 0 and 15, y 0 and 12) */
-      raw(pspPic('hearth_cold'),2,1,{sc:.8});raw(pspPic('straw_bed'),13,2,{sc:1.5});
-      raw(pspPic('furn_desk'),5,1,{sc:.8});
-      raw('gy_chest',2,10,{sc:.95});
-      const hang=(n,x,y,wd,bob)=>raw(pspPic(n),x,y,{block:false,wd,pic:1,bob:bob||0});
-      hang('window_slit',8,1,[0,-1],1.1);hang('vine_a',12,1,[0,-1],0);hang('sconce_black',1,5,[-1,0],1.0);hang('cobweb_corner_a',1,1,[0,-1]);hang('cobweb_corner_b',14,1,[0,-1]);
-      npc('psc_gardener',8,3)}});
-  PSC.chest['9731:2,10']={pot:3,mana:2,elixir:1,gold:900};
-  const L=LEVELS[PSC.LODGE];pscWidenRoom(L,16,14);pscRoomDoor(L,l);L.diff=L.rating=101;L.noExtras=true;LEVEL_RATING[PSC.LODGE]=101;return L}
+  /* rebuilt with the castle kit (it was a Khemetra wooden room: plank floor and ceiling, one flat wall): slate flags, banded stone walls, a muted lamp glow, pieces that stand against the walls */
+  const WARM=[1.2,.9,.58];
+  const C=pspMake({id:9731,start:{x:8,y:10,f:0},wh:3.0,floor:'slate',wall:'ash',amb:.42,lcol:WARM});C.warmCol=WARM;C.warm=WARM;
+  C.room(3,3,12,11,{floor:'slate',name:info.name,at:[8,7],warm:true});
+  psgDressWalls(C,{wh:3.0,win:0,set:['string','ash','string','brick'],rhythm:1});
+  psgDim(['window_sheeted_c','hearth_cold'],'brightness(.62) saturate(.55)');
+  C.links({style:{'out of the lodge':'oak'}});
+  /* the north wall: a cold hearth, a vine, the desk, a sconce each side; the bed against the east wall; a chest and barrels in the two south corners; one urn each side of the door */
+  C.prop('hearth_cold',4,3,{block:true,sc:.8});C.prop('furn_desk',9,3,{block:true,sc:.8});
+  C.picture('vine_a',7,3,[0,-1]);C.picture('sconce_black',6,3,[0,-1],{bob:1.0});C.picture('sconce_black',11,3,[0,-1],{bob:1.0});
+  C.prop('straw_bed',12,7,{block:true,sc:1.0});C.picture('window_sheeted_c',3,7,[-1,0]);
+  const ch=C.chest(4,10,{tier:0});if(ch)ch.sc=.75;PSC.chest['9731:4,10']={pot:3,mana:2,elixir:1,gold:900};
+  C.prop('barrels',12,10,{block:true,sc:.9});
+  C.prop('urn_big',7,11,{block:true,sc:.75});C.prop('urn_big',9,11,{block:true,sc:.75});
+  C.picture('cobweb_corner_a',3,3,[0,-1]);C.picture('cobweb_corner_b',12,3,[0,-1]);
+  C.light(5,4,WARM);C.light(8,7,WARM);C.light(11,9,WARM);
+  C.person('psc_gardener',8,6,1);
+  psgNoLooseArch(C);psgPost(C,true);
+  return C.finish({start:{x:8,y:10,f:0}})}
 function pscMews(info){
-  if(typeof pspPics==='function')pspPics();
-  const l=pspLinkAt(9732,10,14);
-    const G1=[.8,1.15,.95];
-  blRoom({id:PSC.MEWS,name:info.name,w:20,h:15,amb:.5,rating:101,floor:'cobble',wall:'ps_tex_ashlar',
-    back:{to:l.to,x:l.land[0],y:l.land[1],f:l.land[2]},
-    lights:[[3,2],[10,2],[17,2],[3,11],[17,11],[10,7]],lcol:{'3,2':G1,'10,2':[.7,1.2,.9],'17,2':G1,'3,11':G1,'17,11':G1,'10,7':[.7,1.2,.9]},col:[.85,1.12,.95],
-    enemies:[['psraven',3,3],['psraven',7,3],['psraven',14,3],['psraven',18,3],['psraven',3,6]],
-    build:({put,raw,npc})=>{
-      for(const [x,y] of [[3,2],[18,2],[2,6]])raw('gy_rpost',x,y,{sc:1.1});
-      raw('gy_rpost',7,11,{npc:'psc_feather',solid:1,deco:false,sc:1.0});
-            raw('gy_chest',3,12,{npc:'psc_glovechest',solid:1,deco:false,sc:.95});
-      
-      raw(pspPic('window_slit'),5,1,{block:false,wd:[0,-1],pic:1,bob:1.2});raw(pspPic('window_slit'),15,1,{block:false,wd:[0,-1],pic:1,bob:1.2});raw(pspPic('vine_b'),10,1,{block:false,wd:[0,-1],pic:1,bob:0});
-      const hang=(n,x,y,wd,bob)=>raw(pspPic(n),x,y,{block:false,wd,pic:1,bob:bob||0});
-      hang('cobweb_corner_a',1,1,[0,-1]);hang('cobweb_corner_b',18,1,[0,-1]);
-      
-      for(const [x,y] of [[8,3],[12,3]])raw(pspPic('col_twist'),x,y,{sc:.9});
-      
-      npc('psc_falconer',10,4)}});
-  const L=LEVELS[PSC.MEWS];pscWidenRoom(L,20,16);pscRoomDoor(L,l);L.diff=L.rating=101;L.noExtras=true;LEVEL_RATING[PSC.MEWS]=101;return L}
+  /* rebuilt with the castle kit: cobbled stable floor, banded stone walls; the falconer between two twisted columns, a perch each side of him, two stone troughs, the feather perch and the glove chest near the door */
+  const G1=[.8,1.15,.95];
+  const C=pspMake({id:9732,start:{x:10,y:12,f:0},wh:3.4,floor:'cobble',wall:'ash',amb:.2,lcol:PSP_PAL.silver});
+  C.room(3,3,16,13,{floor:'cobble',name:info.name,at:[10,8]});
+  C.setFloor(8,3,12,6,'flagdark');
+  psgDressWalls(C,{wh:3.4,win:0,set:['string','ash','string','ash','moss'],rhythm:1,slits:1});
+  psgDim(['window_sheeted_a'],'brightness(.58) saturate(.55)');
+  C.links({style:{'out of the mews':'oak'}});
+  C.prop('col_twist',8,3,{block:true,sc:.9});C.prop('col_twist',12,3,{block:true,sc:.9});
+  for(const x of [5,15])C.dec('gy_rpost',x,3,{block:true,sc:1.1});
+  C.prop('font',3,8,{block:true,sc:.9});C.prop('font',16,8,{block:true,sc:.9});
+  C.dec('gy_rpost',7,11,{npc:'psc_feather',block:true,solid:1,deco:false,sc:1.0});
+  C.dec('gy_chest',3,12,{npc:'psc_glovechest',block:true,solid:1,deco:false,sc:.8});
+  C.picture('window_sheeted_a',10,3,[0,-1]);
+  C.picture('cobweb_corner_a',3,3,[0,-1]);C.picture('cobweb_corner_b',16,3,[0,-1]);
+  for(const [x,y] of [[4,5],[15,5],[5,9],[14,10]])pspFoe(C,'psraven',x,y);
+  for(const [x,y] of [[5,4],[14,4],[10,8],[5,11],[15,11]])C.light(x,y,G1);
+  C.person('psc_falconer',10,5,1);
+  psgNoLooseArch(C);psgPost(C,true);
+  return C.finish({start:{x:10,y:12,f:0}})}
 nmFeather();
 function nmFeather(){
   khNpc('psc_feather','A perch by the door','gy_rpost',d=>{const F=pscF();
