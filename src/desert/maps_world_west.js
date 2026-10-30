@@ -330,7 +330,8 @@ function wmwGmIco(c,l,i){const im=IMG['gyp_'+WMW_GMPIC[i]];if(!im||!im.width)ret
     const L=wmnLay(l),w=IMG.kh_city1_1;if(L&&L.ib&&w&&w.width){const h=18,ww=h*w.width/w.height,top=L.ib[1];ctx.save();ctx.fillStyle='rgba(40,28,14,.28)';ctx.beginPath();ctx.ellipse(l.x,top+8.5,ww*.42,2,0,0,6.3);ctx.fill();ctx.drawImage(w,l.x-ww/2,top+8-h,ww,h);ctx.restore()}return}
   if(l.k==='thornwell'){ctx.save();ctx.filter='hue-rotate(185deg) saturate(.5) brightness(1.1)';_ico(l);ctx.restore();return}
   _ico(l)}}
-{const _f=mpWorldCreatures;mpWorldCreatures=function(V,z){_f.apply(this,arguments);try{wmwDungeonMarks(V,z)}catch(e){console.error('wmw dungeons',e)}}}
+// (the little cave drawings of the desert dungeons and the Sand Road burrows are no longer drawn on the world map; the dungeons themselves and the atlas are unchanged)
+{const _f=mpWorldCreatures;mpWorldCreatures=function(V,z){_f.apply(this,arguments)}}
 
 /* ==========================================================================
    THE ATLAS OF MAZES AND DUNGEONS: a book of pages on the same parchment, opened by the Atlas button of the world map. Every area that has its own level id and a name is on the

@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.729';
+const VERSION='3.730';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -57511,7 +57511,8 @@ function wmwGmIco(c,l,i){const im=IMG['gyp_'+WMW_GMPIC[i]];if(!im||!im.width)ret
     const L=wmnLay(l),w=IMG.kh_city1_1;if(L&&L.ib&&w&&w.width){const h=18,ww=h*w.width/w.height,top=L.ib[1];ctx.save();ctx.fillStyle='rgba(40,28,14,.28)';ctx.beginPath();ctx.ellipse(l.x,top+8.5,ww*.42,2,0,0,6.3);ctx.fill();ctx.drawImage(w,l.x-ww/2,top+8-h,ww,h);ctx.restore()}return}
   if(l.k==='thornwell'){ctx.save();ctx.filter='hue-rotate(185deg) saturate(.5) brightness(1.1)';_ico(l);ctx.restore();return}
   _ico(l)}}
-{const _f=mpWorldCreatures;mpWorldCreatures=function(V,z){_f.apply(this,arguments);try{wmwDungeonMarks(V,z)}catch(e){console.error('wmw dungeons',e)}}}
+// (the little cave drawings of the desert dungeons and the Sand Road burrows are no longer drawn on the world map; the dungeons themselves and the atlas are unchanged)
+{const _f=mpWorldCreatures;mpWorldCreatures=function(V,z){_f.apply(this,arguments)}}
 
 /* ==========================================================================
    THE ATLAS OF MAZES AND DUNGEONS: a book of pages on the same parchment, opened by the Atlas button of the world map. Every area that has its own level id and a name is on the
