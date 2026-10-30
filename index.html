@@ -76314,9 +76314,13 @@ function pswaHang(id,L){
       const x=Math.round(d.x),y=Math.round(d.y);let wd=null;
       for(const [a,b] of [[0,-1],[0,1],[-1,0],[1,0]])if(open(x,y)&&!open(x+a,y+b)&&ch(x+a,y+b)!==null&&!isDoor(x+a,y+b)){wd=[a,b];break}
       if(wd){d.pic=1;d.wd=wd;d.block=false;if(d.bob===undefined)d.bob=.9;rep.webs++}else{rep.webGone++;continue}}
-    // a statue alcove that blocks a straight one-wide passage is taken out
-    if(/alcove/i.test(k)&&!d.pic&&d.block){const x=Math.round(d.x),y=Math.round(d.y);
-      if((open(x+1,y)&&open(x-1,y)&&!open(x,y+1)&&!open(x,y-1))||(open(x,y+1)&&open(x,y-1)&&!open(x+1,y)&&!open(x-1,y))){rep.alcove++;continue}}
+    // a statue alcove is a niche in a wall, never a tall slab standing in a room: one that stands free is set into the nearest real wall square beside it (not a door), or goes
+    if(/alcove/i.test(k)&&!d.pic&&!d.npc){const x=Math.round(d.x),y=Math.round(d.y);let wd=null;
+      for(const [a,b] of [[0,-1],[0,1],[-1,0],[1,0]])if(open(x,y)&&!open(x+a,y+b)&&ch(x+a,y+b)!==null&&!isDoor(x+a,y+b)){wd=[a,b];break}
+      if(!wd){rep.alcove++;continue}
+      // not in a one-wide passage, where it would be a shelf in the walkway
+      const side=(open(x+wd[1],y+wd[0])?1:0)+(open(x-wd[1],y-wd[0])?1:0);if(side<2){rep.alcove++;continue}
+      d.pic=1;d.wd=wd;d.block=false;d.sc=.52;rep.alcoveSet=(rep.alcoveSet||0)+1}
     out2.push(d)}
   // a portrait and a mirror (or any two frames) on one wall square: the second goes
   const frameAt=new Map(),out3=[];
