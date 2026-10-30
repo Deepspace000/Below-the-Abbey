@@ -129,7 +129,8 @@ function hgHive(i){
   const pickB=k=>{for(let t=0;t<60;t++){const c=pick(k+t*1000);if(c&&blockOk(c[0],c[1]))return c}return null};
   for(let k=0;k<4+i;k++){const c=pickB(200+k);if(c)decor.push({k:CH[(hs(k,i,sd+6)*3)|0],x:c[0],y:c[1],block:true})}
   for(let k=0;k<9;k++){const c=pickB(300+k);if(c)decor.push({k:k%2?'hg_waxbarrel':'hg_jar',x:c[0],y:c[1],block:true})}
-  for(let k=0;k<26;k++){const c=pickB(400+k);if(c)decor.push({k:'hg_eggs',x:c[0],y:c[1],block:true,sc:.7+hs(k,3,sd+7)*.4})}
+  for(let k=0;k<26;k++){const c=pickB(400+k);if(!c)continue;const e={k:'hg_eggs',x:c[0],y:c[1],block:true,sc:.7+hs(k,3,sd+7)*.4},had=decor.find(d=>d.k==='hg_eggs'&&d.x===c[0]&&d.y===c[1]);
+    if(had){delete had.walk;delete had.deco;Object.assign(had,e)}else decor.push(e)}   // (a chamber centre already has its clutch of eggs: that one becomes the solid clutch, never two on one square)
   for(let k=0;k<12;k++){const c=pick(500+k);if(c)items.push({k:['hgcomb','hgcomb','hgjelly','hggrubs'][k%4],x:c[0],y:c[1]})}
   const lv={rows:g.map(r=>r.join('')),start:{x:sp.x,y:sp.y-1,f:0},enemies,items,decor,chars,day:0,floor:hgHoneyFloor(i),name:HG_HIVE_NAMES[i],label:HG_HIVE_NAMES[i],diff:HG.DIFF+i+1,ceilH:2.7,torchGap:1e9,noTele:true,portals:[],lights,
     mapNames:[{t:HG_HIVE_NAMES[i],x:sp.x,y:H-1,k:'place'},{t:i===3?'The Queen’s Cell':'The Heart of the Hive',x:far.x,y:far.y-4,k:'place'}]};

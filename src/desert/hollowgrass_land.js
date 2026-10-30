@@ -36,14 +36,14 @@ function hgBuild(){
     for(const dx of [-1,0,1])for(const dy of [1,2,3])for(const sg of [-1,1])fm[I(cx+dx,cy+sg*(R+dy))]='1';
     for(const dx of [-1,0,1])for(const sg of [-1,1])fm[I(cx+dx,cy+sg*R)]='1';
     const CITY=(typeof HGTCITIES!=='undefined')?HGTCITIES[HG_TOWNS[ti].k]:null; // a town with a real terraced city: its wall is closed and its gates lead into the city level
-    for(let t=-R;t<=R;t++)for(const [x,y,gap] of [[cx+t,cy-R,!CITY&&Math.abs(t)<=1],[cx+t,cy+R,!CITY&&Math.abs(t)<=1],[cx-R,cy+t,false],[cx+R,cy+t,false]]){if(gap)continue;used.add(K(x,y));decor.push({k:'hg_palisade',x,y,block:true,sc:1,ox:(hs(x,y,sd+20)-.5)*.3})}
+    for(let t=-R;t<=R;t++)for(const [x,y,gap] of [[cx+t,cy-R,!CITY&&Math.abs(t)<=1],[cx+t,cy+R,!CITY&&Math.abs(t)<=1],[cx-R,cy+t,Math.abs(t)===R],[cx+R,cy+t,Math.abs(t)===R]]){if(gap)continue;   /* (the four corners belong to the north and south rows, so no post is set twice) */used.add(K(x,y));decor.push({k:'hg_palisade',x,y,block:true,sc:1,ox:(hs(x,y,sd+20)-.5)*.3})}
     for(const [x,y] of [[cx-2,cy-R-1],[cx+2,cy-R-1],[cx-2,cy+R+1],[cx+2,cy+R+1],[cx-2,cy-R+1],[cx+2,cy-R+1],[cx-2,cy+R-1],[cx+2,cy+R-1]]){decor.push({k:'hg_lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y]);used.add(K(x,y))}
     if(CITY){ // the gates: each way out of the city on level 470 is a pale shell gate with a lamp either side; walking into it enters the city
       const exits=[CITY.exitDoor,CITY.exitDoorNorth,CITY.exitDoorSouth].filter(e=>e&&e.at);
       for(const e of exits){const f=e.at.f,gx=e.at.x-DIRS_HG[f][0],gy=e.at.y-DIRS_HG[f][1],south=e.at.y>cy;
         const arr=south?(CITY.entry&&CITY.entry.y>75?CITY.entry:{x:e.x,y:e.y-1,f:0}):(CITY.entryNorth||CITY.entry&&CITY.entry.y<75&&CITY.entry||{x:e.x,y:e.y+1,f:2});
         used.add(K(gx,gy));decor.push({k:'hg_arch',x:gx,y:gy,block:true,sc:1.8,enter:{to:CITY.level,x:arr.x,y:arr.y,f:arr.f}});
-        for(const sx of [-2,2]){const lx=gx+(f%2===0?sx:0),ly=gy+(f%2===1?sx:0);decor.push({k:'hg_lamp',x:lx,y:ly,block:false,walk:true,deco:true});lights.push([lx,ly]);used.add(K(lx,ly))}}
+        for(const sx of [-2,2]){const lx=gx+(f%2===0?sx:0),ly=gy+(f%2===1?sx:0);if(decor.some(d=>d.k==='hg_lamp'&&d.x===lx&&d.y===ly))continue;decor.push({k:'hg_lamp',x:lx,y:ly,block:false,walk:true,deco:true});lights.push([lx,ly]);used.add(K(lx,ly))}}
       return}
     // houses in the blocks between the lanes, apart from the four round the little square
     for(const bx of [-8,-3,2,7])for(const by of [-8,-3,2,7]){
@@ -71,7 +71,7 @@ function hgBuild(){
   // they stand out in the open field, never on or beside a path (floor type 1)
   const fmNear=(x,y,r)=>{for(let j=-r;j<=r;j+=2)for(let i=-r;i<=r;i+=2){const xx=x+i,yy=y+j;if(xx>=0&&yy>=0&&xx<W&&yy<H&&fm[I(xx,yy)]==='1')return true}return false};
   let nf=0;for(let t=0;t<600&&nf<30;t++){const x=6+((hs(t,7,sd+60)*(W-12))|0),y=6+((hs(t,8,sd+60)*(H-12))|0);if(used.has(K(x,y))||near(x,y,keepOut,12)||fmNear(x,y,6)||used.has(K(x-1,y))||used.has(K(x+1,y))||used.has(K(x,y-1)))continue;used.add(K(x,y));nf++;
-    decor.push({k:'hg_frog'+(nf%2),x,y,block:true,npc:'hg_frogbeast',sc:.95+hs(x,y,sd+61)*.45,bob:-.5},{k:'hg_frog0',x:x-1,y,block:true,sc:.0001},{k:'hg_frog0',x:x+1,y,block:true,sc:.0001},{k:'hg_frog0',x,y:y-1,block:true,sc:.0001});used.add(K(x-1,y));used.add(K(x+1,y));used.add(K(x,y-1))}
+    decor.push({k:'hg_frog'+(nf%2),x,y,block:true,npc:'hg_frogbeast',sc:.95+hs(x,y,sd+61)*.45},{k:'hg_frog0',x:x-1,y,block:true,sc:.0001},{k:'hg_frog0',x:x+1,y,block:true,sc:.0001},{k:'hg_frog0',x,y:y-1,block:true,sc:.0001});used.add(K(x-1,y));used.add(K(x+1,y));used.add(K(x,y-1))}
   // grass, bracken and things to pick
   const GR=['pgrass0','pgrass1','pgrass2','pgrass3'].filter(k=>IMG[k]);let ng=0;
   if(GR.length)for(let t=0;t<2400&&ng<760;t++){const x=3+((hs(t,9,sd+70)*(W-6))|0),y=3+((hs(t,10,sd+70)*(H-6))|0);if(used.has(K(x,y))||fm[I(x,y)]==='1')continue;ng++;
@@ -81,7 +81,7 @@ function hgBuild(){
   // wax chests lie out in the grass here and there
   for(let t=0,c=0;t<800&&c<10;t++){const x=8+((hs(t,13,sd+90)*(W-16))|0),y=8+((hs(t,14,sd+90)*(H-16))|0);if(used.has(K(x,y))||near(x,y,towns,14)||near(x,y,[[HG.START.x,HG.START.y]],12))continue;used.add(K(x,y));c++;decor.push({k:['hg_chestweed','hg_chestwax','hg_chestjelly'][c%3],x,y,block:true})}
   // the hives
-  hives.forEach((p,i)=>{decor.push({k:'hg_hive',x:p[0],y:p[1],block:true,enter:{to:HG.HIVES[i],x:0,y:0,f:0},sc:1.05,bob:-.75});used.add(K(p[0],p[1]));lights.push([p[0],p[1]+2]);fm[I(p[0],p[1]+1)]='1';fm[I(p[0],p[1]+2)]='1'});
+  hives.forEach((p,i)=>{decor.push({k:'hg_hive',x:p[0],y:p[1],block:true,enter:{to:HG.HIVES[i],x:0,y:0,f:0},sc:1.05});used.add(K(p[0],p[1]));lights.push([p[0],p[1]+2]);fm[I(p[0],p[1]+1)]='1';fm[I(p[0],p[1]+2)]='1'});
   // the gate in the south, back to the Hollow Land
   decor.push({k:'hg_gate',x:HG.START.x,y:HG.H-4,block:true,enter:{to:HL.CAV,x:61,y:57,f:3}});
   // the wizard, a little way up the track, who will come to meet the party (see hollowgrass_talk.js)
