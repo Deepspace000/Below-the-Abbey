@@ -30,7 +30,7 @@ const WMN_SPEC={
   road:[['l_grove',0,0,26,1],['l_storm',0,-8,26,1]],tunnel:[['i_cave',0,0,22]],ironhill:[['i_castle',0,0,40]],graves:[['i_graves',0,0,26]],mines:[['i_mine',0,0,28]],
   moor:[['l_moor',0,0,38,1]],pass:[['i_mountains',0,0,32]],greendale:[['i_oaks',0,0,28]],anaea:[['i_town',0,0,28]],
   sandroad:[],reddunes:[],bluedunes:[],whitedunes:[],flatlands:[],goldenerg:[],violeterg:[],   // the desert areas have no picture of their own: the dunes of their colour all round them, and the name
-  tomb:[['i_pyramid',0,0,38,1]],scoria:[['i_desertcity',0,0,38]],yarrim:[['i_seaside',0,0,30]],saltbarrow:[['i_oaks',0,0,24]],bells:[['l_drowned',0,0,32,1]],cinder:[['l_volcano',0,0,32]],
+  tomb:[['i_pyramid',0,0,38,1]],scoria:[['i_desertcity',0,0,38]],yarrim:[['i_seaside',0,0,30]],saltbarrow:[['i_oaks',0,0,24]],bells:[['l_drowned',0,0,32,1]],cinder:[['l_volcano',0,0,20]],
   lastlight:[['l_lighthouse',0,0,36]],openSea:[['l_waves',0,0,36,1],['l_storm',0,-6,28,1]],oldhaven:[['i_castle',0,0,40]],oakwood:[['i_oaks',0,0,28]],monastery:[['l_monastery',0,0,34]],
   landpath:[['i_pines',0,0,26]],below:[['i_cave',0,0,20]],orangecastle:[['i_spire',0,0,42]],hollowgrass:[['i_oaks',0,0,36]],deephollow:[['i_stonemaze',0,0,34,1]],goldencrypt:[['i_crypt',0,0,28]],rubymaze:[['i_rubymaze',0,0,30,1]]};
 const WMN_ICSPEC={town:'i_town',castle:'i_castle',abbey:'i_abbey',cave:'i_cave',mine:'i_mine',graves:'i_graves',crypt:'i_crypt',trees:'i_oaks',mountains:'i_mountains',orangecastle:'i_spire',rubymaze:'i_rubymaze'};
