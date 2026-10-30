@@ -12,7 +12,7 @@ for r, d, f in os.walk(os.path.join(ROOT, 'assets')):
     if os.sep + 'audio' in r + os.sep: continue
     for x in sorted(f):
         e = os.path.splitext(x)[1].lower()
-        if e in TYPES: imgs.append(os.path.join(r, x))
+        if e in TYPES and not x.startswith('Gemini_Generated_Image'): imgs.append(os.path.join(r, x))   # raw generator sources: nothing in the game loads them, and itch.io caps a browser build at 500 MB extracted
 imgs.sort()
 # Each picture goes into a pack chosen by a hash of its own path (NB buckets), not by its place in a sorted list. So adding or changing a picture only changes
 # the one pack it belongs to, and itch.io (butler) sends a small update instead of re-sending every pack. Packs hold a few MB each.
@@ -40,6 +40,7 @@ for r, d, f in os.walk(os.path.join(ROOT, 'assets')):
     for x in f:
         p = os.path.join(r, x)
         if os.path.splitext(x)[1].lower() in TYPES: continue
+        if x.startswith('Gemini_Generated_Image'): continue
         rel = os.path.relpath(p, ROOT)
         os.makedirs(os.path.dirname(os.path.join(OUT, rel)), exist_ok=True)
         shutil.copy2(p, os.path.join(OUT, rel))
