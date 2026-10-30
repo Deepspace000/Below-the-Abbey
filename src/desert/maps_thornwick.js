@@ -147,3 +147,17 @@ draw(c,x,L,api){
   api.panel(x,392,40,84,236);
   api.notes(x,['Thornwick is a small timber town inside a ring of log walls, with a gate at each end of the main street.','Market Street runs from the west gate to the east gate, past the fountain square.','The mayor lives on the north side. The inn, the store and the bakery face the street from the south.','The east gate is barred. Only the mayor can order it opened.','Goats wander the lanes and the back yards.'],398,50,72,6.2,4);
 }});
+
+/* the alleys between the houses of Thornwick (3) and Ironhill (13) are one square wide: a barrel or a crate standing in one is moved out of it, to the nearest
+   square that is not in a passage and has a house wall beside it (the castle standard: nothing stands in a one-wide passage). Done once, before the level loads. */
+function ktAlleyTidy(L){
+  if(!L||L._ktAlley||!L.rows||!L.decor)return;L._ktAlley=1;
+  const H=L.rows.length,W=L.rows[0].length,ch=L.chars||{};
+  const open=(x,y)=>{if(x<0||y<0||x>=W||y>=H)return false;const c=L.rows[y][x];return ch[c]!==undefined?ch[c]===0:(c==='.'||c==='t')};
+  const used=new Set();for(const d of L.decor)used.add(d.x+','+d.y);for(const i of (L.items||[]))used.add(i.x+','+i.y);for(const e of (L.enemies||[]))used.add(e.x+','+e.y);
+  const lane=(x,y)=>(open(x-1,y)&&open(x+1,y)&&!open(x,y-1)&&!open(x,y+1))||(open(x,y-1)&&open(x,y+1)&&!open(x-1,y)&&!open(x+1,y));
+  const byWall=(x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>!open(x+a,y+b));
+  for(const d of L.decor){if(!d.block||d.npc||!/^(barrel|crate|sack)/.test(d.k)||!open(d.x,d.y)||!lane(d.x,d.y))continue;
+    let best=null;for(let r=1;r<=4&&!best;r++)for(let y=d.y-r;y<=d.y+r&&!best;y++)for(let x=d.x-r;x<=d.x+r;x++){if(Math.abs(x-d.x)+Math.abs(y-d.y)!==r)continue;if(open(x,y)&&!used.has(x+','+y)&&!lane(x,y)&&byWall(x,y)&&[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>open(x+a,y+b)).length>=2){best=[x,y];break}}
+    if(best){used.delete(d.x+','+d.y);d.x=best[0];d.y=best[1];used.add(best.join(','))}}}
+{const _ll=loadLevel;loadLevel=function(n){try{if(n===3||n===13)ktAlleyTidy(LEVELS[n])}catch(e){console.error('ktAlley',e)}return _ll.apply(this,arguments)}}

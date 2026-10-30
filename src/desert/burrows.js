@@ -65,6 +65,8 @@ for(let k=0;k<BURROW_N;k++){
   LEVELS[BURROW_BASE+k]={rows:B.rows,fmap:B.fm,start:B.start,enemies:B.enemies,items:B.items,decor:B.decor,lights:B.lights,secrets:[],
     amb:.34,ceilH:1.3,floor:'tombslab',floorSet:['tombslab','tombgold','tombsand','tombdark','tomblapis','tombred'],ceil:'tomb',name:BUR_THEMES[k%BUR_THEMES.length].name,label:'Buried Chamber',diff:15+(k%3),
     portals:[{to:41,x:spot.x,y:spot.y+1,f:2,tex:'tomb'}]};
+  // the mound on the Sand Road lands the party on this burrow's own start (the foot of its stair), not on a fixed square that is a wall in most burrows
+  for(const d of SANDROAD.decor)if(d.enter&&d.enter.to===BURROW_BASE+k){d.enter.x=B.start.x;d.enter.y=B.start.y;d.enter.f=B.start.f|0}
 }
 // the tiny dungeons share the tomb's walls and the same music as the other small dungeons
 function makeBurrowArt(){for(let k=0;k<BURROW_N;k++)LEVELS[BURROW_BASE+k].chars=LEVEL42_DATA.chars;if(typeof makeDngArt==='function')makeDngArt()}

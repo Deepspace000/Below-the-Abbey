@@ -19,12 +19,13 @@ function buildErg(E,seed,rk){
   const decor=[],scen=[],items=[],enemies=[],taken=new Set();
   const sc=(k,x,y,o)=>scen.push(Object.assign({k,wx:x+.5+((o&&o.ox)||0),wy:y+.5+((o&&o.oy)||0),sc:(o&&o.sc)||1,decor:{k,walk:true,x,y}}));
   const put=(k,x,y,o)=>{taken.add(x+','+y);decor.push(Object.assign({k,x,y,block:false},o||{}))};
+  const lay=(k,x,y)=>{for(let r=0;r<=2;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const a=x+dx,b=y+dy;if(rows[b]&&rows[b][a]==='.'&&!taken.has(a+','+b)&&!items.some(i=>i.x===a&&i.y===b)){items.push({k,x:a,y:b});return}}}; // a find lies on open sand, never under a palm, a rock or a pillar
   const inland=(x,y)=>x>16&&y>16&&x<W-17&&y<H-17&&Math.abs(y-E.CY)+(x<30?0:99)>14&&od(x,y)>9;
   E.OASES.forEach(([cx,cy],n)=>{ // a ring of reeds, palms and shrubs, and food and water beside the pool
     for(let a=0;a<14;a+=2){const r=2.9+R(a,n,40)*.5;sc('greeds',Math.round(cx+Math.cos(a/14*TAU)*r),Math.round(cy+Math.sin(a/14*TAU)*r*.9),{sc:.8+R(a,n,41)*.5})}
     for(let a=0;a<6;a++){const r=5.6+R(a,n,42)*1.1;put('dpalm'+((a+n)%4),Math.round(cx+Math.cos(a/6*TAU+.3)*r),Math.round(cy+Math.sin(a/6*TAU+.3)*r*.9),{block:true,sc:.9+R(a,n,43)*.35})}
     for(let a=0;a<7;a++){const r=4.8+R(a,n,44)*2.4;sc('dshrub'+(a%3),Math.round(cx+Math.cos(a*1.9)*r),Math.round(cy+Math.sin(a*1.9)*r*.9),{ox:(R(a,n,45)-.5)*.6,oy:(R(a,n,46)-.5)*.6,sc:.8+R(a,n,47)*.5})}
-    [[0,-4.4,'dates'],[2.4,-4,'water'],[-2.6,-3.9,'dates'],[4.2,-1.6,'water'],[-4.3,-1.2,'dates'],[1.6,4.4,'water'],[-1.9,4.3,n?'apple':'bread']].forEach(([dx,dy,k])=>items.push({k,x:Math.round(cx+dx),y:Math.round(cy+dy)}));
+    [[0,-4.4,'dates'],[2.4,-4,'water'],[-2.6,-3.9,'dates'],[4.2,-1.6,'water'],[-4.3,-1.2,'dates'],[1.6,4.4,'water'],[-1.9,4.3,n?'apple':'bread']].forEach(([dx,dy,k])=>lay(k,Math.round(cx+dx),Math.round(cy+dy)));
   });
   for(let y=18;y<H-18;y+=2)for(let x=18;x<W-18;x+=2){ // the empty land
     if(!inland(x,y))continue;const r=R(x,y,20),ox=(R(x,y,3)-.5)*1.4,oy=(R(x,y,4)-.5)*1.4;
@@ -40,7 +41,7 @@ function buildErg(E,seed,rk){
     for(let a=0;a<8;a++){const x=Math.round(cx+Math.cos(a/8*TAU)*4),y=Math.round(cy+Math.sin(a/8*TAU)*4);if(a%2||n%3===0)put('dpillar'+(a%2),x,y,{block:true})}
     if(n%2===0)put('chest',cx,cy,{block:true,magic:DS_MAGIC_TOMB[(n*5+seed)%DS_MAGIC_TOMB.length],goldAmt:380+n*30});
     else put('treasure',cx,cy,{block:true,plain:true});
-    items.push({k:'potion',x:cx+2,y:cy+1});
+    lay('potion',cx+2,cy+1);
   });
   const camp=(t,x,y,n,lvl)=>{let p=0;for(let k=0;k<n*10&&p<n;k++){const ex=x+Math.round((R(x,y,100+k)*2-1)*4),ey=y+Math.round((R(x,y,160+k)*2-1)*4);if(!taken.has(ex+','+ey)&&!enemies.some(e=>e.x===ex&&e.y===ey)&&!items.some(i=>i.x===ex&&i.y===ey)&&ex>14&&ey>14&&ex<W-15&&ey<H-15&&od(ex,ey)>8){enemies.push({t,x:ex,y:ey,lvl});p++}}};
   const T=['scorpion','dwolf','vulture','nomad','mummy','scorpion'];

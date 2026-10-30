@@ -18,14 +18,22 @@ const WM_PROPS={keg:.5,barrel_tall:.92,crate_lid:.64,barrel:.72,cask:.62,chest:.
   signpost:1.05,web:1.5,bell:1.0,skeleton:.6,boat:.95,noticeboard:1.15,gold:.42,orb_pedestal:1.3,brazier:1.5,lantern_hang:1.0,lamp_post:1.6,candelabra:1.05,cage_lantern:.85,
   crystal_tall:1.6,crystal_small:.72,crystal_white:1.5,crystal_teal:1.0,crystal_pillar:2.1,geode:1.0,mush_cluster:.95,mush_tall:1.5,mush_tree:2.2,moss_mound:.55,mush_bulb:1.3,bellflower:.95,
   lever_up:1.2,lever_down:1.2,crank:1.2,chain:1.5,button:1.0,scale:1.15,key:.5,lantern_gold:1.0,lantern_lilac:1.0,lantern_violet:1.0,rune:1.0,keydoor:1.5};
+/* the web is painted strung between two posts; on the walls of the maze it hangs as a plain web: the middle of the picture, without the posts, flat on the wall (wmWebsOnWalls) */
+function wmWebArt(){
+  if(IMG.wm_webw)return;const im=IMG.art_wm_web;if(!im||!im.width)return;
+  const x0=Math.round(im.width*.135),w=Math.round(im.width*.73),cv=document.createElement('canvas');cv.width=w;cv.height=im.height;cv.getContext('2d').drawImage(im,x0,0,w,im.height,0,0,w,im.height);
+  IMG.wm_webw=cv;NPC_H.wm_web=WM_WEB_H}
+const WM_WEB_H=.8;
 function wmArt(){
+  wmWebArt();
   if(WM.art)return;
   for(const k in WM_PROPS){const im=IMG['art_wm_'+k];if(im){IMG['wm_'+k]=im;NPC_H['wm_'+k]=WM_PROPS[k]}}
+  if(!IMG.art_wm_barrel_stack&&IMG.art_wm_barrel){IMG.wm_barrel_stack=IMG.art_wm_barrel;NPC_H.wm_barrel_stack=WM_PROPS.barrel} // no stack was ever painted: the cellars' barrel stands in for it
   const mk=(name,src,fn)=>{const im=IMG[src];if(!im||!im.width)return null;const [c,x]=tcv();x.drawImage(im,0,0,TS,TS);const d=x.getImageData(0,0,TS,TS).data;if(fn)fn(d);return d};
   const fl=(n,src,k)=>{const d=mk(n,src,k?(p=>{for(let i=0;i<p.length;i+=4){p[i]*=k[0];p[i+1]*=k[1];p[i+2]*=k[2]}}):null);if(d)FLOORS[n]=d};
   fl('wmflag','art_floor_wm_flag');fl('wmcobble','art_floor_wm_cobble');fl('wmmoss','art_floor_wm_moss');fl('wmwater','art_floor_wm_water',[1.1,1.05,1.2]);
   {const d=mk('wmceil','art_ceil_wm_brick');if(d)CEILS.wmceil=d;const e=mk('wmceilx','art_ceil_wm_crystal');if(e)CEILS.wmceilx=e}
-  wmOrbArt();
+  wmOrbArt();wmWebArt();
   WM.art=true}
 /* ---------- the orb frames: the painted cage lantern (an orb in an ornate iron frame), with the teal of its glow turned to this floor's orb colour; a dim copy for the empty frame ---------- */
 WM.ORBS=[{n:'amber gold',hue:42,sat:1.25,css:'#ffb838',col:[1.5,1.05,.4]},{n:'violet pink',hue:318,sat:1.1,css:'#ff6ad8',col:[1.5,.55,1.15]},{n:'cyan blue',hue:200,sat:1.2,css:'#46c8ff',col:[.45,1.0,1.55]},{n:'emerald green',hue:132,sat:1.15,css:'#40e070',col:[.5,1.4,.6]}];

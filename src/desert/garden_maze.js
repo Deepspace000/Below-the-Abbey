@@ -63,15 +63,23 @@ function gmBuild(){
   // ---- helpers for the pieces ----
   const doorCell=new Set();for(const d of m.doors)doorCell.add(d.x+','+d.y);for(const d of m.sdoors)doorCell.add(d.x+','+d.y);
   const near=new Set();for(const d of m.doors){for(let k=-1;k<=1;k++)for(let l=-1;l<=1;l++)near.add((d.x+k)+','+(d.y+l));if(d.dx!==undefined){for(let t=1;t<=3;t++)near.add((d.x-Math.sign(d.dx)*t)+','+(d.y-Math.sign(d.dy)*t))}}
+  for(const gy of [1,H-2]){const dy=gy===1?1:-1;for(let k=-1;k<=1;k++)for(let t=0;t<=2;t++)near.add((45+k)+','+(gy+dy*t))} // the two gates (north to Wenlock, south to the Deeper Hollow): the way in stays clear
   const free=(x,y)=>isOpen(x,y)&&!occ.has(x+','+y)&&!near.has(x+','+y);
+  const placed=new Set(),faces=new Set(); // wall faces that already carry a picture (a trellis, a niche, a plaque): one picture per face
   const dec=(a,x,y,o)=>{o=o||{};const k=a.startsWith('gm_')||a==='chest'?a:'gm_'+a;if(!isOpen(x,y))return null;
     const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false;if(o.block)d.solid=1}if(o.txt)d.txt=o.txt;if(o.bob)d.bob=o.bob;if(o.goldAmt)d.goldAmt=o.goldAmt;if(o.wd){d.wd=o.wd;d.pic=1}
+    if(o.wd){const fk=x+','+y+','+o.wd;if(faces.has(fk))return null;faces.add(fk)}else{const pk=k+'@'+x+','+y;if(placed.has(pk))return null;placed.add(pk)} // the same piece twice on one square: once is enough
     decor.push(d);if(o.block||o.occ)occ.add(x+','+y);return d};
   const D=(a,x,y,o)=>free(x,y)?dec(a,x,y,o):null;                 // only on free squares
   const DB=(a,x,y,o)=>D(a,x,y,Object.assign({block:true},o||{}));  // standing in the way
   const lamp=(x,y)=>{if(D('lamp',x,y)){lights.push([x,y])}};
   const plaqueN=new Set();let plq=0;
-  const plaque=(x,y,wd,t)=>{const T=t||GM_PLAQUES[(plq++)%GM_PLAQUES.length];if(!isOpen(x,y))return;decor.push({k:'sign_gm',x,y,block:false,wd,txt:[T[0],T[1]]})};
+  // a plaque hangs flat on a hedge: on its own face (another face of the same square when that one is taken), and when the hedge behind is open (a doorway) it moves along the wall to the nearest hedge
+  const plaque=(x,y,wd,t)=>{const T=t||GM_PLAQUES[(plq++)%GM_PLAQUES.length];if(!isOpen(x,y))return;
+    const ok=(px,py,w)=>isOpen(px,py)&&!isOpen(px+w[0],py+w[1])&&!faces.has(px+','+py+','+w)&&!doorCell.has(px+','+py);
+    let at=null;for(let s=0;s<=3&&!at;s++)for(const sg of (s?[1,-1]:[1])){const px=x+(wd[0]?0:s*sg),py=y+(wd[0]?s*sg:0);if(ok(px,py,wd)){at=[px,py,wd];break}}
+    if(!at)for(const w of [[0,-1],[0,1],[1,0],[-1,0]])if(ok(x,y,w)){at=[x,y,w];break}
+    if(!at)return;faces.add(at[0]+','+at[1]+','+at[2]);decor.push({k:'sign_gm',x:at[0],y:at[1],block:false,wd:at[2],txt:[T[0],T[1]]})};
   const foe=(t,x,y)=>{if(!isOpen(x,y))return;enemies.push({t,x,y,lvl:80});occ.add(x+','+y)};
   const ring=(q,pad,fn)=>{for(let x=q.x0+pad;x<=q.x1-pad;x++){fn(x,q.y0+pad);fn(x,q.y1-pad)}for(let y=q.y0+pad+1;y<q.y1-pad;y++){fn(q.x0+pad,y);fn(q.x1-pad,y)}};
   // a low hedge cell inside a room (blocks, painted as a clipped box hedge)

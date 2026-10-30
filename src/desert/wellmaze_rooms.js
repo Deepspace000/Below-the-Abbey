@@ -75,8 +75,8 @@ WMFU.library=function(c,r){const R=c.rect(r);
   c.light(R.cx,R.y0+1,WM_COL.lil);c.light(R.cx,R.y1,WM_COL.vio);
   wmFoes(c,r,['wmwraith','wmspider','wmwraith'],3)};
 WMFU.mirror=function(c,r){const R=c.rect(r);
-  const mm=[];for(let x=R.x0;x<=R.x1;x+=2)if(c.free(x,R.y0))mm.push([x,R.y0]);for(let x=R.x0;x<=R.x1;x+=2)if(c.free(x,R.y1))mm.push([x,R.y1]);
-  mm.forEach(([x,y],i)=>{c.D('wm_mirror',x,y,{block:true,npc:'wmmirror_'+(i%3)})});
+  const mm=[];for(let x=R.x0;x<=R.x1;x+=2)if(c.free(x,R.y0))mm.push([x,R.y0]);if(R.y1!==R.y0)for(let x=R.x0;x<=R.x1;x+=2)if(c.free(x,R.y1))mm.push([x,R.y1]); // a hall one square deep has one row of mirrors, not the same row twice
+  mm.forEach(([x,y],i)=>{if(c.free(x,y))c.D('wm_mirror',x,y,{block:true,npc:'wmmirror_'+(i%3)})}); // a mirror moved off a doorway may have taken a later mirror's square
   c.prop('statue',R.cx,R.cy,{});c.note('mirror1',R.x0,R.cy,'signpost');
   c.light(R.cx,R.cy,WM_COL.wht);c.light(R.x0,R.y0,WM_COL.vio);c.light(R.x1,R.y1,WM_COL.vio);
   wmFoes(c,r,['wmwraith','wmcultist','wmwraith'],3)};

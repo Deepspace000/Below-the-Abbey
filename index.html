@@ -8509,6 +8509,7 @@ const DS_MAGIC_TOMB=['sunblade','dunebow','sandstaff','jackalhelm','goldmail','s
    ========================================================================== */
 const RD={W:168,H:224,CY:210,CX0:84,NORTH:6};
 const BURROW_N=10,BURROW_BASE=50,BURROW_START={x:10,y:14,f:0}; // the mounds in the dunes lead to levels 50 to 59
+const DPLANT_FOOT=[0,0,.5*.117,.45*.065]; // dplant0..3: the empty rows under the stem (fraction of the picture) times the drawn height (NPC_H), sunk so the plant stands on the sand
 const rdStep=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 function rdCentre(y){return RD.CX0+7*Math.sin(y/19)+9*Math.sin(y/47+1.3)}      // the road's middle once it has turned north
 function rdHalf(y){const t=clamp((RD.CY-y)/(RD.CY-RD.NORTH),0,1);return 4+74*rdStep(.14,.62,t)}   // half the width of the land: a funnel
@@ -8580,7 +8581,7 @@ function buildSandRoad(){
     if(dp>0){
       if(DUNE_SPRITES&&R(x,y,20)<.06*dp&&!nearDune(x,y)){dunes.add(x+','+y);put('dune'+((R(x,y,21)*3)|0),x,y,{block:true,ox:oX*.4,oy:oY*.3,sc:.95+R(x,y,22)*.7})}
       else if(R(x,y,23)<.011*dp)put('drock'+((R(x,y,24)*3)|0),x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,25)*.5});
-      else if(R(x,y,26)<.008*dp)put('dplant'+((R(x,y,29)*4)|0),x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,27)*.4});
+      else if(R(x,y,26)<.008*dp){const v=(R(x,y,29)*4)|0,s=.9+R(x,y,27)*.4;put('dplant'+v,x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:s,bob:-DPLANT_FOOT[v]*s})} // dplant2 and dplant3 have empty rows under the stem: sink them by that much so they stand on the sand
       else if(R(x,y,28)<.005*dp)put('ddead',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,29)*.5});
       else if(R(x,y,30)<.045*dp)sc('dshrub'+((R(x,y,31)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,32)*.7});
       else if(R(x,y,33)<.003*dp)sc('dbones',x,y,{ox:oX,oy:oY,sc:.9+R(x,y,34)*.4});
@@ -8588,7 +8589,8 @@ function buildSandRoad(){
     }
   }
   // ---- landmarks ----
-  for(const yy of [192,146,98]){const c=Math.round(rdCentre(yy));put('dobelisk',c+5,yy,{block:true});put('dobelisk',c-5,yy,{block:true})}
+  // pairs of obelisks beside the road; where the land is narrow they stand a little closer in, never inside the trees
+  for(const yy of [192,146,98]){const c=Math.round(rdCentre(yy));for(const s of [1,-1])for(let d=5;d>=3;d--){const x=c+s*d;if(open[idx(x,yy)]&&!occ.has(x+','+yy)){put('dobelisk',x,yy,{block:true});break}}}
   { // an oasis
     const oy=122,ox=Math.round(rdCentre(oy))+12;
     put('well',ox,oy,{block:true});
@@ -8899,6 +8901,8 @@ for(let k=0;k<BURROW_N;k++){
   LEVELS[BURROW_BASE+k]={rows:B.rows,fmap:B.fm,start:B.start,enemies:B.enemies,items:B.items,decor:B.decor,lights:B.lights,secrets:[],
     amb:.34,ceilH:1.3,floor:'tombslab',floorSet:['tombslab','tombgold','tombsand','tombdark','tomblapis','tombred'],ceil:'tomb',name:BUR_THEMES[k%BUR_THEMES.length].name,label:'Buried Chamber',diff:15+(k%3),
     portals:[{to:41,x:spot.x,y:spot.y+1,f:2,tex:'tomb'}]};
+  // the mound on the Sand Road lands the party on this burrow's own start (the foot of its stair), not on a fixed square that is a wall in most burrows
+  for(const d of SANDROAD.decor)if(d.enter&&d.enter.to===BURROW_BASE+k){d.enter.x=B.start.x;d.enter.y=B.start.y;d.enter.f=B.start.f|0}
 }
 // the tiny dungeons share the tomb's walls and the same music as the other small dungeons
 function makeBurrowArt(){for(let k=0;k<BURROW_N;k++)LEVELS[BURROW_BASE+k].chars=LEVEL42_DATA.chars;if(typeof makeDngArt==='function')makeDngArt()}
@@ -8937,7 +8941,7 @@ function buildRedDunes(){
     if(road)continue;
     if(DUNE_SPRITES&&R(x,y,20)<.055&&!nearDune(x,y)){dunes.add(x+','+y);put('rdune'+((R(x,y,21)*3)|0),x,y,{block:true,ox:oX*.4,oy:oY*.3,sc:.95+R(x,y,22)*.8})}
     else if(R(x,y,23)<.016)put('rrock'+((R(x,y,24)*3)|0),x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,25)*.7});
-    else if(R(x,y,26)<.006)put('dplant'+((R(x,y,29)*4)|0),x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,27)*.4});
+    else if(R(x,y,26)<.006){const v=(R(x,y,29)*4)|0,s=.9+R(x,y,27)*.4;put('dplant'+v,x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:s,bob:-DPLANT_FOOT[v]*s})} // dplant2 and dplant3 have empty rows under the stem: sink them by that much so they stand on the sand
     else if(R(x,y,28)<.007)put('ddead',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,29)*.5});
     else if(R(x,y,30)<.04)sc('dshrub'+((R(x,y,31)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,32)*.7});
     else if(R(x,y,33)<.004)sc('dbones',x,y,{ox:oX,oy:oY,sc:.9+R(x,y,34)*.4});
@@ -9020,7 +9024,10 @@ function buildBlueDunes(){
   for(let a=0;a<7;a++){const r=4.8+R(a,7,44)*2.4,x=Math.round(cx+Math.cos(a*1.9)*r),y=Math.round(cy+Math.sin(a*1.9)*r*.9);sc('dshrub'+(a%3),x,y,{ox:(R(a,8,45)-.5)*.6,oy:(R(a,9,45)-.5)*.6,sc:.8+R(a,10,45)*.5})}
   // food and water to be found beside the pool
   const spots=[[0,-4.4],[2.4,-4],[-2.6,-3.9],[4.2,-1.6],[-4.3,-1.2],[4.1,2.2],[-4,2.5],[1.6,4.4],[-1.9,4.3]];
-  ['dates','water','dates','water','dates','water','apple','bread','water'].forEach((k,i)=>{const [dx,dy]=spots[i];items.push({k,x:Math.round(cx+dx),y:Math.round(cy+dy)})});
+  const solid=new Set(decor.filter(d=>d.block).map(d=>d.x+','+d.y));
+  ['dates','water','dates','water','dates','water','apple','bread','water'].forEach((k,i)=>{const [dx,dy]=spots[i];let x=Math.round(cx+dx),y=Math.round(cy+dy);
+    if(solid.has(x+','+y)){const n=[[0,0],[-1,0],[1,0],[0,-1],[0,1]].map(([a,b])=>[Math.round(cx+dx*.82)+a,Math.round(cy+dy*.82)+b]).find(([a,b])=>!solid.has(a+','+b)&&!items.some(q=>q.x===a&&q.y===b));if(n)[x,y]=n} // a find under a palm moves a step in towards the pool
+    items.push({k,x,y})});
   // a few creatures: three small groups, far from the cave and the oasis
   const camp=(t,x,y,n,lvl)=>{let p=0;for(let k=0;k<n*8&&p<n;k++){const ex=x+Math.round((R(x,y,100+k)*2-1)*3),ey=y+Math.round((R(x,y,160+k)*2-1)*3);if(!enemies.some(e=>e.x===ex&&e.y===ey)&&!items.some(i=>i.x===ex&&i.y===ey)){enemies.push({t,x:ex,y:ey,lvl});p++}}};
   camp('scorpion',50,56,2,16);camp('dwolf',172,76,2,15);camp('scorpion',152,172,2,16);camp('dwolf',56,164,1,15);camp('scorpion',110,40,2,16);camp('dwolf',110,184,2,15);camp('scorpion',190,120,1,16);
@@ -9085,12 +9092,13 @@ function buildErg(E,seed,rk){
   const decor=[],scen=[],items=[],enemies=[],taken=new Set();
   const sc=(k,x,y,o)=>scen.push(Object.assign({k,wx:x+.5+((o&&o.ox)||0),wy:y+.5+((o&&o.oy)||0),sc:(o&&o.sc)||1,decor:{k,walk:true,x,y}}));
   const put=(k,x,y,o)=>{taken.add(x+','+y);decor.push(Object.assign({k,x,y,block:false},o||{}))};
+  const lay=(k,x,y)=>{for(let r=0;r<=2;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const a=x+dx,b=y+dy;if(rows[b]&&rows[b][a]==='.'&&!taken.has(a+','+b)&&!items.some(i=>i.x===a&&i.y===b)){items.push({k,x:a,y:b});return}}}; // a find lies on open sand, never under a palm, a rock or a pillar
   const inland=(x,y)=>x>16&&y>16&&x<W-17&&y<H-17&&Math.abs(y-E.CY)+(x<30?0:99)>14&&od(x,y)>9;
   E.OASES.forEach(([cx,cy],n)=>{ // a ring of reeds, palms and shrubs, and food and water beside the pool
     for(let a=0;a<14;a+=2){const r=2.9+R(a,n,40)*.5;sc('greeds',Math.round(cx+Math.cos(a/14*TAU)*r),Math.round(cy+Math.sin(a/14*TAU)*r*.9),{sc:.8+R(a,n,41)*.5})}
     for(let a=0;a<6;a++){const r=5.6+R(a,n,42)*1.1;put('dpalm'+((a+n)%4),Math.round(cx+Math.cos(a/6*TAU+.3)*r),Math.round(cy+Math.sin(a/6*TAU+.3)*r*.9),{block:true,sc:.9+R(a,n,43)*.35})}
     for(let a=0;a<7;a++){const r=4.8+R(a,n,44)*2.4;sc('dshrub'+(a%3),Math.round(cx+Math.cos(a*1.9)*r),Math.round(cy+Math.sin(a*1.9)*r*.9),{ox:(R(a,n,45)-.5)*.6,oy:(R(a,n,46)-.5)*.6,sc:.8+R(a,n,47)*.5})}
-    [[0,-4.4,'dates'],[2.4,-4,'water'],[-2.6,-3.9,'dates'],[4.2,-1.6,'water'],[-4.3,-1.2,'dates'],[1.6,4.4,'water'],[-1.9,4.3,n?'apple':'bread']].forEach(([dx,dy,k])=>items.push({k,x:Math.round(cx+dx),y:Math.round(cy+dy)}));
+    [[0,-4.4,'dates'],[2.4,-4,'water'],[-2.6,-3.9,'dates'],[4.2,-1.6,'water'],[-4.3,-1.2,'dates'],[1.6,4.4,'water'],[-1.9,4.3,n?'apple':'bread']].forEach(([dx,dy,k])=>lay(k,Math.round(cx+dx),Math.round(cy+dy)));
   });
   for(let y=18;y<H-18;y+=2)for(let x=18;x<W-18;x+=2){ // the empty land
     if(!inland(x,y))continue;const r=R(x,y,20),ox=(R(x,y,3)-.5)*1.4,oy=(R(x,y,4)-.5)*1.4;
@@ -9106,7 +9114,7 @@ function buildErg(E,seed,rk){
     for(let a=0;a<8;a++){const x=Math.round(cx+Math.cos(a/8*TAU)*4),y=Math.round(cy+Math.sin(a/8*TAU)*4);if(a%2||n%3===0)put('dpillar'+(a%2),x,y,{block:true})}
     if(n%2===0)put('chest',cx,cy,{block:true,magic:DS_MAGIC_TOMB[(n*5+seed)%DS_MAGIC_TOMB.length],goldAmt:380+n*30});
     else put('treasure',cx,cy,{block:true,plain:true});
-    items.push({k:'potion',x:cx+2,y:cy+1});
+    lay('potion',cx+2,cy+1);
   });
   const camp=(t,x,y,n,lvl)=>{let p=0;for(let k=0;k<n*10&&p<n;k++){const ex=x+Math.round((R(x,y,100+k)*2-1)*4),ey=y+Math.round((R(x,y,160+k)*2-1)*4);if(!taken.has(ex+','+ey)&&!enemies.some(e=>e.x===ex&&e.y===ey)&&!items.some(i=>i.x===ex&&i.y===ey)&&ex>14&&ey>14&&ex<W-15&&ey<H-15&&od(ex,ey)>8){enemies.push({t,x:ex,y:ey,lvl});p++}}};
   const T=['scorpion','dwolf','vulture','nomad','mummy','scorpion'];
@@ -22000,6 +22008,7 @@ function dcPlace(n){
   const L=LEVELS[n];if(!L||L._dc||typeof terrFor!=='function')return;L._dc=1;
   const tb=terrFor(n);if(!tb)return;const W=tb.W,H=tb.H,N=W*H,blocked=new Uint8Array(N);
   for(let i=0;i<N;i++)blocked[i]=tb.block[i]?1:0;
+  for(let y=0;y<H;y++){const r=L.rows[y]||'';for(let x=0;x<W;x++)if(r[x]!=='.')blocked[y*W+x]=1} // the dune and cliff walls of the map (the terrain mask alone leaves them open)
   const hz=[];
   for(const d of (L.decor||[])){if(d.x<0||d.y<0||d.x>=W||d.y>=H)continue;if(d.block)blocked[d.y*W+d.x]=1;if(d.npc||d.enter||d.k==='chest'||d.k==='dhatch')hz.push([d.x,d.y])}
   for(const e of (L.enemies||[]))hz.push([e.x,e.y]);
@@ -34666,6 +34675,20 @@ draw(c,x,L,api){
   api.notes(x,['Thornwick is a small timber town inside a ring of log walls, with a gate at each end of the main street.','Market Street runs from the west gate to the east gate, past the fountain square.','The mayor lives on the north side. The inn, the store and the bakery face the street from the south.','The east gate is barred. Only the mayor can order it opened.','Goats wander the lanes and the back yards.'],398,50,72,6.2,4);
 }});
 
+/* the alleys between the houses of Thornwick (3) and Ironhill (13) are one square wide: a barrel or a crate standing in one is moved out of it, to the nearest
+   square that is not in a passage and has a house wall beside it (the castle standard: nothing stands in a one-wide passage). Done once, before the level loads. */
+function ktAlleyTidy(L){
+  if(!L||L._ktAlley||!L.rows||!L.decor)return;L._ktAlley=1;
+  const H=L.rows.length,W=L.rows[0].length,ch=L.chars||{};
+  const open=(x,y)=>{if(x<0||y<0||x>=W||y>=H)return false;const c=L.rows[y][x];return ch[c]!==undefined?ch[c]===0:(c==='.'||c==='t')};
+  const used=new Set();for(const d of L.decor)used.add(d.x+','+d.y);for(const i of (L.items||[]))used.add(i.x+','+i.y);for(const e of (L.enemies||[]))used.add(e.x+','+e.y);
+  const lane=(x,y)=>(open(x-1,y)&&open(x+1,y)&&!open(x,y-1)&&!open(x,y+1))||(open(x,y-1)&&open(x,y+1)&&!open(x-1,y)&&!open(x+1,y));
+  const byWall=(x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>!open(x+a,y+b));
+  for(const d of L.decor){if(!d.block||d.npc||!/^(barrel|crate|sack)/.test(d.k)||!open(d.x,d.y)||!lane(d.x,d.y))continue;
+    let best=null;for(let r=1;r<=4&&!best;r++)for(let y=d.y-r;y<=d.y+r&&!best;y++)for(let x=d.x-r;x<=d.x+r;x++){if(Math.abs(x-d.x)+Math.abs(y-d.y)!==r)continue;if(open(x,y)&&!used.has(x+','+y)&&!lane(x,y)&&byWall(x,y)&&[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>open(x+a,y+b)).length>=2){best=[x,y];break}}
+    if(best){used.delete(d.x+','+d.y);d.x=best[0];d.y=best[1];used.add(best.join(','))}}}
+{const _ll=loadLevel;loadLevel=function(n){try{if(n===3||n===13)ktAlleyTidy(LEVELS[n])}catch(e){console.error('ktAlley',e)}return _ll.apply(this,arguments)}}
+
 /* ---- src/desert/maps_gwood.js ---- */
 /* ==========================================================================
    Area map for Gandrick's Wood (levels 7 and 25) and Gandrick's Cave (level 8). See maps_common.js.
@@ -43033,7 +43056,7 @@ function mpWorldDraw(){
   mpWorldCreatures(V,z);
   mpWorldNames(V,z);
   const by=M.by,QLEFT=questsLeft();
-  const visited=l=>l.lv.some(v=>v===LEVEL||G.lst[v]),here=WORLD_LOCS.find(l=>l.lv.includes(LEVEL));
+  const visited=l=>l.lv.some(v=>v===LEVEL||G.lst[v]),here=WORLD_LOCS.find(l=>l.lv.includes(LEVEL))||mpWorldHereUp(LEVEL);
   const txtH=(s,x,y,sz,col)=>{ctx.save();ctx.font=`bold ${sz}px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=3.2;ctx.strokeStyle='rgba(238,226,190,.93)';ctx.strokeText(s,x,y);ctx.fillStyle=col;ctx.fillText(s,x,y);ctx.restore()};
   const LBL_PLACED=[]; // where the place labels already stand
   for(const l of WORLD_LOCS){
@@ -43172,6 +43195,9 @@ function mpWorldCloudDrop(e){
   const a=D.pts[0],b=D.pts[D.pts.length-1],dt=(b[0]-a[0])/1000;
   if(dt>.01&&dt<.4){D.c.fx=Math.max(-320,Math.min(320,(b[1]-a[1])/dt*.5));D.c.fy=Math.max(-320,Math.min(320,(b[2]-a[2])/dt*.5))}}
 addEventListener('pointerup',mpWorldCloudDrop);addEventListener('pointercancel',mpWorldCloudDrop);
+
+/* a house, a cellar or a room that is no place on the map itself: the party is in the place its way out leads to (a Khemetra house to Khemetra, its cellar to the house and so on up) */
+function mpWorldHereUp(n){for(let i=0;i<4;i++){const L=LEVELS[n],p=L&&L.portals&&L.portals[0];if(!p||p.to===n)return null;n=p.to;const l=WORLD_LOCS.find(q=>q.lv.includes(n));if(l)return l}return null}
 
 /* ---- src/desert/mglist.js ---- */
 /* written by tools/inject.py from assets/mg/manifest.json: name -> [file, width, height] */
@@ -47927,7 +47953,7 @@ function rmTownSetup(){
   L.rows[y]=L.rows[y].slice(0,x)+RMZ.TD+L.rows[y].slice(x+1);
   L.portals=L.portals||[];L.portals.push({to:RMZ.ID,x:RMZ.M.start.x,y:RMZ.M.start.y,f:0,tex:'farm'});RMZ.townIdx=L.portals.length-1;
   L.chars=L.chars||{};L.chars[RMZ.TD]=30+RMZ.townIdx;
-  L.decor.push({k:'sign_rubymaze',x:RMZ.DX+1,y:RMZ.DY+1,block:false,wd:[0,-1],sc:1.2,txt:['STAY OUT','']});
+  {const sx=[x+1,x-1,x+2,x-2].find(q=>L.rows[y][q]&&L.rows[y][q]!=='.'&&L.rows[y+1]&&L.rows[y+1][q]==='.');if(sx!==undefined)L.decor.push({k:'sign_rubymaze',x:sx,y:y+1,block:false,wd:[0,-1],sc:1.2,txt:['STAY OUT','']})} // beside the door, flat on the store's back wall
   L.decor.push({k:'kh_ohfolk7_1',x:8,y:18,block:false,walk:true,npc:'ihboy'});
 }
 rmTownSetup();
@@ -52965,15 +52991,23 @@ function gmBuild(){
   // ---- helpers for the pieces ----
   const doorCell=new Set();for(const d of m.doors)doorCell.add(d.x+','+d.y);for(const d of m.sdoors)doorCell.add(d.x+','+d.y);
   const near=new Set();for(const d of m.doors){for(let k=-1;k<=1;k++)for(let l=-1;l<=1;l++)near.add((d.x+k)+','+(d.y+l));if(d.dx!==undefined){for(let t=1;t<=3;t++)near.add((d.x-Math.sign(d.dx)*t)+','+(d.y-Math.sign(d.dy)*t))}}
+  for(const gy of [1,H-2]){const dy=gy===1?1:-1;for(let k=-1;k<=1;k++)for(let t=0;t<=2;t++)near.add((45+k)+','+(gy+dy*t))} // the two gates (north to Wenlock, south to the Deeper Hollow): the way in stays clear
   const free=(x,y)=>isOpen(x,y)&&!occ.has(x+','+y)&&!near.has(x+','+y);
+  const placed=new Set(),faces=new Set(); // wall faces that already carry a picture (a trellis, a niche, a plaque): one picture per face
   const dec=(a,x,y,o)=>{o=o||{};const k=a.startsWith('gm_')||a==='chest'?a:'gm_'+a;if(!isOpen(x,y))return null;
     const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false;if(o.block)d.solid=1}if(o.txt)d.txt=o.txt;if(o.bob)d.bob=o.bob;if(o.goldAmt)d.goldAmt=o.goldAmt;if(o.wd){d.wd=o.wd;d.pic=1}
+    if(o.wd){const fk=x+','+y+','+o.wd;if(faces.has(fk))return null;faces.add(fk)}else{const pk=k+'@'+x+','+y;if(placed.has(pk))return null;placed.add(pk)} // the same piece twice on one square: once is enough
     decor.push(d);if(o.block||o.occ)occ.add(x+','+y);return d};
   const D=(a,x,y,o)=>free(x,y)?dec(a,x,y,o):null;                 // only on free squares
   const DB=(a,x,y,o)=>D(a,x,y,Object.assign({block:true},o||{}));  // standing in the way
   const lamp=(x,y)=>{if(D('lamp',x,y)){lights.push([x,y])}};
   const plaqueN=new Set();let plq=0;
-  const plaque=(x,y,wd,t)=>{const T=t||GM_PLAQUES[(plq++)%GM_PLAQUES.length];if(!isOpen(x,y))return;decor.push({k:'sign_gm',x,y,block:false,wd,txt:[T[0],T[1]]})};
+  // a plaque hangs flat on a hedge: on its own face (another face of the same square when that one is taken), and when the hedge behind is open (a doorway) it moves along the wall to the nearest hedge
+  const plaque=(x,y,wd,t)=>{const T=t||GM_PLAQUES[(plq++)%GM_PLAQUES.length];if(!isOpen(x,y))return;
+    const ok=(px,py,w)=>isOpen(px,py)&&!isOpen(px+w[0],py+w[1])&&!faces.has(px+','+py+','+w)&&!doorCell.has(px+','+py);
+    let at=null;for(let s=0;s<=3&&!at;s++)for(const sg of (s?[1,-1]:[1])){const px=x+(wd[0]?0:s*sg),py=y+(wd[0]?s*sg:0);if(ok(px,py,wd)){at=[px,py,wd];break}}
+    if(!at)for(const w of [[0,-1],[0,1],[1,0],[-1,0]])if(ok(x,y,w)){at=[x,y,w];break}
+    if(!at)return;faces.add(at[0]+','+at[1]+','+at[2]);decor.push({k:'sign_gm',x:at[0],y:at[1],block:false,wd:at[2],txt:[T[0],T[1]]})};
   const foe=(t,x,y)=>{if(!isOpen(x,y))return;enemies.push({t,x,y,lvl:80});occ.add(x+','+y)};
   const ring=(q,pad,fn)=>{for(let x=q.x0+pad;x<=q.x1-pad;x++){fn(x,q.y0+pad);fn(x,q.y1-pad)}for(let y=q.y0+pad+1;y<q.y1-pad;y++){fn(q.x0+pad,y);fn(q.x1-pad,y)}};
   // a low hedge cell inside a room (blocks, painted as a clipped box hedge)
@@ -53401,14 +53435,22 @@ const WM_PROPS={keg:.5,barrel_tall:.92,crate_lid:.64,barrel:.72,cask:.62,chest:.
   signpost:1.05,web:1.5,bell:1.0,skeleton:.6,boat:.95,noticeboard:1.15,gold:.42,orb_pedestal:1.3,brazier:1.5,lantern_hang:1.0,lamp_post:1.6,candelabra:1.05,cage_lantern:.85,
   crystal_tall:1.6,crystal_small:.72,crystal_white:1.5,crystal_teal:1.0,crystal_pillar:2.1,geode:1.0,mush_cluster:.95,mush_tall:1.5,mush_tree:2.2,moss_mound:.55,mush_bulb:1.3,bellflower:.95,
   lever_up:1.2,lever_down:1.2,crank:1.2,chain:1.5,button:1.0,scale:1.15,key:.5,lantern_gold:1.0,lantern_lilac:1.0,lantern_violet:1.0,rune:1.0,keydoor:1.5};
+/* the web is painted strung between two posts; on the walls of the maze it hangs as a plain web: the middle of the picture, without the posts, flat on the wall (wmWebsOnWalls) */
+function wmWebArt(){
+  if(IMG.wm_webw)return;const im=IMG.art_wm_web;if(!im||!im.width)return;
+  const x0=Math.round(im.width*.135),w=Math.round(im.width*.73),cv=document.createElement('canvas');cv.width=w;cv.height=im.height;cv.getContext('2d').drawImage(im,x0,0,w,im.height,0,0,w,im.height);
+  IMG.wm_webw=cv;NPC_H.wm_web=WM_WEB_H}
+const WM_WEB_H=.8;
 function wmArt(){
+  wmWebArt();
   if(WM.art)return;
   for(const k in WM_PROPS){const im=IMG['art_wm_'+k];if(im){IMG['wm_'+k]=im;NPC_H['wm_'+k]=WM_PROPS[k]}}
+  if(!IMG.art_wm_barrel_stack&&IMG.art_wm_barrel){IMG.wm_barrel_stack=IMG.art_wm_barrel;NPC_H.wm_barrel_stack=WM_PROPS.barrel} // no stack was ever painted: the cellars' barrel stands in for it
   const mk=(name,src,fn)=>{const im=IMG[src];if(!im||!im.width)return null;const [c,x]=tcv();x.drawImage(im,0,0,TS,TS);const d=x.getImageData(0,0,TS,TS).data;if(fn)fn(d);return d};
   const fl=(n,src,k)=>{const d=mk(n,src,k?(p=>{for(let i=0;i<p.length;i+=4){p[i]*=k[0];p[i+1]*=k[1];p[i+2]*=k[2]}}):null);if(d)FLOORS[n]=d};
   fl('wmflag','art_floor_wm_flag');fl('wmcobble','art_floor_wm_cobble');fl('wmmoss','art_floor_wm_moss');fl('wmwater','art_floor_wm_water',[1.1,1.05,1.2]);
   {const d=mk('wmceil','art_ceil_wm_brick');if(d)CEILS.wmceil=d;const e=mk('wmceilx','art_ceil_wm_crystal');if(e)CEILS.wmceilx=e}
-  wmOrbArt();
+  wmOrbArt();wmWebArt();
   WM.art=true}
 /* ---------- the orb frames: the painted cage lantern (an orb in an ornate iron frame), with the teal of its glow turned to this floor's orb colour; a dim copy for the empty frame ---------- */
 WM.ORBS=[{n:'amber gold',hue:42,sat:1.25,css:'#ffb838',col:[1.5,1.05,.4]},{n:'violet pink',hue:318,sat:1.1,css:'#ff6ad8',col:[1.5,.55,1.15]},{n:'cyan blue',hue:200,sat:1.2,css:'#46c8ff',col:[.45,1.0,1.55]},{n:'emerald green',hue:132,sat:1.15,css:'#40e070',col:[.5,1.4,.6]}];
@@ -53677,6 +53719,7 @@ function wmContext(k,M){
   c.D=(k2,x,y,o)=>{o=o||{};
     if((o.block||o.npc)&&!o.force&&c.isMouth(x,y)){const r=M.rooms.find(q=>x>=q.x0&&x<=q.x1&&y>=q.y0&&y<=q.y1);
       const alt=r?c.rim(r).concat(c.inner(r)).sort((a,b)=>Math.hypot(a[0]-x,a[1]-y)-Math.hypot(b[0]-x,b[1]-y))[0]:null;if(!alt)return null;x=alt[0];y=alt[1]}
+    if(!o.npc){const twin=dec.find(q=>q.k===k2&&q.x===x&&q.y===y&&!q.npc);if(twin)return twin} // the same piece twice on one square (a narrow room's two corners are one square): once is enough
     const d=Object.assign({k:k2,x,y,block:false},o);dec.push(d);occ.add(x+','+y);return d};
   c.prop=(name,x,y,o)=>c.D('wm_'+name,x,y,Object.assign({block:true},o||{}));
   c.deco=(name,x,y,o)=>c.D('wm_'+name,x,y,Object.assign({block:false,walk:true,deco:true},o||{}));
@@ -53784,21 +53827,33 @@ function wmOrbs(c){
   const k=c.k,M=c.M,o=WM.ORBS[k],W=c.W,picked=[],spaced=(x,y,g)=>picked.every(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)>=g),pool=[];
   const nb=(x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].map(([a,b])=>[x+a,y+b]).filter(([qx,qy])=>c.free(qx,qy)&&!c.isMouth(qx,qy));
   const keyAt=(c.meta.wm&&c.meta.wm.keyAt)||{};
+  const doors=(c.meta.wm&&c.meta.wm.doors)||{},byDoor=(x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>doors[(x+a)+','+(y+b)]); // never on the square in front of a door, a vault or a secret closet
   for(const id in keyAt){const q=keyAt[id],n=nb(q.x,q.y);if(n.length)pool.push(n[0])}
     for(const kind of ['mirror','bells','lanterns','camp','shrine','cellar','library','mine','grotto','fungus','spiders','cistern','lake'])for(const r of M.rooms)if(r.kind===kind&&!r.sealed){const rim=c.rim(r);if(rim.length)pool.push(rim[(c.rnd()*rim.length)|0])}
   const ends=[];for(let y=2;y<c.H-2;y++)for(let x=2;x<c.W-2;x++)if(c.free(x,y)&&[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>c.open(x+a,y+b)).length===1&&!wmInRoom(M,x,y)&&!c.isMouth(x,y))ends.push([x,y]);
   for(let i=ends.length-1;i>0;i--){const j=(c.rnd()*(i+1))|0;[ends[i],ends[j]]=[ends[j],ends[i]]}
-  for(const gap of [7,5,4,3]){for(const q of pool.concat(ends)){if(picked.length>=WM.ORBN)break;if(c.free(q[0],q[1])&&!c.isMouth(q[0],q[1])&&spaced(q[0],q[1],gap)){picked.push(q);
+  for(const gap of [7,5,4,3]){for(const q of pool.concat(ends)){if(picked.length>=WM.ORBN)break;if(c.free(q[0],q[1])&&!c.isMouth(q[0],q[1])&&!byDoor(q[0],q[1])&&spaced(q[0],q[1],gap)){picked.push(q);
     const d=c.D('wm_orbframe'+k,q[0],q[1],{block:true,npc:'wm_orbframe',orbFrame:true,orbColor:o.css,emptyK:'wm_orbframeE'+k,force:true});if(d)c.light(q[0],q[1],o.col)}}
     if(picked.length>=WM.ORBN)break}
   c.meta.orbs=picked.length}
+/* webs hang on walls only, flat (the castle rule): a web beside a wall goes onto it; one in the open moves to the nearest free wall face within two squares, or goes */
+function wmWebsOnWalls(c){
+  const taken=new Set();for(const d of c.dec)if(d.pic&&d.wd)taken.add(d.x+','+d.y+','+d.wd);
+  const busy=new Set();for(const d of c.dec)if(d.k!=='wm_web')busy.add(d.x+','+d.y);
+  for(let i=c.dec.length-1;i>=0;i--){const d=c.dec[i];if(d.k!=='wm_web')continue;
+    let best=null;
+    for(let r=0;r<=2&&!best;r++){let bd=1e9;for(let y=d.y-r;y<=d.y+r;y++)for(let x=d.x-r;x<=d.x+r;x++){if(Math.max(Math.abs(x-d.x),Math.abs(y-d.y))!==r||!c.open(x,y)||(r&&busy.has(x+','+y))||c.isMouth(x,y)&&r)continue;
+      for(const [a,b] of [[0,-1],[1,0],[0,1],[-1,0]]){if(!(c.g[y+b]&&c.g[y+b][x+a]==='#'))continue;const key=x+','+y+','+[a,b];if(taken.has(key))continue;const dd=Math.hypot(x-d.x,y-d.y);if(dd<bd){bd=dd;best={x,y,wd:[a,b]}}}}}
+    if(!best){c.dec.splice(i,1);continue}
+    taken.add(best.x+','+best.y+','+best.wd);
+    Object.assign(d,{x:best.x,y:best.y,pic:1,wd:best.wd,block:false,lk:'wm_webw'});delete d.walk;delete d.deco;delete d.sc}}
 WM.build=function(k){
   const id=WM.IDS[k];if(LEVELS[id])return;wmArt();
   const M=WM.M[k],c=wmContext(k,M),wl=wmWalls(k,M);c.wl=wl;
   wmFloors(c);
   for(const r of M.rooms){const f=WM.furnish[r.kind];if(f)try{f(c,r)}catch(e){console.error('wm furnish',r.kind,e)}}
   try{WM.mech(c,wl)}catch(e){console.error('wm mech',e)}
-  wmSpawn(c);wmFinds(c);wmLamps(c);wmEqualize(c);wmOrbs(c);
+  wmSpawn(c);wmFinds(c);wmLamps(c);wmEqualize(c);wmOrbs(c);wmWebsOnWalls(c);
   const rows=wl.rows,arr=M.arrive;
   const fmr=c.fm.map(r=>r.join(''));
   const names=[];for(const r of M.rooms){if(r.sealed||!WM.ROOMNAMES[r.kind])continue;names.push({t:WM.ROOMNAMES[r.kind],x:(r.x0+r.x1)>>1,y:(r.y0+r.y1)>>1,k:'place'})}
@@ -53834,6 +53889,24 @@ WM.checks=function(k,c){
       if(L._wm.tier[old]!==undefined){L._wm.tier[f[0]+','+f[1]]=L._wm.tier[old];delete L._wm.tier[old];if(L._wm.loot[old]){L._wm.loot[f[0]+','+f[1]]=L._wm.loot[old];delete L._wm.loot[old]}for(const kk in L._wm.keyAt)if(L._wm.keyAt[kk].x===d.x&&L._wm.keyAt[kk].y===d.y)L._wm.keyAt[kk]={x:f[0],y:f[1]}}
       d.x=f[0];d.y=f[1];c.occ.add(f[0]+','+f[1])}
     else{d.block=false;d.walk=true;d.deco=true;if(d.npc)delete d.npc}
+    r=run()}
+  // every chest, cask and barrel can be opened: one whose four sides are all furniture (a vault's dressing packed round it) gets a side cleared; the piece in the way moves to a reached free square of its room, or goes
+  const isCont=d=>/chest|^wm_(cask|barrel|keg|crate)/.test(d.k),isChest=d=>L._wm.tier[d.x+','+d.y]!==undefined||/chest/.test(d.k);
+  for(let guard=0;guard<40;guard++){
+    const shut=c.dec.find(d=>d.block&&isCont(d)&&!inIsl(d.x,d.y)&&!D4.some(([a,b])=>r.reach.has((d.x+a)+','+(d.y+b))));if(!shut)break;
+    // the cheapest way in from the reached squares: through as few movable pieces as possible (chests and people stay where they are)
+    const at=new Map();for(const d of c.dec)if(d.block||d.npc)at.set(d.x+','+d.y,d);
+    const cost=(x,y)=>{if(x<0||y<0||x>=W||y>=H)return -1;const kk=x+','+y;if(!(c.g[y][x]==='.'||doorOpen.has(kk)))return -1;const d=at.get(kk);if(!d)return 0;return (d.npc||isChest(d))?-1:1};
+    const dist=new Map(),prev=new Map(),dq=[];for(const kk of r.reach){dist.set(kk,0);dq.push(kk)}
+    for(let i=0;i<dq.length;i++){const kk=dq[i],[x,y]=kk.split(',').map(Number);for(const [a,b] of D4){const nx=x+a,ny=y+b,nk=nx+','+ny,cc=cost(nx,ny);if(cc<0)continue;const nd=dist.get(kk)+cc;if(dist.has(nk)&&dist.get(nk)<=nd)continue;dist.set(nk,nd);prev.set(nk,kk);dq.push(nk)}}
+    let goal=null;for(const [a,b] of D4){const nk=(shut.x+a)+','+(shut.y+b);if(dist.has(nk)&&(!goal||dist.get(nk)<dist.get(goal)))goal=nk}
+    if(!goal){console.warn('wm: '+shut.k+' at '+shut.x+','+shut.y+' on '+WM.IDS[k]+' is shut in by chests');break}
+    const path=new Set();for(let kk=goal;kk&&!r.reach.has(kk);kk=prev.get(kk))path.add(kk);
+    const room=M.rooms.find(q=>shut.x>=q.x0&&shut.x<=q.x1&&shut.y>=q.y0&&shut.y<=q.y1);
+    for(const kk of path){const d=at.get(kk);if(!d)continue;
+      const cont=new Set(c.dec.filter(q=>q.block&&isCont(q)).map(q=>q.x+','+q.y)),taken=new Set(c.dec.filter(q=>q.block||q.npc).map(q=>q.x+','+q.y));let f=null;
+      if(room)for(let y=room.y0;y<=room.y1&&!f;y++)for(let x=room.x0;x<=room.x1&&!f;x++){const fk=x+','+y;if(r.reach.has(fk)&&!taken.has(fk)&&!path.has(fk)&&!c.isMouth(x,y)&&!D4.some(([a,b])=>cont.has((x+a)+','+(y+b))))f=[x,y]}
+      if(f){d.x=f[0];d.y=f[1];c.occ.add(f[0]+','+f[1])}else c.dec.splice(c.dec.indexOf(d),1)}
     r=run()}
   L._wm.unreached=r.un.length;if(r.un.length)console.error('wm: level '+WM.IDS[k]+' has '+r.un.length+' squares the party cannot reach: '+r.un.map(p=>p.join(',')).join(' '));
   return r.un.length};
@@ -53916,8 +53989,8 @@ WMFU.library=function(c,r){const R=c.rect(r);
   c.light(R.cx,R.y0+1,WM_COL.lil);c.light(R.cx,R.y1,WM_COL.vio);
   wmFoes(c,r,['wmwraith','wmspider','wmwraith'],3)};
 WMFU.mirror=function(c,r){const R=c.rect(r);
-  const mm=[];for(let x=R.x0;x<=R.x1;x+=2)if(c.free(x,R.y0))mm.push([x,R.y0]);for(let x=R.x0;x<=R.x1;x+=2)if(c.free(x,R.y1))mm.push([x,R.y1]);
-  mm.forEach(([x,y],i)=>{c.D('wm_mirror',x,y,{block:true,npc:'wmmirror_'+(i%3)})});
+  const mm=[];for(let x=R.x0;x<=R.x1;x+=2)if(c.free(x,R.y0))mm.push([x,R.y0]);if(R.y1!==R.y0)for(let x=R.x0;x<=R.x1;x+=2)if(c.free(x,R.y1))mm.push([x,R.y1]); // a hall one square deep has one row of mirrors, not the same row twice
+  mm.forEach(([x,y],i)=>{if(c.free(x,y))c.D('wm_mirror',x,y,{block:true,npc:'wmmirror_'+(i%3)})}); // a mirror moved off a doorway may have taken a later mirror's square
   c.prop('statue',R.cx,R.cy,{});c.note('mirror1',R.x0,R.cy,'signpost');
   c.light(R.cx,R.cy,WM_COL.wht);c.light(R.x0,R.y0,WM_COL.vio);c.light(R.x1,R.y1,WM_COL.vio);
   wmFoes(c,r,['wmwraith','wmcultist','wmwraith'],3)};
@@ -54602,7 +54675,7 @@ function wwLoad(){
 function wwAlias(){
   for(const a in WWA){const [n,h]=WWA[a];if(IMG[n]){IMG['ww_'+a]=WW_TREEA.includes(a)?wwDarken(IMG[n],.86):IMG[n];NPC_H['ww_'+a]=h}}
   for(const [k,n] of [['wwi_scare','guardA_0'],['wwi_hound','guardA_1'],['wwi_spider','guardA_2'],['wwi_golem','guardA_3'],['wwi_crows','guardA_4'],['wwi_toad','guardA_5'],['wwi_revenant','guardB_0'],['wwi_root','guardB_1'],['wwi_abom','guardB_2'],['wwi_wisp','guardB_3'],['wwi_crow','guardB_4'],['wwi_witch','witch_1'],['wwi_witchA','witch_0']])if(IMG[n])IMG[k]=IMG[n];
-  NPC_H.wwi_witch=1.45;NPC_H.wwi_witchA=2.6;
+  NPC_H.wwi_witch=1.45;NPC_H.wwi_witchA=1.38; // the cornered witch (arms raised) is drawn at a person's height, not as a giant
   wwLeafImgs();
   wwFloors();
 }
@@ -56770,6 +56843,9 @@ const wmwId=()=>({
 const wmwGyName=(id,i)=>(typeof GY!=='undefined'&&GY.NAMES&&GY.NAMES[id])||LEVEL_NAMES[id]||('Grave Maze '+(i+1));
 const WMW_POS={wenlock:[-300,226],gardens:[-214,200],witchwood:[-282,126],wkgrave:[-356,198],gm1:[-392,166],gm2:[-396,216],gm3:[-362,244],gm4:[-326,152],wellmaze:[-258,260],westgate:[-338,288],
   underlevel:[-84,98],drowned:[-30,100],thornwell:[186,176],goldenpyramid:[678,178]};
+function wmwHgRooms(hg){if(!hg||typeof hgtAny!=='function')return;for(let n=4850;n<=5499;n++)if(hgtAny(n)&&!hg.lv.includes(n))hg.lv.push(n)}
+// a Hollow room registered later (a town that makes its rooms when it is built) joins the grasslands then
+if(typeof hgtRegister==='function'){const _hr=hgtRegister;hgtRegister=function(id){const r=_hr.apply(this,arguments);try{if(id>=4850&&id<=5499&&typeof WORLD_LOCS!=='undefined'){const hg=WORLD_LOCS.find(l=>l.k==='hollowgrass');if(hg&&hgtAny(id)&&!hg.lv.includes(id))hg.lv.push(id)}}catch(e){}return r}}
 function wmwBuild(){
   const I=wmwId(),by=k=>WORLD_LOCS.find(l=>l.k===k),add=(o)=>{if(!by(o.k))WORLD_LOCS.push(o);return by(o.k)};
   const P=WMW_POS,wl=by('wenlock');
@@ -56784,8 +56860,9 @@ function wmwBuild(){
   add({k:'drowned',n:'The Drowned Maze',lv:[477],x:P.drowned[0],y:P.drowned[1],ic:'maze'});
   add({k:'thornwell',n:LEVEL_NAMES[501]||'Under the Well',lv:[501],x:P.thornwell[0],y:P.thornwell[1],ic:'rubymaze'});
   add({k:'goldenpyramid',n:'The Golden Pyramid',lv:[65],x:P.goldenpyramid[0],y:P.goldenpyramid[1],ic:'pyramid'});
-  // the four towns of the Hollow Grasslands and their rooms count as the grasslands: the party is "here" in them
-  const hg=by('hollowgrass');if(hg){for(let n=480;n<=489;n++)if(!hg.lv.includes(n))hg.lv.push(n);for(let n=4850;n<=5499;n++)if(!hg.lv.includes(n))hg.lv.push(n)}
+  // the four towns of the Hollow Grasslands and their rooms count as the grasslands: the party is "here" in them.
+  // Only the room numbers that have a Hollow builder (hgtAny, the guard hgt_engine.js uses): Khemetra's house numbers run through the same range.
+  const hg=by('hollowgrass');if(hg){for(let n=480;n<=489;n++)if(!hg.lv.includes(n))hg.lv.push(n);wmwHgRooms(hg)}
   // roads: the garden road from the gate of the Deeper Hollow, Blackbriar Lane, Churchyard Lane, the road west (shut), the lanes to the four mazes
   const R=(...a)=>{if(!WORLD_ROADS.some(r=>r.join()===a.join()))WORLD_ROADS.push(a)};
   R('deephollow','gardens','wenlock');R('wenlock','witchwood');R('wenlock','wkgrave');R('wenlock','westgate');R('wkgrave','gm1');R('wkgrave','gm2');R('wkgrave','gm3');R('wkgrave','gm4');R('wenlock','wellmaze');R('thornwick','thornwell');
@@ -58414,15 +58491,17 @@ function hsStamp(L,T){
       for(const d of L.decor){if(d.block&&!d.npc&&d.x>=P.p.x0&&d.x<P.p.x0+P.p.w&&d.y>=P.p.y0&&d.y<P.p.y0+P.p.d&&d!==U.agent){d._hsTree=true;d.block=false;d.hidden=true}} // trees on a plot are cleared for good
       const board={k:'hs_sale_'+s,x:P.door[0],y:P.door[1],block:true,solid:1,npc:'hs_b_'+s,sc:1};L.decor.push(board);
       const v=hsFaceVec[P.p.face]; // the sign beside the door: the cell next to the one in front of it, which has the house wall behind it
-      const side=v[1]?[P.front[0]-1,P.front[1]]:[P.front[0],P.front[1]-1];
+      const inPlot=(x,y)=>x>=P.p.x0&&x<P.p.x0+P.p.w&&y>=P.p.y0&&y<P.p.y0+P.p.d;
+      const sides=v[1]?[[P.front[0]-1,P.front[1]],[P.front[0]+1,P.front[1]]]:[[P.front[0],P.front[1]-1],[P.front[0],P.front[1]+1]];
+      const side=sides.find(([x,y])=>inPlot(x-v[0],y-v[1]))||sides[0]; // the side of the door that has the house's own front wall behind it (a house two squares wide has its door at one end)
       const own={k:'sign_hsown',x:side[0],y:side[1],block:false,wd:[-v[0],-v[1]],txt:['YOUR HOUSE',HS_SIZES[s].name],sc:.8,bob:.3,hidden:true};
-      L.decor.push(own);
+      // the sign goes into the level only while the house stands (below): without the house there is no wall for it to hang on
       U.plots[s]={P,board,own,roof:null};
     }
   }
   for(const s of T.sizes){
     const u=U.plots[s],P=u.P,p=P.p,z=hsLook(T,s),owned=hsOwned(T,s);
-    u.board.hidden=owned;u.board.block=!owned;u.own.hidden=!owned;
+    u.board.hidden=owned;u.board.block=!owned;u.own.hidden=!owned;{const i=L.decor.indexOf(u.own);if(owned&&i<0)L.decor.push(u.own);else if(!owned&&i>=0)L.decor.splice(i,1)}
     if(owned&&hsDoorGid(T,s)){
       const W=hsWallSet(T,s),dg=hsDoorGid(T,s);
       for(let y=p.y0;y<p.y0+p.d;y++)for(let x=p.x0;x<p.x0+p.w;x++){
