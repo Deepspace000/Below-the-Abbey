@@ -136,7 +136,13 @@ function ntFloorSet(n,look){
   const wetSrc=FLOORS[a]?a:'gyf_flag';let wet=wetSrc;try{wet=gyFloorWet('ntf'+n+'w',wetSrc,P.lcol.map(v=>Math.min(1,v/1.5)),n%97+3);if(wet!==wetSrc)ntOwnF(n).push(wet)}catch(e){}
   const c1=[150*t[0]*lum*1.3,150*t[1]*lum*1.3,150*t[2]*lum*1.3],c2=[c1[0]*.55,c1[1]*.55,c1[2]*.55];
   const pat=look.floorKind==='plain'?b:ntPatternFloor(n,'ntf'+n+'p',look.floorKind,c1,c2);
-  return [a,b,wet,pat,a,b]}
+  return [a,b,wet,pat,ntWaterFloor(n,look)||wet,b]}
+/* the still dark water of a pond: the game's water floor turned dark and tinted towards the floor's own colour (slot 4 of the floor set; it is not one of the game's water names, so only the pond's own fishing spots exist) */
+function ntWaterFloor(n,look){
+  const out='ntf'+n+'x',src=FLOORS.water||FLOORS.bluewater||FLOORS.wmwater;if(!src)return null;if(FLOORS[out])return out;
+  const t=look.pal.floorTint,mx=Math.max(t[0],t[1],t[2])||1,k=[t[0]/mx*.7,t[1]/mx*.85,t[2]/mx*1],d=new Uint8ClampedArray(src.length);
+  for(let i=0;i<d.length;i+=4){const m=(src[i]+src[i+1]+src[i+2])/3*.62+6;d[i]=Math.min(255,m*k[0]);d[i+1]=Math.min(255,m*k[1]);d[i+2]=Math.min(255,m*k[2]);d[i+3]=255}
+  return ntMadeFloor(n,out,d)}
 function ntCeil(n,look){
   const out='ntc'+n;if(CEILS[out])return out;const src=CEILS[look.ceil]||CEILS.gyc_crypt;if(!src)return look.ceil;const t=look.pal.ceilTint,d=new Uint8ClampedArray(src.length),g=.8;
   for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,src[i]*g*t[0]);d[i+1]=Math.min(255,src[i+1]*g*t[1]);d[i+2]=Math.min(255,src[i+2]*g*t[2]);d[i+3]=255}

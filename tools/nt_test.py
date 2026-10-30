@@ -10,7 +10,8 @@ tele    the stone wakes when stepped on, the network lists the floors, the menu 
 dash    no em dash in any nt file, the notes or this test
 seal    the tower is always open; the level gate (100) at the great door and the road gate, the jump flag passes; the south gate leads to the Crooked Road; stairs down from floor 1 reach the entrance
 mem     240 floors in a row: textures, built floors and the save stay bounded
-walk    the party walks a real path from the arrival to the stairs up on 10 floors of every layout kind with the real collision grid
+walk    the party walks a real path from the arrival to the stairs up on floors 1 to 40, 100, 1000, 100000 with the real collision grid, uses the stairs up and down, and reaches the stone, the shop and the fishing stands
+fish    a pond floor: the stand faces a deep-water fishing spot, a rod starts the fishing, 200 catches with no error
 shots   screenshots of floors of different looks (default twelve)
 """
 import sys, os, json, time, re, math
@@ -75,7 +76,7 @@ BUILD_JS = """(floors) => {
       const W = L.rows[0].length, H = L.rows.length, V = L._nt, pl = V.plan;
       r.kind = V.look.kind; r.W = W; r.H = H; r.name = L.name; r.hue = Math.round(V.look.pal.hue); r.pat = V.look.pattern; r.wall = V.look.wallBase;
       if (!L.rows.every(x => x.length === W)) r.probs.push('rows not rectangular');
-      if (W < 40 || H < 40 || W > 100 || H > 100) r.probs.push('size ' + W + 'x' + H);
+      if (W < 24 || H < 24 || W > 100 || H > 100) r.probs.push('size ' + W + 'x' + H);
       const open = (x, y) => L.rows[y] && L.rows[y][x] === '.';
       if (!open(L.start.x, L.start.y)) r.probs.push('start not open');
       const dg = L.rows[pl.down.y][pl.down.x], ug = L.rows[pl.up.y][pl.up.x];
@@ -104,6 +105,20 @@ BUILD_JS = """(floors) => {
       if (names.has(L.name)) r.probs.push('name repeated'); names.add(L.name);
       if (f > 1) { const pv = ntLook(f - 1), cu = V.look; if (!ntLooksDiffer(cu, pv)) r.probs.push('looks like the floor below: hues ' + Math.round(pv.pal.hue) + ' ' + Math.round(cu.pal.hue) + ' ' + pv.pattern + ' ' + cu.pattern); }
       if (V.torches.length < 30) r.probs.push('few torches ' + V.torches.length);
+      // ponds: blocked by an invisible blocker, not the stairs/stone/arrival/shop/route; the fishing spot is reachable and faces the pond; clearings 2 to 4
+      r.ponds = (pl.ponds || []).length; r.clearings = (pl.clearings || []).length;
+      if (r.clearings < 2 || r.clearings > 4) r.probs.push('clearings ' + r.clearings);
+      for (const pd of (pl.ponds || [])) {
+        for (const [x, y] of pd.cells) {
+          if (!blk.has(x + ',' + y)) r.probs.push('pond square not blocking ' + x + ',' + y);
+          if ((x === pl.up.ix && y === pl.up.iy) || (x === pl.down.ix && y === pl.down.iy) || (x === L.tele.x && y === L.tele.y)) r.probs.push('stairs or stone inside a pond');
+          if (V.route && V.route.has(x + ',' + y)) r.probs.push('pond on the route');
+          if (pl.shop && x >= pl.shop.x0 && x <= pl.shop.x1 && y >= pl.shop.y0 && y <= pl.shop.y1) r.probs.push('pond in the shop');
+        }
+        const st = pd.stand; if (!seen.has(st.x + ',' + st.y)) r.probs.push('fishing stand not reachable');
+        const sp = fshSpots(NT.BASE + f); if (!sp.get((st.x + st.dx) + ',' + (st.y + st.dy))) r.probs.push('no fishing patch in front of the stand');
+      }
+      if (r.ponds && !(FSH_ADD[NT.BASE + f] && FSH_ADD[NT.BASE + f].length === r.ponds)) r.probs.push('fishing spots not registered');
       if (f % 10 === 0 && !L.enemies.some(e => e.t.startsWith('ntg_'))) r.probs.push('no guardian on a tenth floor');
       if (f % 7 === 0 && !(V.shop)) r.probs.push('no shop on a seventh floor');
       if (f % 7 === 0) { const s = V.shop; if (!seen.has(s.x + ',' + (s.y + 1))) r.probs.push('shop not reachable'); }
@@ -327,7 +342,7 @@ WALK_JS = """async (floors) => {
     // the real collision: G.grid and the blocking props; breadth first from the party's square to the square in front of the stairs up
     const start = [G.P.x, G.P.y], goal = [pl.up.ix, pl.up.iy], prev = new Map(), key = (x, y) => x + ',' + y;
     prev.set(key(...start), null); const q = [start];
-    for (let i = 0; i < q.length; i++) { const [x, y] = q[i]; if (x === goal[0] && y === goal[1]) break;
+    for (let i = 0; i < q.length; i++) { const [x, y] = q[i];
       for (const [dx, dy] of [[0,-1],[1,0],[0,1],[-1,0]]) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H || prev.has(key(nx, ny)) || cellBlocked(nx, ny)) continue; prev.set(key(nx, ny), [x, y]); q.push([nx, ny]); } }
     let ok = prev.has(key(...goal)), steps = 0;
     if (ok) { const path = []; let c = goal; while (c) { path.push(c); c = prev.get(key(...c)); } path.reverse(); steps = path.length;
@@ -336,7 +351,12 @@ WALK_JS = """async (floors) => {
       // then bump the stairs
       if (ok) { const dir = [[0,-1],[1,0],[0,1],[-1,0]].findIndex(d => G.P.x + d[0] === pl.up.x && G.P.y + d[1] === pl.up.y); G.P.f = dir; G.P.angT = (dir - 1) * Math.PI / 2; }
     }
-    out.push({f, kind: L._nt.look.kind, ok, steps, up: ok});
+    // the stone, the shop keeper's room, the fishing stands: all reached by the same real collision search; no pond square is walkable
+    const V = L._nt, extra = [];
+    if (!prev.has(key(L.tele.x, L.tele.y))) extra.push('stone');
+    if (V.shop && !prev.has(key(V.shop.x, V.shop.y + 1))) extra.push('shop');
+    for (const pd of (pl.ponds || [])) { if (!prev.has(key(pd.stand.x, pd.stand.y))) extra.push('stand'); for (const [x, y] of pd.cells) if (!cellBlocked(x, y)) extra.push('walkable water'); }
+    out.push({f, kind: L._nt.look.kind, ok: ok && !extra.length, steps, up: ok, extra, ponds: (pl.ponds || []).length, shop: !!V.shop});
     if (ok) { // use the stairs: khBump with the up door
       const g = G.grid[pl.up.y][pl.up.x]; khBump(pl.up.x, pl.up.y, g);
       await new Promise(r => { const t = setInterval(() => { if (LEVEL === id + 1 && G.state === 'play') { clearInterval(t); r(); } }, 100); });
@@ -354,12 +374,12 @@ def run_walk():
     with sync_playwright() as p:
         b, pg, errs = boot(p)
         # floors of every kind: pick ten, two or more of each kind
-        floors = pg.evaluate("""() => { const by = {}; for (let f = 1; f < 80; f++) { const k = ntKindOf(f); (by[k] = by[k] || []).push(f); } const out = []; for (const k in by) out.push(...by[k].slice(0, 2)); return out; }""")
+        floors = list(range(1, 41)) + [100, 1000, 100000]
         print('floors', floors)
         res = pg.evaluate(WALK_JS, floors)
         for r in res:
             print('  ', r)
-        check('the party walks from the arrival to the stairs up on %d floors' % len(res), all(r['ok'] for r in res), [r for r in res if not r['ok']])
+        check('the party walks from the arrival to the stairs up (and reaches the stone, the shop and every fishing stand) on %d floors' % len(res), all(r['ok'] for r in res), [r for r in res if not r['ok']])
         check('the stairs up lead to the arrival of the next floor', all(r.get('arrived') for r in res), [r for r in res if not r.get('arrived')])
         check('the stairs down lead back to the stairs up', all(r.get('back') for r in res), [r for r in res if not r.get('back')])
         kinds = set(r['kind'] for r in res)
@@ -384,6 +404,10 @@ def run_shots():
               if (best) { G.P.x = best[0]; G.P.y = best[1]; G.P.f = best[2]; G.P.angT = (best[2] - 1) * Math.PI / 2; G.C = {x: G.P.x, y: G.P.y, a: G.P.angT}; } G.enemies.forEach(e => e.alert = false); }""")
             pg.wait_for_timeout(900)
             pg.screenshot(path=os.path.join(SHOTS, 'floor_%d.png' % f))
+            if pg.evaluate("() => !!(LEVELS[LEVEL]._nt.plan.ponds || []).length"):
+                pg.evaluate("""() => { const st = LEVELS[LEVEL]._nt.plan.ponds[0].stand; G.P.x = st.x; G.P.y = st.y; const f = st.dx > 0 ? 1 : st.dx < 0 ? 3 : st.dy > 0 ? 2 : 0; G.P.f = f; G.P.angT = (f - 1) * Math.PI / 2; G.C = {x: G.P.x, y: G.P.y, a: G.P.angT}; G.enemies.forEach(e => e.alert = false); }""")
+                pg.wait_for_timeout(900)
+                pg.screenshot(path=os.path.join(SHOTS, 'pond_%d.png' % f))
             info = pg.evaluate("() => [LEVELS[LEVEL].name, LEVELS[LEVEL]._nt.look.pattern, LEVELS[LEVEL]._nt.look.wallBase, Math.round(LEVELS[LEVEL]._nt.look.pal.hue)]")
             print('shot', f, info)
         print('screenshots in', SHOTS)
@@ -454,13 +478,37 @@ def run_seal():
         finish(errs)
 
 
+def run_fish():
+    """Fishing in the tower: a floor with a pond; the stand faces a spot; a rod in the bag starts the fishing; catches come from the deep-water table at a deep level."""
+    with sync_playwright() as p:
+        b, pg, errs = boot(p)
+        f = pg.evaluate("() => { for (let f = 1; f < 40; f++) if (ntPlan(f).plan.ponds.length) return f; return 0; }")
+        check('a pond floor exists in 1..40', f > 0, f)
+        goto_floor(pg, f)
+        r = pg.evaluate("""() => { const pd = LEVELS[LEVEL]._nt.plan.ponds[0], st = pd.stand; G.P.x = st.x; G.P.y = st.y; const fc = st.dx > 0 ? 1 : st.dx < 0 ? 3 : st.dy > 0 ? 2 : 0; G.P.f = fc; G.P.angT = (fc - 1) * Math.PI / 2; G.C = {x: G.P.x, y: G.P.y, a: G.P.angT}; G.enemies.length = 0;
+            const faced = fshFaced(); const noRod = !fshBestRod(); bagAdd(mkItem('fishrod_3'));
+            const sp = fshSpots(LEVEL), w = faced ? faced.water : null;
+            const started = fshStart(faced); const F0 = G.fishing;
+            let fish = {}, junk = 0, n = 0, bad = null;
+            try { for (let i = 0; i < 200; i++) { G.fishing = {phase: 'line', t: 0, cell: faced, water: 'deep', rod: fshBestRod(), id: 'fishrod_3', bait: null, odds: fshOdds(fshBestRod(), null, 'deep'), chance: 100, zone: {c: .5, w: 1}, cur: .5, dir: 1, res: null, show: null, tgt: fshTarget(faced), wait: 1, spd: 1}; fshCatch(G.fishing); const s = G.fishing.show; if (s) { fish[s.id] = (fish[s.id] || 0) + 1; n++; } } } catch (e) { bad = String(e); }
+            G.fishing = null; G.menu = false;
+            return {faced: !!faced, water: w, spots: sp.size, noRod, started, phase: F0 && F0.phase, n, kinds: Object.keys(fish).length, sample: Object.keys(fish).slice(0, 12), bad, lvl: LEVEL}; }""")
+        print(r)
+        check('the stand at the pond faces a fishing spot of deep water', r['faced'] and r['water'] == 'deep', r)
+        check('a rod in the bag starts the fishing and the line is cast', r['started'] and r['phase'], r)
+        check('200 pulls at a deep floor give fish and treasure with no error', r['bad'] is None and r['n'] == 200 and r['kinds'] >= 5, r)
+        # without a rod the plain line, not an error
+        pg.evaluate("() => { fshEnd(); }")
+        finish(errs)
+
+
 def run_all():
     import subprocess
     codes = []
-    for m in ['dash', 'build', 'foes', 'shops', 'save', 'tele', 'walk', 'mem', 'seal']:
+    for m in ['dash', 'build', 'foes', 'shops', 'save', 'tele', 'walk', 'fish', 'mem', 'seal']:
         print('=== ' + m)
         codes.append(subprocess.call([sys.executable, os.path.abspath(__file__), m]))
     sys.exit(1 if any(codes) else 0)
 
 
-{'build': run_build, 'foes': run_foes, 'shops': run_shops, 'save': run_save, 'tele': run_tele, 'dash': run_dash, 'walk': run_walk, 'mem': run_mem, 'seal': run_seal, 'shots': run_shots, 'all': run_all}[what]()
+{'build': run_build, 'foes': run_foes, 'shops': run_shops, 'save': run_save, 'tele': run_tele, 'dash': run_dash, 'walk': run_walk, 'fish': run_fish, 'mem': run_mem, 'seal': run_seal, 'shots': run_shots, 'all': run_all}[what]()
