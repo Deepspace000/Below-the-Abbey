@@ -29,7 +29,7 @@ if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^blpaleknight/,'frostbitten',
 /* ---------- the pictures ---------- */
 function blpArt(){
   if(BLP._art)return;
-  bl3Tint('bl_paleknight','gyp_boss_2','saturate(.15) brightness(1.5) contrast(.9)',1.65);
+  bl3Tint('bl_paleknight','gyp_boss_2','saturate(.15) brightness(1.5) contrast(.9)',1.3);   // a tall man in armour, not a giant (the fight picture has its own size)
   bl3Tint('bl_paletower','wl_bldg1_4','saturate(.2) brightness(.8)',null);
   bl3Ghost('bl_g_dummy','kh_ohsold1_3');
   for(const [k,h] of [['b9_cart',.95],['kh_cart1_0',1.1],['gy_angel',1.95],['gy_lever',.9],['gy_igate',2.2],['gy_arch',2.5]])if(NPC_H[k]===undefined)NPC_H[k]=h;
@@ -188,22 +188,22 @@ function blpBuild(p){
   C.milestone(42,33);
   // Sale's outer wall: three thick, the whole height, with an open arch in the road and two towers; a little toll yard inside
   const WT=C.ch(gyTile('texGrey_2',3.5,{gain:.85,rgb:[.95,1,1]})),WT2=C.ch(gyTile('texGrey_1',3.5,{gain:.8,rgb:[.92,.98,1]}));
-  for(let y=3;y<=66;y++){if(y>=34&&y<=36)continue;for(let x=8;x<=10;x++)C.solid(x,y,(hs(x,y,11)<.5)?WT:WT2)}
+  for(let y=3;y<=66;y++){if(y===35)continue;for(let x=8;x<=10;x++)C.solid(x,y,(hs(x,y,11)<.5)?WT:WT2)}   // the gate is one square wide, so the arch stands in the gap of the wall and not loose on the road
   C.house({x0:6,x1:12,y0:27,y1:32,face:'E',sty:'flint',roof:WL_ROOFS.b9slate?'b9slate':'slate',wh:3.6,to:BLP.GUARD,door:[12,29]});
   C.house({x0:6,x1:12,y0:38,y1:43,face:'E',sty:'flint',roof:WL_ROOFS.b9slate?'b9slate':'slate',wh:3.6,to:BLP.WALK,door:[12,41]});
   for(const [x,y] of [[13,27],[13,31],[13,39],[13,43],[13,33],[13,37]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.warm)}
-  C.dec('gy_arch',9,35,{block:false,sc:1.5});
+  C.dec('gy_arch',9,35,{block:false,sc:1.5});C.light(9,35,C.warm);
   C.dec('gy_rpost',6,33,{block:true,sc:1});C.dec('gy_rpost',6,37,{block:true,sc:1});C.dec('gy_rpost',3,33,{block:true,npc:'blp_toll',sc:1});
   C.dec('kh_oqstuff_8',3,39,{block:true,sc:.8});C.dec('kh_oqstuff_9',3,31,{block:true,sc:.8});
   C.post(5,38,'bl_pb_w',[{n:'SALE',d:-1}],'blp_sign_w','',{i:5});
   C.light(3,33,C.warm);C.light(3,37,C.warm);C.light(7,35,C.warm);
   C.person('blp_pike',5,33,2);
-  if(IMG.wl2_hall_0){C.dec('wl2_hall_0',11,33,{block:true,sc:.95});C.dec('wl2_hall_0',11,37,{block:true,sc:.95})}   // round 2: the arch is flanked by the watch's banners and a barrel or two
+  if(IMG.wl2_hall_0){C.dec('wl2_hall_0',11,33,{wd:[-1,0],bob:.7});C.dec('wl2_hall_0',11,37,{wd:[-1,0],bob:.7})}   // flat on the wall face either side of the gate   // round 2: the arch is flanked by the watch's banners and a barrel or two
   C.dec('barrel',12,33,{block:true,sc:.9});C.dec('barrel',12,37,{block:true,sc:.9});C.dec('kh_oqstuff_6',4,31,{sc:.8});C.dec('barrel',4,39,{block:true,sc:.85});C.light(11,35,C.warm);
   // the wall is lettered with names, and the outside of it has a cairn, the glove, and the lamps
   for(const y of [10,16,22,46,52,58]){C.dec('bl_column',11,y,{block:true,npc:'blp_wall',sc:.9})}
   for(const y of [14,20,50,56]){C.dec('gy_lantern',12,y,{block:true});C.light(12,y,C.pale)}
-  if(!F.glove&&!F.gloveGiven)C.dec('gy_ring',11,44,{block:true,npc:'blp_glove',sc:1,bob:.1});
+  if(!F.glove&&!F.gloveGiven)C.dec('gy_ring',11,44,{block:true,npc:'blp_glove',sc:1});
   for(const [x,y] of [[12,45],[12,47]])C.dec('bl_stone2',x,y,{block:true,sc:.7});
   // the dead land between the wall and the bridge: four unlit lamps, a camp, graves, dead hedges
   BLP_LAMPS.forEach(([x,y],i)=>{const lit=(F.lamps|0)&(1<<i);C.dec('gy_lantern',x,y,{block:true,npc:'blp_lamp'+i});C.light(x,y,lit?C.warm:C.pale)});
@@ -214,7 +214,7 @@ function blpBuild(p){
   // the east bank: the cart with the banner, the waystation shell, the herald, the signs, lamps
   C.dec('b9_cart',62,38,{block:true,npc:'blp_cart',sc:1});C.light(63,40,C.pale);
   C.house({x0:64,x1:69,y0:25,y1:29,face:'S',sty:'flint',roof:WL_ROOFS.b9moss?'b9moss':'moss',wh:2.4,lit:false});
-  C.dec('gy_web',63,30,{sc:.7});
+  C.dec('gy_web',63,27,{wd:[1,0],bob:1.0});   // on the side wall of the shell, not loose in the grass
   C.person('blp_piper',60,33,2);
   C.milestone(69,33);
   C.dec(blSlab('bl_mile10b',['SALE','1 STAGE'],{h:1.0,top:.2,span:.62}),74,37,{block:true,npc:'blp_mile'});

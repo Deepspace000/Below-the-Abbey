@@ -69441,8 +69441,8 @@ function blrBuild(p){
   for(const x of [40,48]){C.dec('gy_lantern',x,44,{block:true});C.light(x,44,WARM)}
   C.person('blr_gate1',42,43,2);C.person('blr_gate2',46,43,2);
   C.dec('greensign',41,41,{block:true,npc:'blr_notice'});
-  C.post(44,57,'blr_fortpost',[{n:'LANTERNREST WAYSTATION',d:0},{n:'THE ROAD',d:2}],'blr_signFort','',{i:1});
-  const bn=blrBanner();if(bn){for(const [x,y] of [[39,43],[49,43],[43,15],[45,15],[20,29],[68,29]])C.dec(x===45&&IMG.wl2_hall_1?'wl2_hall_1':bn,x,y,{block:true,sc:.9})}
+  C.post(46,56,'blr_fortpost',[{n:'LANTERNREST WAYSTATION',d:0},{n:'THE ROAD',d:2}],'blr_signFort','',{i:1});
+  const bn=blrBanner();if(bn){for(const [x,y] of [[39,43],[49,43],[43,15],[45,15],[20,29],[68,29]])C.dec(bn,x,y,{block:true,sc:.9})}
   /* the yard: well, stocks, drill dummies, stew pot, the supply wagon, lamps */
   C.thing('ww_well','blr_well',52,20,{sc:1});C.light(52,22,WARM);
   C.thing('blr_stocks','blr_stocks',54,36,{sc:1});C.thing('ww_totem','blr_dummy',34,36,{sc:.8});C.thing('ww_totem','blr_dummy',36,38,{sc:.8});C.thing('blr_stew','blr_stew',38,19,{sc:1});C.light(38,21,WARM);
@@ -69465,7 +69465,7 @@ function blrBuild(p){
   for(const [x,y] of [[34,33],[54,28],[31,22],[60,26]])C.dec('kh_oqstuff_'+(5+((x+y)%4)),x,y,{sc:.8});
   /* details: a ration board, the sentry log at the gate, a marker boot on the road, dogs in the camp, flags on the drill ground, spilled stores by the burnt wagon, a trail from the hollow */
   C.dec('gy_sign',40,22,{block:true,npc:'blr_n_rations',sc:.8});
-  C.dec('gy_book',47,42,{block:true,npc:'blr_n_log',sc:1,bob:.2});
+  C.dec('gy_book',47,42,{block:true,npc:'blr_n_log',sc:1});
   C.dec('ww_boot',60,62,{block:true,npc:'blr_n_boot',sc:.9});
   C.dec('kh_oqdogs_3',38,41,{sc:1});C.dec('kh_oqdogs_2',57,28,{sc:1});C.dec('kh_oqflags_2',38,34,{block:true,sc:.9});
   C.dec('kh_oqstuff_6',74,53,{sc:.8});C.dec('kh_oqstuff_4',78,54,{sc:.8});C.dec('gy_bones',77,50,{sc:.6});
@@ -69506,8 +69506,8 @@ function blrInn(){
     back:{to:BLR.ID,x:f[0],y:f[1],f:2},
     lights:[[3,2],[11,2],[7,5],[2,8],[12,8]],lcol:{'3,2':BLR_LC,'11,2':BLR_LC,'7,5':[1.5,1.05,.55],'2,8':BLR_LC,'12,8':BLR_LC},col:[1.4,1.0,.6],
     build:C=>{
-      blrP(C,'hearth',7,1,{h:1.3});for(const x of [3,4,5,9,10,11])blrP(C,'bar',x,3,{});blrP(C,'potshelf',2,1,{h:1.2});blrP(C,'herbrack',3,1,{h:1.1});blrP(C,'potshelf',11,1,{h:1.2});blrP(C,'ale',1,2,{});blrP(C,'ale',13,1,{});
-      blrP(C,'longtable',3,6,{h:.7});blrP(C,'longtable',11,6,{h:.7});blrP(C,'longtable',7,8,{h:.7});blrP(C,'chandelier',7,5,{free:1});blrP(C,'lute',13,8,{});blrP(C,'waterbarrel',1,8,{h:.7});blrP(C,'cat',9,2,{h:.26});blrP(C,'dog',5,8,{h:.36});C.raw('gy_sign',1,5,{npc:'blr_n_slate',solid:1,deco:false,sc:.9,bob:.2});C.raw('kh_oqstuff_6',12,8,{block:false,sc:.8});
+      blrP(C,'hearth',7,1,{h:1.3});for(const x of [3,4,5,9,10,11])blrP(C,'bar',x,3,x===4||x===10?{}:{free:1});/* the middle piece of each bar blocks the squares beside it; the others do not, so no square gets two hidden blocks */blrP(C,'potshelf',2,1,{h:1.2});blrP(C,'herbrack',3,1,{h:1.1});blrP(C,'potshelf',11,1,{h:1.2});blrP(C,'ale',1,2,{});blrP(C,'ale',13,1,{});
+      blrP(C,'longtable',3,6,{h:.7});blrP(C,'longtable',11,6,{h:.7});blrP(C,'longtable',7,8,{h:.7});blrP(C,'chandelier',7,5,{free:1});blrP(C,'lute',13,8,{});blrP(C,'waterbarrel',1,8,{h:.7});blrP(C,'cat',9,2,{h:.26});blrP(C,'dog',5,8,{h:.36});C.raw('gy_sign',1,5,{npc:'blr_n_slate',solid:1,deco:false,sc:.9});C.raw('kh_oqstuff_6',12,8,{block:false,sc:.8});
       C.npc('blr_inn',7,2);C.npc('blr_i_corp',5,5);C.npc('blr_i_pilgrim',9,5);C.npc('blr_i_garrick',12,5);C.raw('gy_web',1,1,{block:false,sc:.4})}})}
 function blrArmoury(){
   const f=BLR_ARMH.front;
@@ -69534,7 +69534,7 @@ function blrHall(){
     lights:[[2,2],[10,2],[6,5],[2,8],[10,8]],lcol:{'2,2':BLR_LC,'10,2':BLR_LC,'6,5':[1.35,.98,.58],'2,8':BLR_LC,'10,8':BLR_LC},col:[1.3,.95,.6],
     build:C=>{
       blrP(C,'hearth',6,1,{h:1.3});blrP(C,'banner',3,1,{h:1.6,block:false});blrP(C,'banner',9,1,{h:1.6,block:false});blrP(C,'counciltable',6,5,{h:.8});blrP(C,'mayorchair',6,3,{h:1.0});
-      blrP(C,'bookshelf',1,2,{h:1.1});blrP(C,'bookshelf',11,2,{h:1.1});blrP(C,'noticeboard',2,6,{h:.9,block:false});blrP(C,'coatrack',11,7,{h:1.0});blrP(C,'waterbarrel',1,8,{h:.7});
+      blrP(C,'bookshelf',1,2,{h:1.1});blrP(C,'bookshelf',11,2,{h:1.1});blrP(C,'noticeboard',1,5,{h:.9,block:false});blrP(C,'coatrack',11,7,{h:1.0});blrP(C,'waterbarrel',1,8,{h:.7});
       C.raw('gy_candles',3,5,{block:true,sc:.8});C.raw('gy_candles',9,5,{block:true,sc:.8});
       C.raw('gy_book',3,3,{npc:'blr_n_orders',solid:1,deco:false,sc:.9,bob:.2});C.raw('gy_bones',9,8,{block:false,sc:.5});C.raw('kh_oqstuff_6',4,7,{block:false,sc:.8});
       C.npc('blr_marsh',6,4);C.npc('blr_h_clerk',9,4);C.npc('blr_h_rider',4,8)}})}
@@ -69545,7 +69545,7 @@ function blrInfirmary(){
     lights:[[2,2],[10,2],[6,5],[2,7],[10,7]],lcol:{'2,2':BLR_LC,'10,2':BLR_LC,'6,5':[1.35,.98,.58],'2,7':[1.0,1.1,.9],'10,7':BLR_LC},col:[1.25,1.0,.7],
     build:C=>{
       blrP(C,'cot',2,3,{h:.55});blrP(C,'bed',2,5,{h:.7});blrP(C,'bed',10,3,{h:.7});blrP(C,'cot',10,5,{h:.55});blrP(C,'bed',7,3,{h:.7});blrP(C,'bed',9,6,{h:.7});
-      blrP(C,'herbrack',4,1,{h:1.1});blrP(C,'apothcab',6,1,{h:.95});blrP(C,'potshelf',8,1,{h:1.2});blrP(C,'cauldron',11,1,{h:.9});blrP(C,'waterbarrel',1,7,{h:.7});blrP(C,'shelving',12,5,{h:1.0});
+      blrP(C,'herbrack',4,1,{h:1.1});blrP(C,'apothcab',6,1,{h:.95});blrP(C,'potshelf',8,1,{h:1.2});blrP(C,'cauldron',11,1,{h:.9});blrP(C,'waterbarrel',1,7,{h:.7});blrP(C,'shelving',1,1,{h:1.0});   // (it stood in the east wall)
       C.raw('gy_book',7,7,{npc:'blr_n_chart',solid:1,deco:false,sc:.9,bob:.2});C.raw('kh_oqstuff_4',4,7,{block:false,sc:.7});
       C.npc('blr_surgeon',5,4);C.npc('blr_n_p1',4,6);C.npc('blr_n_p2',11,6)}});
   blrDaceAdd()}
@@ -69823,7 +69823,7 @@ function blhBuild(p){
   C.flatten(2,3,81,40);
   C.gate('E',38);C.gate('W',38);
   // the precinct wall: ruined, with a gap at the gate
-  for(let x=14;x<=70;x++){if(x>=40&&x<=42){}else if(hs(x,31,3)<.9)C.DB('bl_fence',x,31,{sc:.95});if(hs(x,4,3)<.9)C.DB('bl_fence',x,4,{sc:.95})}
+  for(let x=14;x<=70;x++){if(x>=40&&x<=42){}else if(hs(x,31,3)<.9)C.DB('bl_fence',x,31,{sc:.95});if(hs(x,4,3)<.9&&!(x>=20&&x<=25))C.DB('bl_fence',x,4,{sc:.95})}   // no fence inside the bell tower (21 to 24) or touching it
   for(let y=5;y<=30;y++){if(hs(14,y,3)<.88)C.DB('bl_fence',14,y,{sc:.95});if(hs(70,y,3)<.88)C.DB('bl_fence',70,y,{sc:.95})}
   for(const [x,y] of [[14,4],[70,4],[14,31],[70,31],[39,31],[43,31]]){C.DB('bl_column',x,y,{sc:1.1,npc:x===39||x===43?undefined:'blh_ruin'});}
   C.dec('gy_lych',41,31,{sc:1.1});C.light(40,30,C.pale);C.light(42,30,C.pale);
@@ -69844,9 +69844,9 @@ function blhBuild(p){
   C.picHouse({img:'bl_tower',x0:21,x1:24,y0:4,y1:8,w:4.6,wh:3.4,to:BLH.TOWER,door:[22,8]});C.light(21,10,C.pale);C.light(25,10,C.pale);
   C.dec('bl_urn',20,10,{block:true,sc:.8});C.dec('bl_urn',26,10,{block:true,sc:.8});
   // the dormitory ruin, the infirmary garden, the herb beds
-  C.dec('bl_chapel',22,26,{block:true,npc:'blh_dorm',sc:1.15});C.light(22,28,C.pale);C.dec('gy_bones',25,27,{});C.dec('gy_web',19,26,{sc:.7});
-  for(let x=33;x<=45;x+=2){C.dec('bl_fence',x,28,{block:true,sc:.7});C.dec('ww_twig2',x,29,{sc:.55})}
-  C.dec('gy_rose',40,28,{block:true,npc:'blh_infirmary',sc:1});
+  C.dec('bl_chapel',22,26,{block:true,npc:'blh_dorm',sc:1.15});C.light(22,28,C.pale);C.dec('gy_bones',25,27,{});
+  for(let x=33;x<=45;x+=2){if(x>=40&&x<=42)continue;C.dec('bl_fence',x,28,{block:true,sc:.7});C.dec('ww_twig2',x,29,{sc:.55})}   // the lane to the gate (40 to 42) is kept clear
+  C.dec('gy_rose',38,28,{block:true,npc:'blh_infirmary',sc:1});
   // the brothers' graves: seven mounds, seven boards, in a railed plot in the north east
   for(let x=57;x<=69;x++)C.dec('bl_fence',x,11,{block:true,sc:.85});
   BLH_GRAVES.forEach((g,i)=>{const x=58+i*2,y=7;C.dec('gy_mound',x,y+1,{block:true,sc:.75});C.dec(blSlab('bl_hbg'+i,[g[0].replace('BR. ',''),'BROTHER'],{h:.95,top:.2,span:.55}),x,y,{block:true,npc:'blh_grave'+i})});
@@ -69875,7 +69875,7 @@ function blhBuild(p){
     ['blringer',24,11],['blringer',19,10],['blghoul',26,24],['blghoul',60,14],['blghoul',40,27],['blbones',37,15],['blbones',39,21],['blbones',50,20],['blbones',24,19],['blbones',64,27],['blshade',46,8],['blshade',30,8],['blshade',66,28],
     ['blbones',33,54],['blbones',45,57],['blghoul',39,60],['blghoul',51,54],['blshade',36,62],['blbloat',42,58],['blbones',69,47],['blhusk',58,45],['blhusk',24,56],
     ['bldeadwarden',60,38],['bldeadwarden',28,38],['blhusk',50,40],['blcrow',22,34],['blcrow',56,34],['blcrow',70,43],['blhound',34,44],['blhound',12,50],['blcrowflock',72,8]]);
-  for(const [k,x,y] of [['potion6',27,31],['potion6',70,34],['potion6',44,66]])C.items.push({k,x,y,taken:false});
+  for(const [k,x,y] of [['potion6',27,33],['potion6',70,34],['potion6',44,66]])C.items.push({k,x,y,taken:false});
   C.mapNames.push({t:'Hollowbell Abbey',x:41,y:15,k:'place'},{t:'The Abbey Gate',x:41,y:31,k:'place'},{t:'The Fallen Church',x:37,y:7,k:'place'},{t:'The Cloister',x:38,y:18,k:'place'},{t:'The Scriptorium',x:19,y:14,k:'place'},{t:'The Chapter House',x:54,y:14,k:'place'},{t:'The Refectory',x:60,y:23,k:'place'},{t:'The Bell Tower',x:22,y:6,k:'place'},{t:"The Brothers' Graves",x:63,y:7,k:'place'},{t:'The Dormitory',x:22,y:26,k:'place'},{t:'The Gate Lodge',x:16,y:44,k:'place'},{t:'The Bell Foundry',x:68,y:50,k:'place'},{t:"The Pilgrims' Graves",x:38,y:54,k:'place'},{t:'To the Vault of Maldrake',x:78,y:36,k:'place'},{t:'To the Rookery Mill',x:6,y:36,k:'place'});
   const lv=C.finish({start:{x:79,y:38,f:3}});
   lv.tele=undefined;
@@ -69906,7 +69906,7 @@ function blhScript(){
     enemies:[['blbrother',10,6]],
     build:C=>{const P=(n,x,y,o)=>bl3Prop(C,n,x,y,o);
       P('bookshelf',2,1,{h:1.1});P('bookshelf',4,1,{h:1.1});P('bookshelf',10,1,{h:1.1});P('scrollrack',8,1,{h:1.0});
-      P('readdesk',3,4,{h:.85});P('readdesk',6,4,{h:.85});P('readdesk',9,4,{h:.85});P('readdesk',6,6,{h:.85});
+      P('readdesk',3,4,{h:.85});P('readdesk',6,4,{h:.85});P('readdesk',9,4,{h:.85});   // (a fourth desk stood in front of the door)
       if(!F.letter&&!F.letterRead)C.raw('gy_book',6,4,{npc:'blh_letter',solid:1,deco:false,bob:.38,sc:1});
       C.npc('blh_osmund',4,6);C.raw('gy_book',3,4,{npc:'blh_rule',solid:1,deco:false,bob:.38,sc:.9});
       P('candlerack',11,5,{h:1.0});P('waterbarrel',11,7,{h:.7});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_bones',9,7,{block:false,sc:.6})}})}
@@ -69920,7 +69920,7 @@ function blhRefec(){
       C.raw('gy_candles',3,1,{npc:'blh_kitchen',solid:1,deco:false,sc:.8});
       P('longtable',5,4,{h:.6,free:true});P('longtable',9,4,{h:.6,free:true});P('longtable',13,4,{h:.6,free:true});
       for(const x of [4,6,8,10,12,14]){C.raw('gy_skel',x,3,{npc:'blh_seated',solid:1,deco:false,sc:.7})}
-      C.raw('gy_candles',9,6,{npc:'blh_table',solid:1,deco:false,sc:.45});
+      C.raw('gy_candles',9,4,{npc:'blh_table',solid:1,deco:false,sc:.4,bob:.5});   // on the middle table, not in front of the door
       C.npc('blh_anselm',3,3);
       P('lectern',17,3,{h:1.0});P('waterbarrel',17,6,{h:.7});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_bones',7,7,{block:false,sc:.6});C.raw('gy_bones',14,7,{block:false,sc:.6})}})}
 function blhTowerRoom(){
@@ -70030,7 +70030,7 @@ function b9Dim(lv){
 function b9Mist(lv,cells,opt){
   const taken=new Set(lv.decor.map(d=>d.x+','+d.y));opt=opt||{};let n=0;
   for(const [x,y] of cells){if(taken.has(x+','+y))continue;const r=hash2(x,y,71);
-    lv.decor.push({k:opt.k||'b9_mist',x,y,block:false,walk:true,deco:true,bob:(opt.bob||0)+r*(opt.bobr||.5),sc:(opt.sc||1.5)*(.8+r*.5)});n++}
+    lv.decor.push({k:opt.k||'b9_mist',x,y,block:false,walk:true,deco:true,bob:(opt.bob||0)+r*(opt.bobr!==undefined?opt.bobr:.5),sc:(opt.sc||1.5)*(.8+r*.5)});n++}
   return n}
 /* ---------- the pictures ---------- */
 function blrkArt(){
@@ -70219,7 +70219,7 @@ function blrkBuild(p){
   for(let a=0;a<12;a++){const x=Math.round(PC[0]+6.4*Math.cos(a*Math.PI/6)),y=Math.round(PC[1]+4.6*Math.sin(a*Math.PI/6));if(a===3)continue;C.dec(a%2?'gy_column':'gy_obelisk',x,y,{block:true,npc:'blr_stones',sc:.95})}
   C.dec('gy_obelisk',PC[0]-1,PC[1]-1,{block:true,sc:1.0});C.dec('gy_raven',PC[0]-1,PC[1]-1,{block:true,npc:'blr_speaker',sc:1.7,oy:-.9});
   for(let i=0;i<7;i++){const a=i*2*Math.PI/7+.3,x=Math.round(PC[0]+3.6*Math.cos(a)),y=Math.round(PC[1]+2.6*Math.sin(a));C.dec('gy_raven',x,y,{block:true,npc:'blr_rook'+i,sc:1.0})}
-  C.dec('gy_book',PC[0]+1,PC[1]+1,{block:true,npc:'blr_ledger',sc:1.2,bob:.1});
+  C.dec('gy_book',PC[0]+1,PC[1]+1,{block:true,npc:'blr_ledger',sc:1.2});
   for(const [x,y] of [[PC[0]-8,PC[1]],[PC[0]+8,PC[1]],[PC[0],PC[1]-6],[PC[0],PC[1]+6]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.pale)}
   C.pth(55,24,56,26,'1');
   // the miller's house west of the race, the dead watermill east of it, the sluice, the pond, the field
@@ -70229,9 +70229,9 @@ function blrkBuild(p){
   C.dec('bl_urn',30,28,{block:true,sc:.8,npc:'blr_watermill'});
   C.light(29,28,C.pale);C.light(33,28,C.pale);
   C.dec('gy_lever',27,30,{block:true,npc:'blr_sluice',sc:1});C.light(28,31,C.pale);
-  if(!((F.th|0)&1))C.dec('bl_thimble',28,31,{block:true,npc:'blr_thimble0',sc:1.0,bob:.1});
+  if(!((F.th|0)&1))C.dec('bl_thimble',29,31,{block:true,npc:'blr_thimble0',sc:1.0});   // beside the track to the sluice, not on it
   C.dec('b9_cart',50,38,{block:true,npc:'blr_cart',sc:1});
-  if(!((F.th|0)&4))C.dec('bl_thimble',51,38,{block:true,npc:'blr_thimble2',sc:1.0,bob:.1});
+  if(!((F.th|0)&4))C.dec('bl_thimble',51,38,{block:true,npc:'blr_thimble2',sc:1.0});
   C.dec('ww_crowtree',68,10,{block:true,sc:1.2,npc:'blr_millwindow'});
   for(const [x,y] of [[40,22],[48,26],[66,32],[10,32],[18,22]])C.dec('gy_rpost',x,y,{block:true});
   for(let y=42;y<=62;y+=3)for(let x=44;x<=74;x+=4){const d=C.D('ww_totem',x+(hs(x,y,5)<.5?0:1),y,{block:true,npc:'blr_scare',sc:.85});}
@@ -70269,7 +70269,7 @@ function blrGround(){
       C.raw('gy_hatch2',11,2,{npc:'blr_looploft',solid:1,deco:false,sc:1});
       for(const [x,y] of [[1,6],[2,7],[11,6],[11,7]])C.raw('hay',x,y,{block:true,sc:1});
       C.raw('gy_chest',1,2,{npc:'blr_millchest',solid:1,deco:false,sc:.9});
-      P('waterbarrel',2,8,{h:.7});P('coatrack',11,5,{h:1.0});C.raw('barrel',9,8,{block:true,sc:.9});C.raw('kh_oqstuff_9',3,5,{block:false,sc:.9});C.raw('kh_oqstuff_8',10,4,{block:false,sc:.8});C.raw('kh_oqstuff_9',8,3,{block:false,sc:.7});C.raw('barrel',1,9,{block:true,sc:.8});C.raw('crate',12,8,{block:true,sc:.9});
+      P('waterbarrel',2,8,{h:.7});P('coatrack',11,5,{h:1.0});C.raw('barrel',9,8,{block:true,sc:.9});C.raw('kh_oqstuff_9',3,5,{block:false,sc:.9});C.raw('kh_oqstuff_8',10,4,{block:false,sc:.8});C.raw('kh_oqstuff_9',8,3,{block:false,sc:.7});C.raw('crate',11,8,{block:true,sc:.9});/* (the barrel and crate stood in the south and east walls) */
       C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_web',11,1,{block:false,sc:.5});C.raw('gy_bones',8,6,{block:false,sc:.6});C.raw('gy_bones',4,6,{block:false,sc:.5})}})}
 function blrLoft(){
   const F=blF();
@@ -70280,7 +70280,7 @@ function blrLoft(){
     build:C=>{
       for(const [x,y] of [[1,2],[2,2],[11,2],[1,5],[11,6],[2,7]])C.raw('hay',x,y,{block:true,sc:1});
       [[3,3],[9,3],[6,7]].forEach(([x,y],i)=>{if(!((F.sacks|0)&(1<<i)))C.raw('kh_oqstuff_9',x,y,{npc:'blr_sack'+i,solid:1,deco:false,sc:.9})});
-      if(!((F.th|0)&2))C.raw('bl_thimble',6,2,{npc:'blr_thimble1',solid:1,deco:false,sc:1.0,bob:.2});
+      if(!((F.th|0)&2))C.raw('bl_thimble',6,2,{npc:'blr_thimble1',solid:1,deco:false,sc:1.0});
       C.raw('gy_hatch2',2,7,{npc:'blr_loftdown',solid:1,deco:false,sc:1});
       C.raw('gy_hatch2',10,7,{npc:'blr_capdoor',solid:1,deco:false,sc:1});
       for(const x of [1,11])C.raw('hl_p_window',x,4,{block:true,sc:1.0});
@@ -70350,7 +70350,7 @@ if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^blpaleknight/,'frostbitten',
 /* ---------- the pictures ---------- */
 function blpArt(){
   if(BLP._art)return;
-  bl3Tint('bl_paleknight','gyp_boss_2','saturate(.15) brightness(1.5) contrast(.9)',1.65);
+  bl3Tint('bl_paleknight','gyp_boss_2','saturate(.15) brightness(1.5) contrast(.9)',1.3);   // a tall man in armour, not a giant (the fight picture has its own size)
   bl3Tint('bl_paletower','wl_bldg1_4','saturate(.2) brightness(.8)',null);
   bl3Ghost('bl_g_dummy','kh_ohsold1_3');
   for(const [k,h] of [['b9_cart',.95],['kh_cart1_0',1.1],['gy_angel',1.95],['gy_lever',.9],['gy_igate',2.2],['gy_arch',2.5]])if(NPC_H[k]===undefined)NPC_H[k]=h;
@@ -70509,22 +70509,22 @@ function blpBuild(p){
   C.milestone(42,33);
   // Sale's outer wall: three thick, the whole height, with an open arch in the road and two towers; a little toll yard inside
   const WT=C.ch(gyTile('texGrey_2',3.5,{gain:.85,rgb:[.95,1,1]})),WT2=C.ch(gyTile('texGrey_1',3.5,{gain:.8,rgb:[.92,.98,1]}));
-  for(let y=3;y<=66;y++){if(y>=34&&y<=36)continue;for(let x=8;x<=10;x++)C.solid(x,y,(hs(x,y,11)<.5)?WT:WT2)}
+  for(let y=3;y<=66;y++){if(y===35)continue;for(let x=8;x<=10;x++)C.solid(x,y,(hs(x,y,11)<.5)?WT:WT2)}   // the gate is one square wide, so the arch stands in the gap of the wall and not loose on the road
   C.house({x0:6,x1:12,y0:27,y1:32,face:'E',sty:'flint',roof:WL_ROOFS.b9slate?'b9slate':'slate',wh:3.6,to:BLP.GUARD,door:[12,29]});
   C.house({x0:6,x1:12,y0:38,y1:43,face:'E',sty:'flint',roof:WL_ROOFS.b9slate?'b9slate':'slate',wh:3.6,to:BLP.WALK,door:[12,41]});
   for(const [x,y] of [[13,27],[13,31],[13,39],[13,43],[13,33],[13,37]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.warm)}
-  C.dec('gy_arch',9,35,{block:false,sc:1.5});
+  C.dec('gy_arch',9,35,{block:false,sc:1.5});C.light(9,35,C.warm);
   C.dec('gy_rpost',6,33,{block:true,sc:1});C.dec('gy_rpost',6,37,{block:true,sc:1});C.dec('gy_rpost',3,33,{block:true,npc:'blp_toll',sc:1});
   C.dec('kh_oqstuff_8',3,39,{block:true,sc:.8});C.dec('kh_oqstuff_9',3,31,{block:true,sc:.8});
   C.post(5,38,'bl_pb_w',[{n:'SALE',d:-1}],'blp_sign_w','',{i:5});
   C.light(3,33,C.warm);C.light(3,37,C.warm);C.light(7,35,C.warm);
   C.person('blp_pike',5,33,2);
-  if(IMG.wl2_hall_0){C.dec('wl2_hall_0',11,33,{block:true,sc:.95});C.dec('wl2_hall_0',11,37,{block:true,sc:.95})}   // round 2: the arch is flanked by the watch's banners and a barrel or two
+  if(IMG.wl2_hall_0){C.dec('wl2_hall_0',11,33,{wd:[-1,0],bob:.7});C.dec('wl2_hall_0',11,37,{wd:[-1,0],bob:.7})}   // flat on the wall face either side of the gate   // round 2: the arch is flanked by the watch's banners and a barrel or two
   C.dec('barrel',12,33,{block:true,sc:.9});C.dec('barrel',12,37,{block:true,sc:.9});C.dec('kh_oqstuff_6',4,31,{sc:.8});C.dec('barrel',4,39,{block:true,sc:.85});C.light(11,35,C.warm);
   // the wall is lettered with names, and the outside of it has a cairn, the glove, and the lamps
   for(const y of [10,16,22,46,52,58]){C.dec('bl_column',11,y,{block:true,npc:'blp_wall',sc:.9})}
   for(const y of [14,20,50,56]){C.dec('gy_lantern',12,y,{block:true});C.light(12,y,C.pale)}
-  if(!F.glove&&!F.gloveGiven)C.dec('gy_ring',11,44,{block:true,npc:'blp_glove',sc:1,bob:.1});
+  if(!F.glove&&!F.gloveGiven)C.dec('gy_ring',11,44,{block:true,npc:'blp_glove',sc:1});
   for(const [x,y] of [[12,45],[12,47]])C.dec('bl_stone2',x,y,{block:true,sc:.7});
   // the dead land between the wall and the bridge: four unlit lamps, a camp, graves, dead hedges
   BLP_LAMPS.forEach(([x,y],i)=>{const lit=(F.lamps|0)&(1<<i);C.dec('gy_lantern',x,y,{block:true,npc:'blp_lamp'+i});C.light(x,y,lit?C.warm:C.pale)});
@@ -70535,7 +70535,7 @@ function blpBuild(p){
   // the east bank: the cart with the banner, the waystation shell, the herald, the signs, lamps
   C.dec('b9_cart',62,38,{block:true,npc:'blp_cart',sc:1});C.light(63,40,C.pale);
   C.house({x0:64,x1:69,y0:25,y1:29,face:'S',sty:'flint',roof:WL_ROOFS.b9moss?'b9moss':'moss',wh:2.4,lit:false});
-  C.dec('gy_web',63,30,{sc:.7});
+  C.dec('gy_web',63,27,{wd:[1,0],bob:1.0});   // on the side wall of the shell, not loose in the grass
   C.person('blp_piper',60,33,2);
   C.milestone(69,33);
   C.dec(blSlab('bl_mile10b',['SALE','1 STAGE'],{h:1.0,top:.2,span:.62}),74,37,{block:true,npc:'blp_mile'});
@@ -71026,7 +71026,7 @@ b58Wrap(9660,L=>{
   // stores and carts: crates, barrels, sacks by the hall, the stable and the stew
   const clutter=[['kh_oqstuff_8',43,16],['kh_oqstuff_2',45,16],['kh_oqstuff_9',47,17],['kh_oqstuff_2',58,12],['kh_oqstuff_8',59,13],['kh_oqstuff_9',65,12],['kh_oqstuff_2',36,20],['kh_oqstuff_9',37,19],['kh_oqstuff_6',40,24],
     ['kh_oqstuff_8',26,13],['kh_oqstuff_2',25,29],['kh_oqstuff_9',60,28],['kh_oqstuff_6',56,29],['kh_oqstuff_4',50,22],['kh_oqstuff_5',62,33],['kh_oqstuff_2',33,40],['kh_oqstuff_8',66,33],['kh_oqstuff_9',27,36],['kh_oqstuff_6',36,34],['bl_barrow',55,16]];
-  for(const [k,x,y] of clutter)b58Add(L,occ,k,x,y,{block:true,sc:.8});
+  for(const [k,x,y] of clutter){if(L._bgrPath&&L._bgrPath.has(x+','+y))continue;b58Add(L,occ,k,x,y,{block:true,sc:.8})}   // nothing on the yard paths
   for(const [x,y] of [[38,30],[50,30],[44,36]])if(b58Add(L,occ,'b58_brazier',x,y,{sc:.95}))b58Light(L,x,y,B58_WARM);
   // crows on the road side only (the fort is kept clear of them)
   b58Crows(L,occ,11,10,[3,53,87,65],.3)});
@@ -71064,8 +71064,8 @@ function b891Spot(L,id,occ,tx,ty,r,minOpen){
     if(n>=(minOpen||7))return [x,y]}
   return null}
 /* a thing with writing on it: walk up and press */
-function b891Note(L,id,occ,k,npcId,tx,ty,r,sc){
-  const p=b891Spot(L,id,occ,tx,ty,r||4,7);if(!p||!IMG[k]){console.warn('b891 no spot for '+npcId);return null}
+function b891Note(L,id,occ,k,npcId,tx,ty,r,sc,loose){
+  let p=b891Spot(L,id,occ,tx,ty,r||4,7);if(!p&&loose)p=b891Spot(L,id,occ,tx,ty,r||4,5)||b891Spot(L,id,occ,tx,ty,r||4,4);/* a small room is full of furniture: a spot with fewer open squares round it is taken there */if(!p||!IMG[k]){console.warn('b891 no spot for '+npcId);return null}
   const d={k,x:p[0],y:p[1],block:true,solid:1,npc:npcId,deco:false,sc:sc||.8};const a=b58Reach(L);L.decor.push(d);if(b58Reach(L)<a-1){L.decor.pop();return null}
   occ.add(p[0]+','+p[1]);return d}
 /* litter: walk-through props, never the same picture within 2 squares */
@@ -71075,7 +71075,7 @@ function b891Litter(L,id,occ,list){for(const [k,tx,ty,sc] of list){if(!IMG[k])co
 /* duplicates: the same picture twice in one cell goes; crates within 2 squares of each other become barrels, hay, sacks */
 function b891Dedupe(L){const seen=new Set();L.decor=L.decor.filter(d=>{const key=d.k+'@'+d.x+','+d.y;if(seen.has(key)&&!d.npc)return false;seen.add(key);return true})}
 function b891Crates(L){const alts=['barrel','hay','kh_oqstuff_9','kh_oqstuff_2'].filter(k=>IMG[k]);if(!alts.length)return;let n=0;
-  const keep=[];for(const d of L.decor){if(d.k!=='crate'||d.npc)continue;
+  const keep=[];for(const d of L.decor){if(d.k!=='crate'||d.npc||d.hidden)continue;
     if(keep.some(c=>Math.max(Math.abs(c.x-d.x),Math.abs(c.y-d.y))<=2)){const near=L.decor.filter(c=>c!==d&&Math.max(Math.abs(c.x-d.x),Math.abs(c.y-d.y))<=2).map(c=>c.k);d.k=alts.find(a=>!near.includes(a))||alts[n%alts.length];n++}else keep.push(d)}}
 /* hostile creatures out of tight spots (no free 2x2 square) and away from the living */
 function b891Foes(L,id,living,R){
@@ -71083,7 +71083,7 @@ function b891Foes(L,id,living,R){
   for(const e of L.enemies){const near=living.some(([x,y,r])=>Math.hypot(e.x-x,e.y-y)<(r||R));if(!near&&b891Free2(L,id,e.x,e.y,blk))continue;
     let best=null;for(let q=1;q<=8&&!best;q++)for(let dy=-q;dy<=q&&!best;dy++)for(let dx=-q;dx<=q;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==q)continue;const x=e.x+dx,y=e.y+dy;
       if(x<3||y<3||x>=W-3||y>=H-3)continue;if(!b891Open(L,id,x,y,blk)||!b891Free2(L,id,x,y,blk))continue;if(living.some(([a,b,r])=>Math.hypot(x-a,y-b)<(r||R)))continue;
-      if(L.decor.some(d=>d.x===x&&d.y===y)||L.enemies.some(o=>o!==e&&o.x===x&&o.y===y))continue;best=[x,y];break}
+      if(L.decor.some(d=>d.x===x&&d.y===y)||L.enemies.some(o=>o!==e&&Math.abs(o.x-x)<=1&&Math.abs(o.y-y)<=1))continue;if(L._bgrPath&&L._bgrPath.has(x+','+y))continue;best=[x,y];break}   // not on a road or path, not beside another creature
     if(best){e.x=best[0];e.y=best[1]}}}
 /* ----- notes and signs ----- */
 const B891_NOTES={
@@ -71128,7 +71128,7 @@ b891Wrap(9680,(L,id)=>{
 b891Wrap(9690,(L,id)=>{
   b891Dedupe(L);const occ=b58Occ(L);
   b891Note(L,id,occ,'greensign','b891_millsign',44,24,4,.8);
-  b891Note(L,id,occ,'gy_book','b891_tally',57,28,4,.6);
+  b891Note(L,id,occ,IMG.bl_stone1?'bl_stone1':'gy_book','b891_tally',57,28,4,.7);   // a scratched stone, not a book
   b891Note(L,id,occ,'gy_book','b891_wheel',29,31,4,.7);
   b891Note(L,id,occ,'greensign','b891_scarepole',56,46,5,.8);
   b891Litter(L,id,occ,[['kh_oqstuff_9',46,26,.6],['hay',44,30,.7],['kh_oqstuff_9',41,34,.6],['gy_bones',50,34,.6],['barrel',38,40,.7],['gy_candles',56,32,.5],
@@ -71150,7 +71150,7 @@ b891Wrap(9700,(L,id)=>{
 const B891_ROOMS={9682:['b891_desk',6,4],9684:['b891_ropetally',3,2],9686:['b891_names',9,3],9691:['b891_sacks',5,4],9693:['b891_nest',5,5],9694:['b891_table',6,3],9701:['b891_roster',4,3],9702:['b891_letter',6,3]};
 for(const id of [9681,9682,9683,9684,9685,9686,9691,9692,9693,9694,9701,9702])b891Wrap(id,(L,rid)=>{
   b891Dedupe(L);b891Crates(L);const occ=b58Occ(L);
-  const r=B891_ROOMS[rid];if(r)b891Note(L,rid,occ,'gy_book',r[0],r[1],r[2],4,.6);
+  const r=B891_ROOMS[rid];if(r)b891Note(L,rid,occ,'gy_book',r[0],r[1],r[2],4,.6,true);
   if(rid===9683){let n=0;for(const d of L.decor)if(d.k==='gy_skel'&&d.npc==='blh_seated'){n++;if(n%2===0&&IMG.bl_g_monk){d.k=n%4===0?'bl_g_monk2':'bl_g_monk';d.sc=.85}}}
   b891Foes(L,rid,[],0)});
 /* ----- the air: colder at the bridge, browner at the mill, whiter at the abbey ----- */
@@ -78139,6 +78139,11 @@ function ttArt(){
     if(t.id==='tt0'){x.fillStyle='#2a0608';x.strokeStyle='#d89a8a';x.lineWidth=1.4;for(let k=0;k<9;k++){const px=W*(.32+.36*((k*37)%10)/10),py=H*(.42+.34*((k*53)%10)/10);x.beginPath();x.ellipse(px,py,W*.035,H*.02,0,0,6.3);x.fill();x.stroke()}}
     IMG['art_'+t.id]=c;NPC_H['art_'+t.id]=t.ph;ENEMY_DEF[t.id].w=+(t.ph*W/H).toFixed(2)}
   TT._art=TT.list.every(t=>IMG['art_'+t.id])}
+/* the size of a giant on screen (game fix pass, 30 Oct 2026): the engine shrinks a big creature to fit the view but never below 0.3 of its size, so at that floor a giant of 4.2 to 5
+   squares stood 1.3 to 1.5 high and the fight window showed only its legs (Mother Sallowtide, Old Nine-Hands) or cut off its eyes (Old White Eyes, Brannock). A giant is now scaled
+   so that the top of the picture is at TT.TOP squares: still the tallest thing on the road, and the whole giant, head and face too, is in the fight window. */
+TT.TOP=1.0;
+{const _fs=fitScale;fitScale=function(t,def,base){const v=_fs.apply(this,arguments);try{if(def&&def.tt&&base&&base.width){const h=def.w*base.height/base.width;if(h>0)return Math.min(v,TT.TOP/h)}}catch(e){}return v}}
 /* a giant stands in a place: placed when its map is built, far from the arrival square */
 function ttPlace(){
   const n=ttPlaceOf(LEVEL);if(!n||n===6||!BL_ROAD.find(q=>q.id===LEVEL))return;
@@ -78393,10 +78398,11 @@ function bgrScatter(L,id){
     const under=['bl_grass0','bl_grass1','bl_grass2','bl_grass3','ww_twig2','bl_grow_4','bl_grow_ring'].filter(k=>IMG[k]),took=new Set();
     if(under.length&&!isSale)for(const t of added.slice()){if(!t.block||!/bl_twist|bl_grow_5|bl_canker/.test(t.k)||rnd()>.62)continue;
       for(let n=1+(rnd()<.4?1:0);n>0&&nU<120;n--){const a=((rnd()*3)|0)-1,b=((rnd()*3)|0)-1;if(!a&&!b)continue;const x=t.x+a,y=t.y+b;if(x<1||y<1||x>=W-1||y>=H-1)continue;const i=idx(x,y),tk=x+','+y;
-        if(!base[i]||blk[i]||prot[i]||pd[i]===0||took.has(tk)||!okFm(L.fmap[y][x]))continue;took.add(tk);
+        if(!base[i]||blk[i]||prot[i]||occ[i]||pd[i]===0||took.has(tk)||!okFm(L.fmap[y][x]))continue;took.add(tk);occ[i]=1;   // never on a square that already has a piece (no two growths in one square)
         L.decor.push({k:under[(rnd()*under.length)|0],x,y,block:false,walk:true,deco:true,sc:+(.7+rnd()*.6).toFixed(2),ox:+((rnd()-.5)*.5).toFixed(2),oy:+((rnd()-.5)*.5).toFixed(2),_bgru:1});nU++}}
-    // a bramble arch or two over the straight road, far from every gate, door and person
-    if(IMG.bl_arch&&[9610,9620,9630,9640,9650,9680,9690].includes(id)){
+    // a bramble arch or two over the straight road, far from every gate, door and person: switched off (game fix pass, 30 Oct 2026): an arch standing free on the open road
+    // is a loose arch in the middle of the road (the owner's rule: arches and gates are set into walls), so none is placed any more
+    if(false&&IMG.bl_arch&&[9610,9620,9630,9640,9650,9680,9690].includes(id)){
       const cells=[...paths].map(k=>k.split(',').map(Number)).filter(([x,y])=>x>6&&y>6&&x<W-7&&y<H-7);
       const has=(x,y)=>paths.has(x+','+y),tgt=(x,y)=>{for(const g of targets)if(Math.abs(g[0]-x)<=7&&Math.abs(g[1]-y)<=7)return true;return false};
       const ok=cells.filter(([x,y])=>(has(x-2,y)&&has(x-1,y)&&has(x+1,y)&&has(x+2,y))&&gateD(x,y)>=10&&!tgt(x,y)&&!blk[idx(x,y)]&&!prot[idx(x,y)]&&!L.decor.some(d=>d.x===x&&d.y===y));
@@ -78410,7 +78416,7 @@ function bgrScatter(L,id){
       for(const [a,b] of faces){const nx=x+a,ny=y+b,i=idx(nx,ny),fk=nx+','+ny+','+a+','+b;
         if(!base[i]||blk[i]||wp.has(fk))continue;
         if(wk&&IMG.bl_win_a){const lit=(id===9630||id===9680)?.8:.55;if(rnd()<lit){const k=(id===9630||id===9680)&&IMG.bl_win_b?'bl_win_b':'bl_win_a';
-          if(nWn<110){blWindowGlow(L,{x:nx,y:ny,wd:[-a,-b],k,cy:BGR.winCy});wp.add(fk);nWn++;if(wk==='gwin'&&IMG.bl_win_c&&rnd()<.25){blWindowGlow(L,{x:nx,y:ny,wd:[-a,-b],k:'bl_win_c',cy:BGR.winLo});nWn++}}}}
+          if(nWn<110){blWindowGlow(L,{x:nx,y:ny,wd:[-a,-b],k,cy:BGR.winCy});wp.add(fk);nWn++;if(wk==='gwin'&&IMG.bl_win_c)rnd()}}}   // (a second, round window low on the same face was dropped: two pictures on one wall face; rnd() keeps the seeded sequence)
         else if(!isDoor&&IMG.bl_moss&&nM<46&&!prot[i]&&rnd()<.09){L.decor.push({k:'bl_moss',x:nx,y:ny,wd:[-a,-b],pic:1,hx:1,block:false,walk:true,deco:true,bob:.22,_bgru:1});wp.add(fk);nM++}}}
     // painted buildings (a picture over a hidden block: the churches, the chapter house): lit windows standing in front of the picture, at the painted windows
     for(const e of (L.sky||[])){if(!e.big)continue;const m=BGR_BWIN[e.k],im=IMG[e.k];if(!m||!im||!im.width)continue;const hh=e.w*im.height/im.width;
@@ -78428,6 +78434,71 @@ function bgrEnsure(id){
 for(const id of [9610,9620,9630,9640,9650,9660,9670,9680,9690,9700]){const o=KH_LAZY[id];if(o)KH_LAZY[id]=function(){const r=o.apply(this,arguments);try{bgrEnsure(id)}catch(e){console.error(e)}return r}}
 // Sale (its builder is called again until its pictures are ready, and it returns true once the level exists)
 if(typeof saBuild==='function'){const _sb=saBuild;saBuild=function(){const r=_sb.apply(this,arguments);try{if(typeof SA!=='undefined')bgrEnsure(SA.ID)}catch(e){console.error(e)}return r}}
+
+/* ---- src/desert/blight_tidy2.js ---- */
+/* ==========================================================================
+   TIDY PASS FOR THE EAST HALF OF THE BLIGHTED ROAD (game fix pass, 30 Oct 2026). Prefix bt2.
+   Only these levels: Lanternrest 9660 to 9669, Hollowbell Abbey 9680 to 9689, the Rookery Mill 9690 to 9699, the Pale Bridge 9700 to 9709
+   (not the Vault of Maldrake 9670s and not the west half of the road). It runs once per level after every other pass (a wrap of KH_LAZY, last in ORDER, flag L._bt2):
+   - a web is a picture flat on a wall, high up in the corner, never loose in a room; a web with no wall beside it is taken away;
+   - things that hang (shields, tapestries, banners, notice boards, glass windows, painted windows) are pictures flat on the wall beside them,
+     no taller than the wall; one that stood inside a wall square is moved out in front of it;
+   - hidden blocking squares inside a wall (left by a wide piece standing at the wall) are taken away, and those beside a piece that is now on the wall;
+   - books, rings, thimbles and boards lifted over the bare floor (nothing under them) are put down on the floor;
+   - the same piece twice in one square: the second one goes.
+   Plain literal text, no em dashes.
+   ========================================================================== */
+const BT2={IDS:id=>(id>=9660&&id<=9669)||(id>=9680&&id<=9709),stats:{}};
+/* hanging pieces: key -> height on the wall in squares (a room wall is about 1 square high) */
+const BT2_HANG={gy_web:.45,wl2_armour_1:.55,wl2_hall_1:.75,wl2_hall_0:.85,wl2_library_5:.55,wl2_church_2:.8,hl_p_window:.7};
+const BT2_DOWN=/^(gy_book|gy_ring|bl_thimble|gy_sign)$/;
+/* a picture key with its own height (the engine sizes a wall picture by NPC_H of its key): the picture itself is read from the source key when it is drawn */
+function bt2Alias(src,h){
+  const k='bt2_'+src+'_'+Math.round(h*100);
+  if(!Object.getOwnPropertyDescriptor(IMG,k))Object.defineProperty(IMG,k,{get(){return IMG[src]},set(v){},configurable:true,enumerable:false});
+  NPC_H[k]=h;return k}
+function bt2Tidy(L,id){
+  const W=L.rows[0].length,H=L.rows.length,ch=L.chars||{},st={web:0,webGone:0,hang:0,hidden:0,down:0,dup:0};
+  const isDoorC=c=>c==='0'||c==='D'||c==='L'||(ch[c]!==undefined&&!!KH_DOOR[ch[c]])||(typeof ch[c]==='number'&&ch[c]>=30&&ch[c]<100);
+  const inb=(x,y)=>x>=0&&y>=0&&x<W&&y<H;
+  const open=(x,y)=>inb(x,y)&&L.rows[y][x]==='.';
+  const wall=(x,y)=>inb(x,y)&&L.rows[y][x]!=='.'&&!isDoorC(L.rows[y][x]);
+  const D4=[[0,-1],[-1,0],[1,0],[0,1]];
+  const faces=new Set();for(const d of L.decor)if(d.pic&&d.wd)faces.add(d.x+','+d.y+','+d.wd[0]+','+d.wd[1]);
+  const indoor=!L.outdoor;
+  const drop=new Set();
+  // hidden blocks of a wide wall piece: the squares wlinProp blocked beside it
+  const wideCells=d=>{const im=IMG[d.k];if(!im||!im.width||!NPC_H[d.k])return [];const w=NPC_H[d.k]*(d.sc||1)*im.width/im.height,o=[];
+    for(let xx=Math.floor(d.x+.5-w/2+.12);xx<=Math.floor(d.x+.5+w/2-.12);xx++)if(xx!==d.x)o.push(xx);return o};
+  for(const d of L.decor){
+    if(d.pic||drop.has(d))continue;const base=String(d.k);
+    if(BT2_HANG[base]===undefined)continue;
+    if(d.npc&&base!=='gy_web')continue;   // a piece with something to say stays where it can be pressed
+    if(!indoor&&base!=='gy_web')continue;
+    // stood inside a wall square: out in front of it
+    let x=d.x,y=d.y,fixed=null;
+    if(!open(x,y)){const n=D4.find(([a,b])=>open(x+a,y+b));if(!n){drop.add(d);continue}fixed=[-n[0],-n[1]];x+=n[0];y+=n[1]}
+    let wd=fixed;
+    if(!wd){const cands=D4.filter(([a,b])=>wall(x+a,y+b));wd=cands.find(([a,b])=>!faces.has(x+','+y+','+a+','+b))||(base==='gy_web'?cands[0]:null)}
+    if(!wd){if(base==='gy_web'){drop.add(d);st.webGone++}continue}
+    const fk=x+','+y+','+wd[0]+','+wd[1];if(faces.has(fk)&&base!=='gy_web')continue;faces.add(fk);
+    const cells=/^wl2_/.test(base)&&!d.free?wideCells(d):[],oy=d.y;
+    const h=indoor?BT2_HANG[base]:Math.min(1.2,NPC_H[base]||1),k=indoor?bt2Alias(base,h):base;
+    d.x=x;d.y=y;d.k=k;d.wd=[wd[0],wd[1]];d.pic=1;d.block=false;d.walk=true;if(!d.npc)d.deco=true;delete d.solid;delete d.sc;delete d.ox;delete d.oy;
+    d.bob=base==='gy_web'?(indoor?.97-h:1.15):Math.max(.05,.55-h/2);
+    if(base==='gy_web')st.web++;else st.hang++;
+    // the squares it blocked beside it, now that it hangs flat on the wall
+    for(const xx of cells){const q=L.decor.find(q=>q.hidden&&!q.npc&&q.x===xx&&q.y===oy&&!drop.has(q));if(q){drop.add(q);st.hidden++}}}
+  for(const d of L.decor){
+    if(drop.has(d))continue;
+    if(d.hidden&&!d.npc&&!open(d.x,d.y)){drop.add(d);st.hidden++;continue}   // a hidden block inside a wall
+    if(!d.pic&&d.bob>0&&BT2_DOWN.test(String(d.k))){const under=L.decor.some(q=>q!==d&&!drop.has(q)&&!q.pic&&q.x===d.x&&q.y===d.y);if(!under){d.bob=0;if(d.k==='gy_book')d.sc=Math.min(d.sc||1,.55);st.down++}}}   /* a book on the bare floor lies small, not as big as a chest */
+  const seen=new Set();
+  for(const d of L.decor){if(drop.has(d)||d.npc)continue;const key=d.k+'|'+d.x+'|'+d.y+'|'+(d.wd||'');if(seen.has(key)){drop.add(d);st.dup++}else seen.add(key)}
+  if(drop.size)L.decor=L.decor.filter(d=>!drop.has(d));
+  BT2.stats[id]=st;return st}
+for(let id=9660;id<=9709;id++){if(!BT2.IDS(id))continue;const o=KH_LAZY[id];if(!o)continue;
+  KH_LAZY[id]=function(){const r=o.apply(this,arguments);const L=LEVELS[id];if(L&&L.rows&&L.decor&&!L._bt2){L._bt2=1;try{bt2Tidy(L,id)}catch(e){console.error('bt2 '+id,e)}}return r}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

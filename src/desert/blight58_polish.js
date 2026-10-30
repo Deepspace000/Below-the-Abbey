@@ -84,7 +84,7 @@ b58Wrap(9660,L=>{
   // stores and carts: crates, barrels, sacks by the hall, the stable and the stew
   const clutter=[['kh_oqstuff_8',43,16],['kh_oqstuff_2',45,16],['kh_oqstuff_9',47,17],['kh_oqstuff_2',58,12],['kh_oqstuff_8',59,13],['kh_oqstuff_9',65,12],['kh_oqstuff_2',36,20],['kh_oqstuff_9',37,19],['kh_oqstuff_6',40,24],
     ['kh_oqstuff_8',26,13],['kh_oqstuff_2',25,29],['kh_oqstuff_9',60,28],['kh_oqstuff_6',56,29],['kh_oqstuff_4',50,22],['kh_oqstuff_5',62,33],['kh_oqstuff_2',33,40],['kh_oqstuff_8',66,33],['kh_oqstuff_9',27,36],['kh_oqstuff_6',36,34],['bl_barrow',55,16]];
-  for(const [k,x,y] of clutter)b58Add(L,occ,k,x,y,{block:true,sc:.8});
+  for(const [k,x,y] of clutter){if(L._bgrPath&&L._bgrPath.has(x+','+y))continue;b58Add(L,occ,k,x,y,{block:true,sc:.8})}   // nothing on the yard paths
   for(const [x,y] of [[38,30],[50,30],[44,36]])if(b58Add(L,occ,'b58_brazier',x,y,{sc:.95}))b58Light(L,x,y,B58_WARM);
   // crows on the road side only (the fort is kept clear of them)
   b58Crows(L,occ,11,10,[3,53,87,65],.3)});
@@ -122,8 +122,8 @@ function b891Spot(L,id,occ,tx,ty,r,minOpen){
     if(n>=(minOpen||7))return [x,y]}
   return null}
 /* a thing with writing on it: walk up and press */
-function b891Note(L,id,occ,k,npcId,tx,ty,r,sc){
-  const p=b891Spot(L,id,occ,tx,ty,r||4,7);if(!p||!IMG[k]){console.warn('b891 no spot for '+npcId);return null}
+function b891Note(L,id,occ,k,npcId,tx,ty,r,sc,loose){
+  let p=b891Spot(L,id,occ,tx,ty,r||4,7);if(!p&&loose)p=b891Spot(L,id,occ,tx,ty,r||4,5)||b891Spot(L,id,occ,tx,ty,r||4,4);/* a small room is full of furniture: a spot with fewer open squares round it is taken there */if(!p||!IMG[k]){console.warn('b891 no spot for '+npcId);return null}
   const d={k,x:p[0],y:p[1],block:true,solid:1,npc:npcId,deco:false,sc:sc||.8};const a=b58Reach(L);L.decor.push(d);if(b58Reach(L)<a-1){L.decor.pop();return null}
   occ.add(p[0]+','+p[1]);return d}
 /* litter: walk-through props, never the same picture within 2 squares */
@@ -133,7 +133,7 @@ function b891Litter(L,id,occ,list){for(const [k,tx,ty,sc] of list){if(!IMG[k])co
 /* duplicates: the same picture twice in one cell goes; crates within 2 squares of each other become barrels, hay, sacks */
 function b891Dedupe(L){const seen=new Set();L.decor=L.decor.filter(d=>{const key=d.k+'@'+d.x+','+d.y;if(seen.has(key)&&!d.npc)return false;seen.add(key);return true})}
 function b891Crates(L){const alts=['barrel','hay','kh_oqstuff_9','kh_oqstuff_2'].filter(k=>IMG[k]);if(!alts.length)return;let n=0;
-  const keep=[];for(const d of L.decor){if(d.k!=='crate'||d.npc)continue;
+  const keep=[];for(const d of L.decor){if(d.k!=='crate'||d.npc||d.hidden)continue;
     if(keep.some(c=>Math.max(Math.abs(c.x-d.x),Math.abs(c.y-d.y))<=2)){const near=L.decor.filter(c=>c!==d&&Math.max(Math.abs(c.x-d.x),Math.abs(c.y-d.y))<=2).map(c=>c.k);d.k=alts.find(a=>!near.includes(a))||alts[n%alts.length];n++}else keep.push(d)}}
 /* hostile creatures out of tight spots (no free 2x2 square) and away from the living */
 function b891Foes(L,id,living,R){
@@ -141,7 +141,7 @@ function b891Foes(L,id,living,R){
   for(const e of L.enemies){const near=living.some(([x,y,r])=>Math.hypot(e.x-x,e.y-y)<(r||R));if(!near&&b891Free2(L,id,e.x,e.y,blk))continue;
     let best=null;for(let q=1;q<=8&&!best;q++)for(let dy=-q;dy<=q&&!best;dy++)for(let dx=-q;dx<=q;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==q)continue;const x=e.x+dx,y=e.y+dy;
       if(x<3||y<3||x>=W-3||y>=H-3)continue;if(!b891Open(L,id,x,y,blk)||!b891Free2(L,id,x,y,blk))continue;if(living.some(([a,b,r])=>Math.hypot(x-a,y-b)<(r||R)))continue;
-      if(L.decor.some(d=>d.x===x&&d.y===y)||L.enemies.some(o=>o!==e&&o.x===x&&o.y===y))continue;best=[x,y];break}
+      if(L.decor.some(d=>d.x===x&&d.y===y)||L.enemies.some(o=>o!==e&&Math.abs(o.x-x)<=1&&Math.abs(o.y-y)<=1))continue;if(L._bgrPath&&L._bgrPath.has(x+','+y))continue;best=[x,y];break}   // not on a road or path, not beside another creature
     if(best){e.x=best[0];e.y=best[1]}}}
 /* ----- notes and signs ----- */
 const B891_NOTES={
@@ -186,7 +186,7 @@ b891Wrap(9680,(L,id)=>{
 b891Wrap(9690,(L,id)=>{
   b891Dedupe(L);const occ=b58Occ(L);
   b891Note(L,id,occ,'greensign','b891_millsign',44,24,4,.8);
-  b891Note(L,id,occ,'gy_book','b891_tally',57,28,4,.6);
+  b891Note(L,id,occ,IMG.bl_stone1?'bl_stone1':'gy_book','b891_tally',57,28,4,.7);   // a scratched stone, not a book
   b891Note(L,id,occ,'gy_book','b891_wheel',29,31,4,.7);
   b891Note(L,id,occ,'greensign','b891_scarepole',56,46,5,.8);
   b891Litter(L,id,occ,[['kh_oqstuff_9',46,26,.6],['hay',44,30,.7],['kh_oqstuff_9',41,34,.6],['gy_bones',50,34,.6],['barrel',38,40,.7],['gy_candles',56,32,.5],
@@ -208,7 +208,7 @@ b891Wrap(9700,(L,id)=>{
 const B891_ROOMS={9682:['b891_desk',6,4],9684:['b891_ropetally',3,2],9686:['b891_names',9,3],9691:['b891_sacks',5,4],9693:['b891_nest',5,5],9694:['b891_table',6,3],9701:['b891_roster',4,3],9702:['b891_letter',6,3]};
 for(const id of [9681,9682,9683,9684,9685,9686,9691,9692,9693,9694,9701,9702])b891Wrap(id,(L,rid)=>{
   b891Dedupe(L);b891Crates(L);const occ=b58Occ(L);
-  const r=B891_ROOMS[rid];if(r)b891Note(L,rid,occ,'gy_book',r[0],r[1],r[2],4,.6);
+  const r=B891_ROOMS[rid];if(r)b891Note(L,rid,occ,'gy_book',r[0],r[1],r[2],4,.6,true);
   if(rid===9683){let n=0;for(const d of L.decor)if(d.k==='gy_skel'&&d.npc==='blh_seated'){n++;if(n%2===0&&IMG.bl_g_monk){d.k=n%4===0?'bl_g_monk2':'bl_g_monk';d.sc=.85}}}
   b891Foes(L,rid,[],0)});
 /* ----- the air: colder at the bridge, browner at the mill, whiter at the abbey ----- */

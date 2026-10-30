@@ -338,8 +338,8 @@ function blrBuild(p){
   for(const x of [40,48]){C.dec('gy_lantern',x,44,{block:true});C.light(x,44,WARM)}
   C.person('blr_gate1',42,43,2);C.person('blr_gate2',46,43,2);
   C.dec('greensign',41,41,{block:true,npc:'blr_notice'});
-  C.post(44,57,'blr_fortpost',[{n:'LANTERNREST WAYSTATION',d:0},{n:'THE ROAD',d:2}],'blr_signFort','',{i:1});
-  const bn=blrBanner();if(bn){for(const [x,y] of [[39,43],[49,43],[43,15],[45,15],[20,29],[68,29]])C.dec(x===45&&IMG.wl2_hall_1?'wl2_hall_1':bn,x,y,{block:true,sc:.9})}
+  C.post(46,56,'blr_fortpost',[{n:'LANTERNREST WAYSTATION',d:0},{n:'THE ROAD',d:2}],'blr_signFort','',{i:1});
+  const bn=blrBanner();if(bn){for(const [x,y] of [[39,43],[49,43],[43,15],[45,15],[20,29],[68,29]])C.dec(bn,x,y,{block:true,sc:.9})}
   /* the yard: well, stocks, drill dummies, stew pot, the supply wagon, lamps */
   C.thing('ww_well','blr_well',52,20,{sc:1});C.light(52,22,WARM);
   C.thing('blr_stocks','blr_stocks',54,36,{sc:1});C.thing('ww_totem','blr_dummy',34,36,{sc:.8});C.thing('ww_totem','blr_dummy',36,38,{sc:.8});C.thing('blr_stew','blr_stew',38,19,{sc:1});C.light(38,21,WARM);
@@ -362,7 +362,7 @@ function blrBuild(p){
   for(const [x,y] of [[34,33],[54,28],[31,22],[60,26]])C.dec('kh_oqstuff_'+(5+((x+y)%4)),x,y,{sc:.8});
   /* details: a ration board, the sentry log at the gate, a marker boot on the road, dogs in the camp, flags on the drill ground, spilled stores by the burnt wagon, a trail from the hollow */
   C.dec('gy_sign',40,22,{block:true,npc:'blr_n_rations',sc:.8});
-  C.dec('gy_book',47,42,{block:true,npc:'blr_n_log',sc:1,bob:.2});
+  C.dec('gy_book',47,42,{block:true,npc:'blr_n_log',sc:1});
   C.dec('ww_boot',60,62,{block:true,npc:'blr_n_boot',sc:.9});
   C.dec('kh_oqdogs_3',38,41,{sc:1});C.dec('kh_oqdogs_2',57,28,{sc:1});C.dec('kh_oqflags_2',38,34,{block:true,sc:.9});
   C.dec('kh_oqstuff_6',74,53,{sc:.8});C.dec('kh_oqstuff_4',78,54,{sc:.8});C.dec('gy_bones',77,50,{sc:.6});
@@ -403,8 +403,8 @@ function blrInn(){
     back:{to:BLR.ID,x:f[0],y:f[1],f:2},
     lights:[[3,2],[11,2],[7,5],[2,8],[12,8]],lcol:{'3,2':BLR_LC,'11,2':BLR_LC,'7,5':[1.5,1.05,.55],'2,8':BLR_LC,'12,8':BLR_LC},col:[1.4,1.0,.6],
     build:C=>{
-      blrP(C,'hearth',7,1,{h:1.3});for(const x of [3,4,5,9,10,11])blrP(C,'bar',x,3,{});blrP(C,'potshelf',2,1,{h:1.2});blrP(C,'herbrack',3,1,{h:1.1});blrP(C,'potshelf',11,1,{h:1.2});blrP(C,'ale',1,2,{});blrP(C,'ale',13,1,{});
-      blrP(C,'longtable',3,6,{h:.7});blrP(C,'longtable',11,6,{h:.7});blrP(C,'longtable',7,8,{h:.7});blrP(C,'chandelier',7,5,{free:1});blrP(C,'lute',13,8,{});blrP(C,'waterbarrel',1,8,{h:.7});blrP(C,'cat',9,2,{h:.26});blrP(C,'dog',5,8,{h:.36});C.raw('gy_sign',1,5,{npc:'blr_n_slate',solid:1,deco:false,sc:.9,bob:.2});C.raw('kh_oqstuff_6',12,8,{block:false,sc:.8});
+      blrP(C,'hearth',7,1,{h:1.3});for(const x of [3,4,5,9,10,11])blrP(C,'bar',x,3,x===4||x===10?{}:{free:1});/* the middle piece of each bar blocks the squares beside it; the others do not, so no square gets two hidden blocks */blrP(C,'potshelf',2,1,{h:1.2});blrP(C,'herbrack',3,1,{h:1.1});blrP(C,'potshelf',11,1,{h:1.2});blrP(C,'ale',1,2,{});blrP(C,'ale',13,1,{});
+      blrP(C,'longtable',3,6,{h:.7});blrP(C,'longtable',11,6,{h:.7});blrP(C,'longtable',7,8,{h:.7});blrP(C,'chandelier',7,5,{free:1});blrP(C,'lute',13,8,{});blrP(C,'waterbarrel',1,8,{h:.7});blrP(C,'cat',9,2,{h:.26});blrP(C,'dog',5,8,{h:.36});C.raw('gy_sign',1,5,{npc:'blr_n_slate',solid:1,deco:false,sc:.9});C.raw('kh_oqstuff_6',12,8,{block:false,sc:.8});
       C.npc('blr_inn',7,2);C.npc('blr_i_corp',5,5);C.npc('blr_i_pilgrim',9,5);C.npc('blr_i_garrick',12,5);C.raw('gy_web',1,1,{block:false,sc:.4})}})}
 function blrArmoury(){
   const f=BLR_ARMH.front;
@@ -431,7 +431,7 @@ function blrHall(){
     lights:[[2,2],[10,2],[6,5],[2,8],[10,8]],lcol:{'2,2':BLR_LC,'10,2':BLR_LC,'6,5':[1.35,.98,.58],'2,8':BLR_LC,'10,8':BLR_LC},col:[1.3,.95,.6],
     build:C=>{
       blrP(C,'hearth',6,1,{h:1.3});blrP(C,'banner',3,1,{h:1.6,block:false});blrP(C,'banner',9,1,{h:1.6,block:false});blrP(C,'counciltable',6,5,{h:.8});blrP(C,'mayorchair',6,3,{h:1.0});
-      blrP(C,'bookshelf',1,2,{h:1.1});blrP(C,'bookshelf',11,2,{h:1.1});blrP(C,'noticeboard',2,6,{h:.9,block:false});blrP(C,'coatrack',11,7,{h:1.0});blrP(C,'waterbarrel',1,8,{h:.7});
+      blrP(C,'bookshelf',1,2,{h:1.1});blrP(C,'bookshelf',11,2,{h:1.1});blrP(C,'noticeboard',1,5,{h:.9,block:false});blrP(C,'coatrack',11,7,{h:1.0});blrP(C,'waterbarrel',1,8,{h:.7});
       C.raw('gy_candles',3,5,{block:true,sc:.8});C.raw('gy_candles',9,5,{block:true,sc:.8});
       C.raw('gy_book',3,3,{npc:'blr_n_orders',solid:1,deco:false,sc:.9,bob:.2});C.raw('gy_bones',9,8,{block:false,sc:.5});C.raw('kh_oqstuff_6',4,7,{block:false,sc:.8});
       C.npc('blr_marsh',6,4);C.npc('blr_h_clerk',9,4);C.npc('blr_h_rider',4,8)}})}
@@ -442,7 +442,7 @@ function blrInfirmary(){
     lights:[[2,2],[10,2],[6,5],[2,7],[10,7]],lcol:{'2,2':BLR_LC,'10,2':BLR_LC,'6,5':[1.35,.98,.58],'2,7':[1.0,1.1,.9],'10,7':BLR_LC},col:[1.25,1.0,.7],
     build:C=>{
       blrP(C,'cot',2,3,{h:.55});blrP(C,'bed',2,5,{h:.7});blrP(C,'bed',10,3,{h:.7});blrP(C,'cot',10,5,{h:.55});blrP(C,'bed',7,3,{h:.7});blrP(C,'bed',9,6,{h:.7});
-      blrP(C,'herbrack',4,1,{h:1.1});blrP(C,'apothcab',6,1,{h:.95});blrP(C,'potshelf',8,1,{h:1.2});blrP(C,'cauldron',11,1,{h:.9});blrP(C,'waterbarrel',1,7,{h:.7});blrP(C,'shelving',12,5,{h:1.0});
+      blrP(C,'herbrack',4,1,{h:1.1});blrP(C,'apothcab',6,1,{h:.95});blrP(C,'potshelf',8,1,{h:1.2});blrP(C,'cauldron',11,1,{h:.9});blrP(C,'waterbarrel',1,7,{h:.7});blrP(C,'shelving',1,1,{h:1.0});   // (it stood in the east wall)
       C.raw('gy_book',7,7,{npc:'blr_n_chart',solid:1,deco:false,sc:.9,bob:.2});C.raw('kh_oqstuff_4',4,7,{block:false,sc:.7});
       C.npc('blr_surgeon',5,4);C.npc('blr_n_p1',4,6);C.npc('blr_n_p2',11,6)}});
   blrDaceAdd()}

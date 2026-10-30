@@ -4,6 +4,7 @@
     {"code": "OVERDOOR", "area": "Sale", "level": 600, "key": "^sa_planks", "reason": "Sale: planks nailed across the boarded-up doors, drawn on the door square on purpose"},
     {"code": "NPC_UNREACH", "level": 9740, "x": 4, "y": 39, "reason": "Pale Spire Great Halls: the Painters' Closet (4..6,38..41) opens with the brass key (same secret tools/ps_test.py reach allows)"},
     {"code": "NPC_UNREACH", "level": 9740, "x": 6, "y": 39, "reason": "Pale Spire Great Halls: the Painters' Closet (4..6,38..41) opens with the brass key (same secret tools/ps_test.py reach allows)"},
+    {"code": "FLOAT", "level": 9661, "key": "^lamp$", "x": 7, "y": 5, "reason": "Lanternrest inn: the chandelier (a glowing lamp drawn with the picture wl2_inn_4) hangs from the ceiling on its chain; looked at in the room, it is not standing on anything by design"},
     {"code": "ONEWAY", "level": 9715, "key": "door", "x": 30, "y": 4, "reason": "the Crooked Road gate into the Never-Ending Tower: the tower's own south gate leads back (tools/ps_test.py dest checks it)"}
   ]
 }

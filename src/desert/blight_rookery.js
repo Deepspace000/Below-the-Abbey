@@ -57,7 +57,7 @@ function b9Dim(lv){
 function b9Mist(lv,cells,opt){
   const taken=new Set(lv.decor.map(d=>d.x+','+d.y));opt=opt||{};let n=0;
   for(const [x,y] of cells){if(taken.has(x+','+y))continue;const r=hash2(x,y,71);
-    lv.decor.push({k:opt.k||'b9_mist',x,y,block:false,walk:true,deco:true,bob:(opt.bob||0)+r*(opt.bobr||.5),sc:(opt.sc||1.5)*(.8+r*.5)});n++}
+    lv.decor.push({k:opt.k||'b9_mist',x,y,block:false,walk:true,deco:true,bob:(opt.bob||0)+r*(opt.bobr!==undefined?opt.bobr:.5),sc:(opt.sc||1.5)*(.8+r*.5)});n++}
   return n}
 /* ---------- the pictures ---------- */
 function blrkArt(){
@@ -246,7 +246,7 @@ function blrkBuild(p){
   for(let a=0;a<12;a++){const x=Math.round(PC[0]+6.4*Math.cos(a*Math.PI/6)),y=Math.round(PC[1]+4.6*Math.sin(a*Math.PI/6));if(a===3)continue;C.dec(a%2?'gy_column':'gy_obelisk',x,y,{block:true,npc:'blr_stones',sc:.95})}
   C.dec('gy_obelisk',PC[0]-1,PC[1]-1,{block:true,sc:1.0});C.dec('gy_raven',PC[0]-1,PC[1]-1,{block:true,npc:'blr_speaker',sc:1.7,oy:-.9});
   for(let i=0;i<7;i++){const a=i*2*Math.PI/7+.3,x=Math.round(PC[0]+3.6*Math.cos(a)),y=Math.round(PC[1]+2.6*Math.sin(a));C.dec('gy_raven',x,y,{block:true,npc:'blr_rook'+i,sc:1.0})}
-  C.dec('gy_book',PC[0]+1,PC[1]+1,{block:true,npc:'blr_ledger',sc:1.2,bob:.1});
+  C.dec('gy_book',PC[0]+1,PC[1]+1,{block:true,npc:'blr_ledger',sc:1.2});
   for(const [x,y] of [[PC[0]-8,PC[1]],[PC[0]+8,PC[1]],[PC[0],PC[1]-6],[PC[0],PC[1]+6]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.pale)}
   C.pth(55,24,56,26,'1');
   // the miller's house west of the race, the dead watermill east of it, the sluice, the pond, the field
@@ -256,9 +256,9 @@ function blrkBuild(p){
   C.dec('bl_urn',30,28,{block:true,sc:.8,npc:'blr_watermill'});
   C.light(29,28,C.pale);C.light(33,28,C.pale);
   C.dec('gy_lever',27,30,{block:true,npc:'blr_sluice',sc:1});C.light(28,31,C.pale);
-  if(!((F.th|0)&1))C.dec('bl_thimble',28,31,{block:true,npc:'blr_thimble0',sc:1.0,bob:.1});
+  if(!((F.th|0)&1))C.dec('bl_thimble',29,31,{block:true,npc:'blr_thimble0',sc:1.0});   // beside the track to the sluice, not on it
   C.dec('b9_cart',50,38,{block:true,npc:'blr_cart',sc:1});
-  if(!((F.th|0)&4))C.dec('bl_thimble',51,38,{block:true,npc:'blr_thimble2',sc:1.0,bob:.1});
+  if(!((F.th|0)&4))C.dec('bl_thimble',51,38,{block:true,npc:'blr_thimble2',sc:1.0});
   C.dec('ww_crowtree',68,10,{block:true,sc:1.2,npc:'blr_millwindow'});
   for(const [x,y] of [[40,22],[48,26],[66,32],[10,32],[18,22]])C.dec('gy_rpost',x,y,{block:true});
   for(let y=42;y<=62;y+=3)for(let x=44;x<=74;x+=4){const d=C.D('ww_totem',x+(hs(x,y,5)<.5?0:1),y,{block:true,npc:'blr_scare',sc:.85});}
@@ -296,7 +296,7 @@ function blrGround(){
       C.raw('gy_hatch2',11,2,{npc:'blr_looploft',solid:1,deco:false,sc:1});
       for(const [x,y] of [[1,6],[2,7],[11,6],[11,7]])C.raw('hay',x,y,{block:true,sc:1});
       C.raw('gy_chest',1,2,{npc:'blr_millchest',solid:1,deco:false,sc:.9});
-      P('waterbarrel',2,8,{h:.7});P('coatrack',11,5,{h:1.0});C.raw('barrel',9,8,{block:true,sc:.9});C.raw('kh_oqstuff_9',3,5,{block:false,sc:.9});C.raw('kh_oqstuff_8',10,4,{block:false,sc:.8});C.raw('kh_oqstuff_9',8,3,{block:false,sc:.7});C.raw('barrel',1,9,{block:true,sc:.8});C.raw('crate',12,8,{block:true,sc:.9});
+      P('waterbarrel',2,8,{h:.7});P('coatrack',11,5,{h:1.0});C.raw('barrel',9,8,{block:true,sc:.9});C.raw('kh_oqstuff_9',3,5,{block:false,sc:.9});C.raw('kh_oqstuff_8',10,4,{block:false,sc:.8});C.raw('kh_oqstuff_9',8,3,{block:false,sc:.7});C.raw('crate',11,8,{block:true,sc:.9});/* (the barrel and crate stood in the south and east walls) */
       C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_web',11,1,{block:false,sc:.5});C.raw('gy_bones',8,6,{block:false,sc:.6});C.raw('gy_bones',4,6,{block:false,sc:.5})}})}
 function blrLoft(){
   const F=blF();
@@ -307,7 +307,7 @@ function blrLoft(){
     build:C=>{
       for(const [x,y] of [[1,2],[2,2],[11,2],[1,5],[11,6],[2,7]])C.raw('hay',x,y,{block:true,sc:1});
       [[3,3],[9,3],[6,7]].forEach(([x,y],i)=>{if(!((F.sacks|0)&(1<<i)))C.raw('kh_oqstuff_9',x,y,{npc:'blr_sack'+i,solid:1,deco:false,sc:.9})});
-      if(!((F.th|0)&2))C.raw('bl_thimble',6,2,{npc:'blr_thimble1',solid:1,deco:false,sc:1.0,bob:.2});
+      if(!((F.th|0)&2))C.raw('bl_thimble',6,2,{npc:'blr_thimble1',solid:1,deco:false,sc:1.0});
       C.raw('gy_hatch2',2,7,{npc:'blr_loftdown',solid:1,deco:false,sc:1});
       C.raw('gy_hatch2',10,7,{npc:'blr_capdoor',solid:1,deco:false,sc:1});
       for(const x of [1,11])C.raw('hl_p_window',x,4,{block:true,sc:1.0});
