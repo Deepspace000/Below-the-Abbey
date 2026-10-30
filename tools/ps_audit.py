@@ -49,7 +49,7 @@ JS = r"""() => {
       if ([9721, 9722, 9723].includes(l.id) && VINE.test(k)) add('VINES', d);
       if (d.block && !d.pic && !d.npc && !d.deco && open(x, y) && !d.goldAmt) {
         const n = [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([a, b]) => open(x + a, y + b)).length;
-        if (n === 2 && !/col|pillar|pier|statue|st_|stair|tele|chest/i.test(k)) {
+        if (n === 2 && !/col|pillar|pier|statue|st_|stair|tele|chest|tree|stump|yew|dead|thicket|bush/i.test(k)) {
           // a straight one-wide passage: both open neighbours opposite each other
           const s = (open(x + 1, y) && open(x - 1, y)) || (open(x, y + 1) && open(x, y - 1));
           if (s) add('CORRIDOR', d);
