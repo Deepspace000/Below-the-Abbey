@@ -41,7 +41,7 @@ JS = r"""() => {
       const k = String(d.k), x = Math.round(d.x), y = Math.round(d.y);
       if (d.pic && d.wd) {
         const bx = x + d.wd[0], by = y + d.wd[1];
-        if ((open(bx, by) || bx < 0 || by < 0 || bx >= W || by >= H) && !/cell_door|iron_gate/.test(k)) add('NOWALL', d);
+        if ((open(bx, by) || bx < 0 || by < 0 || bx >= W || by >= H) && !/cell_door|iron_gate|bridge_rail|iron_rail/.test(k)) add('NOWALL', d);
         else if (isDoor(bx, by)) add('OVERDOOR', d);
         const key = x + ',' + y + ',' + d.wd[0] + ',' + d.wd[1], p = seen.get(key);
         if (p && !(SHARE.test(k) || SHARE.test(String(p.k)))) add('OVERLAP', d, String(p.k)); else if (!p) seen.set(key, d);

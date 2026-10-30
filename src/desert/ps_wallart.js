@@ -18,6 +18,8 @@ function pswaHang(id,L){
   for(const d of L.decor||[]){
     if(!d.pic||!d.wd||d.npc){out.push(d);continue}
     const wx=Math.round(d.x),wy=Math.round(d.y),bx=wx+d.wd[0],by=wy+d.wd[1];
+    // rails along a stream or a bridge have water behind them, not a wall: they stay
+    if(/bridge_rail|iron_rail/i.test(String(d.k))){out.push(d);continue}
     // 1. a real wall behind it
     if(open(bx,by)||ch(bx,by)===null){rep.noWall++;continue}
     // 4. never over a door or a stair: no door tile behind it

@@ -569,9 +569,10 @@ function pscBuild(info){
   B(BENCH,29,32,{sc:.9});B(BENCH,35,32,{sc:.9});B('urn_big',30,28,{sc:.85});B('urn_big',34,28,{sc:.85});
   lampAt(30,32,GR);lampAt(34,32,GR);lampAt(30,28,SK);lampAt(34,28,SK);
   /* ===== the stream: iron rails, a stone bridge on the Torstrasse and two footbridges ===== */
-  for(const bx of [32,20,44])for(const by of [37,38])for(const sx of [-.42,.42])P(pspPic('bridge_rail'),bx,by,{block:false,ox:sx,sc:1,oy:0});
+  // the rails run ALONG the bridge (a flat rail on each side of the walkway), so the way across is open from the bank; they used to face the player and looked like a fence across the bridge
+  for(const bx of [32,20,44])for(const by of [37,38])for(const sd of [-1,1])P(pspPic('bridge_rail'),bx,by,{block:false,pic:1,wd:[sd,0],bob:0});
   lampAt(32,36,SK);lampAt(20,36,GR);lampAt(44,36,GR);
-  for(let x=15;x<=49;x+=2)if(x!==32&&x!==20&&x!==44&&x!==31&&x!==33)P(pspPic('iron_rail'),x,36,{block:false,oy:.44});
+  for(let x=15;x<=49;x+=2)if(x!==32&&x!==20&&x!==44&&x!==31&&x!==33)P(pspPic('iron_rail'),x,36,{block:false,pic:1,wd:[0,1],bob:0});   // a low rail along the bank, flat to the water
   
   /* ===== the vines: curtains of ivy over the stream wall and the back walls ===== */
   for(let x=15;x<=49;x+=3)hang(x%2?'vine_a':'vine_b',x,36,[0,-1],0);
