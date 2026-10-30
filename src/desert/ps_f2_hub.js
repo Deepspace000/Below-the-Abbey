@@ -8,7 +8,7 @@
    The Sleeper's table: seven hollows; placing a piece takes it from the bag (psf2F().placed). With all seven placed the Sleeper wakes (F.woke), speaks, and the quest is ready;
    the Dreamkeeper hands out the reward (once, by the quest) and F.done is set. A sealed iron stair at the east end of the gallery is the way to the third floor (not open yet).
    ========================================================================== */
-const PSF2H={ID:9820,W:56,H:44,WH:3.2,TABLE:[28,22],KEEPER:[26,37],STAIR3:[52,5]};
+const PSF2H={ID:9820,W:56,H:44,WH:3.2,TABLE:[28,22],KEEPER:[26,35],STAIR3:[52,5]};
 /* painted pieces wanted (assets/ps/<name>.webp replaces the stand-in with no code change) */
 {const P=(n,h,src,o)=>{PSP_PICS[n]=[h,src,o||{}]};
  P('f2_dreamkeeper',1.0,['ps_p_librarian','kh_ohfolk6_0'],{keep:1});
@@ -70,7 +70,7 @@ function psf2HubBuild(info){
   // the gallery: a painted name plaque beside every door, banners and mirrors between the doors (the place of illusions: mirrors everywhere)
   const NAMES={9821:'THE PERFECT FOREST',9822:'THE ISLAND BY THE SEA',9823:'THE CABIN IN THE SNOW',9824:'THE WATERWAYS',9825:'THE DESERT',9826:'THE SWAMP',9827:'THE NIGHTMARE'};
   for(const l of pspLinksFrom(id)){if(!NAMES[l.to])continue;const [x,y]=l.at;
-    if(y===3){C.sign(x+1,4,[0,-1],NAMES[l.to]);cand(x-2,4);cand(x+2,4)}
+    if(y===3){C.sign(x+1,4,[0,-1],NAMES[l.to]);cand(x-2,4)}
     else if(x===2){C.sign(4,20,[0,-1],NAMES[l.to]);cand(4,24)}
     else{C.sign(51,20,[0,-1],NAMES[l.to]);cand(51,24)}}
   for(const x of [14,24,34,44]){pic(x===24||x===34?'mirror_haunted_a':'banner_long_a',x,4,[0,-1]);pic('banner_long_b',x,6,[0,1])}
@@ -110,7 +110,7 @@ function psf2HubBuild(info){
   cand(36,38,[1.3,1.0,.6]);
   // the Stair Landing: the Dreamkeeper beside the stair, candelabra, banners
   C.used.delete(PSF2H.KEEPER.join(','));C.dec(pspPic('f2_dreamkeeper'),PSF2H.KEEPER[0],PSF2H.KEEPER[1],{block:true,npc:'psf2_keeper'});
-  C.light(26,36,[1.2,1.0,.7]);cand(25,40);cand(31,40);for(const x of [25,31])pic('banner_long_a',x,34,[0,-1]);
+  C.light(26,35,[1.2,1.0,.7]);cand(25,40);cand(31,40);for(const x of [25,31])pic('banner_long_a',x,34,[0,-1]);
   pic('window_great',32,36,[1,0]);pic('window_great',24,39,[-1,0]);
   // no creatures on this floor's hub: it is a safe hall
   pspSafeRect(C,2,2,W-3,H-3);

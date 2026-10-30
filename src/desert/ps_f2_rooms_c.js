@@ -14,6 +14,7 @@ function f2SwampBuild(){
     edge:(C,x,y)=>{if(C.E[y*48+x]<=8){C.water(x,y,'bogwater');return true}return false}});
   // the witch's hut (a painted front over a block of wall; its door is barred), the cauldron and the note before it
   const [hx0,hy0,hx1,hy1]=F2_SWAMP.HUT;
+  try{pspDefringe('ps_f2_witchhut')}catch(e){}
   if(IMG.ps_f2_witchhut&&IMG.ps_f2_witchhut.width&&!IMG.ps_f2_witchhut._ps)C.picHouse({img:'ps_f2_witchhut',x0:22,y0:hy0,x1:26,y1:hy1,w:5.6,door:[24,hy1],wh:2.6});
   else C.house({x0:hx0,y0:hy0,x1:hx1,y1:hy1,face:'S',sty:'black',roof:'thatch2',wh:2.4});
   {const g=C.chars[C.rows[hy1][24]];if(g!==undefined)KH_DOOR[g]={psf2:'hutdoor'}}
@@ -24,7 +25,7 @@ function f2SwampBuild(){
   for(const [k,pic,x,y] of F2_SWAMP.ING){C.used.delete(x+','+y);C.dec(pspPic(pic),x,y,{block:true,npc:'f2m_'+k});const sx=x+1,sy=y;if(C.open(sx,sy)){C.used.delete(sx+','+sy);C.dec(pspPic('f2_stake'),sx,sy,{block:false})}}
   // the swamp: dead trees hung with moss, willows, reeds, stumps; toadstool rings
   C.fill([pspPic('f2_swamptree'),'ww_willow','ww_oakmoss','f2i_bogwillow',pspPic('f2_swamptree'),pspPic('f2_stump')],{p1:.18,p2:.5,p3:.8});
-  C.scrub([pspPic('f2_reeds'),'greeds',pspPic('f2_reeds')],.06);
+  C.scrub([pspPic('f2_reeds'),'logm',pspPic('f2_reeds')],.05);
   C.capTrees(/swamptree|willow|oakmoss/,2.4);
   pspSafeZone(C,24,35,6);
   C.foes(['f2frog','f2leech','f2wisp'],[4,14,12,22],1);
@@ -67,7 +68,7 @@ function f2NightBuild(){
   {const [jx,jy]=F2_NIGHT.JAR;C.used.delete(jx+','+jy);C.dec(pspPic('f2_brainjar'),jx,jy,{block:true,npc:'f2n_jar'});C.light(jx,jy,[.6,1.1,.6])}
   F2_NIGHT.LAMP.forEach(([x,y],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_lantern_off'),x,y,{block:true,npc:'f2n_lamp'+i})});
   // the dark: dead trees full of eyes, warped clocks, dolls
-  C.fill([pspPic('f2_eyetree'),'f2i_nightoak','f2i_nightthorn',pspPic('f2_eyetree'),pspPic('f2_clock')],{p1:.12,p2:.4,p3:.7});
+  C.fill([pspPic('f2_eyetree'),'f2i_nightoak','f2i_nightthorn',pspPic('f2_eyetree'),'f2i_nightthorn'],{p1:.12,p2:.45,p3:.75});
   for(const [x,y] of [[6,16],[11,17],[8,22],[12,21],[5,20]])if(C.free(x,y))C.dec(pspPic('f2_doll'),x,y,{block:true});
   for(const [x,y] of [[7,28],[13,29],[10,33],[6,32]])if(C.free(x,y))C.dec(pspPic('f2_clock'),x,y,{block:true});
   C.scrub(['gy_bones',pspPic('f2_doll')],.02);

@@ -31,7 +31,7 @@ const F2B={
   9827:{k:'nightmare',sky:{top:[8,0,6],mid:[56,10,16],low:[116,30,24]},cloud:.7,fog:[30,6,10,.018],haze:0,amb:.5,lcol:[1.3,.55,.5],wn:'Red dark',fx:null,
     text:'The sky is the colour of a bruise, and the air is thick and still. Things move just out of sight.'}};
 /* ---------- floors: f2 names to engine FLOORS keys (some re-toned here) ---------- */
-const F2_FLMAKE={snow:['scree',1.62,[.97,1.0,1.07]],snowpath:['wwf_dirt',1.05,[.9,.94,1.02]],bogwater:['water',.55,[.62,.8,.55]],canal:['water',.82,[.8,.95,1.0]],
+const F2_FLMAKE={snow:['scree',1.62,[.97,1.0,1.07]],snowpath:['wwf_dirt',1.05,[.9,.94,1.02]],bogwater:['water',.78,[.66,.86,.58]],canal:['water',.82,[.8,.95,1.0]],
   seawater:['bluewater',1.0,[1,1,1]],blood:['redsand2',.6,[.9,.6,.6]],ash:['blf_ash',.7,[.9,.85,.9]]};
 function f2FloorKey(n){
   const m=F2_FLMAKE[n];if(!m)return FLOORS[n]?n:'grass';
@@ -203,7 +203,7 @@ function f2Room(S){
   const {rows,block,fm}=C,ix=(x,y)=>y*W+x,hs=(a,b,c)=>hash2(a,b,c+id);C.f2=S;C.hs2=hs;
   const vn=(x,y,cs,sd)=>{const u=x/cs,v=y/cs,i=Math.floor(u),j=Math.floor(v),fx=u-i,fy=v-j,sx=fx*fx*(3-2*fx),sy=fy*fy*(3-2*fy);return(hs(i,j,sd)*(1-sx)+hs(i+1,j,sd)*sx)*(1-sy)+(hs(i,j+1,sd)*(1-sx)+hs(i+1,j+1,sd)*sx)*sy};C.vn=vn;
   C.open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&rows[y][x]==='.'&&!block[ix(x,y)];
-  C.mist=(x,y)=>C.solid(x,y,C.ch(f2MistGid((hs(x,y,3)*5)|0,S.mistH||3.8)));
+  C.mist=(x,y)=>C.solid(x,y,C.ch(f2MistGid((hs(x,y,3)*5)|0,S.mistH||2.9)));
   C.water=(x,y,fl)=>{if(x<2||y<2||x>W-3||y>H-3)return;rows[y][x]='.';fm[ix(x,y)]=f2Fl(C,fl||'seawater');block[ix(x,y)]=1;C.used.add(x+','+y)};
   C.fl=n=>f2Fl(C,n);
   C.setFl=(x0,y0,x1,y1,n)=>{const c=f2Fl(C,n);for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(x>=0&&y>=0&&x<W&&y<H&&rows[y][x]==='.'&&!block[ix(x,y)])fm[ix(x,y)]=c};
@@ -273,9 +273,14 @@ function f2Room(S){
     {const TB=TERRS[id]&&TERRS[id].block,bs=new Set();for(const d of lv.decor)if(d.block||(d.npc&&d.solid))bs.add(d.x+','+d.y);
      const seen=new Uint8Array(W*H),q=[];const push=(x,y)=>{if(x<0||y<0||x>=W||y>=H||seen[ix(x,y)])return;seen[ix(x,y)]=1;q.push([x,y])};push(24,35);for(const t of C.warpTo||[])push(t[0],t[1]);
      for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||seen[ix(nx,ny)]||lv.rows[ny][nx]!=='.'||bs.has(nx+','+ny)||(TB&&TB[ix(nx,ny)]))continue;seen[ix(nx,ny)]=1;q.push([nx,ny])}}
-     const mc=C.ch(f2MistGid(1,S.mistH||3.8));let n=0;
+     const mc=C.ch(f2MistGid(1,S.mistH||2.9));let n=0;
      for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(lv.rows[y][x]==='.'&&!seen[ix(x,y)]&&!bs.has(x+','+y)&&!(TB&&TB[ix(x,y)])){lv.rows[y]=lv.rows[y].slice(0,x)+mc+lv.rows[y].slice(x+1);if(TB)TB[ix(x,y)]=1;n++;
        lv.decor=lv.decor.filter(d=>!(d.x===x&&d.y===y));lv.enemies=lv.enemies.filter(e=>!(e.x===x&&e.y===y))}
+     // and again: a blocking prop left standing in a straight one-wide gap goes, its square becomes mist
+     for(let pass=0;pass<3;pass++){const op=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&lv.rows[y][x]==='.';let k=0;
+       lv.decor=lv.decor.filter(d=>{if(!d.block||d.npc||d.pic||d.goldAmt||/chest/.test(String(d.k)))return true;const x=d.x,y=d.y;if(!op(x,y))return true;
+         const nb=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>op(x+a,y+b)).length,st=(op(x+1,y)&&op(x-1,y))||(op(x,y+1)&&op(x,y-1));
+         if(nb===2&&st){lv.rows[y]=lv.rows[y].slice(0,x)+mc+lv.rows[y].slice(x+1);if(TB)TB[ix(x,y)]=1;k++;return false}return true});if(!k)break}
      lv._f2sealed=n}
     try{if(typeof pswaHang==='function')pswaHang(id,lv)}catch(e){console.error('f2 wallart',e)}
     return lv};

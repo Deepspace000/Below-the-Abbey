@@ -34,7 +34,7 @@ function f2ForestBuild(){
   C.plaque(27,11,'f2_forest_plaque',['TOUCH THE STONES','IN THE ORDER','OF THE YEAR'],'f2f_plaque','A plaque of grey stone at the edge of the glade. The letters cut in it read: TOUCH THE STONES IN THE ORDER OF THE YEAR. Under it is a small carving of a bud, a sun, a leaf and a snowflake, in that order.');
   for(const [x,y] of [[22,7],[26,7]])if(C.free(x,y))C.dec('lbush0',x,y,{block:false,sc:.6});
   // the forest: tall green trees in the band, ferns and logs in the glades
-  C.fill(F2_FOREST_TREES,{sc:1});
+  C.fill(F2_FOREST_TREES,{sc:1,p1:.1,p2:.55,p3:.9});
   C.scrub(['lbush0','lbush0_2','lbush0','logm','boulder'],.05);
   for(const [x,y] of [[6,15],[10,21],[35,15],[41,21],[7,28],[11,33],[5,4],[9,8]])if(C.free(x,y))C.dec('lbush0_2',x,y,{block:false,sc:.8});
   C.capTrees(/ltree/,2.2);
@@ -83,7 +83,7 @@ function f2IslandBuild(){
   F2_ISLAND.PATCH.forEach(([x,y,s],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_patch_'+s),x,y,{block:true,npc:'f2i_patch'+i})});
   // palms, dune grass and rocks
   C.fill(['dpalm0','dpalm1','dpalm2','dpalm3','yar_palms','dpalm0','hgxrock1','boulder'],{p1:.12,p2:.4,p3:.6});
-  C.scrub(['greeds','yar_shells','greeds','hgxrock3'],.05);
+  C.scrub(['yar_shells','hgxrock3','lbush0_1'],.035);
   for(const [x,y] of [[7,16],[8,21],[11,15],[6,19]])if(C.free(x,y))C.dec('hgxrock1',x,y,{block:true,sc:1.1});
   C.capTrees(/dpalm|yar_palms/,2.8);
   pspSafeZone(C,24,35,6);
@@ -123,11 +123,12 @@ function f2SnowBuild(){
     keep:(x,y)=>x>=37&&y<=10});
   const W=48,{rows,block,fm}=C;
   // the cabin: a small timber house with a snowy roof; its door opens into the room inside (built in the north-east corner, walled all round)
-  if(IMG.ps_f2_cabin&&IMG.ps_f2_cabin.width&&!IMG.ps_f2_cabin._ps)C.picHouse({img:'ps_f2_cabin',x0:22,y0:5,x1:26,y1:8,w:6.2,door:[24,8],wh:2.6});else C.house({x0:21,y0:5,x1:27,y1:8,face:'S',sty:'timber',roof:'thatch2',wh:2.6,col:[1.5,1.05,.55]});
+  try{pspDefringe('ps_f2_cabin')}catch(e){}
+  if(IMG.ps_f2_cabin&&IMG.ps_f2_cabin.width&&!IMG.ps_f2_cabin._ps){C.picHouse({img:'ps_f2_cabin',x0:22,y0:5,x1:26,y1:8,w:5.4,door:[24,8],wh:2.6});const wd=C.ch(C.TM.make('plain',(WL.sty&&WL.sty.black)||'timber',2.6).gid);for(let y=5;y<=8;y++)for(let x=22;x<=26;x++)if(!(x===24&&y===8))C.solid(x,y,wd)}   // the sides of the cabin are dark boardselse C.house({x0:21,y0:5,x1:27,y1:8,face:'S',sty:'timber',roof:'thatch2',wh:2.6,col:[1.5,1.05,.55]});
   for(const x of [22,26])C.light(x,9,[1.5,1.05,.55]);
   {const [dx,dy]=[24,8],g=C.chars[rows[dy][dx]];KH_DOOR[g]={psf2:'warp',psh:'warp',to:F2_SNOW.IN,A:F2_SNOW.IN,B:F2_SNOW.IN,lvl:9823,at:{x:F2_SNOW.IN[0],y:F2_SNOW.IN[1],f:0},msg:'You step inside the cabin. It is as cold in here as it is outside.'};(C.warpTo=C.warpTo||[]).push(F2_SNOW.IN)}
   // inside: walls of timber round x 38..43, y 4..7; the hearth on the north wall, the mirror beside it, a bed, a table
-  {const TM=C.TM,wall=C.ch(TM.make('plain','timber',3.0).gid),win=C.ch(TM.make('window','timber',3.0).gid);
+  {const TM=C.TM,sty=(WL.sty&&WL.sty.black)||'timber',wall=C.ch(TM.make('plain',sty,3.0).gid),win=C.ch(TM.make('window',sty,3.0).gid);
    for(let y=2;y<=9;y++)for(let x=38;x<=45;x++){const inner=x>=40&&x<=43&&y>=4&&y<=7;if(inner){rows[y][x]='.';block[y*W+x]=0;fm[y*W+x]=C.fl('wl2f0');C.used.delete(x+','+y)}else if(x>=39&&x<=44&&y>=3&&y<=8){C.solid(x,y,(x===42&&y===3)?win:wall)}else C.mist(x,y)}   // timber inside, mist outside (the room is only reached through the cabin door)
    C.warp(41,8,'oak',F2_SNOW.OUT,'You step out into the snow.')}
   {const [hx,hy]=F2_SNOW.HEARTH;C.dec(pspPic('furn_fireplace_tall'),hx,hy,{block:true,npc:'f2s_hearth'});

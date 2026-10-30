@@ -77693,7 +77693,7 @@ const F2B={
   9827:{k:'nightmare',sky:{top:[8,0,6],mid:[56,10,16],low:[116,30,24]},cloud:.7,fog:[30,6,10,.018],haze:0,amb:.5,lcol:[1.3,.55,.5],wn:'Red dark',fx:null,
     text:'The sky is the colour of a bruise, and the air is thick and still. Things move just out of sight.'}};
 /* ---------- floors: f2 names to engine FLOORS keys (some re-toned here) ---------- */
-const F2_FLMAKE={snow:['scree',1.62,[.97,1.0,1.07]],snowpath:['wwf_dirt',1.05,[.9,.94,1.02]],bogwater:['water',.55,[.62,.8,.55]],canal:['water',.82,[.8,.95,1.0]],
+const F2_FLMAKE={snow:['scree',1.62,[.97,1.0,1.07]],snowpath:['wwf_dirt',1.05,[.9,.94,1.02]],bogwater:['water',.78,[.66,.86,.58]],canal:['water',.82,[.8,.95,1.0]],
   seawater:['bluewater',1.0,[1,1,1]],blood:['redsand2',.6,[.9,.6,.6]],ash:['blf_ash',.7,[.9,.85,.9]]};
 function f2FloorKey(n){
   const m=F2_FLMAKE[n];if(!m)return FLOORS[n]?n:'grass';
@@ -77865,7 +77865,7 @@ function f2Room(S){
   const {rows,block,fm}=C,ix=(x,y)=>y*W+x,hs=(a,b,c)=>hash2(a,b,c+id);C.f2=S;C.hs2=hs;
   const vn=(x,y,cs,sd)=>{const u=x/cs,v=y/cs,i=Math.floor(u),j=Math.floor(v),fx=u-i,fy=v-j,sx=fx*fx*(3-2*fx),sy=fy*fy*(3-2*fy);return(hs(i,j,sd)*(1-sx)+hs(i+1,j,sd)*sx)*(1-sy)+(hs(i,j+1,sd)*(1-sx)+hs(i+1,j+1,sd)*sx)*sy};C.vn=vn;
   C.open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&rows[y][x]==='.'&&!block[ix(x,y)];
-  C.mist=(x,y)=>C.solid(x,y,C.ch(f2MistGid((hs(x,y,3)*5)|0,S.mistH||3.8)));
+  C.mist=(x,y)=>C.solid(x,y,C.ch(f2MistGid((hs(x,y,3)*5)|0,S.mistH||2.9)));
   C.water=(x,y,fl)=>{if(x<2||y<2||x>W-3||y>H-3)return;rows[y][x]='.';fm[ix(x,y)]=f2Fl(C,fl||'seawater');block[ix(x,y)]=1;C.used.add(x+','+y)};
   C.fl=n=>f2Fl(C,n);
   C.setFl=(x0,y0,x1,y1,n)=>{const c=f2Fl(C,n);for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(x>=0&&y>=0&&x<W&&y<H&&rows[y][x]==='.'&&!block[ix(x,y)])fm[ix(x,y)]=c};
@@ -77935,9 +77935,14 @@ function f2Room(S){
     {const TB=TERRS[id]&&TERRS[id].block,bs=new Set();for(const d of lv.decor)if(d.block||(d.npc&&d.solid))bs.add(d.x+','+d.y);
      const seen=new Uint8Array(W*H),q=[];const push=(x,y)=>{if(x<0||y<0||x>=W||y>=H||seen[ix(x,y)])return;seen[ix(x,y)]=1;q.push([x,y])};push(24,35);for(const t of C.warpTo||[])push(t[0],t[1]);
      for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||seen[ix(nx,ny)]||lv.rows[ny][nx]!=='.'||bs.has(nx+','+ny)||(TB&&TB[ix(nx,ny)]))continue;seen[ix(nx,ny)]=1;q.push([nx,ny])}}
-     const mc=C.ch(f2MistGid(1,S.mistH||3.8));let n=0;
+     const mc=C.ch(f2MistGid(1,S.mistH||2.9));let n=0;
      for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(lv.rows[y][x]==='.'&&!seen[ix(x,y)]&&!bs.has(x+','+y)&&!(TB&&TB[ix(x,y)])){lv.rows[y]=lv.rows[y].slice(0,x)+mc+lv.rows[y].slice(x+1);if(TB)TB[ix(x,y)]=1;n++;
        lv.decor=lv.decor.filter(d=>!(d.x===x&&d.y===y));lv.enemies=lv.enemies.filter(e=>!(e.x===x&&e.y===y))}
+     // and again: a blocking prop left standing in a straight one-wide gap goes, its square becomes mist
+     for(let pass=0;pass<3;pass++){const op=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&lv.rows[y][x]==='.';let k=0;
+       lv.decor=lv.decor.filter(d=>{if(!d.block||d.npc||d.pic||d.goldAmt||/chest/.test(String(d.k)))return true;const x=d.x,y=d.y;if(!op(x,y))return true;
+         const nb=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>op(x+a,y+b)).length,st=(op(x+1,y)&&op(x-1,y))||(op(x,y+1)&&op(x,y-1));
+         if(nb===2&&st){lv.rows[y]=lv.rows[y].slice(0,x)+mc+lv.rows[y].slice(x+1);if(TB)TB[ix(x,y)]=1;k++;return false}return true});if(!k)break}
      lv._f2sealed=n}
     try{if(typeof pswaHang==='function')pswaHang(id,lv)}catch(e){console.error('f2 wallart',e)}
     return lv};
@@ -77981,7 +77986,7 @@ pspOnArrive((n,restored)=>{if(!f2Is(n))return;const S=f2S(n);if(!S.seen&&!restor
    The Sleeper's table: seven hollows; placing a piece takes it from the bag (psf2F().placed). With all seven placed the Sleeper wakes (F.woke), speaks, and the quest is ready;
    the Dreamkeeper hands out the reward (once, by the quest) and F.done is set. A sealed iron stair at the east end of the gallery is the way to the third floor (not open yet).
    ========================================================================== */
-const PSF2H={ID:9820,W:56,H:44,WH:3.2,TABLE:[28,22],KEEPER:[26,37],STAIR3:[52,5]};
+const PSF2H={ID:9820,W:56,H:44,WH:3.2,TABLE:[28,22],KEEPER:[26,35],STAIR3:[52,5]};
 /* painted pieces wanted (assets/ps/<name>.webp replaces the stand-in with no code change) */
 {const P=(n,h,src,o)=>{PSP_PICS[n]=[h,src,o||{}]};
  P('f2_dreamkeeper',1.0,['ps_p_librarian','kh_ohfolk6_0'],{keep:1});
@@ -78043,7 +78048,7 @@ function psf2HubBuild(info){
   // the gallery: a painted name plaque beside every door, banners and mirrors between the doors (the place of illusions: mirrors everywhere)
   const NAMES={9821:'THE PERFECT FOREST',9822:'THE ISLAND BY THE SEA',9823:'THE CABIN IN THE SNOW',9824:'THE WATERWAYS',9825:'THE DESERT',9826:'THE SWAMP',9827:'THE NIGHTMARE'};
   for(const l of pspLinksFrom(id)){if(!NAMES[l.to])continue;const [x,y]=l.at;
-    if(y===3){C.sign(x+1,4,[0,-1],NAMES[l.to]);cand(x-2,4);cand(x+2,4)}
+    if(y===3){C.sign(x+1,4,[0,-1],NAMES[l.to]);cand(x-2,4)}
     else if(x===2){C.sign(4,20,[0,-1],NAMES[l.to]);cand(4,24)}
     else{C.sign(51,20,[0,-1],NAMES[l.to]);cand(51,24)}}
   for(const x of [14,24,34,44]){pic(x===24||x===34?'mirror_haunted_a':'banner_long_a',x,4,[0,-1]);pic('banner_long_b',x,6,[0,1])}
@@ -78083,7 +78088,7 @@ function psf2HubBuild(info){
   cand(36,38,[1.3,1.0,.6]);
   // the Stair Landing: the Dreamkeeper beside the stair, candelabra, banners
   C.used.delete(PSF2H.KEEPER.join(','));C.dec(pspPic('f2_dreamkeeper'),PSF2H.KEEPER[0],PSF2H.KEEPER[1],{block:true,npc:'psf2_keeper'});
-  C.light(26,36,[1.2,1.0,.7]);cand(25,40);cand(31,40);for(const x of [25,31])pic('banner_long_a',x,34,[0,-1]);
+  C.light(26,35,[1.2,1.0,.7]);cand(25,40);cand(31,40);for(const x of [25,31])pic('banner_long_a',x,34,[0,-1]);
   pic('window_great',32,36,[1,0]);pic('window_great',24,39,[-1,0]);
   // no creatures on this floor's hub: it is a safe hall
   pspSafeRect(C,2,2,W-3,H-3);
@@ -78198,7 +78203,7 @@ function f2ForestBuild(){
   C.plaque(27,11,'f2_forest_plaque',['TOUCH THE STONES','IN THE ORDER','OF THE YEAR'],'f2f_plaque','A plaque of grey stone at the edge of the glade. The letters cut in it read: TOUCH THE STONES IN THE ORDER OF THE YEAR. Under it is a small carving of a bud, a sun, a leaf and a snowflake, in that order.');
   for(const [x,y] of [[22,7],[26,7]])if(C.free(x,y))C.dec('lbush0',x,y,{block:false,sc:.6});
   // the forest: tall green trees in the band, ferns and logs in the glades
-  C.fill(F2_FOREST_TREES,{sc:1});
+  C.fill(F2_FOREST_TREES,{sc:1,p1:.1,p2:.55,p3:.9});
   C.scrub(['lbush0','lbush0_2','lbush0','logm','boulder'],.05);
   for(const [x,y] of [[6,15],[10,21],[35,15],[41,21],[7,28],[11,33],[5,4],[9,8]])if(C.free(x,y))C.dec('lbush0_2',x,y,{block:false,sc:.8});
   C.capTrees(/ltree/,2.2);
@@ -78247,7 +78252,7 @@ function f2IslandBuild(){
   F2_ISLAND.PATCH.forEach(([x,y,s],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_patch_'+s),x,y,{block:true,npc:'f2i_patch'+i})});
   // palms, dune grass and rocks
   C.fill(['dpalm0','dpalm1','dpalm2','dpalm3','yar_palms','dpalm0','hgxrock1','boulder'],{p1:.12,p2:.4,p3:.6});
-  C.scrub(['greeds','yar_shells','greeds','hgxrock3'],.05);
+  C.scrub(['yar_shells','hgxrock3','lbush0_1'],.035);
   for(const [x,y] of [[7,16],[8,21],[11,15],[6,19]])if(C.free(x,y))C.dec('hgxrock1',x,y,{block:true,sc:1.1});
   C.capTrees(/dpalm|yar_palms/,2.8);
   pspSafeZone(C,24,35,6);
@@ -78287,11 +78292,12 @@ function f2SnowBuild(){
     keep:(x,y)=>x>=37&&y<=10});
   const W=48,{rows,block,fm}=C;
   // the cabin: a small timber house with a snowy roof; its door opens into the room inside (built in the north-east corner, walled all round)
-  if(IMG.ps_f2_cabin&&IMG.ps_f2_cabin.width&&!IMG.ps_f2_cabin._ps)C.picHouse({img:'ps_f2_cabin',x0:22,y0:5,x1:26,y1:8,w:6.2,door:[24,8],wh:2.6});else C.house({x0:21,y0:5,x1:27,y1:8,face:'S',sty:'timber',roof:'thatch2',wh:2.6,col:[1.5,1.05,.55]});
+  try{pspDefringe('ps_f2_cabin')}catch(e){}
+  if(IMG.ps_f2_cabin&&IMG.ps_f2_cabin.width&&!IMG.ps_f2_cabin._ps){C.picHouse({img:'ps_f2_cabin',x0:22,y0:5,x1:26,y1:8,w:5.4,door:[24,8],wh:2.6});const wd=C.ch(C.TM.make('plain',(WL.sty&&WL.sty.black)||'timber',2.6).gid);for(let y=5;y<=8;y++)for(let x=22;x<=26;x++)if(!(x===24&&y===8))C.solid(x,y,wd)}   // the sides of the cabin are dark boardselse C.house({x0:21,y0:5,x1:27,y1:8,face:'S',sty:'timber',roof:'thatch2',wh:2.6,col:[1.5,1.05,.55]});
   for(const x of [22,26])C.light(x,9,[1.5,1.05,.55]);
   {const [dx,dy]=[24,8],g=C.chars[rows[dy][dx]];KH_DOOR[g]={psf2:'warp',psh:'warp',to:F2_SNOW.IN,A:F2_SNOW.IN,B:F2_SNOW.IN,lvl:9823,at:{x:F2_SNOW.IN[0],y:F2_SNOW.IN[1],f:0},msg:'You step inside the cabin. It is as cold in here as it is outside.'};(C.warpTo=C.warpTo||[]).push(F2_SNOW.IN)}
   // inside: walls of timber round x 38..43, y 4..7; the hearth on the north wall, the mirror beside it, a bed, a table
-  {const TM=C.TM,wall=C.ch(TM.make('plain','timber',3.0).gid),win=C.ch(TM.make('window','timber',3.0).gid);
+  {const TM=C.TM,sty=(WL.sty&&WL.sty.black)||'timber',wall=C.ch(TM.make('plain',sty,3.0).gid),win=C.ch(TM.make('window',sty,3.0).gid);
    for(let y=2;y<=9;y++)for(let x=38;x<=45;x++){const inner=x>=40&&x<=43&&y>=4&&y<=7;if(inner){rows[y][x]='.';block[y*W+x]=0;fm[y*W+x]=C.fl('wl2f0');C.used.delete(x+','+y)}else if(x>=39&&x<=44&&y>=3&&y<=8){C.solid(x,y,(x===42&&y===3)?win:wall)}else C.mist(x,y)}   // timber inside, mist outside (the room is only reached through the cabin door)
    C.warp(41,8,'oak',F2_SNOW.OUT,'You step out into the snow.')}
   {const [hx,hy]=F2_SNOW.HEARTH;C.dec(pspPic('furn_fireplace_tall'),hx,hy,{block:true,npc:'f2s_hearth'});
@@ -78426,13 +78432,13 @@ function f2DesertBuild(){
   {const [sx,sy]=F2_DESERT.SARC;C.used.delete(sx+','+sy);C.dec(pspPic('f2_sarc_shut'),sx,sy,{block:true,npc:'f2d_sarc'})}
   C.plaque(19,10,'f2_desert_plaque',['READ THE WALL','AND WALK IT'],'f2d_plaque','A slab of sandstone by the way in. Cut into it: READ THE WALL FROM LEFT TO RIGHT, AND WALK IT. Above you, on the north wall of the court, a frieze is carved: a scarab, an eye, an ankh and a sun disc, in that order from left to right. Eight carved plates are set in the floor.');
   for(const [x,y] of [[18,3],[30,3],[18,9],[30,9]])C.prop('f2_column_lotus',x,y,{sc:.85});
-  for(const [x,y] of [[22,4],[26,4]]){C.dec('fx_fire',x,y,{block:false,sc:.4});C.light(x,y,[1.5,1.0,.5])}
+  for(const [x,y] of [[22,4],[26,4]]){C.prop('brazier',x,y,{block:true});C.light(x,y,[1.5,1.0,.5])}
   // the dunes: palms at the oasis, rocks, obelisks and a fallen head
-  for(const [x,y] of [[8,18],[9,18],[8,19],[9,19]])if(C.free(x,y))C.dec('greeds',x,y,{block:true,sc:1.1});   // reeds round the spring of the oasis
+  for(const [x,y] of [[8,18],[9,18],[8,19],[9,19]])if(C.free(x,y))C.dec(pspPic('f2_reeds'),x,y,{block:true,sc:1.1});   // reeds round the spring of the oasis
   C.fill(['drock0','drock1','drock2','drock1','dpalm2','drock0',pspPic('f2_column_lotus')],{p1:.1,p2:.4,p3:.7,sc:.9});
   for(const [x,y] of [[5,15],[12,16],[6,22],[11,22],[5,19]])if(C.free(x,y))C.dec(['dpalm0','dpalm1','dpalm2','dpalm3'][(x+y)%4],x,y,{block:true});
   C.used.delete('38,17');C.dec(pspPic('f2_statue_head'),38,17,{block:true});C.used.delete('35,21');C.dec('dobelisk',35,21,{block:true});C.used.delete('41,21');C.dec('dobelisk',41,21,{block:true});
-  C.scrub(['drock1','yar_shells','greeds'],.025);
+  C.scrub(['drock1','yar_shells'],.02);
   C.capTrees(/dpalm/,2.6);
   pspSafeZone(C,24,35,6);
   C.foes(['f2scorpion','f2scorpion','f2dustdevil'],[4,13,13,23],1);
@@ -78473,6 +78479,7 @@ function f2SwampBuild(){
     edge:(C,x,y)=>{if(C.E[y*48+x]<=8){C.water(x,y,'bogwater');return true}return false}});
   // the witch's hut (a painted front over a block of wall; its door is barred), the cauldron and the note before it
   const [hx0,hy0,hx1,hy1]=F2_SWAMP.HUT;
+  try{pspDefringe('ps_f2_witchhut')}catch(e){}
   if(IMG.ps_f2_witchhut&&IMG.ps_f2_witchhut.width&&!IMG.ps_f2_witchhut._ps)C.picHouse({img:'ps_f2_witchhut',x0:22,y0:hy0,x1:26,y1:hy1,w:5.6,door:[24,hy1],wh:2.6});
   else C.house({x0:hx0,y0:hy0,x1:hx1,y1:hy1,face:'S',sty:'black',roof:'thatch2',wh:2.4});
   {const g=C.chars[C.rows[hy1][24]];if(g!==undefined)KH_DOOR[g]={psf2:'hutdoor'}}
@@ -78483,7 +78490,7 @@ function f2SwampBuild(){
   for(const [k,pic,x,y] of F2_SWAMP.ING){C.used.delete(x+','+y);C.dec(pspPic(pic),x,y,{block:true,npc:'f2m_'+k});const sx=x+1,sy=y;if(C.open(sx,sy)){C.used.delete(sx+','+sy);C.dec(pspPic('f2_stake'),sx,sy,{block:false})}}
   // the swamp: dead trees hung with moss, willows, reeds, stumps; toadstool rings
   C.fill([pspPic('f2_swamptree'),'ww_willow','ww_oakmoss','f2i_bogwillow',pspPic('f2_swamptree'),pspPic('f2_stump')],{p1:.18,p2:.5,p3:.8});
-  C.scrub([pspPic('f2_reeds'),'greeds',pspPic('f2_reeds')],.06);
+  C.scrub([pspPic('f2_reeds'),'logm',pspPic('f2_reeds')],.05);
   C.capTrees(/swamptree|willow|oakmoss/,2.4);
   pspSafeZone(C,24,35,6);
   C.foes(['f2frog','f2leech','f2wisp'],[4,14,12,22],1);
@@ -78526,7 +78533,7 @@ function f2NightBuild(){
   {const [jx,jy]=F2_NIGHT.JAR;C.used.delete(jx+','+jy);C.dec(pspPic('f2_brainjar'),jx,jy,{block:true,npc:'f2n_jar'});C.light(jx,jy,[.6,1.1,.6])}
   F2_NIGHT.LAMP.forEach(([x,y],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_lantern_off'),x,y,{block:true,npc:'f2n_lamp'+i})});
   // the dark: dead trees full of eyes, warped clocks, dolls
-  C.fill([pspPic('f2_eyetree'),'f2i_nightoak','f2i_nightthorn',pspPic('f2_eyetree'),pspPic('f2_clock')],{p1:.12,p2:.4,p3:.7});
+  C.fill([pspPic('f2_eyetree'),'f2i_nightoak','f2i_nightthorn',pspPic('f2_eyetree'),'f2i_nightthorn'],{p1:.12,p2:.45,p3:.75});
   for(const [x,y] of [[6,16],[11,17],[8,22],[12,21],[5,20]])if(C.free(x,y))C.dec(pspPic('f2_doll'),x,y,{block:true});
   for(const [x,y] of [[7,28],[13,29],[10,33],[6,32]])if(C.free(x,y))C.dec(pspPic('f2_clock'),x,y,{block:true});
   C.scrub(['gy_bones',pspPic('f2_doll')],.02);

@@ -80,13 +80,13 @@ function f2DesertBuild(){
   {const [sx,sy]=F2_DESERT.SARC;C.used.delete(sx+','+sy);C.dec(pspPic('f2_sarc_shut'),sx,sy,{block:true,npc:'f2d_sarc'})}
   C.plaque(19,10,'f2_desert_plaque',['READ THE WALL','AND WALK IT'],'f2d_plaque','A slab of sandstone by the way in. Cut into it: READ THE WALL FROM LEFT TO RIGHT, AND WALK IT. Above you, on the north wall of the court, a frieze is carved: a scarab, an eye, an ankh and a sun disc, in that order from left to right. Eight carved plates are set in the floor.');
   for(const [x,y] of [[18,3],[30,3],[18,9],[30,9]])C.prop('f2_column_lotus',x,y,{sc:.85});
-  for(const [x,y] of [[22,4],[26,4]]){C.dec('fx_fire',x,y,{block:false,sc:.4});C.light(x,y,[1.5,1.0,.5])}
+  for(const [x,y] of [[22,4],[26,4]]){C.prop('brazier',x,y,{block:true});C.light(x,y,[1.5,1.0,.5])}
   // the dunes: palms at the oasis, rocks, obelisks and a fallen head
-  for(const [x,y] of [[8,18],[9,18],[8,19],[9,19]])if(C.free(x,y))C.dec('greeds',x,y,{block:true,sc:1.1});   // reeds round the spring of the oasis
+  for(const [x,y] of [[8,18],[9,18],[8,19],[9,19]])if(C.free(x,y))C.dec(pspPic('f2_reeds'),x,y,{block:true,sc:1.1});   // reeds round the spring of the oasis
   C.fill(['drock0','drock1','drock2','drock1','dpalm2','drock0',pspPic('f2_column_lotus')],{p1:.1,p2:.4,p3:.7,sc:.9});
   for(const [x,y] of [[5,15],[12,16],[6,22],[11,22],[5,19]])if(C.free(x,y))C.dec(['dpalm0','dpalm1','dpalm2','dpalm3'][(x+y)%4],x,y,{block:true});
   C.used.delete('38,17');C.dec(pspPic('f2_statue_head'),38,17,{block:true});C.used.delete('35,21');C.dec('dobelisk',35,21,{block:true});C.used.delete('41,21');C.dec('dobelisk',41,21,{block:true});
-  C.scrub(['drock1','yar_shells','greeds'],.025);
+  C.scrub(['drock1','yar_shells'],.02);
   C.capTrees(/dpalm/,2.6);
   pspSafeZone(C,24,35,6);
   C.foes(['f2scorpion','f2scorpion','f2dustdevil'],[4,13,13,23],1);
