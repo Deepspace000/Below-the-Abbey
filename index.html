@@ -76770,7 +76770,7 @@ for(const cid in PGR.CHESTS){const c=PGR.CHESTS[cid];NPCS[cid].root=KH_KEEPERS[c
   if(typeof bl3Hide==='function')bl3Hide(c.lv,cid,()=>pgrGot(c.item))}
 /* find a dead end for a chest: an open reachable cell with three walls (else two, when the rest stays joined), far from doors, rest rooms, safe zones and the waystone */
 function pgrSpot(L,id,taken,minD){
-  const W=L.rows[0].length,H=L.rows.length,open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&L.rows[y][x]==='.';
+  const W=L.rows[0].length,H=L.rows.length,TB=(typeof TERRS!=='undefined'&&TERRS[id]&&TERRS[id].block)||null,open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&L.rows[y][x]==='.'&&!(TB&&TB[y*W+x]);   // terraced levels: ledges the party cannot step onto are not floor
   const blk=new Set(),occ=new Set();
   for(const d of L.decor){occ.add(d.x+','+d.y);if(d.block||(d.npc&&d.solid))blk.add(d.x+','+d.y)}
   for(const e of L.enemies||[])occ.add(Math.round(e.x)+','+Math.round(e.y));for(const i of L.items||[])occ.add(Math.round(i.x)+','+Math.round(i.y));
