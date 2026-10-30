@@ -96,13 +96,13 @@ def main():
         r = pg.evaluate(ITEMS_JS)
         for s in r['str']:
             print('  ', s)
-        check('26 items', r['n'] == 26, r['n'])
-        check('every type has two (rings four)', all(r['types'].get(k) == 2 for k in SLOTS + ARM) and r['types'].get('ring') == 4, r['types'])
+        check('27 items (26 of the first floor, the circlet of the second floor)', r['n'] == 27, r['n'])
+        check('every type has two (rings four; the head three with the second floor circlet)', all(r['types'].get(k) == (3 if k == 'head' else 2) for k in SLOTS + ARM) and r['types'].get('ring') == 4, r['types'])
         check('items sane and stronger than the previous best', not r['bad'], r['bad'])
         r = pg.evaluate(PLACE_JS)
         check('placements valid, one per item', not r['bad'], r['bad'])
         built = pg.evaluate("() => PSP.LEVELS.filter(l => l.built).map(l => l.id)")
-        check('two on every built level (the Crooked Road, 9715, is a connector without gear)', all(r['per'].get(str(l), 0) >= 2 for l in built if l != 9715), r['per'])
+        check('two on every built level of the first floor (the Crooked Road, 9715, is a connector without gear); the second floor hub (9820) gives one, its illusion rooms none', all(r['per'].get(str(l), 0) >= 2 for l in built if l != 9715 and l < 9820) and r['per'].get('9820', 0) == 1, r['per'])
         check('pieces outside', r['per'].get('9720', 0) + r['per'].get('9730', 0) >= 2)
         for lv in [9720, 9721, 9722, 9732, 9740, 9750, 9780]:
             enter(pg, lv)
