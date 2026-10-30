@@ -12,7 +12,7 @@ function pswaHang(id,L){
   const W=L.rows[0].length,H=L.rows.length,TB=(typeof TERRS!=='undefined'&&TERRS[id]&&TERRS[id].block)||null;
   const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&L.rows[y][x]==='.';
   const ch=(x,y)=>(x>=0&&y>=0&&x<W&&y<H)?L.rows[y][x]:null;
-  const isDoor=(x,y)=>{const c=ch(x,y);if(c===null||c==='.')return false;try{const g=c.charCodeAt(0);return typeof KH_DOOR!=='undefined'&&!!KH_DOOR[g]}catch(e){return false}};
+  const isDoor=(x,y)=>{const c=ch(x,y);if(c===null||c==='.')return false;try{const g=L.chars?L.chars[c]:c.charCodeAt(0);return typeof KH_DOOR!=='undefined'&&g!==undefined&&!!KH_DOOR[g]}catch(e){return false}};
   const rep={noWall:0,narrowed:0,dupes:0,door:0};
   const seen=new Map(),out=[];
   for(const d of L.decor||[]){
