@@ -101,7 +101,7 @@ def run_links():
             const o = {name: l.from + '->' + l.to + ' ' + (l.name || ''), bad: []};
             try { if (!LEVELS[l.from]) KH_LAZY[l.from](); const L = LEVELS[l.from]; const c = L.rows[l.at[1]][l.at[0]];
               const d = c !== '.' && KH_DOOR[L.chars[c]];
-              if (!d) o.bad.push('portal square is not a door'); else { if (d.lvl !== l.to && !l.lock) o.bad.push('door leads to ' + d.lvl); const a = d.at; if (!l.lock && (!a || a.x !== l.land[0] || a.y !== l.land[1] || a.f !== l.land[2])) o.bad.push('door lands ' + JSON.stringify(a));  }
+              if (!d) o.bad.push('portal square is not a door'); else { if (d.lvl !== l.to && !l.lock) o.bad.push('door leads to ' + d.lvl); const a = d.at, ld = pspLandOf(l); if (!l.lock && (!a || a.x !== ld[0] || a.y !== ld[1] || a.f !== ld[2])) o.bad.push('door lands ' + JSON.stringify(a));   /* a far side not built yet lands on the stub room's start */  }
               if (built.includes(l.to)) { if (!LEVELS[l.to]) KH_LAZY[l.to](); const T = LEVELS[l.to]; const [x, y] = l.land;
                 if (T.rows[y][x] !== '.') o.bad.push('land square not open');
                 for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const cx = x + dx, cy = y + dy; if (T.rows[cy][cx] !== '.' && !(cx === l.land[0] && cy === l.land[1])) { const g = T.rows[cy][cx]; const dd = g !== '.' && KH_DOOR[T.chars[g]]; if (!dd) o.bad.push('3x3 not clear at ' + cx + ',' + cy) } ; if (T.decor.some(q => q.block && q.x === cx && q.y === cy)) o.bad.push('blocking decor in 3x3 at ' + cx + ',' + cy) } }

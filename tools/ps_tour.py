@@ -1,5 +1,7 @@
-"""Walks the built Pale Spire levels and takes screenshots from well-spread viewpoints (farthest-point sampling over the reachable open cells, each facing its longest free view), then writes a 2 by 2 contact sheet per level.
-   Env: PS_PORT, BTA_CHROME, PS_TOUR (output folder), PS_NV (viewpoints per level, default 4). Run on your own server from the repo root."""
+"""Walks the built Pale Spire levels and takes screenshots from well-spread viewpoints (farthest-point sampling over the reachable open cells, each facing its longest free view), then writes a contact sheet per level.
+   python tools/ps_tour.py [level ids; t<n> is floor n of the Never-Ending Tower, e.g. 9730 9740 t1 t7]   (no ids: every built castle level)
+   Env: PS_PORT, BTA_CHROME, PS_TOUR (output folder), PS_NV (viewpoints per level, default 4; 12 for the visual tour check). Run on your own server from the repo root.
+   The sheet is 2 by 2 for 4 views, 3 wide otherwise; each view is labelled with its square and facing (N E S W)."""
 import sys, os, json, time
 from playwright.sync_api import sync_playwright
 PORT = os.environ.get('PS_PORT', '8621')
@@ -26,22 +28,26 @@ OUT = os.environ.get('PS_TOUR', os.path.join(os.environ.get('TEMP', '.'), 'ps_to
 NV = int(os.environ.get('PS_NV', '4'))
 os.makedirs(OUT, exist_ok=True)
 
-PICK = """([id, nv]) => { if (!LEVELS[id]) KH_LAZY[id](); const L = LEVELS[id], W = L.rows[0].length, H = L.rows.length;
+PICK = """async ([id, nv]) => { if (id >= 1e9) { await ntLoad(); ntEnsure(id) } else if (!LEVELS[id]) KH_LAZY[id](); const L = LEVELS[id], W = L.rows[0].length, H = L.rows.length;
   const bs = new Set(); for (const d of L.decor) if (d.block) bs.add(d.x + ',' + d.y);
   const TB = (typeof TERRS !== 'undefined' && TERRS[id] && TERRS[id].block) || null;
   const open = (x, y) => x >= 0 && y >= 0 && x < W && y < H && L.rows[y][x] === '.' && !bs.has(x + ',' + y) && !(TB && TB[y * W + x]);
   const seen = new Set([L.start.x + ',' + L.start.y]), q = [[L.start.x, L.start.y]];
   for (let i = 0; i < q.length; i++) { const [x, y] = q[i]; for (const [a, b] of [[1,0],[-1,0],[0,1],[0,-1]]) { const nx = x + a, ny = y + b, k = nx + ',' + ny; if (!seen.has(k) && open(nx, ny)) { seen.add(k); q.push([nx, ny]) } } }
-  const pts = [[L.start.x, L.start.y]]; while (pts.length < nv && q.length) { let best = null, bd = -1; for (const c of q) { let d = 1e9; for (const p of pts) d = Math.min(d, Math.hypot(c[0] - p[0], c[1] - p[1])); if (d > bd) { bd = d; best = c } } pts.push(best) }
+  const view = c => Math.max(...[[0,-1],[1,0],[0,1],[-1,0]].map(([dx, dy]) => { let n = 0; while (n < 14 && open(c[0] + dx * (n + 1), c[1] + dy * (n + 1))) n++; return n }));
+  const cand = q.filter(c => view(c) >= 5).length >= nv ? q.filter(c => view(c) >= 5) : q;   // viewpoints with a real view, not a wall at arm's length
+  const pts = [[L.start.x, L.start.y]]; while (pts.length < nv && cand.length) { let best = null, bd = -1; for (const c of cand) { let d = 1e9; for (const p of pts) d = Math.min(d, Math.hypot(c[0] - p[0], c[1] - p[1])); if (d > bd) { bd = d; best = c } } pts.push(best) }
   const dirs = [[0,-1,0],[1,0,1],[0,1,2],[-1,0,3]];
   return pts.map(p => { let bf = 0, bn = -1; for (const [dx, dy, f] of dirs) { let n = 0; while (n < 14 && open(p[0] + dx * (n + 1), p[1] + dy * (n + 1))) n++; if (n > bn) { bn = n; bf = f } } return [p[0], p[1], bf] }) }"""
 
 GO = """([id, x, y, f]) => { if (G.state !== 'play') return 'notplay'; if (LEVEL !== id) { goToLevel(id, {x, y, f}) }
-  G.P.x = x; G.P.y = y; G.P.f = f; G.P.angT = f * Math.PI / 2; G.P.ang = G.P.angT; G.C.x = x; G.C.y = y; G.lvlBanners = []; G.talk = null; G.msgs = []; return LEVEL }"""
+  G.P.x = x; G.P.y = y; G.P.f = f; G.P.angT = (f - 1) * Math.PI / 2; G.P.ang = G.P.angT; G.C.x = x; G.C.y = y; G.lvlBanners = []; G.talk = null; G.msgs = []; try { PSOV.on = false } catch (e) {} return LEVEL }   // the castle plan panel folded away for the pictures"""
 
+from PIL import ImageDraw
+args = sys.argv[1:]
 with sync_playwright() as p:
     b, pg, errs = T.boot(p, 'palespire', 900, 600)
-    ids = pg.evaluate(T.BUILT)
+    ids = [int(1e9) + int(a[1:]) if a.startswith('t') else int(a) for a in args] or pg.evaluate(T.BUILT)
     for id_ in ids:
         pts = pg.evaluate(PICK, [id_, NV])
         shots = []
@@ -52,13 +58,18 @@ with sync_playwright() as p:
             pg.wait_for_timeout(900)
             fn = os.path.join(OUT, 'ps_%d_%d.png' % (id_, k))
             pg.screenshot(path=fn, clip={'x': 0, 'y': 0, 'width': 790, 'height': 392})
-            shots.append(fn)
-        ims = [Image.open(s) for s in shots]
+            shots.append((fn, x, y, f))
+        ims = [Image.open(s[0]) for s in shots]
         w, h = ims[0].size
-        sheet = Image.new('RGB', (w * 2, h * 2))
-        for i, im in enumerate(ims[:4]):
-            sheet.paste(im, ((i % 2) * w, (i // 2) * h))
-        sheet.save(os.path.join(OUT, 'sheet_%d.jpg' % id_), quality=82)
-        print('level', id_, [list(q) for q in pts])
+        cols = 2 if len(ims) <= 4 else 3
+        rows = (len(ims) + cols - 1) // cols
+        sheet = Image.new('RGB', (w * cols, h * rows))
+        dr = ImageDraw.Draw(sheet)
+        for i, im in enumerate(ims):
+            sheet.paste(im, ((i % cols) * w, (i // cols) * h))
+            dr.text(((i % cols) * w + 6, (i // cols) * h + 4), '%d: %d,%d %s' % (i, shots[i][1], shots[i][2], 'NESW'[shots[i][3]]), fill=(255, 255, 0))
+        name = ('t%d' % (id_ - int(1e9))) if id_ >= 1e9 else str(id_)
+        sheet.save(os.path.join(OUT, 'sheet_%s.jpg' % name), quality=82)
+        print('level', name, [list(q) for q in pts])
     print('errors', T.real(errs)[:5])
     b.close()

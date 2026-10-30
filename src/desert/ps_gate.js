@@ -53,8 +53,17 @@ function psgHaunt(C,list){for(const [k,name,x,y,a,b] of list){if(!C.isOpen(x,y))
 function psgDim(names,filter){for(const n of names){const k=pspPic(n),im=IMG[k];if(!im||!im.width||im._psdim)continue;
   try{const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.filter=filter;x.drawImage(im,0,0);c._psdim=1;IMG[k]=c}catch(e){}}}
 const PSG_ALC=['alcove_empty','alcove_knight','alcove_weeper','alcove_monk','alcove_maiden'];
-/* the same turning down for a raw picture key (the shared chest, the barrels) */
-function psgDimKey(keys,filter){for(const k of keys){const im=IMG[k];if(!im||!im.width||im._psdim)continue;try{const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.filter=filter;x.drawImage(im,0,0);c._psdim=1;IMG[k]=c}catch(e){}}}
+/* the same turning down for a raw picture key that the rest of the game shares (the chest, the barrels, the crates, the sacks): the shared IMG is left alone; the castle copy is
+   swapped in only while the party is in a Pale Spire level (spriteList below), so Wenlock, Sale and the rest keep their own colours. Potions on the castle floor are toned the same way. */
+const PSG_DIMK=new Map();
+function psgDimKey(keys,filter){for(const k of keys){const im=IMG[k];if(!im||!im.width||PSG_DIMK.has(k))continue;try{const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.filter=filter;x.drawImage(im,0,0);c._psdim=1;PSG_DIMK.set(k,c)}catch(e){}}}
+const PSG_ITEMK=new Map();
+function psgItemImg(im){if(!im||!im.width)return im;let c=PSG_ITEMK.get(im);if(c)return c;try{c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.filter='saturate(.35) brightness(.8) hue-rotate(-20deg)';x.drawImage(im,0,0)}catch(e){c=im}PSG_ITEMK.set(im,c);return c}
+{const _sl=spriteList;spriteList=function(){const L=_sl.apply(this,arguments);
+  try{if(typeof pspIs==='function'&&pspIs(LEVEL))for(const s of L){
+    if(s.decor){const c=PSG_DIMK.get(s.decor.k);if(c&&s.img&&s.img===IMG[s.decor.k])s.img=c}
+    else if(s.item){const d=ITEMDEF[s.item.k];if(d&&(d.k==='potion'||/potion|mana|elixir/.test(s.item.k)))s.img=psgItemImg(s.img)}}}catch(e){}
+  return L}}
 function psgTone(){psgDim(PSG_ALC.concat(['window_sheeted_a','window_sheeted_b','window_sheeted_c','mirror_haunted_a','mirror_haunted_b','hearth_cold','font','barrels','banner_long_a','banner_long_b']),'brightness(.66) saturate(.5)');psgDimKey(['gy_chest','barrel','crate','sacks'],'saturate(.55) brightness(.82)')}
 /* ---------- small helpers shared by the builders ---------- */
 /* a darkened, green-shifted copy of one of the Wenlock room props (bed, table, rack ...) so that it sits in the black and green castle; cached */
@@ -67,7 +76,7 @@ function psgToned(key,warm){
 function psgProp(C,name,x,y,o,warm){
   o=o||{};const p=typeof WLIN_P!=='undefined'&&WLIN_P[name];if(!p)return null;const key='wl2_'+p[0];if(!IMG[key])return null;
   if(typeof wlinDefringe==='function')try{wlinDefringe(key)}catch(e){}
-  const ratio=(o.h?o.h/p[1]:1)*(o.sc||1),d={block:o.block!==false};if(ratio!==1)d.sc=ratio;const bob=o.bob!==undefined?o.bob:p[3];if(bob)d.bob=bob*ratio;if(o.npc)d.npc=o.npc;
+  const ratio=(o.h?o.h/p[1]:1)*(o.sc||1),d={block:o.block!==false};if(ratio!==1)d.sc=ratio;const bob=o.bob!==undefined?o.bob:p[3];if(bob)d.bob=bob*ratio;if(o.npc)d.npc=o.npc;if(o.wd){d.wd=o.wd;d.block=false}   // a wall piece (a board of shields) hangs flat on the wall
   return C.dec(psgToned(key,warm),x,y,d)}
 /* ---------- the castle view stand-in: until the painted castle_view and castle_view_near arrive (assets/ps), a dark gothic castle on its crag is drawn here, once, straight on. ---------- */
 function psgDrawCastle(W,H,near){
@@ -203,7 +212,7 @@ function psgBuildApproach(info){
       if(i%11===5)C.light(x,bd.y-3,[.35,.9,.5])});   // a cold glow far down in the pit
   });
   /* the Pilgrim Steps: parapets of iron fence down both sides, an arch over the first flight, a lantern post at each foot, nothing on the stair itself */
-  for(const x of [PSG_GRAND[0]-1,PSG_GRAND[1]+1])for(let y=46;y<=50;y++)C.prop(FENCE[(x+y)&1],x,y,{block:false,maxW:1.02});
+  for(const x of [PSG_GRAND[0]-1,PSG_GRAND[1]+1])for(let y=46;y<=50;y++)if(!C.decor.some(d=>d.x===x&&d.y===y&&/iron_fence/.test(String(d.k))))C.prop(FENCE[(x+y)&1],x,y,{block:false,maxW:1.02});   // the pit fence may already stand at the foot
   C.archway(32,48,'arch_high');post(PSG_GRAND[0]-1,51,[1.1,.95,.7]);post(PSG_GRAND[1]+1,51,[1.1,.95,.7]);
   for(let x=35;x<=46;x++)C.prop(FENCE[x&1],x,22,{block:false,maxW:1.02});
     for(let x=6;x<=58;x+=10){if(x>=26&&x<=38)continue;C.dec(T(['gy_dead','ww_crowtree','gy_dead'][(x/10|0)%3]),x,18+((x/5)&3),{block:false,sc:1+hs(x,5,2)*.4})}
@@ -351,7 +360,7 @@ function psgBuildGatehouse(){
   /* the west guardroom: racks, a cold hearth, a table, bunks in their alcove */
   C.prop('hearth_cold',9,12,{block:true});
   
-  P('shields',4,12,{bob:.3});dec('barrel',12,18,{});dec('crate',11,18,{sc:.9});
+  P('shields',4,12,{wd:[-1,0],bob:.6,block:false});dec('barrel',12,18,{});dec('crate',11,18,{sc:.9});
   C.vineWall(4,9,6,9,[0,-1]);C.alcove(10,18,'alcove_empty',[0,1]);
   for(const [x,y] of [[7,13],[11,15],[5,16],[9,17]])C.light(x,y,SI);C.light(5,10,GR);
   pspFoe(C,'psguard',5,13);pspFoe(C,'psguard',11,15);pspFoe(C,'pshalberd',12,12);pspFoe(C,'psarcher',4,16);

@@ -87,7 +87,7 @@ function ntBuildFloor(n){
   for(const pd of ponds){
     for(const [x,y] of pd.cells){decor.push({k:'pstump',x,y,block:true,sc:.0001,wdh:1,fplWater:1,nt:'pond'});occ.add(x+','+y)}
     const st=pd.stand;occ.add(st.x+','+st.y);pondStands.push({x:st.x,y:st.y,dx:st.dx,dy:st.dy});
-    const reeds=['reeds','hgwm_reed0','greeds'].filter(k=>IMG[k]),grass=['pgrass1','pgrass0','gy_web'].filter(k=>IMG[k]);
+    const reeds=['reeds','hgwm_reed0','greeds'].filter(k=>IMG[k]),grass=['pgrass1','pgrass0'].filter(k=>IMG[k]);
     const rim=new Set();for(const [x,y] of pd.cells)for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++){const nx=x+i,ny=y+j;if(open(nx,ny)&&!isWat(nx,ny))rim.add(nx+','+ny)}
     pd.rim=[...rim].map(k=>k.split(',').map(Number));
     for(const [x,y] of pd.rim){const h=hs(x,y,131);if(x===st.x&&y===st.y)continue;if(route.has(x+','+y))continue;
@@ -187,7 +187,11 @@ function ntBuildFloor(n){
    let g=0;for(const [x,y] of spots){if(g>=nG)break;const u=Math.pow(R(),.55),gem=GEMS[Math.min(GEMS.length-1,Math.floor(u*GEMS.length))];items.push({k:'gem_'+gem[0],x,y});occ.add(x+','+y);g++}
    let p=0;for(let i=g;i<spots.length&&p<Math.max(2,Math.round(cells.length/180));i++){const [x,y]=spots[i];if(occ.has(x+','+y))continue;items.push({k:'potion',x,y});occ.add(x+','+y);p++}
    const dress=['gy_bones','gy_web','gy_urn'].filter(k=>IMG[k]);
-   if(dress.length)for(let i=0;i<spots.length;i+=9){const [x,y]=spots[i];if(occ.has(x+','+y))continue;decor.push({k:dress[(hs(x,y,77)*dress.length)|0],x,y,block:false,walk:true,deco:true,sc:.7})}}
+   if(dress.length)for(let i=0;i<spots.length;i+=9){const [x,y]=spots[i];if(occ.has(x+','+y))continue;const k=dress[(hs(x,y,77)*dress.length)|0];
+     if(k==='gy_web'){   // a web hangs on a wall face, never free in the room (the castle rule); none where the square has no wall beside it
+       const wd=NTG_D.find(([dx,dy])=>!open(x+dx,y+dy)&&!isWat(x+dx,y+dy)&&rows[y+dy][x+dx]!==chMap.get(gNic)&&!((x+dx===plan.down.x&&y+dy===plan.down.y)||(x+dx===plan.up.x&&y+dy===plan.up.y)));
+       if(wd)decor.push({k,x,y,pic:1,wd:[wd[0],wd[1]],block:false,walk:true,deco:true,sc:.7,bob:.9});continue}
+     decor.push({k,x,y,block:false,walk:true,deco:true,sc:k==='gy_urn'?.45:.7})}}   // (an urn at .7 stood as tall as the low tower ceiling)
   const fmS=fm.map(r=>r.join(''));
   const fSet=ntFloorSet(n,look),ceil=ntCeil(n,look);
   const L={rows,chars,fmap:fmS,floorSet:fSet,floor:fSet[0],floor2:fSet[1],ceil,ceilH:look.wh,start:{x:plan.down.ix,y:plan.down.iy,f:plan.down.f},enemies,items,decor,lights,portals:[],day:0,amb:look.amb,torchGap:1e9,

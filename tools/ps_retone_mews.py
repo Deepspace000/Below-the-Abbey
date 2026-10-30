@@ -67,3 +67,31 @@ a = defringe(load('p_gardener'))
 a = tone(a, .62, .5, (.95, 1.0, 1.05), keep_hi=252)
 save('p_gardener', a)
 print('retoned gardener')
+
+# the pale guard (c_psguard, painted on the s2a sheet) stood out as a near-white ghost with a magenta fringe in the dark gatehouse: dark slate like the castle, still a little see-through
+a = defringe(load('c_psguard'))
+a = tone(a, .58, .4, (.9, .97, 1.08), keep_hi=256)
+save('c_psguard', a)
+print('retoned c_psguard')
+
+
+def repad_hem(name, pad=.06, fade=.07, seed=3):
+    """the sheet edge cut the hem off flat: put transparent rows under it and let the last rows fray out column by column, so the hem ends in rags, not a straight cut"""
+    a = load(name)
+    h, w = a.shape[:2]
+    rng = np.random.default_rng(seed)
+    f = max(4, int(h * fade))
+    ragged = np.convolve(rng.random(w), np.ones(9) / 9, mode='same')      # 0..1 per column, smooth
+    for i in range(f):
+        y = h - f + i
+        t = (i + 1) / f                                                     # 0 at the top of the band, 1 at the cut
+        keep = np.clip((ragged - t * 1.1 + .45) * 3, 0, 1)
+        a[y, :, 3] *= keep
+    out = np.zeros((h + int(h * pad), w, 4), np.float32)
+    out[:h] = a
+    return out
+
+
+save('c_psmourner', repad_hem('c_psmourner'))
+print('re-padded c_psmourner (its picture is 6% taller now: the manifest px_h and h follow)')
+# (the Weeping Colossus, cut at the thighs on its sheet, was repainted full length instead: python tools/ingest_ps.py <colossus sheet> col1 sprite names=c_pscolossus hs=3.4)

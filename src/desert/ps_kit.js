@@ -218,7 +218,8 @@ function pspPortal(){
   const [C,l,o]=PSP_ARGS(arguments);if(!C||!l||!l.at)return null;
   const style=pspDoorStyle(l,o),base=pspDoorGid(style,C.wh),gid=KH_NEXT_GID++;T_TILE[gid]=T_TILE[base];if(GY.col&&GY.col[base])GY.col[gid]=GY.col[base];
   const land=l.land;
-  KH_DOOR[gid]={get lvl(){return l.to},get at(){return {x:land[0],y:land[1],f:land[2]}},psp:l,lock:l.lock||null,prov:!!l.prov,pspName:(o&&o.name)||l.name};
+  KH_DOOR[gid]={get lvl(){return l.to},get at(){const q=pspLandOf(l);return {x:q[0],y:q[1],f:q[2]}},psp:l,   // a far side not built yet is the small stub room (ps_glue.js): land on its start, not on a square of the planned map
+  lock:l.lock||null,prov:!!l.prov,pspName:(o&&o.name)||l.name};
   C.solid(l.at[0],l.at[1],C.ch(gid));C.used.add(l.at[0]+','+l.at[1]);
   C.reserve(land[0]-1,land[1]-1,land[0]+1,land[1]+1);C.used.delete(land[0]+','+land[1]);
   return gid}

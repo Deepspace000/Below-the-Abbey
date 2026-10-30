@@ -113,7 +113,7 @@ function pcrBuild(info){
     C.rests.push({x0,y0:y,x1:x0+2,y1:y+1,line:'A wayside shrine. A bench, a warm lantern, a loaf and a cup. Nothing hostile comes near.',name:'The Wayside Shrine'});
     C.light(x0+1,y,C.warmCol);
     if(!NPCS[id])khNpc(id,'A pilgrim bench','gy_bench',()=>say('A stone bench under a small shrine of the Pale Mother, with a lantern that does not flicker. The road behind you is long, and the one ahead is longer.',[['Rest a while.',()=>{try{restParty(true)}catch(e){}return null}],['Leave.',()=>null]]));
-    C.dec(T('gy_bench'),x0+1,y+1,{block:true,npc:id,sc:1.1});C.dec(pspPic('lantern_red_a'),x0,y,{block:false});C.dec(pspPic('statue_plinth'),x0+2,y,{block:true})}
+    C.dec(T('gy_bench'),x0+1,y+1,{block:true,npc:id,sc:1.1});C.dec(pspPic('lantern_red_b'),x0,y,{block:false});C.dec(pspPic('statue_plinth'),x0+2,y,{block:true})}
   for(const [x,y] of [[5,39],[9,39],[13,39],[4,45],[14,45]])if(Dq(x,y)>=3&&C.free(x,y))C.dec(pspPic('urn_big'),x,y,{block:true,sc:.9});
   /* the tower forecourt: two lamps, two urns, two gate-posts, a signpost, the gate set into the wall */
   for(const x of [26,34]){lamp(x,8,PCR_GOLD)}C.light(30,5,PCR_GOLD);C.light(29,7,PCR_GOLD);C.light(31,7,PCR_GOLD);
@@ -143,6 +143,10 @@ function pcrBuild(info){
    for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||reach[ix(nx,ny)]||!open(nx,ny)||bs.has(nx+','+ny))continue;reach[ix(nx,ny)]=1;q.push(ix(nx,ny))}}
    for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(open(x,y)&&!reach[ix(x,y)]&&!bs.has(x+','+y)){wallAt(x,y);for(let i=C.decor.length-1;i>=0;i--)if(C.decor[i].x===x&&C.decor[i].y===y)C.decor.splice(i,1);for(let i=C.lights.length-1;i>=0;i--)if(C.lights[i][0]===x&&C.lights[i][1]===y)C.lights.splice(i,1)}}
   psgNoLooseArch(C);psgPost(C,false);
+  /* a tree right beside a walkable square is kept small and pushed back from it: a big canopy on the next square filled the whole view of anyone walking past */
+  {const blk=new Set(C.decor.filter(d=>d.block).map(d=>d.x+','+d.y)),walk=(x,y)=>open(x,y)&&!blk.has(x+','+y);
+   for(const d of C.decor){if(!d.block||!/gy_dead|crowtree|stump|gy_yew/.test(String(d.k)))continue;const nb=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]].filter(([a,b])=>walk(d.x+a,d.y+b));if(!nb.length)continue;
+     const h=NPC_H[d.k]||3,cap=2.0/h;if((d.sc||1)>cap)d.sc=cap;d.ox=Math.max(-.35,Math.min(.35,-nb.reduce((t,q)=>t+q[0],0)*.2));d.oy=Math.max(-.35,Math.min(.35,-nb.reduce((t,q)=>t+q[1],0)*.2))}}
   const lv=C.finish({start:{x:40,y:59,f:0}});
   lv.fogAt=()=>[70,100,112,.02];   // a cold ground mist over the whole road
   lv.mapNames=[{t:'The East Postern',x:40,y:58,k:'place'},{t:'The Bone Field',x:28,y:52,k:'place'},{t:'The Wayside Shrine',x:7,y:42,k:'place'},{t:'The Glade of Crosses',x:37,y:32,k:'place'},{t:'The Leaning Lamps',x:10,y:22,k:'place'},{t:'The Tower Forecourt',x:30,y:10,k:'place'}];

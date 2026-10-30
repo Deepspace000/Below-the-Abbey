@@ -355,7 +355,7 @@
   "file": "urn_big.webp",
   "w": 447,
   "px_h": 475,
-  "h": 1.4,
+  "h": 1.0,
   "kind": "sprite",
   "sheet": "a5"
  },
@@ -1741,8 +1741,8 @@
  "c_psmourner": {
   "file": "c_psmourner.webp",
   "w": 333,
-  "px_h": 436,
-  "h": 2.2,
+  "px_h": 462,
+  "h": 2.33,
   "kind": "sprite",
   "sheet": "g1"
  },
@@ -2252,11 +2252,11 @@
  },
  "c_pscolossus": {
   "file": "c_pscolossus.webp",
-  "w": 548,
-  "px_h": 700,
+  "w": 156,
+  "px_h": 512,
   "h": 3.4,
   "kind": "sprite",
-  "sheet": "g4"
+  "sheet": "col1"
  },
  "c_psthornwarden": {
   "file": "c_psthornwarden.webp",
