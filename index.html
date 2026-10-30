@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.734';
+const VERSION='3.738';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -20056,10 +20056,10 @@ function diffExample(){try{
   return {name:def.name,lv,now,was,hero:HERO_DEF[me.i].name}}catch(err){return null}}
 function diffChange(n){const was=G.flags.diffStep|0;G.flags.diffStep=Math.max(DIFF_MIN,Math.min(DIFF_MAX,was+n));if((G.flags.diffStep|0)!==was){diffApply();msg('Difficulty: '+diffLabel()+'.','#e8d8a0')}}
 function drawGameplay(){
-  BTNS=[];veil(.6);bigPanel(70,10,340,300);
-  txt('GAMEPLAY',240,28,14,'#d8c88e','center',true);
+  BTNS=[];veil(.6);bigPanel(70,4,340,314);
+  txt('GAMEPLAY',240,22,14,'#d8c88e','center',true);
   const on=autoscaleOn();
-  btnText('gp_scale','Autoscaling:  '+(on?'ON':'OFF'),120,42,240,26);
+  btnText('gp_scale','Autoscaling:  '+(on?'ON':'OFF'),80,42,156,26);btnText('gp_adapt','Intelligent adjustment:  '+(G.flags.noAdapt?'OFF':'ON'),244,42,156,26);
   btnText('gp_fog','Fog of war:  '+(G.flags.noFog?'OFF':'ON'),120,72,118,22);btnText('gp_lookx','Look drag: '+(G.flags.lookXNormal?'NORMAL':'INVERT'),242,72,118,22);
   {const st=G.flags.diffStep|0;btnText('gp_dm','-',120,98,44,24);btnText('gp_dp','+',316,98,44,24);txt('Difficulty:  '+diffLabel(),240,114,10,st===0?'#d8c88e':st>0?'#f0a080':'#a8d8a0','center',true);
    {const X=diffExample(),mk=(n,w,u)=>{u=u||'';return n===w?n+u:n+u+' (was '+w+u+')'};
@@ -20075,11 +20075,13 @@ function drawGameplay(){
     'The world is fixed. Every place has its own level, rising by about three for each place the story leads to, and the level of each place is shown on the world map.',
     'Creatures stand at the level of the place (some a little lower, as ever), and the great creatures a few levels above it. If a place is too hard for the party, go elsewhere and come back stronger.'
   ];
-  let y=176;for(const p of lines){for(const l of wrapText(p,300,8.4)){txt(l,240,y,8.4,'#cdbf94','center');y+=11}y+=8}
+  let y=173;for(const p of lines){for(const l of wrapText(p,310,7.6)){txt(l,240,y,7.6,'#cdbf94','center');y+=9.5}y+=4}
   const r=LEVEL_RATING[LEVEL];
-  txt(on?'Autoscaling is on.':(r?'This place is level '+r+'.':'This place has no fixed level.'),240,y+6,9,'#e8c878','center',true);
-  btnText('gp_nums','Bar numbers: '+(G.flags.noBarNums?'OFF':'ON'),78,278,106,24); // the numbers over the health, mana, experience and food bars
-  btnText('gp_back','Back',190,278,100,24);
+  txt(on?'Autoscaling is on.':(r?'This place is level '+r+'.':'This place has no fixed level.'),240,y+4,8.6,'#e8c878','center',true);y+=16;
+  {const ao=!G.flags.noAdapt,at=ao?'Intelligent adjustment is ON. If the party falls four times in a row in one area, the game offers help once a session: an easier game, weaker enemies for 15 minutes, or a 15 minute boost of +5 to STR, DEX and INT. If the party wins fights very fast, the game raises the difficulty a step at a time ("master player detected"). Turn it off to play at exactly the difficulty you set.':'Intelligent adjustment is OFF. The game never offers help and never changes the difficulty by itself: it stays exactly where you set it.';
+   for(const l of wrapText(at,312,7.2)){txt(l,240,y,7.2,ao?'#b8d8a0':'#a89c78','center');y+=9}}
+  btnText('gp_nums','Bar numbers: '+(G.flags.noBarNums?'OFF':'ON'),78,290,106,24); // the numbers over the health, mana, experience and food bars
+  btnText('gp_back','Back',190,290,100,24);
 }
 (function(){const _b=handleBtn;handleBtn=function(id){
   if(G.menu==='gameplay'&&(id==='gp_dm'||id==='gp_dp')){diffChange(id==='gp_dp'?1:-1);return}
@@ -80458,6 +80460,204 @@ function bt2Tidy(L,id){
   BT2.stats[id]=st;return st}
 for(let id=9660;id<=9709;id++){if(!BT2.IDS(id))continue;const o=KH_LAZY[id];if(!o)continue;
   KH_LAZY[id]=function(){const r=o.apply(this,arguments);const L=LEVELS[id];if(L&&L.rows&&L.decor&&!L._bt2){L._bt2=1;try{bt2Tidy(L,id)}catch(e){console.error('bt2 '+id,e)}}return r}}
+
+/* ---- src/desert/cutscenes_more.js ---- */
+/* cutscenes_more.js: the party talks again. Story scenes (the Violet Tower, the end of the Hollow Grasslands, the start and end of the Deeper Hollow maze, the start of the Blighted Lands,
+   the arrival at Sale, at the Pale Spire and at the Never-Ending Tower) and seven light ones in unexpected places. Each plays once (flags in G.flags.cs2), over the new level, the same way
+   as the early cutscenes (CUTS, startCut, speechLines): narration lines have no speaker, hero lines say who (hn(0) the front fighter, hn(1) the thief, hn(2) the mage, hn(3) the priest). */
+const CS2_ARRIVE={
+  460:['orangeEnd','The Foot of the Violet Tower: the end of the Orange Spire'],
+  475:['mazeStart','the start of the Deeper Hollow'],
+  9610:['blightStart','the start of the Blighted Lands'],
+  600:['saleArrive','the arrival at Sale'],
+  9720:['paleArrive','the arrival at the Pale Spire'],
+  449:['funHalfway','floor ten of the Orange Spire'],
+  476:['funBogey','the Underlevel'],
+  9730:['funStatues','the Court of Statues'],
+  9732:['funRavens','the Mews and Stable'],
+  9750:['funKitchen','the Kitchens and Armoury'],
+  9820:['funDoors','the Hall of Illusions']};
+CUTS.orangeEnd=()=>[
+  {text:'The stair from the Orange Spire ends in a small round room. A plaque is set in the wall beside a slow wheel of dark air. A wind comes out of it that smells of wet grass.'},
+  {who:hn(2),text:'Twenty floors, and the wizard\'s last words were about Vance. He served the Pale Sovereign. Every letter we found was written for a master we had never heard of.'},
+  {who:hn(1),text:'So the man who sent the king\'s men to the abbey was working for the one who blighted the west. It is all one chain.'},
+  {who:hn(3),text:'The wizard said good will opens the door. I hope it keeps opening them.'},
+  {who:hn(0),text:'Then we follow the chain. Through the portal.'}];
+CUTS.hgEnd=()=>[
+  {text:'The grass is quiet. The hives are cleared, the villagers are free, and the four books lie in the bag. The frog-folk have come out of their houses to see the party go.'},
+  {who:hn(3),text:'They are thanking us in their own tongue, and now we understand every word.'},
+  {who:hn(2),text:'Aldous Wend was right. The corruption comes up from below. The Child-King\'s rot is seeping through from the deeper lands.'},
+  {who:hn(1),text:'And a whale is going to carry us down to a maze. I have had better plans.'},
+  {who:hn(0),text:'It is a way down. Bulb, take us.'},
+  {text:'The great whale opens the old gate in the water, and the party slips down into the dark.'}];
+CUTS.mazeStart=()=>[
+  {text:'The whale leaves them at the foot of a hedge. Beyond it, corridors one square wide run away in every direction, climbing through hedge, stone, honeycomb, shell and sandstone as far as the eye can see.'},
+  {who:hn(1),text:'A maze of one-square corridors. I hate it already.'},
+  {who:hn(2),text:'Two hundred squares across, by the surveyors\' count. Eight towns hide inside it, each with a church. Madam Voss walks it for a living.'},
+  {who:hn(0),text:'Then we go up. The corruption comes from the great room at the top.'},
+  {who:hn(3),text:'Keep close, all of you. In a maze, whoever loses the others loses everything.'}];
+CUTS.mazeEnd=()=>[
+  {text:'The Hollowed Warden folds into the ground like cut hedge. The walls stop shaking. Far off a low hum rises and fades, and the air tastes cleaner.'},
+  {who:hn(2),text:'The corruption had a root, and the root was a gardener. The hedge grew round him until nothing of him was left.'},
+  {who:hn(3),text:'Rest now, poor man. You were only the first thing it spoiled.'},
+  {who:hn(1),text:'Twelve ladders down to a black sea, burning spheres, and a Bogeyman. The maze is not finished with us.'},
+  {who:hn(0),text:'It is finished with the Warden. We finish this, and then we go west.'}];
+CUTS.blightStart=()=>[
+  {text:'West of Wenlock the Road Wardens\' gate has stood shut for years. The party passes it with the three seals, and the air changes. The grass is grey and the hedges are dead. A crow sits on the toll house roof and does not fly.'},
+  {who:hn(1),text:'Even the weeds look sick. Nothing here has been green in years.'},
+  {who:hn(2),text:'The Sovereign\'s mark on the seals is the same mark burned into these gateposts. The blight started at this gate.'},
+  {who:hn(3),text:'I can feel the dead on the road ahead. They are not resting. They are walking.'},
+  {who:hn(0),text:'The road runs west to a town called Sale. Wren and Aldous went this way. We follow.'}];
+CUTS.saleArrive=()=>[
+  {text:'Sale is a town of grey stone and black timber, packed tight behind a wall. Pale lamps burn in the windows. The people in the street are very quiet, and none of them casts a warm shadow.'},
+  {who:hn(1),text:'Every shop is barricaded. The shutters are nailed down. Someone here has been living on fear.'},
+  {who:hn(3),text:'These are the dead, and they are not hostile. They look afraid of the same things we are.'},
+  {who:hn(2),text:'Wren and Aldous came to shelter here. And somewhere in this town is the way into the Pale Lands.'},
+  {who:hn(0),text:'Then we earn each shopkeeper\'s trust, one by one, and we find them.'}];
+CUTS.paleArrive=()=>[
+  {text:'Beyond the west gate of Sale the world ends in mist, and a road climbs out of it. At the top, black against a pale sky, stands the Pale Spire: tower on tower, window on window, all of it looking down.'},
+  {who:hn(2),text:'That is the Sovereign\'s house. I can feel the silver in the stone from here.'},
+  {who:hn(1),text:'It is enormous. I would like someone to tell me which door the rats use.'},
+  {who:hn(3),text:'Everything that was taken from the west is somewhere inside it.'},
+  {who:hn(0),text:'We climb it to the top and finish this. Weapons ready.'}];
+CUTS.neverStart=()=>[
+  {text:'A tall crooked tower stands alone in the dead wood, leaning as if the wind had pushed it for a thousand years. Its door is open. Torchlight shows a stair going up, and a second stair beyond it, and the sound of a great many stairs above that.'},
+  {who:hn(0),text:'A tower with no top. Nobody told us about this one.'},
+  {who:hn(2),text:'Each floor is built from its number alone. There is no last floor.'},
+  {who:hn(1),text:'So the climb never ends, and every floor has new things that want to kill us. And treasure.'},
+  {who:hn(3),text:'There is a stone on every floor to bring us home. We can come and go as we like.'}];
+CUTS.funHalfway=()=>[
+  {text:'Floor ten of the Orange Spire. The stairs are narrow and the walls are the colour of old marmalade. The party stops on the landing to catch its breath.'},
+  {who:hn(1),text:'Ten floors. Ten more to go. Are we there yet?'},
+  {who:hn(0),text:'Ask again and I leave you on this landing.'},
+  {who:hn(2),text:'Statistically we are exactly halfway. I counted the steps. Then I lost count at four hundred.'},
+  {who:hn(3),text:'I will say a small prayer for my knees.'}];
+CUTS.funBogey=()=>[
+  {text:'The ladder ends in a very dark room. Somewhere in the dark, water laps against a shore. Something with a lot of teeth makes a low, patient noise.'},
+  {who:hn(1),text:'I was told there is a Bogeyman down here. I assumed that was a story for children.'},
+  {who:hn(3),text:'It is a story for children. The children are how he got so big.'},
+  {who:hn(2),text:'Please do not say its name. Names make it hear us.'},
+  {who:hn(1),text:'Bogeyman. Bogeyman. Bogeyman.'},
+  {who:hn(0),text:'I am going to hit you before it does.'}];
+CUTS.funStatues=()=>[
+  {text:'The Court of Statues. Every lane is lined with stone figures, and every one has been carved to look as if it has only just noticed you.'},
+  {who:hn(1),text:'That one blinked.'},
+  {who:hn(2),text:'Stone does not blink. It is the light.'},
+  {who:hn(1),text:'Then why is that one closer than it was?'},
+  {who:hn(3),text:'Perhaps we should walk as though we are not annoying them.'},
+  {who:hn(0),text:'Nobody turns their back on a statue. And nobody touches the roses.'}];
+CUTS.funRavens=()=>[
+  {text:'The Mews and Stable. Pale ravens sit in a row on their perches and turn their heads together to look at the party. A falconer\'s ghost drifts among the perches. On one perch lies a single white feather.'},
+  {who:hn(1),text:'Good evening, ravens. We are friends. Please do not do the thing.'},
+  {who:hn(2),text:'I believe they are waiting for someone to touch the feather.'},
+  {who:hn(1),text:'I was not going to touch it.'},
+  {who:hn(0),text:'You were already reaching.'},
+  {who:hn(1),text:'I was stretching.'}];
+CUTS.funKitchen=()=>[
+  {text:'The Kitchens and Armoury. Pots hang from every beam. A long table is laid with food that has not been touched for a hundred years, and has not rotted either.'},
+  {who:hn(0),text:'That bread looks fresh.'},
+  {who:hn(3),text:'It is a hundred years old, '+hn(0)+'.'},
+  {who:hn(0),text:'It still looks fresh.'},
+  {who:hn(1),text:'I will not be the one to tell her the cheese is moving.'},
+  {who:hn(2),text:'Everyone keep your hands in your pockets. That includes you, '+hn(0)+'.'}];
+CUTS.funDoors=()=>[
+  {text:'At the top of the Grand Stair is a long hall with seven doors. A pale figure waits by the stair. The air smells faintly of forest, and of the sea, and of snow, all at once.'},
+  {who:hn(1),text:'Seven doors. Seven different smells. I trust none of them.'},
+  {who:hn(2),text:'That is the whole point of an illusion. It is meant to be trusted.'},
+  {who:hn(3),text:'Then let us be polite to it, and keep a hand on our purses.'},
+  {who:hn(0),text:'We open every door, and we hit whatever comes out.'}];
+CUTS.funShop=()=>[
+  {text:'On the seventh floor of the Never-Ending Tower there is a lamp-lit room with a counter, a shelf and a bell. A shopkeeper is dusting a jar, and looks up as though nothing were strange.'},
+  {who:hn(1),text:'There is a shop. In an endless tower. Full of monsters.'},
+  {who:hn(2),text:'The business case is baffling. Who is the customer?'},
+  {who:hn(3),text:'We are. And the keeper clearly knows it.'},
+  {who:hn(0),text:'Buy potions. Do not ask where he gets his supplies.'}];
+function cs2F(){const F=G.flags;return F.cs2||(F.cs2={})}
+/* where the party arrives: the scene plays once, after the level is built and the party stands in it */
+{const _g=goToLevel;goToLevel=function(n,entry){
+  try{
+    // the end of the Hollow Grasslands: before the whale carries the party down into the maze
+    if(n===475&&LEVEL!==475&&G.state==='play'&&!G.cut&&!cs2F().hgEnd&&((LEVEL>=470&&LEVEL<=474)||(typeof hgtAny==='function'&&hgtAny(LEVEL)))){cs2F().hgEnd=1;const a=arguments,self=this;startCut('hgEnd',()=>goToLevel.apply(self,a));return}
+  }catch(e){console.error('cs2 hgEnd',e)}
+  const r=_g.apply(this,arguments);
+  try{
+    if(G.state==='play'&&!G.cut&&LEVEL===n){
+      const F=cs2F(),a=CS2_ARRIVE[n];
+      if(a&&!F[a[0]]){F[a[0]]=1;startCut(a[0])}
+      else if(typeof ntIs==='function'&&ntIs(n)){
+        if(typeof NT!=='undefined'&&n===NT.BASE&&!F.neverStart){F.neverStart=1;startCut('neverStart')}
+        else if(typeof ntFloorOf==='function'&&ntFloorOf(n)===7&&!F.funShop){F.funShop=1;startCut('funShop')}}}
+  }catch(e){console.error('cs2 arrive',e)}
+  return r}}
+/* the end of the Deeper Hollow maze: when the Hollowed Warden at the top falls */
+{const _h=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;const r=_h.apply(this,arguments);
+  try{if(was&&e.hp<=0&&e.t==='hgdwarden'&&!cs2F().mazeEnd){cs2F().mazeEnd=1;later(1200,()=>{if(!G.cut)startCut('mazeEnd')})}}catch(x){console.error('cs2 warden',x)}
+  return r}}
+
+/* ---- src/desert/adapt.js ---- */
+/* ==========================================================================
+   INTELLIGENT ADJUSTMENT (Menu > Gameplay, on by default). The game watches how the party is doing and helps either way:
+   1. (Once per play session.) If the party falls four times in a row in the same area (without winning five fights in between), the death screen offers help: make the game a bit easier for good
+      (difficulty 30 percent lower), weaker enemies for 15 minutes (difficulty 50 percent lower for a while, then back), or a 15 minute boost of +5 to strength, dexterity and intelligence.
+   2. If the party wins fights very fast (eight quick wins in a row: each enemy dead within two rounds, enemies not far below the party's level), the game puts the difficulty up one step
+      (10 percent) and says "master player detected, putting difficulty up. ;)". If the wins stay that fast, it goes up another step, and so on (never more than 12 steps in all).
+   Turn it off in Menu > Gameplay to play at exactly the difficulty that is set. State is kept in G.flags.ada (saved with the game); the death count and the fast-win count live only in the session.
+   ========================================================================== */
+const ADA={deaths:0,lastLv:-1,killsSince:0,counted:false,offer:false,shown:false,fast:0,boostRounds:0};
+const adaOn=()=>!(G.flags&&G.flags.noAdapt);
+function adaF(){return G.flags.ada||(G.flags.ada={up:0,boostLeft:0,boostOn:0,lowLeft:0,lowDelta:0})}
+function adaAvgLvl(){const a=G.heroes.filter(h=>h.alive);return a.length?a.reduce((s,h)=>s+h.lvl,0)/a.length:1}
+function adaBoost(on){const F=adaF();if(on===!!F.boostOn)return;const d=on?5:-5;for(let i=0;i<G.heroes.length;i++){const h=G.heroes[i];h.str+=d;h.dex+=d;h.int+=d;try{recalcMax(i)}catch(e){}}F.boostOn=on?1:0}
+function adaLow(on){const F=adaF();if(on){const was=G.flags.diffStep|0,n=Math.max(DIFF_MIN,was-5);F.lowDelta=was-n;G.flags.diffStep=n}else{const was=G.flags.diffStep|0;G.flags.diffStep=Math.min(DIFF_MAX,was+(F.lowDelta|0));F.lowDelta=0}try{diffApply()}catch(e){}}
+function adaTick(dt){
+  if(G.state==='dead'){
+    if(!ADA.counted){ADA.counted=true;
+      if(adaOn()){ADA.deaths=(ADA.lastLv===LEVEL||ADA.lastLv===-1)?ADA.deaths+1:1;ADA.lastLv=LEVEL;ADA.killsSince=0;ADA.fast=0;
+        if(ADA.deaths>=4){ADA.deaths=0;if(!ADA.shown){ADA.shown=true;ADA.offer=true}}}}   // the offer appears once a play session, so it never nags
+  }else{ADA.counted=false;if(ADA.offer&&G.state!=='dead')ADA.offer=false}
+  if(G.state==='play'&&G.flags&&G.flags.ada){const F=G.flags.ada;
+    if(F.boostOn){F.boostLeft-=dt;if(F.boostLeft<=0){adaBoost(false);msg('The boost wears off. Your stats are back to normal.','#c8c8e8')}}
+    if(F.lowDelta){F.lowLeft-=dt;if(F.lowLeft<=0){adaLow(false);msg('The enemies of this area are back to their normal strength.','#c8c8e8')}}}
+}
+{const _u=update;update=function(dt){const r=_u.apply(this,arguments);try{adaTick(dt||.016)}catch(e){console.error('adapt',e)}return r}}
+/* fast wins: how many rounds each enemy took to kill */
+{const _h=hurtEnemy;hurtEnemy=function(e,dmg){
+  const was=e&&e.hp>0;if(was&&e._ada0===undefined)e._ada0=G.rounds;
+  const r=_h.apply(this,arguments);
+  try{if(was&&e.hp<=0&&adaOn()&&G.state==='play'){
+    ADA.killsSince++;if(ADA.killsSince>=5)ADA.deaths=0;   // five wins after a fall and the string of falls is broken
+    const lv=e.lvl||LEVEL_RATING[LEVEL]||0,dur=G.rounds-(e._ada0===undefined?G.rounds:e._ada0);
+    if(lv>=adaAvgLvl()-8&&!(ENEMY_DEF[e.t]&&ENEMY_DEF[e.t].boss&&dur>=3)){
+      if(dur<=1)ADA.fast++;else if(dur>=4)ADA.fast=Math.max(0,ADA.fast-2);
+      const F=adaF();
+      if(ADA.fast>=8&&F.up<12&&(G.flags.diffStep|0)<DIFF_MAX){ADA.fast=0;F.up++;diffChange(1);msg('master player detected, putting difficulty up. ;)','#ffd870')}}}}catch(x){console.error('adapt kill',x)}
+  return r}}
+/* the offer on the death screen */
+function adaWrap(t,w,s){return wrapText(t,w,s)}
+{const _d=drawEnd;drawEnd=function(win){
+  if(win||!ADA.offer)return _d.apply(this,arguments);
+  BTNS=[];veil(.78);bigPanel(50,26,380,268);
+  ctx.save();ctx.font='20px '+FTITLE;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='#000';ctx.strokeText('The Party Has Fallen Again',240,52);ctx.fillStyle='#ff9a8a';ctx.fillText('The Party Has Fallen Again',240,52);ctx.restore();
+  txt('Would you like a bit of help in this area?',240,78,11,'#e8d8a0','center',true);
+  const lines=['You have fallen four times in a row here. You can keep trying as you are, or pick one of these. You can change the difficulty at any time in Menu > Gameplay, and turn Intelligent adjustment off there.'];
+  let y=96;for(const p of lines)for(const l of adaWrap(p,330,8.4)){txt(l,240,y,8.4,'#cdbf94','center');y+=11}
+  btnText('ada_ease','Make it a bit easier (difficulty -30%)',80,y+8,320,26);
+  btnText('ada_low','Play at a lower level for 15 minutes',80,y+40,320,26);
+  btnText('ada_boost','15 minute boost: +5 to STR, DEX and INT',80,y+72,320,26);
+  btnText('ada_no','No thanks, I will carry on',80,y+112,320,26);
+  txt('Easier and the 15 minute help are saved with your game.',240,y+150,7.6,'#a89c78','center')}}
+{const _b=handleBtn;handleBtn=function(id){
+  if(G.state==='dead'&&ADA.offer&&/^ada_/.test(id)){
+    const F=adaF();
+    if(id==='ada_ease'){G.flags.diffStep=Math.max(DIFF_MIN,(G.flags.diffStep|0)-3);try{diffApply()}catch(e){}msg('Difficulty: '+diffLabel()+'. You can change it in Menu > Gameplay.','#a8d8a0')}
+    else if(id==='ada_low'){if(!F.lowDelta)adaLow(true);F.lowLeft=900;msg('For the next 15 minutes the enemies here are about half as hard.','#a8d8a0')}
+    else if(id==='ada_boost'){adaBoost(true);F.boostLeft=900;msg('A 15 minute boost: +5 to strength, dexterity and intelligence.','#a8d8a0')}
+    ADA.offer=false;ADA.deaths=0;ADA.killsSince=0;sfx('equip');return}
+  if(G.menu==='gameplay'&&id==='gp_adapt'){G.flags.noAdapt=G.flags.noAdapt?0:1;
+    if(G.flags.noAdapt)msg('Intelligent adjustment is OFF. The difficulty stays exactly where you set it.','#e8d8a0');
+    else{msg('Intelligent adjustment is ON. If the party falls four times in a row in one area, the game offers help (an easier game, weaker enemies for 15 minutes, or a 15 minute +5 boost to STR, DEX and INT).','#e8d8a0');msg('If the party wins fights very fast, the game raises the difficulty one step at a time ("master player detected"). Turn it off here to stop both.','#e8d8a0')}
+    return}
+  return _b.apply(this,arguments)}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
