@@ -174,3 +174,21 @@ HGW4.fishMin=2.6;
         L.decor.push({k:'hgt_hanglamp',x,y,block:false,walk:true,deco:true,sc:1,cl:1});L.lights=L.lights||[];L.lights.push([x,y]);HGDPC.lights.push({x,y,col:[1,.78,.45],kI:.95,r2:64});n++}}}
   catch(e){console.error('hgr4 lights',e)}
   return r}}
+/* ---------- the castle standard (the tidy pass of wenlock_polish.js, wlTidy), run last on the finished maze and the Underlevel ----------
+   475: the set-piece props and items that later passes walled in step back out against their wall; wall decals and notes that were left on solid squares, on open
+   water or on a face already taken move to a real wall face; the Unfinished Arch, a doorway standing in the air at the end of a dead end, is taken away (the mason's cart and barrel stay).
+   476: the Messenger's five letters and the hooks are on real walls. The huts of the maze villages are cut to their feet so that they stand on the ground. */
+{const _b=hgdBuild;hgdBuild=function(){const r=_b.apply(this,arguments);const L=LEVELS[HGD.ID];
+  if(L&&L.decor&&!L._wlt)try{for(let i=0;i<8;i++)wlTrimFoot('icn_hgdi_hut'+i);wlTidy(L,{id:HGD.ID,only:[1,3,6],arches:'remove'})}catch(e){console.error('hgd tidy',e)}
+  return r}}
+{const _b=hgduBuild;hgduBuild=function(){const r=_b.apply(this,arguments);const L=LEVELS[HGDU.ID];
+  if(L&&L.decor&&!L._wlt)try{wlTidy(L,{id:HGDU.ID,only:[1,3]})}catch(e){console.error('hgdu tidy',e)}
+  return r}}
+/* the fishing places (fishing_places.js) open some lake walls into water when the maze is first loaded: the pictures on those walls are hung again on real walls,
+   before the level's pieces are read (the fishing pass is run first here, it runs once) */
+{const _ll=loadLevel;loadLevel=function(n){
+  if(n===HGD.ID){const L=LEVELS[n];if(L&&L._wlt&&!L._wltAgain)try{if(typeof fplPrep==='function')fplPrep(n);wlTidy(L,{id:n,only:[3],again:1})}catch(e){console.error('hgd tidy on load',e)}}
+  return _ll.apply(this,arguments)}}
+{const _b=hgdwBuild;hgdwBuild=function(){const r=_b.apply(this,arguments);const L=LEVELS[HGDW.ID];
+  if(L&&L.decor&&!L._wlt)try{wlTidy(L,{id:HGDW.ID,only:[0]})}catch(e){console.error('hgdw tidy',e)}   // the Drowned Maze: pairs of pieces keep their offsets
+  return r}}

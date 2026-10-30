@@ -86,6 +86,7 @@ function wldMake(){
   const R=khRoom(b,WLD.ID,{to:WL.ID,x:WLD.front[0],y:WLD.front[1],f:2});
   const L=R.level;
   L.rows=WLD_MAZE.map(r=>r.replace(/#/g,'w'));L.start={x:7,y:13,f:0};L.ceil='tomb';L.diff=80;L.noTele=true;
+  try{wlTidy(L,{id:WLD.ID})}catch(e){console.error('wlTidy den',e)}   // the webs hang flat in real corners (wenlock_polish.js)
   LEVELS[WLD.ID]=L;LEVEL_NAMES[WLD.ID]="Old Bracken's Den";LEVEL_RATING[WLD.ID]=80;
   return L;
 }

@@ -39,6 +39,7 @@ function gyAvenueBuild(){
   const names=[{t:'The Hall of the Avenue',x:15,y:9,k:'place'}];vaults.forEach((v,i)=>names.push({t:'Vault '+(i+1),x:v.x0+2,y:v.mid,k:'place'}));
   const L={rows,chars,fmap:fm,floorSet:gyCryptFloors(),floor:gyCryptFloors()[3],ceil:'gyc_crypt',ceilH:WH+1,start:{x:GY_AV.start.x,y:GY_AV.start.y,f:GY_AV.start.f},enemies,items:[],decor,lights,portals:[],day:0,amb:.05,torchGap:1e9,noTele:true,noExtras:true,
     name:GY.NAMES[542],label:GY.NAMES[542],diff:85,mapNames:names,_gy:{kind:'crypt',lcol}};
+  try{wlTidy(L,{id:GY_AV.ID})}catch(e){console.error('wlTidy avenue',e)}   // webs flat in real corners, pictures on real walls (wenlock_polish.js)
   LEVELS[GY_AV.ID]=L;LEVEL_NAMES[GY_AV.ID]=GY.NAMES[542];LEVEL_RATING[GY_AV.ID]=85;
   return L}
 KH_LAZY[GY_AV.ID]=gyAvenueBuild;

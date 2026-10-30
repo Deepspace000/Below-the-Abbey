@@ -185,6 +185,7 @@ function gyMazeBuild(k){
   const arr={x:sr.x0,y:ex.y,f:1};
   const L={rows,chars,fmap:fm,floorSet:fSet,floor:fb0,floor2:fb1,ceil:spec.ceil,ceilH:GYM.WH,start:arr,enemies,items,decor,lights,portals:[],day:0,amb:0,torchGap:1e9,noTele:true,noExtras:true,
     name:spec.name,label:spec.name,diff:84+k,mapNames:names,_gy:{kind:'maze',k,M,Q,lcol,niches:NICHES,ground:(()=>{const c=GYMP.ground[spec.floor],o={};for(const f of '012345')o[f]=c;return o})(),seed:M.seed,exit:ex,torches,torch:spec.torch}};
+  try{wlTidy(L,{id:id})}catch(e){console.error('wlTidy maze',e)}   // webs flat in real corners, pictures on real walls (wenlock_polish.js)
   LEVELS[id]=L;
   gyMazeCheck(k,L);
   return L}

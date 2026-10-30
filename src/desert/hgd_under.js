@@ -21,7 +21,10 @@ function hgduArt(){for(const [id,,img] of HGDU_KINDS){const src=IMG[img];if(IMG[
   for(let k=0;k<p.length;k+=4){const r=p[k],g=p[k+1],b=p[k+2];if(p[k+3]>40&&r>120&&g<110&&b<110&&r>g*1.7){p[k]=255;p[k+1]=Math.min(70,g);p[k+2]=Math.min(60,b);q[k]=255;q[k+1]=30;q[k+2]=20;q[k+3]=255}else{p[k]*=.32;p[k+1]*=.3;p[k+2]*=.3}}
   x.putImageData(d,0,0);ex.putImageData(ed,0,0);
   x.save();x.globalCompositeOperation='lighter';x.filter='blur('+Math.max(3,c.width/55)+'px)';x.globalAlpha=.9;x.drawImage(eye,0,0);x.filter='blur('+Math.max(8,c.width/22)+'px)';x.globalAlpha=.55;x.drawImage(eye,0,0);x.restore();
-  IMG['hgu_'+id]=c}catch(e){console.error('hgduArt',e)}}}
+  IMG['hgu_'+id]=c;try{wlTrimFoot('hgu_'+id)}catch(e){}}catch(e){console.error('hgduArt',e)}}}   // cut to the feet, so that nothing walks a little above the floor
+/* the fight window: a creature is drawn at most about .8 of a wall high (fitScale), but never smaller than .3 of its painted size, so the tall thin pictures of the slimes,
+   horrors and demon-insects came out taller than the window and lost their heads. Their size in squares is capped so that the fit always brings them inside it. */
+{const _fs=fitScale;fitScale=function(t,def,base){if(base&&base.width&&def&&/^(hgusl|hguyk|hgdemon)\d$/.test(t)){const mx=2.6*base.width/base.height;if(def.w>mx)def.w=Math.round(mx*1000)/1000}return _fs.apply(this,arguments)}}
 // what the bites leave behind
 AFFL_HITS.push([/^hgusl/,'poisoned',.22],[/^hguyk/,'bleeding',.22],[/^hguyk[35]/,'fever',.14],[/^hgusl[37]/,'stung',.2],[/^hgu/,'shaken',.1],[/^hgu/,'graverot',.07]);
 {const _aa=afflArea;afflArea=function(n,L){const r=_aa.apply(this,arguments);if(n===HGDU.ID){r.msgText='The air is close and sour, and something is clicking in the walls. You cannot see more than a step.'}return r}} // only a line of text on arrival: the party is no longer afflicted with nobody near (it used to roll tomblung, shaken, fleas and fever at every arrival; the bites of the creatures still leave afflictions)

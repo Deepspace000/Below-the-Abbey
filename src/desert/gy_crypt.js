@@ -47,6 +47,7 @@ function gyCryptBuild(){
   const fm=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=(open(x,y)&&(x>=10&&x<=14&&y<=3))?'3':'3';fm.push(s)}
   const L={rows,chars,fmap:fm,floorSet:gyCryptFloors(),floor:gyCryptFloors()[3],ceil:'gyc_crypt',ceilH:WH+1,start:{x:GY_C.start.x,y:GY_C.start.y,f:GY_C.start.f},enemies:[],items:[],decor,lights,portals:[],day:0,amb:.04,torchGap:1e9,noTele:true,noExtras:true,
     name:GY.NAMES[531],label:GY.NAMES[531],diff:84,mapNames:names,peaceful:true,_gy:{kind:'crypt',lcol}};
+  try{wlTidy(L,{id:GY.CRYPT})}catch(e){console.error('wlTidy crypt',e)}   // webs flat in real corners, pictures on real walls (wenlock_polish.js)
   LEVELS[GY.CRYPT]=L;
   return L}
 KH_LAZY[GY.CRYPT]=gyCryptBuild;

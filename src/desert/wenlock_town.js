@@ -159,7 +159,7 @@ function wlBuild(){
   // the lych-gate to the Maze of Gardens at the east end, and the road west
   {const gh=2.5,gate=TM.make('gate','wlgrey',gh,'kh_ohwall1_5');T_DOORS.wlgate=gate.tex;const gc=pch(1),pil=ch(TM.make('plain','wlgrey',gh).gid);
     solid(97,WL_Y-1,pil);solid(97,WL_Y+1,pil);rows[WL_Y][97]=gc;block[WL_Y*W+97]=0;
-    lv.portals[1]={to:WK.GARDEN,x:2,y:2,f:0,tex:'wlgate'};   // the real place is looked up when the door is opened (WK.GBACK)
+    lv.portals[1]={to:WK.GARDEN,get x(){return (WK.GBACK||{x:45}).x},get y(){return (WK.GBACK||{y:3}).y},get f(){return (WK.GBACK||{f:2}).f},set x(v){},set y(v){},set f(v){},tex:'wlgate'};   // the place by the garden's gate (WK.GBACK, 45,3 facing south), looked up again when the door is opened
     sky.push({x:97.5,y:WL_Y+.5,k:A('roof1_5','kh_ohroof1_0')||'kh_ohroof1_0',w:3.6,z:gh-.03});
     const gw=TM.make('gate','wlgrey',gh,'kh_ohwall1_5');T_DOORS.wlgate2=gw.tex;const wc=pch(2);solid(2,WL_Y-1,pil);solid(2,WL_Y+1,pil);rows[WL_Y][2]=wc;block[WL_Y*W+2]=0;
     lv.portals[2]={to:WL.ID,x:WK.WSTART.x,y:WL_Y,f:3,tex:'wlgate2',req:'wlNeverOpen',lock:'A signpost beside the gate reads: TO THE WESTERN KINGDOMS. Beneath it, in smaller letters: (not yet open). The gate is shut, and the road beyond it is blocked by a very large and very sleepy ox.'};
@@ -314,6 +314,7 @@ function wlBuild(){
   if(typeof WL_MAPX!=='undefined')lv.mapNames.push(...WL_MAPX);
   {for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=chars[rows[y][x]];if(c>=30&&c<100)block[y*W+x]=0}} // a gate is not a rock face
   WL.houses=houses;WL.brook=brook;WL.street=street;
+  try{wlTidy(lv,{id:WL.ID,town:1,only:[3],keys:/^sign_wlnote$/,doorOk:1,solid:(x,y)=>!!block[y*W+x]})}catch(e){console.error('wlTidy town',e)}   // the notices are pinned to real walls once every building stands (wenlock_polish.js)
   LEVELS[WL.ID]=lv;LEVEL_NAMES[WL.ID]='Wenlock';
   {const T=yarTerrain(W,H,hgt,rk,block);TERRS[WL.ID]=T}
   return true;

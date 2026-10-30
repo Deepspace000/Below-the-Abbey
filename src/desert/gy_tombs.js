@@ -53,6 +53,7 @@ function gyTombBuild(id){
   const fm=[];for(let y=0;y<H;y++)fm.push('3'.repeat(W));
   const L={rows,chars,fmap:fm,floorSet:gyCryptFloors(),floor:gyCryptFloors()[3],ceil:'gyc_crypt',ceilH:WH+1,start:{x:5,y:9,f:0},enemies:[],items:[],decor,lights,portals:[],day:0,amb:.05,torchGap:1e9,noTele:true,noExtras:true,
     name:GY_TOMB_NAMES[id],label:GY_TOMB_NAMES[id],diff:84,mapNames:[{t:GY_TOMB_NAMES[id],x:5,y:5,k:'place'}],peaceful:true,_gy:{kind:'crypt',lcol}};
+  try{wlTidy(L,{id:id})}catch(e){console.error('wlTidy tomb',e)}   // webs flat in real corners, pictures on real walls (wenlock_polish.js)
   LEVELS[id]=L;LEVEL_NAMES[id]=GY_TOMB_NAMES[id];LEVEL_RATING[id]=84;
   return L}
 for(const id of [536,537,538,539,540,541])KH_LAZY[id]=((i)=>()=>gyTombBuild(i))(id);
