@@ -77955,6 +77955,9 @@ function f2TexFloor(key,out,g,tn){if(FLOORS[out])return out;const im=IMG[key];if
   for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,s[i]*(g||1)*(tn?tn[0]:1));d[i+1]=Math.min(255,s[i+1]*(g||1)*(tn?tn[1]:1));d[i+2]=Math.min(255,s[i+2]*(g||1)*(tn?tn[2]:1));d[i+3]=255}FLOORS[out]=d;return out}catch(e){return null}}
 /* the re-toned creatures exist as soon as the castle's pictures are in (a fight or a test may meet them before any room is built) */
 {const _pp=pspPics;pspPics=function(){const r=_pp.apply(this,arguments);try{F2.art=0;f2Art()}catch(e){console.error('f2Art',e)}return r}}
+/* the jump links ?town=illusion1 to illusion7 (PSP.JUMPS): the engine's town filter keeps digits only for palespire and blight names, so illusionN is passed on as palespire2N */
+for(let n=1;n<=7;n++)if(PSP.JUMPS['illusion'+n])PSP.JUMPS['palespire2'+n]=PSP.JUMPS['illusion'+n];
+{const _j=jumpFromUrl;jumpFromUrl=function(){try{const q=new URLSearchParams(location.search),m=/^illusion([1-7])$/.exec((q.get('town')||'').toLowerCase());if(m){q.set('town','palespire2'+m[1]);history.replaceState(null,'',location.pathname+'?'+q.toString()+location.hash)}}catch(e){}return _j.apply(this,arguments)}}
 /* the in-map doors (C.warp) */
 function f2MoveTo(a){G.talk=null;G.P.x=a[0];G.P.y=a[1];G.P.f=a[2];G.P.angT=(a[2]-1)*Math.PI/2;G.C={x:a[0],y:a[1],a:G.P.angT};try{reveal()}catch(e){}}
 {const _k=khBump;khBump=function(nx,ny,g){const d=KH_DOOR[g];
