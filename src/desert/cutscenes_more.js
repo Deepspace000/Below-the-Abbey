@@ -97,7 +97,7 @@ CUTS.funKitchen=()=>[
   {who:hn(1),text:'I will not be the one to tell her the cheese is moving.'},
   {who:hn(2),text:'Everyone keep your hands in your pockets. That includes you, '+hn(0)+'.'}];
 CUTS.funDoors=()=>[
-  {text:'At the top of the Grand Stair is a long hall with seven doors. A pale figure waits by the stair. The air smells faintly of forest, and of the sea, and of snow, all at once.'},
+  {text:'At the top of the Grand Stair is a long hall with seven doors. An old man in a silver robe stands straight ahead, holding up a lantern, as if he has been waiting there a very long time. The air smells of forest, and of the sea, and of snow, all at once.'},
   {who:hn(1),text:'Seven doors. Seven different smells. I trust none of them.'},
   {who:hn(2),text:'That is the whole point of an illusion. It is meant to be trusted.'},
   {who:hn(3),text:'Then let us be polite to it, and keep a hand on our purses.'},
