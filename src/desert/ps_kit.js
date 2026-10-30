@@ -106,6 +106,8 @@ function pspFloor(name){
     case 'cobble':tone('gyf_cobble',.6,[.64,.76,.88]);if(FLOORS[out]&&FLOORS.gyf_cobble)gyFloorWet(out+'w',out,[.4,.56,.72],17);break;
     case 'dirt':tone('gyf_dirt',.5,[.66,.74,.7]);break;
     case 'lawn':tone('gyf_grass',.5,[.66,.82,.78]);break;
+    case 'deadgrass':tone('gyf_grass',.3,[.66,.66,.58]);break;   // the Crooked Road: grey-brown dead grass
+    case 'trackdirt':tone('gyf_dirt',.36,[.6,.62,.6]);break;      // the worn shoulder of the road
     case 'wet':{tone('gyf_flag',.34,[.58,.74,.9]);const w=gyFloorWet(out+'x',out,[.36,.54,.74],23);if(FLOORS[w])FLOORS[out]=FLOORS[w]}break;
     case 'straw':{tone('gyf_flag',.5,[.88,.9,1.02]);const d=new Uint8ClampedArray(FLOORS[out]);for(let n=0;n<420;n++){const x0=(hs(n,1,31)*N)|0,y0=(hs(n,2,31)*N)|0,len=6+((hs(n,3,31)*14)|0),a=hs(n,4,31)*6.28,c=hs(n,5,31)<.5?[190,170,96]:[158,138,78];
         for(let t=0;t<len;t++){const px=(x0+Math.cos(a)*t+N)%N|0,py=(y0+Math.sin(a)*t+N)%N|0,o=(py*N+px)*4;d[o]=c[0];d[o+1]=c[1];d[o+2]=c[2]}}FLOORS[out]=d}break;

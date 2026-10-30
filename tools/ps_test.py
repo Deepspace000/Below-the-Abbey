@@ -1,5 +1,5 @@
 """Tests for the Pale Spire (levels 9720 and up), on your OWN server (python -m http.server 8621 from the repo root). Run ONE mode at a time:
-   python tools/ps_test.py [load|links|reach|key|quests|walk|save|dash|shots|all] [level ids for shots]
+   python tools/ps_test.py [load|links|reach|key|quests|walk|save|dest|dash|shots|all] [level ids for shots]
 Env: PS_PORT (default 8621), BTA_CHROME (Chrome path), PS_SHOTS (screenshot folder), PS_LOADWAIT (ms to wait for the art, default 15000)
 load    every built level builds, rows are rectangular, names and ratings agree with PSP.LEVELS, the arrival square is open
 links   every PSP.LINKS entry whose from-level is built: the portal square is a door tile with the same destination, the land square is open with a clear 3 by 3, the twin exists and agrees
@@ -8,6 +8,7 @@ key     the stair doors: each lock:'pskey2' link is an iron door that refuses wi
 quests  every quest psq1 to psq38 that is defined has a title, a giver, a reward, the Pale Lands area, a ring (QRF.T) and a giver mark; lists the undefined ones
 walk    the party walks from the arrival of each built level to each of its door tiles and back through the real rules: G.grid, solid decor (cellBlocked), terrace block cells and, on terraced levels, the step limit (terrStepOK); terraced levels are walked for real with doMove
 save    a game saved in each built level loads again in the same level
+dest    presses every castle door, stair and warp with the real move code: each lands in the intended castle level (or stays, closed); only the 9715 tower gate reaches the Never-Ending Tower; links and Go to area agree
 dash    no em dash in any ps file, the notes or the manifest
 shots   screenshots of each built level (and the ids given)
 """
@@ -231,6 +232,64 @@ def run_save():
         b.close()
 
 
+DEST_JS = """async () => {
+  const o = {bad: [], n: 0, nt: 0, rows: []};
+  const castle = new Set(PSP.LEVELS.map(l => l.id)); const okTo = n => castle.has(n) || n === 600;
+  const ids = PSP.LEVELS.map(l => l.id).filter(id => { if (!LEVELS[id] && KH_LAZY[id]) { try { KH_LAZY[id]() } catch (e) {} } return !!LEVELS[id] });
+  const doors = [];
+  for (const id of ids) { const L = LEVELS[id], R = L.rows;
+    for (let y = 0; y < R.length; y++) for (let x = 0; x < R[y].length; x++) { const gid = L.chars && L.chars[R[y][x]]; if (gid === undefined || !KH_DOOR[gid]) continue; doors.push({id, x, y, gid}) } }
+  const D4 = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+  for (const d of doors) {
+    const door = KH_DOOR[d.gid]; const L = LEVELS[d.id]; let want = null; try { want = door.lvl } catch (e) {}
+    G.state = 'play'; G.talk = null; goToLevel(d.id, {x: L.start.x, y: L.start.y, f: L.start.f});
+    let st = null;
+    for (let f = 0; f < 4 && !st; f++) { const sx = d.x - D4[f][0], sy = d.y - D4[f][1];
+      if (G.grid[sy] && G.grid[sy][sx] === 0 && !G.decor.some(q => q.block && !q.found && q.x === sx && q.y === sy)) st = [sx, sy, f] }
+    if (!st) { o.bad.push('no standing square at ' + d.id + ' ' + d.x + ',' + d.y); continue }
+    G.P = {x: st[0], y: st[1], f: st[2], angT: (st[2] - 1) * Math.PI / 2}; G.C = {x: st[0], y: st[1], a: G.P.angT};
+    doMove(0); await new Promise(r => setTimeout(r, 450)); o.n++;
+    const to = LEVEL, tag = d.id + ' (' + d.x + ',' + d.y + ')';
+    o.rows.push(tag + ' -> ' + to);
+    const gate = d.id === 9715 && want === 1000000000;
+    if (to >= 1000000000) { o.nt++; if (!gate) o.bad.push(tag + ' reaches the Never-Ending Tower and is not the tower gate'); continue }
+    if (gate) { if (to !== 9715) o.bad.push('the tower gate went somewhere odd (' + to + ')'); continue }
+    if (want !== null && want !== undefined) {   // a door with a destination: it is that level, or (far side unbuilt) it stays with a closed message
+      const link = door.psp || door.link; const closed = !!(door.seal || door.lock || (link && (link.prov || link.lock)));   // a sealed, key-locked or not-yet-built far side keeps the party in the level
+      if (!okTo(want)) o.bad.push(tag + ' has an unintended destination ' + want);
+      else if (to !== want && !(closed && to === d.id)) o.bad.push(tag + ' went to ' + to + ', expected ' + want);
+    } else if (to !== d.id) o.bad.push(tag + ' is a warp or secret but left the level (' + to + ')');   // warps, niches, closets, secrets stay in the level
+  }
+  // the gate with the level rule off goes to the tower and the tower's south gate comes back to 9715
+  NT.DEBUG = true; goToLevel(9715, {x: 30, y: 5, f: 0}); G.state = 'play'; G.talk = null; G.P = {x: 30, y: 5, f: 0, angT: -Math.PI / 2}; G.C = {x: 30, y: 5, a: G.P.angT}; doMove(0); await new Promise(r => setTimeout(r, 900));
+  o.gateTo = LEVEL; NT.DEBUG = false;
+  // every castle link of PSP.LINKS: the far side is a castle level (or Sale, or the tower for the gate alone)
+  for (const l of PSP.LINKS) { if (l.to >= 1000000000) { if (!(l.from === 9715 && l.at[0] === 30 && l.at[1] === 4)) o.bad.push('link to the tower from ' + l.from + ' ' + l.at) } else if (!okTo(l.to)) o.bad.push('link ' + l.from + ' -> ' + l.to + ' is not a castle level') }
+  // the teleport network: no castle level belongs to the tower's place on the world map, and the stones of the castle and the tower stay apart
+  for (const id of ids) { const loc = teleLocOf(id); if (loc && loc.k === 'neverending') o.bad.push('teleLocOf(' + id + ') is the Never-Ending Tower') }
+  { const keep = G.flags.teles; G.flags.teles = {9730: 1, 1000000000: 1, 1000000001: 1};
+    for (const loc of WORLD_LOCS) { const lv = teleLevelsAt(loc); if (loc.k === 'neverending' ? lv.some(n => castle.has(n)) : lv.some(n => n >= 1000000000)) o.bad.push('teleLevelsAt(' + loc.k + ') mixes castle and tower stones: ' + lv) }
+    G.flags.teles = keep }
+  // Go to area lists the castle levels only under the Pale Lands heading, and the tower under its own
+  const rows = gotoListRaw(); let head = ''; o.goto = [];
+  for (const r of rows) { if (r.h) { head = r.h; continue } if (castle.has(r.n) && !/Pale Lands/.test(head)) o.bad.push('goto row ' + r.n + ' under ' + head); if (r.n >= 1000000000 && !/Never-Ending/.test(head)) o.bad.push('goto tower row ' + r.n + ' under ' + head) }
+  return o }"""
+
+
+def run_dest():
+    with sync_playwright() as p:
+        b, pg, errs = boot(p)
+        pg.evaluate("async () => { try { await ntLoad() } catch (e) {} for (let i = 0; i < 80 && !NT.ready; i++) await new Promise(r => setTimeout(r, 500)) }")
+        r = pg.evaluate(DEST_JS)
+        for row in r['rows']:
+            print('  ' + row)
+        check('every castle door, stair and warp lands where it should (%d pressed)' % r['n'], not r['bad'], r['bad'])
+        check('only the Crooked Road gate reaches the Never-Ending Tower (%d door tiles did)' % r['nt'], r['nt'] == 0 or r['bad'] == [], r['bad'])
+        check('the tower gate opens on the tower when the level rule is off', r['gateTo'] >= 1000000000, r['gateTo'])
+        check('no page errors', not real(errs), real(errs)[:8])
+        b.close()
+
+
 def run_dash():
     files = glob.glob(os.path.join(ROOT, 'src', 'desert', 'ps_*.js')) + glob.glob(os.path.join(ROOT, 'tools', 'PALE_SPIRE*.md')) + glob.glob(os.path.join(ROOT, 'tools', 'PS_*_NOTES.md')) + glob.glob(os.path.join(ROOT, 'assets', 'ps', '*.json'))
     for f in files:
@@ -251,9 +310,9 @@ def run_shots():
         print('errors', real(errs)[:6]); b.close()
 
 
-modes = {'load': run_load, 'links': run_links, 'reach': run_reach, 'key': run_key, 'quests': run_quests, 'walk': run_walk, 'save': run_save, 'dash': run_dash, 'shots': run_shots}
+modes = {'load': run_load, 'links': run_links, 'reach': run_reach, 'key': run_key, 'quests': run_quests, 'walk': run_walk, 'save': run_save, 'dest': run_dest, 'dash': run_dash, 'shots': run_shots}
 if what == 'all':
-    for m in ('load', 'links', 'reach', 'key', 'quests', 'walk', 'save', 'dash'):
+    for m in ('load', 'links', 'reach', 'key', 'quests', 'walk', 'save', 'dest', 'dash'):
         print('=== ' + m); modes[m]()
 else:
     modes[what]()
