@@ -76,7 +76,7 @@ function drawGameplay(){
   BTNS=[];veil(.6);bigPanel(70,10,340,300);
   txt('GAMEPLAY',240,28,14,'#d8c88e','center',true);
   const on=autoscaleOn();
-  btnText('gp_scale','Autoscaling:  '+(on?'ON':'OFF'),120,42,240,26);
+  btnText('gp_scale','Autoscaling:  '+(on?'ON':'OFF'),80,42,156,26);btnText('gp_adapt','Intelligent adjustment:  '+(G.flags.noAdapt?'OFF':'ON'),244,42,156,26);
   btnText('gp_fog','Fog of war:  '+(G.flags.noFog?'OFF':'ON'),120,72,118,22);btnText('gp_lookx','Look drag: '+(G.flags.lookXNormal?'NORMAL':'INVERT'),242,72,118,22);
   {const st=G.flags.diffStep|0;btnText('gp_dm','-',120,98,44,24);btnText('gp_dp','+',316,98,44,24);txt('Difficulty:  '+diffLabel(),240,114,10,st===0?'#d8c88e':st>0?'#f0a080':'#a8d8a0','center',true);
    {const X=diffExample(),mk=(n,w,u)=>{u=u||'';return n===w?n+u:n+u+' (was '+w+u+')'};
