@@ -183,11 +183,11 @@ function bltRoom(){
     build:C=>{
       const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
       P('bookshelf',2,1,{h:1.1});P('bookshelf',4,1,{h:1.1});P('hearth',9,1,{h:1.3});P('clock',7,1,{h:1.1});
-      P('readdesk',6,3,{h:.85});C.raw('gy_book',6,3,{npc:'blt_ledger',solid:1,deco:false,bob:.38,sc:1});
+      P('readdesk',6,3,{h:.85});C.raw('gy_book',6,3,{npc:'blt_ledger',solid:1,deco:false,hidden:true,sc:1});
       C.raw('gy_skel',7,3,{npc:'blt_deadwarden',solid:1,deco:false,sc:.95});
       C.raw('gy_chest',11,2,{npc:'blt_sealchest',solid:1,deco:false,sc:.9});
-      P('bed',2,6,{h:.8});P('bed',2,7,{h:.8});P('candlerack',4,5,{h:1.0});P('coatrack',11,5,{h:1.0});P('noticeboard',5,1,{h:.9,block:false});
-      P('waterbarrel',11,7,{h:.7});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_bones',8,6,{block:false,sc:.3});C.raw('gy_bones',3,7,{block:false,sc:.3})}})}
+      P('bed',2,6,{h:.8});P('bed',2,7,{h:.8});P('candlerack',4,5,{h:1.0});P('coatrack',11,5,{h:1.0});P('noticeboard',5,1,{h:.7,block:false,free:true,pic:1,wd:[0,-1],bob:.25});
+      P('waterbarrel',11,7,{h:.7});C.raw('gy_web',1,1,{block:false,sc:.5,pic:1,wd:[0,-1],bob:.55});C.raw('gy_bones',8,6,{block:false,sc:.3});C.raw('gy_bones',3,7,{block:false,sc:.3})}})}
 /* wardens put down count towards blq2 */
 {const _h=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;const r=_h.apply(this,arguments);
   try{if(was&&e.hp<=0&&e.t==='bldeadwarden'&&qSt('blq2')==='active'){const F=blF();F.wk=(F.wk|0)+1;if(F.wk<=5)msg('A Road Warden put to rest ('+Math.min(5,F.wk)+' of 5).','#ffe36a')}}catch(x){console.error(x)}

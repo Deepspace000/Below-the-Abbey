@@ -82,17 +82,17 @@ function b14Mere(){
 /* ---- the rooms of the four places: bone heaps were drawn a metre across (now a handful of bones), webs in the corners, candle stubs and cold window light so the cosy rooms look blighted, and the barn, cellar, belfry and vestry, which stood nearly empty, get their furniture ---- */
 const B14_ROOMX={
   9622:b=>{b.prop('shelving',1,1,{h:1.2});b.prop('veg',6,1,{h:.6});b.raw('barrel',1,5,{sc:.9});b.raw('crate',4,6,{sc:.9});b.raw('hay',9,3,{sc:.8})},
-  9623:b=>{b.raw('hay',1,2,{sc:1.1});b.raw('hay',1,3,{sc:1.0});b.raw('hay',11,3,{sc:1.0});b.prop('cothearth',8,1,{h:.95});b.prop('waterbarrel',1,8,{h:.7});b.raw('crate',3,7,{sc:.9});b.raw('crate',4,7,{sc:.8});b.raw('barrel',10,8,{sc:.9});
-    b.raw('wl_prop1_5',3,4,{sc:.42,block:true});b.raw('hay',6,8,{sc:.9,block:false})},
+  9623:b=>{b.raw('hay',1,2,{sc:1.1});b.raw('hay',1,3,{sc:1.0});b.raw('hay',11,3,{sc:1.0});b.prop('cothearth',8,1,{h:.95});b.prop('waterbarrel',1,7,{h:.7});b.raw('crate',3,7,{sc:.9});b.raw('crate',4,7,{sc:.8});b.raw('barrel',10,7,{sc:.9});
+    b.raw('wl_prop1_5',3,4,{sc:.42,block:true})},
   9633:b=>{b.prop('bookshelf',1,1,{h:1.1});b.prop('candlerack',3,1,{h:1.0});b.prop('candlerack',9,1,{h:1.0});b.raw('barrel',1,8,{sc:.8});b.raw('hay',11,8,{sc:.8})},
-  9634:b=>{b.prop('coatrack',9,1,{h:1.0});b.prop('waterbarrel',1,7,{h:.7});b.prop('tapestry',7,1,{h:1.0,block:false})}
+  9634:b=>{b.prop('coatrack',9,1,{h:1.0});b.prop('waterbarrel',1,7,{h:.7});b.prop('tapestry',7,1,{h:.8,block:false,free:true,pic:1,wd:[0,-1],bob:.2})}
 };
 function b14RoomDress(id,b){
   try{if(B14_ROOMX[id])B14_ROOMX[id](b)}catch(e){console.error('b14 room x',id,e)}
   try{if(B34_ROOMX[id])B34_ROOMX[id](b)}catch(e){console.error('b34 room x',id,e)}
   const W=b.W,H=b.H,free=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&!b.has(x,y);
   // webs in the top corners and above the door side, a few bone fragments and candle stubs on free cells, none in the middle of the room or beside the door
-  for(const [x,y] of [[1,1],[W-2,1],[1,H-2],[W-2,H-2]])if(free(x,y))b.raw('gy_web',x,y,{block:false,sc:.5});
+  for(const [x,y] of [[1,1],[W-2,1],[1,H-2],[W-2,H-2]])if(free(x,y))b.raw('gy_web',x,y,{block:false,sc:.5,pic:1,wd:[0,y===1?-1:1],bob:.55});   // hung flat on the wall in the corner, never free-standing
   const placed=[],far=(x,y)=>placed.every(q=>Math.max(Math.abs(q[0]-x),Math.abs(q[1]-y))>2);
   let n=0;for(let k=0;k<40&&n<4;k++){const x=1+((hash2(k,id,311)*(W-2))|0),y=1+((hash2(k,id,312)*(H-3))|0);if(!free(x,y)||!far(x,y)||Math.abs(x-(W>>1))<2&&y>H-4)continue;b.raw('gy_bones',x,y,{block:false,sc:.25});placed.push([x,y]);n++}
   n=0;placed.length=0;for(let k=0;k<30&&n<3;k++){const x=1+((hash2(k,id,313)*(W-2))|0),y=1+((hash2(k,id,314)*(H-3))|0);if(!free(x,y)||!far(x,y)||Math.abs(x-(W>>1))<2&&y>H-4)continue;b.raw('gy_candles',x,y,{block:false,sc:.35});placed.push([x,y]);n++}}

@@ -149,8 +149,8 @@ khNpc('blc_name','A grave board','bl_slab',d=>{
 function blcPage(n,where,flag){return d=>{const F=blF();
   if(F[flag])return say('A bare place where the page lay. There is a ring of dust, and a very faint sound of singing.',[BYE]);
   return say('A single leaf of old paper, brittle and brown, ruled in four-line staves and written all over with notes, and no words. A corner has been torn from the book it came from. '+where,[['Take the page.',()=>{F[flag]=1;d.found=true;d.hidden=true;sfx('key');msg('You take a page of the choir\'s last hymn ('+blcPages()+' of 3).','#ffe36a');return null}],BYE])}}
-khNpc('blc_page1','A page of music','gy_book',blcPage(1,'It lies on the lid of the sarcophagus, under a pale thumbprint.','pg1'));
-khNpc('blc_page2','A page of music','gy_book',blcPage(2,'It is tucked in under the lip of the nameless bell, where nobody would look.','pg2'));
+khNpc('blc_page1','A page of music','gy_book',blcPage(1,'It lies on the floor at the head of the sarcophagus, under a pale thumbprint.','pg1'));
+khNpc('blc_page2','A page of music','gy_book',blcPage(2,'It lies on the boards under the lip of the nameless bell, where nobody would look.','pg2'));
 khNpc('blc_page3','A page of music','gy_book',blcPage(3,'It lies on a low grave, weighted with a stone.','pg3'));
 khNpc('blc_sign_church','A churchyard notice','greensign',()=>say('A notice board at the lych-gate. THE CHURCH OF THE HOLLOW SAINT. ALL WELCOME. SERVICES: ALWAYS. SERMON IN PROGRESS: PLEASE ENTER QUIETLY. Under it, in a different hand: PLEASE ENTER. HE IS VERY LONELY.',[BYE]));
 khNpc('blc_ibell','An upside-down bell','bl_ibell',()=>say('A great bronze bell set on a stone block with its mouth to the sky, full of rain and drowned leaves. It rings by itself, low, when the wind finds it. Moss is grown over the clapper. Somebody has hung a small tin cup on its rim, for drinking.',[BYE]));
@@ -249,7 +249,7 @@ function blcBuild(p){
   // the east plot: the Alder vault, a page on a low grave, crosses; the sexton's hut and Gideon
   C.dec('bl_mausoleum',52,15,{block:true,npc:'blc_mausoleum',sc:1.0});C.light(50,17,C.pale);C.light(54,17,C.pale);
   for(const [x,y] of [[46,16],[48,19],[56,19],[58,16],[46,23],[52,22],[58,24],[48,27],[54,27]]){C.dec('gy_mound',x,y,{block:true,sc:.75});C.dec(['bl_ccross','bl_lean','bl_wcross','bl_tomb'][(hs(x,y,7)*4)|0],x,y-1,{block:true,sc:.85})}
-  if(!F.pg3)C.dec('gy_book',50,25,{block:true,npc:'blc_page3',sc:1,bob:.1});
+  if(!F.pg3)C.dec('gy_book',50,25,{block:true,npc:'blc_page3',sc:1});
   C.dec('bl_hut',59,27,{block:true,npc:'blc_hut',sc:.9});C.light(58,29,C.warm);C.dec('gy_bench',56,29,{block:false});
   C.person('blc_gideon',57,30,2);
   for(const [x,y] of [[20,12],[60,12],[20,30],[60,30]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.pale)}
@@ -287,9 +287,9 @@ function blcNave(){
     enemies:[],
     build:C=>{
       const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
-      P('altar',10,1,{h:1.4});P('votive',8,1,{h:1.0});P('votive',12,1,{h:1.0});P('glasswin',5,0,{h:1.3,free:true,block:false});P('glasswin',15,0,{h:1.3,free:true,block:false});
+      P('altar',10,1,{h:1.4});P('votive',8,1,{h:1.0});P('votive',12,1,{h:1.0});P('glasswin',5,1,{h:.85,free:true,block:false,pic:1,wd:[0,-1],bob:.2});P('glasswin',15,1,{h:.85,free:true,block:false,pic:1,wd:[0,-1],bob:.2});
       P('font',17,5,{h:.9});P('chandelier',10,7,{h:1.0,free:true,block:false});
-      C.raw('mi_saint',3,2,{npc:'blc_saint',solid:1,deco:false,sc:1.0});
+      C.raw('mi_saint',3,2,{npc:'blc_saint',solid:1,deco:false,sc:.78});
       // the pulpit end: Father Alder at his lectern
       P('lectern',10,3,{h:1.0});C.npc('blc_alder',10,4);
       // pews in two blocks with an aisle between
@@ -297,14 +297,14 @@ function blcNave(){
       // the stalls of the choir: two rows of singers, the precentor in front
       if(!F.choirRest){
         const GK=b34Ghosts();let n=0;
-        for(const [x,y] of [[2,5],[3,5],[4,5],[5,5],[6,5],[2,6],[4,6],[6,6],[14,5],[15,5],[16,5],[17,5],[18,5],[14,6],[16,6],[18,6]])C.raw(GK[((x%4)*2+(y%2))%8],x,y,{npc:'blc_choir',solid:1,deco:false,sc:.9+((x*3+y)%4)*.03,bob:.08+((n++)%3)*.04})}
+        for(const [x,y] of [[2,5],[3,5],[4,5],[5,5],[6,5],[2,6],[4,6],[6,6],[14,5],[15,5],[16,5],[17,5],[18,5],[14,6],[16,6],[18,6]]){const gk=GK[((x%4)*2+(y%2))%8],tall=/banshee|gh3/.test(gk);C.raw(gk,x,y,{npc:'blc_choir',solid:1,deco:false,sc:(.9+((x*3+y)%4)*.03)*(tall?.82:1)})}}
       C.raw('mi_pew',7,5,{npc:'blc_stall',solid:1,deco:false,sc:1});
       C.npc('blc_ambrose',8,6);
       // the three doors: crypt stair (south west), belfry trapdoor (east corner), vestry (east wall)
       C.raw('gy_stair',1,13,{npc:'blc_cryptdoor',solid:1,deco:false,sc:.95});
       C.raw('gy_hatch2',19,13,{npc:'blc_belfrydoor',solid:1,deco:false,sc:1});
       C.raw('gy_arch',19,7,{npc:'blc_vestrydoor',solid:1,deco:false,sc:.9});
-      P('candlerack',1,4,{h:1.0});P('candlerack',19,4,{h:1.0});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_web',19,1,{block:false,sc:.5});C.raw('gy_bones',9,11,{block:false,sc:.3});C.raw('gy_bones',12,13,{block:false,sc:.3})}})}
+      P('candlerack',1,4,{h:1.0});P('candlerack',19,4,{h:1.0});C.raw('gy_web',1,1,{block:false,sc:.5,pic:1,wd:[0,-1],bob:.55});C.raw('gy_web',19,1,{block:false,sc:.5,pic:1,wd:[0,-1],bob:.55});C.raw('gy_bones',9,11,{block:false,sc:.3});C.raw('gy_bones',12,13,{block:false,sc:.3})}})}
 function blcCrypt(){
   const F=blF();
   blRoom({id:BLC.CRYPT,name:'The Crypt of the Hollow Saint',w:21,h:15,amb:.38,rating:86,floor:FLOORS.mosscobble?'mosscobble':'cobble',wall:IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0',
@@ -316,11 +316,11 @@ function blcCrypt(){
       for(const [x,y] of [[2,3],[2,5],[18,3],[18,5],[2,9],[18,9]])C.raw('gy_niche',x,y,{npc:'blc_niche',solid:1,deco:false,sc:.9});
       for(const [x,y] of [[5,3],[15,3],[5,8],[15,8],[8,10],[12,10]]){const ci=({'5,3':0,'15,8':1,'8,10':2})[x+','+y];if(ci!==undefined)C.raw('gy_coffin',x,y,{npc:'blc_cof'+ci,solid:1,deco:false,sc:.9});else C.raw('gy_coffin',x,y,{block:true,sc:.9})}
       C.raw('gy_sarc',10,2,{npc:'blc_sarc',solid:1,deco:false,sc:1.2});
-      if(!F.pg1)C.raw('gy_book',9,1,{npc:'blc_page1',solid:1,deco:false,sc:.9,bob:.55});
+      if(!F.pg1)C.raw('gy_book',9,1,{npc:'blc_page1',solid:1,deco:false,sc:.9});
       for(const [x,y] of [[8,1],[12,1],[1,7],[19,7]])C.raw('gy_candles',x,y,{block:true,sc:.85});
       C.raw('gy_chest',18,12,{npc:'blc_cryptchest',solid:1,deco:false,sc:.9});
       C.raw('gy_rune',2,12,{npc:'blc_pauper',solid:1,deco:false,sc:.9});
-      C.raw('gy_web',1,1,{block:false,sc:.6});C.raw('gy_web',19,1,{block:false,sc:.6});C.raw('gy_bones',7,6,{block:false,sc:.3});C.raw('gy_bones',13,7,{block:false,sc:.3});C.raw('gy_bones',10,11,{block:false,sc:.3});
+      C.raw('gy_web',1,1,{block:false,sc:.6,pic:1,wd:[0,-1],bob:.55});C.raw('gy_web',19,1,{block:false,sc:.6,pic:1,wd:[0,-1],bob:.55});C.raw('gy_bones',7,6,{block:false,sc:.3});C.raw('gy_bones',13,7,{block:false,sc:.3});C.raw('gy_bones',10,11,{block:false,sc:.3});
       C.raw('gy_stair',10,13,{npc:'blc_cryptup',solid:1,deco:false,sc:.95})}})}
 function blcBelfry(){
   const F=blF();
@@ -330,9 +330,9 @@ function blcBelfry(){
     enemies:[['blcrow',3,5],['blcrow',10,5],['blcrow',6,3],['blshade',10,7]],
     build:C=>{
       C.raw('bl_bellbad',3,2,{npc:'blc_bellA',solid:1,deco:false,sc:1.7});C.raw('bl_bellbad',6,2,{npc:'blc_bellB',solid:1,deco:false,sc:1.5});C.raw('bl_ibellS',10,2,{npc:'blc_bellC',solid:1,deco:false,sc:1.3});
-      if(!F.pg2)C.raw('gy_book',10,3,{npc:'blc_page2',solid:1,deco:false,sc:.9,bob:.1});
-      for(const x of [1,11])C.raw('hl_p_window',x,4,{block:true,sc:1.0});
-      C.raw('crate',2,7,{block:true,sc:.9});C.raw('barrel',11,7,{block:true,sc:.9});C.raw('gy_bones',5,5,{block:false,sc:.3});C.raw('gy_bones',8,6,{block:false,sc:.3});C.raw('gy_web',1,1,{block:false,sc:.6});C.raw('gy_web',11,1,{block:false,sc:.6});
+      if(!F.pg2)C.raw('gy_book',10,3,{npc:'blc_page2',solid:1,deco:false,sc:.9});
+      for(const x of [1,11])C.raw('hl_p_window',x,4,{block:false,sc:.55,pic:1,wd:[x===1?-1:1,0],bob:.1});   // flat in the side walls
+      C.raw('crate',2,7,{block:true,sc:.9});C.raw('barrel',11,7,{block:true,sc:.9});C.raw('gy_bones',5,5,{block:false,sc:.3});C.raw('gy_bones',8,6,{block:false,sc:.3});C.raw('gy_web',1,1,{block:false,sc:.6,pic:1,wd:[0,-1],bob:.55});C.raw('gy_web',11,1,{block:false,sc:.6,pic:1,wd:[0,-1],bob:.55});
       C.raw('gy_hatch2',5,8,{npc:'blc_belfryup',solid:1,deco:false,sc:1})}})}
 function blcVestry(){
   const F=blF();
@@ -343,9 +343,9 @@ function blcVestry(){
     build:C=>{
       const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
       P('bookshelf',2,1,{h:1.1});P('scrollrack',4,1,{h:1.0});P('dresser',9,1,{h:1.1});P('cot',1,6,{h:.7});P('waterbarrel',9,6,{h:.7});P('candlerack',6,1,{h:1.0});P('clock',8,1,{h:1.1});
-      P('readdesk',5,3,{h:.85});C.raw('gy_book',5,3,{npc:'blc_book',solid:1,deco:false,bob:.4,sc:1});
+      P('readdesk',5,3,{h:.85});C.raw('gy_book',5,3,{npc:'blc_book',solid:1,deco:false,hidden:true,sc:1});
       C.raw('gy_chest',9,4,{npc:'blc_offer',solid:1,deco:false,sc:.9});C.raw('gy_chest',1,2,{npc:'blc_robes',solid:1,deco:false,sc:.9});
-      C.raw('gy_web',9,1,{block:false,sc:.5});C.raw('gy_bones',4,6,{block:false,sc:.3})}})}
+      C.raw('gy_web',9,1,{block:false,sc:.5,pic:1,wd:[0,-1],bob:.55});C.raw('gy_bones',4,6,{block:false,sc:.3})}})}
 for(const [id,fn] of [[BLC.NAVE,blcNave],[BLC.CRYPT,blcCrypt],[BLC.BELFRY,blcBelfry],[BLC.VESTRY,blcVestry]])
   KH_LAZY[id]=()=>{if(!LEVELS[id]){if(!LEVELS[BLC.ID])KH_LAZY[BLC.ID]();blcArt();fn()}return LEVELS[id]};
 /* the quest rings */
