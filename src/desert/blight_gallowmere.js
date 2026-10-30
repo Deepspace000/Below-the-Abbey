@@ -257,10 +257,10 @@ function blgBuild(p){
   // the dead and the wisps (the wisps wait where the lamps have not reached, none within five squares of a lit lamp)
   const land2=(t,x,y,r)=>{for(let k=0;k<=(r||4);k++)for(let dy=-k;dy<=k;dy++)for(let dx=-k;dx<=k;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==k)continue;const a=x+dx,b=y+dy;if(ok(a,b)&&!C.path.has(a+','+b)){C.foe(t,a,b);return true}}return false};
   const litNear=(x,y)=>BLG_LAMPS.some(([lx,ly],i)=>((F.lamps|0)&(1<<i))&&Math.hypot(x-lx,y-ly)<=5.5);
-  const wisps=[[68,38],[64,39],[60,38],[56,39],[53,38],[76,29],[76,47],[66,12],[70,15],[64,14],[28,7],[24,13],[34,12],[40,50],[20,30],[10,26],[84,56],[80,60],[30,64]];
+  const wisps=[[64,39],[56,39],[76,29],[76,47],[66,12],[70,15],[64,14],[28,7],[24,13],[34,12],[40,50],[20,30],[10,26],[84,56],[80,60],[30,64]];
   for(const [x,y] of wisps){if(litNear(x,y))continue;if(y>=38&&y<=39&&x>=50&&x<=74){if(!C.used.has(x+','+y))C.foe('blwisp',x,y)}else land2('blwisp',x,y,3)}
-  for(const [t,x,y] of [['blbloat',12,50],['blbloat',44,60],['blbloat',30,48],['blbloat',82,52],['blhusk',9,44],['blhusk',40,56],['blhusk',76,58],['blhusk',26,38],['blghoul',34,46],['blghoul',10,32],['blghoul',79,53],['blghoul',46,36],
-      ['blcrow',24,30],['blcrow',46,50],['blcrow',78,48],['blshade',20,20],['blshade',36,60],['blshade',6,58],['blbones',30,34],['blcrowflock',60,12]])land2(t,x,y,4);
+  for(const [t,x,y] of [['blbloat',12,50],['blbloat',44,60],['blbloat',30,48],['blbloat',82,52],['blhusk',9,44],['blhusk',37,53],['blhusk',76,58],['blhusk',26,38],['blghoul',34,46],['blghoul',10,32],['blghoul',79,53],['blghoul',46,36],
+      ['blcrow',24,30],['blcrow',46,50],['blcrow',76,52],['blshade',20,20],['blshade',36,60],['blshade',6,58],['blbones',30,34],['blcrowflock',60,12]])land2(t,x,y,4);
   for(const [k,x,y] of [['potion6',9,34],['potion6',38,66],['potion6',84,60]])C.items.push({k,x,y,taken:false});
   C.mapNames.push({t:'The Causeway',x:62,y:36,k:'place'},{t:'The Village Green',x:36,y:37,k:'place'},{t:'The Gallows Tree',x:36,y:30,k:'place'},{t:"Osk Brine's House",x:42,y:42,k:'place'},{t:"Nan Sallow's Cottage",x:31,y:32,k:'place'},{t:'The Jetty',x:49,y:49,k:'place'},{t:'Heron Isle',x:66,y:12,k:'place'},{t:"The Reeve's Isle",x:28,y:10,k:'place'},{t:'The Salt Pans',x:38,y:63,k:'place'},{t:'The Reed Beds',x:8,y:16,k:'place'},{t:'The Peat Fields',x:9,y:52,k:'place'},{t:'The Toll Hut',x:80,y:33,k:'place'},{t:'To Ashenfold and the Church',x:85,y:36,k:'place'},{t:'To the Bone Orchard',x:6,y:36,k:'place'});
   const lv=C.finish({start:{x:84,y:38,f:3}});
@@ -277,7 +277,7 @@ function blgOsk(){
       const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
       P('cothearth',6,1,{h:.95});P('clock',3,1,{h:1.1});P('dresser',10,1,{h:1.0});P('bed',2,6,{h:.7});P('longtable',7,5,{h:.7});P('waterbarrel',11,3,{h:.7});P('candlerack',9,1,{h:1.0});P('cat',4,7,{h:.26});
       C.raw('hay',1,3,{npc:'blg_nets',solid:1,deco:false,sc:.9});C.raw('greensign',4,1,{npc:'blg_chart',solid:1,deco:false,sc:.8});
-      C.raw('yar_boat_row',11,6,{block:true,sc:1.3});C.raw('gy_web',1,1,{block:false,sc:.5});
+      C.raw('yar_boat_row',11,6,{block:true,sc:1.3});C.raw('gy_web',1,1,{block:false,sc:.5,pic:1,wd:[0,-1],bob:.55});
       C.npc('blg_osk',5,4)}})}
 function blgReeve(){
   blRoom({id:BLG.REEVE,name:"The Reeve's Flooded Hall",w:15,h:12,amb:.4,rating:86,floor:'blf_flood',wall:IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0',
@@ -286,9 +286,9 @@ function blgReeve(){
     enemies:[['blreeve',7,3],['blbloat',3,5],['blbloat',11,5],['blwisp',4,2],['blwisp',10,2]],
     build:C=>{
       const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
-      P('banner',3,1,{h:1.6});P('banner',11,1,{h:1.6});P('tapestry',7,0,{h:1.1,free:true,block:false});P('counciltable',7,6,{h:.8});P('chandelier',7,8,{h:1.0,free:true,block:false});
+      P('banner',3,1,{h:1.6});P('banner',11,1,{h:1.6});P('tapestry',7,1,{h:.8,free:true,block:false,pic:1,wd:[0,-1],bob:.2});P('counciltable',7,6,{h:.8});P('chandelier',7,8,{h:1.0,free:true,block:false});
       C.raw('mi_pew',7,2,{npc:'blg_reevechair',solid:1,deco:false,sc:1.0});C.raw('gy_chest',9,2,{npc:'blg_reevechest',solid:1,deco:false,sc:.9});
-      C.raw('hay',1,9,{block:false,sc:.6});C.raw('gy_bones',5,9,{block:false,sc:.3});C.raw('gy_bones',11,10,{block:false,sc:.3});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_web',13,1,{block:false,sc:.5});
+      C.raw('hay',1,9,{block:false,sc:.6});C.raw('gy_bones',5,9,{block:false,sc:.3});C.raw('gy_bones',11,10,{block:false,sc:.3});C.raw('gy_web',1,1,{block:false,sc:.5,pic:1,wd:[0,-1],bob:.55});C.raw('gy_web',13,1,{block:false,sc:.5,pic:1,wd:[0,-1],bob:.55});
       C.raw(b14Dead('b14_greeds','greeds','saturate(.2) brightness(.5)'),2,5,{block:false,sc:.9});C.raw(b14Dead('b14_greeds','greeds','saturate(.2) brightness(.5)'),12,5,{block:false,sc:.9});C.raw(b14Dead('b14_greeds','greeds','saturate(.2) brightness(.5)'),1,7,{block:false,sc:.7})}})}
 function blgNan(){
   const f=BLG_HOUSE_NAN.front;
@@ -299,7 +299,7 @@ function blgNan(){
     build:C=>{
       const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
       P('hearth',5,1,{h:1.2});P('potshelf',2,1,{h:1.0});P('potshelf',8,1,{h:1.0});P('bed',8,6,{h:.7});P('dresser',9,3,{h:1.0});P('coopstack',1,4,{h:.95});P('veg',1,6,{h:.6});P('cat',3,7,{h:.26});P('waterbarrel',9,7,{h:.7});P('rocker',3,4,{h:.7});
-      C.raw('gy_coffin',7,7,{npc:'blg_hoblid',solid:1,deco:false,sc:.6});C.raw('gy_web',9,1,{block:false,sc:.5});
+      C.raw('gy_coffin',7,7,{npc:'blg_hoblid',solid:1,deco:false,sc:.6});C.raw('gy_web',9,1,{block:false,sc:.5,pic:1,wd:[0,-1],bob:.55});
       C.npc('blg_nan',5,4)}})}
 for(const [id,fn] of [[BLG.OSK,blgOsk],[BLG.REEVE,blgReeve],[BLG.NAN,blgNan]])
   KH_LAZY[id]=()=>{if(!LEVELS[id]){if(!LEVELS[BLG.ID])KH_LAZY[BLG.ID]();blgArt();fn()}return LEVELS[id]};

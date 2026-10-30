@@ -4,6 +4,14 @@
     {"code": "OVERDOOR", "area": "Sale", "level": 600, "key": "^sa_planks", "reason": "Sale: planks nailed across the boarded-up doors, drawn on the door square on purpose"},
     {"code": "NPC_UNREACH", "level": 9740, "x": 4, "y": 39, "reason": "Pale Spire Great Halls: the Painters' Closet (4..6,38..41) opens with the brass key (same secret tools/ps_test.py reach allows)"},
     {"code": "NPC_UNREACH", "level": 9740, "x": 6, "y": 39, "reason": "Pale Spire Great Halls: the Painters' Closet (4..6,38..41) opens with the brass key (same secret tools/ps_test.py reach allows)"},
-    {"code": "ONEWAY", "level": 9715, "key": "door", "x": 30, "y": 4, "reason": "the Crooked Road gate into the Never-Ending Tower: the tower's own south gate leads back (tools/ps_test.py dest checks it)"}
+    {"code": "ONEWAY", "level": 9715, "key": "door", "x": 30, "y": 4, "reason": "the Crooked Road gate into the Never-Ending Tower: the tower's own south gate leads back (tools/ps_test.py dest checks it)"},
+    {"code": "FOE_CUT", "level": "9610-9709", "key": "^tt[0-9]$", "reason": "Blighted Road: the six giants of blight_titans.js are level 100 bosses as tall as a church tower, really big creatures by design (the brief allows really big ones to be cut off)"},
+    {"code": "FLOAT", "level": 9631, "key": "^lamp$", "x": 10, "y": 7, "reason": "Nave of the Hollow Saint: the candle chandelier (wl2_inn_4, drawn as lamp) hangs from the ceiling on its chains; looked at in a screenshot"},
+    {"code": "FLOAT", "level": 9642, "key": "^lamp$", "x": 7, "y": 8, "reason": "The Reeve's Flooded Hall: the candle chandelier hangs from the ceiling on its chains over the council table; looked at in a screenshot"},
+    {"code": "NPC_UNREACH", "level": 9640, "key": "^lamp$", "x": 69, "y": 13, "reason": "Gallowmere: Heron Isle is reached by Osk's rowing boat (blg_boat1 at the jetty), which the audit does not model"},
+    {"code": "NPC_UNREACH", "level": 9640, "key": "^bl_mk1$", "x": 67, "y": 11, "reason": "Gallowmere: Heron Isle is reached by Osk's rowing boat (blg_boat1 at the jetty), which the audit does not model"},
+    {"code": "NPC_UNREACH", "level": 9640, "key": "^gy_ghost1$", "x": 68, "y": 12, "reason": "Gallowmere: Heron Isle is reached by Osk's rowing boat (blg_boat1 at the jetty), which the audit does not model"},
+    {"code": "NPC_UNREACH", "level": 9640, "key": "^gy_mound$", "x": 70, "y": 12, "reason": "Gallowmere: Heron Isle is reached by Osk's rowing boat (blg_boat1 at the jetty), which the audit does not model"},
+    {"code": "NPC_UNREACH", "level": 9640, "key": "^b34_heron$", "x": 63, "y": 15, "reason": "Gallowmere: Heron Isle is reached by Osk's rowing boat (blg_boat1 at the jetty), which the audit does not model"}
   ]
 }

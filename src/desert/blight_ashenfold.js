@@ -171,10 +171,10 @@ function blaKitchen(){
       P('dresser',2,1,{h:1.05});P('clock',11,1,{h:1.1});P('rocker',12,3,{h:.7});P('bookshelf',13,1,{h:1.0});
       P('longtable',7,5,{h:.7});P('longtable',9,5,{h:.7});P('longtable',5,5,{h:.7});
       // the family at supper: four places, each behind the table
-      C.raw('gy_ghost1',5,4,{npc:'bla_edda',solid:1,deco:false,sc:1});C.raw('gy_zombie',7,4,{npc:'bla_wilf',solid:1,deco:false,sc:1});C.raw('gy_ghost0',9,4,{npc:'bla_gran',solid:1,deco:false,sc:1});C.raw('gy_skel',11,5,{npc:'bla_amos',solid:1,deco:false,sc:.95});
+      C.raw('gy_ghost1',5,4,{npc:'bla_edda',solid:1,deco:false,sc:1});C.raw('gy_zombie',7,4,{npc:'bla_wilf',solid:1,deco:false,sc:.85});C.raw('gy_ghost0',9,4,{npc:'bla_gran',solid:1,deco:false,sc:1});C.raw('gy_skel',11,5,{npc:'bla_amos',solid:1,deco:false,sc:.95});
       C.raw('gy_hatch2',2,5,{npc:'bla_cellardoor',solid:1,deco:false,sc:1});
       P('candlerack',3,3,{h:1.0});P('pietable',12,7,{h:.7});P('waterbarrel',1,8,{h:.7});P('cat',4,8,{h:.26});P('veg',13,8,{h:.6});
-      C.raw('gy_web',1,1,{block:false,sc:.5})}})}
+      C.raw('gy_web',1,1,{block:false,sc:.5,pic:1,wd:[0,-1],bob:.55})}})}
 function blaCellar(){
   blRoom({id:BLA.CELLAR,name:'The Farmhouse Cellar',w:11,h:8,amb:.4,rating:85,floor:'wood',wall:'kh_ohwall1_0',
     back:{to:BLA.HOUSE,x:3,y:5,f:3},
