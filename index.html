@@ -72136,7 +72136,14 @@ PSP.LEVELS=[
  PSP_LV(9790,'The Deep Cells and the Cistern',48,40,103,5,'in'),
  PSP_LV(9800,'The Oubliette',40,36,104,5,'in'),
  PSP_LV(9810,'The Wine Cellar and Old Cistern',64,48,103,0,'in'),
- PSP_LV(9820,'The Second Floor: the State Rooms',112,84,103,0,'in'),
+ PSP_LV(9820,'The Second Floor: the Hall of Illusions',56,44,103,6,'in',{note:'level 2 hub (small, castle style): the Dreamkeeper (quest giver) at the stair, seven doors to the illusion rooms 9821 to 9827, the Sleepers table; see tools/PS_F2_SPEC.md'}),
+ PSP_LV(9821,'The Illusion of the Perfect Forest',48,40,103,6,'out',{room:1,part:'hand'}),
+ PSP_LV(9822,'The Illusion of the Island by the Sea',48,40,103,6,'out',{room:2,part:'foot'}),
+ PSP_LV(9823,'The Illusion of the Cabin in the Snow',48,40,103,6,'out',{room:3,part:'face'}),
+ PSP_LV(9824,'The Illusion of the Waterways',48,40,103,6,'out',{room:4,part:'chest'}),
+ PSP_LV(9825,'The Illusion of the Desert',48,40,104,6,'out',{room:5,part:'legs'}),
+ PSP_LV(9826,'The Illusion of the Swamp',48,40,104,6,'out',{room:6,part:'heart'}),
+ PSP_LV(9827,'The Illusion of the Nightmare',48,40,104,6,'out',{room:7,part:'brain'}),
  PSP_LV(9830,'The Second Floor: the West Wing, State Bedchambers',72,64,104,0,'in'),
  PSP_LV(9840,'The Second Floor: the East Wing, Council and Great Library',72,64,104,0,'in'),
  PSP_LV(9850,'The Curtain Wall Walk',96,88,104,0,'out'),
@@ -72197,12 +72204,20 @@ PSP_L(9750,[45,12],9740,[5,30,1],{name:'service wing to the screens passage'});
 PSP_L(9740,[61,30],9760,[5,12,1],{name:'banqueting hall to the east wing'});
 PSP_L(9760,[2,12],9740,[58,30,3],{name:'east wing to the banqueting hall'});
 /* the three stairs to the second floor (all need the Second Floor Key; far sides provisional) */
-PSP_L(9740,[32,5],9820,[56,78,0],{name:'the Grand Stair',lock:'pskey2',prov:1});
-PSP_L(9820,[56,81],9740,[32,8,2],{name:'the Grand Stair, down',prov:1});
+PSP_L(9740,[32,5],9820,[28,38,0],{name:'the Grand Stair',lock:'pskey2',prov:1});
+PSP_L(9820,[28,41],9740,[32,8,2],{name:'the Grand Stair, down',prov:1});
 PSP_L(9750,[6,3],9830,[8,8,2],{name:'the West Turret Stair',lock:'pskey2',prov:1});
 PSP_L(9830,[8,5],9750,[6,6,2],{name:'the West Turret Stair, down',prov:1});
 PSP_L(9760,[42,3],9840,[64,8,2],{name:'the East Turret Stair',lock:'pskey2',prov:1});
 PSP_L(9840,[64,5],9760,[42,6,2],{name:'the East Turret Stair, down',prov:1});
+/* level 2: the hub (9820) and the seven illusion rooms (9821 to 9827). Hub doors in the north wall (y=3, landing y=5) and one each in the west and east walls; every room arrival is (24,35,facing north) and its return door is (24,38). prov:1 stays on all of them: pspLandOf uses the real landing once the room is built. */
+PSP_L(9820,[9,3],9821,[24,35,0],{name:'the door of the Perfect Forest',prov:1});    PSP_L(9821,[24,38],9820,[9,5,2],{name:'back to the Hall of Illusions',prov:1});
+PSP_L(9820,[19,3],9822,[24,35,0],{name:'the door of the Island by the Sea',prov:1});  PSP_L(9822,[24,38],9820,[19,5,2],{name:'back to the Hall of Illusions',prov:1});
+PSP_L(9820,[29,3],9823,[24,35,0],{name:'the door of the Cabin in the Snow',prov:1});  PSP_L(9823,[24,38],9820,[29,5,2],{name:'back to the Hall of Illusions',prov:1});
+PSP_L(9820,[39,3],9824,[24,35,0],{name:'the door of the Waterways',prov:1});          PSP_L(9824,[24,38],9820,[39,5,2],{name:'back to the Hall of Illusions',prov:1});
+PSP_L(9820,[49,3],9825,[24,35,0],{name:'the door of the Desert',prov:1});             PSP_L(9825,[24,38],9820,[49,5,2],{name:'back to the Hall of Illusions',prov:1});
+PSP_L(9820,[2,22],9826,[24,35,0],{name:'the door of the Swamp',prov:1});              PSP_L(9826,[24,38],9820,[5,22,1],{name:'back to the Hall of Illusions',prov:1});
+PSP_L(9820,[53,22],9827,[24,35,0],{name:'the door of the Nightmare',prov:1});         PSP_L(9827,[24,38],9820,[50,22,3],{name:'back to the Hall of Illusions',prov:1});
 /* package 4 to package 5: the dungeon door and the stairs down through the dungeons */
 PSP_L(9750,[20,36],9780,[24,5,2],{name:'the Dungeon Door'});
 PSP_L(9780,[24,2],9750,[20,33,0],{name:'stair up to the kitchens'});
@@ -72216,7 +72231,7 @@ PSP.KEY2={item:'pskey2',name:'The Second Floor Key',flag:'key2',hiddenIn:9800}; 
 PSP.REST=[9723,9731,9740,9750,9760];                 // levels that hold a quiet rest room (free rest, no creatures, warm candle light); the room names are in the plan
 /* test and jump links (?town=...&lvl=...): name -> [level, x, y, f]; the party level for a link is the level rating of the target, capped at 115 */
 PSP.JUMPS={palespire:[9720,32,52,0],palespire1:[9720,32,52,0],palespire2:[9730,32,49,0],palespire3:[9740,32,44,0],palespire4:[9750,42,22,3],
-  palespire5:[9760,5,22,1],palespire6:[9780,24,5,2],palespire7:[9790,40,5,2],palespire8:[9800,8,5,2],palespirekey:[9800,22,14,2],crookedroad:[9715,40,59,0]};
+  palespire5:[9760,5,22,1],palespire6:[9780,24,5,2],palespire7:[9790,40,5,2],palespire8:[9800,8,5,2],palespirekey:[9800,22,14,2],crookedroad:[9715,40,59,0],palespire9:[9820,28,38,0],illusion1:[9821,24,35,0],illusion2:[9822,24,35,0],illusion3:[9823,24,35,0],illusion4:[9824,24,35,0],illusion5:[9825,24,35,0],illusion6:[9826,24,35,0],illusion7:[9827,24,35,0]};
 /* small readers (no side effects) */
 const pspIs=n=>n>=PSP.LO&&n<=PSP.HI;
 const pspLevel=id=>PSP.LEVELS.find(l=>l.id===id)||null;
@@ -77624,6 +77639,25 @@ for(const lv of [...new Set(Object.values(PGR.CHESTS).map(c=>c.lv))]){
     if(inC){for(let i=0;i<5;i++)if(IMG['ps_tele'+i])IMG['tele'+i]=IMG['ps_tele'+i];NPC_H.teleporter=1.0}
     else{for(let i=0;i<5;i++)if(orig.t[i])IMG['tele'+i]=orig.t[i];if(orig.h!==undefined)NPC_H.teleporter=orig.h}}catch(e){console.error('tele swap',e)}};
   const _pt=placeTeleporter;placeTeleporter=function(){swap();return _pt.apply(this,arguments)}}
+
+/* ---- src/desert/ps_f2_core.js ---- */
+/* ps_f2_core.js: the shared core of the second floor (the Hall of Illusions, 9820, and the seven illusion rooms, 9821 to 9827). See tools/PS_F2_SPEC.md.
+   The seven pieces of the Sleeper, the flags, and psf2Give(part). Built by the coordinator; the hub agent and the room agents use it, they do not redefine it. */
+const PSF2={PARTS:['hand','foot','face','chest','legs','heart','brain'],
+  ROOMS:{hand:9821,foot:9822,face:9823,chest:9824,legs:9825,heart:9826,brain:9827},
+  NAMES:{hand:"The Sleeper's Hand",foot:"The Sleeper's Foot",face:"The Sleeper's Face",chest:"The Sleeper's Chest",legs:"The Sleeper's Legs",heart:"The Sleeper's Heart",brain:"The Sleeper's Brain"},
+  ITEMS:{hand:'psf_hand',foot:'psf_foot',face:'psf_face',chest:'psf_chest',legs:'psf_legs',heart:'psf_heart',brain:'psf_brain'},
+  WHERE:{hand:'perfect forest',foot:'island by the sea',face:'cabin in the snow',chest:'waterways',legs:'desert',heart:'swamp',brain:'nightmare'}};
+for(const p of PSF2.PARTS){const id=PSF2.ITEMS[p];if(!ITEMDEF[id])ITEMDEF[id]={n:PSF2.NAMES[p],k:'quest',t:'Quest item',ic:'herb',c:'#d8d0e8',stack:1,price:0,sw:.3,
+  d:"One of the seven pieces of the Sleeper, found in the "+PSF2.WHERE[p]+". Take it to the Sleeper's table in the Hall of Illusions."}}
+function psf2F(){const P=(G.flags.psp=G.flags.psp||{});return P.f2||(P.f2={got:{},rooms:{},talked:0,placed:{},done:0})}
+function psf2Got(part){const F=psf2F();return !!(F.got[part]||bagCount(PSF2.ITEMS[part])>0||F.placed[part])}
+function psf2Count(){return PSF2.PARTS.filter(psf2Got).length}
+function psf2All(){return psf2Count()===PSF2.PARTS.length}
+/* a room's puzzle calls this when it is solved: gives the piece once, whatever else happens */
+function psf2Give(part){const F=psf2F();if(!PSF2.ITEMS[part]||F.got[part])return false;F.got[part]=1;
+  const it=mkItem(PSF2.ITEMS[part]);if(!bagAdd(it))G.items.push({k:PSF2.ITEMS[part],x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false});
+  try{msg('You find '+PSF2.NAMES[part]+'.','#ffe36a');sfx('key')}catch(e){}return true}
 
 /* ---- src/desert/nt_look.js ---- */
 /* ==========================================================================
