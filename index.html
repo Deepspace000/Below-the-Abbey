@@ -24214,7 +24214,8 @@ function hgHive(i){
   const pickB=k=>{for(let t=0;t<60;t++){const c=pick(k+t*1000);if(c&&blockOk(c[0],c[1]))return c}return null};
   for(let k=0;k<4+i;k++){const c=pickB(200+k);if(c)decor.push({k:CH[(hs(k,i,sd+6)*3)|0],x:c[0],y:c[1],block:true})}
   for(let k=0;k<9;k++){const c=pickB(300+k);if(c)decor.push({k:k%2?'hg_waxbarrel':'hg_jar',x:c[0],y:c[1],block:true})}
-  for(let k=0;k<26;k++){const c=pickB(400+k);if(c)decor.push({k:'hg_eggs',x:c[0],y:c[1],block:true,sc:.7+hs(k,3,sd+7)*.4})}
+  for(let k=0;k<26;k++){const c=pickB(400+k);if(!c)continue;const e={k:'hg_eggs',x:c[0],y:c[1],block:true,sc:.7+hs(k,3,sd+7)*.4},had=decor.find(d=>d.k==='hg_eggs'&&d.x===c[0]&&d.y===c[1]);
+    if(had){delete had.walk;delete had.deco;Object.assign(had,e)}else decor.push(e)}   // (a chamber centre already has its clutch of eggs: that one becomes the solid clutch, never two on one square)
   for(let k=0;k<12;k++){const c=pick(500+k);if(c)items.push({k:['hgcomb','hgcomb','hgjelly','hggrubs'][k%4],x:c[0],y:c[1]})}
   const lv={rows:g.map(r=>r.join('')),start:{x:sp.x,y:sp.y-1,f:0},enemies,items,decor,chars,day:0,floor:hgHoneyFloor(i),name:HG_HIVE_NAMES[i],label:HG_HIVE_NAMES[i],diff:HG.DIFF+i+1,ceilH:2.7,torchGap:1e9,noTele:true,portals:[],lights,
     mapNames:[{t:HG_HIVE_NAMES[i],x:sp.x,y:H-1,k:'place'},{t:i===3?'The Queen’s Cell':'The Heart of the Hive',x:far.x,y:far.y-4,k:'place'}]};
@@ -24262,14 +24263,14 @@ function hgBuild(){
     for(const dx of [-1,0,1])for(const dy of [1,2,3])for(const sg of [-1,1])fm[I(cx+dx,cy+sg*(R+dy))]='1';
     for(const dx of [-1,0,1])for(const sg of [-1,1])fm[I(cx+dx,cy+sg*R)]='1';
     const CITY=(typeof HGTCITIES!=='undefined')?HGTCITIES[HG_TOWNS[ti].k]:null; // a town with a real terraced city: its wall is closed and its gates lead into the city level
-    for(let t=-R;t<=R;t++)for(const [x,y,gap] of [[cx+t,cy-R,!CITY&&Math.abs(t)<=1],[cx+t,cy+R,!CITY&&Math.abs(t)<=1],[cx-R,cy+t,false],[cx+R,cy+t,false]]){if(gap)continue;used.add(K(x,y));decor.push({k:'hg_palisade',x,y,block:true,sc:1,ox:(hs(x,y,sd+20)-.5)*.3})}
+    for(let t=-R;t<=R;t++)for(const [x,y,gap] of [[cx+t,cy-R,!CITY&&Math.abs(t)<=1],[cx+t,cy+R,!CITY&&Math.abs(t)<=1],[cx-R,cy+t,Math.abs(t)===R],[cx+R,cy+t,Math.abs(t)===R]]){if(gap)continue;   /* (the four corners belong to the north and south rows, so no post is set twice) */used.add(K(x,y));decor.push({k:'hg_palisade',x,y,block:true,sc:1,ox:(hs(x,y,sd+20)-.5)*.3})}
     for(const [x,y] of [[cx-2,cy-R-1],[cx+2,cy-R-1],[cx-2,cy+R+1],[cx+2,cy+R+1],[cx-2,cy-R+1],[cx+2,cy-R+1],[cx-2,cy+R-1],[cx+2,cy+R-1]]){decor.push({k:'hg_lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y]);used.add(K(x,y))}
     if(CITY){ // the gates: each way out of the city on level 470 is a pale shell gate with a lamp either side; walking into it enters the city
       const exits=[CITY.exitDoor,CITY.exitDoorNorth,CITY.exitDoorSouth].filter(e=>e&&e.at);
       for(const e of exits){const f=e.at.f,gx=e.at.x-DIRS_HG[f][0],gy=e.at.y-DIRS_HG[f][1],south=e.at.y>cy;
         const arr=south?(CITY.entry&&CITY.entry.y>75?CITY.entry:{x:e.x,y:e.y-1,f:0}):(CITY.entryNorth||CITY.entry&&CITY.entry.y<75&&CITY.entry||{x:e.x,y:e.y+1,f:2});
         used.add(K(gx,gy));decor.push({k:'hg_arch',x:gx,y:gy,block:true,sc:1.8,enter:{to:CITY.level,x:arr.x,y:arr.y,f:arr.f}});
-        for(const sx of [-2,2]){const lx=gx+(f%2===0?sx:0),ly=gy+(f%2===1?sx:0);decor.push({k:'hg_lamp',x:lx,y:ly,block:false,walk:true,deco:true});lights.push([lx,ly]);used.add(K(lx,ly))}}
+        for(const sx of [-2,2]){const lx=gx+(f%2===0?sx:0),ly=gy+(f%2===1?sx:0);if(decor.some(d=>d.k==='hg_lamp'&&d.x===lx&&d.y===ly))continue;decor.push({k:'hg_lamp',x:lx,y:ly,block:false,walk:true,deco:true});lights.push([lx,ly]);used.add(K(lx,ly))}}
       return}
     // houses in the blocks between the lanes, apart from the four round the little square
     for(const bx of [-8,-3,2,7])for(const by of [-8,-3,2,7]){
@@ -24297,7 +24298,7 @@ function hgBuild(){
   // they stand out in the open field, never on or beside a path (floor type 1)
   const fmNear=(x,y,r)=>{for(let j=-r;j<=r;j+=2)for(let i=-r;i<=r;i+=2){const xx=x+i,yy=y+j;if(xx>=0&&yy>=0&&xx<W&&yy<H&&fm[I(xx,yy)]==='1')return true}return false};
   let nf=0;for(let t=0;t<600&&nf<30;t++){const x=6+((hs(t,7,sd+60)*(W-12))|0),y=6+((hs(t,8,sd+60)*(H-12))|0);if(used.has(K(x,y))||near(x,y,keepOut,12)||fmNear(x,y,6)||used.has(K(x-1,y))||used.has(K(x+1,y))||used.has(K(x,y-1)))continue;used.add(K(x,y));nf++;
-    decor.push({k:'hg_frog'+(nf%2),x,y,block:true,npc:'hg_frogbeast',sc:.95+hs(x,y,sd+61)*.45,bob:-.5},{k:'hg_frog0',x:x-1,y,block:true,sc:.0001},{k:'hg_frog0',x:x+1,y,block:true,sc:.0001},{k:'hg_frog0',x,y:y-1,block:true,sc:.0001});used.add(K(x-1,y));used.add(K(x+1,y));used.add(K(x,y-1))}
+    decor.push({k:'hg_frog'+(nf%2),x,y,block:true,npc:'hg_frogbeast',sc:.95+hs(x,y,sd+61)*.45},{k:'hg_frog0',x:x-1,y,block:true,sc:.0001},{k:'hg_frog0',x:x+1,y,block:true,sc:.0001},{k:'hg_frog0',x,y:y-1,block:true,sc:.0001});used.add(K(x-1,y));used.add(K(x+1,y));used.add(K(x,y-1))}
   // grass, bracken and things to pick
   const GR=['pgrass0','pgrass1','pgrass2','pgrass3'].filter(k=>IMG[k]);let ng=0;
   if(GR.length)for(let t=0;t<2400&&ng<760;t++){const x=3+((hs(t,9,sd+70)*(W-6))|0),y=3+((hs(t,10,sd+70)*(H-6))|0);if(used.has(K(x,y))||fm[I(x,y)]==='1')continue;ng++;
@@ -24307,7 +24308,7 @@ function hgBuild(){
   // wax chests lie out in the grass here and there
   for(let t=0,c=0;t<800&&c<10;t++){const x=8+((hs(t,13,sd+90)*(W-16))|0),y=8+((hs(t,14,sd+90)*(H-16))|0);if(used.has(K(x,y))||near(x,y,towns,14)||near(x,y,[[HG.START.x,HG.START.y]],12))continue;used.add(K(x,y));c++;decor.push({k:['hg_chestweed','hg_chestwax','hg_chestjelly'][c%3],x,y,block:true})}
   // the hives
-  hives.forEach((p,i)=>{decor.push({k:'hg_hive',x:p[0],y:p[1],block:true,enter:{to:HG.HIVES[i],x:0,y:0,f:0},sc:1.05,bob:-.75});used.add(K(p[0],p[1]));lights.push([p[0],p[1]+2]);fm[I(p[0],p[1]+1)]='1';fm[I(p[0],p[1]+2)]='1'});
+  hives.forEach((p,i)=>{decor.push({k:'hg_hive',x:p[0],y:p[1],block:true,enter:{to:HG.HIVES[i],x:0,y:0,f:0},sc:1.05});used.add(K(p[0],p[1]));lights.push([p[0],p[1]+2]);fm[I(p[0],p[1]+1)]='1';fm[I(p[0],p[1]+2)]='1'});
   // the gate in the south, back to the Hollow Land
   decor.push({k:'hg_gate',x:HG.START.x,y:HG.H-4,block:true,enter:{to:HL.CAV,x:61,y:57,f:3}});
   // the wizard, a little way up the track, who will come to meet the party (see hollowgrass_talk.js)
@@ -25197,7 +25198,7 @@ function hgtIntFloor(K,fds){
 
 const HGTL={STEP:.26,STEP_MAX:.3,CLIMB:.55,DIRS:[[0,-1],[1,0],[0,1],[-1,0]],
   K:{GROUND:0,STAIR:1,PLAT:2,BRIDGE:3,COURT:4,PLAZA:5,ALLEY:6,TERRACE:7}};
-const HGTL_DECOR={lamp:'hgt_lamp',glitter:'hgt_glitter',fountain:'hgt_fountain',arch:'hgt_arch',chest:'hgt_chest',bench:'hgt_bench',urn:'hgt_urn',spire:'hgt_spire'};
+const HGTL_DECOR={lamp:'hgt_lamp',glitter:'hgt_glitter',fountain:'hgt_fountain',arch:'hg_arch',chest:'hgt_chest',bench:'hgt_bench',urn:'hgt_urn',spire:'hgt_spire'};
 const HGTL_CHARS={},HGTL_WH={},HGTL_ROLE={};
 (function(){
   const pool='ABCEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';let n=0;
@@ -25378,7 +25379,7 @@ function hgtlLampRow(B,x,y,dir,len,gap){const f=HGTL.DIRS[dir&3];gap=gap||3;for(
 
 /* ---------- assembling ---------- */
 /* returns a LEVELS entry. opts {name,label,start,diff,ceilH,chars,extra}. rows hold the placeholder chars until hgtlBindChars is called */
-function hgtlAssemble(B,opts){opts=opts||{};const st=opts.start||B.start||{x:1,y:1,f:0};
+function hgtlAssemble(B,opts){opts=opts||{};hgtlArches(B);hgtlClearWalls(B);hgtlDedupe(B);const st=opts.start||B.start||{x:1,y:1,f:0};
   const lv=Object.assign({rows:B.rows.map(r=>r.join('')),chars:Object.assign({},opts.chars||{}),start:{x:st.x,y:st.y,f:st.f|0},enemies:[],items:[],decor:B.decor,scenery:[],portals:B.portals,lights:B.lights,
     mapNames:B.names.map(n=>Object.assign({},n)),terrace:Object.assign({h:B.h},B.lid?{lid:B.lid}:{},B.water?{water:B.water,wl:B.wl}:{},Object.keys(B.dive).length?{dive:B.dive}:{}),outdoor:true,day:0,name:opts.name||'Town',label:opts.label||opts.name||'Town',diff:opts.diff||1,noTele:true,hgtl:{kind:B.kind,doors:B.doors,secrets:B.secrets,lintels:B.lintels,W:B.W,H:B.H}},opts.extra||{});
   if(opts.ceilH)lv.ceilH=opts.ceilH;return lv}
@@ -25580,6 +25581,101 @@ function hgtlValidateExtra(B,r,out){out.tubesBad=[];out.poolsBad=[];const W=B.W,
     if(!seen)out.poolsBad.push({x:p.x,y:p.y,why:'unreachable'});
     if(p.deep.length){if(p.lead){if(!p.deep.some(c=>B.dive[K(c[0],c[1])]))out.poolsBad.push({x:p.x,y:p.y,why:'lead has no cell'})}else if(!p.bath)out.warnings.push('deep pool at '+p.x+','+p.y+' leads nowhere (give it lead or bath:true)')}}
   for(const k in B.dive){const d=B.dive[k];if(d.to===undefined||d.x===undefined)out.poolsBad.push({x:k,why:'dive target incomplete'})}}
+
+/* hgtlTidyRoom(L, o): the last pass of a small Hollow interior (a flat room level {rows, decor, items, start}), so the room can be walked.
+   - a free-standing piece on a wall or pillar square is moved to a free square by a wall (a person, a chest, a barrel) or taken out (anything else)
+   - a solid piece in a passage one square wide (open on two opposite sides only) is moved to a free square by a wall
+   - a solid piece that cuts a person, a chest, an item or a door (o.doors [[x,y]..]) off from the way in is moved, or taken out if there is no room
+   - an item lying under a solid piece is moved to the nearest free square; the same piece twice on one square is kept once
+   Wall pictures (pic with a wall side) and pieces hung high (bob 1 and over, not solid) are never touched. The level is changed in place. */
+function hgtlTidyRoom(L,o){
+  o=o||{};const rows=L.rows.map(r=>typeof r==='string'?r:r.join('')),H=rows.length,W=rows[0].length,D=L.decor,items=L.items||[],st=L.start||{x:W>>1,y:H-2};
+  const doors=(o.doors||[]).slice(),K=(x,y)=>y*W+x,D4=[[1,0],[-1,0],[0,1],[0,-1]];
+  const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&rows[y][x]==='.';
+  const wallPic=d=>!!(d.pic&&d.wd),high=d=>!d.block&&(d.bob||0)>=1;
+  const loot=d=>!d.npc&&!d.deco&&typeof CONTAINERS!=='undefined'&&CONTAINERS.includes(d.k);
+  const must=d=>!!(d.npc||loot(d)||d.goldAmt);
+  const solid=d=>!!(d.block&&!d.found&&!wallPic(d));
+  const round=d=>[Math.round(d.x),Math.round(d.y)];
+  const blockedBy=skip=>{const s=new Set();for(const d of D)if(d!==skip&&solid(d)){const [x,y]=round(d);s.add(K(x,y))}return s};
+  const reach=bl=>{const seen=new Uint8Array(W*H),q=[];if(open(st.x,st.y)&&!bl.has(K(st.x,st.y))){seen[K(st.x,st.y)]=1;q.push([st.x,st.y])}
+    for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of D4){const nx=x+a,ny=y+b;if(open(nx,ny)&&!seen[K(nx,ny)]&&!bl.has(K(nx,ny))){seen[K(nx,ny)]=1;q.push([nx,ny])}}}return seen};
+  const near=(S,x,y)=>(open(x,y)&&S[K(x,y)])||D4.some(([a,b])=>open(x+a,y+b)&&S[K(x+a,y+b)]);
+  const targets=()=>{const t=[];for(const d of D)if(must(d)&&!wallPic(d))t.push(round(d));for(const it of items)t.push([it.x,it.y]);for(const q of doors)t.push(q);return t};
+  const nOK=bl=>{const S=reach(bl);return targets().filter(([x,y])=>near(S,x,y)).length};
+  const corridor=(x,y)=>{const n=D4.filter(([a,b])=>open(x+a,y+b));return n.length===2&&((open(x+1,y)&&open(x-1,y))||(open(x,y+1)&&open(x,y-1)))};
+  const used=()=>{const s=new Set();for(const d of D)if(!wallPic(d)&&!high(d)){const [x,y]=round(d);s.add(K(x,y))}for(const it of items)s.add(K(it.x,it.y));return s};
+  const byDoor=(x,y)=>doors.concat([[st.x,st.y]]).some(([a,b])=>Math.abs(a-x)+Math.abs(b-y)<=1);
+  // a free square for a piece: open, empty, by a wall, not in a passage, not at a door or the way in, and the room still walks with the piece there
+  function home(d,fx,fy){const U=used(),c=[],S0=reach(blockedBy(d));
+    for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!open(x,y)||U.has(K(x,y))||byDoor(x,y)||corridor(x,y)||!near(S0,x,y))continue;
+      const walls=D4.filter(([a,b])=>!open(x+a,y+b)).length;if(!walls&&solid(d))continue;c.push([Math.abs(x-fx)+Math.abs(y-fy)-(walls?.5:0),x,y])}
+    c.sort((a,b)=>a[0]-b[0]);
+    const base=nOK(blockedBy(d)),ox=d.x,oy=d.y;
+    for(const [,x,y] of c){if(!solid(d))return [x,y];d.x=x;d.y=y;const bl=blockedBy(d);bl.add(K(x,y));const n=nOK(bl);d.x=ox;d.y=oy;if(n>=base)return [x,y]}
+    return null}
+  const drop=d=>{const i=D.indexOf(d);if(i>=0)D.splice(i,1)};
+  // a person with no good square goes to the nearest free open square and lets the party walk through; anything else with no room is taken out
+  const move=d=>{const [fx,fy]=round(d),h=home(d,fx,fy);if(h){d.x=h[0];d.y=h[1];if(d.ox!==undefined){d.ox=0;d.oy=0}return true}
+    if(d.npc){const U=used();let best=null,bd=1e9;for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(open(x,y)&&!U.has(K(x,y))&&!(x===st.x&&y===st.y)){const dd=Math.abs(x-fx)+Math.abs(y-fy);if(dd<bd){bd=dd;best=[x,y]}}
+      if(best){d.x=best[0];d.y=best[1]}d.block=false;d.walk=true;return !!best}
+    drop(d);return false};
+  // 0. a wall picture whose wall is a door or open floor
+  doors.push([st.x,st.y+1]);
+  for(const d of D.slice())if(wallPic(d)){const [x,y]=round(d),bx=x+d.wd[0],by=y+d.wd[1];if(open(bx,by)||doors.some(q=>q[0]===bx&&q[1]===by))drop(d)}
+  // 1. pieces standing in a wall or a pillar
+  for(const d of D.slice()){if(wallPic(d))continue;const [x,y]=round(d);if(!open(x,y))move(d)}   // (a room's walls and pillars reach the ceiling: a lamp hung over one is moved too)
+  // 2. the same piece twice on one square
+  {const seen=new Set();for(const d of D.slice()){if(wallPic(d))continue;const [x,y]=round(d),k=d.k+'|'+x+'|'+y+'|'+(d.bob||0);if(seen.has(k))drop(d);else seen.add(k)}}
+  // 3. solid pieces in one-square passages
+  for(const d of D.slice()){if(!solid(d)||d.npc)continue;const [x,y]=round(d);if(open(x,y)&&corridor(x,y))move(d)}
+  // 4. items under solid pieces
+  {const bl=blockedBy(null);for(const it of items)if(!open(it.x,it.y)||bl.has(K(it.x,it.y))){const U=used();let best=null,bd=1e9;
+    for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(open(x,y)&&!U.has(K(x,y))&&!bl.has(K(x,y))){const dd=Math.abs(x-it.x)+Math.abs(y-it.y);if(dd<bd){bd=dd;best=[x,y]}}
+    if(best){it.x=best[0];it.y=best[1]}}}
+  // 5. whatever cuts a person, a chest, an item or a door off from the way in
+  const gave=new Set();for(let pass=0;pass<24;pass++){const bl=blockedBy(null),S=reach(bl);const lost=targets().find(([x,y])=>!near(S,x,y)&&!gave.has(x+','+y));if(!lost)break;gave.add(lost[0]+','+lost[1]);
+    const [tx,ty]=lost,goal=(x,y)=>Math.abs(x-tx)+Math.abs(y-ty)<=1,prev=new Map(),q=[[st.x,st.y]];prev.set(K(st.x,st.y),-1);let hit=goal(st.x,st.y)?K(st.x,st.y):-1;
+    for(let i=0;i<q.length&&hit<0;i++){const [x,y]=q[i];for(const [a,b] of D4){const nx=x+a,ny=y+b;if(!open(nx,ny)||prev.has(K(nx,ny)))continue;prev.set(K(nx,ny),K(x,y));if(goal(nx,ny)){hit=K(nx,ny);break}q.push([nx,ny])}}
+    if(hit<0){const d=D.find(q=>must(q)&&round(q)[0]===tx&&round(q)[1]===ty);if(d)move(d);else{const it=items.find(i=>i.x===tx&&i.y===ty);if(it){const S2=reach(blockedBy(null)),U=used();let best=null,bd=1e9;for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(S2[K(x,y)]&&!U.has(K(x,y))){const dd=Math.abs(x-tx)+Math.abs(y-ty);if(dd<bd){bd=dd;best=[x,y]}}if(best){it.x=best[0];it.y=best[1]}}}continue}
+    let moved=false;for(let c=hit;c>=0;c=prev.get(c)){const x=c%W,y=(c/W)|0;for(const d of D.slice())if(solid(d)&&!(must(d)&&round(d)[0]===tx&&round(d)[1]===ty)){const [dx,dy]=round(d);if(dx===x&&dy===y){if(d.npc){d.block=false;d.walk=true}else move(d);moved=true}}}
+    if(moved)gave.delete(tx+','+ty)}
+  return L}
+
+/* hgtlClearWalls(B): the last pass of a terraced Hollow town, after every wall is in place. A free-standing piece left on a square that a later
+   step turned into a wall (a house, a stair tower, a border) is moved to the nearest free open square if it is a person or a chest, and taken out
+   otherwise; a free-standing fish tank whose footprint was built over is taken out whole. Wall pictures, pieces hung high (bob 1 and over, not
+   solid) and the ornaments on the roofs (o.roof(d) true) are left alone. Returns the number of pieces moved or taken out. */
+function hgtlClearWalls(B,o){
+  o=o||{};const W=B.W||B.rows[0].length,H=B.H||B.rows.length,open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&B.rows[y][x]==='.',D4=[[1,0],[-1,0],[0,1],[0,-1]];
+  let n=0;const kill=new Set();
+  // fish tanks first: a tank is kept or dropped with all of its blocks
+  for(const m of B.decor)if(m.k==='hgtk_tank'&&m.tk&&!m.tk.wall){const t=m.tk,w=Math.round(t.cyl?2*t.R+.12:t.bx1-t.bx0+.12),h=Math.round(t.cyl?2*t.R+.12:t.by1-t.by0+.12);let ok=true;
+    for(let j=0;j<h;j++)for(let i=0;i<w;i++)if(!open(t.fx+i,t.fy+j))ok=false;
+    if(!ok){kill.add(m);for(const d of B.decor)if(d.k==='hgtk_blk'&&d.x>=t.fx&&d.x<t.fx+w&&d.y>=t.fy&&d.y<t.fy+h)kill.add(d);if(B.tanks){const i=B.tanks.indexOf(t);if(i>=0)B.tanks.splice(i,1)}}}
+  const taken=new Set();for(const d of B.decor)if(!kill.has(d))taken.add(Math.round(d.x)+','+Math.round(d.y));
+  for(const d of B.decor){if(kill.has(d)||(d.pic&&d.wd)||(!d.block&&(d.bob||0)>=1)||(o.roof&&o.roof(d))||/^hgtk_/.test(d.k))if(!(d.bob>=1&&/hanging|hanglamp|deco_lanterns/.test(d.k)))continue;   // (a lamp hung in the air over a wall square has nothing to hang from)
+    const x=Math.round(d.x),y=Math.round(d.y);if(open(x,y))continue;
+    const keep=d.npc||/chest|waxbarrel/.test(d.k);
+    if(keep){let best=null;for(let r=1;r<=4&&!best;r++)for(let dy=-r;dy<=r&&!best;dy++)for(let dx=-r;dx<=r;dx++){const nx=x+dx,ny=y+dy;if(open(nx,ny)&&!taken.has(nx+','+ny)){best=[nx,ny];break}}
+      if(best){taken.add(best[0]+','+best[1]);d.x=best[0];d.y=best[1];if(d.ox!==undefined){d.ox=0;d.oy=0}n++;continue}}
+    kill.add(d)}
+  if(kill.size){n+=kill.size;B.decor=B.decor.filter(d=>!kill.has(d))}
+  return n}
+
+/* hgtlArches(B): the painted gateway arch (hg_arch, an arch with two open doors) belongs in a gap one square wide between two walls. An arch
+   (hg_arch, or the old key hgt_arch that never had a picture) standing anywhere else, out on open ground, is taken out. */
+function hgtlArches(B){
+  const W=B.W||B.rows[0].length,H=B.H||B.rows.length,open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&B.rows[y][x]==='.',wall=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&B.rows[y][x]!=='.';
+  const gap=(x,y)=>open(x,y)&&((wall(x+1,y)&&wall(x-1,y)&&open(x,y+1)&&open(x,y-1))||(wall(x,y+1)&&wall(x,y-1)&&open(x+1,y)&&open(x-1,y)));
+  let n=0;B.decor=B.decor.filter(d=>{if((d.k!=='hgt_arch'&&d.k!=='hg_arch')||d.npc)return true;if(gap(Math.round(d.x),Math.round(d.y))){d.k='hg_arch';return true}n++;return false});
+  return n}
+
+/* hgtlDedupe(B): the same piece twice on one square (two builder steps that both light a corner, say) is kept once. Pieces with their own offset
+   (ox, oy) are different placements and stay; two of the same lamp hung at two heights over one square are one too many, and one wall lamp per square is enough. */
+function hgtlDedupe(B){const seen=new Set();let n=0;
+  B.decor=B.decor.filter(d=>{if(d.npc||d.enter||/^hgtk_/.test(d.k))return true;const key=d.k+'|'+Math.round(d.x)+'|'+Math.round(d.y)+'|'+(d.wd||'')+(/bracket/.test(d.k)?'':'|'+(+(d.ox||0)).toFixed(2)+'|'+(+(d.oy||0)).toFixed(2));if(seen.has(key)){n++;return false}seen.add(key);return true});
+  return n}
 
 /* ---- src/desert/hgt_maze.js ---- */
 /* hgt_maze.js  (prefix hgtz)  MAZES for the terraced towns of the Hollow Grasslands. Builders on the library builder B (hgtlNew, see hgt_lib.js).
@@ -30595,7 +30691,7 @@ function rect(B,x,y,w,d,h,k){for(let j=0;j<d;j++)for(let i=0;i<w;i++)O(B,x+i,y+j
 function solid(B,x,y,w,d,ch,h){for(let j=0;j<d;j++)for(let i=0;i<w;i++)Wl(B,x+i,y+j,ch,h)}
 function decor(B,k,x,y,o){B.decor.push(Object.assign({k,x,y,block:false},o||{}))}
 const NEWP=['hgtb_plant_spiralfern','hgtb_plant_orbbush','hgtb_plant_lacecoral','hgtb_plant_tealgrass','hgtb_plant_lupin','hgtb_plant_glowshrooms'],TREES=['fairytree','willow','giantcap'];
-function plant(B,k,x,y,sc,o){let kk='hgt_'+k;const r=hs(x,y,211);if(TREES.includes(k)){if(r<.25&&IMG.hgtb_plant_belltree)kk='hgtb_plant_belltree'}else if(r<.35){const n=NEWP[(hs(x,y,212)*NEWP.length)|0];if(IMG[n])kk=n}
+function plant(B,k,x,y,sc,o){let kk=k==='glowshrooms'?'hgtb_plant_glowshrooms':'hgt_'+k;   /* (there is no hgt_glowshrooms picture; the painted glow mushrooms are hgtb_plant_glowshrooms) */const r=hs(x,y,211);if(TREES.includes(k)){if(r<.25&&IMG.hgtb_plant_belltree)kk='hgtb_plant_belltree'}else if(r<.35){const n=NEWP[(hs(x,y,212)*NEWP.length)|0];if(IMG[n])kk=n}
   if(isO(B,x,y))decor(B,kk,x,y,Object.assign({walk:true,deco:true,sc:sc||1,ox:(hs(x,y,41)-.5)*.5,oy:(hs(x,y,42)-.5)*.5},o||{}))}
 const light=(B,x,y)=>{if(isO(B,x,y))B.lights.push([x,y])};
 function lampPost(B,x,y){if(isO(B,x,y)){const r=hs(x,y,210),k=r<.3?'hgt_lamppost':r<.5?'hgtb_lamp_tall':r<.68?'hgtb_lamp_short':r<.84?'hgtb_lamp_vine':'hgtb_lamp_bare';decor(B,IMG[k]?k:'hgt_lamppost',x,y,{walk:true,deco:true,sc:1});light(B,x,y)}}
@@ -31051,7 +31147,8 @@ function buildRoom(key){
   const decorL=[],lights=[],items=[];
   const put=(role,x,y,o)=>{const k=khProp(role);if(IMG[k]&&k.startsWith('kh_'))NPC_H[k]=khPropH(role);decorL.push(Object.assign({k,x,y,block:true,deco:true},o||{}))};
   for(const [role,x,y] of def.props||[])put(role,x,y);
-  for(const [n,x,y,sc] of def.plants||[]){const k='hgt_'+n;decorL.push({k,x,y,block:false,walk:true,deco:true,sc:sc||1})}
+  // the hanging lamps and the wind chimes hang from the ceiling (2.7 high), the top of the picture at the ceiling; plants and lanterns stand on the floor
+  for(const [n,x,y,sc] of def.plants||[]){const k='hgt_'+n,hang=n==='hanglamp'||n==='chime';decorL.push(Object.assign({k,x,y,block:false,walk:true,deco:true,sc:sc||1},hang?{bob:Math.max(0,2.7-(NPC_H[k]||SPR_H[k]||1)*(sc||1))}:{}))}
   for(const [x,y] of def.lights||[])lights.push([x,y]);
   for(const [x,y,k] of def.chests||[])decorL.push({k,x,y,block:true});
   for(const [x,y] of def.barrels||[])decorL.push({k:'hg_waxbarrel',x,y,block:true});
@@ -31065,6 +31162,7 @@ function buildRoom(key){
    for(const [x,y] of [[1,d-3],[w-2,d-3]])if(!taken(x,y)&&IMG.hgtb_lamp_short)decorL.push({k:'hgtb_lamp_short',x,y,block:false,walk:true,deco:true,sc:1});
    if(IMG.hgtb_lamp_bracket)for(const [x,y] of [[2,1],[w-3,1],[1,d>>1],[w-2,d>>1]])if(!taken(x,y)&&rows[y]&&rows[y][x]==='.')decorL.push({k:'hgtb_lamp_bracket',x,y,block:false,walk:true,deco:true,sc:1,bob:.9});
    if(R.id%3===0&&IMG.hgtb_plant_belltree&&!taken(1,1))decorL.push({k:'hgtb_plant_orbbush',x:1,y:1,block:false,walk:true,deco:true,sc:1})}
+  hgtlTidyRoom({rows,decor:decorL,items,start:{x:cx,y:d-2}},{doors:R.next?[[cx,0]]:[]});   // people and chests out of the walls, passages clear, everything reachable
   for(let i=decorL.length-1;i>=0;i--){const q=decorL[i];if(rows[q.y]&&rows[q.y][q.x]!=='.')decorL.splice(i,1)}
   const fa=nm_=>FLOORS[nm_]?nm_:'hgt_f5',f0=fa(R.floorPref||RFLOOR[(R.id*3)%RFLOOR.length]),f1=fa(RFLOOR[(R.id*3+4)%RFLOOR.length]),f2=fa(['hgtb_f_mandala','hgtb_f_rosette','hgtb_f_lotus','hgtb_f_star'][R.id%4]),my2=Math.max(2,(d>>1)-1),fmI=[];
   for(let y=0;y<d;y++){let q='';for(let x=0;x<w;x++)q+=(Math.abs(x-cx)<=1&&Math.abs(y-my2)<=1)?'2':(x===1||y===1||x===w-2||y===d-2)?'1':'0';fmI.push(q)}
@@ -31907,13 +32005,11 @@ function build(){
   for(const hsr of B.houses){
     if(isO(hsr.x+(hsr.w>>1),hsr.y+(hsr.d>>1)))continue;
     const v=hs(hsr.x,hsr.y,90);
-    const k=v<.2?'hgt_finial':v<.4?'hgt_cupola':v<.55?'hgt_chimney':v<.7?'hgt_banner':v<.8?'hgt_obelisk':v<.9?'hgt_fairytree':'hgt_willow';
-    const sc=k==='hgt_cupola'?1.2+hsr.w*.12:k==='hgt_obelisk'?.8:(k==='hgt_fairytree'||k==='hgt_willow')?.9:1;
+    // only pieces that rise over a roof (a finial, a cupola, a banner pole); no chimney pots, trees, obelisks, standing lanterns or potted plants up
+    // there (they stood on the wall squares of the house and could not be seen from the streets)
+    const k=v<.36?'hgt_finial':v<.72?'hgt_cupola':'hgt_banner';
+    const sc=k==='hgt_cupola'?1.2+hsr.w*.12:1;
     dec(k,hsr.x+(hsr.w>>1),hsr.y+(hsr.d>>1),{bob:hsr.wh,sc});
-    // lit lanterns on the corners of the roof
-    for(const [cx,cy] of [[hsr.x,hsr.y],[hsr.x+hsr.w-1,hsr.y+hsr.d-1]])dec('hgt_gardenlantern',cx,cy,{bob:hsr.wh,sc:.9});
-    // plants on the ledges
-    if(hs(hsr.x,hsr.y,91)<.5)dec(PLANTS[(hs(hsr.x,hsr.y,92)*PLANTS.length)|0],hsr.x+hsr.w-1,hsr.y,{bob:hsr.wh,sc:1.1});
     // a lit doorway lamp in front of every door that opens
     if(hsr.room)B.lights.push([hsr.front[0],hsr.front[1]])}
   for(const st of stairTowers){dec('hgt_cupola',st.nx,st.ny,{bob:5.1-0,sc:1.6});for(const c of st.path.filter((c,i)=>i%5===2))dec('hgt_hanglamp',c[0],c[1],{bob:1.7});}
@@ -32099,6 +32195,8 @@ function roomLevel(id){
   for(const [k,id2,x,y] of R.npcs)decor.push({k,x,y,block:false,walk:true,npc:id2,sc:1});
   for(const [k,x,y] of R.loot)items.push({k,x,y});
   const st=R.arrive||{x:ex,y:d,f:0};
+  {const dl=[];for(let y=0;y<rows.length;y++)for(let x=0;x<rows[0].length;x++)if('DEFG'.includes(rows[y][x]))dl.push([x,y]);
+   hgtlTidyRoom({rows,decor,items,start:st},{doors:dl})}   // nothing in a wall or pillar, passages clear, every barrel, chest and person reachable
   return {rows:rows.map(r=>r.join('')),chars,start:{x:st.x,y:st.y,f:st.f},enemies:[],items,decor,lights,portals:[],floor:R.floor,ceil:'beam',ceilH:3,day:0,amb:.5,noTele:true,noExtras:true,diff:66,name:R.name,label:R.name,mapNames:[]};
 }
 for(let id=INT0;id<=INTN;id++)if(ROOMS[id])hgtRegister(id,roomLevel);
@@ -32749,7 +32847,7 @@ function hgtxglormBuild(id){
    pet('hgtb_aquawhale',around(70,140),{sc:1});pet('hgtb_peachwhale',around(82,140),{sc:1});pet('hgtb_aquawhale',around(46,88),{sc:.9});pet('hgtb_peachwhale',around(104,76),{sc:.9});
    const KINDS=['hgtb_pearlslug','hgtb_creammoth','hgtb_pinkbulb','hgtb_amberpup','hgtb_pups','hgtb_jadeeel','hgtb_lanternbeetle','hgtb_spindleray','hgtb_fishbeetle','hgtb_spindlespider'],FLY=['hgtb_lilacmoth','hgtb_jadefinmoth','hgtb_creamjelly','hgtb_fishfly'];
    let n=0;for(const p of POOLS){pet(KINDS[n%10],around(p.x+2,p.y-1));pet(KINDS[(n+3)%10],around(p.x+p.w-3,p.y+p.d));pet(FLY[n%4],around(p.x+(p.w>>1),p.y+p.d+1),{bob:.7});n++}
-   for(const [x,y] of [[33,10],[117,10],[10,10],[140,10],[60,4],[90,4],[88,12],[56,12],[125,30],[125,40],[11,28],[8,30],[45,30],[105,30],[20,70],[130,90],[50,125],[100,125],[75,100],[60,90],[90,80]])pet((n++%3===0)?FLY[n%4]:KINDS[n%10],around(x,y),n%3===0?{bob:.8}:{});
+   for(const [x,y] of [[33,10],[117,10],[10,10],[140,10],[60,4],[90,4],[88,12],[56,12],[125,30],[125,40],[11,28],[8,30],[45,30],[105,30],[20,70],[130,90],[50,125],[100,125],[75,100],[60,90],[90,80]]){const fly=n++%3===0;pet(fly?FLY[n%4]:KINDS[n%10],around(x,y),fly?{bob:.8}:{})}   // (only the flying ones are lifted; the walking ones stand on the ground)
    for(const m of MZ)if(m&&m.approach)pet(KINDS[(n++)%10],around(m.approach.x,m.approach.y))}
   /* ---------- people at work: sweepers on the landings, readers and fishers at the pools, walkers on routes ---------- */
   {const AG=[],sw=['I sweep the landing every morning. The dust comes down from the tiers above.','Mind the steps. They are swept, not dried.'],tiers=[0,1,2,3,4,5];
@@ -32765,7 +32863,7 @@ function hgtxglormBuild(id){
   {const KINDS=['hgtb_pearlslug','hgtb_creammoth','hgtb_pinkbulb','hgtb_amberpup','hgtb_pups','hgtb_jadeeel','hgtb_lanternbeetle','hgtb_spindleray','hgtb_fishbeetle','hgtb_spindlespider','hgtb_lilacmoth','hgtb_jadefinmoth','hgtb_creamjelly','hgtb_fishfly'];let n=0;
    for(let gy=7;gy<142;gy+=8)for(let gx=7;gx<142;gx+=8){if(R(gx,gy,120)<.25)continue;let done=false;
      for(let r=0;r<=3&&!done;r++)for(let dy=-r;dy<=r&&!done;dy++)for(let dx=-r;dx<=r&&!done;dx++){const x=gx+dx,y=gy+dy;if(!isO(x,y)||inMz(x,y)||B.occ.has(x+','+y)||Math.abs(ground(x,y))>3.2||B.kind[I(x,y)]===G.STAIR)continue;
-       const k=KINDS[n++%14];B.occ.add(x+','+y);hgtlDecor(B,k,x,y,Object.assign({block:false,walk:true,deco:true},n%14>9?{bob:.8}:{}));done=true}}}
+       const i=n++%14,k=KINDS[i];B.occ.add(x+','+y);hgtlDecor(B,k,x,y,Object.assign({block:false,walk:true,deco:true},i>9?{bob:.8}:{}));done=true}}}   // (the last four kinds fly; the spider walks)
   hgtlSetStart(B,75,144,0);
   /* ---------- edges: pillars and hanging plants along the summit, vines and lamps along the great wall ---------- */
   for(let x=53;x<=91;x+=3){if((x>=56&&x<=62)||(x>=66&&x<=82))continue;wall(x,13,'m','band',SH,SH+3.4);plant(x,12,1.8,.5,'hgt_willow');plant(x+1,12,1.4,.6,'hgt_lightvine')}
@@ -32885,9 +32983,9 @@ function hgtxglormRoomBuild(rid){
   const SOL=[],solid=(x,y)=>{if(x>0&&y>0&&x<w-1&&y<d-1&&!(x===(w>>1)&&(y===d-2||y===1))){rows[y][x]=cb;SOL.push(x+','+y)}};
   if(rid>=5160){const v=rid%6;
     if(v%2===0){solid(2,2);solid(w-3,2);solid(2,d-3);solid(w-3,d-3)}                                  // corner pillars
-    if(v%3===1){for(let x=1;x<=3;x++)solid(x,d-4);solid(3,d-3);solid(3,d-2)}                         // a recess in the south west corner
+    if(v%3===1){for(let x=1;x<=3;x++)solid(x,d-4);solid(3,d-3)}                                      // a recess in the south west corner, open at its foot
     if(v===2||v===5){for(let y=2;y<=((d>>1)-1);y++)solid(w-4,y)}                                       // a half partition on the east
-    if(v===3){for(let x=w-4;x<w-1;x++)solid(x,d-4);solid(w-4,d-3);solid(w-4,d-2)}                     // a recess in the south east corner
+    if(v===3){for(let x=w-4;x<w-1;x++)solid(x,d-4);solid(w-4,d-3)}                                   // a recess in the south east corner, open at its foot
   }
   const exitAt=parent!==null?{x:HGTXG_ROOMS[parent].w>>1,y:1,f:2}:out?{x:out.ax,y:out.ay,f:out.face}:{x:75,y:144,f:0};
   const exitLvl=parent!==null?parent:483;
@@ -32921,11 +33019,12 @@ function hgtxglormRoomBuild(rid){
    const PETS=['hgtb_pearlslug','hgtb_creammoth','hgtb_pinkbulb','hgtb_amberpup','hgtb_pups','hgtb_jadeeel','hgtb_lanternbeetle','hgtb_fishbeetle','hgtb_spindleray','hgtb_lilacmoth','hgtb_jadefinmoth','hgtb_creamjelly','hgtb_fishfly','hgtb_creammoth','hgtb_spindlespider','hgtb_amberpup'];
    put(PETS[(rid*7+3)%16],w-2,d-2,1);if(rid%3===0)put('hg_chestjelly',1,d-2,0);
    decor.push({k:['hgtb_furn_chandelier','hgtb_furn_chandelier_lantern','hgt_hanglamp'][rid%3],x:cx,y:Math.max(2,cy-1),block:false,walk:true,deco:true,bob:1.4,sc:1.2});lights.push([cx,cy]);
-   const FOLKI=['hgtb_sweep','hgtb_basket','hgtb_water','hgtb_polish','hgtb_read','hgtb_fisher','hgtb_watch','hgtb_walk','hgtb_plantbed','hgtb_jar','hgtb_lantern','hgtb_elder'],fi=FOLKI[rid%12];for(const q of decor)if(q.npc===r.extra)q.k=fi}
+   const FOLKI=['hgtb_sweep','hgtb_basket','hgtb_water','hgtb_polish','hgtb_read','hgtb_fisher','hgtb_watch','hgtb_walk','hgtb_plantbed','hgtb_jar','hgtb_lantern','hgtb_elder'],fi=FOLKI[rid%12];if(r.extra)for(const q of decor)if(q.npc===r.extra)q.k=fi}   // (only the room's own worker: a room with no worker keeps its furniture)
   {const cnt={};for(const q of decor){if(!q.block||q.npc)continue;(cnt[q.y]=cnt[q.y]||[]).push(q)}
    for(const y in cnt){const L=cnt[y];if(L.length>3){const occ=new Set(decor.map(q=>q.x+','+q.y));L.slice(3).forEach((q,i)=>{for(const dy of [2,-2,3,-3]){const ny=q.y+dy;if(ny>0&&ny<d-2&&!occ.has(q.x+','+ny)&&rows[ny][q.x]==='.'){occ.delete(q.x+','+q.y);q.y=ny;occ.add(q.x+','+ny);break}}})}}}
   lights.push([w>>1,d-2],[w>>1,2]);
   const fmap=[];for(let y=0;y<d;y++){let s='';for(let x=0;x<w;x++)s+=(Math.abs(x-(w>>1))<=2&&y>=(d>>1)-1&&y<=(d>>1)+1)?'1':'0';fmap.push(s)}
+  hgtlTidyRoom({rows,decor,items:[],start:{x:w>>1,y:d-2}},{doors:r.up?[[w>>1,0]]:[]});   // nothing in a pillar, nothing blocking a passage, every chest and person reachable
   return {rows:rows.map(a=>a.join('')),chars,start:{x:w>>1,y:d-2,f:0},enemies:[],items:[],decor,lights,portals:[],floor:r.fl==='wood'?'wood':hgtxglormFloor(r.fl),fmap,floorSet:[['hgtb_f_planks','hgtb_f_terrazzo','hgtb_f_marble','hgtb_f_reed'][rid%4],['hgtb_f_floral','hgtb_f_lotus','hgtb_f_mandala','hgtb_f_rosette','hgtb_f_star','hgtb_f_circles','hgtb_f_petals','hgtb_f_sunburst'][rid%8],'pale','dirt','mosscobble','stainedcobble'],ceil:'tomb',ceilH:2.7,day:0,amb:.5,torchGap:1e9,noTele:true,noExtras:true,diff:HG.DIFF,name:r.n,label:r.n,mapNames:[]}}
 function hgtxglormFloor(n){return n}
 for(const id in HGTXG_ROOMS)hgtRegister(+id,hgtxglormRoomBuild.bind(null,+id));
@@ -33443,9 +33542,19 @@ function build(id){
   {let best=null;for(const g of spire.gapWalls){if(g.arm!==1)continue;for(const d of HGTL.DIRS){const lc=spire.lane.get((g.i+d[0])+','+(g.j+d[1]));if(lc&&Math.abs(lc.h-g.lo)<.01&&lc.u>.45&&lc.u<.6&&!best)best={g,d,lc}}}
     if(best){const q=toInt(4893),face=HGTL.DIRS.findIndex(z=>z[0]===best.d[0]&&z[1]===best.d[1]);door(best.g.i,best.g.j,face,'a',best.g.hi-best.g.lo+.6,4893,q.tx,q.ty,q.tf);const rec=B.doors[B.doors.length-1];links[4893]={x:rec.ax,y:rec.ay,f:rec.face}}}
   /* looms, tapestries and threads of light on the top platform, round the column */
+  // a loom stands only where the whole platform can still be walked round (the ways in are the platform squares one step from open ground off the
+  // platform); a tapestry hangs flat on a wall beside its square (the column or the parapet), never standing loose on the floor
   {const ring=spire.plat.filter(c=>{const r=Math.hypot(c[0]-cx,c[1]-cy);return r>2.5});let n=0;
-   for(const c of ring){if(!isOpen(c[0],c[1])||(c[0]===(spire.door&&spire.door.ax)&&c[1]===(spire.door&&spire.door.ay)))continue;n++;
-     if(n%2===0)dec('kh_int4_2',c[0],c[1],{block:true,deco:true,sc:1.5});else if(n%3===1)dec('kh_int4_3',c[0],c[1],{block:true,deco:true,sc:1.4});else dec('hgt_lightvine',c[0],c[1],{walk:true,deco:true,sc:1.4,bob:.1});light(c[0],c[1])}
+   const P=new Set(spire.plat.filter(c=>isOpen(c[0],c[1])).map(c=>c[0]+','+c[1])),solidP=new Set(),D4=HGTL.DIRS;
+   const step=(x,y,a,b)=>Math.abs(h[I(x,y)]-h[I(a,b)])<=.55,ins=[...P].map(s=>s.split(',').map(Number)).filter(([x,y])=>D4.some(d=>isOpen(x+d[0],y+d[1])&&!P.has((x+d[0])+','+(y+d[1]))&&step(x,y,x+d[0],y+d[1])));
+   const walkable=()=>{const seen=new Set(),q=ins.filter(([x,y])=>!solidP.has(x+','+y));for(const [x,y] of q)seen.add(x+','+y);
+     for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const d of D4){const k=(x+d[0])+','+(y+d[1]);if(P.has(k)&&!solidP.has(k)&&!seen.has(k)&&step(x,y,x+d[0],y+d[1])){seen.add(k);q.push([x+d[0],y+d[1]])}}}
+     for(const k of P)if(!solidP.has(k)&&!seen.has(k))return false;return true};
+   for(const c of ring){if(!isOpen(c[0],c[1])||(c[0]===(spire.door&&spire.door.ax)&&c[1]===(spire.door&&spire.door.ay)))continue;n++;const key=c[0]+','+c[1];
+     const wd=D4.find(d=>!isOpen(c[0]+d[0],c[1]+d[1]));
+     if(n%2===0){solidP.add(key);if(walkable())dec('kh_int4_2',c[0],c[1],{block:true,deco:true,sc:1.5});else{solidP.delete(key);dec('hgt_lightvine',c[0],c[1],{walk:true,deco:true,sc:1.4,bob:.1})}}
+     else if(n%3===1&&wd)dec('kh_int4_3',c[0],c[1],{pic:1,wd:[wd[0],wd[1]],bob:.12,block:false});
+     else dec('hgt_lightvine',c[0],c[1],{walk:true,deco:true,sc:1.4,bob:.1});light(c[0],c[1])}
    NPC_H.kh_int4_2=1.0;NPC_H.kh_int4_3=1.0}
   /* the basin is dressed: stalls on the shore, lamps down every causeway, trees, giant caps and glitter plants on the banks, benches by the plaza */
   for(const [sx,sy] of [[GX-12,121],[GX+12,121],[GX-14,128],[GX+14,128],[GX-12,131],[GX+12,131]]){const k=khProp(['stallA','stallC','stallB','stallD','stallE','stallF'][(sx+sy)%6]);if(IMG[k]&&k.startsWith('kh_'))NPC_H[k]=khPropH('stallA');if(isOpen(sx,sy))dec(k,sx,sy,{block:true,deco:true,sc:1.3})}
@@ -33607,6 +33716,7 @@ function hgtxulbHelix(B,o){
 
 /* ---------- the rooms: small shell-walled interiors (levels 4880 to 4899). Each is a flat level with the door back out in the middle of the bottom wall. ---------- */
 const ROOMS={};
+const HGTXULB_WALLROLE={kitchenshelf:.42,tapestry:.12};   // wall pictures in the rooms: their lift above the floor (the Khemetra house values)
 const R_=(id,name,tint,floor,fn,o)=>{ROOMS[id]=Object.assign({id,name,tint,floor,fn},o||{})};
 /* the folk of Ulb who are not quest givers: plain things to say about the city */
 const hgtxulbFolk=[ // [id, name, picture, lines]
@@ -33638,7 +33748,12 @@ function hgtxulbRoom(id){
   const wallW=hgtaChar(hgtaWallTile(TT[TL][0],3,{base:TT[TL][1],mid:pd,top:TT[TL][2]}));
   for(let y=0;y<H_;y++){let r='';for(let x=0;x<W_;x++)r+=(y===0||y===H_-1||x===0||x===W_-1)?(((y===0||y===H_-1)?x%3===1:y%3===1)?wallW:wall):'.';rows.push(r.split(''))}
   const lk=HGTXULB.LINKS&&HGTXULB.LINKS[id]||{x:75,y:3,f:2};
-  const put=(role,x,y,o)=>{const k=khProp(role);if(IMG[k]&&k.startsWith('kh_'))NPC_H[k]=khPropH(role);decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}))};
+  // the kitchen shelf and the tapestry are pictures flat on the wall beside them (as in the Khemetra houses, KH_WALLPIECE); the hanging lamp
+  // (kh_int2_1) hangs from the ceiling (ceilH 3), the top of its chain at the ceiling; everything else stands on the floor
+  const put=(role,x,y,o)=>{const k=khProp(role);if(IMG[k]&&k.startsWith('kh_'))NPC_H[k]=khPropH(role);
+    if(HGTXULB_WALLROLE[role]!==undefined&&k.startsWith('kh_')){const wd=y===1?[0,-1]:x===1?[-1,0]:x===W_-2?[1,0]:null;if(wd){decor.push(Object.assign({k,x,y,pic:1,wd,bob:HGTXULB_WALLROLE[role],block:false},o||{}));return}}
+    if(role==='hlamp'&&k==='kh_int2_1'){decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true,bob:3-khPropH(role)*.965},o||{}));return}
+    decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}))};
   const raw=(k,x,y,o)=>decor.push(Object.assign({k,x,y,block:true},o||{}));
   const npc=(nid,img,x,y,o)=>decor.push(Object.assign({k:img,x,y,block:true,npc:nid,sc:1},o||{}));
   const light=(x,y)=>lights.push([x,y]);
@@ -33667,7 +33782,7 @@ function hgtxulbRoom(id){
    for(let x=3;x<W_-3;x+=3)prop('tapestry',x,1);
    const cy0=H_>>1;
    // the centrepiece of the room, one big painted piece in the middle
-   {const CEN=HGTXULB.CENTRE[id]||HGTXULB.CENTRE_ALL[id%HGTXULB.CENTRE_ALL.length],ck=IMG[CEN]?CEN:'hgtb_furn_table_chairs';for(const [dx,dy] of [[0,-1],[0,0],[1,-1],[-1,-1],[0,-2]]){const x=mid+dx,y=cy0+dy;if(free(x,y)&&y<H_-4){take(x,y);decor.push({k:ck,x,y,block:true,sc:CEN.indexOf('stage')>0?1.3:1.4});lights.push([x,y]);break}}}
+   {const CEN=HGTXULB.CENTRE[id]||HGTXULB.CENTRE_ALL[id%HGTXULB.CENTRE_ALL.length],ck=IMG[CEN]?CEN:'hgtb_furn_table_chairs';for(const [dx,dy] of [[0,-1],[0,0],[1,-1],[-1,-1],[0,-2]]){const x=mid+dx,y=cy0+dy;if(free(x,y)&&y<H_-4){take(x,y);decor.push(Object.assign({k:ck,x,y,block:true,sc:CEN.indexOf('stage')>0?1.3:1.4},ck==='hgtb_deco_pearlplinth'?{bob:-.05}:{}));lights.push([x,y]);break}}}
    for(const [x,y,k] of [[1,2,'hgt_bulbflower'],[W_-2,2,'hgt_shellflower'],[1,H_-4,'hgt_fern'],[W_-2,H_-4,'hgt_pearlbush']])if(free(x,y)){take(x,y);decor.push({k,x,y,block:false,walk:true,deco:true,sc:1.1})}
    const XTRA=['hgtb_furn_cabinet','hgtb_furn_books_globe','hgtb_plant_barrel','hgtb_plant_potvine','hgtb_furn_bookshelf','hgtb_plant_lupin','hgtb_stall_sage_herbs','hgtb_deco_lanterns'];
    for(let q=0;q<4;q++){const k=XTRA[(id*3+q*5)%XTRA.length];const cand=[[1,2+q],[W_-2,2+q],[2+q*2,1],[W_-3-q,H_-3]];for(const [x,y] of cand)if(free(x,y)&&IMG[k]){take(x,y);decor.push({k,x,y,block:true,sc:1});break}}
@@ -33680,7 +33795,7 @@ function hgtxulbRoom(id){
    for(const [x,y] of [[W_-3,H_-3],[2,H_-3],[W_-3,2]])if(free(x,y)){take(x,y);decor.push({k:sur,x,y,block:true,sc:1.1});lights.push([x,y]);break}
    lights.push([mid,cy0],[2,2],[W_-3,H_-3]);
    for(const d of decor)if(/lamp|brazier/.test(d.k)||d.k==='kh_int2_1'||d.k==='kh_int5_5')lights.push([d.x,d.y])}
-  for(const r of rows)void r;
+  hgtlTidyRoom({rows,decor,items,start:{x:mid,y:H_-2}},{doors:drs.map(q=>[q.x,q.y])});   // nothing in a wall, nothing blocking a passage, every chest and person reachable
   Object.assign(chars,hgtaChars);
   const L={rows:rows.map(r=>r.join('')),chars,start:{x:mid,y:H_-2,f:0},enemies:[],items,decor,lights:sp.lights||lights,portals:[],day:0,amb:.58+((id*7)%5)*.05,floor:HGTXULB.floorFor(TL,id,sp.floor||'wood'),ceil:'beam',ceilH:3,name:sp.name,label:sp.name,
     diff:66,noTele:true,noExtras:true,mapNames:[{t:sp.name,x:mid,y:1,k:'place'}]};
@@ -33712,12 +33827,12 @@ const hgtxulbThemes=[
  ['A Weaving Hall','l','hgt_f5',(c,k)=>{const {put,W,H,npc}=c;for(let x=2;x<W-2;x+=2)put('loom',x,2);for(let x=3;x<W-3;x+=3)put('chair',x,4);put('table',W-3,H-4);put('rolledcarpets',1,H>>1)}],
  ['A Spindle Workshop','p','wood',(c)=>{const {put,W,H}=c;for(let x=1;x<W-1;x+=2)put('rack',x,1);put('table',3,3);put('table',W-4,3);put('chair',3,4);put('chair',W-4,4);put('loom',W-2,H-4)}],
  ['A Reed Storehouse','c','wood',(c)=>{const {put,raw,W,H}=c;for(let y=1;y<H-3;y+=2){raw('crate',1,y);raw('barrel',W-2,y)}for(let x=3;x<W-3;x+=2)put('rolledcarpets',x,1);put('amphora',3,H-4)}],
- ['A Dye House','a','hgt_f3',(c)=>{const {put,W,H}=c;for(let x=1;x<W-1;x+=2)put('basin',x,1);put('rack',1,3);put('rack',W-2,3);put('amphora',1,H-4);put('amphora',W-2,H-4);put('tapestry',W>>1,2)}],
+ ['A Dye House','a','hgt_f3',(c)=>{const {put,W,H}=c;for(let x=1;x<W-1;x+=2)put('basin',x,1);put('rack',1,3);put('rack',W-2,3);put('amphora',1,H-4);put('amphora',W-2,H-4);if(!((W>>1)&1))put('tapestry',W>>1,1)}],
  ['A Tapestry Gallery','l','hgt_f5',(c)=>{const {put,W,H}=c;for(let x=1;x<W-1;x++)put('tapestry',x,1);for(let y=2;y<H-3;y+=2){put('tapestry',1,y);put('tapestry',W-2,y)}put('statue',W>>1,3);put('bench',3,H-4);put('bench',W-4,H-4)}],
  ['A Thread Library','l','hgt_f5',(c)=>{const {put,W,H}=c;for(let x=1;x<W-1;x++)put('bookcase',x,1);for(let y=2;y<H-3;y+=1){put('bookcase',1,y);put('bookcase',W-2,y)}put('desk',3,3);put('chair',3,4);put('desk',W-4,3);put('chair',W-4,4)}],
  ['An Apothecary of Glowing Herbs','a','wood',(c)=>{const {put,decor,light,W,H}=c;for(let x=1;x<W-1;x+=2)put('potshelf',x,1);put('basin',2,H-4);put('basin',W-3,H-4);put('table',W>>1,3);for(const [x,y] of [[2,3],[W-3,3],[2,H-5],[W-3,H-5]]){decor.push({k:'hgt_lightvine',x,y,block:false,walk:true,deco:true,sc:1.2});light(x,y)}decor.push({k:'hgt_mushrooms',x:W>>1,y:4,block:false,walk:true,deco:true,sc:1.3})}],
  ['A Bedroom','p','wood',(c)=>{const {put,W,H}=c;put('bed',1,2);put('bed',W-2,2);put('cradle',1,H-4);put('wardrobe',W-2,H-4);put('dresser',W>>1,1);put('harp',W-2,H>>1)}],
- ['A Kitchen','c','wood',(c)=>{const {put,W,H}=c;put('hearth',W>>1,1);put('oven',2,1);put('oven',W-3,1);for(let x=1;x<W-1;x+=2)put('kitchenshelf',x,2);put('table',3,H-4);put('chair',2,H-4);put('chair',4,H-4);put('table',W-4,H-4);put('chair',W-5,H-4)}],
+ ['A Kitchen','c','wood',(c)=>{const {put,W,H}=c;put('hearth',W>>1,1);put('oven',2,1);put('oven',W-3,1);for(let x=1;x<W-1;x+=2)if(x!==(W>>1)&&x!==2&&x!==W-3)put('kitchenshelf',x,1);put('table',3,H-4);put('chair',2,H-4);put('chair',4,H-4);put('table',W-4,H-4);put('chair',W-5,H-4)}],
  ['A Clock Room','a','hgt_f5',(c)=>{const {put,W,H}=c;put('statue',W>>1,1);put('birdcage',2,2);put('birdcage',W-3,2);put('obelisk',2,H-4);put('obelisk',W-3,H-4);put('hlamp',W>>1,3);put('table',W>>1,H-4)}],
  ['A Reed-Boat Shed','c','wood',(c)=>{const {put,W,H}=c;put('ship',2,2);put('ship',W-3,2);put('sail',1,H>>1);put('sail',W-2,H>>1);put('rope',3,H-4);put('anchor',W-4,H-4);put('wheel',W>>1,2)}],
  ['A Sunken Bath','a','hgt_f3',(c)=>{const {put,W,H}=c;put('basin',2,2);put('basin',W-3,2);put('basin',2,H-4);put('basin',W-3,H-4);put('fountain',W>>1,2);put('cushions',W>>1,H-4);put('amphora',1,H>>1);put('amphora',W-2,H>>1)}],
@@ -49185,7 +49300,9 @@ function hgrPlace(){
       let spot=null;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[2,0],[0,2],[-1,1],[1,-1]])if(open(n.p[0]+dx,n.p[1]+dy)){spot=[n.p[0]+dx,n.p[1]+dy];break}
       if(spot)chosen.push(spot)}
     if(chosen.length>=HGR.N)break}
-  chosen.forEach((p,i)=>L.decor.push({k:r.spr+(i%5),x:p[0],y:p[1],block:false,walk:true,npc:'hgbound',sc:1,bob:r.h===1?.28:undefined}))}
+  // they stand on the floor where they were caught (a hive chamber is too low to hang a person from, and up under the ceiling they could not be seen);
+  // the pictures have a little empty space under the feet, taken back with a small negative lift
+  chosen.forEach((p,i)=>{const k=r.spr+(i%5),sc=.95,h=(NPC_H[k]||1.45)*sc;L.decor.push({k,x:p[0],y:p[1],block:false,walk:true,npc:'hgbound',sc,bob:r.h===1?-.07*h:r.h===2?0:-.05*h})})}   // (empty space under the feet: hg_bh1_ 7 per cent, hg_bh0_ and hg_bound 5, hg_bh2_ none)
 {const _ll=loadLevel;loadLevel=function(n){_ll.apply(this,arguments);try{if(hgrOf(LEVEL))hgrPlace()}catch(e){console.error(e)}}}
 const hgrIndex=d=>{const L=LEVELS[LEVEL];let k=0;for(const q of L.decor){if(q.npc==='hgbound'){if(q.x===d.x&&q.y===d.y)return k;k++}}return 0};
 function hgFreeFrog(d){

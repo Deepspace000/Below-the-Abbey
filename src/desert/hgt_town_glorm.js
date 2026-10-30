@@ -497,7 +497,7 @@ function hgtxglormBuild(id){
    pet('hgtb_aquawhale',around(70,140),{sc:1});pet('hgtb_peachwhale',around(82,140),{sc:1});pet('hgtb_aquawhale',around(46,88),{sc:.9});pet('hgtb_peachwhale',around(104,76),{sc:.9});
    const KINDS=['hgtb_pearlslug','hgtb_creammoth','hgtb_pinkbulb','hgtb_amberpup','hgtb_pups','hgtb_jadeeel','hgtb_lanternbeetle','hgtb_spindleray','hgtb_fishbeetle','hgtb_spindlespider'],FLY=['hgtb_lilacmoth','hgtb_jadefinmoth','hgtb_creamjelly','hgtb_fishfly'];
    let n=0;for(const p of POOLS){pet(KINDS[n%10],around(p.x+2,p.y-1));pet(KINDS[(n+3)%10],around(p.x+p.w-3,p.y+p.d));pet(FLY[n%4],around(p.x+(p.w>>1),p.y+p.d+1),{bob:.7});n++}
-   for(const [x,y] of [[33,10],[117,10],[10,10],[140,10],[60,4],[90,4],[88,12],[56,12],[125,30],[125,40],[11,28],[8,30],[45,30],[105,30],[20,70],[130,90],[50,125],[100,125],[75,100],[60,90],[90,80]])pet((n++%3===0)?FLY[n%4]:KINDS[n%10],around(x,y),n%3===0?{bob:.8}:{});
+   for(const [x,y] of [[33,10],[117,10],[10,10],[140,10],[60,4],[90,4],[88,12],[56,12],[125,30],[125,40],[11,28],[8,30],[45,30],[105,30],[20,70],[130,90],[50,125],[100,125],[75,100],[60,90],[90,80]]){const fly=n++%3===0;pet(fly?FLY[n%4]:KINDS[n%10],around(x,y),fly?{bob:.8}:{})}   // (only the flying ones are lifted; the walking ones stand on the ground)
    for(const m of MZ)if(m&&m.approach)pet(KINDS[(n++)%10],around(m.approach.x,m.approach.y))}
   /* ---------- people at work: sweepers on the landings, readers and fishers at the pools, walkers on routes ---------- */
   {const AG=[],sw=['I sweep the landing every morning. The dust comes down from the tiers above.','Mind the steps. They are swept, not dried.'],tiers=[0,1,2,3,4,5];
@@ -513,7 +513,7 @@ function hgtxglormBuild(id){
   {const KINDS=['hgtb_pearlslug','hgtb_creammoth','hgtb_pinkbulb','hgtb_amberpup','hgtb_pups','hgtb_jadeeel','hgtb_lanternbeetle','hgtb_spindleray','hgtb_fishbeetle','hgtb_spindlespider','hgtb_lilacmoth','hgtb_jadefinmoth','hgtb_creamjelly','hgtb_fishfly'];let n=0;
    for(let gy=7;gy<142;gy+=8)for(let gx=7;gx<142;gx+=8){if(R(gx,gy,120)<.25)continue;let done=false;
      for(let r=0;r<=3&&!done;r++)for(let dy=-r;dy<=r&&!done;dy++)for(let dx=-r;dx<=r&&!done;dx++){const x=gx+dx,y=gy+dy;if(!isO(x,y)||inMz(x,y)||B.occ.has(x+','+y)||Math.abs(ground(x,y))>3.2||B.kind[I(x,y)]===G.STAIR)continue;
-       const k=KINDS[n++%14];B.occ.add(x+','+y);hgtlDecor(B,k,x,y,Object.assign({block:false,walk:true,deco:true},n%14>9?{bob:.8}:{}));done=true}}}
+       const i=n++%14,k=KINDS[i];B.occ.add(x+','+y);hgtlDecor(B,k,x,y,Object.assign({block:false,walk:true,deco:true},i>9?{bob:.8}:{}));done=true}}}   // (the last four kinds fly; the spider walks)
   hgtlSetStart(B,75,144,0);
   /* ---------- edges: pillars and hanging plants along the summit, vines and lamps along the great wall ---------- */
   for(let x=53;x<=91;x+=3){if((x>=56&&x<=62)||(x>=66&&x<=82))continue;wall(x,13,'m','band',SH,SH+3.4);plant(x,12,1.8,.5,'hgt_willow');plant(x+1,12,1.4,.6,'hgt_lightvine')}
@@ -633,9 +633,9 @@ function hgtxglormRoomBuild(rid){
   const SOL=[],solid=(x,y)=>{if(x>0&&y>0&&x<w-1&&y<d-1&&!(x===(w>>1)&&(y===d-2||y===1))){rows[y][x]=cb;SOL.push(x+','+y)}};
   if(rid>=5160){const v=rid%6;
     if(v%2===0){solid(2,2);solid(w-3,2);solid(2,d-3);solid(w-3,d-3)}                                  // corner pillars
-    if(v%3===1){for(let x=1;x<=3;x++)solid(x,d-4);solid(3,d-3);solid(3,d-2)}                         // a recess in the south west corner
+    if(v%3===1){for(let x=1;x<=3;x++)solid(x,d-4);solid(3,d-3)}                                      // a recess in the south west corner, open at its foot
     if(v===2||v===5){for(let y=2;y<=((d>>1)-1);y++)solid(w-4,y)}                                       // a half partition on the east
-    if(v===3){for(let x=w-4;x<w-1;x++)solid(x,d-4);solid(w-4,d-3);solid(w-4,d-2)}                     // a recess in the south east corner
+    if(v===3){for(let x=w-4;x<w-1;x++)solid(x,d-4);solid(w-4,d-3)}                                   // a recess in the south east corner, open at its foot
   }
   const exitAt=parent!==null?{x:HGTXG_ROOMS[parent].w>>1,y:1,f:2}:out?{x:out.ax,y:out.ay,f:out.face}:{x:75,y:144,f:0};
   const exitLvl=parent!==null?parent:483;
@@ -669,11 +669,12 @@ function hgtxglormRoomBuild(rid){
    const PETS=['hgtb_pearlslug','hgtb_creammoth','hgtb_pinkbulb','hgtb_amberpup','hgtb_pups','hgtb_jadeeel','hgtb_lanternbeetle','hgtb_fishbeetle','hgtb_spindleray','hgtb_lilacmoth','hgtb_jadefinmoth','hgtb_creamjelly','hgtb_fishfly','hgtb_creammoth','hgtb_spindlespider','hgtb_amberpup'];
    put(PETS[(rid*7+3)%16],w-2,d-2,1);if(rid%3===0)put('hg_chestjelly',1,d-2,0);
    decor.push({k:['hgtb_furn_chandelier','hgtb_furn_chandelier_lantern','hgt_hanglamp'][rid%3],x:cx,y:Math.max(2,cy-1),block:false,walk:true,deco:true,bob:1.4,sc:1.2});lights.push([cx,cy]);
-   const FOLKI=['hgtb_sweep','hgtb_basket','hgtb_water','hgtb_polish','hgtb_read','hgtb_fisher','hgtb_watch','hgtb_walk','hgtb_plantbed','hgtb_jar','hgtb_lantern','hgtb_elder'],fi=FOLKI[rid%12];for(const q of decor)if(q.npc===r.extra)q.k=fi}
+   const FOLKI=['hgtb_sweep','hgtb_basket','hgtb_water','hgtb_polish','hgtb_read','hgtb_fisher','hgtb_watch','hgtb_walk','hgtb_plantbed','hgtb_jar','hgtb_lantern','hgtb_elder'],fi=FOLKI[rid%12];if(r.extra)for(const q of decor)if(q.npc===r.extra)q.k=fi}   // (only the room's own worker: a room with no worker keeps its furniture)
   {const cnt={};for(const q of decor){if(!q.block||q.npc)continue;(cnt[q.y]=cnt[q.y]||[]).push(q)}
    for(const y in cnt){const L=cnt[y];if(L.length>3){const occ=new Set(decor.map(q=>q.x+','+q.y));L.slice(3).forEach((q,i)=>{for(const dy of [2,-2,3,-3]){const ny=q.y+dy;if(ny>0&&ny<d-2&&!occ.has(q.x+','+ny)&&rows[ny][q.x]==='.'){occ.delete(q.x+','+q.y);q.y=ny;occ.add(q.x+','+ny);break}}})}}}
   lights.push([w>>1,d-2],[w>>1,2]);
   const fmap=[];for(let y=0;y<d;y++){let s='';for(let x=0;x<w;x++)s+=(Math.abs(x-(w>>1))<=2&&y>=(d>>1)-1&&y<=(d>>1)+1)?'1':'0';fmap.push(s)}
+  hgtlTidyRoom({rows,decor,items:[],start:{x:w>>1,y:d-2}},{doors:r.up?[[w>>1,0]]:[]});   // nothing in a pillar, nothing blocking a passage, every chest and person reachable
   return {rows:rows.map(a=>a.join('')),chars,start:{x:w>>1,y:d-2,f:0},enemies:[],items:[],decor,lights,portals:[],floor:r.fl==='wood'?'wood':hgtxglormFloor(r.fl),fmap,floorSet:[['hgtb_f_planks','hgtb_f_terrazzo','hgtb_f_marble','hgtb_f_reed'][rid%4],['hgtb_f_floral','hgtb_f_lotus','hgtb_f_mandala','hgtb_f_rosette','hgtb_f_star','hgtb_f_circles','hgtb_f_petals','hgtb_f_sunburst'][rid%8],'pale','dirt','mosscobble','stainedcobble'],ceil:'tomb',ceilH:2.7,day:0,amb:.5,torchGap:1e9,noTele:true,noExtras:true,diff:HG.DIFF,name:r.n,label:r.n,mapNames:[]}}
 function hgtxglormFloor(n){return n}
 for(const id in HGTXG_ROOMS)hgtRegister(+id,hgtxglormRoomBuild.bind(null,+id));

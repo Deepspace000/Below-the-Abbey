@@ -464,9 +464,19 @@ function build(id){
   {let best=null;for(const g of spire.gapWalls){if(g.arm!==1)continue;for(const d of HGTL.DIRS){const lc=spire.lane.get((g.i+d[0])+','+(g.j+d[1]));if(lc&&Math.abs(lc.h-g.lo)<.01&&lc.u>.45&&lc.u<.6&&!best)best={g,d,lc}}}
     if(best){const q=toInt(4893),face=HGTL.DIRS.findIndex(z=>z[0]===best.d[0]&&z[1]===best.d[1]);door(best.g.i,best.g.j,face,'a',best.g.hi-best.g.lo+.6,4893,q.tx,q.ty,q.tf);const rec=B.doors[B.doors.length-1];links[4893]={x:rec.ax,y:rec.ay,f:rec.face}}}
   /* looms, tapestries and threads of light on the top platform, round the column */
+  // a loom stands only where the whole platform can still be walked round (the ways in are the platform squares one step from open ground off the
+  // platform); a tapestry hangs flat on a wall beside its square (the column or the parapet), never standing loose on the floor
   {const ring=spire.plat.filter(c=>{const r=Math.hypot(c[0]-cx,c[1]-cy);return r>2.5});let n=0;
-   for(const c of ring){if(!isOpen(c[0],c[1])||(c[0]===(spire.door&&spire.door.ax)&&c[1]===(spire.door&&spire.door.ay)))continue;n++;
-     if(n%2===0)dec('kh_int4_2',c[0],c[1],{block:true,deco:true,sc:1.5});else if(n%3===1)dec('kh_int4_3',c[0],c[1],{block:true,deco:true,sc:1.4});else dec('hgt_lightvine',c[0],c[1],{walk:true,deco:true,sc:1.4,bob:.1});light(c[0],c[1])}
+   const P=new Set(spire.plat.filter(c=>isOpen(c[0],c[1])).map(c=>c[0]+','+c[1])),solidP=new Set(),D4=HGTL.DIRS;
+   const step=(x,y,a,b)=>Math.abs(h[I(x,y)]-h[I(a,b)])<=.55,ins=[...P].map(s=>s.split(',').map(Number)).filter(([x,y])=>D4.some(d=>isOpen(x+d[0],y+d[1])&&!P.has((x+d[0])+','+(y+d[1]))&&step(x,y,x+d[0],y+d[1])));
+   const walkable=()=>{const seen=new Set(),q=ins.filter(([x,y])=>!solidP.has(x+','+y));for(const [x,y] of q)seen.add(x+','+y);
+     for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const d of D4){const k=(x+d[0])+','+(y+d[1]);if(P.has(k)&&!solidP.has(k)&&!seen.has(k)&&step(x,y,x+d[0],y+d[1])){seen.add(k);q.push([x+d[0],y+d[1]])}}}
+     for(const k of P)if(!solidP.has(k)&&!seen.has(k))return false;return true};
+   for(const c of ring){if(!isOpen(c[0],c[1])||(c[0]===(spire.door&&spire.door.ax)&&c[1]===(spire.door&&spire.door.ay)))continue;n++;const key=c[0]+','+c[1];
+     const wd=D4.find(d=>!isOpen(c[0]+d[0],c[1]+d[1]));
+     if(n%2===0){solidP.add(key);if(walkable())dec('kh_int4_2',c[0],c[1],{block:true,deco:true,sc:1.5});else{solidP.delete(key);dec('hgt_lightvine',c[0],c[1],{walk:true,deco:true,sc:1.4,bob:.1})}}
+     else if(n%3===1&&wd)dec('kh_int4_3',c[0],c[1],{pic:1,wd:[wd[0],wd[1]],bob:.12,block:false});
+     else dec('hgt_lightvine',c[0],c[1],{walk:true,deco:true,sc:1.4,bob:.1});light(c[0],c[1])}
    NPC_H.kh_int4_2=1.0;NPC_H.kh_int4_3=1.0}
   /* the basin is dressed: stalls on the shore, lamps down every causeway, trees, giant caps and glitter plants on the banks, benches by the plaza */
   for(const [sx,sy] of [[GX-12,121],[GX+12,121],[GX-14,128],[GX+14,128],[GX-12,131],[GX+12,131]]){const k=khProp(['stallA','stallC','stallB','stallD','stallE','stallF'][(sx+sy)%6]);if(IMG[k]&&k.startsWith('kh_'))NPC_H[k]=khPropH('stallA');if(isOpen(sx,sy))dec(k,sx,sy,{block:true,deco:true,sc:1.3})}
@@ -628,6 +638,7 @@ function hgtxulbHelix(B,o){
 
 /* ---------- the rooms: small shell-walled interiors (levels 4880 to 4899). Each is a flat level with the door back out in the middle of the bottom wall. ---------- */
 const ROOMS={};
+const HGTXULB_WALLROLE={kitchenshelf:.42,tapestry:.12};   // wall pictures in the rooms: their lift above the floor (the Khemetra house values)
 const R_=(id,name,tint,floor,fn,o)=>{ROOMS[id]=Object.assign({id,name,tint,floor,fn},o||{})};
 /* the folk of Ulb who are not quest givers: plain things to say about the city */
 const hgtxulbFolk=[ // [id, name, picture, lines]
@@ -659,7 +670,12 @@ function hgtxulbRoom(id){
   const wallW=hgtaChar(hgtaWallTile(TT[TL][0],3,{base:TT[TL][1],mid:pd,top:TT[TL][2]}));
   for(let y=0;y<H_;y++){let r='';for(let x=0;x<W_;x++)r+=(y===0||y===H_-1||x===0||x===W_-1)?(((y===0||y===H_-1)?x%3===1:y%3===1)?wallW:wall):'.';rows.push(r.split(''))}
   const lk=HGTXULB.LINKS&&HGTXULB.LINKS[id]||{x:75,y:3,f:2};
-  const put=(role,x,y,o)=>{const k=khProp(role);if(IMG[k]&&k.startsWith('kh_'))NPC_H[k]=khPropH(role);decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}))};
+  // the kitchen shelf and the tapestry are pictures flat on the wall beside them (as in the Khemetra houses, KH_WALLPIECE); the hanging lamp
+  // (kh_int2_1) hangs from the ceiling (ceilH 3), the top of its chain at the ceiling; everything else stands on the floor
+  const put=(role,x,y,o)=>{const k=khProp(role);if(IMG[k]&&k.startsWith('kh_'))NPC_H[k]=khPropH(role);
+    if(HGTXULB_WALLROLE[role]!==undefined&&k.startsWith('kh_')){const wd=y===1?[0,-1]:x===1?[-1,0]:x===W_-2?[1,0]:null;if(wd){decor.push(Object.assign({k,x,y,pic:1,wd,bob:HGTXULB_WALLROLE[role],block:false},o||{}));return}}
+    if(role==='hlamp'&&k==='kh_int2_1'){decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true,bob:3-khPropH(role)*.965},o||{}));return}
+    decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}))};
   const raw=(k,x,y,o)=>decor.push(Object.assign({k,x,y,block:true},o||{}));
   const npc=(nid,img,x,y,o)=>decor.push(Object.assign({k:img,x,y,block:true,npc:nid,sc:1},o||{}));
   const light=(x,y)=>lights.push([x,y]);
@@ -688,7 +704,7 @@ function hgtxulbRoom(id){
    for(let x=3;x<W_-3;x+=3)prop('tapestry',x,1);
    const cy0=H_>>1;
    // the centrepiece of the room, one big painted piece in the middle
-   {const CEN=HGTXULB.CENTRE[id]||HGTXULB.CENTRE_ALL[id%HGTXULB.CENTRE_ALL.length],ck=IMG[CEN]?CEN:'hgtb_furn_table_chairs';for(const [dx,dy] of [[0,-1],[0,0],[1,-1],[-1,-1],[0,-2]]){const x=mid+dx,y=cy0+dy;if(free(x,y)&&y<H_-4){take(x,y);decor.push({k:ck,x,y,block:true,sc:CEN.indexOf('stage')>0?1.3:1.4});lights.push([x,y]);break}}}
+   {const CEN=HGTXULB.CENTRE[id]||HGTXULB.CENTRE_ALL[id%HGTXULB.CENTRE_ALL.length],ck=IMG[CEN]?CEN:'hgtb_furn_table_chairs';for(const [dx,dy] of [[0,-1],[0,0],[1,-1],[-1,-1],[0,-2]]){const x=mid+dx,y=cy0+dy;if(free(x,y)&&y<H_-4){take(x,y);decor.push(Object.assign({k:ck,x,y,block:true,sc:CEN.indexOf('stage')>0?1.3:1.4},ck==='hgtb_deco_pearlplinth'?{bob:-.05}:{}));lights.push([x,y]);break}}}
    for(const [x,y,k] of [[1,2,'hgt_bulbflower'],[W_-2,2,'hgt_shellflower'],[1,H_-4,'hgt_fern'],[W_-2,H_-4,'hgt_pearlbush']])if(free(x,y)){take(x,y);decor.push({k,x,y,block:false,walk:true,deco:true,sc:1.1})}
    const XTRA=['hgtb_furn_cabinet','hgtb_furn_books_globe','hgtb_plant_barrel','hgtb_plant_potvine','hgtb_furn_bookshelf','hgtb_plant_lupin','hgtb_stall_sage_herbs','hgtb_deco_lanterns'];
    for(let q=0;q<4;q++){const k=XTRA[(id*3+q*5)%XTRA.length];const cand=[[1,2+q],[W_-2,2+q],[2+q*2,1],[W_-3-q,H_-3]];for(const [x,y] of cand)if(free(x,y)&&IMG[k]){take(x,y);decor.push({k,x,y,block:true,sc:1});break}}
@@ -701,7 +717,7 @@ function hgtxulbRoom(id){
    for(const [x,y] of [[W_-3,H_-3],[2,H_-3],[W_-3,2]])if(free(x,y)){take(x,y);decor.push({k:sur,x,y,block:true,sc:1.1});lights.push([x,y]);break}
    lights.push([mid,cy0],[2,2],[W_-3,H_-3]);
    for(const d of decor)if(/lamp|brazier/.test(d.k)||d.k==='kh_int2_1'||d.k==='kh_int5_5')lights.push([d.x,d.y])}
-  for(const r of rows)void r;
+  hgtlTidyRoom({rows,decor,items,start:{x:mid,y:H_-2}},{doors:drs.map(q=>[q.x,q.y])});   // nothing in a wall, nothing blocking a passage, every chest and person reachable
   Object.assign(chars,hgtaChars);
   const L={rows:rows.map(r=>r.join('')),chars,start:{x:mid,y:H_-2,f:0},enemies:[],items,decor,lights:sp.lights||lights,portals:[],day:0,amb:.58+((id*7)%5)*.05,floor:HGTXULB.floorFor(TL,id,sp.floor||'wood'),ceil:'beam',ceilH:3,name:sp.name,label:sp.name,
     diff:66,noTele:true,noExtras:true,mapNames:[{t:sp.name,x:mid,y:1,k:'place'}]};
@@ -733,12 +749,12 @@ const hgtxulbThemes=[
  ['A Weaving Hall','l','hgt_f5',(c,k)=>{const {put,W,H,npc}=c;for(let x=2;x<W-2;x+=2)put('loom',x,2);for(let x=3;x<W-3;x+=3)put('chair',x,4);put('table',W-3,H-4);put('rolledcarpets',1,H>>1)}],
  ['A Spindle Workshop','p','wood',(c)=>{const {put,W,H}=c;for(let x=1;x<W-1;x+=2)put('rack',x,1);put('table',3,3);put('table',W-4,3);put('chair',3,4);put('chair',W-4,4);put('loom',W-2,H-4)}],
  ['A Reed Storehouse','c','wood',(c)=>{const {put,raw,W,H}=c;for(let y=1;y<H-3;y+=2){raw('crate',1,y);raw('barrel',W-2,y)}for(let x=3;x<W-3;x+=2)put('rolledcarpets',x,1);put('amphora',3,H-4)}],
- ['A Dye House','a','hgt_f3',(c)=>{const {put,W,H}=c;for(let x=1;x<W-1;x+=2)put('basin',x,1);put('rack',1,3);put('rack',W-2,3);put('amphora',1,H-4);put('amphora',W-2,H-4);put('tapestry',W>>1,2)}],
+ ['A Dye House','a','hgt_f3',(c)=>{const {put,W,H}=c;for(let x=1;x<W-1;x+=2)put('basin',x,1);put('rack',1,3);put('rack',W-2,3);put('amphora',1,H-4);put('amphora',W-2,H-4);if(!((W>>1)&1))put('tapestry',W>>1,1)}],
  ['A Tapestry Gallery','l','hgt_f5',(c)=>{const {put,W,H}=c;for(let x=1;x<W-1;x++)put('tapestry',x,1);for(let y=2;y<H-3;y+=2){put('tapestry',1,y);put('tapestry',W-2,y)}put('statue',W>>1,3);put('bench',3,H-4);put('bench',W-4,H-4)}],
  ['A Thread Library','l','hgt_f5',(c)=>{const {put,W,H}=c;for(let x=1;x<W-1;x++)put('bookcase',x,1);for(let y=2;y<H-3;y+=1){put('bookcase',1,y);put('bookcase',W-2,y)}put('desk',3,3);put('chair',3,4);put('desk',W-4,3);put('chair',W-4,4)}],
  ['An Apothecary of Glowing Herbs','a','wood',(c)=>{const {put,decor,light,W,H}=c;for(let x=1;x<W-1;x+=2)put('potshelf',x,1);put('basin',2,H-4);put('basin',W-3,H-4);put('table',W>>1,3);for(const [x,y] of [[2,3],[W-3,3],[2,H-5],[W-3,H-5]]){decor.push({k:'hgt_lightvine',x,y,block:false,walk:true,deco:true,sc:1.2});light(x,y)}decor.push({k:'hgt_mushrooms',x:W>>1,y:4,block:false,walk:true,deco:true,sc:1.3})}],
  ['A Bedroom','p','wood',(c)=>{const {put,W,H}=c;put('bed',1,2);put('bed',W-2,2);put('cradle',1,H-4);put('wardrobe',W-2,H-4);put('dresser',W>>1,1);put('harp',W-2,H>>1)}],
- ['A Kitchen','c','wood',(c)=>{const {put,W,H}=c;put('hearth',W>>1,1);put('oven',2,1);put('oven',W-3,1);for(let x=1;x<W-1;x+=2)put('kitchenshelf',x,2);put('table',3,H-4);put('chair',2,H-4);put('chair',4,H-4);put('table',W-4,H-4);put('chair',W-5,H-4)}],
+ ['A Kitchen','c','wood',(c)=>{const {put,W,H}=c;put('hearth',W>>1,1);put('oven',2,1);put('oven',W-3,1);for(let x=1;x<W-1;x+=2)if(x!==(W>>1)&&x!==2&&x!==W-3)put('kitchenshelf',x,1);put('table',3,H-4);put('chair',2,H-4);put('chair',4,H-4);put('table',W-4,H-4);put('chair',W-5,H-4)}],
  ['A Clock Room','a','hgt_f5',(c)=>{const {put,W,H}=c;put('statue',W>>1,1);put('birdcage',2,2);put('birdcage',W-3,2);put('obelisk',2,H-4);put('obelisk',W-3,H-4);put('hlamp',W>>1,3);put('table',W>>1,H-4)}],
  ['A Reed-Boat Shed','c','wood',(c)=>{const {put,W,H}=c;put('ship',2,2);put('ship',W-3,2);put('sail',1,H>>1);put('sail',W-2,H>>1);put('rope',3,H-4);put('anchor',W-4,H-4);put('wheel',W>>1,2)}],
  ['A Sunken Bath','a','hgt_f3',(c)=>{const {put,W,H}=c;put('basin',2,2);put('basin',W-3,2);put('basin',2,H-4);put('basin',W-3,H-4);put('fountain',W>>1,2);put('cushions',W>>1,H-4);put('amphora',1,H>>1);put('amphora',W-2,H>>1)}],

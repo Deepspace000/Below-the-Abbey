@@ -71,7 +71,7 @@
 
 const HGTL={STEP:.26,STEP_MAX:.3,CLIMB:.55,DIRS:[[0,-1],[1,0],[0,1],[-1,0]],
   K:{GROUND:0,STAIR:1,PLAT:2,BRIDGE:3,COURT:4,PLAZA:5,ALLEY:6,TERRACE:7}};
-const HGTL_DECOR={lamp:'hgt_lamp',glitter:'hgt_glitter',fountain:'hgt_fountain',arch:'hgt_arch',chest:'hgt_chest',bench:'hgt_bench',urn:'hgt_urn',spire:'hgt_spire'};
+const HGTL_DECOR={lamp:'hgt_lamp',glitter:'hgt_glitter',fountain:'hgt_fountain',arch:'hg_arch',chest:'hgt_chest',bench:'hgt_bench',urn:'hgt_urn',spire:'hgt_spire'};
 const HGTL_CHARS={},HGTL_WH={},HGTL_ROLE={};
 (function(){
   const pool='ABCEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';let n=0;
@@ -252,7 +252,7 @@ function hgtlLampRow(B,x,y,dir,len,gap){const f=HGTL.DIRS[dir&3];gap=gap||3;for(
 
 /* ---------- assembling ---------- */
 /* returns a LEVELS entry. opts {name,label,start,diff,ceilH,chars,extra}. rows hold the placeholder chars until hgtlBindChars is called */
-function hgtlAssemble(B,opts){opts=opts||{};const st=opts.start||B.start||{x:1,y:1,f:0};
+function hgtlAssemble(B,opts){opts=opts||{};hgtlArches(B);hgtlClearWalls(B);hgtlDedupe(B);const st=opts.start||B.start||{x:1,y:1,f:0};
   const lv=Object.assign({rows:B.rows.map(r=>r.join('')),chars:Object.assign({},opts.chars||{}),start:{x:st.x,y:st.y,f:st.f|0},enemies:[],items:[],decor:B.decor,scenery:[],portals:B.portals,lights:B.lights,
     mapNames:B.names.map(n=>Object.assign({},n)),terrace:Object.assign({h:B.h},B.lid?{lid:B.lid}:{},B.water?{water:B.water,wl:B.wl}:{},Object.keys(B.dive).length?{dive:B.dive}:{}),outdoor:true,day:0,name:opts.name||'Town',label:opts.label||opts.name||'Town',diff:opts.diff||1,noTele:true,hgtl:{kind:B.kind,doors:B.doors,secrets:B.secrets,lintels:B.lintels,W:B.W,H:B.H}},opts.extra||{});
   if(opts.ceilH)lv.ceilH=opts.ceilH;return lv}
@@ -454,3 +454,98 @@ function hgtlValidateExtra(B,r,out){out.tubesBad=[];out.poolsBad=[];const W=B.W,
     if(!seen)out.poolsBad.push({x:p.x,y:p.y,why:'unreachable'});
     if(p.deep.length){if(p.lead){if(!p.deep.some(c=>B.dive[K(c[0],c[1])]))out.poolsBad.push({x:p.x,y:p.y,why:'lead has no cell'})}else if(!p.bath)out.warnings.push('deep pool at '+p.x+','+p.y+' leads nowhere (give it lead or bath:true)')}}
   for(const k in B.dive){const d=B.dive[k];if(d.to===undefined||d.x===undefined)out.poolsBad.push({x:k,why:'dive target incomplete'})}}
+
+/* hgtlTidyRoom(L, o): the last pass of a small Hollow interior (a flat room level {rows, decor, items, start}), so the room can be walked.
+   - a free-standing piece on a wall or pillar square is moved to a free square by a wall (a person, a chest, a barrel) or taken out (anything else)
+   - a solid piece in a passage one square wide (open on two opposite sides only) is moved to a free square by a wall
+   - a solid piece that cuts a person, a chest, an item or a door (o.doors [[x,y]..]) off from the way in is moved, or taken out if there is no room
+   - an item lying under a solid piece is moved to the nearest free square; the same piece twice on one square is kept once
+   Wall pictures (pic with a wall side) and pieces hung high (bob 1 and over, not solid) are never touched. The level is changed in place. */
+function hgtlTidyRoom(L,o){
+  o=o||{};const rows=L.rows.map(r=>typeof r==='string'?r:r.join('')),H=rows.length,W=rows[0].length,D=L.decor,items=L.items||[],st=L.start||{x:W>>1,y:H-2};
+  const doors=(o.doors||[]).slice(),K=(x,y)=>y*W+x,D4=[[1,0],[-1,0],[0,1],[0,-1]];
+  const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&rows[y][x]==='.';
+  const wallPic=d=>!!(d.pic&&d.wd),high=d=>!d.block&&(d.bob||0)>=1;
+  const loot=d=>!d.npc&&!d.deco&&typeof CONTAINERS!=='undefined'&&CONTAINERS.includes(d.k);
+  const must=d=>!!(d.npc||loot(d)||d.goldAmt);
+  const solid=d=>!!(d.block&&!d.found&&!wallPic(d));
+  const round=d=>[Math.round(d.x),Math.round(d.y)];
+  const blockedBy=skip=>{const s=new Set();for(const d of D)if(d!==skip&&solid(d)){const [x,y]=round(d);s.add(K(x,y))}return s};
+  const reach=bl=>{const seen=new Uint8Array(W*H),q=[];if(open(st.x,st.y)&&!bl.has(K(st.x,st.y))){seen[K(st.x,st.y)]=1;q.push([st.x,st.y])}
+    for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of D4){const nx=x+a,ny=y+b;if(open(nx,ny)&&!seen[K(nx,ny)]&&!bl.has(K(nx,ny))){seen[K(nx,ny)]=1;q.push([nx,ny])}}}return seen};
+  const near=(S,x,y)=>(open(x,y)&&S[K(x,y)])||D4.some(([a,b])=>open(x+a,y+b)&&S[K(x+a,y+b)]);
+  const targets=()=>{const t=[];for(const d of D)if(must(d)&&!wallPic(d))t.push(round(d));for(const it of items)t.push([it.x,it.y]);for(const q of doors)t.push(q);return t};
+  const nOK=bl=>{const S=reach(bl);return targets().filter(([x,y])=>near(S,x,y)).length};
+  const corridor=(x,y)=>{const n=D4.filter(([a,b])=>open(x+a,y+b));return n.length===2&&((open(x+1,y)&&open(x-1,y))||(open(x,y+1)&&open(x,y-1)))};
+  const used=()=>{const s=new Set();for(const d of D)if(!wallPic(d)&&!high(d)){const [x,y]=round(d);s.add(K(x,y))}for(const it of items)s.add(K(it.x,it.y));return s};
+  const byDoor=(x,y)=>doors.concat([[st.x,st.y]]).some(([a,b])=>Math.abs(a-x)+Math.abs(b-y)<=1);
+  // a free square for a piece: open, empty, by a wall, not in a passage, not at a door or the way in, and the room still walks with the piece there
+  function home(d,fx,fy){const U=used(),c=[],S0=reach(blockedBy(d));
+    for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!open(x,y)||U.has(K(x,y))||byDoor(x,y)||corridor(x,y)||!near(S0,x,y))continue;
+      const walls=D4.filter(([a,b])=>!open(x+a,y+b)).length;if(!walls&&solid(d))continue;c.push([Math.abs(x-fx)+Math.abs(y-fy)-(walls?.5:0),x,y])}
+    c.sort((a,b)=>a[0]-b[0]);
+    const base=nOK(blockedBy(d)),ox=d.x,oy=d.y;
+    for(const [,x,y] of c){if(!solid(d))return [x,y];d.x=x;d.y=y;const bl=blockedBy(d);bl.add(K(x,y));const n=nOK(bl);d.x=ox;d.y=oy;if(n>=base)return [x,y]}
+    return null}
+  const drop=d=>{const i=D.indexOf(d);if(i>=0)D.splice(i,1)};
+  // a person with no good square goes to the nearest free open square and lets the party walk through; anything else with no room is taken out
+  const move=d=>{const [fx,fy]=round(d),h=home(d,fx,fy);if(h){d.x=h[0];d.y=h[1];if(d.ox!==undefined){d.ox=0;d.oy=0}return true}
+    if(d.npc){const U=used();let best=null,bd=1e9;for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(open(x,y)&&!U.has(K(x,y))&&!(x===st.x&&y===st.y)){const dd=Math.abs(x-fx)+Math.abs(y-fy);if(dd<bd){bd=dd;best=[x,y]}}
+      if(best){d.x=best[0];d.y=best[1]}d.block=false;d.walk=true;return !!best}
+    drop(d);return false};
+  // 0. a wall picture whose wall is a door or open floor
+  doors.push([st.x,st.y+1]);
+  for(const d of D.slice())if(wallPic(d)){const [x,y]=round(d),bx=x+d.wd[0],by=y+d.wd[1];if(open(bx,by)||doors.some(q=>q[0]===bx&&q[1]===by))drop(d)}
+  // 1. pieces standing in a wall or a pillar
+  for(const d of D.slice()){if(wallPic(d))continue;const [x,y]=round(d);if(!open(x,y))move(d)}   // (a room's walls and pillars reach the ceiling: a lamp hung over one is moved too)
+  // 2. the same piece twice on one square
+  {const seen=new Set();for(const d of D.slice()){if(wallPic(d))continue;const [x,y]=round(d),k=d.k+'|'+x+'|'+y+'|'+(d.bob||0);if(seen.has(k))drop(d);else seen.add(k)}}
+  // 3. solid pieces in one-square passages
+  for(const d of D.slice()){if(!solid(d)||d.npc)continue;const [x,y]=round(d);if(open(x,y)&&corridor(x,y))move(d)}
+  // 4. items under solid pieces
+  {const bl=blockedBy(null);for(const it of items)if(!open(it.x,it.y)||bl.has(K(it.x,it.y))){const U=used();let best=null,bd=1e9;
+    for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(open(x,y)&&!U.has(K(x,y))&&!bl.has(K(x,y))){const dd=Math.abs(x-it.x)+Math.abs(y-it.y);if(dd<bd){bd=dd;best=[x,y]}}
+    if(best){it.x=best[0];it.y=best[1]}}}
+  // 5. whatever cuts a person, a chest, an item or a door off from the way in
+  const gave=new Set();for(let pass=0;pass<24;pass++){const bl=blockedBy(null),S=reach(bl);const lost=targets().find(([x,y])=>!near(S,x,y)&&!gave.has(x+','+y));if(!lost)break;gave.add(lost[0]+','+lost[1]);
+    const [tx,ty]=lost,goal=(x,y)=>Math.abs(x-tx)+Math.abs(y-ty)<=1,prev=new Map(),q=[[st.x,st.y]];prev.set(K(st.x,st.y),-1);let hit=goal(st.x,st.y)?K(st.x,st.y):-1;
+    for(let i=0;i<q.length&&hit<0;i++){const [x,y]=q[i];for(const [a,b] of D4){const nx=x+a,ny=y+b;if(!open(nx,ny)||prev.has(K(nx,ny)))continue;prev.set(K(nx,ny),K(x,y));if(goal(nx,ny)){hit=K(nx,ny);break}q.push([nx,ny])}}
+    if(hit<0){const d=D.find(q=>must(q)&&round(q)[0]===tx&&round(q)[1]===ty);if(d)move(d);else{const it=items.find(i=>i.x===tx&&i.y===ty);if(it){const S2=reach(blockedBy(null)),U=used();let best=null,bd=1e9;for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(S2[K(x,y)]&&!U.has(K(x,y))){const dd=Math.abs(x-tx)+Math.abs(y-ty);if(dd<bd){bd=dd;best=[x,y]}}if(best){it.x=best[0];it.y=best[1]}}}continue}
+    let moved=false;for(let c=hit;c>=0;c=prev.get(c)){const x=c%W,y=(c/W)|0;for(const d of D.slice())if(solid(d)&&!(must(d)&&round(d)[0]===tx&&round(d)[1]===ty)){const [dx,dy]=round(d);if(dx===x&&dy===y){if(d.npc){d.block=false;d.walk=true}else move(d);moved=true}}}
+    if(moved)gave.delete(tx+','+ty)}
+  return L}
+
+/* hgtlClearWalls(B): the last pass of a terraced Hollow town, after every wall is in place. A free-standing piece left on a square that a later
+   step turned into a wall (a house, a stair tower, a border) is moved to the nearest free open square if it is a person or a chest, and taken out
+   otherwise; a free-standing fish tank whose footprint was built over is taken out whole. Wall pictures, pieces hung high (bob 1 and over, not
+   solid) and the ornaments on the roofs (o.roof(d) true) are left alone. Returns the number of pieces moved or taken out. */
+function hgtlClearWalls(B,o){
+  o=o||{};const W=B.W||B.rows[0].length,H=B.H||B.rows.length,open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&B.rows[y][x]==='.',D4=[[1,0],[-1,0],[0,1],[0,-1]];
+  let n=0;const kill=new Set();
+  // fish tanks first: a tank is kept or dropped with all of its blocks
+  for(const m of B.decor)if(m.k==='hgtk_tank'&&m.tk&&!m.tk.wall){const t=m.tk,w=Math.round(t.cyl?2*t.R+.12:t.bx1-t.bx0+.12),h=Math.round(t.cyl?2*t.R+.12:t.by1-t.by0+.12);let ok=true;
+    for(let j=0;j<h;j++)for(let i=0;i<w;i++)if(!open(t.fx+i,t.fy+j))ok=false;
+    if(!ok){kill.add(m);for(const d of B.decor)if(d.k==='hgtk_blk'&&d.x>=t.fx&&d.x<t.fx+w&&d.y>=t.fy&&d.y<t.fy+h)kill.add(d);if(B.tanks){const i=B.tanks.indexOf(t);if(i>=0)B.tanks.splice(i,1)}}}
+  const taken=new Set();for(const d of B.decor)if(!kill.has(d))taken.add(Math.round(d.x)+','+Math.round(d.y));
+  for(const d of B.decor){if(kill.has(d)||(d.pic&&d.wd)||(!d.block&&(d.bob||0)>=1)||(o.roof&&o.roof(d))||/^hgtk_/.test(d.k))if(!(d.bob>=1&&/hanging|hanglamp|deco_lanterns/.test(d.k)))continue;   // (a lamp hung in the air over a wall square has nothing to hang from)
+    const x=Math.round(d.x),y=Math.round(d.y);if(open(x,y))continue;
+    const keep=d.npc||/chest|waxbarrel/.test(d.k);
+    if(keep){let best=null;for(let r=1;r<=4&&!best;r++)for(let dy=-r;dy<=r&&!best;dy++)for(let dx=-r;dx<=r;dx++){const nx=x+dx,ny=y+dy;if(open(nx,ny)&&!taken.has(nx+','+ny)){best=[nx,ny];break}}
+      if(best){taken.add(best[0]+','+best[1]);d.x=best[0];d.y=best[1];if(d.ox!==undefined){d.ox=0;d.oy=0}n++;continue}}
+    kill.add(d)}
+  if(kill.size){n+=kill.size;B.decor=B.decor.filter(d=>!kill.has(d))}
+  return n}
+
+/* hgtlArches(B): the painted gateway arch (hg_arch, an arch with two open doors) belongs in a gap one square wide between two walls. An arch
+   (hg_arch, or the old key hgt_arch that never had a picture) standing anywhere else, out on open ground, is taken out. */
+function hgtlArches(B){
+  const W=B.W||B.rows[0].length,H=B.H||B.rows.length,open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&B.rows[y][x]==='.',wall=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&B.rows[y][x]!=='.';
+  const gap=(x,y)=>open(x,y)&&((wall(x+1,y)&&wall(x-1,y)&&open(x,y+1)&&open(x,y-1))||(wall(x,y+1)&&wall(x,y-1)&&open(x+1,y)&&open(x-1,y)));
+  let n=0;B.decor=B.decor.filter(d=>{if((d.k!=='hgt_arch'&&d.k!=='hg_arch')||d.npc)return true;if(gap(Math.round(d.x),Math.round(d.y))){d.k='hg_arch';return true}n++;return false});
+  return n}
+
+/* hgtlDedupe(B): the same piece twice on one square (two builder steps that both light a corner, say) is kept once. Pieces with their own offset
+   (ox, oy) are different placements and stay; two of the same lamp hung at two heights over one square are one too many, and one wall lamp per square is enough. */
+function hgtlDedupe(B){const seen=new Set();let n=0;
+  B.decor=B.decor.filter(d=>{if(d.npc||d.enter||/^hgtk_/.test(d.k))return true;const key=d.k+'|'+Math.round(d.x)+'|'+Math.round(d.y)+'|'+(d.wd||'')+(/bracket/.test(d.k)?'':'|'+(+(d.ox||0)).toFixed(2)+'|'+(+(d.oy||0)).toFixed(2));if(seen.has(key)){n++;return false}seen.add(key);return true});
+  return n}

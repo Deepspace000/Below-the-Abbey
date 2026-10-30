@@ -53,7 +53,9 @@ function hgrPlace(){
       let spot=null;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[2,0],[0,2],[-1,1],[1,-1]])if(open(n.p[0]+dx,n.p[1]+dy)){spot=[n.p[0]+dx,n.p[1]+dy];break}
       if(spot)chosen.push(spot)}
     if(chosen.length>=HGR.N)break}
-  chosen.forEach((p,i)=>L.decor.push({k:r.spr+(i%5),x:p[0],y:p[1],block:false,walk:true,npc:'hgbound',sc:1,bob:r.h===1?.28:undefined}))}
+  // they stand on the floor where they were caught (a hive chamber is too low to hang a person from, and up under the ceiling they could not be seen);
+  // the pictures have a little empty space under the feet, taken back with a small negative lift
+  chosen.forEach((p,i)=>{const k=r.spr+(i%5),sc=.95,h=(NPC_H[k]||1.45)*sc;L.decor.push({k,x:p[0],y:p[1],block:false,walk:true,npc:'hgbound',sc,bob:r.h===1?-.07*h:r.h===2?0:-.05*h})})}   // (empty space under the feet: hg_bh1_ 7 per cent, hg_bh0_ and hg_bound 5, hg_bh2_ none)
 {const _ll=loadLevel;loadLevel=function(n){_ll.apply(this,arguments);try{if(hgrOf(LEVEL))hgrPlace()}catch(e){console.error(e)}}}
 const hgrIndex=d=>{const L=LEVELS[LEVEL];let k=0;for(const q of L.decor){if(q.npc==='hgbound'){if(q.x===d.x&&q.y===d.y)return k;k++}}return 0};
 function hgFreeFrog(d){

@@ -50,7 +50,7 @@ function rect(B,x,y,w,d,h,k){for(let j=0;j<d;j++)for(let i=0;i<w;i++)O(B,x+i,y+j
 function solid(B,x,y,w,d,ch,h){for(let j=0;j<d;j++)for(let i=0;i<w;i++)Wl(B,x+i,y+j,ch,h)}
 function decor(B,k,x,y,o){B.decor.push(Object.assign({k,x,y,block:false},o||{}))}
 const NEWP=['hgtb_plant_spiralfern','hgtb_plant_orbbush','hgtb_plant_lacecoral','hgtb_plant_tealgrass','hgtb_plant_lupin','hgtb_plant_glowshrooms'],TREES=['fairytree','willow','giantcap'];
-function plant(B,k,x,y,sc,o){let kk='hgt_'+k;const r=hs(x,y,211);if(TREES.includes(k)){if(r<.25&&IMG.hgtb_plant_belltree)kk='hgtb_plant_belltree'}else if(r<.35){const n=NEWP[(hs(x,y,212)*NEWP.length)|0];if(IMG[n])kk=n}
+function plant(B,k,x,y,sc,o){let kk=k==='glowshrooms'?'hgtb_plant_glowshrooms':'hgt_'+k;   /* (there is no hgt_glowshrooms picture; the painted glow mushrooms are hgtb_plant_glowshrooms) */const r=hs(x,y,211);if(TREES.includes(k)){if(r<.25&&IMG.hgtb_plant_belltree)kk='hgtb_plant_belltree'}else if(r<.35){const n=NEWP[(hs(x,y,212)*NEWP.length)|0];if(IMG[n])kk=n}
   if(isO(B,x,y))decor(B,kk,x,y,Object.assign({walk:true,deco:true,sc:sc||1,ox:(hs(x,y,41)-.5)*.5,oy:(hs(x,y,42)-.5)*.5},o||{}))}
 const light=(B,x,y)=>{if(isO(B,x,y))B.lights.push([x,y])};
 function lampPost(B,x,y){if(isO(B,x,y)){const r=hs(x,y,210),k=r<.3?'hgt_lamppost':r<.5?'hgtb_lamp_tall':r<.68?'hgtb_lamp_short':r<.84?'hgtb_lamp_vine':'hgtb_lamp_bare';decor(B,IMG[k]?k:'hgt_lamppost',x,y,{walk:true,deco:true,sc:1});light(B,x,y)}}
@@ -506,7 +506,8 @@ function buildRoom(key){
   const decorL=[],lights=[],items=[];
   const put=(role,x,y,o)=>{const k=khProp(role);if(IMG[k]&&k.startsWith('kh_'))NPC_H[k]=khPropH(role);decorL.push(Object.assign({k,x,y,block:true,deco:true},o||{}))};
   for(const [role,x,y] of def.props||[])put(role,x,y);
-  for(const [n,x,y,sc] of def.plants||[]){const k='hgt_'+n;decorL.push({k,x,y,block:false,walk:true,deco:true,sc:sc||1})}
+  // the hanging lamps and the wind chimes hang from the ceiling (2.7 high), the top of the picture at the ceiling; plants and lanterns stand on the floor
+  for(const [n,x,y,sc] of def.plants||[]){const k='hgt_'+n,hang=n==='hanglamp'||n==='chime';decorL.push(Object.assign({k,x,y,block:false,walk:true,deco:true,sc:sc||1},hang?{bob:Math.max(0,2.7-(NPC_H[k]||SPR_H[k]||1)*(sc||1))}:{}))}
   for(const [x,y] of def.lights||[])lights.push([x,y]);
   for(const [x,y,k] of def.chests||[])decorL.push({k,x,y,block:true});
   for(const [x,y] of def.barrels||[])decorL.push({k:'hg_waxbarrel',x,y,block:true});
@@ -520,6 +521,7 @@ function buildRoom(key){
    for(const [x,y] of [[1,d-3],[w-2,d-3]])if(!taken(x,y)&&IMG.hgtb_lamp_short)decorL.push({k:'hgtb_lamp_short',x,y,block:false,walk:true,deco:true,sc:1});
    if(IMG.hgtb_lamp_bracket)for(const [x,y] of [[2,1],[w-3,1],[1,d>>1],[w-2,d>>1]])if(!taken(x,y)&&rows[y]&&rows[y][x]==='.')decorL.push({k:'hgtb_lamp_bracket',x,y,block:false,walk:true,deco:true,sc:1,bob:.9});
    if(R.id%3===0&&IMG.hgtb_plant_belltree&&!taken(1,1))decorL.push({k:'hgtb_plant_orbbush',x:1,y:1,block:false,walk:true,deco:true,sc:1})}
+  hgtlTidyRoom({rows,decor:decorL,items,start:{x:cx,y:d-2}},{doors:R.next?[[cx,0]]:[]});   // people and chests out of the walls, passages clear, everything reachable
   for(let i=decorL.length-1;i>=0;i--){const q=decorL[i];if(rows[q.y]&&rows[q.y][q.x]!=='.')decorL.splice(i,1)}
   const fa=nm_=>FLOORS[nm_]?nm_:'hgt_f5',f0=fa(R.floorPref||RFLOOR[(R.id*3)%RFLOOR.length]),f1=fa(RFLOOR[(R.id*3+4)%RFLOOR.length]),f2=fa(['hgtb_f_mandala','hgtb_f_rosette','hgtb_f_lotus','hgtb_f_star'][R.id%4]),my2=Math.max(2,(d>>1)-1),fmI=[];
   for(let y=0;y<d;y++){let q='';for(let x=0;x<w;x++)q+=(Math.abs(x-cx)<=1&&Math.abs(y-my2)<=1)?'2':(x===1||y===1||x===w-2||y===d-2)?'1':'0';fmI.push(q)}

@@ -460,13 +460,11 @@ function build(){
   for(const hsr of B.houses){
     if(isO(hsr.x+(hsr.w>>1),hsr.y+(hsr.d>>1)))continue;
     const v=hs(hsr.x,hsr.y,90);
-    const k=v<.2?'hgt_finial':v<.4?'hgt_cupola':v<.55?'hgt_chimney':v<.7?'hgt_banner':v<.8?'hgt_obelisk':v<.9?'hgt_fairytree':'hgt_willow';
-    const sc=k==='hgt_cupola'?1.2+hsr.w*.12:k==='hgt_obelisk'?.8:(k==='hgt_fairytree'||k==='hgt_willow')?.9:1;
+    // only pieces that rise over a roof (a finial, a cupola, a banner pole); no chimney pots, trees, obelisks, standing lanterns or potted plants up
+    // there (they stood on the wall squares of the house and could not be seen from the streets)
+    const k=v<.36?'hgt_finial':v<.72?'hgt_cupola':'hgt_banner';
+    const sc=k==='hgt_cupola'?1.2+hsr.w*.12:1;
     dec(k,hsr.x+(hsr.w>>1),hsr.y+(hsr.d>>1),{bob:hsr.wh,sc});
-    // lit lanterns on the corners of the roof
-    for(const [cx,cy] of [[hsr.x,hsr.y],[hsr.x+hsr.w-1,hsr.y+hsr.d-1]])dec('hgt_gardenlantern',cx,cy,{bob:hsr.wh,sc:.9});
-    // plants on the ledges
-    if(hs(hsr.x,hsr.y,91)<.5)dec(PLANTS[(hs(hsr.x,hsr.y,92)*PLANTS.length)|0],hsr.x+hsr.w-1,hsr.y,{bob:hsr.wh,sc:1.1});
     // a lit doorway lamp in front of every door that opens
     if(hsr.room)B.lights.push([hsr.front[0],hsr.front[1]])}
   for(const st of stairTowers){dec('hgt_cupola',st.nx,st.ny,{bob:5.1-0,sc:1.6});for(const c of st.path.filter((c,i)=>i%5===2))dec('hgt_hanglamp',c[0],c[1],{bob:1.7});}
@@ -652,6 +650,8 @@ function roomLevel(id){
   for(const [k,id2,x,y] of R.npcs)decor.push({k,x,y,block:false,walk:true,npc:id2,sc:1});
   for(const [k,x,y] of R.loot)items.push({k,x,y});
   const st=R.arrive||{x:ex,y:d,f:0};
+  {const dl=[];for(let y=0;y<rows.length;y++)for(let x=0;x<rows[0].length;x++)if('DEFG'.includes(rows[y][x]))dl.push([x,y]);
+   hgtlTidyRoom({rows,decor,items,start:st},{doors:dl})}   // nothing in a wall or pillar, passages clear, every barrel, chest and person reachable
   return {rows:rows.map(r=>r.join('')),chars,start:{x:st.x,y:st.y,f:st.f},enemies:[],items,decor,lights,portals:[],floor:R.floor,ceil:'beam',ceilH:3,day:0,amb:.5,noTele:true,noExtras:true,diff:66,name:R.name,label:R.name,mapNames:[]};
 }
 for(let id=INT0;id<=INTN;id++)if(ROOMS[id])hgtRegister(id,roomLevel);
