@@ -45,12 +45,20 @@ function pspWallGid(style,v,wh){
     case 'dun':gid=gyTile('texBlack_'+(v%5),wh,{gain:1.3,rgb:[.7,.84,.78],tag:'psd'+v});break;
     case 'dark':gid=pspTex('ashlar',null)?g('pst_ashlar',{gain:1.6,tag:'pskP'+v,draw:wet}):gyTile('texBlack_'+(v%5),wh,{gain:.85,rgb:[.7,.82,.76],tag:'psk'+v});break;
     case 'bone':gid=gyTile('texBone_'+(1+v%4),wh,{gain:1.0,rgb:[.86,.92,.84],tag:'psb'+v});break;
-    case 'brick':if(pspTex('brick_dark')!=='pst_brick_dark'){gid=g('texBlack_'+(v%5),{gain:1.35,rgb:[.78,.78,.7],tag:'psbr'+v,draw:(x,w,h)=>{x.strokeStyle='rgba(10,16,12,.55)';x.lineWidth=1.5;for(let yy=0,r=0;yy<h;yy+=14,r++){x.beginPath();x.moveTo(0,yy);x.lineTo(w,yy);x.stroke();for(let xx=(r%2)*16;xx<w;xx+=32){x.beginPath();x.moveTo(xx,yy);x.lineTo(xx,yy+14);x.stroke()}}wet(x,w,h)}});break}gid=g('pst_brick_dark',{gain:1.15,rgb:[.84,.9,1.0],tag:'psbrP'+v,draw:wet});break;
+    case 'brick':if(pspTex('brick_dark')!=='pst_brick_dark'){gid=g('texBlack_'+(v%5),{gain:1.35,rgb:[.78,.78,.7],tag:'psbr'+v,draw:(x,w,h)=>{x.strokeStyle='rgba(10,16,12,.55)';x.lineWidth=1.5;for(let yy=0,r=0;yy<h;yy+=14,r++){x.beginPath();x.moveTo(0,yy);x.lineTo(w,yy);x.stroke();for(let xx=(r%2)*16;xx<w;xx+=32){x.beginPath();x.moveTo(xx,yy);x.lineTo(xx,yy+14);x.stroke()}}wet(x,w,h)}});break}gid=g('pst_brick_dark',{gain:1.05,rgb:[.84,.9,1.0],tag:'psbrP2'+v,draw:(x,w,h)=>{x.save();x.globalCompositeOperation='color';x.globalAlpha=.85;x.fillStyle='#5c646e';x.fillRect(0,0,w,h);x.restore();wet(x,w,h)}});break;
     case 'panel':if(pspTex('timber_plaster')==='pst_timber_plaster'){gid=g('pst_timber_plaster',{gain:.62,rgb:[.8,.78,.9],tag:'pspP'+v,draw:wet});break}gid=g('texBone_'+(1+v%3),{gain:.5,rgb:[.7,.8,.62],tag:'psp'+v,draw:(x,w,h)=>{x.globalAlpha=.6;x.fillStyle='#10201a';for(let i=0;i<2;i++){const px=8+i*60;x.fillRect(px,h*.18,52,h*.5);x.fillStyle='#1c342a';x.fillRect(px+4,h*.18+4,44,h*.5-8);x.fillStyle='#10201a'}x.globalAlpha=1;x.fillStyle=P.brass;x.fillRect(0,h*.7,w,3)}});break;
     case 'win':gid=g(pspTex('ashlar','texBlack_2'),{tag:'psw'+v,draw:(x,w,h)=>{const top=h-h*.9,bot=h-34,x0=48,x1=80;x.save();pspPointed(x,x0-6,x1+6,top-6,bot+6,36);x.fillStyle=P.copper;x.fill();pspPointed(x,x0,x1,top,bot,34);const gr=x.createLinearGradient(0,top,0,bot);gr.addColorStop(0,P.glass[1]);gr.addColorStop(.5,P.glass[0]);gr.addColorStop(1,P.glass[2]);x.fillStyle=gr;x.fill();x.clip();
       x.strokeStyle=P.bone;x.lineWidth=2.4;x.beginPath();x.moveTo(64,top);x.lineTo(64,bot);for(let yy=top+36;yy<bot;yy+=38){x.moveTo(x0,yy);x.lineTo(x1,yy)}x.stroke();
       x.fillStyle='rgba(180,255,210,.35)';x.beginPath();x.arc(64,top+36,8,0,6.3);x.fill();x.restore();wet(x,w,h)}});break;   // tall thin lancet, green glass
-    case 'pier':gid=g(pspTex('ashlar','texBlack_1'),{tag:'psr'+v,draw:(x,w,h)=>{const gr=x.createLinearGradient(30,0,98,0);gr.addColorStop(0,'rgba(10,20,16,.6)');gr.addColorStop(.3,'rgba(150,200,170,.22)');gr.addColorStop(.7,'rgba(120,170,140,.08)');gr.addColorStop(1,'rgba(8,16,12,.62)');x.fillStyle=gr;x.fillRect(30,0,68,h);x.fillStyle=P.copperDk;x.fillRect(26,h-14,76,14);x.fillRect(26,0,76,10);x.fillStyle=P.copper;x.fillRect(26,10,76,3)}});break;
+    case 'pier':gid=g(pspTex('ashlar','texBlack_1'),{tag:'psr'+v,draw:(x,w,h)=>{const gr=x.createLinearGradient(30,0,98,0);gr.addColorStop(0,'rgba(10,20,16,.6)');gr.addColorStop(.3,'rgba(150,176,190,.12)');gr.addColorStop(.7,'rgba(120,150,165,.05)');gr.addColorStop(1,'rgba(8,16,12,.62)');x.fillStyle=gr;x.fillRect(30,0,68,h);x.fillStyle=P.copperDk;x.fillRect(26,h-14,76,14);x.fillRect(26,0,76,10);x.fillStyle=P.copper;x.fillRect(26,10,76,3)}});break;
+    case 'string':gid=g(pspTex('ashlar','texBlack_2'),{tag:'psst'+v,draw:(x,w,h)=>{const y1=h-128*2.05,y2=h-14;   // a plinth at the foot, a projecting string course two squares up, a drip line under the cornice
+      x.fillStyle='rgba(8,12,16,.5)';x.fillRect(0,y2,w,14);x.fillStyle='rgba(150,176,190,.22)';x.fillRect(0,y2,w,2);
+      x.fillStyle='rgba(6,10,14,.55)';x.fillRect(0,y1+8,w,8);x.fillStyle='rgba(150,176,190,.3)';x.fillRect(0,y1-2,w,3);x.fillStyle='rgba(40,52,62,.55)';x.fillRect(0,y1+1,w,7);
+      x.fillStyle='rgba(6,10,14,.45)';x.fillRect(0,0,w,8);wet(x,w,h)}});break;
+    case 'slit':gid=g(pspTex('ashlar','texBlack_2'),{tag:'pssl'+v,draw:(x,w,h)=>{const top=h-128*2.7,bot=h-128*1.35;   // an arrow slit: a deep splay with a thin cold light down the middle
+      x.fillStyle='rgba(4,8,12,.5)';x.beginPath();x.moveTo(50,top-8);x.lineTo(78,top-8);x.lineTo(70,bot+10);x.lineTo(58,bot+10);x.closePath();x.fill();
+      x.fillStyle='#04070a';x.fillRect(60,top,8,bot-top);x.fillStyle='rgba(120,160,176,.32)';x.fillRect(63,top+6,2,bot-top-12);
+      x.fillStyle='rgba(150,176,190,.18)';x.fillRect(46,bot+10,36,3);wet(x,w,h)}});break;
     case 'ivy':if(pspTex('ivy_wall')==='pst_ivy_wall'){gid=g('pst_ivy_wall',{gain:2.2,tag:'psiP'+v,draw:wet});break}gid=g('texBlack_'+(1+v%4),{tag:'psi'+v,draw:(x,w,h)=>{const G=P.ivy;for(let k=0;k<9;k++){let px=hash2(k,v,71)*w,py=h;x.strokeStyle='#0c1c14';x.lineWidth=2;x.beginPath();x.moveTo(px,py);for(let t=0;t<8;t++){px+=(hash2(k,t,72)-.5)*14;py-=h*(.05+hash2(k,t,73)*.09);x.lineTo(px,py)}x.stroke()}
       for(let k=0;k<420;k++){const px=hash2(k,v,74)*w,py=h*(1-Math.pow(hash2(k,v,75),1.5)),r=1.4+hash2(k,v,76)*2.6;x.fillStyle=G[(hash2(k,v,77)*4)|0];x.globalAlpha=.94;x.beginPath();x.ellipse(px,py,r,r*.62,hash2(k,v,78)*3.1,0,6.3);x.fill()}x.globalAlpha=1;wet(x,w,h)}});break;
     case 'moss':if(pspTex('ashlar_moss')==='pst_ashlar_moss'){gid=g('pst_ashlar_moss',{tag:'psmP'+v,draw:wet});break}gid=g('texBlack_'+(v%5),{tag:'psm'+v,draw:(x,w,h)=>{for(let k=0;k<120;k++){const px=hash2(k,v,81)*w,py=h*(1-Math.pow(hash2(k,v,82),2.2)),r=2+hash2(k,v,83)*5;x.fillStyle=hash2(k,v,84)<.5?P.moss:P.mossHi;x.globalAlpha=.8;x.beginPath();x.arc(px,py,r,0,6.3);x.fill()}x.globalAlpha=1;wet(x,w,h)}});break;
@@ -77,16 +85,19 @@ function pspDoorGid(style,wh){
     x.fillStyle=P.brass;x.beginPath();x.arc(x1-16,top+dh*.58,5,0,6.3);x.fill();x.restore()}});
   return PSPK.tiles[k]=gid}
 /* ---------- the floors (made once, the engine wants 128 by 128 RGBA) ---------- */
-const PSP_FLOOR_NAMES=['flag','marble','runner','wet','straw','lawn','gravel','cobble','flagdark','dirt','grate'];
+const PSP_FLOOR_NAMES=['flag','marble','runner','wet','straw','lawn','gravel','cobble','flagdark','dirt','grate','slate'];
 function pspFloor(name){
   if(PSPK.floors[name])return PSPK.floors[name];
   if(typeof gyFloors==='function')try{gyFloors()}catch(e){}
   const out='psf_'+name,N=128,hs=(a,b,c)=>hash2(a,b,c);
   const tone=(src,g,t)=>FLOORS[src]?gyFloorTone(out,src,g,t):(FLOORS[out]=FLOORS.cobble||FLOORS.grass,out);
-  {const PT={flag:['flagstone',1.7,[.9,1,1.08]],flagdark:['flagstone',1.1,[.82,.94,1.04]],gravel:['gravel',1.5,[.92,1,1.06]],cobble:['cobble',1.9,[.92,1,1.08]],wet:['cobble_wet',1.6,[.85,.98,1.14]],marble:['marble',1.9,[.95,1,1.05]]}[name];
+  {const PT={flag:['flagstone',1.7,[.9,1,1.08],.8,.5],flagdark:['flagstone',1.1,[.82,.94,1.04],.8,.5],slate:['flagstone',.95,[.8,.9,1.02],.7,.18],gravel:['gravel',1.5,[.92,1,1.06],.6,.5],cobble:['cobble',1.55,[.92,1,1.08],.5,.45],wet:['cobble_wet',1.45,[.85,.98,1.14],.5,.55],marble:['marble',1.9,[.95,1,1.05]]}[name];
     const im=PT&&IMG['ps_tex_'+PT[0]];
     if(im&&im.width){const c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(im,0,0,N,N);const d=x.getImageData(0,0,N,N).data;
-      for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,d[i]*PT[1]*PT[2][0]);d[i+1]=Math.min(255,d[i+1]*PT[1]*PT[2][1]);d[i+2]=Math.min(255,d[i+2]*PT[1]*PT[2][2]);d[i+3]=255}
+      let mr=0,mg=0,mb=0,mn=0;for(let i=0;i<d.length;i+=4){mr+=d[i];mg+=d[i+1];mb+=d[i+2];mn++}mr/=mn;mg/=mn;mb/=mn;
+      const fl=PT[3]===undefined?1:PT[3],sa=PT[4]===undefined?1:PT[4];   // fl: how much of the stone's contrast is kept (the cobbles were noisy), sa: how much of its colour (the lodge floor was tan)
+      for(let i=0;i<d.length;i+=4){let r=mr+(d[i]-mr)*fl,g2=mg+(d[i+1]-mg)*fl,b=mb+(d[i+2]-mb)*fl;const l=(r+g2+b)/3;r=l+(r-l)*sa;g2=l+(g2-l)*sa;b=l+(b-l)*sa;
+        d[i]=Math.max(0,Math.min(255,r*PT[1]*PT[2][0]));d[i+1]=Math.max(0,Math.min(255,g2*PT[1]*PT[2][1]));d[i+2]=Math.max(0,Math.min(255,b*PT[1]*PT[2][2]));d[i+3]=255}
       FLOORS[out]=new Uint8ClampedArray(d);return PSPK.floors[name]=out}}
   switch(name){
     case 'flag':tone('gyf_flag',.8,[.7,.82,.94]);break;
@@ -106,8 +117,8 @@ function pspFloor(name){
       FLOORS[out]=d}break;
     case 'runner':{const base=FLOORS.gyf_flag,d=new Uint8ClampedArray(N*N*4);
       for(let y=0;y<N;y++)for(let x=0;x<N;x++){const o=(y*N+x)*4,e=Math.min(x,127-x),n=hs(x>>2,y>>2,43)*10;
-        let r=62+n*.5,g=20+n*.4,b=30+n*.4;
-        if(e<5){r=128;g=104;b=52}else if(e<8){r=26,g=10,b=14}else if(Math.abs(x-64)<6&&((y>>4)&1)===0){r=104;g=60;b=60}
+        let r=34+n*.35,g=22+n*.3,b=30+n*.3;   // a dark oxblood runner, worn: the bright red and the brass border were the loudest thing in the room
+        if(e<5){r=84;g=70;b=46}else if(e<8){r=16,g=10,b=12}else if(Math.abs(x-64)<6&&((y>>4)&1)===0){r=58;g=38;b=42}
         d[o]=r;d[o+1]=g;d[o+2]=b;d[o+3]=255}
       FLOORS[out]=d}break;
     case 'grate':{tone('gyf_flag',.22,[.58,.74,.9]);const d=new Uint8ClampedArray(FLOORS[out]);for(let y=0;y<N;y++)for(let x=0;x<N;x++){const bar=(x%16<3)||(y%16<3),o=(y*N+x)*4,v=bar?96:6;if(bar||(x%16<5||y%16<5)){d[o]=v*.8;d[o+1]=v*1.1;d[o+2]=v*.9}else{d[o]=3;d[o+1]=7;d[o+2]=6}}FLOORS[out]=d}break;
@@ -120,6 +131,16 @@ function pspCeils(){
   const T=(out,src,g,t)=>{const b=CEILS[src];if(!b||CEILS[out])return;const d=new Uint8ClampedArray(b.length);for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,b[i]*g*t[0]);d[i+1]=Math.min(255,b[i+1]*g*t[1]);d[i+2]=Math.min(255,b[i+2]*g*t[2]);d[i+3]=255}CEILS[out]=d};
   T('ps_sky','cloud',.5,[.7,.85,1.0]);T('ps_vault','gyc_1',.7,[.7,.82,.95]);T('ps_dark','gyc_2',.6,[.68,.8,.94]);
   for(const n of ['ps_sky','ps_vault','ps_dark'])if(!CEILS[n])CEILS[n]=CEILS.gyc_crypt||CEILS.beam||CEILS.cloud}
+/* a magenta fringe on a cut-out (the keying left it on the edge pixels): the red and blue are pulled down to the green, so the edge goes grey-brown instead of purple. Done once per picture, on a copy. */
+function pspDefringe(k){
+  const im=IMG[k];if(!im||!im.width||im._psfd||/rose|lantern_red|candles|stained|c_psraven/.test(k))return;
+  try{const w=im.width,h=im.height;if(w*h>5e6){im._psfd=1;return}const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(im,0,0);const d=x.getImageData(0,0,w,h),p=d.data;let n=0;
+    const A=(xx,yy)=>xx<0||yy<0||xx>=w||yy>=h?0:p[(yy*w+xx)*4+3];
+    for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){const i=(yy*w+xx)*4,a=p[i+3];if(a===0)continue;
+      let edge=a<250;if(!edge){for(let r=1;r<=3&&!edge;r++)if(A(xx-r,yy)<40||A(xx+r,yy)<40||A(xx,yy-r)<40||A(xx,yy+r)<40)edge=true}
+      if(!edge)continue;const R=p[i],G=p[i+1],B=p[i+2];
+      if(R>G+12&&B>G+12){p[i]=Math.min(R,G*1.12+3);p[i+2]=Math.min(B,G*1.05+3);p[i+1]=G*.94;n++}}
+    if(n){x.putImageData(d,0,0);c._psfd=1;IMG[k]=c}else im._psfd=1}catch(e){}}
 /* ---------- the kit ---------- */
 const PSP_ARGS=a=>{const A=Array.prototype.slice.call(a);if(A[0]&&A[0].rows&&A[0].finish)return [A[0]].concat(A.slice(1));return [PSP.cur].concat(A)};
 function pspMake(plan){
@@ -167,6 +188,7 @@ function pspMake(plan){
     o=o||{};
     // safe zones: nothing hostile stands in one (a builder may have used C.foe directly)
     for(let i=C.enemies.length-1;i>=0;i--){const e=C.enemies[i];if(C.safe.some(z=>pspInZone(z,e.x,e.y,0)))C.enemies.splice(i,1)}
+    try{const seen={};for(const d of C.decor)if(d.k&&!seen[d.k]){seen[d.k]=1;pspDefringe(d.k)}}catch(e){}
     const lv=fin.call(C,o),cnt=C.floorNames.length;
     lv.floorSet=C.floorNames.map(n=>pspFloor(n));for(let i=cnt;i<7;i++)lv.floorSet.push(lv.floorSet[0]);
     lv.floor=lv.floorSet[0];lv.floor2=lv.floorSet[1]||lv.floor;
@@ -325,6 +347,8 @@ function pspSkyFrame(){
     const H=Math.round((cs.h0||38)+((cs.h1||106)-(cs.h0||38))*prog*prog*(3-2*prog)),near=prog>.45,mix=Math.max(0,Math.min(1,(prog-.35)/.2));   // rows tall on screen (the sky shows about 105 rows above the horizon)
     const lift=Math.round((cs.lift||0)*(1-prog)+(cs.lift1||0)*prog),base=150-lift,cu=col(baseAz);
     const draw=(img,alpha)=>put(img,cu,base-H/2+Math.round(H*.02),H,alpha,cs.wm||1);
+    if(cs.ring){const img=pspCastleImg(false);   // lesser towers of the same city, further round the horizon (mirrored copies, smaller and hazier), so the skyline shows from more of the road
+      for(const [da,fl,sz,al] of [[1.45,1,.62,.8],[-1.45,0,.56,.75],[2.9,0,.5,.6],[-2.9,1,.54,.65]]){const c2=col(baseAz+da),H2=Math.round(H*sz);x.save();x.translate(c2,0);if(fl)x.scale(-1,1);put(img,0,base-H2/2+Math.round(H2*.02),H2,al,cs.wm||1);x.restore()}}
     draw(pspCastleImg(false),near?1-mix:1);if(near)draw(pspCastleImg(true),mix);
     // distance haze: the castle is a cold shadow in the teal mist far off, and clears as the party climbs
     x.globalCompositeOperation='source-atop';

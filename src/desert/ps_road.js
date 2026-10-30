@@ -16,8 +16,9 @@ const PCR={ID:9715,W:48,H:64,
   GLADES:[[22,48,34,56,'gravel','The Bone Field'],[3,38,15,46,'flagdark','The Wayside Shrine'],[30,28,44,36,'gravel','The Glade of Crosses'],[4,18,18,26,'gravel','The Leaning Lamps'],[22,6,38,14,'flagdark','The Tower Forecourt']]};
 function pcrBuild(info){
   const W=PCR.W,H=PCR.H;
-  const C=pspMake({id:9715,start:{x:40,y:59,f:0},walled:true,wall:'dark',wh:3.4,floor:'cobble',amb:.95,wind:.3});
+  const C=pspMake({id:9715,start:{x:40,y:59,f:0},walled:true,wall:'dark',wh:3.4,floor:'cobble',amb:.95,wind:.3,castle:{at:[14,100],far:130,near:70,lift:28,lift1:18,h0:34,h1:60,wm:1.9,ring:1}});
   const {rows,block}=C,hs=C.hs,PAL=PSP_PAL,SI=PAL.silver,GR=PAL.green,ix=(x,y)=>y*W+x;
+  const T=k=>psgToned(k);   // the graveyard pieces, greyed and darkened so that they sit in the castle's palette (the raw ones are bright green ivy and red-brown wood)
   const open=(x,y)=>rows[y]&&rows[y][x]==='.';
   /* ---- the road: five wide, along the centre line ---- */
   const R=PCR.ROUTE,cl=[];
@@ -31,6 +32,8 @@ function pcrBuild(info){
   const dist=new Float32Array(W*H).fill(99);
   for(const [cx,cy] of cl)for(let y=Math.max(0,cy-6);y<=Math.min(H-1,cy+6);y++)for(let x=Math.max(0,cx-6);x<=Math.min(W-1,cx+6);x++){const d=Math.max(Math.abs(x-cx),Math.abs(y-cy));if(d<dist[ix(x,y)])dist[ix(x,y)]=d}
   const D=(x,y)=>dist[ix(x,y)];
+  /* the kerb: a dark dressed-flag strip along both outer edges of the road (the centre line is the other flag strip), the cobbles lie calm between them */
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(open(x,y)&&D(x,y)===2&&!PCR.GLADES.some(g=>x>=g[0]&&x<=g[2]&&y>=g[1]&&y<=g[3]))C.setFloorCell(x,y,'flagdark');
   /* the postern and the tower gate are set INTO a wall: the squares beside and behind them are wall (the road's five-wide carve had left each door standing free in open floor) */
   for(let y=61;y<=62;y++)for(let x=36;x<=44;x++)C.solid(x,y,C.ch(pspWallGid('dark',(hs(x,y,4)*4)|0,3.4)));
   for(let x=26;x<=34;x++)C.solid(x,4,C.ch(pspWallGid(x===30?'pier':'dark',(hs(x,4,4)*4)|0,3.4)));
@@ -45,31 +48,29 @@ function pcrBuild(info){
   const lamp=(x,y,col)=>{if(!C.free(x,y))return;C.dec('gy_lantern',x,y,{block:false,sc:1.05});C.light(x,y,col||SI)};
   const edge=(x,y)=>open(x,y)&&D(x,y)===2;                // the outer row of the road
   const far=(x,y,d)=>open(x,y)&&D(x,y)>=(d||5)&&C.free(x,y);   // well off the route: solid props only here
-  const tree=(x,y,sc)=>{if(far(x,y,3))C.dec('gy_dead',x,y,{block:true,sc:sc||1.5+hs(x,y,7)*.7})};
+  const TREES=['gy_dead','ww_crowtree','gy_dead','ww_stump'],tree=(x,y,sc,k)=>{if(far(x,y,3))C.dec(T(k||TREES[(hs(x,y,8)*TREES.length)|0]),x,y,{block:true,sc:sc||1.2+hs(x,y,7)*.4})};
   /* the iron fence along the outer row, with gaps, and a leaning lamp every few squares (walk-through pictures) */
   for(const [cx,cy] of cl){
     for(const [dx,dy] of [[-2,0],[2,0],[0,-2],[0,2]]){const x=cx+dx,y=cy+dy;
       if(!edge(x,y)||C.decor.some(d=>d.x===x&&d.y===y))continue;
       const r=hs(x,y,21);
-      if(r<.4)C.prop(FENCE[(x+y)&1],x,y,{block:false,maxW:1.02});
-      else if(r<.43)C.dec('gy_dead',x,y,{block:false,sc:.8+hs(x,y,22)*.3});          // a bare twig tree you can brush past
-      else if(r<.5)C.dec('gy_bones',x,y,{block:false,sc:.7});
-      else if(r<.6)C.prop('moss_rock',x,y,{block:false})}}
+      if(r<.3)C.prop(FENCE[(x+y)&1],x,y,{block:false,maxW:1.02});
+      else if(r<.325)C.prop(['moss_rock','cobble_heap'][(x+y)&1],x,y,{block:false})}}
   cl.forEach(([x,y],i)=>{if(i%11===5){for(const [dx,dy] of [[-2,0],[2,0],[0,-2],[0,2]])if(edge(x+dx,y+dy)){lamp(x+dx,y+dy,i%22===5?SI:GR);break}}});
   /* the glades: dead trees, stones, bones */
   for(const g of PCR.GLADES){
     const [x0,y0,x1,y1]=g;
     for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(!open(x,y)||!C.free(x,y))continue;const r=hs(x,y,31),d=D(x,y);
       if(d>=3){
-        if(r<.05)tree(x,y);
-        else if(r<.13)C.dec('gy_bones',x,y,{block:false,sc:.8});
-        else if(r<.155&&g[5]!=='The Tower Forecourt')C.dec(['gy_stone1','gy_stone2','gy_ccross','gy_wcross'][(hs(x,y,32)*4)|0],x,y,{block:true,sc:.95})}}}
+        if(r<.022)tree(x,y);
+        else if(r<.05)C.dec([T('gy_bones'),pspPic('cobble_heap'),pspPic('moss_rock')][(hs(x,y,33)*3)|0],x,y,{block:false,sc:.8});
+        else if(r<.068&&g[5]!=='The Tower Forecourt')C.dec(T(['gy_stone1','gy_stone2','gy_ccross','gy_wcross'][(hs(x,y,32)*4)|0]),x,y,{block:true,sc:.95})}}}
   /* the Bone Field: skulls on posts and heaps of bones */
-  for(const [x,y] of [[24,50],[27,54],[31,50],[33,54],[23,55],[30,55]])if(far(x,y,3))C.prop('skull_pillar',x,y,{block:true});
-  for(let k=0;k<12;k++){const x=22+((hs(k,1,51)*13)|0),y=48+((hs(k,2,51)*9)|0);if(open(x,y)&&C.free(x,y))C.dec('gy_bones',x,y,{block:false,sc:.6+hs(k,3,51)*.5})}
+  for(const [x,y] of [[24,50],[31,50],[33,54],[23,55]])if(far(x,y,3))C.prop('skull_pillar',x,y,{block:true});
+  for(const [x,y,k] of [[26,48,0],[29,53,1],[22,51,0],[33,50,2]])if(open(x,y)&&C.free(x,y))C.dec(k===0?T('gy_bones'):k===1?pspPic('cobble_heap'):pspPic('moss_rock'),x,y,{block:false,sc:.75})
   /* the Glade of Crosses: rows of crosses and a great old tree */
-  for(let x=33;x<=43;x+=2)for(const y of [29,35])if(far(x,y,3))C.dec(['gy_ccross','gy_wcross','gy_stone1'][(x>>1)%3],x,y,{block:true,sc:1});
-  tree(42,29,2.3);tree(31,35,2.1);
+  for(let x=33;x<=43;x+=2)for(const y of [29,35])if(far(x,y,3)&&((x>>1)+y)%3)C.dec(T(['gy_ccross','gy_wcross','gy_stone1'][(x>>1)%3]),x,y,{block:true,sc:1});
+  tree(42,29,1.7,'gy_yew');tree(31,35,1.6,'ww_crowtree');
   /* the Leaning Lamps: lamps that lean over the road, a ring of them */
   for(const [x,y] of [[5,19],[8,19],[11,19],[15,19],[5,25],[8,25],[15,25],[17,22],[5,22]])if(open(x,y))lamp(x,y,hs(x,y,9)<.5?SI:[.8,1.2,.6]);
   /* the Wayside Shrine: a safe place with a bench, a warm lantern, a free rest */
@@ -78,7 +79,7 @@ function pcrBuild(info){
     C.rests.push({x0,y0:y,x1:x0+2,y1:y+1,line:'A wayside shrine. A bench, a warm lantern, a loaf and a cup. Nothing hostile comes near.',name:'The Wayside Shrine'});
     C.light(x0+1,y,C.warmCol);
     if(!NPCS[id])khNpc(id,'A pilgrim bench','gy_bench',()=>say('A stone bench under a small shrine of the Pale Mother, with a lantern that does not flicker. The road behind you is long, and the one ahead is longer.',[['Rest a while.',()=>{try{restParty(true)}catch(e){}return null}],['Leave.',()=>null]]));
-    C.dec('gy_bench',x0+1,y+1,{block:true,npc:id,sc:1.1});C.dec(pspPic('lantern_red_a'),x0,y,{block:false});C.dec(pspPic('statue_plinth'),x0+2,y,{block:true})}
+    C.dec(T('gy_bench'),x0+1,y+1,{block:true,npc:id,sc:1.1});C.dec(pspPic('lantern_red_a'),x0,y,{block:false});C.dec(pspPic('statue_plinth'),x0+2,y,{block:true})}
   for(const [x,y] of [[5,39],[9,39],[13,39],[4,45],[14,45]])if(far(x,y,3))C.dec(pspPic('urn_big'),x,y,{block:true,sc:.9});
   /* the tower forecourt: two lamps, two urns, a sign, the gate framed by an arch */
   C.prop('arch_iron',30,5,{block:false});
