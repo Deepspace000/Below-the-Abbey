@@ -102,7 +102,7 @@ function pcrBuild(info){
   FOE('pssentinel',G[4],9,1);FOE('pssentinel',G[4],10,1);
   for(const e of C.enemies)e.lvl=100;
   C.glow(7,SI);
-  psgNoLooseArch(C);
+  psgNoLooseArch(C);psgPost(C,false);
   const lv=C.finish({start:{x:40,y:59,f:0}});
   lv.mapNames=[{t:'The East Postern',x:40,y:58,k:'place'},{t:'The Bone Field',x:28,y:52,k:'place'},{t:'The Wayside Shrine',x:7,y:42,k:'place'},{t:'The Glade of Crosses',x:37,y:32,k:'place'},{t:'The Leaning Lamps',x:10,y:22,k:'place'},{t:'The Tower Forecourt',x:30,y:10,k:'place'}];
   return lv}

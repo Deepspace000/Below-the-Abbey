@@ -50,3 +50,14 @@ a[..., 3] = np.where(mid, al * .12, al)          # the cyan halo goes, the soft 
 a = tone(a, .62, .45, (.92, .98, 1.08), keep_hi=250)
 save('c_psfalconer', a)
 print('retoned c_psraven, c_psfalconer')
+
+# the red lanterns read pink: pull the blue out of the lit glass so they are a deep red
+for nm in ('lantern_red_a', 'lantern_red_b'):
+    a = defringe(load(nm))
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    pink = (r > 120) & (b > g + 8) & (r > g + 30)
+    a[..., 2] = np.where(pink, b * .28, b)
+    a[..., 1] = np.where(pink, g * .75, g)
+    a[..., 0] = np.where(pink, np.minimum(255, r * 1.05), r)
+    save(nm, a)
+print('retoned red lanterns')

@@ -95,7 +95,7 @@ function pscBricks(x,W,Hp,seed,y0,y1){if(pscPaintTex(x,W,Hp,'ashlar',y0,y1,seed*
   x.save();x.beginPath();x.rect(0,y0,W,y1-y0);x.clip();x.fillStyle=PSC_K.mort;x.fillRect(0,y0,W,y1-y0);
   for(let y=y1-17,r=0;y>y0-17;y-=17,r++)for(let bx=-(r%2)*20;bx<W;bx+=40){x.fillStyle=cols[(R()*6)|0];x.fillRect(bx+1,y+1,38,15);if(R()<.16){x.fillStyle='rgba(70,120,70,.4)';x.fillRect(bx+1,y+1,38,4)}}
   x.restore()}
-function pscMossBase(x,W,Hp,seed,h){const R=blRng(seed);for(let k=0;k<W/3;k++){const px=R()*W,r=3+R()*7;x.fillStyle=R()<.5?'rgba(52,96,52,.8)':'rgba(34,70,40,.85)';x.beginPath();x.ellipse(px,Hp-R()*h,r,r*.6,0,0,6.3);x.fill()}}
+function pscMossBase(x,W,Hp,seed,h){const R=blRng(seed);for(let k=0;k<W/3;k++){const px=R()*W,r=3+R()*7;x.fillStyle=R()<.5?'rgba(40,56,48,.75)':'rgba(26,40,34,.8)';x.beginPath();x.ellipse(px,Hp-R()*h,r,r*.6,0,0,6.3);x.fill()}}
 /* a tall thin pointed (lancet) window with green glass, mullion and tracery; bot = y of its sill */
 function pscLancet(x,cx,bot,ww,hh,glow,dark){const top=bot-hh,g=x.createLinearGradient(0,top,0,bot);
   if(dark){g.addColorStop(0,'#0e1c18');g.addColorStop(1,'#050a08')}else{g.addColorStop(0,glow?'#e0b868':'#46687c');g.addColorStop(.5,glow?'#b07c34':'#26465a');g.addColorStop(1,glow?'#7a4a1c':'#122430')}
@@ -532,7 +532,7 @@ function pscBuild(info){
   const hedge=(x,y,kind)=>{if(g[y][x]==='.'&&rows[y][x]==='.'&&!C.used.has(x+','+y)){C.solid(x,y,C.ch(HG[kind||'high'][int(hs(x,y,9)*4)]));g[y][x]='h';fm[y*W+x]='4'}};
   const NAMES=['st_mourners','st_chimera','st_hydra','st_judge','st_gargoyle','st_headless','st_judge','st_veiled','st_hand','st_bishop'];
   const wakers={};const reserveWake=(t,x,y)=>{wakers[x+','+y]=t};
-  const plaque=(x,y,key,lines,text)=>{const id='psc_pl_'+key,k=blSlab('psc_slab_'+key,lines,{h:.95,top:.18,span:.62});if(!NPCS[id])khNpc(id,'A plaque',k,()=>say(text,[BYE]));return C.thing(k,id,x,y,{sc:1})};
+  const plaque=(x,y,key,lines,text)=>{const wd=[[0,-1],[1,0],[0,1],[-1,0]].find(([a,b])=>C.rows[y+b]&&C.rows[y+b][x+a]!=='.');if(!wd||!C.isOpen(x,y))return null;const d={k:'sign_gy',x,y,block:false,wd,txt:[lines[0],lines[1]||''],sc:1};C.decor.push(d);return d};   // a name plate on the wall (it was a stone slab standing in the lane)
   /* ===== the dressing of every lane: lanterns on brackets (a lit lantern every seventh square), ivy and vines hung on the walls, alcoves with creepy statues set into the wall ===== */
   const isDoorCell=(x,y)=>{const c=rows[y]&&rows[y][x];return c&&c!=='.'&&KH_DOOR[C.chars[c]]};
   const wallAt=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&g[y][x]==='#'&&!isDoorCell(x,y);
@@ -734,7 +734,7 @@ function pscLodge(info){
   C.picture('cobweb_corner_a',3,3,[0,-1]);C.picture('cobweb_corner_b',12,3,[0,-1]);
   C.light(5,4,WARM);C.light(8,7,WARM);C.light(11,9,WARM);
   C.person('psc_gardener',8,6,1);
-  psgNoLooseArch(C);
+  psgNoLooseArch(C);psgPost(C,true);
   return C.finish({start:{x:8,y:10,f:0}})}
 function pscMews(info){
   /* rebuilt with the castle kit: cobbled stable floor, banded stone walls; the falconer between two twisted columns, a perch each side of him, two stone troughs, the feather perch and the glove chest near the door */
@@ -755,7 +755,7 @@ function pscMews(info){
   for(const [x,y] of [[4,5],[15,5],[5,9],[14,10]])pspFoe(C,'psraven',x,y);
   for(const [x,y] of [[5,4],[14,4],[10,8],[5,11],[15,11]])C.light(x,y,G1);
   C.person('psc_falconer',10,5,1);
-  psgNoLooseArch(C);
+  psgNoLooseArch(C);psgPost(C,true);
   return C.finish({start:{x:10,y:12,f:0}})}
 nmFeather();
 function nmFeather(){
