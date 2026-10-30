@@ -270,7 +270,7 @@ function mpWorldDraw(){
   mpWorldCreatures(V,z);
   mpWorldNames(V,z);
   const by=M.by,QLEFT=questsLeft();
-  const visited=l=>l.lv.some(v=>v===LEVEL||G.lst[v]),here=WORLD_LOCS.find(l=>l.lv.includes(LEVEL));
+  const visited=l=>l.lv.some(v=>v===LEVEL||G.lst[v]),here=WORLD_LOCS.find(l=>l.lv.includes(LEVEL))||mpWorldHereUp(LEVEL);
   const txtH=(s,x,y,sz,col)=>{ctx.save();ctx.font=`bold ${sz}px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=3.2;ctx.strokeStyle='rgba(238,226,190,.93)';ctx.strokeText(s,x,y);ctx.fillStyle=col;ctx.fillText(s,x,y);ctx.restore()};
   const LBL_PLACED=[]; // where the place labels already stand
   for(const l of WORLD_LOCS){
@@ -409,3 +409,6 @@ function mpWorldCloudDrop(e){
   const a=D.pts[0],b=D.pts[D.pts.length-1],dt=(b[0]-a[0])/1000;
   if(dt>.01&&dt<.4){D.c.fx=Math.max(-320,Math.min(320,(b[1]-a[1])/dt*.5));D.c.fy=Math.max(-320,Math.min(320,(b[2]-a[2])/dt*.5))}}
 addEventListener('pointerup',mpWorldCloudDrop);addEventListener('pointercancel',mpWorldCloudDrop);
+
+/* a house, a cellar or a room that is no place on the map itself: the party is in the place its way out leads to (a Khemetra house to Khemetra, its cellar to the house and so on up) */
+function mpWorldHereUp(n){for(let i=0;i<4;i++){const L=LEVELS[n],p=L&&L.portals&&L.portals[0];if(!p||p.to===n)return null;n=p.to;const l=WORLD_LOCS.find(q=>q.lv.includes(n));if(l)return l}return null}

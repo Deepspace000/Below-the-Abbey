@@ -8,6 +8,7 @@ function dcPlace(n){
   const L=LEVELS[n];if(!L||L._dc||typeof terrFor!=='function')return;L._dc=1;
   const tb=terrFor(n);if(!tb)return;const W=tb.W,H=tb.H,N=W*H,blocked=new Uint8Array(N);
   for(let i=0;i<N;i++)blocked[i]=tb.block[i]?1:0;
+  for(let y=0;y<H;y++){const r=L.rows[y]||'';for(let x=0;x<W;x++)if(r[x]!=='.')blocked[y*W+x]=1} // the dune and cliff walls of the map (the terrain mask alone leaves them open)
   const hz=[];
   for(const d of (L.decor||[])){if(d.x<0||d.y<0||d.x>=W||d.y>=H)continue;if(d.block)blocked[d.y*W+d.x]=1;if(d.npc||d.enter||d.k==='chest'||d.k==='dhatch')hz.push([d.x,d.y])}
   for(const e of (L.enemies||[]))hz.push([e.x,e.y]);

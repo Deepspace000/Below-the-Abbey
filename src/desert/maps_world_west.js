@@ -20,6 +20,9 @@ const wmwId=()=>({
 const wmwGyName=(id,i)=>(typeof GY!=='undefined'&&GY.NAMES&&GY.NAMES[id])||LEVEL_NAMES[id]||('Grave Maze '+(i+1));
 const WMW_POS={wenlock:[-300,226],gardens:[-214,200],witchwood:[-282,126],wkgrave:[-356,198],gm1:[-392,166],gm2:[-396,216],gm3:[-362,244],gm4:[-326,152],wellmaze:[-258,260],westgate:[-338,288],
   underlevel:[-84,98],drowned:[-30,100],thornwell:[186,176],goldenpyramid:[678,178]};
+function wmwHgRooms(hg){if(!hg||typeof hgtAny!=='function')return;for(let n=4850;n<=5499;n++)if(hgtAny(n)&&!hg.lv.includes(n))hg.lv.push(n)}
+// a Hollow room registered later (a town that makes its rooms when it is built) joins the grasslands then
+if(typeof hgtRegister==='function'){const _hr=hgtRegister;hgtRegister=function(id){const r=_hr.apply(this,arguments);try{if(id>=4850&&id<=5499&&typeof WORLD_LOCS!=='undefined'){const hg=WORLD_LOCS.find(l=>l.k==='hollowgrass');if(hg&&hgtAny(id)&&!hg.lv.includes(id))hg.lv.push(id)}}catch(e){}return r}}
 function wmwBuild(){
   const I=wmwId(),by=k=>WORLD_LOCS.find(l=>l.k===k),add=(o)=>{if(!by(o.k))WORLD_LOCS.push(o);return by(o.k)};
   const P=WMW_POS,wl=by('wenlock');
@@ -34,8 +37,9 @@ function wmwBuild(){
   add({k:'drowned',n:'The Drowned Maze',lv:[477],x:P.drowned[0],y:P.drowned[1],ic:'maze'});
   add({k:'thornwell',n:LEVEL_NAMES[501]||'Under the Well',lv:[501],x:P.thornwell[0],y:P.thornwell[1],ic:'rubymaze'});
   add({k:'goldenpyramid',n:'The Golden Pyramid',lv:[65],x:P.goldenpyramid[0],y:P.goldenpyramid[1],ic:'pyramid'});
-  // the four towns of the Hollow Grasslands and their rooms count as the grasslands: the party is "here" in them
-  const hg=by('hollowgrass');if(hg){for(let n=480;n<=489;n++)if(!hg.lv.includes(n))hg.lv.push(n);for(let n=4850;n<=5499;n++)if(!hg.lv.includes(n))hg.lv.push(n)}
+  // the four towns of the Hollow Grasslands and their rooms count as the grasslands: the party is "here" in them.
+  // Only the room numbers that have a Hollow builder (hgtAny, the guard hgt_engine.js uses): Khemetra's house numbers run through the same range.
+  const hg=by('hollowgrass');if(hg){for(let n=480;n<=489;n++)if(!hg.lv.includes(n))hg.lv.push(n);wmwHgRooms(hg)}
   // roads: the garden road from the gate of the Deeper Hollow, Blackbriar Lane, Churchyard Lane, the road west (shut), the lanes to the four mazes
   const R=(...a)=>{if(!WORLD_ROADS.some(r=>r.join()===a.join()))WORLD_ROADS.push(a)};
   R('deephollow','gardens','wenlock');R('wenlock','witchwood');R('wenlock','wkgrave');R('wenlock','westgate');R('wkgrave','gm1');R('wkgrave','gm2');R('wkgrave','gm3');R('wkgrave','gm4');R('wenlock','wellmaze');R('thornwick','thornwell');

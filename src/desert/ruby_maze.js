@@ -270,7 +270,7 @@ function rmTownSetup(){
   L.rows[y]=L.rows[y].slice(0,x)+RMZ.TD+L.rows[y].slice(x+1);
   L.portals=L.portals||[];L.portals.push({to:RMZ.ID,x:RMZ.M.start.x,y:RMZ.M.start.y,f:0,tex:'farm'});RMZ.townIdx=L.portals.length-1;
   L.chars=L.chars||{};L.chars[RMZ.TD]=30+RMZ.townIdx;
-  L.decor.push({k:'sign_rubymaze',x:RMZ.DX+1,y:RMZ.DY+1,block:false,wd:[0,-1],sc:1.2,txt:['STAY OUT','']});
+  {const sx=[x+1,x-1,x+2,x-2].find(q=>L.rows[y][q]&&L.rows[y][q]!=='.'&&L.rows[y+1]&&L.rows[y+1][q]==='.');if(sx!==undefined)L.decor.push({k:'sign_rubymaze',x:sx,y:y+1,block:false,wd:[0,-1],sc:1.2,txt:['STAY OUT','']})} // beside the door, flat on the store's back wall
   L.decor.push({k:'kh_ohfolk7_1',x:8,y:18,block:false,walk:true,npc:'ihboy'});
 }
 rmTownSetup();

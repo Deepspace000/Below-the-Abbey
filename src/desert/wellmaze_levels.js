@@ -82,21 +82,33 @@ function wmOrbs(c){
   const k=c.k,M=c.M,o=WM.ORBS[k],W=c.W,picked=[],spaced=(x,y,g)=>picked.every(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)>=g),pool=[];
   const nb=(x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].map(([a,b])=>[x+a,y+b]).filter(([qx,qy])=>c.free(qx,qy)&&!c.isMouth(qx,qy));
   const keyAt=(c.meta.wm&&c.meta.wm.keyAt)||{};
+  const doors=(c.meta.wm&&c.meta.wm.doors)||{},byDoor=(x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>doors[(x+a)+','+(y+b)]); // never on the square in front of a door, a vault or a secret closet
   for(const id in keyAt){const q=keyAt[id],n=nb(q.x,q.y);if(n.length)pool.push(n[0])}
     for(const kind of ['mirror','bells','lanterns','camp','shrine','cellar','library','mine','grotto','fungus','spiders','cistern','lake'])for(const r of M.rooms)if(r.kind===kind&&!r.sealed){const rim=c.rim(r);if(rim.length)pool.push(rim[(c.rnd()*rim.length)|0])}
   const ends=[];for(let y=2;y<c.H-2;y++)for(let x=2;x<c.W-2;x++)if(c.free(x,y)&&[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>c.open(x+a,y+b)).length===1&&!wmInRoom(M,x,y)&&!c.isMouth(x,y))ends.push([x,y]);
   for(let i=ends.length-1;i>0;i--){const j=(c.rnd()*(i+1))|0;[ends[i],ends[j]]=[ends[j],ends[i]]}
-  for(const gap of [7,5,4,3]){for(const q of pool.concat(ends)){if(picked.length>=WM.ORBN)break;if(c.free(q[0],q[1])&&!c.isMouth(q[0],q[1])&&spaced(q[0],q[1],gap)){picked.push(q);
+  for(const gap of [7,5,4,3]){for(const q of pool.concat(ends)){if(picked.length>=WM.ORBN)break;if(c.free(q[0],q[1])&&!c.isMouth(q[0],q[1])&&!byDoor(q[0],q[1])&&spaced(q[0],q[1],gap)){picked.push(q);
     const d=c.D('wm_orbframe'+k,q[0],q[1],{block:true,npc:'wm_orbframe',orbFrame:true,orbColor:o.css,emptyK:'wm_orbframeE'+k,force:true});if(d)c.light(q[0],q[1],o.col)}}
     if(picked.length>=WM.ORBN)break}
   c.meta.orbs=picked.length}
+/* webs hang on walls only, flat (the castle rule): a web beside a wall goes onto it; one in the open moves to the nearest free wall face within two squares, or goes */
+function wmWebsOnWalls(c){
+  const taken=new Set();for(const d of c.dec)if(d.pic&&d.wd)taken.add(d.x+','+d.y+','+d.wd);
+  const busy=new Set();for(const d of c.dec)if(d.k!=='wm_web')busy.add(d.x+','+d.y);
+  for(let i=c.dec.length-1;i>=0;i--){const d=c.dec[i];if(d.k!=='wm_web')continue;
+    let best=null;
+    for(let r=0;r<=2&&!best;r++){let bd=1e9;for(let y=d.y-r;y<=d.y+r;y++)for(let x=d.x-r;x<=d.x+r;x++){if(Math.max(Math.abs(x-d.x),Math.abs(y-d.y))!==r||!c.open(x,y)||(r&&busy.has(x+','+y))||c.isMouth(x,y)&&r)continue;
+      for(const [a,b] of [[0,-1],[1,0],[0,1],[-1,0]]){if(!(c.g[y+b]&&c.g[y+b][x+a]==='#'))continue;const key=x+','+y+','+[a,b];if(taken.has(key))continue;const dd=Math.hypot(x-d.x,y-d.y);if(dd<bd){bd=dd;best={x,y,wd:[a,b]}}}}}
+    if(!best){c.dec.splice(i,1);continue}
+    taken.add(best.x+','+best.y+','+best.wd);
+    Object.assign(d,{x:best.x,y:best.y,pic:1,wd:best.wd,block:false,lk:'wm_webw'});delete d.walk;delete d.deco;delete d.sc}}
 WM.build=function(k){
   const id=WM.IDS[k];if(LEVELS[id])return;wmArt();
   const M=WM.M[k],c=wmContext(k,M),wl=wmWalls(k,M);c.wl=wl;
   wmFloors(c);
   for(const r of M.rooms){const f=WM.furnish[r.kind];if(f)try{f(c,r)}catch(e){console.error('wm furnish',r.kind,e)}}
   try{WM.mech(c,wl)}catch(e){console.error('wm mech',e)}
-  wmSpawn(c);wmFinds(c);wmLamps(c);wmEqualize(c);wmOrbs(c);
+  wmSpawn(c);wmFinds(c);wmLamps(c);wmEqualize(c);wmOrbs(c);wmWebsOnWalls(c);
   const rows=wl.rows,arr=M.arrive;
   const fmr=c.fm.map(r=>r.join(''));
   const names=[];for(const r of M.rooms){if(r.sealed||!WM.ROOMNAMES[r.kind])continue;names.push({t:WM.ROOMNAMES[r.kind],x:(r.x0+r.x1)>>1,y:(r.y0+r.y1)>>1,k:'place'})}
@@ -132,6 +144,24 @@ WM.checks=function(k,c){
       if(L._wm.tier[old]!==undefined){L._wm.tier[f[0]+','+f[1]]=L._wm.tier[old];delete L._wm.tier[old];if(L._wm.loot[old]){L._wm.loot[f[0]+','+f[1]]=L._wm.loot[old];delete L._wm.loot[old]}for(const kk in L._wm.keyAt)if(L._wm.keyAt[kk].x===d.x&&L._wm.keyAt[kk].y===d.y)L._wm.keyAt[kk]={x:f[0],y:f[1]}}
       d.x=f[0];d.y=f[1];c.occ.add(f[0]+','+f[1])}
     else{d.block=false;d.walk=true;d.deco=true;if(d.npc)delete d.npc}
+    r=run()}
+  // every chest, cask and barrel can be opened: one whose four sides are all furniture (a vault's dressing packed round it) gets a side cleared; the piece in the way moves to a reached free square of its room, or goes
+  const isCont=d=>/chest|^wm_(cask|barrel|keg|crate)/.test(d.k),isChest=d=>L._wm.tier[d.x+','+d.y]!==undefined||/chest/.test(d.k);
+  for(let guard=0;guard<40;guard++){
+    const shut=c.dec.find(d=>d.block&&isCont(d)&&!inIsl(d.x,d.y)&&!D4.some(([a,b])=>r.reach.has((d.x+a)+','+(d.y+b))));if(!shut)break;
+    // the cheapest way in from the reached squares: through as few movable pieces as possible (chests and people stay where they are)
+    const at=new Map();for(const d of c.dec)if(d.block||d.npc)at.set(d.x+','+d.y,d);
+    const cost=(x,y)=>{if(x<0||y<0||x>=W||y>=H)return -1;const kk=x+','+y;if(!(c.g[y][x]==='.'||doorOpen.has(kk)))return -1;const d=at.get(kk);if(!d)return 0;return (d.npc||isChest(d))?-1:1};
+    const dist=new Map(),prev=new Map(),dq=[];for(const kk of r.reach){dist.set(kk,0);dq.push(kk)}
+    for(let i=0;i<dq.length;i++){const kk=dq[i],[x,y]=kk.split(',').map(Number);for(const [a,b] of D4){const nx=x+a,ny=y+b,nk=nx+','+ny,cc=cost(nx,ny);if(cc<0)continue;const nd=dist.get(kk)+cc;if(dist.has(nk)&&dist.get(nk)<=nd)continue;dist.set(nk,nd);prev.set(nk,kk);dq.push(nk)}}
+    let goal=null;for(const [a,b] of D4){const nk=(shut.x+a)+','+(shut.y+b);if(dist.has(nk)&&(!goal||dist.get(nk)<dist.get(goal)))goal=nk}
+    if(!goal){console.warn('wm: '+shut.k+' at '+shut.x+','+shut.y+' on '+WM.IDS[k]+' is shut in by chests');break}
+    const path=new Set();for(let kk=goal;kk&&!r.reach.has(kk);kk=prev.get(kk))path.add(kk);
+    const room=M.rooms.find(q=>shut.x>=q.x0&&shut.x<=q.x1&&shut.y>=q.y0&&shut.y<=q.y1);
+    for(const kk of path){const d=at.get(kk);if(!d)continue;
+      const cont=new Set(c.dec.filter(q=>q.block&&isCont(q)).map(q=>q.x+','+q.y)),taken=new Set(c.dec.filter(q=>q.block||q.npc).map(q=>q.x+','+q.y));let f=null;
+      if(room)for(let y=room.y0;y<=room.y1&&!f;y++)for(let x=room.x0;x<=room.x1&&!f;x++){const fk=x+','+y;if(r.reach.has(fk)&&!taken.has(fk)&&!path.has(fk)&&!c.isMouth(x,y)&&!D4.some(([a,b])=>cont.has((x+a)+','+(y+b))))f=[x,y]}
+      if(f){d.x=f[0];d.y=f[1];c.occ.add(f[0]+','+f[1])}else c.dec.splice(c.dec.indexOf(d),1)}
     r=run()}
   L._wm.unreached=r.un.length;if(r.un.length)console.error('wm: level '+WM.IDS[k]+' has '+r.un.length+' squares the party cannot reach: '+r.un.map(p=>p.join(',')).join(' '));
   return r.un.length};

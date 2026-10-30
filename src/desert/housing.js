@@ -120,15 +120,17 @@ function hsStamp(L,T){
       for(const d of L.decor){if(d.block&&!d.npc&&d.x>=P.p.x0&&d.x<P.p.x0+P.p.w&&d.y>=P.p.y0&&d.y<P.p.y0+P.p.d&&d!==U.agent){d._hsTree=true;d.block=false;d.hidden=true}} // trees on a plot are cleared for good
       const board={k:'hs_sale_'+s,x:P.door[0],y:P.door[1],block:true,solid:1,npc:'hs_b_'+s,sc:1};L.decor.push(board);
       const v=hsFaceVec[P.p.face]; // the sign beside the door: the cell next to the one in front of it, which has the house wall behind it
-      const side=v[1]?[P.front[0]-1,P.front[1]]:[P.front[0],P.front[1]-1];
+      const inPlot=(x,y)=>x>=P.p.x0&&x<P.p.x0+P.p.w&&y>=P.p.y0&&y<P.p.y0+P.p.d;
+      const sides=v[1]?[[P.front[0]-1,P.front[1]],[P.front[0]+1,P.front[1]]]:[[P.front[0],P.front[1]-1],[P.front[0],P.front[1]+1]];
+      const side=sides.find(([x,y])=>inPlot(x-v[0],y-v[1]))||sides[0]; // the side of the door that has the house's own front wall behind it (a house two squares wide has its door at one end)
       const own={k:'sign_hsown',x:side[0],y:side[1],block:false,wd:[-v[0],-v[1]],txt:['YOUR HOUSE',HS_SIZES[s].name],sc:.8,bob:.3,hidden:true};
-      L.decor.push(own);
+      // the sign goes into the level only while the house stands (below): without the house there is no wall for it to hang on
       U.plots[s]={P,board,own,roof:null};
     }
   }
   for(const s of T.sizes){
     const u=U.plots[s],P=u.P,p=P.p,z=hsLook(T,s),owned=hsOwned(T,s);
-    u.board.hidden=owned;u.board.block=!owned;u.own.hidden=!owned;
+    u.board.hidden=owned;u.board.block=!owned;u.own.hidden=!owned;{const i=L.decor.indexOf(u.own);if(owned&&i<0)L.decor.push(u.own);else if(!owned&&i>=0)L.decor.splice(i,1)}
     if(owned&&hsDoorGid(T,s)){
       const W=hsWallSet(T,s),dg=hsDoorGid(T,s);
       for(let y=p.y0;y<p.y0+p.d;y++)for(let x=p.x0;x<p.x0+p.w;x++){

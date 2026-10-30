@@ -30,7 +30,10 @@ function buildBlueDunes(){
   for(let a=0;a<7;a++){const r=4.8+R(a,7,44)*2.4,x=Math.round(cx+Math.cos(a*1.9)*r),y=Math.round(cy+Math.sin(a*1.9)*r*.9);sc('dshrub'+(a%3),x,y,{ox:(R(a,8,45)-.5)*.6,oy:(R(a,9,45)-.5)*.6,sc:.8+R(a,10,45)*.5})}
   // food and water to be found beside the pool
   const spots=[[0,-4.4],[2.4,-4],[-2.6,-3.9],[4.2,-1.6],[-4.3,-1.2],[4.1,2.2],[-4,2.5],[1.6,4.4],[-1.9,4.3]];
-  ['dates','water','dates','water','dates','water','apple','bread','water'].forEach((k,i)=>{const [dx,dy]=spots[i];items.push({k,x:Math.round(cx+dx),y:Math.round(cy+dy)})});
+  const solid=new Set(decor.filter(d=>d.block).map(d=>d.x+','+d.y));
+  ['dates','water','dates','water','dates','water','apple','bread','water'].forEach((k,i)=>{const [dx,dy]=spots[i];let x=Math.round(cx+dx),y=Math.round(cy+dy);
+    if(solid.has(x+','+y)){const n=[[0,0],[-1,0],[1,0],[0,-1],[0,1]].map(([a,b])=>[Math.round(cx+dx*.82)+a,Math.round(cy+dy*.82)+b]).find(([a,b])=>!solid.has(a+','+b)&&!items.some(q=>q.x===a&&q.y===b));if(n)[x,y]=n} // a find under a palm moves a step in towards the pool
+    items.push({k,x,y})});
   // a few creatures: three small groups, far from the cave and the oasis
   const camp=(t,x,y,n,lvl)=>{let p=0;for(let k=0;k<n*8&&p<n;k++){const ex=x+Math.round((R(x,y,100+k)*2-1)*3),ey=y+Math.round((R(x,y,160+k)*2-1)*3);if(!enemies.some(e=>e.x===ex&&e.y===ey)&&!items.some(i=>i.x===ex&&i.y===ey)){enemies.push({t,x:ex,y:ey,lvl});p++}}};
   camp('scorpion',50,56,2,16);camp('dwolf',172,76,2,15);camp('scorpion',152,172,2,16);camp('dwolf',56,164,1,15);camp('scorpion',110,40,2,16);camp('dwolf',110,184,2,15);camp('scorpion',190,120,1,16);

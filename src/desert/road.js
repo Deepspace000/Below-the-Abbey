@@ -6,6 +6,7 @@
    ========================================================================== */
 const RD={W:168,H:224,CY:210,CX0:84,NORTH:6};
 const BURROW_N=10,BURROW_BASE=50,BURROW_START={x:10,y:14,f:0}; // the mounds in the dunes lead to levels 50 to 59
+const DPLANT_FOOT=[0,0,.5*.117,.45*.065]; // dplant0..3: the empty rows under the stem (fraction of the picture) times the drawn height (NPC_H), sunk so the plant stands on the sand
 const rdStep=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 function rdCentre(y){return RD.CX0+7*Math.sin(y/19)+9*Math.sin(y/47+1.3)}      // the road's middle once it has turned north
 function rdHalf(y){const t=clamp((RD.CY-y)/(RD.CY-RD.NORTH),0,1);return 4+74*rdStep(.14,.62,t)}   // half the width of the land: a funnel
@@ -77,7 +78,7 @@ function buildSandRoad(){
     if(dp>0){
       if(DUNE_SPRITES&&R(x,y,20)<.06*dp&&!nearDune(x,y)){dunes.add(x+','+y);put('dune'+((R(x,y,21)*3)|0),x,y,{block:true,ox:oX*.4,oy:oY*.3,sc:.95+R(x,y,22)*.7})}
       else if(R(x,y,23)<.011*dp)put('drock'+((R(x,y,24)*3)|0),x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,25)*.5});
-      else if(R(x,y,26)<.008*dp)put('dplant'+((R(x,y,29)*4)|0),x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,27)*.4});
+      else if(R(x,y,26)<.008*dp){const v=(R(x,y,29)*4)|0,s=.9+R(x,y,27)*.4;put('dplant'+v,x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:s,bob:-DPLANT_FOOT[v]*s})} // dplant2 and dplant3 have empty rows under the stem: sink them by that much so they stand on the sand
       else if(R(x,y,28)<.005*dp)put('ddead',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,29)*.5});
       else if(R(x,y,30)<.045*dp)sc('dshrub'+((R(x,y,31)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,32)*.7});
       else if(R(x,y,33)<.003*dp)sc('dbones',x,y,{ox:oX,oy:oY,sc:.9+R(x,y,34)*.4});
@@ -85,7 +86,8 @@ function buildSandRoad(){
     }
   }
   // ---- landmarks ----
-  for(const yy of [192,146,98]){const c=Math.round(rdCentre(yy));put('dobelisk',c+5,yy,{block:true});put('dobelisk',c-5,yy,{block:true})}
+  // pairs of obelisks beside the road; where the land is narrow they stand a little closer in, never inside the trees
+  for(const yy of [192,146,98]){const c=Math.round(rdCentre(yy));for(const s of [1,-1])for(let d=5;d>=3;d--){const x=c+s*d;if(open[idx(x,yy)]&&!occ.has(x+','+yy)){put('dobelisk',x,yy,{block:true});break}}}
   { // an oasis
     const oy=122,ox=Math.round(rdCentre(oy))+12;
     put('well',ox,oy,{block:true});

@@ -109,6 +109,7 @@ function wmContext(k,M){
   c.D=(k2,x,y,o)=>{o=o||{};
     if((o.block||o.npc)&&!o.force&&c.isMouth(x,y)){const r=M.rooms.find(q=>x>=q.x0&&x<=q.x1&&y>=q.y0&&y<=q.y1);
       const alt=r?c.rim(r).concat(c.inner(r)).sort((a,b)=>Math.hypot(a[0]-x,a[1]-y)-Math.hypot(b[0]-x,b[1]-y))[0]:null;if(!alt)return null;x=alt[0];y=alt[1]}
+    if(!o.npc){const twin=dec.find(q=>q.k===k2&&q.x===x&&q.y===y&&!q.npc);if(twin)return twin} // the same piece twice on one square (a narrow room's two corners are one square): once is enough
     const d=Object.assign({k:k2,x,y,block:false},o);dec.push(d);occ.add(x+','+y);return d};
   c.prop=(name,x,y,o)=>c.D('wm_'+name,x,y,Object.assign({block:true},o||{}));
   c.deco=(name,x,y,o)=>c.D('wm_'+name,x,y,Object.assign({block:false,walk:true,deco:true},o||{}));

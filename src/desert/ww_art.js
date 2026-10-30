@@ -33,7 +33,7 @@ function wwLoad(){
 function wwAlias(){
   for(const a in WWA){const [n,h]=WWA[a];if(IMG[n]){IMG['ww_'+a]=WW_TREEA.includes(a)?wwDarken(IMG[n],.86):IMG[n];NPC_H['ww_'+a]=h}}
   for(const [k,n] of [['wwi_scare','guardA_0'],['wwi_hound','guardA_1'],['wwi_spider','guardA_2'],['wwi_golem','guardA_3'],['wwi_crows','guardA_4'],['wwi_toad','guardA_5'],['wwi_revenant','guardB_0'],['wwi_root','guardB_1'],['wwi_abom','guardB_2'],['wwi_wisp','guardB_3'],['wwi_crow','guardB_4'],['wwi_witch','witch_1'],['wwi_witchA','witch_0']])if(IMG[n])IMG[k]=IMG[n];
-  NPC_H.wwi_witch=1.45;NPC_H.wwi_witchA=2.6;
+  NPC_H.wwi_witch=1.45;NPC_H.wwi_witchA=1.38; // the cornered witch (arms raised) is drawn at a person's height, not as a giant
   wwLeafImgs();
   wwFloors();
 }
