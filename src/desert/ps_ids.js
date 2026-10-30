@@ -126,5 +126,7 @@ PSP.JUMPS={palespire:[9720,32,52,0],palespire1:[9720,32,52,0],palespire2:[9730,3
 /* small readers (no side effects) */
 const pspIs=n=>n>=PSP.LO&&n<=PSP.HI;
 const pspLevel=id=>PSP.LEVELS.find(l=>l.id===id)||null;
+/* where a link lands: its planned square, or the start of the small stub room (ps_glue.js) while the far side is not built */
+const pspLandOf=l=>{const t=l&&l.prov&&pspLevel(l.to);return t&&!t.built?[12,13,0]:l.land};
 const pspLinksFrom=id=>PSP.LINKS.filter(l=>l.from===id);
 const pspLinkAt=(id,x,y)=>PSP.LINKS.find(l=>l.from===id&&l.at&&l.at[0]===x&&l.at[1]===y)||null;

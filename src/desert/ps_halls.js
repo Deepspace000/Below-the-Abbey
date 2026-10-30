@@ -391,7 +391,7 @@ function pshBuild(){
     const st=styleAt(x,y);let kd=kindAt[k]||'plain';const v=(hs(x,y,3)*2)|0;if(kd==='face'||kd==='ivy')kd='plain';
     s+=ch(pshTile(st,kd,kd==='plain'?v:0))}rows.push(s)}
   // the door records: which tile number is which door
-  for(const d of doorRec){const c=rows[d.at[1]][d.at[0]],gid=chars[c];KH_DOOR[gid]={psh:'link',link:d.link,get lvl(){return d.link.to},get at(){const q=d.link.land;return {x:q[0],y:q[1],f:q[2]}},kind:d.kind}}
+  for(const d of doorRec){const c=rows[d.at[1]][d.at[0]],gid=chars[c];KH_DOOR[gid]={psh:'link',link:d.link,get lvl(){return d.link.to},get at(){const q=pspLandOf(d.link);return {x:q[0],y:q[1],f:q[2]}},kind:d.kind}}
   for(const k in special){const [x,y]=k.split(',').map(Number),c=rows[y][x],[t,,o]=special[k];KH_DOOR[chars[c]]=Object.assign({psh:t,x,y},o)}
   for(const h of PSH_HIDDEN){const c=rows[h.door[1]][h.door[0]];KH_DOOR[chars[c]]={psh:'niche',flag:h.flag,cell:h.chest}}
   const fmS=fm.map(r=>r.join(''));
@@ -400,7 +400,7 @@ function pshBuild(){
   const L={rows,chars,fmap:fmS,floorSet:fl.slice(),floor:fl[0],floor2:fl[1],ceil:'psc_hall',ceilH:WH,start:{x:32,y:44,f:0},enemies,items,decor,lights,portals:[],day:0,amb:.3,torchGap:1e9,noTele:true,noExtras:true,sky:[],
     name:'The Ground Floor: the Great Halls',label:'The Great Halls',diff:101,mapNames,_psh:{lcol,kI,r2,col:PSH_COL.cold,miss,S:null,gdata:Object.fromEntries((S.gh||[]).map(g=>[g.id,g]))}};
   LEVELS[PSH.ID]=L;LEVEL_NAMES[PSH.ID]=L.name;LEVEL_RATING[PSH.ID]=101;
-  if(miss.length)console.warn('psh missed: '+miss.slice(0,60).join(' '));
+  if(miss.length&&PSP.DEBUG)console.warn('psh missed: '+miss.slice(0,60).join(' '));   // pieces of the room tables whose square was already taken (kept in L._psh.miss)
   {const NN=W*H,hh=new Float32Array(NN).fill(.3),rk=new Float32Array(NN),block=new Uint8Array(NN);for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(rows[y][x]!=='.')block[y*W+x]=1;try{TERRS[PSH.ID]=yarTerrain(W,H,hh,rk,block)}catch(e){console.error(e)}}
   return L}
 if(typeof pspRegister==='function'){try{pspRegister(PSH.ID,pshBuild,{})}catch(e){KH_LAZY[PSH.ID]=pshBuild}}else KH_LAZY[PSH.ID]=pshBuild;
@@ -644,10 +644,10 @@ function pshFurnish(S){
   for(const y of [7,13])mark(25,y,'win');mark(25,10,'win');mark(25,11,'face');
   gar(26,7,We);gar(38,6,Ea);
   wall(pt(200),[[26,6]],We,{bob:hi});wall(pt(210),[[38,7]],Ea,{bob:hi});
-  sign(32,6,N,'UP THE GRAND STAIR','The way to the state rooms. Ask the Chamberlain.');sign(38,8,Ea,'THE AUDIENCE CHAMBER','The Sovereign receives no one');
+  sign(31,6,N,'UP THE GRAND STAIR','The way to the state rooms. Ask the Chamberlain.');sign(37,8,[0,1],'THE AUDIENCE CHAMBER','The Sovereign receives no one');
   hang(32,11,2.3);hang(32,7,1.8,V);lamp(28,7,V,1.7,120);lamp(36,7,V,1.7,120);
   /* the way up: broad mossy steps rising to the great barred double door, chains and a padlock, cold light through the bars */
-  pic(P('vine_b'),31,6,N,{bob:.9});pic(P('vine_a'),33,6,N,{bob:.9});pic(P('banner_long_a'),30,6,N,{bob:hi});pic(P('banner_long_b'),34,6,N,{bob:hi});lamp(32,6,[.5,.72,1.2],1.5,90);
+  pic(P('vine_a'),33,6,N,{bob:.9});pic(P('banner_long_a'),30,6,N,{bob:hi});pic(P('banner_long_b'),34,6,N,{bob:hi});lamp(32,6,[.5,.72,1.2],1.5,90);
   foe('psstairwarden',32,13);
   put(P('furn_organ'),28,7,{block:true});put(P('furn_altarpiece'),36,7,{block:true});put(P('furn_clock_grandfather'),27,8,{block:true});
   ghost('maid','p_ghost_maid',[[28,7],[36,7],[36,8],[28,8]],{sp:.22,clue:2,lines:['They took the key down to where the lamps do not burn.','He went up the stair and never came down.','I wash the steps every night. They will not stay clean.']});
@@ -691,12 +691,13 @@ function pshFurnish(S){
   foe('psofficer',43,22);
   /* ===== the long-abandoned house: sheets, webs, mirrors, ancestors, candles, red lanterns ===== */
   {const taken=new Set();for(const d of decor)if(d.wd)taken.add(d.x+','+d.y+','+d.wd[0]+','+d.wd[1]);let mi=0,pi=0;
+   {const m0=S.miss.length;   // the dresser tries many wall slots; a slot that is taken is not a miss
    pshHaunt({W:S.W,H:S.H,seed:9740,pi:3,start:[32,44],blocked:()=>decor.filter(d=>d.block).map(d=>d.x+','+d.y),open:(x,y)=>open(x,y),free:(x,y)=>S.fr(x,y)&&!S.keep.has(x+','+y),wall:(x,y,a,b)=>g[y+b]&&g[y+b][x+a]==='#'&&S.over[(x+a)+','+(y+b)]===undefined,taken:(x,y,a,b)=>taken.has(x+','+y+','+a+','+b),
      stand:{portrait:(i)=>pshPortrait(20+i)},
      counts:{mirror:6,portrait:12,sheetwin:0,cobcorner:12,cobthick:5,candles:7,redlamp:5,dust:0,spider:3},
      wallPic:(k,x,y,wd,o)=>{const oo={bob:o.bob};if(o.mirror!==undefined)oo.npc='psh_mir'+(mi++%12);else if(o.portrait!==undefined&&(pi++%2===0))oo.npc='psh_ancp'+(pi%8);const d=pic(k,x,y,wd,oo);return !!d},
      floorProp:(k,x,y,o)=>!!put(k,x,y,o),
-     light:(x,y,c)=>lamp(x,y,c,1.0,40)})}}
+     light:(x,y,c)=>lamp(x,y,c,1.0,40)});S.miss.length=m0}}}
 
 /* ---------- doors ---------- */
 function pshSelfMove(a){G.talk=null;sfx('door');G.P.x=a[0];G.P.y=a[1];G.P.f=a[2];G.P.angT=(a[2]-1)*Math.PI/2;G.C={x:a[0],y:a[1],a:G.P.angT};try{reveal()}catch(e){}}

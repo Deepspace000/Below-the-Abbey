@@ -498,7 +498,7 @@ function pscBase(info){
   const sealed=pspDoorGid('iron',4.8);   // the sealed wall-stair doors are the castle's own ironbound door set in the wall (the old tile was a flat amber arch)
   const DOORS={'32,10':T.great[1],'18,10':T.gallery[1],'12,24':T.kitchen,'52,24':T.cloister,'10,40':T.cloister,'54,40':T.kitchen,'3,34':sealed,'60,34':sealed,'32,52':T.gate,'60,30':T.gate};
   const bind=l=>{const base=DOORS[l.at[0]+','+l.at[1]];if(!base)return;const gid=clone(base);C.solid(l.at[0],l.at[1],ch(gid));
-    const d={lvl:l.to,get at(){if(!LEVELS[l.to]&&KH_LAZY[l.to])try{KH_LAZY[l.to]()}catch(e){console.error(e)}return {x:l.land[0],y:l.land[1],f:l.land[2]}},psc:1};
+    const d={lvl:l.to,get at(){if(!LEVELS[l.to]&&KH_LAZY[l.to])try{KH_LAZY[l.to]()}catch(e){console.error(e)}const q=pspLandOf(l);return {x:q[0],y:q[1],f:q[2]}},psc:1};
     if(l.prov)d.seal='The wall walk is closed. An iron grille is locked across the foot of the stair, and the lock is furred with green rust.';
     KH_DOOR[gid]=d};
   for(const l of pspLinksFrom(9730))if(l.at)bind(l);
@@ -538,8 +538,9 @@ function pscBuild(info){
   const wallAt=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&g[y][x]==='#'&&!isDoorCell(x,y);
   const sideWd=(x,y,salt)=>{const c=[[0,-1],[0,1],[-1,0],[1,0]].filter(([a,b])=>wallAt(x+a,y+b));return c.length?c[int(hs(x,y,salt)*c.length)]:null};
   const ALC=['alcove_weeper','alcove_monk','alcove_knight','alcove_maiden','alcove_empty'];
+  const laneDone=new Set();   // two lanes that cross dress their shared squares once
   PSC_LANES.forEach((ln,li)=>{const [nmx,x0,y0,x1,y1]=ln,horiz=(x1-x0)>(y1-y0);
-    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(g[y][x]!=='.')continue;const idx=horiz?x:y,wd=sideWd(x,y,3+li);if(!wd)continue;
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(g[y][x]!=='.'||laneDone.has(x+','+y))continue;laneDone.add(x+','+y);const idx=horiz?x:y,wd=sideWd(x,y,3+li);if(!wd)continue;
       if((idx+li*3)%7===0&&!(x>=30&&x<=34&&y>=11&&y<=13)){hang('lantern_bracket',x,y,wd,.9);lampAt(x,y,hs(x,y,71)<.35?WARM:SK)}
       else if(hs(x,y,61+li)<.13)hang(hs(x,y,62)<.5?'vine_a':'vine_b',x,y,wd,0);
             else if(hs(x,y,63+li)<.03)hang(ALC[int(hs(x,y,64)*5)],x,y,wd,0)}});
@@ -704,7 +705,7 @@ function pscBuild(info){
   for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(C.rows[d.y]&&C.rows[d.y][d.x]!=='.'&&!d.npc)C.decor.splice(i,1)}   // a hedge or wall laid over a prop takes the prop away
   const lv=C.finish({start:{x:32,y:49,f:0},col:PSC_SICK});
   lv.floorSet=PSC_FLOORSET.slice();lv.floor=lv.floorSet[0];lv.day=.74;lv.amb=.86;lv.ceilH=9;lv.ceil=CEILS.psc_sky?'psc_sky':lv.ceil;lv.name=info.name;lv.label=info.name;
-  lv._psc={lcol:C.lcol,col:PSC_SICK};lv.noTele=false;lv.tele=PSC.TELE;
+  lv._psc={lcol:C.lcol,col:PSC_SICK};lv.noTele=false;lv.tele={x:PSC.TELE[0],y:PSC.TELE[1]};   // the engine reads tele.x and tele.y (an array left the stone at NaN)
   lv.sky=lv.sky||[];
   return lv}
 

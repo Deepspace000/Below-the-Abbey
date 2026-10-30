@@ -270,7 +270,7 @@ function pswMake(id){
       KH_DOOR[gid]={lvl:lk.to,at:{x:lk.land[0],y:lk.land[1],f:lk.land[2]}}}
     else if(D.kind==='lock'){
       const lk=D.link;gid=pspStairDoorTile(brick+'_0',WH,sp.g*.9,[.8,.95,1.1],'w'+id);
-      KH_DOOR[gid]={psw:'lock',link:lk}}
+      KH_DOOR[gid]={psw:'lock',link:lk,get lvl(){return lk.to},get at(){const q=pspLandOf(lk);return {x:q[0],y:q[1],f:q[2]}}}}   // lvl and at for maps and checks only; khBump above opens it
     else if(D.kind==='dungeon'){
       const lk=D.link;gid=gyTile(brick+'_0',WH,{fac:{img:'f_dungeongate',i:0,n:1,fit:1},gain:1.0,rgb:[.85,.95,1.05],tag:'pswd'+id,emit:.35});
       KH_DOOR[gid]={psw:'dungeon',lvl:lk.to,at:{x:lk.land[0],y:lk.land[1],f:lk.land[2]}}}
@@ -286,7 +286,7 @@ function pswMake(id){
     const d={k:key,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}d.sc=o.sc||1;if(o.npc){d.npc=o.npc;d.deco=false;if(o.block)d.solid=1}
     if(o.i!==undefined)d.i=o.i;if(o.wd){d.wd=o.wd;d.pic=1}if(o.txt)d.txt=o.txt;if(o.goldAmt)d.goldAmt=o.goldAmt;if(o.ox!==undefined){d.ox=o.ox;d.oy=o.oy}if(o.bob!==undefined)d.bob=o.bob;if(o.lift!==undefined)d.lift=o.lift;
     if(o.text)d.text=o.text;decor.push(d);if(!o.walkOk&&!o.wd)occ.add(x+','+y);return d};
-  const p=(name,x,y,o)=>{const k=pswPic(name);if(o===undefined)o={block:true};else if(o.block===undefined)o=Object.assign({block:!(o.wd||o.walkOk||!Object.keys(o).length)},o);return k?dec(k,x,y,o):(miss.push('nopic:'+name+'@'+x+','+y),null)};
+  const p=(name,x,y,o)=>{const k=pswPic(name);if(o===undefined)o={block:true};else if(o.block===undefined)o=Object.assign({block:!(o.wd||o.walkOk||!Object.keys(o).length)},o);return k?dec(k,x,y,o):(PSW_PAINT[name]===null?null:(miss.push('nopic:'+name+'@'+x+','+y),null))};   // a piece dropped on purpose (PSW_PAINT null) is not a miss
   const sign=(x,y,wd,a,b)=>{if(!open(x,y)){miss.push('sign@'+x+','+y);return}decor.push({k:'sign_gy',x,y,block:false,wd,txt:[a,b||''],sc:1})};
   const foe=(t,x,y)=>{if(!open(x,y)||(occ.has(x+','+y)&&!reserved.has(x+','+y))){miss.push('foe '+t+'@'+x+','+y);return false}enemies.push({t,x,y,lvl:(id===9750&&!(ENEMY_DEF[t]&&ENEMY_DEF[t].boss))?S.diff-1:S.diff});occ.add(x+','+y);return true};
   const light=(x,y,col)=>{if(!open(x,y)){miss.push('light@'+x+','+y);return}lights.push([x,y]);if(col)lcol[x+','+y]=col};
@@ -602,7 +602,7 @@ PSW_SPEC[9760]={W:48,H:40,diff:101,ceil:'tex_vault_ribbed',wh:3.4,lcol:pswCold,
     // ---- the Clock Room: gears, weights and a pendulum ----
     sign(42,29,[0,-1],'THE CLOCK ROOM','The clock stopped at midnight');
     p('chandelier',41,34,{walkOk:1,bob:.6});p('barrels',44,36);p('barrels',39,36);p('tools',44,32);p('cl_smith',39,35);
-    w('clock_face',44,34,[1,0]);w('clock_face',42,29,[0,-1]);w('banner_long_a',40,29,[0,-1]);w('banner_long_b',44,30,[1,0]);w('c_psgargoyle',40,36,[0,1]);w('c_psgargoyle',43,36,[0,1]);w('vine_a',39,31,[-1,0]);w('lantern_bracket',44,31,[1,0]);foe('psarmour',43,35);foe('psink',41,31);
+    w('clock_face',44,34,[1,0]);w('banner_long_a',40,29,[0,-1]);w('banner_long_b',44,30,[1,0]);w('c_psgargoyle',40,36,[0,1]);w('c_psgargoyle',43,36,[0,1]);w('vine_a',39,31,[-1,0]);w('lantern_bracket',44,31,[1,0]);foe('psarmour',43,35);foe('psink',41,31);
     light(41,33,pswSick);light(43,35,pswCold);light(40,30,pswVerd);
     // ---- a ghost choir, ghost scholars and the monks who never left; cold spots; wraiths ----
     ghost('ghost_choir',[[29,22],[38,22]],{sp:.22});ghost('ghost_choir',[[30,23],[36,23],[36,21],[30,21]],{sp:.18,ph:.3});ghost('ghost_choir',[[31,19],[36,19]],{sp:.15,ph:.7});
@@ -630,12 +630,12 @@ function pswApplyHidden(n){
     if(F.sacristanDead)G.enemies=G.enemies.filter(e=>e.t!=='pssacristan');
     if(F.stewardDead)G.enemies=G.enemies.filter(e=>e.t!=='psteward');
     if(F.candlesDone)G.enemies=G.enemies.filter(e=>e.t!=='pschorister')}}
-const pswPickPic={loaf:'basket',hilt:'sword_rack',book:'bookmark',ladle:'tools'};
+const pswPickPic={loaf:'basket',hilt:'sword_rack',book:'bookmark',ladle:'pans_hanging'};
 function pswItemDecor(C,key,x,y,o){const k=key==='book'?'gy_book':pswPic(pswPickPic[key]);return k?C.dec(k,x,y,o):null}
 function pswLoaf(C,i,x,y){pswItemDecor(C,'loaf',x,y,{npc:'psw_loaf'+i,sc:.8,walkOk:1})}
 function pswHilt(C,i,x,y){C.dec(IMG.icn_sword?'icn_sword':pswPic('tools'),x,y,{npc:'psw_hilt'+i,sc:1,walkOk:1})}
 function pswBook(C,i,x,y){C.dec('gy_book',x,y,{npc:'psw_book'+i,sc:1.1,walkOk:1})}
-function pswLadle(C,x,y){C.dec(pswPic('tools'),x,y,{npc:'psw_ladle',sc:.6,walkOk:1})}
+function pswLadle(C,x,y){C.dec(pswPic('pans_hanging'),x,y,{npc:'psw_ladle',sc:.6,walkOk:1})}   // the ladle hangs with the pans by the great pot ('tools' was dropped as a domestic stand-in, which left the quest ladle out)
 for(let i=1;i<=6;i++)pswTake('psw_loaf'+i,'A cold loaf','loaf'+i,'psloaf','A round loaf of white bread, cold and perfect, lying where a baker left it. Nobody has eaten it in a long time.','You have already taken the loaf from here.','Take the loaf.','You take a Pale Loaf.');
 for(let i=1;i<=3;i++)pswTake('psw_hilt'+i,'A sword hilt','hilt'+i,'pshilt',['A sword hilt with no blade, left among the weapons.','A sword hilt, hammered flat on one side and tossed in a corner.','A sword hilt lying half under a bench in the guardroom.'][i-1],'You have taken the hilt from here.','Take the hilt.','You take a sword hilt.');
 for(let i=1;i<=5;i++)pswTake('psw_book'+i,'A strayed book','book'+i,'psbook'+i,['A book with a violet cloth cover, left on a desk. The stamp of the library is inside the front board.','A book with a violet cloth cover, pushed behind a bench. It has the library stamp.','A book with a violet cloth cover, forgotten on a stone bench in the cloister. It has the library stamp.','A book with a violet cloth cover, left on a pew. It has the library stamp.','A book with a violet cloth cover, left on the chapter house lectern. It has the library stamp.'][i-1],'You have taken the book from here.','Take the book.','You take a library book.');

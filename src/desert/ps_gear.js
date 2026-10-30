@@ -189,7 +189,7 @@ function pgrSpot(L,id,taken,minD){
   for(const l of PSP.LINKS){if(l.from===id&&l.at)doors.push(l.at);if(l.to===id&&l.land)doors.push(l.land)}
   const P=L._ps||{},zones=(P.safe||[]).slice(),rests=P.rests||[];
   const inz=(z,x,y,e)=>z.rect?(x>=z.x0-e&&x<=z.x1+e&&y>=z.y0-e&&y<=z.y1+e):Math.hypot(x-z.x,y-z.y)<=z.r+e;
-  const tele=L.tele||(PSP.TELE&&PSP.TELE.id===id?PSP.TELE.at:null);
+  const tele=L.tele?(Array.isArray(L.tele)?L.tele:[L.tele.x,L.tele.y]):(PSP.TELE&&PSP.TELE.id===id?PSP.TELE.at:null);
   const dist=new Map([[L.start.x+','+L.start.y,0]]),q=[[L.start.x,L.start.y]];
   for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b,k=nx+','+ny;if(dist.has(k)||!free(nx,ny))continue;dist.set(k,dist.get(x+','+y)+1);q.push([nx,ny])}}
   const reachCount=skip=>{const seen=new Set([L.start.x+','+L.start.y]),qq=[[L.start.x,L.start.y]];for(let i=0;i<qq.length;i++){const [x,y]=qq[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b,k=nx+','+ny;if(seen.has(k)||k===skip||!free(nx,ny))continue;seen.add(k);qq.push([nx,ny])}}return seen.size};

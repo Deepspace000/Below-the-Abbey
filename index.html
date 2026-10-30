@@ -71647,6 +71647,8 @@ PSP.JUMPS={palespire:[9720,32,52,0],palespire1:[9720,32,52,0],palespire2:[9730,3
 /* small readers (no side effects) */
 const pspIs=n=>n>=PSP.LO&&n<=PSP.HI;
 const pspLevel=id=>PSP.LEVELS.find(l=>l.id===id)||null;
+/* where a link lands: its planned square, or the start of the small stub room (ps_glue.js) while the far side is not built */
+const pspLandOf=l=>{const t=l&&l.prov&&pspLevel(l.to);return t&&!t.built?[12,13,0]:l.land};
 const pspLinksFrom=id=>PSP.LINKS.filter(l=>l.from===id);
 const pspLinkAt=(id,x,y)=>PSP.LINKS.find(l=>l.from===id&&l.at&&l.at[0]===x&&l.at[1]===y)||null;
 
@@ -71990,7 +71992,8 @@ function pspPortal(){
   const [C,l,o]=PSP_ARGS(arguments);if(!C||!l||!l.at)return null;
   const style=pspDoorStyle(l,o),base=pspDoorGid(style,C.wh),gid=KH_NEXT_GID++;T_TILE[gid]=T_TILE[base];if(GY.col&&GY.col[base])GY.col[gid]=GY.col[base];
   const land=l.land;
-  KH_DOOR[gid]={get lvl(){return l.to},get at(){return {x:land[0],y:land[1],f:land[2]}},psp:l,lock:l.lock||null,prov:!!l.prov,pspName:(o&&o.name)||l.name};
+  KH_DOOR[gid]={get lvl(){return l.to},get at(){const q=pspLandOf(l);return {x:q[0],y:q[1],f:q[2]}},psp:l,   // a far side not built yet is the small stub room (ps_glue.js): land on its start, not on a square of the planned map
+  lock:l.lock||null,prov:!!l.prov,pspName:(o&&o.name)||l.name};
   C.solid(l.at[0],l.at[1],C.ch(gid));C.used.add(l.at[0]+','+l.at[1]);
   C.reserve(land[0]-1,land[1]-1,land[0]+1,land[1]+1);C.used.delete(land[0]+','+land[1]);
   return gid}
@@ -72358,7 +72361,7 @@ function psgBuildApproach(info){
       if(i%11===5)C.light(x,bd.y-3,[.35,.9,.5])});   // a cold glow far down in the pit
   });
   /* the Pilgrim Steps: parapets of iron fence down both sides, an arch over the first flight, a lantern post at each foot, nothing on the stair itself */
-  for(const x of [PSG_GRAND[0]-1,PSG_GRAND[1]+1])for(let y=46;y<=50;y++)C.prop(FENCE[(x+y)&1],x,y,{block:false,maxW:1.02});
+  for(const x of [PSG_GRAND[0]-1,PSG_GRAND[1]+1])for(let y=46;y<=50;y++)if(!C.decor.some(d=>d.x===x&&d.y===y&&/iron_fence/.test(String(d.k))))C.prop(FENCE[(x+y)&1],x,y,{block:false,maxW:1.02});   // the pit fence may already stand at the foot
   C.archway(32,48,'arch_high');post(PSG_GRAND[0]-1,51,[1.1,.95,.7]);post(PSG_GRAND[1]+1,51,[1.1,.95,.7]);
   for(let x=35;x<=46;x++)C.prop(FENCE[x&1],x,22,{block:false,maxW:1.02});
     for(let x=6;x<=58;x+=10){if(x>=26&&x<=38)continue;C.dec(T(['gy_dead','ww_crowtree','gy_dead'][(x/10|0)%3]),x,18+((x/5)&3),{block:false,sc:1+hs(x,5,2)*.4})}
@@ -73165,7 +73168,7 @@ function pscBase(info){
   const sealed=pspDoorGid('iron',4.8);   // the sealed wall-stair doors are the castle's own ironbound door set in the wall (the old tile was a flat amber arch)
   const DOORS={'32,10':T.great[1],'18,10':T.gallery[1],'12,24':T.kitchen,'52,24':T.cloister,'10,40':T.cloister,'54,40':T.kitchen,'3,34':sealed,'60,34':sealed,'32,52':T.gate,'60,30':T.gate};
   const bind=l=>{const base=DOORS[l.at[0]+','+l.at[1]];if(!base)return;const gid=clone(base);C.solid(l.at[0],l.at[1],ch(gid));
-    const d={lvl:l.to,get at(){if(!LEVELS[l.to]&&KH_LAZY[l.to])try{KH_LAZY[l.to]()}catch(e){console.error(e)}return {x:l.land[0],y:l.land[1],f:l.land[2]}},psc:1};
+    const d={lvl:l.to,get at(){if(!LEVELS[l.to]&&KH_LAZY[l.to])try{KH_LAZY[l.to]()}catch(e){console.error(e)}const q=pspLandOf(l);return {x:q[0],y:q[1],f:q[2]}},psc:1};
     if(l.prov)d.seal='The wall walk is closed. An iron grille is locked across the foot of the stair, and the lock is furred with green rust.';
     KH_DOOR[gid]=d};
   for(const l of pspLinksFrom(9730))if(l.at)bind(l);
@@ -73205,8 +73208,9 @@ function pscBuild(info){
   const wallAt=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&g[y][x]==='#'&&!isDoorCell(x,y);
   const sideWd=(x,y,salt)=>{const c=[[0,-1],[0,1],[-1,0],[1,0]].filter(([a,b])=>wallAt(x+a,y+b));return c.length?c[int(hs(x,y,salt)*c.length)]:null};
   const ALC=['alcove_weeper','alcove_monk','alcove_knight','alcove_maiden','alcove_empty'];
+  const laneDone=new Set();   // two lanes that cross dress their shared squares once
   PSC_LANES.forEach((ln,li)=>{const [nmx,x0,y0,x1,y1]=ln,horiz=(x1-x0)>(y1-y0);
-    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(g[y][x]!=='.')continue;const idx=horiz?x:y,wd=sideWd(x,y,3+li);if(!wd)continue;
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(g[y][x]!=='.'||laneDone.has(x+','+y))continue;laneDone.add(x+','+y);const idx=horiz?x:y,wd=sideWd(x,y,3+li);if(!wd)continue;
       if((idx+li*3)%7===0&&!(x>=30&&x<=34&&y>=11&&y<=13)){hang('lantern_bracket',x,y,wd,.9);lampAt(x,y,hs(x,y,71)<.35?WARM:SK)}
       else if(hs(x,y,61+li)<.13)hang(hs(x,y,62)<.5?'vine_a':'vine_b',x,y,wd,0);
             else if(hs(x,y,63+li)<.03)hang(ALC[int(hs(x,y,64)*5)],x,y,wd,0)}});
@@ -73371,7 +73375,7 @@ function pscBuild(info){
   for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(C.rows[d.y]&&C.rows[d.y][d.x]!=='.'&&!d.npc)C.decor.splice(i,1)}   // a hedge or wall laid over a prop takes the prop away
   const lv=C.finish({start:{x:32,y:49,f:0},col:PSC_SICK});
   lv.floorSet=PSC_FLOORSET.slice();lv.floor=lv.floorSet[0];lv.day=.74;lv.amb=.86;lv.ceilH=9;lv.ceil=CEILS.psc_sky?'psc_sky':lv.ceil;lv.name=info.name;lv.label=info.name;
-  lv._psc={lcol:C.lcol,col:PSC_SICK};lv.noTele=false;lv.tele=PSC.TELE;
+  lv._psc={lcol:C.lcol,col:PSC_SICK};lv.noTele=false;lv.tele={x:PSC.TELE[0],y:PSC.TELE[1]};   // the engine reads tele.x and tele.y (an array left the stone at NaN)
   lv.sky=lv.sky||[];
   return lv}
 
@@ -73836,7 +73840,7 @@ function pshBuild(){
     const st=styleAt(x,y);let kd=kindAt[k]||'plain';const v=(hs(x,y,3)*2)|0;if(kd==='face'||kd==='ivy')kd='plain';
     s+=ch(pshTile(st,kd,kd==='plain'?v:0))}rows.push(s)}
   // the door records: which tile number is which door
-  for(const d of doorRec){const c=rows[d.at[1]][d.at[0]],gid=chars[c];KH_DOOR[gid]={psh:'link',link:d.link,get lvl(){return d.link.to},get at(){const q=d.link.land;return {x:q[0],y:q[1],f:q[2]}},kind:d.kind}}
+  for(const d of doorRec){const c=rows[d.at[1]][d.at[0]],gid=chars[c];KH_DOOR[gid]={psh:'link',link:d.link,get lvl(){return d.link.to},get at(){const q=pspLandOf(d.link);return {x:q[0],y:q[1],f:q[2]}},kind:d.kind}}
   for(const k in special){const [x,y]=k.split(',').map(Number),c=rows[y][x],[t,,o]=special[k];KH_DOOR[chars[c]]=Object.assign({psh:t,x,y},o)}
   for(const h of PSH_HIDDEN){const c=rows[h.door[1]][h.door[0]];KH_DOOR[chars[c]]={psh:'niche',flag:h.flag,cell:h.chest}}
   const fmS=fm.map(r=>r.join(''));
@@ -73845,7 +73849,7 @@ function pshBuild(){
   const L={rows,chars,fmap:fmS,floorSet:fl.slice(),floor:fl[0],floor2:fl[1],ceil:'psc_hall',ceilH:WH,start:{x:32,y:44,f:0},enemies,items,decor,lights,portals:[],day:0,amb:.3,torchGap:1e9,noTele:true,noExtras:true,sky:[],
     name:'The Ground Floor: the Great Halls',label:'The Great Halls',diff:101,mapNames,_psh:{lcol,kI,r2,col:PSH_COL.cold,miss,S:null,gdata:Object.fromEntries((S.gh||[]).map(g=>[g.id,g]))}};
   LEVELS[PSH.ID]=L;LEVEL_NAMES[PSH.ID]=L.name;LEVEL_RATING[PSH.ID]=101;
-  if(miss.length)console.warn('psh missed: '+miss.slice(0,60).join(' '));
+  if(miss.length&&PSP.DEBUG)console.warn('psh missed: '+miss.slice(0,60).join(' '));   // pieces of the room tables whose square was already taken (kept in L._psh.miss)
   {const NN=W*H,hh=new Float32Array(NN).fill(.3),rk=new Float32Array(NN),block=new Uint8Array(NN);for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(rows[y][x]!=='.')block[y*W+x]=1;try{TERRS[PSH.ID]=yarTerrain(W,H,hh,rk,block)}catch(e){console.error(e)}}
   return L}
 if(typeof pspRegister==='function'){try{pspRegister(PSH.ID,pshBuild,{})}catch(e){KH_LAZY[PSH.ID]=pshBuild}}else KH_LAZY[PSH.ID]=pshBuild;
@@ -74089,10 +74093,10 @@ function pshFurnish(S){
   for(const y of [7,13])mark(25,y,'win');mark(25,10,'win');mark(25,11,'face');
   gar(26,7,We);gar(38,6,Ea);
   wall(pt(200),[[26,6]],We,{bob:hi});wall(pt(210),[[38,7]],Ea,{bob:hi});
-  sign(32,6,N,'UP THE GRAND STAIR','The way to the state rooms. Ask the Chamberlain.');sign(38,8,Ea,'THE AUDIENCE CHAMBER','The Sovereign receives no one');
+  sign(31,6,N,'UP THE GRAND STAIR','The way to the state rooms. Ask the Chamberlain.');sign(37,8,[0,1],'THE AUDIENCE CHAMBER','The Sovereign receives no one');
   hang(32,11,2.3);hang(32,7,1.8,V);lamp(28,7,V,1.7,120);lamp(36,7,V,1.7,120);
   /* the way up: broad mossy steps rising to the great barred double door, chains and a padlock, cold light through the bars */
-  pic(P('vine_b'),31,6,N,{bob:.9});pic(P('vine_a'),33,6,N,{bob:.9});pic(P('banner_long_a'),30,6,N,{bob:hi});pic(P('banner_long_b'),34,6,N,{bob:hi});lamp(32,6,[.5,.72,1.2],1.5,90);
+  pic(P('vine_a'),33,6,N,{bob:.9});pic(P('banner_long_a'),30,6,N,{bob:hi});pic(P('banner_long_b'),34,6,N,{bob:hi});lamp(32,6,[.5,.72,1.2],1.5,90);
   foe('psstairwarden',32,13);
   put(P('furn_organ'),28,7,{block:true});put(P('furn_altarpiece'),36,7,{block:true});put(P('furn_clock_grandfather'),27,8,{block:true});
   ghost('maid','p_ghost_maid',[[28,7],[36,7],[36,8],[28,8]],{sp:.22,clue:2,lines:['They took the key down to where the lamps do not burn.','He went up the stair and never came down.','I wash the steps every night. They will not stay clean.']});
@@ -74136,12 +74140,13 @@ function pshFurnish(S){
   foe('psofficer',43,22);
   /* ===== the long-abandoned house: sheets, webs, mirrors, ancestors, candles, red lanterns ===== */
   {const taken=new Set();for(const d of decor)if(d.wd)taken.add(d.x+','+d.y+','+d.wd[0]+','+d.wd[1]);let mi=0,pi=0;
+   {const m0=S.miss.length;   // the dresser tries many wall slots; a slot that is taken is not a miss
    pshHaunt({W:S.W,H:S.H,seed:9740,pi:3,start:[32,44],blocked:()=>decor.filter(d=>d.block).map(d=>d.x+','+d.y),open:(x,y)=>open(x,y),free:(x,y)=>S.fr(x,y)&&!S.keep.has(x+','+y),wall:(x,y,a,b)=>g[y+b]&&g[y+b][x+a]==='#'&&S.over[(x+a)+','+(y+b)]===undefined,taken:(x,y,a,b)=>taken.has(x+','+y+','+a+','+b),
      stand:{portrait:(i)=>pshPortrait(20+i)},
      counts:{mirror:6,portrait:12,sheetwin:0,cobcorner:12,cobthick:5,candles:7,redlamp:5,dust:0,spider:3},
      wallPic:(k,x,y,wd,o)=>{const oo={bob:o.bob};if(o.mirror!==undefined)oo.npc='psh_mir'+(mi++%12);else if(o.portrait!==undefined&&(pi++%2===0))oo.npc='psh_ancp'+(pi%8);const d=pic(k,x,y,wd,oo);return !!d},
      floorProp:(k,x,y,o)=>!!put(k,x,y,o),
-     light:(x,y,c)=>lamp(x,y,c,1.0,40)})}}
+     light:(x,y,c)=>lamp(x,y,c,1.0,40)});S.miss.length=m0}}}
 
 /* ---------- doors ---------- */
 function pshSelfMove(a){G.talk=null;sfx('door');G.P.x=a[0];G.P.y=a[1];G.P.f=a[2];G.P.angT=(a[2]-1)*Math.PI/2;G.C={x:a[0],y:a[1],a:G.P.angT};try{reveal()}catch(e){}}
@@ -74605,7 +74610,7 @@ function pswMake(id){
       KH_DOOR[gid]={lvl:lk.to,at:{x:lk.land[0],y:lk.land[1],f:lk.land[2]}}}
     else if(D.kind==='lock'){
       const lk=D.link;gid=pspStairDoorTile(brick+'_0',WH,sp.g*.9,[.8,.95,1.1],'w'+id);
-      KH_DOOR[gid]={psw:'lock',link:lk}}
+      KH_DOOR[gid]={psw:'lock',link:lk,get lvl(){return lk.to},get at(){const q=pspLandOf(lk);return {x:q[0],y:q[1],f:q[2]}}}}   // lvl and at for maps and checks only; khBump above opens it
     else if(D.kind==='dungeon'){
       const lk=D.link;gid=gyTile(brick+'_0',WH,{fac:{img:'f_dungeongate',i:0,n:1,fit:1},gain:1.0,rgb:[.85,.95,1.05],tag:'pswd'+id,emit:.35});
       KH_DOOR[gid]={psw:'dungeon',lvl:lk.to,at:{x:lk.land[0],y:lk.land[1],f:lk.land[2]}}}
@@ -74621,7 +74626,7 @@ function pswMake(id){
     const d={k:key,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}d.sc=o.sc||1;if(o.npc){d.npc=o.npc;d.deco=false;if(o.block)d.solid=1}
     if(o.i!==undefined)d.i=o.i;if(o.wd){d.wd=o.wd;d.pic=1}if(o.txt)d.txt=o.txt;if(o.goldAmt)d.goldAmt=o.goldAmt;if(o.ox!==undefined){d.ox=o.ox;d.oy=o.oy}if(o.bob!==undefined)d.bob=o.bob;if(o.lift!==undefined)d.lift=o.lift;
     if(o.text)d.text=o.text;decor.push(d);if(!o.walkOk&&!o.wd)occ.add(x+','+y);return d};
-  const p=(name,x,y,o)=>{const k=pswPic(name);if(o===undefined)o={block:true};else if(o.block===undefined)o=Object.assign({block:!(o.wd||o.walkOk||!Object.keys(o).length)},o);return k?dec(k,x,y,o):(miss.push('nopic:'+name+'@'+x+','+y),null)};
+  const p=(name,x,y,o)=>{const k=pswPic(name);if(o===undefined)o={block:true};else if(o.block===undefined)o=Object.assign({block:!(o.wd||o.walkOk||!Object.keys(o).length)},o);return k?dec(k,x,y,o):(PSW_PAINT[name]===null?null:(miss.push('nopic:'+name+'@'+x+','+y),null))};   // a piece dropped on purpose (PSW_PAINT null) is not a miss
   const sign=(x,y,wd,a,b)=>{if(!open(x,y)){miss.push('sign@'+x+','+y);return}decor.push({k:'sign_gy',x,y,block:false,wd,txt:[a,b||''],sc:1})};
   const foe=(t,x,y)=>{if(!open(x,y)||(occ.has(x+','+y)&&!reserved.has(x+','+y))){miss.push('foe '+t+'@'+x+','+y);return false}enemies.push({t,x,y,lvl:(id===9750&&!(ENEMY_DEF[t]&&ENEMY_DEF[t].boss))?S.diff-1:S.diff});occ.add(x+','+y);return true};
   const light=(x,y,col)=>{if(!open(x,y)){miss.push('light@'+x+','+y);return}lights.push([x,y]);if(col)lcol[x+','+y]=col};
@@ -74937,7 +74942,7 @@ PSW_SPEC[9760]={W:48,H:40,diff:101,ceil:'tex_vault_ribbed',wh:3.4,lcol:pswCold,
     // ---- the Clock Room: gears, weights and a pendulum ----
     sign(42,29,[0,-1],'THE CLOCK ROOM','The clock stopped at midnight');
     p('chandelier',41,34,{walkOk:1,bob:.6});p('barrels',44,36);p('barrels',39,36);p('tools',44,32);p('cl_smith',39,35);
-    w('clock_face',44,34,[1,0]);w('clock_face',42,29,[0,-1]);w('banner_long_a',40,29,[0,-1]);w('banner_long_b',44,30,[1,0]);w('c_psgargoyle',40,36,[0,1]);w('c_psgargoyle',43,36,[0,1]);w('vine_a',39,31,[-1,0]);w('lantern_bracket',44,31,[1,0]);foe('psarmour',43,35);foe('psink',41,31);
+    w('clock_face',44,34,[1,0]);w('banner_long_a',40,29,[0,-1]);w('banner_long_b',44,30,[1,0]);w('c_psgargoyle',40,36,[0,1]);w('c_psgargoyle',43,36,[0,1]);w('vine_a',39,31,[-1,0]);w('lantern_bracket',44,31,[1,0]);foe('psarmour',43,35);foe('psink',41,31);
     light(41,33,pswSick);light(43,35,pswCold);light(40,30,pswVerd);
     // ---- a ghost choir, ghost scholars and the monks who never left; cold spots; wraiths ----
     ghost('ghost_choir',[[29,22],[38,22]],{sp:.22});ghost('ghost_choir',[[30,23],[36,23],[36,21],[30,21]],{sp:.18,ph:.3});ghost('ghost_choir',[[31,19],[36,19]],{sp:.15,ph:.7});
@@ -74965,12 +74970,12 @@ function pswApplyHidden(n){
     if(F.sacristanDead)G.enemies=G.enemies.filter(e=>e.t!=='pssacristan');
     if(F.stewardDead)G.enemies=G.enemies.filter(e=>e.t!=='psteward');
     if(F.candlesDone)G.enemies=G.enemies.filter(e=>e.t!=='pschorister')}}
-const pswPickPic={loaf:'basket',hilt:'sword_rack',book:'bookmark',ladle:'tools'};
+const pswPickPic={loaf:'basket',hilt:'sword_rack',book:'bookmark',ladle:'pans_hanging'};
 function pswItemDecor(C,key,x,y,o){const k=key==='book'?'gy_book':pswPic(pswPickPic[key]);return k?C.dec(k,x,y,o):null}
 function pswLoaf(C,i,x,y){pswItemDecor(C,'loaf',x,y,{npc:'psw_loaf'+i,sc:.8,walkOk:1})}
 function pswHilt(C,i,x,y){C.dec(IMG.icn_sword?'icn_sword':pswPic('tools'),x,y,{npc:'psw_hilt'+i,sc:1,walkOk:1})}
 function pswBook(C,i,x,y){C.dec('gy_book',x,y,{npc:'psw_book'+i,sc:1.1,walkOk:1})}
-function pswLadle(C,x,y){C.dec(pswPic('tools'),x,y,{npc:'psw_ladle',sc:.6,walkOk:1})}
+function pswLadle(C,x,y){C.dec(pswPic('pans_hanging'),x,y,{npc:'psw_ladle',sc:.6,walkOk:1})}   // the ladle hangs with the pans by the great pot ('tools' was dropped as a domestic stand-in, which left the quest ladle out)
 for(let i=1;i<=6;i++)pswTake('psw_loaf'+i,'A cold loaf','loaf'+i,'psloaf','A round loaf of white bread, cold and perfect, lying where a baker left it. Nobody has eaten it in a long time.','You have already taken the loaf from here.','Take the loaf.','You take a Pale Loaf.');
 for(let i=1;i<=3;i++)pswTake('psw_hilt'+i,'A sword hilt','hilt'+i,'pshilt',['A sword hilt with no blade, left among the weapons.','A sword hilt, hammered flat on one side and tossed in a corner.','A sword hilt lying half under a bench in the guardroom.'][i-1],'You have taken the hilt from here.','Take the hilt.','You take a sword hilt.');
 for(let i=1;i<=5;i++)pswTake('psw_book'+i,'A strayed book','book'+i,'psbook'+i,['A book with a violet cloth cover, left on a desk. The stamp of the library is inside the front board.','A book with a violet cloth cover, pushed behind a bench. It has the library stamp.','A book with a violet cloth cover, forgotten on a stone bench in the cloister. It has the library stamp.','A book with a violet cloth cover, left on a pew. It has the library stamp.','A book with a violet cloth cover, left on the chapter house lectern. It has the library stamp.'][i-1],'You have taken the book from here.','Take the book.','You take a library book.');
@@ -75324,7 +75329,7 @@ function psdMake(info){
   try{const taken=new Set();for(const d of decor)if(d.wd)taken.add(d.x+','+d.y+','+d.wd[0]+','+d.wd[1]);let mi=0;
     pshHaunt({W,H,seed:id,start:start?[start.x,start.y]:null,blocked:()=>decor.filter(d=>d.block).map(d=>d.x+','+d.y),open:(x,y)=>open(x,y)&&!deepAt(x,y),free:(x,y)=>free(x,y)&&!keep.has(x+','+y),wall:(x,y,a,b)=>!open(x+a,y+b)&&rows[y+b]!==undefined&&rows[y+b][x+a]!=='.'&&!doorSq.some(q=>q[0]===x+a&&q[1]===y+b),taken:(x,y,a,b)=>taken.has(x+','+y+','+a+','+b),
       counts:Object.assign({},S.haunt||{mirror:3,cobcorner:14,cobthick:2,candles:4,redlamp:5,spider:3},{cobthick:0}),
-      wallPic:(k,x,y,wd,o)=>{const oo={wd,raw:true,sc:1};if(o.mirror!==undefined)oo.npc='psh_mir'+((mi++)%12);const d=dec(k,x,y,oo);if(d)taken.add(x+','+y+','+wd[0]+','+wd[1]);return !!d},
+      wallPic:(k,x,y,wd,o)=>{const oo={wd,raw:true,sc:1};if(o.mirror!==undefined)oo.npc='psh_mir'+((mi++)%12);const d=dec(k,x,y,oo);if(d){d.pic=1;if(o.bob!==undefined)d.bob=o.bob;taken.add(x+','+y+','+wd[0]+','+wd[1])}return !!d},   // hung flat on the wall face (a red lantern with its bob), not free in the room
       floorProp:(k,x,y,o)=>!!dec(k,x,y,{block:!!o.block,sc:o.sc||1,raw:true}),light:(x,y,c)=>light(x,y,c)})}catch(e){console.error('psd haunt',e)}
   /* ---- wall torches (green-white), candle niches, lamps ---- */
   const torches=[];
@@ -76268,8 +76273,61 @@ function pstTidy(id,L){
     base=reach()}
   if(gone.size)L.decor=L.decor.filter(d=>!gone.has(d));
   L._tidy=rep;return L}
+/* every chest, coffer and person of a castle level can be reached: walls that open (hidden doors, closets, niches, warp stairs) are listed in L._secrets and followed;
+   where loose furniture still walls a chest or a person off, the pieces on the cheapest way in are taken away (furniture first, columns and statues only if there is no other way). */
+const PST_STRUCT=/col|pillar|pier|statue|st_|alcove|stair|tele|fountain|well|tomb|throne|altar|organ/i;
+function pstAccess(id,L){
+  if(!L||L._access||!L.rows||!L.chars)return;L._access=1;
+  const W=L.rows[0].length,H=L.rows.length,TB=(typeof TERRS!=='undefined'&&TERRS[id]&&TERRS[id].block)||null,D4=[[1,0],[-1,0],[0,1],[0,-1]];
+  const doorAt=(x,y)=>{const c=L.rows[y]&&L.rows[y][x];if(!c||c==='.')return null;const g=L.chars[c];return g!==undefined&&KH_DOOR[g]?KH_DOOR[g]:null};
+  const sec=[],warp=new Map();
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const D=doorAt(x,y);if(!D)continue;
+    if(D.A||D.B)warp.set(y*W+x,[D.A,D.B].filter(Boolean));
+    else if(/secret|closet|niche/.test(String(D.psh||'')+String(D.psw||'')+String(D.psd||'')))sec.push({x,y})}
+  L._secrets=sec;const secS=new Set(sec.map(q=>q.y*W+q.x));
+  if(TB)for(const v of secS)TB[v]=0;   // the terrace block of an indoor level marks every wall square; a wall that opens must be walkable once it is open
+  const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&(L.rows[y][x]==='.'||secS.has(y*W+x))&&!(TB&&TB[y*W+x]);
+  const solid=new Map();for(const d of L.decor||[])if(d.block&&!d.found)solid.set(Math.round(d.y)*W+Math.round(d.x),d);
+  const targets=(L.decor||[]).filter(d=>(d.loot||d.goldAmt||(d.npc&&!d.wd)||/chest|coffer/i.test(String(d.k)))&&!d.pic);
+  const reach=()=>{const seen=new Uint8Array(W*H),q=[];const push=(x,y)=>{if(open(x,y)&&!solid.has(y*W+x)&&!seen[y*W+x]){seen[y*W+x]=1;q.push(y*W+x)}};
+    if(L.start)push(L.start.x,L.start.y);for(const l of PSP.LINKS)if(l.to===id&&l.land)push(l.land[0],l.land[1]);
+    for(let i=0;i<q.length;i++){const v=q[i],x=v%W,y=(v/W)|0;for(const [a,b] of D4){const nx=x+a,ny=y+b,w=warp.get(ny*W+nx);if(w)for(const p of w)push(p[0],p[1]);push(nx,ny)}}
+    return seen};
+  const rep={removed:[]};let seen=reach();
+  const near=(d)=>{const x=Math.round(d.x),y=Math.round(d.y);return D4.some(([a,b])=>seen[(y+b)*W+x+a])||!!seen[y*W+x]};
+  for(const t of targets){if(near(t))continue;const tx=Math.round(t.x),ty=Math.round(t.y);
+    // cheapest way in from the reached floor: a free square costs 0, loose furniture 1, a column or statue 6; people, chests and walls are never crossed
+    const cost=v=>{const d=solid.get(v);if(!d)return 0;if(d===t||d.npc||d.loot||d.goldAmt||/chest|coffer/i.test(String(d.k)))return -1;return PST_STRUCT.test(String(d.k))?6:1};
+    const dist=new Float64Array(W*H).fill(1e9),prev=new Int32Array(W*H).fill(-1),dq=[];
+    for(let v=0;v<W*H;v++)if(seen[v]){dist[v]=0;dq.push(v)}
+    for(let it=0;it<dq.length&&it<200000;it++){let bi=it;for(let j=it+1;j<dq.length&&j<it+64;j++)if(dist[dq[j]]<dist[dq[bi]])bi=j;[dq[it],dq[bi]]=[dq[bi],dq[it]];const v=dq[it],x=v%W,y=(v/W)|0;
+      for(const [a,b] of D4){const nx=x+a,ny=y+b;if(!open(nx,ny))continue;const nv=ny*W+nx,c=cost(nv);if(c<0)continue;if(dist[v]+c<dist[nv]){dist[nv]=dist[v]+c;prev[nv]=v;dq.push(nv)}}}
+    let best=-1;for(const [a,b] of D4){const nv=(ty+b)*W+tx+a;if(open(tx+a,ty+b)&&dist[nv]<1e9&&(best<0||dist[nv]<dist[best]))best=nv}
+    if(best<0)continue;
+    for(let v=best;v>=0&&!seen[v];v=prev[v]){const d=solid.get(v);if(d){L.decor.splice(L.decor.indexOf(d),1);solid.delete(v);rep.removed.push([d.k,d.x,d.y,'for '+t.k+'@'+tx+','+ty])}}
+    seen=reach()}
+  L._accessRep=rep}
+/* the loose gems of a castle level: placed here (gems.js would scatter them on any open square, also on terrace cells the party cannot step on and in rooms nobody reaches).
+   Same count and value spread as gems.js, but only on squares walked to from the start and every landing, off the terraces, away from doors. */
+function pstGems(id,L){
+  if(!L||L._gems||!L.rows||L.outdoor||(L.day>0)||!(L.enemies||[]).length||typeof GEM_BY_VALUE==='undefined')return;L._gems=1;
+  const W=L.rows[0].length,H=L.rows.length,TB=(typeof TERRS!=='undefined'&&TERRS[id]&&TERRS[id].block)||null;
+  const blk=new Set();for(const d of L.decor||[])if(d.block)blk.add(Math.round(d.x)+','+Math.round(d.y));
+  const walk=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&L.rows[y][x]==='.'&&!(TB&&TB[y*W+x])&&!blk.has(x+','+y);
+  const seen=new Uint8Array(W*H),q=[];const push=(x,y)=>{if(walk(x,y)&&!seen[y*W+x]){seen[y*W+x]=1;q.push([x,y])}};
+  if(L.start)push(L.start.x,L.start.y);for(const l of PSP.LINKS)if(l.to===id&&l.land)push(l.land[0],l.land[1]);
+  for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]])push(x+a,y+b)}
+  const taken=new Set();for(const o of [...(L.items||[]),...(L.enemies||[]),...(L.decor||[])])taken.add(Math.round(o.x)+','+Math.round(o.y));
+  const st=L.start||{x:1,y:1};let floor=0;for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(L.rows[y][x]==='.')floor++;
+  const cnt=Math.max(1,Math.min(7,Math.round(floor/230))),rating=LEVEL_RATING[id]||L.diff||100,skew=Math.min(1,rating/90)*.6;
+  const nearDoor=(x,y)=>{for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){const c=(L.rows[y+dy]||'')[x+dx];if(c&&c!=='.'&&L.chars&&KH_DOOR[L.chars[c]])return true}return Math.abs(x-st.x)+Math.abs(y-st.y)<6};
+  L.items=L.items||[];let placed=0;
+  for(let t=0;t<1500&&placed<cnt;t++){const x=1+Math.floor(hash2(t,id,811)*(W-2)),y=1+Math.floor(hash2(t,id,823)*(H-2));
+    if(!seen[y*W+x]||taken.has(x+','+y)||nearDoor(x,y))continue;
+    const u=hash2(placed,id,839),u2=u*(1-skew)+skew*hash2(placed,id,853),g=GEM_BY_VALUE[Math.min(39,Math.floor(u2*40))];
+    taken.add(x+','+y);L.items.push({k:'gem_'+g[0],x,y});placed++}}
 {for(const info of PSP.LEVELS){const id=info.id,orig=KH_LAZY[id];if(!orig||orig._pst)continue;
-  const w=()=>{const lv=orig();const L=LEVELS[id]||lv;try{pstTidy(id,L)}catch(e){console.error('ps tidy',id,e)}return LEVELS[id]||lv};w._pst=1;w._psc=orig._psc;KH_LAZY[id]=w}}
+  const w=()=>{const lv=orig();const L=LEVELS[id]||lv;try{pstTidy(id,L)}catch(e){console.error('ps tidy',id,e)}try{pstAccess(id,L)}catch(e){console.error('ps access',id,e)}try{pstGems(id,L)}catch(e){console.error('ps gems',id,e)}return LEVELS[id]||lv};w._pst=1;w._psc=orig._psc;KH_LAZY[id]=w}}
 
 /* ---- src/desert/ps_wallart.js ---- */
 /* ps_wallart.js: the castle's picture hanger. Runs once on every castle level after it is built (after ps_tidy.js).
@@ -76907,7 +76965,7 @@ function pgrSpot(L,id,taken,minD){
   for(const l of PSP.LINKS){if(l.from===id&&l.at)doors.push(l.at);if(l.to===id&&l.land)doors.push(l.land)}
   const P=L._ps||{},zones=(P.safe||[]).slice(),rests=P.rests||[];
   const inz=(z,x,y,e)=>z.rect?(x>=z.x0-e&&x<=z.x1+e&&y>=z.y0-e&&y<=z.y1+e):Math.hypot(x-z.x,y-z.y)<=z.r+e;
-  const tele=L.tele||(PSP.TELE&&PSP.TELE.id===id?PSP.TELE.at:null);
+  const tele=L.tele?(Array.isArray(L.tele)?L.tele:[L.tele.x,L.tele.y]):(PSP.TELE&&PSP.TELE.id===id?PSP.TELE.at:null);
   const dist=new Map([[L.start.x+','+L.start.y,0]]),q=[[L.start.x,L.start.y]];
   for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b,k=nx+','+ny;if(dist.has(k)||!free(nx,ny))continue;dist.set(k,dist.get(x+','+y)+1);q.push([nx,ny])}}
   const reachCount=skip=>{const seen=new Set([L.start.x+','+L.start.y]),qq=[[L.start.x,L.start.y]];for(let i=0;i<qq.length;i++){const [x,y]=qq[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b,k=nx+','+ny;if(seen.has(k)||k===skip||!free(nx,ny))continue;seen.add(k);qq.push([nx,ny])}}return seen.size};
@@ -77703,7 +77761,7 @@ function ntBuildFloor(n){
   for(const pd of ponds){
     for(const [x,y] of pd.cells){decor.push({k:'pstump',x,y,block:true,sc:.0001,wdh:1,fplWater:1,nt:'pond'});occ.add(x+','+y)}
     const st=pd.stand;occ.add(st.x+','+st.y);pondStands.push({x:st.x,y:st.y,dx:st.dx,dy:st.dy});
-    const reeds=['reeds','hgwm_reed0','greeds'].filter(k=>IMG[k]),grass=['pgrass1','pgrass0','gy_web'].filter(k=>IMG[k]);
+    const reeds=['reeds','hgwm_reed0','greeds'].filter(k=>IMG[k]),grass=['pgrass1','pgrass0'].filter(k=>IMG[k]);
     const rim=new Set();for(const [x,y] of pd.cells)for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++){const nx=x+i,ny=y+j;if(open(nx,ny)&&!isWat(nx,ny))rim.add(nx+','+ny)}
     pd.rim=[...rim].map(k=>k.split(',').map(Number));
     for(const [x,y] of pd.rim){const h=hs(x,y,131);if(x===st.x&&y===st.y)continue;if(route.has(x+','+y))continue;
@@ -77803,7 +77861,11 @@ function ntBuildFloor(n){
    let g=0;for(const [x,y] of spots){if(g>=nG)break;const u=Math.pow(R(),.55),gem=GEMS[Math.min(GEMS.length-1,Math.floor(u*GEMS.length))];items.push({k:'gem_'+gem[0],x,y});occ.add(x+','+y);g++}
    let p=0;for(let i=g;i<spots.length&&p<Math.max(2,Math.round(cells.length/180));i++){const [x,y]=spots[i];if(occ.has(x+','+y))continue;items.push({k:'potion',x,y});occ.add(x+','+y);p++}
    const dress=['gy_bones','gy_web','gy_urn'].filter(k=>IMG[k]);
-   if(dress.length)for(let i=0;i<spots.length;i+=9){const [x,y]=spots[i];if(occ.has(x+','+y))continue;decor.push({k:dress[(hs(x,y,77)*dress.length)|0],x,y,block:false,walk:true,deco:true,sc:.7})}}
+   if(dress.length)for(let i=0;i<spots.length;i+=9){const [x,y]=spots[i];if(occ.has(x+','+y))continue;const k=dress[(hs(x,y,77)*dress.length)|0];
+     if(k==='gy_web'){   // a web hangs on a wall face, never free in the room (the castle rule); none where the square has no wall beside it
+       const wd=NTG_D.find(([dx,dy])=>!open(x+dx,y+dy)&&!isWat(x+dx,y+dy)&&rows[y+dy][x+dx]!==chMap.get(gNic)&&!((x+dx===plan.down.x&&y+dy===plan.down.y)||(x+dx===plan.up.x&&y+dy===plan.up.y)));
+       if(wd)decor.push({k,x,y,pic:1,wd:[wd[0],wd[1]],block:false,walk:true,deco:true,sc:.7,bob:.9});continue}
+     decor.push({k,x,y,block:false,walk:true,deco:true,sc:.7})}}
   const fmS=fm.map(r=>r.join(''));
   const fSet=ntFloorSet(n,look),ceil=ntCeil(n,look);
   const L={rows,chars,fmap:fmS,floorSet:fSet,floor:fSet[0],floor2:fSet[1],ceil,ceilH:look.wh,start:{x:plan.down.ix,y:plan.down.iy,f:plan.down.f},enemies,items,decor,lights,portals:[],day:0,amb:look.amb,torchGap:1e9,
@@ -77929,8 +77991,8 @@ function ntBuildEntrance(){
   V.torches=ntTorchSpots(open,W,H,(x,y)=>y===NTE.door.y||y===NTE.gate.y,hs);
   const dec=(k,x,y,o)=>{o=o||{};if(!IMG[k]||!open(x,y))return;decor.push(Object.assign({k,x,y,block:!!o.block,walk:!o.block,deco:!o.block,sc:o.sc||1},o.block?{}:{}))};
   for(const [x,y] of [[16,5],[21,5],[10,5],[27,5],[3,5],[34,5],[10,24],[27,24]]){if(open(x,y)){decor.push({k:'brazier',x,y,block:true,sc:1});lights.push([x,y]);lcol[x+','+y]=look.pal.lcol}}
-  decor.push({k:'sign_gy',x:15,y:4,block:false,wd:[0,-1],txt:['THE NEVER-ENDING TOWER','Each floor is one level higher than the last'],sc:1});
-  decor.push({k:'sign_gy',x:22,y:26,block:false,wd:[0,1],txt:['THE CROOKED TOWER','North of the Pale Spire'],sc:1});
+  decor.push({k:'sign_gy',x:15,y:4,block:false,wd:[0,-1],txt:['THE NEVER-ENDING TOWER'],sc:1});
+  decor.push({k:'sign_gy',x:22,y:26,block:false,wd:[0,1],txt:['THE CROOKED TOWER'],sc:1});
   for(const [x,y] of [[6,12],[6,18],[31,12],[31,18]])dec('gy_slab',x,y,{block:true,sc:.9});
   const fm=[];for(let y=0;y<H;y++)fm.push('0'.repeat(W).split(''));
   for(let y=4;y<=26;y++)for(let x=2;x<=35;x++){if(x>=15&&x<=22&&y<=12)fm[y][x]='3';else if(x>=17&&x<=20)fm[y][x]='1'}

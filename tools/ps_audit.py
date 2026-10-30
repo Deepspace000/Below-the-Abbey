@@ -13,6 +13,12 @@
      BANNED     hounds, dogs, timber, hay, village pieces anywhere in the castle
      SIGNTEXT   a sign with a second line
      TINY/HUGE  a picture drawn narrower than 0.12 or wider than 1.6 squares
+     (the checks below were added from the whole-game audit, tools/game_audit.py, so the castle standard and the whole-game audit agree)
+     WDLOOSE    a piece with a wall side (wd) that is not a wall picture, so it is drawn free-standing in the room
+     DUPDECOR   the same piece twice on one square and wall side
+     TELE       a teleport stone given as anything but {x, y} on an open square (an array left the stone at NaN)
+     ARRIVE     a door whose landing in the far level is not an open square (a far side not built yet lands on the stub room's start)
+     UNREACH    a chest, coffer, person or loose item that no walk from the start and the landings reaches (warp stairs A/B and the walls that open, L._secrets, are followed; terraces blocked)
    Floating pieces: run tools/ps_ground.py too (this script calls it with --ground). """
 import sys, os, json, time, subprocess
 from playwright.sync_api import sync_playwright
@@ -56,6 +62,28 @@ JS = r"""() => {
         }
       }
     }
+    // the whole-game audit's checks (tools/game_audit.py)
+    const dupK = new Map();
+    for (const d of L.decor || []) {
+      const k = String(d.k), x = Math.round(d.x), y = Math.round(d.y);
+      if (d.wd && !d.pic && !d.npc && !d.txt) add('WDLOOSE', d, 'wd ' + d.wd);
+      const kk = k + '|' + x + '|' + y + '|' + (d.wd || ''); dupK.set(kk, (dupK.get(kk) || 0) + 1); if (dupK.get(kk) === 2 && !/grass|reed|weed|moss|flower|vine|ivy|fern|tuft|petal/i.test(k)) add('DUPDECOR', d);
+    }
+    if (L.tele && !(Number.isFinite(L.tele.x) && Number.isFinite(L.tele.y) && open(L.tele.x, L.tele.y))) out.push([l.id, 'TELE', 'tele', -1, -1, JSON.stringify(L.tele)]);
+    for (const k of PSP.LINKS) { if (k.from !== l.id || !k.land) continue; const T = LEVELS[k.to] || (KH_LAZY[k.to] && (KH_LAZY[k.to](), LEVELS[k.to])); if (!T) continue; const q = pspLandOf(k);
+      if (!(T.rows[q[1]] && T.rows[q[1]][q[0]] === '.')) out.push([l.id, 'ARRIVE', 'link to ' + k.to, k.at ? k.at[0] : -1, k.at ? k.at[1] : -1, 'lands on ' + q[0] + ',' + q[1] + ' of ' + T.rows[0].length + 'x' + T.rows.length]) }
+    { const TB = (typeof TERRS !== 'undefined' && TERRS[l.id] && TERRS[l.id].block) || null, D4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+      const sec = new Set((L._secrets || []).map(q => q.y * W + q.x)), warp = new Map();
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const c = L.rows[y][x]; if (c === '.') continue; const g = L.chars && L.chars[c], D = g != null && KH_DOOR[g]; if (D && (D.A || D.B)) warp.set(y * W + x, [D.A, D.B].filter(Boolean)) }
+      const opener = d => !!d.opens || (!!d.npc && /gate|door|hatch|portcullis|fence|bars|cell/i.test(d.k + ' ' + d.npc));   // cell doors and gates open (as in game_audit.py)
+      const blk = new Set(); for (const d of L.decor || []) if (d.block && !d.found && !opener(d)) blk.add(Math.round(d.y) * W + Math.round(d.x));
+      const walk = (x, y) => x >= 0 && y >= 0 && x < W && y < H && (L.rows[y][x] === '.' || sec.has(y * W + x)) && !(TB && TB[y * W + x] && !sec.has(y * W + x)) && !blk.has(y * W + x);
+      const seen = new Uint8Array(W * H), q = []; const push = (x, y) => { if (walk(x, y) && !seen[y * W + x]) { seen[y * W + x] = 1; q.push(y * W + x) } };
+      if (L.start) push(L.start.x, L.start.y); for (const k of PSP.LINKS) if (k.to === l.id && k.land) push(k.land[0], k.land[1]);
+      for (let i = 0; i < q.length; i++) { const v = q[i], x = v % W, y = (v / W) | 0; for (const [a, b] of D4) { const w = warp.get((y + b) * W + x + a); if (w) for (const p of w) push(p[0], p[1]); push(x + a, y + b) } }
+      const near = (x, y) => !!seen[y * W + x] || D4.some(([a, b]) => x + a >= 0 && y + b >= 0 && x + a < W && y + b < H && seen[(y + b) * W + x + a]);
+      for (const d of L.decor || []) { if (d.pic || d.hidden || d.found) continue; if ((d.loot || d.goldAmt || (d.npc && !d.wd) || /chest|coffer/i.test(String(d.k))) && !near(Math.round(d.x), Math.round(d.y))) add('UNREACH', d, d.npc || '') }
+      for (const it of L.items || []) if (!seen[it.y * W + it.x]) out.push([l.id, 'UNREACH', it.k, it.x, it.y, 'item']) }
     // a frame (portrait, mirror, window) and a web in the same square must both be on a wall
     const cell = new Map(); for (const d of L.decor || []) { const kk = Math.round(d.x) + ',' + Math.round(d.y); (cell.get(kk) || cell.set(kk, []).get(kk)).push(d) }
     for (const [kk, ds] of cell) { const wb = ds.some(d => /web/i.test(String(d.k))), fr = ds.filter(d => /portrait|mirror|frame|pt\d|pshpt/i.test(String(d.k)) && !(d.pic && d.wd)); for (const d of fr) if (wb) add('WEBFRAME', d) }

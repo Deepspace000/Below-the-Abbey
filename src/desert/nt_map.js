@@ -42,8 +42,8 @@ function ntBuildEntrance(){
   V.torches=ntTorchSpots(open,W,H,(x,y)=>y===NTE.door.y||y===NTE.gate.y,hs);
   const dec=(k,x,y,o)=>{o=o||{};if(!IMG[k]||!open(x,y))return;decor.push(Object.assign({k,x,y,block:!!o.block,walk:!o.block,deco:!o.block,sc:o.sc||1},o.block?{}:{}))};
   for(const [x,y] of [[16,5],[21,5],[10,5],[27,5],[3,5],[34,5],[10,24],[27,24]]){if(open(x,y)){decor.push({k:'brazier',x,y,block:true,sc:1});lights.push([x,y]);lcol[x+','+y]=look.pal.lcol}}
-  decor.push({k:'sign_gy',x:15,y:4,block:false,wd:[0,-1],txt:['THE NEVER-ENDING TOWER','Each floor is one level higher than the last'],sc:1});
-  decor.push({k:'sign_gy',x:22,y:26,block:false,wd:[0,1],txt:['THE CROOKED TOWER','North of the Pale Spire'],sc:1});
+  decor.push({k:'sign_gy',x:15,y:4,block:false,wd:[0,-1],txt:['THE NEVER-ENDING TOWER'],sc:1});
+  decor.push({k:'sign_gy',x:22,y:26,block:false,wd:[0,1],txt:['THE CROOKED TOWER'],sc:1});
   for(const [x,y] of [[6,12],[6,18],[31,12],[31,18]])dec('gy_slab',x,y,{block:true,sc:.9});
   const fm=[];for(let y=0;y<H;y++)fm.push('0'.repeat(W).split(''));
   for(let y=4;y<=26;y++)for(let x=2;x<=35;x++){if(x>=15&&x<=22&&y<=12)fm[y][x]='3';else if(x>=17&&x<=20)fm[y][x]='1'}

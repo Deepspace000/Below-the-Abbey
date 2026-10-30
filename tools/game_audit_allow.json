@@ -4,6 +4,10 @@
     {"code": "OVERDOOR", "area": "Sale", "level": 600, "key": "^sa_planks", "reason": "Sale: planks nailed across the boarded-up doors, drawn on the door square on purpose"},
     {"code": "NPC_UNREACH", "level": 9740, "x": 4, "y": 39, "reason": "Pale Spire Great Halls: the Painters' Closet (4..6,38..41) opens with the brass key (same secret tools/ps_test.py reach allows)"},
     {"code": "NPC_UNREACH", "level": 9740, "x": 6, "y": 39, "reason": "Pale Spire Great Halls: the Painters' Closet (4..6,38..41) opens with the brass key (same secret tools/ps_test.py reach allows)"},
+    {"code": "LOOT_UNREACH", "level": 9740, "x": 8, "y": 5, "reason": "Pale Spire Great Halls: the Lady's Withdrawing Room (4..9,4..10) is entered by the warp door at 10,8 (KH_DOOR A/B, ps_halls.js), which the audit does not follow; a flood fill that follows the A/B warps reaches it"},
+    {"code": "NPC_UNREACH", "level": 9740, "x": 6, "y": 6, "reason": "Pale Spire Great Halls: the Lady's Withdrawing Room (4..9,4..10) is entered by the warp door at 10,8 (KH_DOOR A/B, ps_halls.js), which the audit does not follow; a flood fill that follows the A/B warps reaches it"},
+    {"code": "LOOT_UNREACH", "level": 9740, "x": 24, "y": 33, "reason": "Pale Spire Great Halls: the minstrels' gallery (8..24,33..35) is entered by the warp stair at 9,32 (KH_DOOR A/B), which the audit does not follow; reached with the warps followed (a chair that walled the chest in was removed by ps_tidy.js pstAccess)"},
+    {"code": "LOOT_UNREACH", "level": 9740, "x": 8, "y": 38, "reason": "Pale Spire Great Halls: the vault under the gallery (8..22,37..39) is entered by the warp stair at 22,36 (KH_DOOR A/B), which the audit does not follow; reached with the warps followed"},
     {"code": "ONEWAY", "level": 9715, "key": "door", "x": 30, "y": 4, "reason": "the Crooked Road gate into the Never-Ending Tower: the tower's own south gate leads back (tools/ps_test.py dest checks it)"}
   ]
 }
