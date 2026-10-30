@@ -12,3 +12,12 @@ Rubric for the critic (be merciless, list every offender with level, x,y, key):
 5. Wrong place: objects that do not belong to the room's purpose.
 Fix method: remove first; replace with a painted piece that fits only if the space needs it; retint borrowed pieces with the kit's tint helpers (pspStand / pspTint patterns) only if they then look right; never code-drawn art for props. Prefer fewer, better placed pieces: a composed room has 1 focal point, symmetry or rhythm, and breathing space. Keep reach/walk/links/key tests green (tools/ps_test.py).
 Method: Playwright screenshots (patterns in tools/ps_test.py, tools/ps_tour.py; note facing = (f-1)*PI/2 in the game, so prefer goToLevel(id,{x,y,f}) over setting angles; own `python -m http.server <unique port>` from your worktree root; BTA_CHROME="C:/Program Files/Google/Chrome/Application/chrome.exe"; never kill python by name). Also dump decor lists via page JS and audit by key. Spawn a harsh critic subagent (Agent tool, model sonnet) on at least 12 viewpoints per level you own, fix everything it finds, then a SECOND critic round on fresh screenshots, fix again. Report remaining issues honestly.
+
+## Definition of done (added after the owner found agents sloppy and error prone)
+You may NOT report a level as done until ALL of these pass on your own build, and you paste their final lines into your report:
+1. `python tools/ps_audit.py --ground` prints `AUDIT CLEAN` (wall pictures on real walls, none over doors, no overlapping frames, no free webs, no loose doors/arches, no blocking props in one-wide passages, no vines in the gatehouse, no banned village pieces, signs with one line).
+2. `python tools/ps_signs_audit.py` shows 0 outside range; `python tools/ps_ground.py` shows no floating piece you caused.
+3. `python tools/ps_test.py load links reach walk key quests save dash` and `python tools/pg_test.py` and `python tools/nt_test.py build seal` all ALL PASSED (one mode at a time).
+4. You LOOKED at screenshots of every changed area from at least two angles and at 3 squares and 1 square, and you say which you looked at. Say plainly what you did not look at.
+5. Do not touch files outside your listed scope. Do not claim a fix you did not see working. If you could not do part of the request, say so first, in the first line of your report.
+If you find a class of mistake the audit does not catch, add a check to tools/ps_audit.py rather than only fixing the instances.
