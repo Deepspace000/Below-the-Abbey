@@ -74929,11 +74929,12 @@ PSW_SPEC[9760]={W:48,H:40,diff:101,ceil:'tex_vault_ribbed',wh:3.4,lcol:pswCold,
     p('furn_altarpiece',44,22,{npc:'psw_altar',sc:1.1});p('furn_lectern_black',41,22,{npc:'psw_nave'});p('furn_organ',44,19);p('st_saint2',44,24);p('furn_pulpit',38,20);p('furn_screen_tracery',38,24);p('furn_clock_grandfather',28,26);w('alcove_knight',43,18,[0,-1]);w('alcove_maiden',43,26,[0,1]);p('furn_candelabra_black',42,20);p('furn_candelabra_black',42,24);
     w('window_great',44,21,[1,0]);w('window_great',44,23,[1,0]);w('c_psgargoyle',40,18,[0,-1]);w('c_psgargoyle',40,26,[0,1]);
     for(const [x,y] of [[31,19],[35,19],[31,25],[35,25],[38,22],[41,22],[43,22]])light(x,y,cyc([pswCold,pswVerd],x+y));
-    // ---- the Bell Room: a great bell on a raised floor ----
-    sign(31,29,[0,-1],'THE BELL ROOM','Do not ring');
-    p('bell_big',33,32,{sc:1.6});p('bell_small',31,32,{block:false});p('bell_small',35,32,{block:false});p('bell_frame',33,34,{block:false});p('cl_angel',30,35);p('cl_monk',36,35);p('barrels',30,30);p('barrels',36,30);
-    w('window_slit',29,32,[-1,0]);w('window_slit',37,32,[1,0]);w('clock_face',33,29,[0,-1]);w('banner_long_a',31,29,[0,-1]);w('banner_long_b',35,29,[0,-1]);w('c_psgargoyle',32,36,[0,1]);w('c_psgargoyle',35,36,[0,1]);w('vine_a',30,36,[0,1]);w('vine_b',29,35,[-1,0]);
-    foe('psmonk',31,30);foe('psmonk',35,35);light(33,31,pswVerd);light(31,35,pswCold);light(35,30,pswCold);
+    // ---- the Bell Room: one great bell on a raised floor, two small bells either side, a clock face over the door, slit windows; nothing else ----
+    sign(31,29,[0,-1],'THE BELL ROOM','');
+    p('bell_big',33,32,{sc:.62});p('bell_small',31,33,{sc:.7});p('bell_small',35,33,{sc:.7});
+    w('window_slit',29,32,[-1,0]);w('window_slit',37,32,[1,0]);w('clock_face',33,29,[0,-1]);w('banner_long_a',35,29,[0,-1]);
+    w('banner_long_b',30,36,[0,1]);w('c_psgargoyle',32,36,[0,1]);w('c_psgargoyle',34,36,[0,1]);w('banner_long_b',36,36,[0,1]);
+    foe('psmonk',30,35);foe('psmonk',36,31);light(33,31,pswVerd);light(31,35,pswCold);light(35,30,pswCold);
     // ---- the Clock Room: gears, weights and a pendulum ----
     sign(42,29,[0,-1],'THE CLOCK ROOM','The clock stopped at midnight');
     p('chandelier',41,34,{walkOk:1,bob:.6});p('barrels',44,36);p('barrels',39,36);p('tools',44,32);p('cl_smith',39,35);
