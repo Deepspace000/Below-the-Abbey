@@ -26,7 +26,7 @@ function monChapelTpl(b){return {w:11,h:15,floor:'kh2',amb:.8,noExtras:true,ligh
   raw('mi_candel',1,6,{block:true});raw('mi_candel',9,6,{block:true});raw('mi_candel',1,10,{block:true});raw('mi_candel',9,10,{block:true});
   raw('mi_font',9,13,{block:true});raw('mw_cross',1,13,{block:true});
   // chandeliers hang over the aisle
-  for(const y of [5,9])raw('mi_chand',5,y,{block:false,walk:true,bob:2.15});
+  for(const y of [5,9])raw('mi_chand',5,y,{block:false,walk:true,bob:3.4-NPC_H.mi_chand}); // the ring at the top of the chain meets the ceiling (3.4 in the chapel)
   npc(b.keeper,6,4);
 }}}
 /* the nave of the church: the chapel's furnishings on a grander plan */
@@ -41,7 +41,7 @@ function monChurchTpl(b){return {w:15,h:21,floor:'kh2',amb:.8,noExtras:true,ligh
   for(const y of [8,10,12,14,16,18])for(const x of [2,3,4,5,9,10,11,12])raw('mi_pew',x,y,{block:true});
   for(const [x,y] of [[1,7],[13,7],[1,11],[13,11],[1,15],[13,15]])raw('mi_candel',x,y,{block:true});
   raw('mi_font',13,19,{block:true});raw('mw_cross',1,19,{block:true});
-  for(const y of [6,11,16])raw('mi_chand',7,y,{block:false,walk:true,bob:3.1});
+  for(const y of [6,11,16])raw('mi_chand',7,y,{block:false,walk:true,bob:4.4-NPC_H.mi_chand}); // hung from the ceiling of the nave (4.4)
   npc(b.keeper,8,4);
 }}}
 /* the scriptorium: shelves of books along the wall, lecterns with open books, candelabra for the evenings */
@@ -59,7 +59,7 @@ function monWrapTpl(room){return bb=>{
     for(let x=2;x<=W-3;x+=3)pic('mw_shutter',x,1,[0,-1],.7);
     for(let y=3;y<=H-4;y+=3){pic('mw_banner',1,y,[-1,0],.1);pic('mw_banner',W-2,y,[1,0],.1)}
     for(const [x,y] of [[1,H-3],[W-2,H-3]])if(!has(x,y))raw('mi_candel',x,y,{block:true});
-    if(!has(mid,3))raw('mi_chand',mid,3,{block:false,walk:true,bob:1.5});
+    if(!has(mid,3))raw('mi_chand',mid,3,{block:false,walk:true,bob:2.6-NPC_H.mi_chand}); // hung from the ceiling of the room (2.6)
   }})}}
 function monFacade(b,k,decor){
   const y=b.y1+1,P=(n,x,bob)=>decor.push({k:'mw_'+n,x,y,wd:[0,-1],pic:1,block:false,walk:true,deco:true,bob:bob||0});
@@ -155,7 +155,7 @@ function monBuild(){
       if(b.chapel)sky.push({x:(b.x0+b.x1+1)/2,y:(b.y0+b.y1+1)/2,k:'kh_ohtower1_4',w:3.6,z:b.wh-.03},{x:b.x0-.3,y:b.y0+1.2,k:'kh_ohtower1_0',w:1.9,z:b.wh-.03},{x:b.x1+1.3,y:b.y0+1.2,k:'kh_ohtower1_0',w:1.9,z:b.wh-.03},{x:b.x0-.3,y:b.y1-.2,k:'kh_ohtower1_4',w:1.4,z:b.wh-.03},{x:b.x1+1.3,y:b.y1-.2,k:'kh_ohtower1_4',w:1.4,z:b.wh-.03});
       if(b.tower)sky.push({x:b.x1+1.4,y:b.y0+1.5,k:'kh_ohtower1_4',w:2.1,z:b.wh-.03},{x:b.x0-.4,y:b.y0+1.5,k:'kh_ohtower1_0',w:1.9,z:b.wh-.03}); // the church: a spired bell tower and a slate cone turret
       LEVEL_NAMES[b.rid]=b.name;const rid=b.rid,front=[b.dx,b.y1+1];
-      const mk=()=>{if(LEVELS[rid])return;const bb={id:b.room==='inn'?'mon_guest':'mon'+k,name:b.name,room:b.room,keeper:b.keeper,scene:b.scene,wallImg:'kh_ohwall1_'+(k%3),floor:b.room==='hall'?'cobble':'wood',tpl:b.chapel?monChapelTpl:b.church?monChurchTpl:b.script?(bb=>{const t=monScriptTpl(bb),old=t.build;return Object.assign({},t,{build:h=>{old(h);const {raw,has,W,H,mid}=h;for(let y=3;y<=H-4;y+=3){if(!has(1,y))raw('mw_banner',1,y,{pic:1,wd:[-1,0],block:false,walk:true,bob:.1});if(!has(W-2,y))raw('mw_banner',W-2,y,{pic:1,wd:[1,0],block:false,walk:true,bob:.1})}for(const x of [3,7])raw('mw_shutter',x,H-1>1?1:1,{pic:1,wd:[0,-1],block:false,walk:true,bob:1.2});raw('mi_chand',mid,4,{block:false,walk:true,bob:1.5})}})}):monWrapTpl(b.room)};
+      const mk=()=>{if(LEVELS[rid])return;const bb={id:b.room==='inn'?'mon_guest':'mon'+k,name:b.name,room:b.room,keeper:b.keeper,scene:b.scene,wallImg:'kh_ohwall1_'+(k%3),floor:b.room==='hall'?'cobble':'wood',tpl:b.chapel?monChapelTpl:b.church?monChurchTpl:b.script?(bb=>{const t=monScriptTpl(bb),old=t.build;return Object.assign({},t,{build:h=>{old(h);const {raw,has,W,H,mid}=h;for(let y=3;y<=H-4;y+=3){if(!has(1,y))raw('mw_banner',1,y,{pic:1,wd:[-1,0],block:false,walk:true,bob:.1});if(!has(W-2,y))raw('mw_banner',W-2,y,{pic:1,wd:[1,0],block:false,walk:true,bob:.1})}for(const x of [3,7])raw('mw_shutter',x,H-1>1?1:1,{pic:1,wd:[0,-1],block:false,walk:true,bob:1.2});raw('mi_chand',mid,4,{block:false,walk:true,bob:2.6-NPC_H.mi_chand})}})}):monWrapTpl(b.room)};
         const R=khRoom(bb,rid,{to:MON.ID,x:front[0],y:front[1],f:2});R.level.ceilH=b.chapel?3.4:b.church?4.4:2.6;LEVELS[rid]=R.level};
       KH_LAZY[rid]=mk;
       for(let x=b.x0-1;x<=b.x1+1;x++)used.add(x+','+(b.y1+1));
@@ -164,7 +164,8 @@ function monBuild(){
     if(IMG.kh_ohgard1_0){dc('kh_ohgard1_0',46,31,{block:true,walk:false});lights.push([46,31])}
     const BENCH=IMG.kh_ohgard1_3?'kh_ohgard1_3':null;
     if(BENCH)for(const [x,y] of [[44,29],[48,31],[44,33],[37,31],[37,27],[48,27]])tryDc(BENCH,x,y);
-    dc('memorial',38,18,{block:true,walk:false,npc:'mon_bell',sc:.9});
+    if(IMG.bl_bell&&IMG.bl_bell.width&&!IMG.mon_bellpic){IMG.mon_bellpic=IMG.bl_bell;NPC_H.mon_bellpic=1.55} // the bell itself, hanging in its wooden frame (the painted bell of the Blighted Lands, reused), not a grave stone
+    dc(IMG.mon_bellpic?'mon_bellpic':'memorial',38,18,{block:true,walk:false,npc:'mon_bell',sc:.9});
     // flower beds all over the lawns, hedges beside the paths
     for(let y=5;y<H-5;y++)for(let x=5;x<W-5;x++){if(!free(x,y)||fm[y*W+x]==='1')continue;
       const near=(fm[y*W+x+1]==='1'||fm[y*W+x-1]==='1'||fm[(y+1)*W+x]==='1'||fm[(y-1)*W+x]==='1');

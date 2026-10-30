@@ -192,7 +192,7 @@ function quayBuild(){
   // signs on the doors that open
   for(const b of OQ_HOUSES){const sx=b.front[0],sy=b.front[1]+1;decor.push({k:'sign_'+b.keeper,x:sx,y:sy,block:false,wd:b.wall,txt:[b.name.toUpperCase(),'']});}
   /* ---- the level ---- */
-  const lv={rows:rows.map(r=>r.join('')),start:{x:OQ.CX,y:SHORE+2,f:0},enemies:[],items:[{k:'potion',x:44,y:SHORE+2}],decor,scenery,sky,fmap:null,
+  const lv={rows:rows.map(r=>r.join('')),start:{x:OQ.CX,y:SHORE+2,f:0},enemies:[],items:[{k:'potion',x:44,y:SHORE+1}],decor,scenery,sky,fmap:null,
     floorSet:['quayStone','cobble','wood','bluesand','bluewater','isleSandDk'],floor:'quayStone',ceil:'cloud',day:.98,outdoor:true,amb:.9,name:'Oldhaven Quay',label:'Oldhaven Quay',noExtras:true,diff:25,
     tele:{x:56,y:32},ceilH:5.2,chars,lights,portals:[]};
   lv.portals[1]={to:305,x:74,y:141,f:0,tex:'oqportc',req:'oldhavenOpen',lock:'The great gate of Oldhaven is barred until noon. Speak to the herald.'};

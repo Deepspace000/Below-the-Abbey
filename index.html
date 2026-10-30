@@ -16108,7 +16108,8 @@ function ohBuild(){
       for(let y=cy0+cd+2;y<=b.y1-1;y+=2){flowers(cx0+2,y);flowers(cx0+cw-3,y)}
       for(const [x,y] of [[cx0-2,cy0+2],[cx0+cw+1,cy0+2]])for(let q=0;q<3;q++)tree('cypress',x,y+q*2);
       const fx=(b.x0+b.x1)>>1;setF(fx,cy0+cd,fx,b.y1,'4');setF(fx-1,cy0+cd,fx+1,cy0+cd,'4');
-      for(let n=0;n<3;n++)crowdAt(fx,b.y1-3-n,2,['oh_f_monk','oh_f_friar','oh_f_lady']);
+      for(let x=cx0;x<cx0+cw;x++)for(let y=cy0;y<cy0+cd;y++)used.add(x+','+y); // the chapel stands here (its walls are put in later): nobody may be placed inside it
+      for(let n=0;n<3;n++)crowdAt(fx+(n===1?2:-2),Math.min(b.y1,cy0+cd+1+n),1,['oh_f_monk','oh_f_friar','oh_f_lady']); // beside the path to the chapel door, not on it
       return;
     }
     // blocks of houses: a ring round a green courtyard, or two terraces with a back lane
@@ -16639,7 +16640,7 @@ function quayBuild(){
   // signs on the doors that open
   for(const b of OQ_HOUSES){const sx=b.front[0],sy=b.front[1]+1;decor.push({k:'sign_'+b.keeper,x:sx,y:sy,block:false,wd:b.wall,txt:[b.name.toUpperCase(),'']});}
   /* ---- the level ---- */
-  const lv={rows:rows.map(r=>r.join('')),start:{x:OQ.CX,y:SHORE+2,f:0},enemies:[],items:[{k:'potion',x:44,y:SHORE+2}],decor,scenery,sky,fmap:null,
+  const lv={rows:rows.map(r=>r.join('')),start:{x:OQ.CX,y:SHORE+2,f:0},enemies:[],items:[{k:'potion',x:44,y:SHORE+1}],decor,scenery,sky,fmap:null,
     floorSet:['quayStone','cobble','wood','bluesand','bluewater','isleSandDk'],floor:'quayStone',ceil:'cloud',day:.98,outdoor:true,amb:.9,name:'Oldhaven Quay',label:'Oldhaven Quay',noExtras:true,diff:25,
     tele:{x:56,y:32},ceilH:5.2,chars,lights,portals:[]};
   lv.portals[1]={to:305,x:74,y:141,f:0,tex:'oqportc',req:'oldhavenOpen',lock:'The great gate of Oldhaven is barred until noon. Speak to the herald.'};
@@ -17402,10 +17403,17 @@ function lpBuild(s){
     else{ // instead the face of the house is dressed: a shuttered window and climbing roses either side of the door
       decor.push({k:'mw_shutter',x:MX(x0-1),y:y0,wd:[mir?-1:1,0],pic:1,block:false,walk:true,deco:true,bob:.8},{k:'mw_ivy',x:MX(x0-1),y:y1,wd:[mir?-1:1,0],pic:1,block:false,walk:true,deco:true,bob:0})}
     if(kind==='church'){sky.push({x:mir?W-(x1+1.5):x1+1.5,y:y0+1,k:'kh_ohtower1_'+(2+(b.i%2)),w:3.4,z:wh-.03});
-      // the churchyard behind the church: graves in rows, an iron fence, a few crosses
-      for(let gy=y0-1;gy<=y1+1;gy+=2)for(let gx=x1+4;gx<=x1+10;gx+=2){if(hs(gx,gy,sd+8)<.82){const k=hs(gx,gy,sd+9)<.25?'cross':hs(gx,gy,sd+9)<.6?'grave':'grave2';decor.push({k,x:MX(gx),y:gy,block:true,deco:true,sc:1});used.add(K(gx,gy))}}
-      for(let gx=x1+3;gx<=x1+11;gx++){if(hs(gx,1,sd+10)<.95){for(const gy of [y0-2,y1+2]){decor.push({k:'ironfence',x:MX(gx),y:gy,block:true,deco:true});used.add(K(gx,gy))}}}
-      for(let gy=y0-1;gy<=y1+1;gy++)for(const gx of [x1+3,x1+11]){decor.push({k:'ironfence',x:MX(gx),y:gy,block:true,deco:true});used.add(K(gx,gy))}
+      // the churchyard behind the church: graves in rows, an iron fence, a few crosses. It is nine squares across; where the slope or the line of trees
+      // along the east edge of the map would cut through it, it lies on the north side of the church instead (turned a quarter round), so no grave or
+      // fence stands inside a wall. A gap in the fence on the side towards the church lets the party walk in and read the stones.
+      const yOK=(xa,xb,ya,yb)=>{if(xa<2||xb>W-7||ya<2||yb>H-3)return false;for(let y=ya;y<=yb;y++)for(let x=xa;x<=xb;x++)if(rows[y][MX(x)]!=='.'||block[I(x,y)])return false;return true};
+      const east=yOK(x1+3,x1+11,y0-2,y1+2),north=!east&&yOK(x0-1,x0+7,y0-11,y0-3); // u runs along the church, v away from it (v=0 or v=8 is the fence on the church side)
+      const T2=east?(u,v)=>[x1+3+v,y0-2+u]:north?(u,v)=>[x0-1+u,y0-11+v]:(u,v)=>[x0-1+u,y1+3+v],gate=east?[ym-(y0-2),0]:north?[4,8]:[4,0];
+      for(let u=1;u<=7;u+=2)for(let v=1;v<=7;v+=2){const [gx,gy]=T2(u,v);if(hs(gx,gy,sd+8)<.82){const k=hs(gx,gy,sd+9)<.25?'cross':hs(gx,gy,sd+9)<.6?'grave':'grave2';decor.push({k,x:MX(gx),y:gy,block:true,deco:true,sc:1});used.add(K(gx,gy))}}
+      for(let v=0;v<=8;v++){if(hs(T2(0,v)[0],1,sd+10)<.95||!east){for(const u of [0,8]){const [gx,gy]=T2(u,v);decor.push({k:'ironfence',x:MX(gx),y:gy,block:true,deco:true});used.add(K(gx,gy))}}}
+      for(let u=1;u<=7;u++)for(const v of [0,8]){if(u===gate[0]&&v===gate[1])continue;const [gx,gy]=T2(u,v);decor.push({k:'ironfence',x:MX(gx),y:gy,block:true,deco:true});used.add(K(gx,gy))}
+      for(let u=0;u<=8;u++)for(let v=0;v<=8;v++){const [gx,gy]=T2(u,v);used.add(K(gx,gy));carve.add(K(gx,gy))} // the dense woods leave the churchyard open
+      {const [gx,gy]=T2(gate[0],gate[1]);for(let d=1;d<=2;d++){const q=east?[gx-d,gy]:north?[gx,gy+d]:[gx,gy-d];carve.add(K(q[0],q[1]))}} // and the two squares in front of its gate
     }
     for(let y=y0-1;y<=y1+1;y++)for(let x=x0-1;x<=x1+1;x++)used.add(K(x,y));
     LEVEL_NAMES[rid]=b.name;
@@ -17474,14 +17482,16 @@ function lpBuild(s){
   for(const cl of clearings){ // the green spaces, with huge oaks
     if(cl.skip)continue;const cy=cl.y,GYc=GY(cy);
     const oaks=cl.side>0?[[cl.cx-2,cy-1],[cl.cx+2,cy+1],[cl.cx,cy-3]]:[[xc[cy]-6,cy-1],[xc[cy]-9,cy+2]];
-    oaks.forEach(([x,y],j)=>{if(x<1||used.has(K(x,y)))return;used.add(K(x,y));decor.push({k:OAKS[(j+(GYc%5))%5],x:MX(x),y,block:true,sc:mount?1.3:1.7,ox:0,oy:0})});
+    oaks.forEach(([x,y],j)=>{if(x<1||x>W-7||used.has(K(x,y))||rows[y][MX(x)]!=='.')return;used.add(K(x,y));/* never inside the rock of the pass or the slope at the east edge */decor.push({k:OAKS[(j+(GYc%5))%5],x:MX(x),y,block:true,sc:mount?1.3:1.7,ox:0,oy:0})});
     for(let q=0;q<26;q++){const x=(cl.cx||xc[cy]-7)+Math.round((hs(q,GYc,gsd+60)-.5)*9),y=cy+Math.round((hs(q,GYc,gsd+61)-.5)*9);const sc=scenery.length;flower(x,y,.6);void sc}
-    const bx=(cl.cx||xc[cy]-7)+3,by=cy+2;if(BENCH&&!used.has(K(bx,by))){used.add(K(bx,by));decor.push({npc:'lp_bench',k:BENCH,x:MX(bx),y:by,block:false,walk:true,deco:true})}
+    let bx=Math.min((cl.cx||xc[cy]-7)+3,W-7);const by=cy+2,benchOK=x=>!used.has(K(x,by))&&rows[by][MX(x)]==='.'&&!block[I(x,by)]&&Math.abs(x-xc[by])>=3;
+    if(!benchOK(bx))for(let q=bx-1;q>xc[by]+2;q--)if(benchOK(q)){bx=q;break} // in the mountains the green space can lie inside the rock: the bench then stands at the nearest open grass towards the path
+    if(BENCH&&benchOK(bx)){used.add(K(bx,by));decor.push({npc:'lp_bench',k:BENCH,x:MX(bx),y:by,block:false,walk:true,deco:true})}
   }
   /* ---- the knights who ride along, and the ends of the stretch ---- */
   const walkers=[],kp=KH_KEEPERS.lp_knight;
   if(kp&&s%2===(leg==='W'?0:1)){const y0=safeLo+20+((hs(sd,70,70)*(safeHi-safeLo-200))|0),y1=Math.min(safeHi-10,y0+110);
-    for(const j of [0,1]){const kd={k:khFaceKey(kp.face),x:MX(xc[y0]+2),y:y0,block:false,walk:true,npc:'lp_knight',sc:kp.sc||1,lw:walkers.length,lr:'k'},hd={k:IMG.oh_horse?'oh_horse':'ltree0',x:MX(xc[y0]+3),y:y0,block:false,walk:true,deco:true,sc:1,lw:walkers.length,lr:'h'};
+    for(const j of [0,1]){const yj=y0+j*45,oj=j?2:-2,kd={k:khFaceKey(kp.face),x:MX(xc[yj]+oj),y:yj,block:false,walk:true,npc:'lp_knight',sc:kp.sc||1,lw:walkers.length,lr:'k'},hd={k:IMG.oh_horse?'oh_horse':'ltree0',x:MX(xc[yj]+oj+(oj>0?1:-1)),y:yj,block:false,walk:true,deco:true,sc:1,lw:walkers.length,lr:'h'}; // each knight starts where its ride begins (the second 45 rows on), so the two never stand on one square
       decor.push(kd,hd);walkers.push({kd,hd,y0,y1,t:j*45,dir:j?1:-1,off:j?2:-2})}}
   // pilgrims and travellers on the way, walking slowly up and down their stretch
   for(let q=0;q<2;q++){const pg=(q===0&&s%3===1)?LP_PILG[6]:LP_PILG[(hs(s,q,sd+95)*(LP_PILG.length-1))|0],y0=safeLo+10+((hs(s,q+7,sd+96)*(safeHi-safeLo-170))|0),y1=Math.min(safeHi-5,y0+90+((hs(q,s,sd+97)*60)|0));
@@ -17743,7 +17753,7 @@ khNpc('mon_scribe',MON_FOLK.scribe[1],MON_FOLK.scribe[2],()=>{const M=MONF();M.m
 khNpc('mon_bees',MON_FOLK.bees[1],MON_FOLK.bees[2],()=>{const M=MONF();M.met.mon_bees=1;if(qSt('mq4')==='done')return say('The bees are quiet today. They know the honey went to a good cause.',[BYE]);return qNode('mq4',MOND.mq4)},{q:'mq4'});
 khNpc('mon_cellar',MON_FOLK.cellar[1],MON_FOLK.cellar[2],()=>{if(qSt('mq6')==='done')return say('The cellar is warm, the wine is calm and the barrels are in their rows. I could kiss you. I will not, but I could.',[BYE]);return qNode('mq6',MOND.mq6)},{q:'mq6'});
 khNpc('mon_bellman',MON_FOLK.bell[1],MON_FOLK.bell[2],()=>{if(qSt('mq9')==='done')return say('I heard it from my bed. It sounded better than when I ring it.',[BYE]);return qNode('mq9',MOND.mq9)},{q:'mq9'});
-khNpc('mon_bell','The monastery bell','memorial',()=>{const M=MONF();
+khNpc('mon_bell','The monastery bell','bl_bell',()=>{const M=MONF();
   const ring=()=>{try{playSmp('church_bell1',.7,1)}catch(e){try{sfx('level')}catch(x){}}M.bell=1;msg('The bell rings out over the grounds, and the valley answers.','#e8d890');return say('A single, clear note rolls out over the gardens, over the wall and down the mountain. Somewhere a bird answers it.',[BYE])};
   return say('A great bronze bell hangs from an oak frame at the foot of the church, with a rope worn smooth by many hands.',[['Ring the bell.',ring],['Leave it.',()=>null]])});
 khNpc('mon_abbot',MON_FOLK.abbot[1],MON_FOLK.abbot[2],()=>{
@@ -17816,7 +17826,7 @@ function monChapelTpl(b){return {w:11,h:15,floor:'kh2',amb:.8,noExtras:true,ligh
   raw('mi_candel',1,6,{block:true});raw('mi_candel',9,6,{block:true});raw('mi_candel',1,10,{block:true});raw('mi_candel',9,10,{block:true});
   raw('mi_font',9,13,{block:true});raw('mw_cross',1,13,{block:true});
   // chandeliers hang over the aisle
-  for(const y of [5,9])raw('mi_chand',5,y,{block:false,walk:true,bob:2.15});
+  for(const y of [5,9])raw('mi_chand',5,y,{block:false,walk:true,bob:3.4-NPC_H.mi_chand}); // the ring at the top of the chain meets the ceiling (3.4 in the chapel)
   npc(b.keeper,6,4);
 }}}
 /* the nave of the church: the chapel's furnishings on a grander plan */
@@ -17831,7 +17841,7 @@ function monChurchTpl(b){return {w:15,h:21,floor:'kh2',amb:.8,noExtras:true,ligh
   for(const y of [8,10,12,14,16,18])for(const x of [2,3,4,5,9,10,11,12])raw('mi_pew',x,y,{block:true});
   for(const [x,y] of [[1,7],[13,7],[1,11],[13,11],[1,15],[13,15]])raw('mi_candel',x,y,{block:true});
   raw('mi_font',13,19,{block:true});raw('mw_cross',1,19,{block:true});
-  for(const y of [6,11,16])raw('mi_chand',7,y,{block:false,walk:true,bob:3.1});
+  for(const y of [6,11,16])raw('mi_chand',7,y,{block:false,walk:true,bob:4.4-NPC_H.mi_chand}); // hung from the ceiling of the nave (4.4)
   npc(b.keeper,8,4);
 }}}
 /* the scriptorium: shelves of books along the wall, lecterns with open books, candelabra for the evenings */
@@ -17849,7 +17859,7 @@ function monWrapTpl(room){return bb=>{
     for(let x=2;x<=W-3;x+=3)pic('mw_shutter',x,1,[0,-1],.7);
     for(let y=3;y<=H-4;y+=3){pic('mw_banner',1,y,[-1,0],.1);pic('mw_banner',W-2,y,[1,0],.1)}
     for(const [x,y] of [[1,H-3],[W-2,H-3]])if(!has(x,y))raw('mi_candel',x,y,{block:true});
-    if(!has(mid,3))raw('mi_chand',mid,3,{block:false,walk:true,bob:1.5});
+    if(!has(mid,3))raw('mi_chand',mid,3,{block:false,walk:true,bob:2.6-NPC_H.mi_chand}); // hung from the ceiling of the room (2.6)
   }})}}
 function monFacade(b,k,decor){
   const y=b.y1+1,P=(n,x,bob)=>decor.push({k:'mw_'+n,x,y,wd:[0,-1],pic:1,block:false,walk:true,deco:true,bob:bob||0});
@@ -17945,7 +17955,7 @@ function monBuild(){
       if(b.chapel)sky.push({x:(b.x0+b.x1+1)/2,y:(b.y0+b.y1+1)/2,k:'kh_ohtower1_4',w:3.6,z:b.wh-.03},{x:b.x0-.3,y:b.y0+1.2,k:'kh_ohtower1_0',w:1.9,z:b.wh-.03},{x:b.x1+1.3,y:b.y0+1.2,k:'kh_ohtower1_0',w:1.9,z:b.wh-.03},{x:b.x0-.3,y:b.y1-.2,k:'kh_ohtower1_4',w:1.4,z:b.wh-.03},{x:b.x1+1.3,y:b.y1-.2,k:'kh_ohtower1_4',w:1.4,z:b.wh-.03});
       if(b.tower)sky.push({x:b.x1+1.4,y:b.y0+1.5,k:'kh_ohtower1_4',w:2.1,z:b.wh-.03},{x:b.x0-.4,y:b.y0+1.5,k:'kh_ohtower1_0',w:1.9,z:b.wh-.03}); // the church: a spired bell tower and a slate cone turret
       LEVEL_NAMES[b.rid]=b.name;const rid=b.rid,front=[b.dx,b.y1+1];
-      const mk=()=>{if(LEVELS[rid])return;const bb={id:b.room==='inn'?'mon_guest':'mon'+k,name:b.name,room:b.room,keeper:b.keeper,scene:b.scene,wallImg:'kh_ohwall1_'+(k%3),floor:b.room==='hall'?'cobble':'wood',tpl:b.chapel?monChapelTpl:b.church?monChurchTpl:b.script?(bb=>{const t=monScriptTpl(bb),old=t.build;return Object.assign({},t,{build:h=>{old(h);const {raw,has,W,H,mid}=h;for(let y=3;y<=H-4;y+=3){if(!has(1,y))raw('mw_banner',1,y,{pic:1,wd:[-1,0],block:false,walk:true,bob:.1});if(!has(W-2,y))raw('mw_banner',W-2,y,{pic:1,wd:[1,0],block:false,walk:true,bob:.1})}for(const x of [3,7])raw('mw_shutter',x,H-1>1?1:1,{pic:1,wd:[0,-1],block:false,walk:true,bob:1.2});raw('mi_chand',mid,4,{block:false,walk:true,bob:1.5})}})}):monWrapTpl(b.room)};
+      const mk=()=>{if(LEVELS[rid])return;const bb={id:b.room==='inn'?'mon_guest':'mon'+k,name:b.name,room:b.room,keeper:b.keeper,scene:b.scene,wallImg:'kh_ohwall1_'+(k%3),floor:b.room==='hall'?'cobble':'wood',tpl:b.chapel?monChapelTpl:b.church?monChurchTpl:b.script?(bb=>{const t=monScriptTpl(bb),old=t.build;return Object.assign({},t,{build:h=>{old(h);const {raw,has,W,H,mid}=h;for(let y=3;y<=H-4;y+=3){if(!has(1,y))raw('mw_banner',1,y,{pic:1,wd:[-1,0],block:false,walk:true,bob:.1});if(!has(W-2,y))raw('mw_banner',W-2,y,{pic:1,wd:[1,0],block:false,walk:true,bob:.1})}for(const x of [3,7])raw('mw_shutter',x,H-1>1?1:1,{pic:1,wd:[0,-1],block:false,walk:true,bob:1.2});raw('mi_chand',mid,4,{block:false,walk:true,bob:2.6-NPC_H.mi_chand})}})}):monWrapTpl(b.room)};
         const R=khRoom(bb,rid,{to:MON.ID,x:front[0],y:front[1],f:2});R.level.ceilH=b.chapel?3.4:b.church?4.4:2.6;LEVELS[rid]=R.level};
       KH_LAZY[rid]=mk;
       for(let x=b.x0-1;x<=b.x1+1;x++)used.add(x+','+(b.y1+1));
@@ -17954,7 +17964,8 @@ function monBuild(){
     if(IMG.kh_ohgard1_0){dc('kh_ohgard1_0',46,31,{block:true,walk:false});lights.push([46,31])}
     const BENCH=IMG.kh_ohgard1_3?'kh_ohgard1_3':null;
     if(BENCH)for(const [x,y] of [[44,29],[48,31],[44,33],[37,31],[37,27],[48,27]])tryDc(BENCH,x,y);
-    dc('memorial',38,18,{block:true,walk:false,npc:'mon_bell',sc:.9});
+    if(IMG.bl_bell&&IMG.bl_bell.width&&!IMG.mon_bellpic){IMG.mon_bellpic=IMG.bl_bell;NPC_H.mon_bellpic=1.55} // the bell itself, hanging in its wooden frame (the painted bell of the Blighted Lands, reused), not a grave stone
+    dc(IMG.mon_bellpic?'mon_bellpic':'memorial',38,18,{block:true,walk:false,npc:'mon_bell',sc:.9});
     // flower beds all over the lawns, hedges beside the paths
     for(let y=5;y<H-5;y++)for(let x=5;x<W-5;x++){if(!free(x,y)||fm[y*W+x]==='1')continue;
       const near=(fm[y*W+x+1]==='1'||fm[y*W+x-1]==='1'||fm[(y+1)*W+x]==='1'||fm[(y-1)*W+x]==='1');
@@ -23325,6 +23336,7 @@ function pfPrep(n){
   const fmS=Array.isArray(L.fmap)?L.fmap:null,nearRoad=(x,y)=>{if(!fmS)return false;for(let dy=-3;dy<=3;dy++){const r=fmS[y+dy];if(!r)continue;for(let dx=-3;dx<=3;dx++){const f=r[x+dx];if(f==='1'||f==='3')return true}}return false}; // the road is the floor type '1', and its edge '3'
   const edgeMemo=new Map(),edgeAt=y=>{if(edgeMemo.has(y))return edgeMemo.get(y);let m=W;for(let dy=-2;dy<=2;dy++)for(let x=56;x<m;x++)if(blk.has(x+','+(y+dy))){m=x;break}edgeMemo.set(y,m);return m}; // where the trees begin on a row
   // each clearing is a round of open ground about 6 squares across, about a third full of trees: solid ones, and soft ones you can walk through (never on a path)
+  const newAt=new Set();
   for(const [cx,cy] of deepNodes){const OAKS=['ltree0','ltree4','ltree8','ltree12','ltree19'],disc=[],mine=[];
     for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){if(dx*dx+dy*dy>11)continue;const x=cx+dx,y=cy+dy;if(!walk(x,y))continue;cut(x,y);if(!cellsAll.has(x+','+y))disc.push([x,y])}
     const want=Math.round(disc.length*.32);let placed=0;
@@ -23332,7 +23344,8 @@ function pfPrep(n){
       if(x<edgeAt(y)+4||nearRoad(x,y))continue; // never out on the road or its verge: only back in the forest
       if(Math.abs(x-cx)+Math.abs(y-cy)<1||cellsAll.has(x+','+y)||cellsAll.has((x+1)+','+y)&&cellsAll.has((x-1)+','+y))continue; // keep the middle and the paths clear
       if(mine.some(m=>Math.abs(m[0]-x)<=1&&Math.abs(m[1]-y)<=1))continue; // spaced out: no two trees side by side
-      mine.push([x,y]);
+      if(newAt.has(x+','+y))continue; // two clearings can overlap: one new tree to a square
+      mine.push([x,y]);newAt.add(x+','+y);
       const soft=hs(x,y,670)<.4;L.decor.push({k:soft?(hs(x,y,671)<.5?'pt_birch':'pt_willow'):OAKS[(hs(x,y,672)*5)|0],x,y,block:!soft,walk:soft||undefined,pfNew:1,sc:soft?.8+hs(x,y,673)*.3:.85+hs(x,y,674)*.4});placed++}}
   L._pfTools={cells:cellsAll,weave,walk,cut};L._pfPaths=cellsAll; // the squares of every trail and weaving path: pfDense fills them with trees you can walk through
   // wolves: now and then one waits deep on a trail
@@ -23353,6 +23366,10 @@ function pfPrep(n){
     }
   }
   for(const d of clear){d.block=false;d.sc=.0001;d.pfCut=1} // the trees on a trail are made invisible, not removed, so saved decor keeps its places in the list
+  {const occ=new Set(L.decor.map(d=>d.x+','+d.y)); // a new tree of a clearing never grows out of the rock of a cave: it moves to open ground beside it, or is hidden
+   for(const d of L.decor)if(d.pfNew&&L.rows[d.y]&&L.rows[d.y][d.x]!=='.'){let to=null;
+     for(let r=1;r<=2&&!to;r++)for(let dy=-r;dy<=r&&!to;dy++)for(let dx=-r;dx<=r;dx++){const x=d.x+dx,y=d.y+dy,k=x+','+y;if(walk(x,y)&&!occ.has(k)&&!cellsAll.has(k)){to=[x,y];break}}
+     if(to){occ.add(to[0]+','+to[1]);d.x=to[0];d.y=to[1]}else{d.block=false;d.sc=.0001;d.pfCut=1}}}
   L.enemies=L.enemies.filter(e=>e.t!=='wolf'||(L.rows[e.y]&&L.rows[e.y][e.x]==='.'));
 }
 /* ---------- the thick woods along the sea: the whole east side is forest, with only a sliver of it open ---------- */
@@ -23499,7 +23516,7 @@ function pfFoodChest(g,W,H,sx,sy,decor,items,used,sd,extra){ // a chest of food 
   const cells=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(g[y][x]==='.'&&!used.has(key(x,y))&&!base.has(key(x,y))&&Math.abs(x-sx)+Math.abs(y-sy)>3)cells.push([x,y]);
   cells.sort((a,b)=>hash2(a[0],a[1],sd+765)-hash2(b[0],b[1],sd+765));
   for(const [cx,cy] of cells.slice(0,260)){const seen=new Set([key(sx,sy)]),q=[[sx,sy]];for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const k=key(x+dx,y+dy);if(g[y+dy]&&g[y+dy][x+dx]==='.'&&!base.has(k)&&k!==key(cx,cy)&&!seen.has(k)){seen.add(k);q.push([x+dx,y+dy])}}}
-    if(targets.every(([tx,ty])=>seen.has(key(tx,ty))||base.has(key(tx,ty))&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>seen.has(key(tx+dx,ty+dy))))){used.add(key(cx,cy));decor.push(Object.assign({k:'chest',x:cx,y:cy,block:true,food:pfFood(sd)},extra||{}));return true}}
+    if([[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>seen.has(key(cx+dx,cy+dy)))&&targets.every(([tx,ty])=>seen.has(key(tx,ty))||base.has(key(tx,ty))&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>seen.has(key(tx+dx,ty+dy))))){used.add(key(cx,cy));decor.push(Object.assign({k:'chest',x:cx,y:cy,block:true,food:pfFood(sd)},extra||{}));return true}}
   return false}
 function pfCaveBuild(ci){
   const W=23,H=19,kind=PF_KINDS[ci],hs=hash2,sd=ci*17+5,g=[];
@@ -23696,6 +23713,7 @@ function pfRuinProps(g,W,H,sx,sy,keepCells,used,decor,items,enemies,id){
   const want=22+((hash2(id,1,771)*10)|0),KINDS=['rs_statue0','rs_statue1','rs_col0','rs_col1','rs_col1','rs_brick0','rs_brick1','rs_brick2','rs_brick2'],placed=[];
   for(const k of cand){if(placed.length>=want)break;const [x,y]=k.split(',').map(Number);
     if(placed.some(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)<2))continue; // spread out, throughout the halls
+    {const o=(a,b)=>open.has(key(x+a,y+b)),e=o(1,0),w=o(-1,0),s=o(0,1),n=o(0,-1);if((e&&w&&!s&&!n)||(s&&n&&!e&&!w))continue} // never in a straight passage one square wide
     blocked.add(k);const r=reach();let ok=true;for(const [tx,ty] of targets){const kk=key(tx,ty);if(!(r.has(kk)||base.has(kk)&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>r.has(key(tx+dx,ty+dy))))){ok=false;break}}
     if(!ok){blocked.delete(k);continue}
     placed.push([x,y]);const h=hash2(x,y,772);
@@ -23726,10 +23744,11 @@ ENEMY_DEF.slime=Object.assign({},ENEMY_DEF.wolf,{name:'Green Slime',hp:30,dmg:[2
 const WD_OUT=[2,7,10,19,22,32,41,60,61,62,63,64,311,520]; // the outdoor maps outside the Pilgrim's Path that hide places (the Path's own levels are LP.BASE to LP.BASE+LP.N-1)
 const WD_TINTS=[[255,255,255],[200,228,200],[240,214,170],[226,190,192],[190,206,236],[236,226,200]];
 const WD_RUIN_NAMES=['The Overgrown Ruin','The Mossy Vault','The Vine-Choked Cellar','The Forgotten Shrine','The Sunken Hall','The Old Watchpost','The Tangled Crypt','The Green Hall','The Fallen Gatehouse','The Ivy Chapel'];
-const WD_CAVES=[ // [level, kind, name]  ids 7200 and up
+const WD_CAVES=[ // [level, kind, name]  ids 7120 and up (they were 7200 and up, the numbers of the rooms of Sale, so a cave door led into a Sale shop)
  [2,'witch','The Witch’s Hollow'],[7,'bears','The Bear Den'],[10,'fugitive','The Hunted Man’s Hole'],[19,'wolvestreasure','The Moor Wolves’ Cave'],[22,'exile','The Exile’s Cave'],[32,'treasure','The Greendale Hoard'],[311,'bears','The Oakwood Bear Cave'],[520,'bears','The Blackbriar Den'],[520,'wolvestreasure','The Hounds’ Hollow']];
-const WD_CAVE0=7200,WD_RUIN0=8000;
+const WD_CAVE0=7120,WD_RUIN0=8000; // 7120 to 7128: free numbers between the caves of the Pilgrim's Path (7100 to 7119) and Sale (7200 to 7299)
 WD_CAVES.forEach((c,i)=>LEVEL_NAMES[WD_CAVE0+i]=c[2]);
+const wdSeedId=id=>id>=WD_CAVE0&&id<WD_CAVE0+WD_CAVES.length?7200+(id-WD_CAVE0):id; // the caves are still laid out from their old numbers, so each stands where it always stood and looks the same inside
 const WD_ENT={}; // interior id -> {n,x,y,f}: where its door stands in the outdoor map
 const wdRuinId=(n,k)=>WD_RUIN0+n*8+k;
 /* the levels where a door tile can be walked into: every cave and ruin, and every outdoor map that has an entrance to one */
@@ -23795,6 +23814,8 @@ function wdSpot(L,n,seed){
     if(ok&&L._wdOnly){for(let dy=0;dy<=3&&ok;dy++)for(let dx=-2;dx<=2;dx++)if(!L._wdOnly.has((x+dx)+','+(y+dy))){ok=false;break}} // a maze wood: only inside its clearings
     if(!ok||near(x,y+1,L._wdOnly?2:3)||(L._wd||[]).some(q=>Math.abs(q.x-x)<8&&Math.abs(q.y-y)<8))continue;
     for(const [dx,dy] of [[-3,1],[3,1],[-2,4],[2,4]]){const c=(L.rows[y+dy]||'')[x+dx];if(c&&c!=='.'&&/[0-9]/.test(c))ok=false}
+    {const ch=L.chars||{},door=c=>{if(!c||c==='.')return false;if(/[0-9]/.test(c))return true;const v=ch[c];return typeof v==='number'&&((v>=30&&v<100)||(v>=1000&&typeof KH_DOOR!=='undefined'&&!!KH_DOOR[v]))};
+     for(let dy=-3;dy<=5&&ok;dy++)for(let dx=-4;dx<=4;dx++)if(door((L.rows[y+dy]||'')[x+dx])){ok=false;break}} // never beside a gate or a door of the map, where the hill and its sides would stand in the way to it
     if(!ok)continue;
     let tc=0;for(let dy=-4;dy<=5;dy++)for(let dx=-4;dx<=4;dx++)if(trees.has((x+dx)+','+(y+dy)))tc++;
     const sc=tc+hash2(t,seed,4412)*4; // behind trees where there are trees
@@ -23824,7 +23845,9 @@ function wdThicket(L,n,x,y,id){ // dead twisted trees grow across the way: the g
     L.decor.push({k:k[(hash2(x,y,760)*4)|0],x,y,block:true,sc:1.05,ox:-.18,oy:0},{k:k[(hash2(x,y,761)*4)|0],x,y,block:true,sc:.95,ox:.2,oy:.06});
   (L._wdMarks=L._wdMarks||[]).push({x,y,id})}
 /* ---------- a ? on the map for every place not yet visited, as soon as the party looks towards it ---------- */
-const wdRevealed=()=>{const F=G.flags;return F.wdSeen||(F.wdSeen={})};
+const wdRevealed=()=>{const F=G.flags,R=F.wdSeen||(F.wdSeen={});
+  if(!R._c7120){R._c7120=1;WD_CAVES.forEach((c,i)=>{if(R[c[0]+':'+(7200+i)])R[c[0]+':'+(WD_CAVE0+i)]=1})} // a saved game from before the caves moved from 7200 keeps the caves it had spotted
+  return R};
 /* sharp eyes: a Ranger in the party, a Scout, and the herb trades (Healer, Alchemist) all spot hidden places from further away, and over a wider angle */
 function wdSharp(){
   let range=15,cone=.62;
@@ -23901,7 +23924,7 @@ function wdRuinRows(sd,W,H){
     if(hash2(sd,i,724)<.5){hl(ay,ax,bx);vl(bx,ay,by)}else{vl(ax,ay,by);hl(by,ax,bx)}}
   return {g,cells,rooms}}
 function wdBuild(id){
-  const P=wdParent(id),cave=!!P.cave,W=cave?23:33,H=cave?19:25,sd=id*13+7;
+  const P=wdParent(id),cave=!!P.cave,W=cave?23:33,H=cave?19:25,sid=wdSeedId(id),sd=sid*13+7;
   const parentL=LEVELS[P.n]||(KH_LAZY[P.n]&&(KH_LAZY[P.n](),LEVELS[P.n]));
   if(!WD_ENT[id]){try{wdPrep(P.n)}catch(e){console.error(e)}}
   const ent=WD_ENT[id]||{n:P.n,x:(parentL&&parentL.start&&parentL.start.x)||2,y:(parentL&&parentL.start&&parentL.start.y)||2,f:2};
@@ -23920,7 +23943,7 @@ function wdBuild(id){
   if(cave){kind=P.cave[1];name=P.cave[2]}
   else{const r=hash2(id,9,731);kind=r<.72?'empty':r<.9?'treasure':'slime';name=WD_RUIN_NAMES[(hash2(id,8,732)*WD_RUIN_NAMES.length)|0]}
   const gold=120+Math.round(diff*5);
-  wdForage(id,cave,pick,items);
+  wdForage(sid,cave,pick,items);
   if(cave){
     decor.push(...[1].map(()=>{const b=pick(1)||[sx,sy-1];return {k:'bones',x:b[0],y:b[1],block:false}}));
     if(kind==='treasure'||kind==='bears'||kind==='wolvestreasure'){decor.push({k:'chest',x:far[0],y:far[1],block:true,goldAmt:gold+80});const c=pick(2);if(c)items.push({k:'potion',x:c[0],y:c[1]})}
@@ -23946,24 +23969,24 @@ function wdBuild(id){
     if(kind==='slime'){for(let i=0;i<4;i++){const c=pick(90+i);if(c)enemies.push({t:'slime',x:c[0],y:c[1]})}}
     try{pfRuinProps(g,W,H,sx,sy,[[far[0],far[1]]],used,decor,items,enemies,id)}catch(e){console.error(e)} // broken statues, columns and brickwork, throughout
   }
-  if(hash2(id,12,795)<.4&&!decor.some(d=>d.k==='chest'))pfFoodChest(g,W,H,sx,sy,decor,items,used,id+7,{gear:1,food:null}); // armour in about four dungeons in ten
-  if(hash2(id,6,764)<.5)pfFoodChest(g,W,H,sx,sy,decor,items,used,id); // some hold a little food in a chest
+  if(hash2(sid,12,795)<.4&&!decor.some(d=>d.k==='chest'))pfFoodChest(g,W,H,sx,sy,decor,items,used,sid+7,{gear:1,food:null}); // armour in about four dungeons in ten
+  if(hash2(sid,6,764)<.5)pfFoodChest(g,W,H,sx,sy,decor,items,used,sid); // some hold a little food in a chest
   const T=wdTiles(cave?'cave':'ruin',cave?2.6:2.8,tint,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(cave?2.6:2.8,cave?'cave':'ruin',tint,P.n===520);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:ent.f}};
   const chars={'#':T.wall};chars[door]=dgid;
   if(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[P.n])LEVEL_RATING[id]=LEVEL_RATING[P.n];
   LEVEL_NAMES[id]=name;
-  if(P.n===520){decor.push({k:'lantern',x:sx+1,y:sy,block:false,walk:true,deco:true})}   /* Blackbriar Wood: a lantern by the way out */
+  if(P.n===520){const lk=IMG.wm_lantern_gold?'wm_lantern_gold':'lamp',ch=cave?2.6:2.9;decor.push(lk==='lamp'?{k:lk,x:sx+1,y:sy,block:false,walk:true,deco:true}:{k:lk,x:sx+1,y:sy,block:false,walk:true,deco:true,bob:ch-(NPC_H[lk]||.8)})}   /* Blackbriar Wood: a lantern by the way out, hanging on its chain from the roof (there is no picture called 'lantern') */
   return {rows:g.map(r=>r.join('')),start:{x:sx,y:sy,f:0},enemies,items,decor,chars,day:0,floor:cave?'scree':'mosscobble',name,label:name,diff,ceilH:cave?2.6:2.9,torchGap:1e9,noTele:true,portals:[],lights:P.n===520?[[sx+1,sy],[sx,sy-2]]:[],mapNames:[{t:name,x:sx,y:H-1,k:'place'}]}}
 /* every place gets a lazy builder */
 for(let i=0;i<WD_CAVES.length;i++)KH_LAZY[WD_CAVE0+i]=((id)=>()=>{if(!LEVELS[id])LEVELS[id]=wdBuild(id)})(WD_CAVE0+i);
-for(const n of [...WD_OUT,...Array.from({length:24},(_,i)=>400+i)])for(let k=0;k<4;k++){const id=wdRuinId(n,k);KH_LAZY[id]=((i)=>()=>{if(!LEVELS[i])LEVELS[i]=wdBuild(i)})(id)}
+for(const n of [...WD_OUT,...Array.from({length:24},(_,i)=>400+i)])for(let k=0;k<wdCount(n);k++){const id=wdRuinId(n,k);/* only the ruins that wdPrep really places (a ruin with no door to it was a room nobody could enter) */KH_LAZY[id]=((i)=>()=>{if(!LEVELS[i])LEVELS[i]=wdBuild(i)})(id)}
 /* ---------- carving the outdoor maps ---------- */
 function wdPrep(n){
   const L=LEVELS[n];if(!L||L._wdDone||!L.rows||!L.decor)return;L._wdDone=1;
   if(typeof pfPrep==='function'&&wdIsLP(n))try{pfPrep(n)}catch(e){}
   if(typeof PF_OLD!=='undefined'&&PF_OLD.includes(n))try{pfOld(n)}catch(e){console.error(e)}
   const caves=WD_CAVES.map((c,i)=>[c,i]).filter(([c])=>c[0]===n);
-  for(const [c,i] of caves)wdPlace(L,n,WD_CAVE0+i,'cave',[255,255,255],WD_CAVE0+i);
+  for(const [c,i] of caves)wdPlace(L,n,WD_CAVE0+i,'cave',[255,255,255],wdSeedId(WD_CAVE0+i));
   const cnt=(WD_OUT.includes(n)||wdIsLP(n))?wdCount(n):0;
   for(let k=0;k<cnt;k++){const id=wdRuinId(n,k),tint=WD_TINTS[(hash2(id,5,730)*WD_TINTS.length)|0];wdPlace(L,n,id,'ruin',tint,id)}
   // soft trees that grow only along the sides of the path: the party can walk right through them
@@ -48915,10 +48938,10 @@ for(const n of ['wd_hill0','wd_hill1','wd_hill2','wd_hill3','wd_rock0','wd_rock1
 for(let i=0;i<4;i++){NPC_H['wd_hill'+i]=1.9;NPC_H['wd_rock'+i]=1.5}   // the hill is about a person and a half high, two and a half squares wide; the rock pile a little lower and wider
 const WDH_DESERT=new Set([41,60,61,62,63,64]); // the outdoor maps that are desert
 {const _wp=wdPlace;wdPlace=function(L,n,id,kind,tint,seed){
-  const sp=wdSpot(L,n,seed);if(!sp)return false;const [x,y]=sp,lp=wdIsLP(n),cave=kind==='cave';
+  const sp=wdSpot(L,n,seed);if(!sp)return false;const [x,y]=sp,lp=wdIsLP(n),cave=kind==='cave',sid=wdSeedId(id);
   const nt=L.decor.reduce((c,d)=>c+(wdTreeKey(d)&&(d.sc===undefined||d.sc>.01)&&Math.abs(d.x-x)<=14&&Math.abs(d.y-y)<=14?1:0),0);
   const desert=WDH_DESERT.has(n)&&!(n===41&&nt>=12);   // the Sand Road runs from forest into dunes: where it is still forest, a hill among trees
-  const pic=desert?'wd_rock'+((hash2(id,3,811)*4)|0):'wd_hill'+(cave?[1,0,1,3][(hash2(id,3,812)*4)|0]:[2,3,0,2][(hash2(id,3,813)*4)|0]);
+  const pic=desert?'wd_rock'+((hash2(sid,3,811)*4)|0):'wd_hill'+(cave?[1,0,1,3][(hash2(sid,3,812)*4)|0]:[2,3,0,2][(hash2(sid,3,813)*4)|0]);
   const at=cave?{x:8,y:16,f:0}:{x:16,y:22,f:0};
   L.decor=L.decor||[];const Q=L._wdhQ||(L._wdhQ=[]);   // the new sprites are added after everything else in wdPrep, so the saved states of the burned thickets (kept by position in the list) still line up
   // where the party stands to knock (the thicket is on this square), the squares the hill covers, and the sides that are closed off
@@ -48933,14 +48956,14 @@ const WDH_DESERT=new Set([41,60,61,62,63,64]); // the outdoor maps that are dese
   if(!desert){
     const tpl=L.decor.filter(d=>wdTreeKey(d)&&(d.sc===undefined||d.sc>.01)&&Math.abs(d.x-x)<=14&&Math.abs(d.y-y)<=14);
     if(tpl.length){
-      const used=new Set(L.decor.concat(Q).filter(d=>d.sc===undefined||d.sc>.01||d.block).map(d=>d.x+','+d.y)),cnt=8+((hash2(id,4,814)*6)|0);let made=0;
+      const used=new Set(L.decor.concat(Q).filter(d=>d.sc===undefined||d.sc>.01||d.block).map(d=>d.x+','+d.y).concat((L.enemies||[]).map(e=>e.x+','+e.y),(L.items||[]).map(i=>i.x+','+i.y))),cnt=8+((hash2(sid,4,814)*6)|0);let made=0; // never on a creature or an item lying on the ground
       for(let t=0;t<90&&made<cnt;t++){
-        const dx=((hash2(t,id,815)*13)|0)-6,dy=((hash2(t,id,816)*10)|0)-5,tx=x+dx,ty=y+dy;
+        const dx=((hash2(t,sid,815)*13)|0)-6,dy=((hash2(t,sid,816)*10)|0)-5,tx=x+dx,ty=y+dy;
         if(Math.abs(dx)<=1&&Math.abs(dy)<=1)continue;                                   // not on the hill
         if(lp?(ty===y&&tx<x&&tx>=x-4):(tx===x&&ty>y&&ty<=y+4))continue;                  // the way to the door stays clear
         if((L.rows[ty]||'')[tx]!=='.'||used.has(tx+','+ty))continue;
-        const tp=tpl[(hash2(t,id,817)*tpl.length)|0];used.add(tx+','+ty);made++;
-        Q.push({k:tp.k,x:tx,y:ty,block:tp.block,walk:tp.walk,sc:(tp.sc||1)*(.9+hash2(t,id,818)*.25),ox:(hash2(t,id,819)-.5)*.5,oy:(hash2(t,id,820)-.5)*.4,wdh:1})}}}
+        const tp=tpl[(hash2(t,sid,817)*tpl.length)|0];if(L.decor.some(d=>d.x===tx&&d.y===ty&&d.k===tp.k))continue;used.add(tx+','+ty);made++; // not the same tree twice on one square (a hidden one may still lie there)
+        Q.push({k:tp.k,x:tx,y:ty,block:tp.block,walk:tp.walk,sc:(tp.sc||1)*(.9+hash2(t,sid,818)*.25),ox:(hash2(t,sid,819)-.5)*.5,oy:(hash2(t,sid,820)-.5)*.4,wdh:1})}}}
   {const n0=L.decor.length;wdThicket(L,n,door[0],door[1],id);
    if(desert)for(let i=n0;i<L.decor.length;i++){const d=L.decor[i];d.block=false;d.sc=.0001;d.pfCut=1}}   // no dead trees in the deserts, so the rock pile is walked straight into (the sprites stay in the list, so saved games still line up)
   (L._wd=L._wd||[]).push(lp?{x,y,id,w:1}:{x,y,id});
@@ -48948,7 +48971,51 @@ const WDH_DESERT=new Set([41,60,61,62,63,64]); // the outdoor maps that are dese
   return true}}
 {const _wpr=wdPrep;wdPrep=function(n){const L=LEVELS[n],r=_wpr.apply(this,arguments);
   if(L&&L._wdhQ&&!L._wdhDone){L._wdhDone=1;for(const d of L._wdhQ)L.decor.push(d);L._wdhQ=null}
+  if(L&&!L._wdhTidy&&L.rows&&L.decor){L._wdhTidy=1;try{wdhTidy(L,n)}catch(e){console.error(e)}}
   return r}}
+/* ---------- the tidy pass (the castle standard) for the Pilgrim's Path and the Oakwood: nothing stands where it cannot be reached ---------- */
+const wdhMine=n=>wdIsLP(n)||n===311||n===304||n===305||(n>=6800&&n<6813)||(n>=7100&&n<7129)||(n>=wdRuinId(311,0)&&n<wdRuinId(311,4))||(n>=wdRuinId(LP.BASE,0)&&n<wdRuinId(LP.BASE+LP.N,0));
+function wdhGrid(L,n){ // the squares the party can stand on: open floor, not too steep or wet, with nothing solid on it (the dead trees of a thicket count as solid until they are burned)
+  const W=L.rows[0].length,H=L.rows.length,tb=TERRS[n]&&TERRS[n].block,solid=new Uint8Array(W*H);
+  for(const d of L.decor)if(d.block&&!d.found&&Number.isInteger(d.x)&&Number.isInteger(d.y)&&d.x>=0&&d.y>=0&&d.x<W&&d.y<H)solid[d.y*W+d.x]=1;
+  const ok=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&L.rows[y][x]==='.'&&!(tb&&tb[y*W+x])&&!solid[y*W+x];
+  const seen=new Uint8Array(W*H),q=[];const st=L.start||{x:1,y:1};
+  const push=(x,y)=>{if(ok(x,y)&&!seen[y*W+x]){seen[y*W+x]=1;q.push(y*W+x)}};push(st.x,st.y);
+  for(let i=0;i<q.length;i++){const x=q[i]%W,y=(q[i]/W)|0;push(x+1,y);push(x-1,y);push(x,y+1);push(x,y-1)}
+  return {W,H,ok,seen,solid}}
+function wdhTidy(L,n){
+  if(!wdhMine(n)&&!WD_OUT.includes(n))return;
+  const W=L.rows[0].length,H=L.rows.length,R=wdhGrid(L,n);
+  // a creature never stands in a tree, on a rock or in a wall: it steps to the nearest open square
+  const taken=new Set((L.enemies||[]).map(e=>e.x+','+e.y));
+  for(const e of L.enemies||[]){if(R.ok(e.x,e.y))continue;let best=null;
+    for(let r=1;r<=4&&!best;r++)for(let dy=-r;dy<=r&&!best;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=e.x+dx,y=e.y+dy;if(R.ok(x,y)&&!taken.has(x+','+y)){best=[x,y];break}}
+    if(best){taken.delete(e.x+','+e.y);e.x=best[0];e.y=best[1];taken.add(best[0]+','+best[1])}}
+  // the Oakwood and the older outdoor maps: a hidden cave or ruin whose door stands in a pocket walled in by living oaks gets a narrow way cut to it through the trees (the dead trees across the door stay, to be burned)
+  if(WD_OUT.includes(n)){const tree=d=>!d.npc&&!d.enter&&wdTreeKey(d)&&!/^gtree/.test(d.k)&&d.block;
+    for(const q of L._wd||[]){const e=WD_ENT[q.id];if(!e||e.n!==n)continue;const S=wdhGrid(L,n);if(S.seen[e.y*W+e.x]||[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>S.seen[(e.y+b)*W+e.x+a]&&S.ok(e.x+a,e.y+b)))continue;
+      const at=new Map();for(const d of L.decor)if(d.block&&!d.found){const k=d.y*W+d.x;if(!at.has(k))at.set(k,[]);at.get(k).push(d)}
+      const cost=i=>{const x=i%W,y=(i/W)|0;if(L.rows[y][x]!=='.')return -1;const l=at.get(i);if(!l)return 1;return l.every(tree)?8:-1};
+      const dist=new Float64Array(W*H).fill(1e9),prev=new Int32Array(W*H).fill(-1),hp=[]; // Dijkstra with a little binary heap of [cost, square]
+      const hpush=(c,i)=>{hp.push([c,i]);let a=hp.length-1;while(a>0){const p=(a-1)>>1;if(hp[p][0]<=hp[a][0])break;[hp[p],hp[a]]=[hp[a],hp[p]];a=p}};
+      const hpop=()=>{const t=hp[0],l=hp.pop();if(hp.length){hp[0]=l;let a=0;for(;;){let b=a*2+1;if(b>=hp.length)break;if(b+1<hp.length&&hp[b+1][0]<hp[b][0])b++;if(hp[a][0]<=hp[b][0])break;[hp[a],hp[b]]=[hp[b],hp[a]];a=b}}return t};
+      for(let i=0;i<W*H;i++)if(S.seen[i]){dist[i]=0;hpush(0,i)}
+      const goal=e.y*W+e.x;
+      while(hp.length){const [dc,i]=hpop();if(dc>dist[i])continue;if(i===goal)break;
+        const x=i%W,y=(i/W)|0;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<1||ny<1||nx>=W-1||ny>=H-1)continue;const j=ny*W+nx,c=j===goal?1:cost(j);if(c<0)continue;if(dist[i]+c<dist[j]){dist[j]=dist[i]+c;prev[j]=i;hpush(dist[j],j)}}}
+      for(let i=prev[goal];i>=0&&!S.seen[i];i=prev[i]){for(const d of at.get(i)||[])if(tree(d)){d.block=false;d.sc=.0001;d.pfCut=1}}}}
+}
+/* items lying on the ground that the herbs and the mana potions of other parts of the game put in a walled-in pocket of the woods move to the nearest square the party can reach.
+   This runs after every other part of the game has placed its items (it wraps loadLevel last), and only moves them, so saved games still line up. */
+setTimeout(()=>{const _ll=loadLevel;loadLevel=function(n){const r=_ll.apply(this,arguments);try{const L=LEVELS[n];if(L&&wdhMine(n)&&L.items&&L.items.length&&L._wdhItems!==L.items.length){L._wdhItems=L.items.length;wdhReachItems(L,n)}}catch(e){console.error(e)}return r}},0);
+function wdhReachItems(L,n){
+  const R=wdhGrid(L,n),W=R.W,H=R.H,busy=new Set(L.items.map(i=>i.x+','+i.y));for(let i=0;i<W*H;i++)if(R.solid[i])busy.add((i%W)+','+((i/W)|0));
+  for(const d of L.decor)if(d.npc||d.enter)busy.add(d.x+','+d.y);
+  for(const it of L.items){if(R.seen[it.y*W+it.x])continue;
+    const vis=new Uint8Array(W*H),q=[it.y*W+it.x];vis[q[0]]=1;let got=-1;
+    for(let i=0;i<q.length&&got<0;i++){const x=q[i]%W,y=(q[i]/W)|0;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H)continue;const j=ny*W+nx;if(vis[j])continue;vis[j]=1;if(R.seen[j]&&!busy.has(nx+','+ny)){got=j;break}q.push(j)}}
+    if(got>=0){busy.delete(it.x+','+it.y);it.x=got%W;it.y=(got/W)|0;busy.add(it.x+','+it.y)}}
+}
 /* walking into a hill or rock pile goes in (the desert levels do this already, in desertBump; the older outdoor maps need it here) */
 {const _dm=doMove;doMove=function(rel){
   try{if(LEVEL<41&&G.state==='play'&&!G.cut&&!G.talk){const dir=DIRS[(G.P.f+rel)%4],nx=G.P.x+dir[0],ny=G.P.y+dir[1],d=G.decor.find(q=>q.enter&&/^wd_(hill|rock)/.test(q.k)&&q.x===nx&&q.y===ny&&!q.found);

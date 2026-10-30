@@ -504,7 +504,8 @@ function ohBuild(){
       for(let y=cy0+cd+2;y<=b.y1-1;y+=2){flowers(cx0+2,y);flowers(cx0+cw-3,y)}
       for(const [x,y] of [[cx0-2,cy0+2],[cx0+cw+1,cy0+2]])for(let q=0;q<3;q++)tree('cypress',x,y+q*2);
       const fx=(b.x0+b.x1)>>1;setF(fx,cy0+cd,fx,b.y1,'4');setF(fx-1,cy0+cd,fx+1,cy0+cd,'4');
-      for(let n=0;n<3;n++)crowdAt(fx,b.y1-3-n,2,['oh_f_monk','oh_f_friar','oh_f_lady']);
+      for(let x=cx0;x<cx0+cw;x++)for(let y=cy0;y<cy0+cd;y++)used.add(x+','+y); // the chapel stands here (its walls are put in later): nobody may be placed inside it
+      for(let n=0;n<3;n++)crowdAt(fx+(n===1?2:-2),Math.min(b.y1,cy0+cd+1+n),1,['oh_f_monk','oh_f_friar','oh_f_lady']); // beside the path to the chapel door, not on it
       return;
     }
     // blocks of houses: a ring round a green courtyard, or two terraces with a back lane

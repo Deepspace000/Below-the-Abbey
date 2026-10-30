@@ -14,10 +14,11 @@ ENEMY_DEF.slime=Object.assign({},ENEMY_DEF.wolf,{name:'Green Slime',hp:30,dmg:[2
 const WD_OUT=[2,7,10,19,22,32,41,60,61,62,63,64,311,520]; // the outdoor maps outside the Pilgrim's Path that hide places (the Path's own levels are LP.BASE to LP.BASE+LP.N-1)
 const WD_TINTS=[[255,255,255],[200,228,200],[240,214,170],[226,190,192],[190,206,236],[236,226,200]];
 const WD_RUIN_NAMES=['The Overgrown Ruin','The Mossy Vault','The Vine-Choked Cellar','The Forgotten Shrine','The Sunken Hall','The Old Watchpost','The Tangled Crypt','The Green Hall','The Fallen Gatehouse','The Ivy Chapel'];
-const WD_CAVES=[ // [level, kind, name]  ids 7200 and up
+const WD_CAVES=[ // [level, kind, name]  ids 7120 and up (they were 7200 and up, the numbers of the rooms of Sale, so a cave door led into a Sale shop)
  [2,'witch','The Witch’s Hollow'],[7,'bears','The Bear Den'],[10,'fugitive','The Hunted Man’s Hole'],[19,'wolvestreasure','The Moor Wolves’ Cave'],[22,'exile','The Exile’s Cave'],[32,'treasure','The Greendale Hoard'],[311,'bears','The Oakwood Bear Cave'],[520,'bears','The Blackbriar Den'],[520,'wolvestreasure','The Hounds’ Hollow']];
-const WD_CAVE0=7200,WD_RUIN0=8000;
+const WD_CAVE0=7120,WD_RUIN0=8000; // 7120 to 7128: free numbers between the caves of the Pilgrim's Path (7100 to 7119) and Sale (7200 to 7299)
 WD_CAVES.forEach((c,i)=>LEVEL_NAMES[WD_CAVE0+i]=c[2]);
+const wdSeedId=id=>id>=WD_CAVE0&&id<WD_CAVE0+WD_CAVES.length?7200+(id-WD_CAVE0):id; // the caves are still laid out from their old numbers, so each stands where it always stood and looks the same inside
 const WD_ENT={}; // interior id -> {n,x,y,f}: where its door stands in the outdoor map
 const wdRuinId=(n,k)=>WD_RUIN0+n*8+k;
 /* the levels where a door tile can be walked into: every cave and ruin, and every outdoor map that has an entrance to one */
@@ -83,6 +84,8 @@ function wdSpot(L,n,seed){
     if(ok&&L._wdOnly){for(let dy=0;dy<=3&&ok;dy++)for(let dx=-2;dx<=2;dx++)if(!L._wdOnly.has((x+dx)+','+(y+dy))){ok=false;break}} // a maze wood: only inside its clearings
     if(!ok||near(x,y+1,L._wdOnly?2:3)||(L._wd||[]).some(q=>Math.abs(q.x-x)<8&&Math.abs(q.y-y)<8))continue;
     for(const [dx,dy] of [[-3,1],[3,1],[-2,4],[2,4]]){const c=(L.rows[y+dy]||'')[x+dx];if(c&&c!=='.'&&/[0-9]/.test(c))ok=false}
+    {const ch=L.chars||{},door=c=>{if(!c||c==='.')return false;if(/[0-9]/.test(c))return true;const v=ch[c];return typeof v==='number'&&((v>=30&&v<100)||(v>=1000&&typeof KH_DOOR!=='undefined'&&!!KH_DOOR[v]))};
+     for(let dy=-3;dy<=5&&ok;dy++)for(let dx=-4;dx<=4;dx++)if(door((L.rows[y+dy]||'')[x+dx])){ok=false;break}} // never beside a gate or a door of the map, where the hill and its sides would stand in the way to it
     if(!ok)continue;
     let tc=0;for(let dy=-4;dy<=5;dy++)for(let dx=-4;dx<=4;dx++)if(trees.has((x+dx)+','+(y+dy)))tc++;
     const sc=tc+hash2(t,seed,4412)*4; // behind trees where there are trees
@@ -112,7 +115,9 @@ function wdThicket(L,n,x,y,id){ // dead twisted trees grow across the way: the g
     L.decor.push({k:k[(hash2(x,y,760)*4)|0],x,y,block:true,sc:1.05,ox:-.18,oy:0},{k:k[(hash2(x,y,761)*4)|0],x,y,block:true,sc:.95,ox:.2,oy:.06});
   (L._wdMarks=L._wdMarks||[]).push({x,y,id})}
 /* ---------- a ? on the map for every place not yet visited, as soon as the party looks towards it ---------- */
-const wdRevealed=()=>{const F=G.flags;return F.wdSeen||(F.wdSeen={})};
+const wdRevealed=()=>{const F=G.flags,R=F.wdSeen||(F.wdSeen={});
+  if(!R._c7120){R._c7120=1;WD_CAVES.forEach((c,i)=>{if(R[c[0]+':'+(7200+i)])R[c[0]+':'+(WD_CAVE0+i)]=1})} // a saved game from before the caves moved from 7200 keeps the caves it had spotted
+  return R};
 /* sharp eyes: a Ranger in the party, a Scout, and the herb trades (Healer, Alchemist) all spot hidden places from further away, and over a wider angle */
 function wdSharp(){
   let range=15,cone=.62;
@@ -189,7 +194,7 @@ function wdRuinRows(sd,W,H){
     if(hash2(sd,i,724)<.5){hl(ay,ax,bx);vl(bx,ay,by)}else{vl(ax,ay,by);hl(by,ax,bx)}}
   return {g,cells,rooms}}
 function wdBuild(id){
-  const P=wdParent(id),cave=!!P.cave,W=cave?23:33,H=cave?19:25,sd=id*13+7;
+  const P=wdParent(id),cave=!!P.cave,W=cave?23:33,H=cave?19:25,sid=wdSeedId(id),sd=sid*13+7;
   const parentL=LEVELS[P.n]||(KH_LAZY[P.n]&&(KH_LAZY[P.n](),LEVELS[P.n]));
   if(!WD_ENT[id]){try{wdPrep(P.n)}catch(e){console.error(e)}}
   const ent=WD_ENT[id]||{n:P.n,x:(parentL&&parentL.start&&parentL.start.x)||2,y:(parentL&&parentL.start&&parentL.start.y)||2,f:2};
@@ -208,7 +213,7 @@ function wdBuild(id){
   if(cave){kind=P.cave[1];name=P.cave[2]}
   else{const r=hash2(id,9,731);kind=r<.72?'empty':r<.9?'treasure':'slime';name=WD_RUIN_NAMES[(hash2(id,8,732)*WD_RUIN_NAMES.length)|0]}
   const gold=120+Math.round(diff*5);
-  wdForage(id,cave,pick,items);
+  wdForage(sid,cave,pick,items);
   if(cave){
     decor.push(...[1].map(()=>{const b=pick(1)||[sx,sy-1];return {k:'bones',x:b[0],y:b[1],block:false}}));
     if(kind==='treasure'||kind==='bears'||kind==='wolvestreasure'){decor.push({k:'chest',x:far[0],y:far[1],block:true,goldAmt:gold+80});const c=pick(2);if(c)items.push({k:'potion',x:c[0],y:c[1]})}
@@ -234,24 +239,24 @@ function wdBuild(id){
     if(kind==='slime'){for(let i=0;i<4;i++){const c=pick(90+i);if(c)enemies.push({t:'slime',x:c[0],y:c[1]})}}
     try{pfRuinProps(g,W,H,sx,sy,[[far[0],far[1]]],used,decor,items,enemies,id)}catch(e){console.error(e)} // broken statues, columns and brickwork, throughout
   }
-  if(hash2(id,12,795)<.4&&!decor.some(d=>d.k==='chest'))pfFoodChest(g,W,H,sx,sy,decor,items,used,id+7,{gear:1,food:null}); // armour in about four dungeons in ten
-  if(hash2(id,6,764)<.5)pfFoodChest(g,W,H,sx,sy,decor,items,used,id); // some hold a little food in a chest
+  if(hash2(sid,12,795)<.4&&!decor.some(d=>d.k==='chest'))pfFoodChest(g,W,H,sx,sy,decor,items,used,sid+7,{gear:1,food:null}); // armour in about four dungeons in ten
+  if(hash2(sid,6,764)<.5)pfFoodChest(g,W,H,sx,sy,decor,items,used,sid); // some hold a little food in a chest
   const T=wdTiles(cave?'cave':'ruin',cave?2.6:2.8,tint,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(cave?2.6:2.8,cave?'cave':'ruin',tint,P.n===520);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:ent.f}};
   const chars={'#':T.wall};chars[door]=dgid;
   if(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[P.n])LEVEL_RATING[id]=LEVEL_RATING[P.n];
   LEVEL_NAMES[id]=name;
-  if(P.n===520){decor.push({k:'lantern',x:sx+1,y:sy,block:false,walk:true,deco:true})}   /* Blackbriar Wood: a lantern by the way out */
+  if(P.n===520){const lk=IMG.wm_lantern_gold?'wm_lantern_gold':'lamp',ch=cave?2.6:2.9;decor.push(lk==='lamp'?{k:lk,x:sx+1,y:sy,block:false,walk:true,deco:true}:{k:lk,x:sx+1,y:sy,block:false,walk:true,deco:true,bob:ch-(NPC_H[lk]||.8)})}   /* Blackbriar Wood: a lantern by the way out, hanging on its chain from the roof (there is no picture called 'lantern') */
   return {rows:g.map(r=>r.join('')),start:{x:sx,y:sy,f:0},enemies,items,decor,chars,day:0,floor:cave?'scree':'mosscobble',name,label:name,diff,ceilH:cave?2.6:2.9,torchGap:1e9,noTele:true,portals:[],lights:P.n===520?[[sx+1,sy],[sx,sy-2]]:[],mapNames:[{t:name,x:sx,y:H-1,k:'place'}]}}
 /* every place gets a lazy builder */
 for(let i=0;i<WD_CAVES.length;i++)KH_LAZY[WD_CAVE0+i]=((id)=>()=>{if(!LEVELS[id])LEVELS[id]=wdBuild(id)})(WD_CAVE0+i);
-for(const n of [...WD_OUT,...Array.from({length:24},(_,i)=>400+i)])for(let k=0;k<4;k++){const id=wdRuinId(n,k);KH_LAZY[id]=((i)=>()=>{if(!LEVELS[i])LEVELS[i]=wdBuild(i)})(id)}
+for(const n of [...WD_OUT,...Array.from({length:24},(_,i)=>400+i)])for(let k=0;k<wdCount(n);k++){const id=wdRuinId(n,k);/* only the ruins that wdPrep really places (a ruin with no door to it was a room nobody could enter) */KH_LAZY[id]=((i)=>()=>{if(!LEVELS[i])LEVELS[i]=wdBuild(i)})(id)}
 /* ---------- carving the outdoor maps ---------- */
 function wdPrep(n){
   const L=LEVELS[n];if(!L||L._wdDone||!L.rows||!L.decor)return;L._wdDone=1;
   if(typeof pfPrep==='function'&&wdIsLP(n))try{pfPrep(n)}catch(e){}
   if(typeof PF_OLD!=='undefined'&&PF_OLD.includes(n))try{pfOld(n)}catch(e){console.error(e)}
   const caves=WD_CAVES.map((c,i)=>[c,i]).filter(([c])=>c[0]===n);
-  for(const [c,i] of caves)wdPlace(L,n,WD_CAVE0+i,'cave',[255,255,255],WD_CAVE0+i);
+  for(const [c,i] of caves)wdPlace(L,n,WD_CAVE0+i,'cave',[255,255,255],wdSeedId(WD_CAVE0+i));
   const cnt=(WD_OUT.includes(n)||wdIsLP(n))?wdCount(n):0;
   for(let k=0;k<cnt;k++){const id=wdRuinId(n,k),tint=WD_TINTS[(hash2(id,5,730)*WD_TINTS.length)|0];wdPlace(L,n,id,'ruin',tint,id)}
   // soft trees that grow only along the sides of the path: the party can walk right through them
