@@ -22,7 +22,7 @@ const F2B={
     text:'A warm wind blows off the sea. The sun is bright, and the waves come in slow and even, always the same.'},
   9823:{k:'snow',sky:{top:[150,164,184],mid:[190,200,212],low:[226,230,236]},cloud:1.15,fog:[214,222,232,.02],amb:.95,lcol:[.95,1.0,1.12],wn:'Snow',fx:'snow',
     text:'Snow falls without a sound. It is bitterly cold, and the light is grey and even.'},
-  9824:{k:'water',sky:{top:[46,44,104],mid:[206,124,118],low:[255,196,128]},cloud:1.35,fog:[214,176,160,.006],haze:.1,silver:.62,amb:1.0,lcol:[1.45,1.05,.7],wn:'Evening haze',fx:null,
+  9824:{k:'water',sky:{top:[46,44,104],mid:[206,124,118],low:[255,196,128]},cloud:1.9,fog:[214,176,160,.006],haze:.1,silver:.62,amb:1.0,lcol:[1.45,1.05,.7],wn:'Evening haze',fx:null,
     text:'The canals lie still under a pink evening sky. Water laps at the steps, and somewhere a bell rings the hour.'},
   9825:{k:'desert',sky:{top:[84,146,212],mid:[200,202,192],low:[242,216,160]},cloud:.55,fog:[228,206,166,.012],amb:1.1,lcol:[1.3,1.1,.75],wn:'Heat',fx:'heat',
     text:'The sun beats down on the sand. The air shimmers with heat, and there is no wind.'},
@@ -321,10 +321,13 @@ function f2X(C,d,keys){C.f2x=C.f2x||{};const n='f2x'+Object.keys(C.f2x).length;d
 pspOnArrive(n=>{const L=LEVELS[n];if(!L||!L._f2x||!G.decor)return;for(const d of G.decor){const o=d.kname&&L._f2x[d.kname];if(!o)continue;for(const k in o)if(d[k]===undefined)d[k]=k==='mv'?Object.assign({},o[k],{segs:null,t:0}):k==='span'?Object.assign({},o[k]):o[k]}});
 {const _sl=spriteList;spriteList=function(){const L=_sl.apply(this,arguments);
   if(typeof LEVEL==='undefined'||!(f2Is(LEVEL)||LEVEL===F2.HUB))return L;
+  const LV=LEVELS[LEVEL],dk=LV&&LV._f2deck,cx=G.C.x+.5,cy=G.C.y+.5,onDeck=!!(dk&&cx>=dk[0]&&cx<=dk[2]+1&&cy>=dk[1]&&cy<=dk[3]+1);   // standing on a bridge deck: its side faces give way to its parapets
+  let drop=false;
   for(const s of L){const d=s.decor;if(!d)continue;
+    if(d.span&&d.span.deck&&((d.span.deck==='hide')===onDeck)){s._f2drop=1;drop=true;continue}
     if(d.span&&s.pic){s.x=d.span.x;s.y=d.span.y;s.w=d.span.w;s.bob=d.span.bob;s.flat=[d.wd[0],d.wd[1]]}
     else if(d.mv&&d.mvFlip&&!s.pic){const C=G.C,fx=Math.cos(C.a),fy=Math.sin(C.a),rx=-fy,ry=fx;const right=(d.mvDx*rx+d.mvDy*ry)>0;const im=IMG[right?d.mvFlip:d.k];if(im)s.img=im}}   // a boat seen moving to the right shows its prow on the right
-  return L}}
+  return drop?L.filter(s=>!s._f2drop):L}}
 /* a mirrored copy of a picture (a boat going the other way) */
 function f2Flip(k){const nk=k+'_fl';if(IMG[nk]&&IMG[nk].width)return nk;const im=IMG[k];if(!im||!im.width)return k;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.translate(im.width,0);x.scale(-1,1);x.drawImage(im,0,0);IMG[nk]=c;NPC_H[nk]=NPC_H[k];return nk}
 /* ---------- things that move by themselves (a gondola rowing up and down a canal): decor with mv = {path:[[x,y],...], speed, t} ---------- */
@@ -341,12 +344,15 @@ function f2MoveTick(dt){if(!f2Is(LEVEL)||!G.decor)return;
         else{d.x=px;d.y=py;if(dx||dy){d.mvDx=dx;d.mvDy=dy}}break}}}}
 /* ---------- a ride in a boat: the camera glides along a path over the water, then the party steps off at the landing ---------- */
 function f2Ride(path,land,o){o=o||{};if(F2.ride)return;const P=path.map(p=>[p[0],p[1]]);let L=0;const segs=[];for(let i=0;i<P.length-1;i++){const l=Math.hypot(P[i+1][0]-P[i][0],P[i+1][1]-P[i][1]);segs.push([L,l]);L+=l}
-  F2.ride={P,segs,len:L,t:0,speed:o.speed||1.6,land,lv:LEVEL,hide:o.hide||null,done:o.done||null};if(o.hide)o.hide.hidden=true;G.talk=null;G.lockT=G.time+999;try{sfx('door')}catch(e){}}
+  F2.ride={P,segs,len:L,t:0,speed:o.speed||1.6,land,lv:LEVEL,hide:o.hide||null,done:o.done||null};
+  if(o.prow&&IMG[o.prow]){const d={k:o.prow,x:P[0][0]|0,y:P[0][1]|0,block:false,walk:true,deco:true,pic:1,wd:[0,1],span:{x:P[0][0],y:P[0][1],w:o.prowW||1.35,bob:o.prowBob===undefined?-.42:o.prowBob},f2prow:1};G.decor.push(d);F2.ride.prow=d}   // the bow of the boat, just in front of the party, all the way
+  if(o.hide)o.hide.hidden=true;G.talk=null;G.lockT=G.time+999;try{sfx('door')}catch(e){}}
 function f2RideTick(dt){const R=F2.ride;if(!R)return;if(LEVEL!==R.lv){F2.ride=null;G.lockT=0;return}
   R.t=Math.min(R.len,R.t+dt*R.speed);const s=R.t;let x=R.P[0][0],y=R.P[0][1],dx=0,dy=-1;
   for(let i=0;i<R.segs.length;i++){const [L0,l]=R.segs[i];if(s<=L0+l||i===R.segs.length-1){const u=l?Math.min(1,(s-L0)/l):1,a=R.P[i],b=R.P[i+1];x=a[0]+(b[0]-a[0])*u;y=a[1]+(b[1]-a[1])*u;dx=b[0]-a[0];dy=b[1]-a[1];break}}
   const ang=Math.atan2(dy,dx);G.C.x=x;G.C.y=y;let da=ang-G.C.a;while(da>Math.PI)da-=Math.PI*2;while(da<-Math.PI)da+=Math.PI*2;G.C.a+=da*Math.min(1,dt*3);G.P.angT=G.C.a;G.P.ang=G.C.a;G.lockT=G.time+999;
-  if(R.t>=R.len){const [lx,ly,lf]=R.land;F2.ride=null;G.lockT=0;f2MoveTo([lx,ly,lf]);if(R.done)try{R.done()}catch(e){console.error('f2 ride done',e)}}}
+  if(R.prow){const a=G.C.a,fx=Math.cos(a),fy=Math.sin(a),pd=R.prow;pd.span.x=x+.5+fx*.9;pd.span.y=y+.5+fy*.9;pd.wd=[fx,fy];pd.x=Math.floor(pd.span.x);pd.y=Math.floor(pd.span.y);pd.span.bob=(R.prowBob0===undefined?(R.prowBob0=pd.span.bob):R.prowBob0)+Math.sin(G.time*2.2)*.025}
+  if(R.t>=R.len){const [lx,ly,lf]=R.land;if(R.prow){const i=G.decor.indexOf(R.prow);if(i>=0)G.decor.splice(i,1)}F2.ride=null;G.lockT=0;f2MoveTo([lx,ly,lf]);if(R.done)try{R.done()}catch(e){console.error('f2 ride done',e)}}}
 {const _u2=update;update=function(dt){const r=_u2.apply(this,arguments);try{if(typeof LEVEL!=='undefined'&&f2Is(LEVEL)&&G.state==='play'){const d=Math.min(dt,.05);f2MoveTick(d);if(F2.ride)f2RideTick(d)}}catch(e){console.error('f2 move',e);F2.ride=null;G.lockT=0}return r}}
 /* ---------- a painted far skyline on the sky of a room (domes and towers over the roofs, a mountain range, a sea horizon), fixed to the world while the clouds drift ----------
    F2SKY[id] = {img, rows (height in sky rows), base (sky row of its foot; 150 is the horizon), rep (copies round the sky), haze (0..1)} */
@@ -386,7 +392,7 @@ function f2Soft(key,o){o=o||{};const nk=key+'_s'+(o.tag||'');if(IMG[nk]&&IMG[nk]
   IMG[nk]=c;NPC_H[nk]=NPC_H[key];return nk}
 /* the way back to the hall in a room: a three-square gateway picture over x 23..25 of row 38 (the door is the middle square), its plaque lettered THE HALL OF ILLUSIONS; the castle sign there goes */
 function f2RetGate(C,img,o){o=o||{};const im=IMG[img];if(!im||!im.width)return;
-  const k=f2Lettered(img.replace(/^ps_/,''),img.replace(/^ps_/,'')+'_lt',['THE HALL','OF ILLUSIONS'],{box:[.4,.065,.6,.115],col:'#d8e4f0',h:NPC_H[img]});
+  const k=f2Lettered(img.replace(/^ps_/,''),img.replace(/^ps_/,'')+'_lt',['THE HALL','OF ILLUSIONS'],{box:o.box||[.4,.065,.6,.115],col:'#d8e4f0',h:NPC_H[img]});
   const wh=2.3,rows=C.rows;
   if(o.one){const g0=f2FacGid(k,0,1,o.wh||3.4,{tex:o.tex||'texBlack_2',emit:.3,fit:false,rgb:o.rgb}),g=C.chars[rows[38][24]];if(g0!=null&&g!==undefined&&KH_DOOR[g])T_TILE[g]=T_TILE[g0]}
   else for(let i=0;i<3;i++){const x=23+i,g0=f2FacGid(k,i,3,wh,{tex:'texBlack_2',emit:.25});if(g0==null)continue;

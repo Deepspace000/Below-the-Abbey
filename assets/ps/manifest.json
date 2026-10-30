@@ -3644,5 +3644,75 @@
 "h": 2.0,
 "kind": "sprite",
 "sheet": "v7s"
+},
+"f2_balustrade": {
+"file": "f2_balustrade.webp",
+"w": 985,
+"px_h": 184,
+"h": 0.6,
+"kind": "sprite",
+"sheet": "v8b"
+},
+"f2_fa_gothbrick": {
+"file": "f2_fa_gothbrick.webp",
+"w": 270,
+"px_h": 455,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v8c"
+},
+"f2_fa_gothcream": {
+"file": "f2_fa_gothcream.webp",
+"w": 270,
+"px_h": 455,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v8c"
+},
+"f2_fa_gothpeach": {
+"file": "f2_fa_gothpeach.webp",
+"w": 269,
+"px_h": 455,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "v8c"
+},
+"f2_doge_corner": {
+"file": "f2_doge_corner.webp",
+"w": 194,
+"px_h": 499,
+"h": 3.2,
+"kind": "sprite",
+"sheet": "v10a"
+},
+"f2_doge_balcony": {
+"file": "f2_doge_balcony.webp",
+"w": 300,
+"px_h": 472,
+"h": 3.2,
+"kind": "sprite",
+"sheet": "v10a"
+},
+"f2_doge_clock": {
+"file": "f2_doge_clock.webp",
+"w": 258,
+"px_h": 471,
+"h": 3.2,
+"kind": "sprite",
+"sheet": "v10a"
+},
+"f2_tex_water_a": {
+"file": "f2_tex_water_a.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "v11w"
+},
+"f2_tex_water_b": {
+"file": "f2_tex_water_b.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "v11w"
 }
 }
