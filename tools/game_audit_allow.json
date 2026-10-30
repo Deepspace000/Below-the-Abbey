@@ -16,6 +16,7 @@
     {"code": "NPC_UNREACH", "level": 9640, "key": "^gy_mound$", "x": 70, "y": 12, "reason": "Gallowmere: Heron Isle is reached by Osk's rowing boat (blg_boat1 at the jetty), which the audit does not model"},
     {"code": "NPC_UNREACH", "level": 9640, "key": "^b34_heron$", "x": 63, "y": 15, "reason": "Gallowmere: Heron Isle is reached by Osk's rowing boat (blg_boat1 at the jetty), which the audit does not model"},
     {"code": "FLOAT", "level": 9661, "key": "^lamp$", "x": 7, "y": 5, "reason": "Lanternrest inn: the chandelier (a glowing lamp drawn with the picture wl2_inn_4) hangs from the ceiling on its chain; looked at in the room, it is not standing on anything by design"},
+    {"code": "HOVER", "level": "200-289,1000-13999", "key": "^kh_int2_1$", "x": 6, "y": 3, "reason": "Khemetra 'magic' house scene (khemetra_build.js KH_HOME_SETS, KH_CEILPIECE): the brass lamp hangs from the ceiling on its chain; its lift is the room's real ceiling minus its height, so the top of the chain meets the ceiling (checked in screenshots). The audit's HANG list does not know this picture key."},
     {"code": "ONEWAY", "level": 9715, "key": "door", "x": 30, "y": 4, "reason": "the Crooked Road gate into the Never-Ending Tower: the tower's own south gate leads back (tools/ps_test.py dest checks it)"}
   ]
 }

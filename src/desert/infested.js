@@ -110,7 +110,8 @@ function infMake(L,b,lvl,back,T){
   occ.add(sx+',1');
   // the bodies (a person's spot, or a free square when nobody lived here; sometimes a second one)
   const spots=free.filter(([x,y])=>!occ.has(x+','+y)&&Math.abs(x-st.x)+Math.abs(y-st.y)>=2);
-  const bodyAt=(p,i)=>{const q=p||spots[R(40+i,spots.length)]||free[0];if(!q)return;const x=q[0]!==undefined?q[0]:q.x,y=q[0]!==undefined?q[1]:q.y;L.decor.push({k:infCorpse(x,y),x,y,block:false,infBody:1});occ.add(x+','+y)};
+  const bodyAt=(p,i)=>{const sp=spots.filter(([x,y])=>!occ.has(x+','+y)); // never a second body on a square that already has one
+    const q=p||sp[R(40+i,sp.length)];if(!q)return;const x=q[0]!==undefined?q[0]:q.x,y=q[0]!==undefined?q[1]:q.y;L.decor.push({k:infCorpse(x,y),x,y,block:false,infBody:1});occ.add(x+','+y)};
   bodies.forEach((p,i)=>bodyAt(p,i));
   if(R(50,10)<4)bodyAt(null,9);
   // 1 to 5 creatures: not near the door, not on the stair, on squares the party can walk to

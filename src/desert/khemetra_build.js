@@ -192,6 +192,9 @@ function khRoom(b,lvl,back){
   const level={rows,start:{x:mid,y:H-2,f:0},enemies:(R.enemies||[]).map(e=>({t:e[0],x:e[1],y:e[2],lvl:e[3]})),items:R.items||[],decor,day:0,amb:R.amb||.66,
     floor:b.floor||R.floor||'kh1',ceil:'beam',name:b.name,label:b.name,lights:R.lights||[],portals:[{to:back.to,x:back.x,y:back.y,f:back.f,tex:'in'}],diff:16,khRoom:b.id,scene:b.scene||KH_SCENE_OF[b.id],
     chars:wall?{w:wall}:undefined};
+  // a piece hung from the ceiling (KH_CEILPIECE): its lift is read when the level is loaded, from the ceiling the room really has then (a caller may raise
+  // level.ceilH after this), so the top of its chain always meets the ceiling; .035 is the engine's drop for kh_int pictures
+  for(const d of decor)if(d.ceil){delete d.bob;Object.defineProperty(d,'bob',{enumerable:true,configurable:true,get:()=>{const hh=NPC_H[d.k]||.5,c=typeof ceilFor==='function'?ceilFor(lvl,level):1.22;return Math.max(0,c-hh*(1-(/^kh_int/.test(d.k)?.035:0)))}})}
   if(R.noExtras)level.noExtras=true;
   if(R.tele)level.tele={x:R.tele[0],y:R.tele[1]};   // where this room's stone teleporter stands, when the room has a better nook for it than the default
   return {level,start:{x:mid,y:H-2,f:0}};
@@ -235,26 +238,30 @@ function khRoomHall(b){return {w:11,h:8,lights:[[3,2],[7,2],[5,5]],build:({put,r
   put('table',2,5);put('chair',2,6);put('table',8,5);put('chair',8,6);raw('crate',1,3);raw('barrel',9,3);
   npc(b.keeper,mid,2);
 }}}
-/* a house: small, and furnished to suit whoever lives there (poor houses have a few humble things, rich ones a great many) */
+/* a house: small, and furnished to suit whoever lives there (poor houses have a few humble things, rich ones a great many)
+   Wall pieces (the kitchen shelf with its pans, the tapestry) are pictures flat on the back wall: KH_WALLPIECE, wall side [0,-1] (row 0 is the back wall).
+   The hanging lamp hangs from the ceiling on its chain (KH_CEILPIECE: its lift is worked out from the room's real ceiling when the level is loaded).
+   Everything else stands on the floor. */
+const KH_WALLPIECE={pic:1,wd:[0,-1],block:false},KH_CEILPIECE={ceil:1,block:false};
 const KH_HOME_SETS={
-  warm:[['hearth',2,1],['kitchenshelf',4,1,{bob:.5}],['bed',6,1],['table',2,3],['chair',1,3],['cushions',6,3]],
+  warm:[['hearth',2,1],['kitchenshelf',4,1,Object.assign({bob:.42},KH_WALLPIECE)],['bed',6,1],['table',2,3],['chair',1,3],['cushions',6,3]],
   worker:[['bed',1,1],['potshelf',6,1],['table',2,3],['chair',1,4],['amphora',6,3]],
   spartan:[['bed',1,1],['rack',6,1],['amphora',6,4]],
   messy:[['bed',1,1],['cushions',2,3],['cushions',6,3],['chest',6,1],['desk',3,1],['amphora',1,4],['potshelf',5,1]],
   empty:[],
   dark:[['brazier',2,1],['brazier',6,1],['wardrobe',4,1],['chest',1,4]],
-  noble:[['bed',1,1],['wardrobe',6,1],['dresser',3,1],['tapestry',4,1,{bob:.45,block:false}],['harp',6,3],['cushions',2,3],['floorlamp',1,4],['birdcage',6,4]],
-  magic:[['bookcase',1,1],['bookcase',6,1],['brazier',3,1],['brazier',5,1],['cushions',2,3],['hlamp',6,3,{bob:.8}]],
+  noble:[['bed',1,1],['wardrobe',6,1],['dresser',3,1],['tapestry',4,1,Object.assign({bob:.12},KH_WALLPIECE)],['harp',6,3],['cushions',2,3],['floorlamp',1,4],['birdcage',6,4]],
+  magic:[['bookcase',1,1],['bookcase',6,1],['brazier',3,1],['brazier',5,1],['cushions',2,3],['hlamp',6,3,KH_CEILPIECE]],
   wizard:[['bookcase',1,1],['shelf',6,1],['desk',2,3],['brazier',5,1],['chair',1,3],['amphora',6,3]],
   scholar:[['bookcase',1,1],['bookcase',3,1],['bookcase',6,1],['desk',2,3],['chair',1,4],['floorlamp',6,3]],
-  musician:[['harp',1,1],['tapestry',4,1,{bob:.45,block:false}],['cushions',2,3],['cushions',6,3],['floorlamp',6,1]],
+  musician:[['harp',1,1],['tapestry',4,1,Object.assign({bob:.12},KH_WALLPIECE)],['cushions',2,3],['cushions',6,3],['floorlamp',6,1]],
   merchant:[['chest',1,1],['chest',2,1],['rolledcarpets',6,1],['desk',2,3],['amphora',6,3]],
   healer:[['potshelf',1,1],['potshelf',6,1],['washstand',3,1],['bed',6,3],['table',2,3],['amphora',1,4]],
-  cats:[['shrine',4,1,{bob:.3,block:false}],['cushions',1,1],['cushions',6,1],['cushions',2,3],['cushions',6,3]],
+  cats:[['shrine',4,3],['cushions',1,1],['cushions',6,1],['cushions',2,3],['cushions',6,3]],
   fisher:[['potshelf',1,1],['bed',6,1],['table',2,3],['chair',1,3],['amphora',6,3]],
   potter:[['oven',1,1],['potshelf',3,1],['potshelf',6,1],['amphora',1,3],['amphora',2,4],['amphora',6,3]],
   soldier:[['rack',1,1],['bed',6,1],['table',2,3],['chair',1,3],['chest',6,3]],
-  priest:[['shrine',4,1,{bob:.3,block:false}],['brazier',2,1],['brazier',6,1],['cushions',2,3],['cushions',6,3],['amphora',1,4]],
+  priest:[['shrine',4,3],['brazier',2,1],['brazier',6,1],['cushions',2,3],['cushions',6,3],['amphora',1,4]],
   children:[['bed',1,1],['bed',6,1],['cradle',3,1],['cushions',2,3],['cushions',6,3],['chair',1,4]],
   taxman:[['bookcase',1,1],['desk',2,2],['chest',6,1],['counter',6,3],['chair',2,3]],
   boarded:[['chair',1,4],['amphora',6,4]],
