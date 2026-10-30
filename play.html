@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.737';
+const VERSION='3.738';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -20056,8 +20056,8 @@ function diffExample(){try{
   return {name:def.name,lv,now,was,hero:HERO_DEF[me.i].name}}catch(err){return null}}
 function diffChange(n){const was=G.flags.diffStep|0;G.flags.diffStep=Math.max(DIFF_MIN,Math.min(DIFF_MAX,was+n));if((G.flags.diffStep|0)!==was){diffApply();msg('Difficulty: '+diffLabel()+'.','#e8d8a0')}}
 function drawGameplay(){
-  BTNS=[];veil(.6);bigPanel(70,10,340,300);
-  txt('GAMEPLAY',240,28,14,'#d8c88e','center',true);
+  BTNS=[];veil(.6);bigPanel(70,4,340,314);
+  txt('GAMEPLAY',240,22,14,'#d8c88e','center',true);
   const on=autoscaleOn();
   btnText('gp_scale','Autoscaling:  '+(on?'ON':'OFF'),80,42,156,26);btnText('gp_adapt','Intelligent adjustment:  '+(G.flags.noAdapt?'OFF':'ON'),244,42,156,26);
   btnText('gp_fog','Fog of war:  '+(G.flags.noFog?'OFF':'ON'),120,72,118,22);btnText('gp_lookx','Look drag: '+(G.flags.lookXNormal?'NORMAL':'INVERT'),242,72,118,22);
@@ -20075,11 +20075,13 @@ function drawGameplay(){
     'The world is fixed. Every place has its own level, rising by about three for each place the story leads to, and the level of each place is shown on the world map.',
     'Creatures stand at the level of the place (some a little lower, as ever), and the great creatures a few levels above it. If a place is too hard for the party, go elsewhere and come back stronger.'
   ];
-  let y=176;for(const p of lines){for(const l of wrapText(p,300,8.4)){txt(l,240,y,8.4,'#cdbf94','center');y+=11}y+=8}
+  let y=173;for(const p of lines){for(const l of wrapText(p,310,7.6)){txt(l,240,y,7.6,'#cdbf94','center');y+=9.5}y+=4}
   const r=LEVEL_RATING[LEVEL];
-  txt(on?'Autoscaling is on.':(r?'This place is level '+r+'.':'This place has no fixed level.'),240,y+6,9,'#e8c878','center',true);
-  btnText('gp_nums','Bar numbers: '+(G.flags.noBarNums?'OFF':'ON'),78,278,106,24); // the numbers over the health, mana, experience and food bars
-  btnText('gp_back','Back',190,278,100,24);
+  txt(on?'Autoscaling is on.':(r?'This place is level '+r+'.':'This place has no fixed level.'),240,y+4,8.6,'#e8c878','center',true);y+=16;
+  {const ao=!G.flags.noAdapt,at=ao?'Intelligent adjustment is ON. If the party falls four times in a row in one area, the game offers help once a session: an easier game, weaker enemies for 15 minutes, or a 15 minute boost of +5 to STR, DEX and INT. If the party wins fights very fast, the game raises the difficulty a step at a time ("master player detected"). Turn it off to play at exactly the difficulty you set.':'Intelligent adjustment is OFF. The game never offers help and never changes the difficulty by itself: it stays exactly where you set it.';
+   for(const l of wrapText(at,312,7.2)){txt(l,240,y,7.2,ao?'#b8d8a0':'#a89c78','center');y+=9}}
+  btnText('gp_nums','Bar numbers: '+(G.flags.noBarNums?'OFF':'ON'),78,290,106,24); // the numbers over the health, mana, experience and food bars
+  btnText('gp_back','Back',190,290,100,24);
 }
 (function(){const _b=handleBtn;handleBtn=function(id){
   if(G.menu==='gameplay'&&(id==='gp_dm'||id==='gp_dp')){diffChange(id==='gp_dp'?1:-1);return}
