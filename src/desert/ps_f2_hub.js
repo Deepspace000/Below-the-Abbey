@@ -71,8 +71,8 @@ function psf2HubBuild(info){
   const NAMES={9821:'THE PERFECT FOREST',9822:'THE ISLAND BY THE SEA',9823:'THE CABIN IN THE SNOW',9824:'THE WATERWAYS',9825:'THE DESERT',9826:'THE SWAMP',9827:'THE NIGHTMARE'};
   for(const l of pspLinksFrom(id)){if(!NAMES[l.to])continue;const [x,y]=l.at;
     if(y===3){C.sign(x+1,4,[0,-1],NAMES[l.to]);cand(x-2,4);cand(x+2,4)}
-    else if(x===2){C.sign(4,21,[0,-1],NAMES[l.to]);cand(4,20)}
-    else{C.sign(51,21,[0,-1],NAMES[l.to]);cand(51,20)}}
+    else if(x===2){C.sign(4,20,[0,-1],NAMES[l.to]);cand(4,24)}
+    else{C.sign(51,20,[0,-1],NAMES[l.to]);cand(51,24)}}
   for(const x of [14,24,34,44]){pic(x===24||x===34?'mirror_haunted_a':'banner_long_a',x,4,[0,-1]);pic('banner_long_b',x,6,[0,1])}
   for(const x of [5,50])pic('window_stained_tall',x,6,[0,1]);
   // the nave: two rows of columns, stained windows high on the side walls, candelabra by the dais

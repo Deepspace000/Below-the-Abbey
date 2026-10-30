@@ -62,8 +62,7 @@ function f2NightBuild(){
   const C=f2Room({id:9827,ground:'tombdark',path:'wl2f5',band:[1,4],wh:3.4,
     routes:[[[24,35],[24,27],[31,23],[31,15],[24,13],[24,11]],[[24,27],[14,25],[9,20]],[[31,19],[40,19]],[[22,31],[11,31]]],
     clear:[[17,2,31,12,'blood','The Ring of Lanterns',1],[4,15,13,24,'ash','The Doll Room',1],[35,14,44,24,'ash','The Hall of Eyes',1],[5,27,15,34,'blood','The Broken Clocks',1]],
-    edge:(C,x,y)=>{const e=C.E[y*48+x];if(e<=5){const h=C.hs2(x,y,77);if(h<.16){const f=f2FacGid('ps_f2_eyedoor',0,1,3.4,{tex:'texBlack_1',fit:false,rgb:[.95,.9,.9]});if(f!=null){const g=KH_NEXT_GID++;T_TILE[g]=T_TILE[f];KH_DOOR[g]={psf2:'nightdoor'};C.solid(x,y,C.ch(g));return true}}
-      C.solid(x,y,C.ch(pspWallGid(h<.5?'dark':'moss',(h*7)|0,3.4)));return true}return false}});
+    edge:(C,x,y)=>{const e=C.E[y*48+x];if(e<=5){const h=C.hs2(x,y,77);C.solid(x,y,C.ch(pspWallGid(h<.5?'dark':'moss',(h*7)|0,3.4)));return true}return false}});
   // the jar on its pedestal and the four lanterns round it
   {const [jx,jy]=F2_NIGHT.JAR;C.used.delete(jx+','+jy);C.dec(pspPic('f2_brainjar'),jx,jy,{block:true,npc:'f2n_jar'});C.light(jx,jy,[.6,1.1,.6])}
   F2_NIGHT.LAMP.forEach(([x,y],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_lantern_off'),x,y,{block:true,npc:'f2n_lamp'+i})});
@@ -81,6 +80,12 @@ function f2NightBuild(){
   for(const [x,y] of [[5,16],[43,15],[14,33]])C.chestAt(x,y,1);
   C.ret();
   const lv=C.done({glow:9});
+  // staring doors: a few black wall squares that face a square the party can stand on become doors covered in eyes (they never open)
+  {const f=f2FacGid('ps_f2_eyedoor',0,1,3.4,{tex:'texBlack_1',fit:false,rgb:[.95,.9,.9]}),TB=TERRS[9827]&&TERRS[9827].block,bs=new Set(lv.decor.filter(d=>d.block).map(d=>d.x+','+d.y));
+   const stand=(x,y)=>lv.rows[y]&&lv.rows[y][x]==='.'&&!bs.has(x+','+y)&&!(TB&&TB[y*48+x]);
+   if(f!=null)for(let y=3;y<37;y++)for(let x=3;x<45;x++){const c=lv.rows[y][x];if(c==='.'||C.hs2(x,y,77)>=.16||!(C.E[y*48+x]<=5))continue;const g0=lv.chars[c];if(g0!==undefined&&KH_DOOR[g0])continue;
+     if(![[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>stand(x+a,y+b)))continue;
+     const g=KH_NEXT_GID++;T_TILE[g]=T_TILE[f];if(GY.col&&GY.col[f])GY.col[g]=GY.col[f];KH_DOOR[g]={psf2:'nightdoor'};const ch=C.ch(g);lv.chars[ch]=g;lv.rows[y]=lv.rows[y].slice(0,x)+ch+lv.rows[y].slice(x+1)}}
   for(const [x,y] of F2_NIGHT.LAMP){lv.lights.push([x,y]);lv._ps.lcol[x+','+y]=[.5,.25,.25]}
   return lv}
 pspRegister(9827,f2NightBuild);

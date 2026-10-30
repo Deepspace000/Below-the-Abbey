@@ -252,18 +252,31 @@ function f2Room(S){
   // a lettered stone slab (a plaque of a puzzle): the picture is made once
   C.plaque=(x,y,key,lines,npc,text,o)=>{const k=blSlab(key,lines,{h:1.0,top:.16,span:.66});if(npc&&!NPCS[npc])khNpc(npc,'A carved plaque',k,()=>say(text,[BYE]));C.used.delete(x+','+y);return C.dec(k,x,y,Object.assign({block:true,npc,sc:.9},o||{}))};
   // a door in a wall that takes the party to another square of the same map (into a cabin, out of it)
-  C.warp=(x,y,style,to,msgText)=>{const b=style==='house'?null:pspDoorGid(style||'oak',wh),g=KH_NEXT_GID++;if(b!=null){T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b]}KH_DOOR[g]={psf2:'warp',to,A:to,B:to,msg:msgText};(C.warpTo=C.warpTo||[]).push(to);C.solid(x,y,C.ch(g));C.used.add(x+','+y);return g};
+  C.warp=(x,y,style,to,msgText)=>{const b=style==='house'?null:pspDoorGid(style||'oak',wh),g=KH_NEXT_GID++;if(b!=null){T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b]}KH_DOOR[g]={psf2:'warp',psh:'warp',to,A:to,B:to,lvl:id,at:{x:to[0],y:to[1],f:to[2]},msg:msgText};(C.warpTo=C.warpTo||[]).push(to);C.solid(x,y,C.ch(g));C.used.add(x+','+y);return g};
   C.foes=(list,rect,seed,o)=>{let n=0;list.forEach((t,i)=>{const q=C.spot(rect[0],rect[1],rect[2],rect[3],seed*31+i,o);if(q&&f2Foe(C,t,q[0],q[1]))n++});return n};
-  C.chestAt=(x,y,tier)=>{C.used.delete(x+','+y);return C.chest(x,y,{tier:tier===undefined?1:tier})};
+  C.chestAt=(x,y,tier)=>{if(C.enemies.some(e=>e.x===x&&e.y===y)||!C.open(x,y)){const q=C.near(x,y,3,true);if(!q)return null;x=q[0];y=q[1]}C.used.delete(x+','+y);return C.chest(x,y,{tier:tier===undefined?1:tier})};
   // finish: no sealed pockets, lights, the level's air
   C.done=o=>{o=o||{};
     {const bs=new Set();for(const d of C.decor)if(d.block)bs.add(d.x+','+d.y);
      const reach=new Uint8Array(W*H),q=[ix(24,35)];reach[q[0]]=1;for(const [a,b] of C.warpTo||[]){if(!reach[ix(a,b)]){reach[ix(a,b)]=1;q.push(ix(a,b))}}
      for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||reach[ix(nx,ny)]||!C.open(nx,ny)||bs.has(nx+','+ny))continue;reach[ix(nx,ny)]=1;q.push(ix(nx,ny))}}
      for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++)if(C.open(x,y)&&!reach[ix(x,y)]&&!bs.has(x+','+y)){C.mist(x,y);for(let i=C.decor.length-1;i>=0;i--)if(C.decor[i].x===x&&C.decor[i].y===y)C.decor.splice(i,1);for(let i=C.lights.length-1;i>=0;i--)if(C.lights[i][0]===x&&C.lights[i][1]===y)C.lights.splice(i,1);for(let i=C.enemies.length-1;i>=0;i--)if(C.enemies[i].x===x&&C.enemies[i].y===y)C.enemies.splice(i,1)}}
+    // a blocking prop in a straight one-wide gap between walls is not a passage piece: that square becomes mist wall (the way round is unchanged, the prop already blocked it)
+    {const op=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&rows[y][x]==='.';
+     for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(!d.block||d.npc||d.pic||d.goldAmt||/chest/.test(String(d.k)))continue;const x=d.x,y=d.y;if(!op(x,y))continue;
+       const n=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>op(x+a,y+b)).length,st=(op(x+1,y)&&op(x-1,y))||(op(x,y+1)&&op(x,y-1));
+       if(n===2&&st){C.decor.splice(i,1);C.mist(x,y)}}}
     C.glow(o.glow||7,B.lcol);
     const lv=C.finish({start:{x:24,y:35,f:0}});
     lv.fogAt=()=>B.fog;lv.amb=B.amb;lv.f2=1;lv._noTidy=true;
+    // last check on the finished level (the same walk as tools/ps_test.py reach): an open square nothing reaches becomes mist wall
+    {const TB=TERRS[id]&&TERRS[id].block,bs=new Set();for(const d of lv.decor)if(d.block||(d.npc&&d.solid))bs.add(d.x+','+d.y);
+     const seen=new Uint8Array(W*H),q=[];const push=(x,y)=>{if(x<0||y<0||x>=W||y>=H||seen[ix(x,y)])return;seen[ix(x,y)]=1;q.push([x,y])};push(24,35);for(const t of C.warpTo||[])push(t[0],t[1]);
+     for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||seen[ix(nx,ny)]||lv.rows[ny][nx]!=='.'||bs.has(nx+','+ny)||(TB&&TB[ix(nx,ny)]))continue;seen[ix(nx,ny)]=1;q.push([nx,ny])}}
+     const mc=C.ch(f2MistGid(1,S.mistH||3.8));let n=0;
+     for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(lv.rows[y][x]==='.'&&!seen[ix(x,y)]&&!bs.has(x+','+y)&&!(TB&&TB[ix(x,y)])){lv.rows[y]=lv.rows[y].slice(0,x)+mc+lv.rows[y].slice(x+1);if(TB)TB[ix(x,y)]=1;n++;
+       lv.decor=lv.decor.filter(d=>!(d.x===x&&d.y===y));lv.enemies=lv.enemies.filter(e=>!(e.x===x&&e.y===y))}
+     lv._f2sealed=n}
     try{if(typeof pswaHang==='function')pswaHang(id,lv)}catch(e){console.error('f2 wallart',e)}
     return lv};
   return C}
@@ -278,6 +291,8 @@ function f2FacGid(img,i,n,wh,o){o=o||{};const k='fac'+img+i+'/'+n+'|'+wh+(o.fit=
 /* a painted texture (assets/ps, kind tex) as a floor of the engine (128 x 128) */
 function f2TexFloor(key,out,g,tn){if(FLOORS[out])return out;const im=IMG[key];if(!im||!im.width)return null;try{const N=128,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.drawImage(im,0,0,N,N);const s=x.getImageData(0,0,N,N).data,d=new Uint8ClampedArray(N*N*4);
   for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,s[i]*(g||1)*(tn?tn[0]:1));d[i+1]=Math.min(255,s[i+1]*(g||1)*(tn?tn[1]:1));d[i+2]=Math.min(255,s[i+2]*(g||1)*(tn?tn[2]:1));d[i+3]=255}FLOORS[out]=d;return out}catch(e){return null}}
+/* the re-toned creatures exist as soon as the castle's pictures are in (a fight or a test may meet them before any room is built) */
+{const _pp=pspPics;pspPics=function(){const r=_pp.apply(this,arguments);try{F2.art=0;f2Art()}catch(e){console.error('f2Art',e)}return r}}
 /* the in-map doors (C.warp) */
 function f2MoveTo(a){G.talk=null;G.P.x=a[0];G.P.y=a[1];G.P.f=a[2];G.P.angT=(a[2]-1)*Math.PI/2;G.C={x:a[0],y:a[1],a:G.P.angT};try{reveal()}catch(e){}}
 {const _k=khBump;khBump=function(nx,ny,g){const d=KH_DOOR[g];

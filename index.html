@@ -77914,18 +77914,31 @@ function f2Room(S){
   // a lettered stone slab (a plaque of a puzzle): the picture is made once
   C.plaque=(x,y,key,lines,npc,text,o)=>{const k=blSlab(key,lines,{h:1.0,top:.16,span:.66});if(npc&&!NPCS[npc])khNpc(npc,'A carved plaque',k,()=>say(text,[BYE]));C.used.delete(x+','+y);return C.dec(k,x,y,Object.assign({block:true,npc,sc:.9},o||{}))};
   // a door in a wall that takes the party to another square of the same map (into a cabin, out of it)
-  C.warp=(x,y,style,to,msgText)=>{const b=style==='house'?null:pspDoorGid(style||'oak',wh),g=KH_NEXT_GID++;if(b!=null){T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b]}KH_DOOR[g]={psf2:'warp',to,A:to,B:to,msg:msgText};(C.warpTo=C.warpTo||[]).push(to);C.solid(x,y,C.ch(g));C.used.add(x+','+y);return g};
+  C.warp=(x,y,style,to,msgText)=>{const b=style==='house'?null:pspDoorGid(style||'oak',wh),g=KH_NEXT_GID++;if(b!=null){T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b]}KH_DOOR[g]={psf2:'warp',psh:'warp',to,A:to,B:to,lvl:id,at:{x:to[0],y:to[1],f:to[2]},msg:msgText};(C.warpTo=C.warpTo||[]).push(to);C.solid(x,y,C.ch(g));C.used.add(x+','+y);return g};
   C.foes=(list,rect,seed,o)=>{let n=0;list.forEach((t,i)=>{const q=C.spot(rect[0],rect[1],rect[2],rect[3],seed*31+i,o);if(q&&f2Foe(C,t,q[0],q[1]))n++});return n};
-  C.chestAt=(x,y,tier)=>{C.used.delete(x+','+y);return C.chest(x,y,{tier:tier===undefined?1:tier})};
+  C.chestAt=(x,y,tier)=>{if(C.enemies.some(e=>e.x===x&&e.y===y)||!C.open(x,y)){const q=C.near(x,y,3,true);if(!q)return null;x=q[0];y=q[1]}C.used.delete(x+','+y);return C.chest(x,y,{tier:tier===undefined?1:tier})};
   // finish: no sealed pockets, lights, the level's air
   C.done=o=>{o=o||{};
     {const bs=new Set();for(const d of C.decor)if(d.block)bs.add(d.x+','+d.y);
      const reach=new Uint8Array(W*H),q=[ix(24,35)];reach[q[0]]=1;for(const [a,b] of C.warpTo||[]){if(!reach[ix(a,b)]){reach[ix(a,b)]=1;q.push(ix(a,b))}}
      for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||reach[ix(nx,ny)]||!C.open(nx,ny)||bs.has(nx+','+ny))continue;reach[ix(nx,ny)]=1;q.push(ix(nx,ny))}}
      for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++)if(C.open(x,y)&&!reach[ix(x,y)]&&!bs.has(x+','+y)){C.mist(x,y);for(let i=C.decor.length-1;i>=0;i--)if(C.decor[i].x===x&&C.decor[i].y===y)C.decor.splice(i,1);for(let i=C.lights.length-1;i>=0;i--)if(C.lights[i][0]===x&&C.lights[i][1]===y)C.lights.splice(i,1);for(let i=C.enemies.length-1;i>=0;i--)if(C.enemies[i].x===x&&C.enemies[i].y===y)C.enemies.splice(i,1)}}
+    // a blocking prop in a straight one-wide gap between walls is not a passage piece: that square becomes mist wall (the way round is unchanged, the prop already blocked it)
+    {const op=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&rows[y][x]==='.';
+     for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(!d.block||d.npc||d.pic||d.goldAmt||/chest/.test(String(d.k)))continue;const x=d.x,y=d.y;if(!op(x,y))continue;
+       const n=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>op(x+a,y+b)).length,st=(op(x+1,y)&&op(x-1,y))||(op(x,y+1)&&op(x,y-1));
+       if(n===2&&st){C.decor.splice(i,1);C.mist(x,y)}}}
     C.glow(o.glow||7,B.lcol);
     const lv=C.finish({start:{x:24,y:35,f:0}});
     lv.fogAt=()=>B.fog;lv.amb=B.amb;lv.f2=1;lv._noTidy=true;
+    // last check on the finished level (the same walk as tools/ps_test.py reach): an open square nothing reaches becomes mist wall
+    {const TB=TERRS[id]&&TERRS[id].block,bs=new Set();for(const d of lv.decor)if(d.block||(d.npc&&d.solid))bs.add(d.x+','+d.y);
+     const seen=new Uint8Array(W*H),q=[];const push=(x,y)=>{if(x<0||y<0||x>=W||y>=H||seen[ix(x,y)])return;seen[ix(x,y)]=1;q.push([x,y])};push(24,35);for(const t of C.warpTo||[])push(t[0],t[1]);
+     for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||seen[ix(nx,ny)]||lv.rows[ny][nx]!=='.'||bs.has(nx+','+ny)||(TB&&TB[ix(nx,ny)]))continue;seen[ix(nx,ny)]=1;q.push([nx,ny])}}
+     const mc=C.ch(f2MistGid(1,S.mistH||3.8));let n=0;
+     for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(lv.rows[y][x]==='.'&&!seen[ix(x,y)]&&!bs.has(x+','+y)&&!(TB&&TB[ix(x,y)])){lv.rows[y]=lv.rows[y].slice(0,x)+mc+lv.rows[y].slice(x+1);if(TB)TB[ix(x,y)]=1;n++;
+       lv.decor=lv.decor.filter(d=>!(d.x===x&&d.y===y));lv.enemies=lv.enemies.filter(e=>!(e.x===x&&e.y===y))}
+     lv._f2sealed=n}
     try{if(typeof pswaHang==='function')pswaHang(id,lv)}catch(e){console.error('f2 wallart',e)}
     return lv};
   return C}
@@ -77940,6 +77953,8 @@ function f2FacGid(img,i,n,wh,o){o=o||{};const k='fac'+img+i+'/'+n+'|'+wh+(o.fit=
 /* a painted texture (assets/ps, kind tex) as a floor of the engine (128 x 128) */
 function f2TexFloor(key,out,g,tn){if(FLOORS[out])return out;const im=IMG[key];if(!im||!im.width)return null;try{const N=128,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.drawImage(im,0,0,N,N);const s=x.getImageData(0,0,N,N).data,d=new Uint8ClampedArray(N*N*4);
   for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,s[i]*(g||1)*(tn?tn[0]:1));d[i+1]=Math.min(255,s[i+1]*(g||1)*(tn?tn[1]:1));d[i+2]=Math.min(255,s[i+2]*(g||1)*(tn?tn[2]:1));d[i+3]=255}FLOORS[out]=d;return out}catch(e){return null}}
+/* the re-toned creatures exist as soon as the castle's pictures are in (a fight or a test may meet them before any room is built) */
+{const _pp=pspPics;pspPics=function(){const r=_pp.apply(this,arguments);try{F2.art=0;f2Art()}catch(e){console.error('f2Art',e)}return r}}
 /* the in-map doors (C.warp) */
 function f2MoveTo(a){G.talk=null;G.P.x=a[0];G.P.y=a[1];G.P.f=a[2];G.P.angT=(a[2]-1)*Math.PI/2;G.C={x:a[0],y:a[1],a:G.P.angT};try{reveal()}catch(e){}}
 {const _k=khBump;khBump=function(nx,ny,g){const d=KH_DOOR[g];
@@ -78026,8 +78041,8 @@ function psf2HubBuild(info){
   const NAMES={9821:'THE PERFECT FOREST',9822:'THE ISLAND BY THE SEA',9823:'THE CABIN IN THE SNOW',9824:'THE WATERWAYS',9825:'THE DESERT',9826:'THE SWAMP',9827:'THE NIGHTMARE'};
   for(const l of pspLinksFrom(id)){if(!NAMES[l.to])continue;const [x,y]=l.at;
     if(y===3){C.sign(x+1,4,[0,-1],NAMES[l.to]);cand(x-2,4);cand(x+2,4)}
-    else if(x===2){C.sign(4,21,[0,-1],NAMES[l.to]);cand(4,20)}
-    else{C.sign(51,21,[0,-1],NAMES[l.to]);cand(51,20)}}
+    else if(x===2){C.sign(4,20,[0,-1],NAMES[l.to]);cand(4,24)}
+    else{C.sign(51,20,[0,-1],NAMES[l.to]);cand(51,24)}}
   for(const x of [14,24,34,44]){pic(x===24||x===34?'mirror_haunted_a':'banner_long_a',x,4,[0,-1]);pic('banner_long_b',x,6,[0,1])}
   for(const x of [5,50])pic('window_stained_tall',x,6,[0,1]);
   // the nave: two rows of columns, stained windows high on the side walls, candelabra by the dais
@@ -78261,17 +78276,17 @@ function f2IslandApply(){const R=f2S(9822);if(LEVEL!==9822)return;
   for(const [x,y,s] of F2_ISLAND.PATCH)if(R.dug&&R.dug[s])for(const d of G.decor||[])if(d.npc&&Math.round(d.x)===x&&Math.round(d.y)===y)d.k=pspPic('f2_patch_dug')}
 f2OnArrive(9822,()=>f2IslandApply());
 /* ---------- 3. THE CABIN IN THE SNOW (9823): the face ---------- */
-const F2_SNOW={LOGS:[[8,19],[40,22],[10,31]],FLINT:[29,9],HEARTH:[41,4],MIRROR:[43,4],IN:[41,7,0],OUT:[24,9,2]};
+const F2_SNOW={LOGS:[[8,23],[40,22],[10,31]],FLINT:[29,9],HEARTH:[41,4],MIRROR:[43,4],IN:[41,7,0],OUT:[24,9,2]};
 function f2SnowBuild(){
   const C=f2Room({id:9823,ground:'snow',path:'snowpath',band:[2,5],wh:3.2,
-    routes:[[[24,35],[24,26],[30,21],[30,14],[24,12],[24,9]],[[24,29],[12,28],[10,31]],[[30,18],[40,20]],[[24,24],[12,22],[8,19]]],
+    routes:[[[24,35],[24,26],[30,21],[30,14],[24,12],[24,9]],[[24,29],[12,28],[10,31]],[[30,18],[40,20]],[[24,24],[12,23],[8,23]]],
     clear:[[14,3,34,13,'snow','The Cabin',1],[4,15,13,24,'snow','The Frozen Pond',1],[35,16,44,26,'snow',"The Bear's Den",1],[5,27,15,34,'snow','The Birch Stand',1]],
     keep:(x,y)=>x>=37&&y<=10});
   const W=48,{rows,block,fm}=C;
   // the cabin: a small timber house with a snowy roof; its door opens into the room inside (built in the north-east corner, walled all round)
   if(IMG.ps_f2_cabin&&IMG.ps_f2_cabin.width&&!IMG.ps_f2_cabin._ps)C.picHouse({img:'ps_f2_cabin',x0:22,y0:5,x1:26,y1:8,w:6.2,door:[24,8],wh:2.6});else C.house({x0:21,y0:5,x1:27,y1:8,face:'S',sty:'timber',roof:'thatch2',wh:2.6,col:[1.5,1.05,.55]});
   for(const x of [22,26])C.light(x,9,[1.5,1.05,.55]);
-  {const [dx,dy]=[24,8],g=C.chars[rows[dy][dx]];KH_DOOR[g]={psf2:'warp',to:F2_SNOW.IN,A:F2_SNOW.IN,B:F2_SNOW.IN,msg:'You step inside the cabin. It is as cold in here as it is outside.'};(C.warpTo=C.warpTo||[]).push(F2_SNOW.IN)}
+  {const [dx,dy]=[24,8],g=C.chars[rows[dy][dx]];KH_DOOR[g]={psf2:'warp',psh:'warp',to:F2_SNOW.IN,A:F2_SNOW.IN,B:F2_SNOW.IN,lvl:9823,at:{x:F2_SNOW.IN[0],y:F2_SNOW.IN[1],f:0},msg:'You step inside the cabin. It is as cold in here as it is outside.'};(C.warpTo=C.warpTo||[]).push(F2_SNOW.IN)}
   // inside: walls of timber round x 38..43, y 4..7; the hearth on the north wall, the mirror beside it, a bed, a table
   {const TM=C.TM,wall=C.ch(TM.make('plain','timber',3.0).gid),win=C.ch(TM.make('window','timber',3.0).gid);
    for(let y=2;y<=9;y++)for(let x=38;x<=45;x++){const inner=x>=40&&x<=43&&y>=4&&y<=7;if(inner){rows[y][x]='.';block[y*W+x]=0;fm[y*W+x]=C.fl('wl2f0');C.used.delete(x+','+y)}else if(x>=39&&x<=44&&y>=3&&y<=8){C.solid(x,y,(x===42&&y===3)?win:wall)}else C.mist(x,y)}   // timber inside, mist outside (the room is only reached through the cabin door)
@@ -78284,7 +78299,7 @@ function f2SnowBuild(){
   {const [fx,fy]=F2_SNOW.FLINT;C.used.delete(fx+','+fy);C.dec(pspPic('f2_flintpost'),fx,fy,{block:true,npc:'f2s_flint'})}
   F2_SNOW.LOGS.forEach(([x,y],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_log'),x,y,{block:true,npc:'f2s_log'+i,sc:1.3})});
   // the frozen pond (ice, walk round it), snowy pines, birches and rocks
-  for(let y=17;y<=21;y++)for(let x=6;x<=11;x++)if(Math.hypot((x-8.5)/3,(y-19)/2.4)<1&&!(x===8&&y===19)&&C.free(x,y))C.water(x,y,'canal');
+  for(let y=17;y<=21;y++)for(let x=6;x<=11;x++)if(Math.hypot((x-8.5)/3,(y-19)/2.4)<1&&C.free(x,y))C.water(x,y,'canal');
   C.fill([pspPic('f2_snowpine'),pspPic('f2_snowpine2'),pspPic('f2_snowpine'),pspPic('f2_snowpine2'),pspPic('f2_snowbirch')],{});
   C.scrub([pspPic('f2_log')],.012);
   C.capTrees(/snowpine|snowbirch/,2.6);
@@ -78503,8 +78518,7 @@ function f2NightBuild(){
   const C=f2Room({id:9827,ground:'tombdark',path:'wl2f5',band:[1,4],wh:3.4,
     routes:[[[24,35],[24,27],[31,23],[31,15],[24,13],[24,11]],[[24,27],[14,25],[9,20]],[[31,19],[40,19]],[[22,31],[11,31]]],
     clear:[[17,2,31,12,'blood','The Ring of Lanterns',1],[4,15,13,24,'ash','The Doll Room',1],[35,14,44,24,'ash','The Hall of Eyes',1],[5,27,15,34,'blood','The Broken Clocks',1]],
-    edge:(C,x,y)=>{const e=C.E[y*48+x];if(e<=5){const h=C.hs2(x,y,77);if(h<.16){const f=f2FacGid('ps_f2_eyedoor',0,1,3.4,{tex:'texBlack_1',fit:false,rgb:[.95,.9,.9]});if(f!=null){const g=KH_NEXT_GID++;T_TILE[g]=T_TILE[f];KH_DOOR[g]={psf2:'nightdoor'};C.solid(x,y,C.ch(g));return true}}
-      C.solid(x,y,C.ch(pspWallGid(h<.5?'dark':'moss',(h*7)|0,3.4)));return true}return false}});
+    edge:(C,x,y)=>{const e=C.E[y*48+x];if(e<=5){const h=C.hs2(x,y,77);C.solid(x,y,C.ch(pspWallGid(h<.5?'dark':'moss',(h*7)|0,3.4)));return true}return false}});
   // the jar on its pedestal and the four lanterns round it
   {const [jx,jy]=F2_NIGHT.JAR;C.used.delete(jx+','+jy);C.dec(pspPic('f2_brainjar'),jx,jy,{block:true,npc:'f2n_jar'});C.light(jx,jy,[.6,1.1,.6])}
   F2_NIGHT.LAMP.forEach(([x,y],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_lantern_off'),x,y,{block:true,npc:'f2n_lamp'+i})});
@@ -78522,6 +78536,12 @@ function f2NightBuild(){
   for(const [x,y] of [[5,16],[43,15],[14,33]])C.chestAt(x,y,1);
   C.ret();
   const lv=C.done({glow:9});
+  // staring doors: a few black wall squares that face a square the party can stand on become doors covered in eyes (they never open)
+  {const f=f2FacGid('ps_f2_eyedoor',0,1,3.4,{tex:'texBlack_1',fit:false,rgb:[.95,.9,.9]}),TB=TERRS[9827]&&TERRS[9827].block,bs=new Set(lv.decor.filter(d=>d.block).map(d=>d.x+','+d.y));
+   const stand=(x,y)=>lv.rows[y]&&lv.rows[y][x]==='.'&&!bs.has(x+','+y)&&!(TB&&TB[y*48+x]);
+   if(f!=null)for(let y=3;y<37;y++)for(let x=3;x<45;x++){const c=lv.rows[y][x];if(c==='.'||C.hs2(x,y,77)>=.16||!(C.E[y*48+x]<=5))continue;const g0=lv.chars[c];if(g0!==undefined&&KH_DOOR[g0])continue;
+     if(![[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>stand(x+a,y+b)))continue;
+     const g=KH_NEXT_GID++;T_TILE[g]=T_TILE[f];if(GY.col&&GY.col[f])GY.col[g]=GY.col[f];KH_DOOR[g]={psf2:'nightdoor'};const ch=C.ch(g);lv.chars[ch]=g;lv.rows[y]=lv.rows[y].slice(0,x)+ch+lv.rows[y].slice(x+1)}}
   for(const [x,y] of F2_NIGHT.LAMP){lv.lights.push([x,y]);lv._ps.lcol[x+','+y]=[.5,.25,.25]}
   return lv}
 pspRegister(9827,f2NightBuild);
