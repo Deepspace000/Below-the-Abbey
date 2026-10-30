@@ -70,6 +70,8 @@ function tmApply(n,weak,real){
   G.gold=real?Math.round(tmGold(n)*.5):tmGold(n);
   // 4. the quests
   const Q=tmQuestPlan(n);for(const id of Q.main.concat(Q.extra))G.quests[id]={st:'done',base:0};
+  // 5. each hero's special power is the strongest active power the hero has unlocked at this level (the one that needs the highest level)
+  G.heroes.forEach((h,hi)=>{try{const PW=heroPowers(hi);let best=0,bl=-1;PW.forEach((p,k)=>{if(p&&p.act&&h.lvl>=p.lv&&p.lv>=bl){bl=p.lv;best=k}});h.powSel=best}catch(e){console.error('tm power',e)}});
   tmCleanse();TM.clean=[G.time+1.2,G.time+3]; // a test party starts with no afflictions (those an area gives on entering are cleared a moment later too)
   // the creatures of the area were sized while the party was being rebuilt at a low level: size them again now that it stands at level n
   for(const e of G.enemies){if(e.hp<=0||e.dying)continue;const fr=e.hp/e.maxhp;e.maxhp=enemyStat(e.t,e.lvl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}
