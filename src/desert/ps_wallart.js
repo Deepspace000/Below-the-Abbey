@@ -56,6 +56,13 @@ function pswaHang(id,L){
     out3.push(d)}
   // the Pale Approach: nothing painted on the far walls in line with the Pilgrim Steps (x 30 to 34): the engine draws a far wall picture through the dark stair risers, so a statue seems to float behind the steps
   if(id===9720){const keep=out3.filter(d=>!(d.pic&&d.wd&&/alcove|st_|statue|saint|weep|mourn/i.test(String(d.k))&&Math.abs(Math.round(d.x)-32)<=2&&Math.round(d.y)<46));rep.stairLine=out3.length-keep.length;L.decor=keep}else L.decor=out3;
+  // hanging lanterns (red steel lanterns, hanging lamps on chains) that stand free hang from the ceiling, above the party, not on the floor
+  rep.lift=0;
+  if(!L.outdoor){const CH=L.ceilH||3.2;
+    for(const d of L.decor){const k=String(d.k);if(d.pic||d.wd||d.npc||!/lantern_red|lantern_hanging|hanging_lamp|lamp_hanging/i.test(k))continue;
+      const h=(NPC_H[d.k]||1)*(d.sc||1);d.block=false;d.bob=+Math.max(.5,CH-h-.02).toFixed(2);rep.lift++}}
+  // out of doors a hanging lantern has nothing to hang from: a loose one is taken out
+  if(L.outdoor){const n0=L.decor.length;L.decor=L.decor.filter(d=>d.pic||d.wd||d.npc||!/lantern_red|lantern_hanging|hanging_lamp|lamp_hanging/i.test(String(d.k)));rep.lift=-(n0-L.decor.length)}
   L._wallart=rep;return L}
 {for(const info of PSP.LEVELS){const id=info.id,orig=KH_LAZY[id];if(!orig||orig._pswa)continue;
   const w=()=>{const lv=orig();const L=LEVELS[id]||lv;try{pswaHang(id,L)}catch(e){console.error('ps wallart',id,e)}return LEVELS[id]||lv};w._pswa=1;KH_LAZY[id]=w}}
