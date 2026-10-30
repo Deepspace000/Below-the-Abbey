@@ -140,7 +140,8 @@ const UW={
 const UWS={}; // per level: where the vents are, and what swims by
 const UW_THEME={
   reef:{big:['staghorn','brain','rocks','tubes'],small:['softcoral','anemone','seafan','seagrass','kelp'],props:['clam','amphora']},
-  abbey:{big:['yar_arch','timber','rocks','brain'],small:['kelp','seagrass','softcoral','anemone'],props:['amphora','clam']},
+  abbey:{big:['rocks','timber','rocks','brain'],   // the bell arch is not scattered: one great bell in its broken arch stands ahead of the start (below)
+   small:['kelp','seagrass','softcoral','anemone'],props:['amphora','clam']},
   vent:{big:['rocks','tubes','staghorn','yar_crystals'],small:['anemone','seafan','seagrass','softcoral'],props:['clam','amphora']},
   wreck:{big:['timber','yar_wreck','rocks','brain'],small:['kelp','kelp','seagrass','softcoral','anemone'],props:['amphora','clam']}
 };
@@ -190,7 +191,7 @@ function uwBuild(id){
   const vents=[],vspots=[[start.x-6,start.y-6],[26,66],[84,60],[54,34]];
   for(const [vx,vy] of vspots){let s=null;for(let r=0;r<8&&!s;r++)for(let yy=-r;yy<=r&&!s;yy++)for(let xx=-r;xx<=r&&!s;xx++){const x=vx+xx,y=vy+yy;if(!block[y*W+x]&&rows[y][x]==='.')s=[x,y]}if(s){vents.push(s);used.add(s[0]+','+s[1])}}
   // a landmark or two ahead of the start, so that each reef opens on its own picture
-  {const LM={reef:['staghorn','brain','staghorn'],abbey:['yar_arch','yar_arch','timber'],vent:['tubes','rocks','tubes'],wreck:['yar_wreck','timber','rocks']}[sp.theme]||[];
+  {const LM={reef:['staghorn','brain','staghorn'],abbey:['timber','yar_arch','rocks'],vent:['tubes','rocks','tubes'],wreck:['yar_wreck','timber','rocks']}[sp.theme]||[];
     LM.forEach((k,i)=>{const x=start.x-7+i*7,y=start.y-8-(i%2)*2;if(free(x,y))dc(k.startsWith('yar_')?k:'uw_'+k,x,y,{sc:1.35+(i%2)*.25})})}
   // the dive line up, the prize, and the boss
   dc('uw_buoy',start.x+2,start.y-1,{npc:'uw_up',cat:id,deco:false});

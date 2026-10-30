@@ -20,6 +20,7 @@ fplDef(44,c=>{
     const cx=(p.x0+p.x1)>>1,cy=(p.y0+p.y1)>>1;let done=false;
     for(let k=0;k<offs.length&&!done;k++){
       const px=cx+offs[k][0],py=cy+offs[k][1],cells=c.ellipse(px,py,3.4,2.3,(px*7+py)|0);
+      if(cells.some(([x,y])=>[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>{const r=c.L.rows[y+dy];return !r||r[x+dx]!=='.'})))continue; // a dry path between the pond and every wall, so no pond lies against a door
       if(!c.lake(cells,{floor:'water',quiet:true,into:'2'}))continue;
       done=true;c.quietStands=true;let s=0;
       s+=c.edgeStand(cells,'N',px)?1:0;s+=c.edgeStand(cells,'S',px)?1:0;s+=c.edgeStand(cells,'W',py)?1:0;s+=c.edgeStand(cells,'E',py)?1:0;

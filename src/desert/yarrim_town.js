@@ -77,14 +77,14 @@ const YR_TPL={
   }})
 };
 
-/* ---- the cottages: seven squares by six, a wooden floor, a hearth or a bed or a loom, and the things of the trade. Some have someone at home. ---- */
+/* ---- the cottages: seven squares by six with the walls (the floor is x 1 to 5, y 1 to 4; everything stands on it, the way in at x 3 is kept clear), a wooden floor, a hearth or a bed or a loom, and the things of the trade. Some have someone at home. ---- */
 const YR_COT0=1500;   // the level numbers of the cottage rooms
 const YR_COT_SETS=[
-  {n:"A Fisherman's Cottage",tele:[1,4],item:[5,4],res:[2,2],who:0,build:({put,raw})=>{put('hearth',3,1);put('bed',1,1);put('table',5,3);put('chair',4,3);put('rope',1,3);raw('yar_bucket2',5,1);raw('barrel',6,1);put('sail',6,4)}},
-  {n:"A Net-Mender's Cottage",tele:[6,4],item:[2,4],res:[4,2],who:1,build:({put,raw})=>{put('loom',5,1);put('potshelf',1,1);put('table',1,3);put('chair',2,3);put('sail',6,3);put('sail',6,2);raw('crate',5,4);raw('yar_bucket4',1,4)}},
-  {n:"A Widow's Cottage",tele:[6,4],item:[4,4],res:[2,3],who:2,build:({put,raw})=>{put('hearth',5,1);put('kitchenshelf',2,1);put('bed',1,2);put('birdcage',1,4);put('table',5,3);put('chair',6,3)}},
-  {n:"A Boatbuilder's House",tele:[1,4],item:[2,4],res:[4,2],who:3,build:({put,raw})=>{raw('crate',1,1);raw('barrel',2,1);put('wheel',5,1);put('ship',6,1);put('anchor',6,3);put('rope',1,3);put('seachest',5,4)}},
-  {n:"A Poor Fisher's Hut",tele:[6,2],item:[4,4],res:[2,3],who:4,build:({put,raw})=>{put('bed',1,1);put('potshelf',5,1);put('amphora',1,4);put('table',5,3);put('chair',5,4);raw('yar_bucket3',6,4)}}
+  {n:"A Fisherman's Cottage",tele:[1,4],item:[2,4],res:[2,2],who:0,build:({put,raw})=>{put('hearth',3,1);put('bed',1,1);put('table',5,3);put('chair',4,3);put('rope',1,3);raw('yar_bucket2',5,1);raw('barrel',4,1);put('sail',5,4)}},
+  {n:"A Net-Mender's Cottage",tele:[4,4],item:[2,4],res:[4,2],who:1,build:({put,raw})=>{put('loom',5,1);put('potshelf',1,1);put('table',1,3);put('chair',2,3);put('sail',5,3);put('sail',5,2);raw('crate',5,4);raw('yar_bucket4',1,4)}},
+  {n:"A Widow's Cottage",tele:[5,4],item:[4,4],res:[2,3],who:2,build:({put,raw})=>{put('hearth',5,1);put('kitchenshelf',2,1,Object.assign({bob:.42},KH_WALLPIECE));put('bed',1,2);put('birdcage',1,4);put('table',5,3);put('chair',4,3)}},
+  {n:"A Boatbuilder's House",tele:[1,4],item:[2,4],res:[4,2],who:3,build:({put,raw})=>{raw('crate',1,1);raw('barrel',2,1);put('wheel',5,1);put('ship',4,1);put('anchor',5,3);put('rope',1,3);put('seachest',5,4)}},
+  {n:"A Poor Fisher's Hut",tele:[5,2],item:[4,4],res:[2,3],who:4,build:({put,raw})=>{put('bed',1,1);put('potshelf',5,1);put('amphora',1,4);put('table',5,3);put('chair',5,4);raw('yar_bucket3',4,1)}}
 ];
 const YR_COT_ITEMS=['bread','herring','ale','apple'];
 function YR_COT_TPL(c){

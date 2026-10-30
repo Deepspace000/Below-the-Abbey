@@ -45,6 +45,9 @@ async function khPrepareRun(){
   const rowCodes=new Array(H);for(let y=0;y<H;y++)rowCodes[y]=new Uint16Array(W);
   const WALL_DEFAULT='#'.charCodeAt(0),DOT='.'.charCodeAt(0);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++)rowCodes[y][x]=C.solid[idx(x,y)]?WALL_DEFAULT:DOT;
+  {const seen=new Uint8Array(W*H),q=[[KH.CX,H-KH.WALL-4]];seen[idx(KH.CX,H-KH.WALL-4)]=1; // pockets of open ground that no street reaches are filled in, so nothing (a herb, a pond) can be put where nobody can walk
+    while(q.length){const [x,y]=q.pop();for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;const i=idx(nx,ny);if(C.solid[i]||seen[i])continue;seen[i]=1;q.push([nx,ny])}}
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(!C.solid[idx(x,y)]&&!seen[idx(x,y)]){rowCodes[y][x]=WALL_DEFAULT;C.solid[idx(x,y)]=1}}
   const gateMod=C.modules.find(m=>m.kind==='castle'&&m.face===0&&m.cells.some(([x,y])=>x===KH.CX&&y===H-KH.WALL));
   const eastMods=C.modules.filter(m=>m.kind==='castle'&&m.cells.some(([x,y])=>x>=W-KH.WALL&&y>=199&&y<=201));
   for(const m of eastMods)m.doorCells=m.cells.filter(([x,y])=>y>=199&&y<=201);

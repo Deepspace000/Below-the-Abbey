@@ -60,7 +60,7 @@ function khBuildCisterns(){
   const decor=[],enemies=[],items=[];
   const free=(x,y)=>rows[y][x]==='.';
   const cell=(x,y)=>({k:'bones',x,y,block:false,walk:true});
-  for(let i=0;i<40;i++){const x=1+((rng()*(W-2))|0),y=1+((rng()*(H-2))|0);if(free(x,y)&&Math.abs(x-1)+Math.abs(y-H+2)>6)decor.push(cell(x,y))}
+  for(let i=0;i<40;i++){const x=1+((rng()*(W-2))|0),y=1+((rng()*(H-2))|0);if(free(x,y)&&Math.abs(x-1)+Math.abs(y-H+2)>6&&!decor.some(d=>d.x===x&&d.y===y))decor.push(cell(x,y))} // one heap of bones to a square
   const types=['skel','skel','ghost','scorpion','bat','skel','ghost','mummy'];
   for(let i=0;i<13;i++){let x,y,t=0;do{x=1+((rng()*(W-2))|0);y=1+((rng()*(H-4))|0);t++}while((!free(x,y)||Math.abs(x-1)+Math.abs(y-H+2)<10)&&t<80);if(free(x,y))enemies.push({t:types[i%types.length],x,y,lvl:16})}
   for(const [x,y] of [[5,6],[17,5],[30,11],[7,19],[22,22],[34,24]])if(free(x,y))decor.push({k:'chest',x,y,block:true,deco:false});
@@ -93,13 +93,13 @@ function khBuildWorld(){
   const pal=khBuildPalace();
   LEVELS[KH_PALACE]={rows:pal.rows,start:pal.start,enemies:[],items:[],decor:pal.decor,day:0,amb:.72,floor:'kh2',ceil:'beam',name:'The Palace of Khemetra',label:'Palace',lights:pal.lights,portals:[back(44,KH_PALACE_FRONT.x,KH_PALACE_FRONT.y,KH_PALACE_FRONT.f)],diff:16,chars:wall?{w:wall}:undefined};
   const cis=khBuildCisterns();
-  LEVELS[KH_CISTERN]={rows:cis.rows,start:cis.start,enemies:cis.enemies,items:cis.items,decor:cis.decor,day:0,amb:.28,floor:'kh3',ceil:'beam',name:'The Cisterns beneath Khemetra',label:'Cisterns',lights:[[1,28],[11,27],[21,16],[31,5],[39,2]],portals:[back(44,KH_HATCH.x,KH_HATCH.y+1,2),back(KH_STUDY,7,9,0)],diff:17,noExtras:true,chars:{w:khInteriorWall('cellar')||undefined}};
+  LEVELS[KH_CISTERN]={rows:cis.rows,start:cis.start,enemies:cis.enemies,items:cis.items,decor:cis.decor,day:0,amb:.28,floor:'kh3',ceil:'beam',name:'The Cisterns beneath Khemetra',label:'Cisterns',lights:[[1,28],[11,27],[21,16],[31,5],[39,1]],portals:[back(44,KH_HATCH.x,KH_HATCH.y+1,2),back(KH_STUDY,7,9,0)],diff:17,noExtras:true,chars:{w:khInteriorWall('cellar')||undefined}};
   if(!LEVELS[KH_CISTERN].chars.w)delete LEVELS[KH_CISTERN].chars;
   const st=khBuildStudy();
-  LEVELS[KH_STUDY]={rows:st.rows,start:st.start,enemies:[],items:[],decor:st.decor,day:0,amb:.7,floor:'kh2',ceil:'beam',name:"Ishkander's Study",label:'The Wizards Study',lights:st.lights,portals:[back(KH_CISTERN,KH_CIST_END.x,KH_CIST_END.y,2)],diff:17,chars:wall?{w:wall}:undefined};
+  LEVELS[KH_STUDY]={rows:st.rows,start:st.start,enemies:[],items:[],decor:st.decor,day:0,amb:.7,floor:'kh2',ceil:'beam',name:"Ishkander's Study",label:'The Wizards Study',lights:st.lights,portals:[back(KH_CISTERN,KH_CIST_END.x,KH_CIST_END.y,cis.rows[KH_CIST_END.y+1][KH_CIST_END.x]==='.'?2:3)],diff:17,chars:wall?{w:wall}:undefined};
   const tn=khBuildSeaTunnel();
   LEVELS[KH_SEATUNNEL]={rows:tn.rows,start:tn.start,enemies:[],items:[],decor:tn.decor,day:.55,amb:.55,floor:'sand',ceil:'cloud',name:'The Tunnel to the Narrow Sea',label:'Sea Tunnel',lights:tn.lights,portals:[back(62,KH_SEA_MOUTH.x,KH_SEA_MOUTH.y+1,2)],diff:20,noExtras:true,seaTunnel:true};
 }
-const KH_PALACE_FRONT={x:200,y:206,f:2},KH_HATCH={x:108,y:112},KH_CIST_END={x:39,y:2},KH_SEA_MOUTH={x:292,y:150};
+const KH_PALACE_FRONT={x:200,y:206,f:2},KH_HATCH={x:108,y:112},KH_CIST_END={x:39,y:1},KH_SEA_MOUTH={x:292,y:150};
 // the mouth of the tunnel to the sea stands in the east of the Violet Erg from the start
 (function(){const V=LEVELS[62];if(V){V.decor=V.decor||[];V.decor.push({k:'dburrow',x:KH_SEA_MOUTH.x,y:KH_SEA_MOUTH.y,block:true,enter:{to:KH_SEATUNNEL,x:15,y:17,f:0}})}})();

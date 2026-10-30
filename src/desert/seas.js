@@ -105,7 +105,7 @@ function seaBuild(id){
   for(const [x0,y0,x1,y1,ch] of sp.walls||[])for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){rows[y][x]=ch;block[y*W+x]=1}
   const portals=[];
   if(sp.gate){rows[sp.gate[1]][sp.gate[0]]='1';block[sp.gate[1]*W+sp.gate[0]]=1;portals[1]={to:305,x:74,y:141,f:0,tex:'citygate',req:'oldhavenOpen',lock:'The great gate of Oldhaven is barred until noon. Speak to the herald.'}}
-  const spot=(dx,dy)=>{for(let r=0;r<14;r++)for(let yy=-r;yy<=r;yy++)for(let xx=-r;xx<=r;xx++){if(Math.max(Math.abs(xx),Math.abs(yy))!==r)continue;const x=cx+dx+xx,y=cy+dy+yy;if(x<2||y<2||x>=W-2||y>=H-2)continue;if(!block[y*W+x]&&rows[y][x]==='.')return [x,y]}return null};
+  const spot=(dx,dy,skip)=>{for(let r=0;r<14;r++)for(let yy=-r;yy<=r;yy++)for(let xx=-r;xx<=r;xx++){if(Math.max(Math.abs(xx),Math.abs(yy))!==r)continue;const x=cx+dx+xx,y=cy+dy+yy;if(x<2||y<2||x>=W-2||y>=H-2)continue;if(!block[y*W+x]&&rows[y][x]==='.'&&!(skip&&skip.has(x+','+y)))return [x,y]}return null};   // skip: squares already taken
   // the pier and the ship
   let sy=-1;for(let y=H-2;y>0;y--)if(!block[y*W+cx]&&h[y*W+cx]>-.06){sy=y;break}
   const plank=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;block[i]=0;h[i]=.08;rk[i]=0;fm[i]='2'}};
@@ -131,8 +131,8 @@ function seaBuild(id){
   isleBeachProps(W,H,fm,h,block,rows,used,scenery,sp.seed,cx,cy,.16,[cx,sy-2]);
   for(let q=0;q<26;q++){const a=hash2(id,q,91)*TAU,rr=sp.rx*(.55+hash2(id,q,92)*.4),x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr*(sp.ry/sp.rx),cxl=x|0,cyl=y|0;
     if(cxl<2||cyl<2||cxl>=W-2||cyl>=H-2||block[cyl*W+cxl]||used.has(cxl+','+cyl))continue;scenery.push({k:'yar_gull_stand',wx:x,wy:y,sc:.8+hash2(id,q,93)*.4,decor:{k:'yar_gull_stand',walk:true,x:cxl,y:cyl}})}
-  const enemies=[];
-  for(const [t,n,dx,dy,r] of sp.enemies){for(let q=0;q<n;q++){const a=hash2(id,q+40,t.length)*TAU,rr=hash2(id,q+50,t.length)*r,s=spot(dx+Math.cos(a)*rr|0,dy+Math.sin(a)*rr|0);if(s&&Math.abs(s[0]-cx)+Math.abs(s[1]-(sy-2))>12)enemies.push({t,x:s[0],y:s[1]})}}
+  const enemies=[],foeAt=new Set(decor.filter(d=>d.block).map(d=>d.x+','+d.y));   // a creature never stands on a solid piece (an altar, a tree) or on another creature
+  for(const [t,n,dx,dy,r] of sp.enemies){for(let q=0;q<n;q++){const a=hash2(id,q+40,t.length)*TAU,rr=hash2(id,q+50,t.length)*r,s=spot(dx+Math.cos(a)*rr|0,dy+Math.sin(a)*rr|0,foeAt);if(s&&Math.abs(s[0]-cx)+Math.abs(s[1]-(sy-2))>12){enemies.push({t,x:s[0],y:s[1]});foeAt.add(s[0]+','+s[1])}}}
   const start={x:cx,y:sy-2,f:0};
   const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[],decor,scenery,floorSet:sp.floors,floor:sp.floors[0],ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:sp.name,label:sp.label,noExtras:true,diff:sp.diff,tele:{x:start.x,y:start.y},
