@@ -61,11 +61,12 @@ function ntBuildFloor(n){
   try{T=ntWallTiles(n,look);gDown=ntStairTile(n,look,false);gUp=ntStairTile(n,look,true);gNic=ntNicheTile(n,look)}finally{NT._making=false}
   const chars={},chMap=new Map();let nextCh=0x300;const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
   const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&a[y*W+x]===1;
+  const wat=plan.water||new Set(),isWat=(x,y)=>wat.has(y*W+x);   // pond squares: closed in the plan, floor and blocker here
   const near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
   const PL=T.plain.map(ch),RIM=T.rim.map(ch),FAR=ch(T.far);
   const rows=[];
   for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++){
-    if(open(x,y)){s+='.';continue}
+    if(open(x,y)||isWat(x,y)){s+='.';continue}
     if(!near(x,y)){s+=FAR;continue}
     s+=hs(x,y,3)<.18?RIM[(hs(x,y,4)*RIM.length)|0]:PL[(hs(x,y,5)*PL.length)|0]}rows.push(s)}
   const put=(x,y,c)=>{rows[y]=rows[y].slice(0,x)+c+rows[y].slice(x+1)};
@@ -81,13 +82,24 @@ function ntBuildFloor(n){
   for(const k of route)occ.add(k);
   V.route=route;
   const free=(x,y)=>open(x,y)&&!occ.has(x+','+y);
+  /* ---- ponds: dark still water, blocking (an invisible blocker on each square, as the game's lakes have), with a fishing spot on one edge; reeds and grass round it (walk-through) ---- */
+  const ponds=plan.ponds||[],pondStands=[];
+  for(const pd of ponds){
+    for(const [x,y] of pd.cells){decor.push({k:'pstump',x,y,block:true,sc:.0001,wdh:1,fplWater:1,nt:'pond'});occ.add(x+','+y)}
+    const st=pd.stand;occ.add(st.x+','+st.y);pondStands.push({x:st.x,y:st.y,dx:st.dx,dy:st.dy});
+    const reeds=['reeds','hgwm_reed0','greeds'].filter(k=>IMG[k]),grass=['pgrass1','pgrass0','gy_web'].filter(k=>IMG[k]);
+    const rim=new Set();for(const [x,y] of pd.cells)for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++){const nx=x+i,ny=y+j;if(open(nx,ny)&&!isWat(nx,ny))rim.add(nx+','+ny)}
+    pd.rim=[...rim].map(k=>k.split(',').map(Number));
+    for(const [x,y] of pd.rim){const h=hs(x,y,131);if(x===st.x&&y===st.y)continue;if(route.has(x+','+y))continue;
+      if(h<.42&&reeds.length){decor.push({k:reeds[(hs(x,y,132)*reeds.length)|0],x,y,block:false,walk:true,deco:true,sc:.8+hs(x,y,133)*.5,ox:(hs(x,y,134)-.5)*.5,oy:(hs(x,y,135)-.5)*.4})}
+      else if(h<.6&&grass.length){decor.push({k:grass[(hs(x,y,136)*grass.length)|0],x,y,block:false,walk:true,deco:true,sc:.9+hs(x,y,137)*.4,ox:(hs(x,y,138)-.5)*.5,oy:(hs(x,y,139)-.5)*.4})}}}
   /* the arrival square and the stone: a clear zone round them, where nothing stands and no creature is put */
   const SAFE=7,safeFrom=[[plan.down.ix,plan.down.iy],[plan.stone.x,plan.stone.y]];
   const inSafe=(x,y)=>safeFrom.some(([sx,sy])=>Math.hypot(sx-x,sy-y)<=SAFE);
   const shop=plan.shop,inShop=(x,y)=>shop&&x>=shop.x0-1&&x<=shop.x1+1&&y>=shop.y0-1&&y<=shop.y1+1;
   const nearShopDoor=(x,y)=>shop&&Math.hypot(x-shop.door.x,y-shop.door.y)<10;
   /* ---- wall torches: lots of them, along the corridors and round the rooms ---- */
-  V.torches=torches.push(...ntTorchSpots(open,W,H,(x,y)=>(x===plan.down.x&&y===plan.down.y)||(x===plan.up.x&&y===plan.up.y),hs))&&torches;
+  V.torches=torches.push(...ntTorchSpots(open,W,H,(x,y)=>(x===plan.down.x&&y===plan.down.y)||(x===plan.up.x&&y===plan.up.y)||isWat(x,y),hs))&&torches;
   /* ---- candle niches: a few alcoves cut into the walls ---- */
   {const tk=new Set(torches.map(t=>t[0]+','+t[1])),cand=[];
    for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(open(x,y)||rows[y][x]==='.'||tk.has(x+','+y))continue;
@@ -104,6 +116,8 @@ function ntBuildFloor(n){
   /* ---- floors ---- */
   const fm=[];for(let y=0;y<H;y++)fm.push(new Array(W).fill('0'));
   for(const r of plan.rooms){const slot=(r.big||r.centre||r.kind==='oct')&&look.floorKind!=='plain'?'3':'1';for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)if(open(x,y))fm[y][x]=slot}
+  for(const c of (plan.clearings||[]))for(const [x,y] of c.cells)if(open(x,y))fm[y][x]='1';
+  for(const pd of ponds){for(const [x,y] of pd.rim)fm[y][x]='2';for(const [x,y] of pd.cells)fm[y][x]='4'}
   if(shop)for(let y=shop.y0;y<=shop.y1;y++)for(let x=shop.x0;x<=shop.x1;x++)fm[y][x]='3';
   for(const [x,y] of cells)if(fm[y][x]==='0'&&hs(x,y,41)<.06)fm[y][x]='2';
   /* ---- braziers: standing fires in the rooms and at the corners of the way ---- */
@@ -127,7 +141,7 @@ function ntBuildFloor(n){
     V.shop={x:cx,y:ky,name:S[1],idx:si}}
   /* ---- chests, jars and a few loose things ---- */
   let chests=0;
-  {const budget=Math.max(4,Math.round(cells.length/42)),cand=dead.concat(cells.filter(([x,y])=>d8(x,y)>=6&&hs(x,y,61)<.05));
+  {const budget=Math.max(4,Math.round(cells.length/42)),cand=dead.concat(cells.filter(([x,y])=>d8(x,y)>=6&&hs(x,y,61)<.05),(plan.clearings||[]).flatMap(c=>c.cells.filter(([x,y])=>open(x,y)&&d8(x,y)>=5&&d8(x,y)<=7&&hs(x,y,64)<.12)));
    for(const [x,y] of cand){if(chests>=budget)break;
      if(!free(x,y)||inShop(x,y)||inSafe(x,y)||(Math.hypot(x-plan.up.ix,y-plan.up.iy)<3)||!ntSafeBlock(a,W,H,x,y))continue;
      if(dead.some(q=>q[0]===x&&q[1]===y)&&hs(x,y,62)>.7)continue;
@@ -165,7 +179,7 @@ function ntBuildFloor(n){
     const lost=cells.filter(([x,y])=>!seen.has(x+','+y)&&!blk.has(x+','+y));
     if(!lost.length)break;
     let victim=null,bd=1e9;
-    for(const d of decor){if(!d.block||d.npc)continue;for(const [x,y] of lost){const dd=Math.abs(d.x-x)+Math.abs(d.y-y);if(dd<bd){bd=dd;victim=d}}}
+    for(const d of decor){if(!d.block||d.npc||d.fplWater)continue;for(const [x,y] of lost){const dd=Math.abs(d.x-x)+Math.abs(d.y-y);if(dd<bd){bd=dd;victim=d}}}
     if(!victim)break;decor.splice(decor.indexOf(victim),1);occ.delete(victim.x+','+victim.y);if(victim.k!=='brazier')chests--}
   /* ---- gems, potions and bones on the ground ---- */
   {const nG=Math.max(3,Math.round(cells.length/55)),spots=cells.filter(([x,y])=>free(x,y)&&!inSafe(x,y)&&!inShop(x,y));
@@ -179,12 +193,14 @@ function ntBuildFloor(n){
   const L={rows,chars,fmap:fmS,floorSet:fSet,floor:fSet[0],floor2:fSet[1],ceil,ceilH:look.wh,start:{x:plan.down.ix,y:plan.down.iy,f:plan.down.f},enemies,items,decor,lights,portals:[],day:0,amb:look.amb,torchGap:1e9,
     noExtras:true,tele:{x:plan.stone.x,y:plan.stone.y},name:look.name,label:look.name,teleName:look.name,diff:rating,mapNames:[],_nt:V,_gems:1};
   V.look=look;V.plan=plan;V.pool=poolSel;V.chests=chests;V.rating=rating;
+  V.ponds=ponds.length;V.fishing=pondStands;
   LEVELS[id]=L;LEVEL_RATING[id]=rating;NTC.live.add(n);
+  if(typeof fshAddSpots==='function'){if(FSH_ADD[id])delete FSH_ADD[id];if(pondStands.length)fshAddSpots(id,pondStands,{water:'deep'})}   // dark still water: the 'deep' catch table (eel, crayfish, catfish, ray, angler, leaf dragon, ...)
   return L}
 /* a floor far from the party is given back */
 function ntEvict(cur){
   for(const f of [...NTC.live]){if(Math.abs(f-cur)<=NTC.keep)continue;const id=ntIdOf(f);if(LEVEL===id)continue;
-    delete LEVELS[id];ntRelease(f);NTC.live.delete(f)}}
+    delete LEVELS[id];ntRelease(f);NTC.live.delete(f);try{delete FSH_ADD[id];delete FSHV.cache[id]}catch(e){}}}
 /* ---------- going in, going up and down ---------- */
 {const _g=goToLevel;goToLevel=function(n,entry){
   if(ntIs(n)){

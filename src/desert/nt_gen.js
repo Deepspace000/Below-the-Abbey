@@ -1,7 +1,8 @@
 /* ==========================================================================
    THE NEVER-ENDING TOWER: THE LAYOUTS (prefix ntg). ntGen(n, look) makes the plan of floor n from the floor number alone: a grid of open (1) and closed (0) squares,
    the arrival square with the stairs down beside it, the stairs up far away, the teleport stone, the rooms, the dead ends, and (every 7th floor) a shop room.
-   Kinds: dense (a perfect maze with a few loops), semi (a maze with 4 to 9 rooms carved in), sparse (many rooms of different shapes, short corridors, pillared halls),
+   Kinds: dense (a network of many small rooms joined by winding corridors, 1 and 2 wide, with loops), semi (a braided maze with rooms carved in: most dead ends opened into loops), sparse (rooms of different shapes, short corridors, pillared halls),
+   Every kind then gets: wider stretches of corridor, loops (walls opened where the way round is long), 2 to 4 round clearings (7 to 12 across) with at least 3 ways in, fishing ponds in some clearings (plan.ponds, plan.water), and its dead ends pruned (only 1 to 3 short spurs are kept).
    spiral (rings with one opening each), cross (a maze or halls in four wings), ring (a wide circuit round a maze), caves (cellular caves).
    Nothing here uses the game: the plan is pure data, so it can be built and tested anywhere. Notes: tools/NT_NOTES.md
    ========================================================================== */
@@ -108,22 +109,37 @@ function ntgCorridor(G,R,ax,ay,bx,by,wide){
     for(;;){ntgSet(G,cx,cy,1);if(wide){ntgSet(G,cx+(sy?1:0),cy+(sx?1:0),1)}if(cx===x1&&cy===y1)break;if(cx!==x1)cx+=sx;else cy+=sy}};
   if(xf){seg(ax,ay,bx,ay);seg(bx,ay,bx,by)}else{seg(ax,ay,ax,by);seg(ax,by,bx,by)}}
 /* ---------- the kinds ---------- */
-function ntgDense(G,R,P){ntgMaze(G,R,null,P.pNew);ntgBraid(G,R,P.braid);
-  const k=R.int(0,2);for(let i=0;i<k;i++){const w=R.pick([3,3,5]),h=R.pick([3,3,5]),x=R.int(2,G.W-w-3)|1,y=R.int(2,G.H-h-3)|1;ntgRect(G,x,y,x+w-1,y+h-1,1);P.rooms.push({x0:x,y0:y,x1:x+w-1,y1:y+h-1,kind:'cell'})}}
+function ntgDense(G,R,P){   // many small rooms joined by winding corridors, with loops: a cave and room network, not a maze
+  const W=G.W,H=G.H,rooms=P.rooms,target=Math.max(8,Math.min(16,Math.round(W*H/105)));let tries=0;
+  while(rooms.length<target&&tries++<700){
+    const w=R.int(3,6),h=R.int(3,6),x=R.int(2,W-w-3),y=R.int(2,H-h-3);
+    if(rooms.some(r=>x<r.x1+3&&x+w-1>r.x0-3&&y<r.y1+3&&y+h-1>r.y0-3))continue;
+    const kind=R.pick(['rect','ellipse','ellipse','oct','ell']),sq=ntgShape(R,kind,w,h);
+    for(const [dx,dy] of sq)ntgSet(G,x+dx,y+dy,1);
+    rooms.push({x0:x,y0:y,x1:x+w-1,y1:y+h-1,kind})}
+  const mid=r=>[Math.floor((r.x0+r.x1)/2),Math.floor((r.y0+r.y1)/2)],wind=(a,b)=>{   // a corridor through a wandering waypoint
+    const [ax,ay]=mid(rooms[a]),[bx,by]=mid(rooms[b]),mx=Math.max(2,Math.min(W-3,Math.round((ax+bx)/2+R.int(-5,5)))),my=Math.max(2,Math.min(H-3,Math.round((ay+by)/2+R.int(-5,5)))),wd=R()<.35;
+    ntgCorridor(G,R,ax,ay,mx,my,wd);ntgCorridor(G,R,mx,my,bx,by,wd)};
+  const joined=[0],rest=[];for(let i=1;i<rooms.length;i++)rest.push(i);
+  const dist=(i,j)=>{const [ax,ay]=mid(rooms[i]),[bx,by]=mid(rooms[j]);return Math.abs(ax-bx)+Math.abs(ay-by)};
+  while(rest.length){let bd=1e9,bi=-1,bj=-1;for(const i of rest)for(const j of joined){const d=dist(i,j);if(d<bd){bd=d;bi=i;bj=j}}
+    wind(bi,bj);joined.push(bi);rest.splice(rest.indexOf(bi),1)}
+  for(let k=0;k<Math.round(rooms.length*.7);k++){const a=R.int(0,rooms.length-1);let bj=-1,bd=1e9;for(let j=0;j<rooms.length;j++){if(j===a)continue;const d=dist(a,j)+R.int(0,8);if(d<bd){bd=d;bj=j}}
+    if(bj>=0&&R()<.5){let b2=R.int(0,rooms.length-1);if(b2!==a)bj=b2}if(bj>=0)wind(a,bj)}}
 function ntgSemi(G,R,P){
   ntgMaze(G,R,null,P.pNew);ntgBraid(G,R,P.braid);
-  const k=R.int(4,9);let tries=0;
+  const k=R.int(3,6);let tries=0;
   while(P.rooms.length<k&&tries++<300){
-    const w=R.pick([3,5,5,7,7,9]),h=R.pick([3,5,5,7,9]),x=R.int(2,G.W-w-3)|1,y=R.int(2,G.H-h-3)|1;
+    const w=R.pick([3,5,5,7,7]),h=R.pick([3,5,5,7]),x=R.int(2,G.W-w-3)|1,y=R.int(2,G.H-h-3)|1;
     if(P.rooms.some(r=>x<r.x1+3&&x+w-1>r.x0-3&&y<r.y1+3&&y+h-1>r.y0-3))continue;
     const kind=R.pick(['rect','rect','ellipse','oct']);const sq=ntgShape(R,kind,w,h);
     for(const [dx,dy] of sq)ntgSet(G,x+dx,y+dy,1);
     if(w>=7&&h>=7)ntgPillars(G,R,sq,x,y,w,h,3);
     P.rooms.push({x0:x,y0:y,x1:x+w-1,y1:y+h-1,kind})}}
 function ntgSparse(G,R,P){
-  const W=G.W,H=G.H,target=R.int(11,22),rooms=P.rooms;let tries=0;
+  const W=G.W,H=G.H,target=R.int(8,14),rooms=P.rooms;let tries=0;
   while(rooms.length<target&&tries++<900){
-    const big=R()<.2,w=big?R.int(11,20):R.int(4,12),h=big?R.int(8,13):R.int(4,10),x=R.int(2,W-w-3),y=R.int(2,H-h-3);
+    const big=R()<.2,w=big?R.int(8,14):R.int(4,10),h=big?R.int(7,10):R.int(4,8),x=R.int(2,W-w-3),y=R.int(2,H-h-3);
     if(x<2||y<2)continue;
     if(rooms.some(r=>x<r.x1+3&&x+w-1>r.x0-3&&y<r.y1+3&&y+h-1>r.y0-3))continue;
     const kind=big?'rect':R.pick(NTG_SHAPES);const sq=ntgShape(R,kind,w,h);
@@ -142,7 +158,7 @@ function ntgSparse(G,R,P){
     let bd=1e9,bi=-1,bj=-1;
     for(const i of rest)for(const j of joined){const [ax,ay]=mid(rooms[i]),[bx,by]=mid(rooms[j]),d=Math.abs(ax-bx)+Math.abs(ay-by);if(d<bd){bd=d;bi=i;bj=j}}
     link(bi,bj,R()<.15);joined.push(bi);rest.splice(rest.indexOf(bi),1)}
-  for(let k=0;k<R.int(3,6);k++){const a=R.int(0,rooms.length-1),b=R.int(0,rooms.length-1);if(a!==b)link(a,b,false)}
+  for(let k=0,K=R.int(5,9);k<K;k++){const a=R.int(0,rooms.length-1),b=R.int(0,rooms.length-1);if(a!==b)link(a,b,false)}
   P.pad=true}
 function ntgSpiral(G,R,P){
   const W=G.W,H=G.H,cw=R.pick([1,2,2,3]);let k=0,x0=1,y0=1,x1=W-2,y1=H-2;const rings=[];
@@ -164,13 +180,13 @@ function ntgSpiral(G,R,P){
     else if(side===2)ntgSet(G,Math.floor(q[0]+2+t*(q[2]-q[0]-4)),q[3]-cw,1);else ntgSet(G,q[0]+cw,Math.floor(q[1]+2+t*(q[3]-q[1]-4)),1)}
   P.spiral=true}
 function ntgCross(G,R,P){
-  const W=G.W,H=G.H,bw=R.pick([11,13,15]),cx=Math.floor(W/2),cy=Math.floor(H/2);
+  const W=G.W,H=G.H,bw=R.pick([9,11,11]),cx=Math.floor(W/2),cy=Math.floor(H/2);
   const inMask=(x,y)=>Math.abs(x-cx)<=bw/2||Math.abs(y-cy)<=bw/2;
   if(R()<.55){ntgMaze(G,R,inMask,P.pNew);ntgBraid(G,R,P.braid)}
   else{   // four wings of halls
     const mk=(x,y,w,h,kind)=>{const sq=ntgShape(R,kind,w,h);for(const [dx,dy] of sq)ntgSet(G,x+dx,y+dy,1);if(Math.min(w,h)>=6)ntgPillars(G,R,sq,x,y,w,h,3);P.rooms.push({x0:x,y0:y,x1:x+w-1,y1:y+h-1,kind})};
-    mk(cx-6,cy-6,13,13,'oct');
-    for(const [dx,dy] of NTG_D){let d=8+R.int(0,2);while(d<Math.min(W,H)/2-8){const w=dx?R.int(7,10):R.int(5,9),h=dx?R.int(5,9):R.int(7,10);
+    mk(cx-5,cy-5,11,11,'oct');
+    for(const [dx,dy] of NTG_D){let d=7+R.int(0,2);while(d<Math.min(W,H)/2-6){const w=dx?R.int(6,9):R.int(5,8),h=dx?R.int(5,8):R.int(6,9);
         const x=dx>0?cx+d:dx<0?cx-d-w+1:cx-Math.floor(w/2),y=dy>0?cy+d:dy<0?cy-d-h+1:cy-Math.floor(h/2);mk(x,y,w,h,R.pick(['rect','ellipse','plus']));
         for(let t=0;t<2;t++){ntgSet(G,dx?cx+(dx>0?d-1:-d+1):cx,dx?cy:cy+(dy>0?d-1:-d+1),1)}d+=Math.max(w,h)+2}}
     // straight halls along the axes
@@ -180,7 +196,7 @@ function ntgRing(G,R,P){
   ntgRect(G,m,m,W-1-m,m+rw-1,1);ntgRect(G,m,H-m-rw,W-1-m,H-1-m,1);ntgRect(G,m,m,m+rw-1,H-1-m,1);ntgRect(G,W-m-rw,m,W-1-m,H-1-m,1);
   const inner=[m+rw+1,m+rw+1,W-m-rw-2,H-m-rw-2];
   ntgMaze(G,R,null,P.pNew,inner);ntgBraid(G,R,P.braid);
-  for(let k=0;k<4;k++){const side=k,t=R.int(8,Math.max(9,Math.min(W,H)-9));
+  for(let k=0;k<4;k++){const side=k,t=R.int(7,Math.max(8,Math.min(W,H)-8));
     if(side===0)ntgRect(G,t,m+rw,t,m+rw+1,1);else if(side===1)ntgRect(G,W-m-rw-2,t,W-m-rw-1,t,1);else if(side===2)ntgRect(G,t,H-m-rw-2,t,H-m-rw-1,1);else ntgRect(G,m+rw,t,m+rw+1,t,1)}
   // the pillars of the circuit: a column every few squares, so that it is a colonnade
   for(let x=m+2;x<W-m-2;x+=4){if(rw>=5){ntgSet(G,x,m+2,0);ntgSet(G,x,H-m-3,0)}}
@@ -195,8 +211,106 @@ function ntgCaves(G,R,P){
   G.a=a;for(let x=0;x<W;x++){G.a[x]=0;G.a[(H-1)*W+x]=0}for(let y=0;y<H;y++){G.a[y*W]=0;G.a[y*W+W-1]=0}
   // thin walls between the caverns are the pillars; the open parts are joined at the end (ntgKeepLargest, ntgJoin)
   P.caves=true}
+/* ---------- opening the plan up: wider stretches, loops, clearings, ponds, no dead ends ---------- */
+const ntgDeg=(G,x,y)=>{let c=0;for(const [dx,dy] of NTG_D)if(ntgAt(G,x+dx,y+dy))c++;return c};
+/* stretches of a one-wide corridor made two wide (never against another corridor, never shorter than 3) */
+function ntgWiden(G,R,per){
+  const W=G.W,H=G.H,trials=Math.round(W*H*per);
+  for(let t=0;t<trials;t++){
+    const x=R.int(2,W-3),y=R.int(2,H-3);if(!ntgAt(G,x,y))continue;
+    const hor=ntgAt(G,x-1,y)&&ntgAt(G,x+1,y)&&!ntgAt(G,x,y-1)&&!ntgAt(G,x,y+1),ver=ntgAt(G,x,y-1)&&ntgAt(G,x,y+1)&&!ntgAt(G,x-1,y)&&!ntgAt(G,x+1,y);
+    if(!hor&&!ver)continue;
+    const s=R()<.5?1:-1,len=R.int(3,8),list=[];
+    for(let i=0;i<len;i++){const cx=x+(hor?i:0),cy=y+(hor?0:i),sx=cx+(hor?0:s),sy=cy+(hor?s:0),bx=cx+(hor?0:s*2),by=cy+(hor?s*2:0);
+      const straight=hor?(ntgAt(G,cx,cy)&&!ntgAt(G,cx,cy-1)&&!ntgAt(G,cx,cy+1)):(ntgAt(G,cx,cy)&&!ntgAt(G,cx-1,cy)&&!ntgAt(G,cx+1,cy));
+      if(!straight||ntgAt(G,bx,by)||sx<2||sy<2||sx>G.W-3||sy>G.H-3)break;list.push([sx,sy])}
+    if(list.length>=3)for(const [sx,sy] of list)ntgSet(G,sx,sy,1)}}
+/* loops: a wall square with open floor on both sides is opened when the walk between the two sides is long, so that the way round is short */
+function ntgLoops(G,R,count,minDist){
+  const W=G.W,H=G.H,cand=[];let made=0;
+  for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(ntgAt(G,x,y))continue;const hor=ntgAt(G,x-1,y)&&ntgAt(G,x+1,y),ver=ntgAt(G,x,y-1)&&ntgAt(G,x,y+1);if(hor||ver)cand.push([x,y,hor])}
+  for(let i=cand.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[cand[i],cand[j]]=[cand[j],cand[i]]}
+  for(let t=0;t<cand.length&&made<count&&t<count*6;t++){
+    const [x,y,hor]=cand[t],ax=hor?x-1:x,ay=hor?y:y-1,bx=hor?x+1:x,by=hor?y:y+1,d=ntgBfs(G,ax,ay),db=d[by*W+bx];
+    if(db<0||db>=minDist){ntgSet(G,x,y,1);made++}}
+  return made}
+/* dead ends: a spur is filled in back to its junction; 1 to 3 short spurs are kept (they hold a chest) */
+function ntgPrune(G,R,keepN){
+  const W=G.W,H=G.H,tips=[];
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(ntgAt(G,x,y)&&ntgDeg(G,x,y)===1)tips.push([x,y]);
+  const keep=new Set();
+  for(let i=tips.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[tips[i],tips[j]]=[tips[j],tips[i]]}
+  for(const [x,y] of tips){if(keep.size>=keepN)break;   // only a spur of 2 to 6 squares is worth keeping
+    let len=0,cx=x,cy=y,px=-1,py=-1;
+    for(;len<8;len++){let nx=-1,ny=-1,n=0;for(const [dx,dy] of NTG_D)if(ntgAt(G,cx+dx,cy+dy)&&!(cx+dx===px&&cy+dy===py)){nx=cx+dx;ny=cy+dy;n++}
+      if(n!==1)break;px=cx;py=cy;cx=nx;cy=ny}
+    if(len>=2&&len<=6)keep.add(x+','+y)}
+  for(let pass=0;pass<60;pass++){let any=false;
+    for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(ntgAt(G,x,y)&&ntgDeg(G,x,y)<=1&&!keep.has(x+','+y)){G.a[y*W+x]=0;any=true}
+    if(!any)break}
+  return keep.size}
+/* a clearing: an irregular round open space of 7 to 12 squares across, with a few standing stones, joined to the rest by at least three ways in */
+function ntgClearing(G,R,cx,cy,rx,ry){
+  const a=R()*6.28,b=R()*6.28,cells=[];
+  for(let y=Math.floor(cy-ry*1.3);y<=Math.ceil(cy+ry*1.3);y++)for(let x=Math.floor(cx-rx*1.3);x<=Math.ceil(cx+rx*1.3);x++){
+    if(x<2||y<2||x>G.W-3||y>G.H-3)continue;
+    const dx=(x-cx)/rx,dy=(y-cy)/ry,th=Math.atan2(dy,dx),rr=1+.13*Math.sin(2*th+a)+.09*Math.sin(3*th+b);
+    if(dx*dx+dy*dy<=rr*rr){ntgSet(G,x,y,1);cells.push([x,y])}}
+  return {cx,cy,rx,ry,cells,stones:[]}}
+function ntgClearingWays(G,R,cl){
+  const W=G.W,inC=new Set(cl.cells.map(([x,y])=>y*W+x)),sides=()=>{const s=new Set();for(const [x,y] of cl.cells)for(let f=0;f<4;f++){const nx=x+NTG_D[f][0],ny=y+NTG_D[f][1];if(ntgAt(G,nx,ny)&&!inC.has(ny*W+nx))s.add(f)}return s};
+  const order=[0,1,2,3];for(let i=3;i>0;i--){const j=Math.floor(R()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
+  for(const f of order){
+    if(sides().size>=3)break;if(sides().has(f))continue;
+    const [dx,dy]=NTG_D[f];let x=Math.round(cl.cx),y=Math.round(cl.cy);
+    const off=R.int(-2,2);if(dx)y+=off;else x+=off;   // a little off the middle, so that the ways do not all leave from one square
+    let g=0;while(inC.has(y*W+x)&&g++<20){x+=dx;y+=dy}
+    const path=[];let found=false;
+    for(let k=0;k<10;k++){if(x<2||y<2||x>W-3||y>G.H-3)break;if(ntgAt(G,x,y)&&!inC.has(y*W+x)){found=true;break}path.push([x,y]);x+=dx;y+=dy}
+    if(found)for(const [px,py] of path)ntgSet(G,px,py,1)}
+  return sides().size}
+function ntgClearings(G,R,P,count){
+  const W=G.W,H=G.H,list=[];
+  for(let t=0;t<260&&list.length<count;t++){
+    const big=Math.min(W,H)>=40,rx=3.5+R()*(big?2.4:1.6),ry=3.5+R()*(big?2.4:1.6);
+    const cx=R.int(Math.ceil(rx)+3,W-Math.ceil(rx)-4),cy=R.int(Math.ceil(ry)+3,H-Math.ceil(ry)-4);
+    if(list.some(c=>Math.hypot(c.cx-cx,c.cy-cy)<c.rx+rx+4))continue;
+    const cl=ntgClearing(G,R,cx,cy,rx,ry);
+    // standing stones: single squares and pairs, at least two squares from the edge so that the clearing can be walked round
+    const inC=new Set(cl.cells.map(([x,y])=>y*W+x));
+    for(let k=R.int(0,3),g=0;k>0&&g<30;g++){const [sx,sy]=cl.cells[Math.floor(R()*cl.cells.length)];
+      if(Math.hypot(sx-cx,sy-cy)<1.8)continue;let ok=true;for(let j=-2;j<=2&&ok;j++)for(let i=-2;i<=2;i++)if(!inC.has((sy+j)*W+sx+i)){ok=false;break}
+      if(!ok||cl.stones.some(q=>Math.abs(q[0]-sx)<=2&&Math.abs(q[1]-sy)<=2))continue;
+      G.a[sy*W+sx]=0;cl.stones.push([sx,sy]);if(R()<.4&&inC.has(sy*W+sx+1)){G.a[sy*W+sx+1]=0;cl.stones.push([sx+1,sy])}k--}
+    list.push(cl)}
+  for(const cl of list)ntgClearingWays(G,R,cl);
+  return list}
+/* ponds: a small pond (2 by 2 to 3 by 3) with a margin of open floor all round it, in a clearing; a fishing spot on one edge. The pond is cut out of the plan (and listed in G.water), so the stairs, the route and the stone are chosen round it. */
+function ntgConnected(G){
+  const W=G.W,H=G.H;let first=-1,total=0;for(let i=0;i<W*H;i++)if(G.a[i]===1){total++;if(first<0)first=i}
+  if(first<0)return true;const d=ntgBfs(G,first%W,(first/W)|0);let n=0;for(let i=0;i<W*H;i++)if(d[i]>=0&&G.a[i]===1)n++;return n===total}
+function ntgPonds(G,R,clearings,want){
+  const W=G.W,ponds=[];G.water=new Set();
+  const order=clearings.map((c,i)=>i);for(let i=order.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
+  for(const ci of order){
+    if(ponds.length>=want)break;const cl=clearings[ci];
+    const sizes=[[2,2],[3,3],[2,3],[3,2],[3,3]];let done=false;
+    for(let t=0;t<40&&!done;t++){
+      const [pw,ph]=sizes[Math.floor(R()*sizes.length)],c=cl.cells[Math.floor(R()*cl.cells.length)],x0=c[0],y0=c[1];
+      let ok=true;for(let y=y0-1;y<=y0+ph&&ok;y++)for(let x=x0-1;x<=x0+pw;x++)if(!ntgAt(G,x,y)){ok=false;break}
+      if(!ok)continue;
+      const cells=[];for(let y=y0;y<y0+ph;y++)for(let x=x0;x<x0+pw;x++)cells.push([x,y]);
+      if(pw*ph===9&&R()<.45){const k=[[0,0],[2,0],[0,2],[2,2]][Math.floor(R()*4)];cells.splice(cells.findIndex(q=>q[0]===x0+k[0]&&q[1]===y0+k[1]),1)}
+      // the fishing spot: the middle of one side, standing on the open square beside it, looking at the pond
+      const sides=[[x0+Math.floor(pw/2),y0-1,0,1],[x0+Math.floor(pw/2),y0+ph,0,-1],[x0-1,y0+Math.floor(ph/2),1,0],[x0+pw,y0+Math.floor(ph/2),-1,0]],sd=sides[Math.floor(R()*4)];
+      if(!cells.some(q=>q[0]===sd[0]+sd[2]&&q[1]===sd[1]+sd[3]))continue;
+      for(const [x,y] of cells)G.a[y*W+x]=0;
+      if(!ntgConnected(G)||!ntgAt(G,sd[0],sd[1])){for(const [x,y] of cells)G.a[y*W+x]=1;continue}
+      for(const [x,y] of cells)G.water.add(y*W+x);
+      ponds.push({cells,stand:{x:sd[0],y:sd[1],dx:sd[2],dy:sd[3]},clearing:ci});done=true}}
+  return ponds}
 /* ---------- a plan ---------- */
-const NTG_SIZE={dense:[41,75],semi:[45,85],sparse:[44,80],spiral:[51,71],cross:[53,79],ring:[55,79],caves:[48,80]};
+const NTG_SIZE={dense:[29,53],semi:[31,59],sparse:[31,56],spiral:[36,50],cross:[37,55],ring:[39,55],caves:[34,56]};   // about half the area of the first version (each side times 0.7)
 function ntgDims(R,kind){const s=NTG_SIZE[kind];let W=R.int(s[0],s[1]),H=R.int(s[0],s[1]);if(kind==='spiral'||kind==='ring'){H=Math.min(H,W+6);W=Math.min(W,H+6)}
   if(kind==='dense'||kind==='semi'||kind==='cross'){W|=1;H|=1}return [W,H]}
 function ntGen(n,look){
@@ -204,17 +318,27 @@ function ntGen(n,look){
   let [W,H]=ntgDims(R,kind);
   const shop=n>0&&n%NT.SHOP_EVERY===0,SH=shop?10:0;     // a shop floor has a strip at the foot of the plan for the shop room
   if(shop){H+=SH;if(kind==='dense'||kind==='semi'||kind==='cross')H|=1}
-  const G=ntgGrid(W,H),P={rooms:[],pNew:.45+R()*.5,braid:kind==='dense'?.25+R()*.3:.05+R()*.2,kind};
-  const sub=ntgGrid(W,H-SH);G.a=new Uint8Array(W*H);
+  const G=ntgGrid(W,H),P={rooms:[],pNew:.45+R()*.5,braid:.7+R()*.25,kind,clearings:[],ponds:[]};
+  G.a=new Uint8Array(W*H);
   // the plan is made on the upper part; the shop strip is carved afterwards
   const Gp={W,H:H-SH,a:new Uint8Array(W*(H-SH))};
   ({dense:ntgDense,semi:ntgSemi,sparse:ntgSparse,spiral:ntgSpiral,cross:ntgCross,ring:ntgRing,caves:ntgCaves})[kind](Gp,R,P);
-  ntgKeepLargest(Gp);if(P.pad||P.caves||kind==='sparse')ntgJoin(Gp,R);
+  ntgKeepLargest(Gp);ntgJoin(Gp,R);
   ntgBreakOpen(Gp,R,8);ntgKeepLargest(Gp);
-  G.a.set(Gp.a);
+  // open it up: stretches two wide, clearings (2 to 4, with ways in on at least three sides), loops; then the dead ends are filled in
+  if(kind!=='caves'&&kind!=='spiral')ntgWiden(Gp,R,.05);
+  P.clearings=ntgClearings(Gp,R,P,2+(R()<.6?1:0)+(R()<.3?1:0));
+  ntgLoops(Gp,R,Math.max(4,Math.round(W*(H-SH)/150)),22);
+  if(kind==='semi'||kind==='cross'||kind==='ring'){ntgLoops(Gp,R,Math.round(W*(H-SH)/18),7);ntgWiden(Gp,R,.1)}   // a maze lattice becomes a flowing network: many more short loops, and wide stretches
+  P.kept=ntgPrune(Gp,R,R.int(1,3));
+  ntgKeepLargest(Gp);ntgJoin(Gp,R);
+  P.clearings=P.clearings.map(c=>({cx:c.cx,cy:c.cy,rx:c.rx,ry:c.ry,stones:c.stones,cells:c.cells.filter(([x,y])=>Gp.a[y*Gp.W+x]===1)})).filter(c=>c.cells.length>=30);
+  // ponds: on about one floor in two, in one or two of the clearings
+  if((ntSeed(n,57)&1)===0&&P.clearings.length)P.ponds=ntgPonds(Gp,R,P.clearings,1+(P.clearings.length>=3&&R()<.35?1:0));
+  G.a.set(Gp.a);G.water=Gp.water||new Set();
   // the border is solid
   for(let x=0;x<W;x++){G.a[x]=0;G.a[(H-1)*W+x]=0}for(let y=0;y<H;y++){G.a[y*W]=0;G.a[y*W+W-1]=0}
-  const out={n,kind,W,H,G,rooms:P.rooms,shop:null,P};
+  const out={n,kind,W,H,G,rooms:P.rooms,clearings:P.clearings,ponds:P.ponds,water:G.water,shop:null,P};
   if(shop)ntgShopRoom(G,R,out,H-SH);
   ntgStairs(G,R,out);
   return out}
@@ -236,7 +360,7 @@ function ntgBfs(G,sx,sy){
 function ntgDoorSpots(G,minY,maxY){   // wall squares with exactly one open neighbour and a way on behind that neighbour
   const W=G.W,out=[];
   for(let y=Math.max(0,minY);y<Math.min(G.H,maxY);y++)for(let x=0;x<W;x++){
-    if(G.a[y*W+x]===1)continue;let n=0,dir=-1;
+    if(G.a[y*W+x]===1||(G.water&&G.water.has(y*W+x)))continue;let n=0,dir=-1;
     for(let f=0;f<4;f++)if(ntgAt(G,x+NTG_D[f][0],y+NTG_D[f][1])){n++;dir=f}
     if(n!==1)continue;
     const ix=x+NTG_D[dir][0],iy=y+NTG_D[dir][1];let m=0;for(const [dx,dy] of NTG_D)if(ntgAt(G,ix+dx,iy+dy))m++;
