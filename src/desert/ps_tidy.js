@@ -87,6 +87,16 @@ function pstAccess(id,L){
     for(let v=best;v>=0&&!seen[v];v=prev[v]){const d=solid.get(v);if(d){L.decor.splice(L.decor.indexOf(d),1);solid.delete(v);rep.removed.push([d.k,d.x,d.y,'for '+t.k+'@'+tx+','+ty])}}
     seen=reach()}
   L._accessRep=rep}
+/* a picture of a window (sheeted window, stained glass) or a mirror hung on a wall square that is itself a glowing slit window (pspWallGid 'win'): the slit's bright frame showed
+   round the picture as a pale panel; the wall square behind the picture becomes plain stone */
+function pstWinUnder(id,L){
+  if(!L||L._winUnder||!L.rows||!L.chars||typeof PSPK==='undefined')return;L._winUnder=1;
+  const winG=new Set(Object.entries(PSPK.tiles).filter(([k])=>k.startsWith('win')).map(([,g])=>g));if(!winG.size)return;
+  let plainC=null;const used=new Set(Object.keys(L.chars));
+  const plain=()=>{if(plainC)return plainC;const gid=pspWallGid('ash',1,L.ceilH||4);for(const c in L.chars)if(L.chars[c]===gid)return plainC=c;let n=0x4e00;while(used.has(String.fromCharCode(n)))n++;plainC=String.fromCharCode(n);L.chars[plainC]=gid;return plainC};
+  let n=0;for(const d of L.decor||[]){if(!d.pic||!d.wd||!/window|mirror|sheeted|stained/i.test(String(d.k)))continue;const x=Math.round(d.x)+d.wd[0],y=Math.round(d.y)+d.wd[1],r=L.rows[y];if(!r)continue;const c=r[x];
+    if(c&&c!=='.'&&winG.has(L.chars[c])){L.rows[y]=r.slice(0,x)+plain()+r.slice(x+1);n++}}
+  L._winUnderN=n}
 /* the loose gems of a castle level: placed here (gems.js would scatter them on any open square, also on terrace cells the party cannot step on and in rooms nobody reaches).
    Same count and value spread as gems.js, but only on squares walked to from the start and every landing, off the terraces, away from doors. */
 function pstGems(id,L){
@@ -107,4 +117,4 @@ function pstGems(id,L){
     const u=hash2(placed,id,839),u2=u*(1-skew)+skew*hash2(placed,id,853),g=GEM_BY_VALUE[Math.min(39,Math.floor(u2*40))];
     taken.add(x+','+y);L.items.push({k:'gem_'+g[0],x,y});placed++}}
 {for(const info of PSP.LEVELS){const id=info.id,orig=KH_LAZY[id];if(!orig||orig._pst)continue;
-  const w=()=>{const lv=orig();const L=LEVELS[id]||lv;try{pstTidy(id,L)}catch(e){console.error('ps tidy',id,e)}try{pstAccess(id,L)}catch(e){console.error('ps access',id,e)}try{pstGems(id,L)}catch(e){console.error('ps gems',id,e)}return LEVELS[id]||lv};w._pst=1;w._psc=orig._psc;KH_LAZY[id]=w}}
+  const w=()=>{const lv=orig();const L=LEVELS[id]||lv;try{pstTidy(id,L)}catch(e){console.error('ps tidy',id,e)}try{pstAccess(id,L)}catch(e){console.error('ps access',id,e)}try{pstWinUnder(id,L)}catch(e){console.error('ps win',id,e)}try{pstGems(id,L)}catch(e){console.error('ps gems',id,e)}return LEVELS[id]||lv};w._pst=1;w._psc=orig._psc;KH_LAZY[id]=w}}

@@ -18,7 +18,7 @@ const pscQ=(id,title,who,steps,reward,extra)=>{const q=yrQ(id,title,who,steps,re
 const pscSafe=(x,y,r)=>Math.hypot(x-PSC.TELE[0],y-PSC.TELE[1])<=(r||8);
 const pscNearFront=(x,y,r)=>PSC.FRONTS.some(f=>Math.hypot(x-f[0],y-f[1])<=(r||3))||Math.hypot(x-32,y-49)<=3||Math.hypot(x-10,y-42)<=3||Math.hypot(x-54,y-42)<=3;
 /* the palette of the castle (dark black and green, like the old German churches); package 1 may later put a shared one in PSP_PAL, this one is ours until then */
-const PSC_K={stone:'#22262b',stone2:'#2f353c',stoneLt:'#566471',trim:'#7a8896',cop:'#a8843f',cop2:'#6b5428',copLt:'#d8b86a',verd:'#4aa58b',brick:'#34363b',brick2:'#292b30',mort:'#13151a',plast:'#44505a',plast2:'#56626c',plastDk:'#323c45',timber:'#0e1013',glass:'#bfe6f0',glassDk:'#14222c',iron:'#0d0f12',moss:'#3a5a48',ivy:['#1c3226','#27402f','#162a20','#2c4a3c','#223c34'],slate:'#2b3641',slateLt:'#566a7c'};
+const PSC_K={stone:'#22262b',stone2:'#2f353c',stoneLt:'#566471',trim:'#7a8896',cop:'#a8843f',cop2:'#6b5428',copLt:'#d8b86a',verd:'#4aa58b',brick:'#34363b',brick2:'#292b30',mort:'#13151a',plast:'#44505a',plast2:'#56626c',plastDk:'#323c45',timber:'#0e1013',glass:'#bfe6f0',glassDk:'#14222c',iron:'#0d0f12',moss:'#3a5a48',ivy:['#1b2826','#24322f','#152020','#29393a','#1f2d2e'],slate:'#2b3641',slateLt:'#566a7c'};
 const PSC_SICK=[.66,.98,1.25],PSC_GREEN=[.55,1.1,1.15],PSC_WARM=[1.6,1.05,.55];   // cold teal-blue moonlight; warm brass lamps are the exception
 PSP_PICS.banner_long_a=[3.6,['hl_p_banner','mw_banner','hgtb_deco_banner'],{keep:1}];PSP_PICS.banner_long_b=[3.6,['mw_banner','hl_p_banner','hgtb_deco_banner'],{keep:1}];PSP_PICS.bat_flock=[1.2,['gyi_raven','gy_bones'],{dark:1}];PSP_PICS.moon_crescent=[2.0,['gy_column'],{}];
 /* ---------- art: the same loader the Blighted Road uses (the graveyard, witch wood and Wenlock pictures are the stand-ins' sources) ---------- */
@@ -240,12 +240,12 @@ function pscFacadeTiles(){
   T.grille=pscTile('gl',4.2,(x,W,Hp)=>{const K=PSC_K;pscAshlar(x,W,Hp,870);pscPointed(x,64,Hp,92,Hp-300,'#030504',K.stoneLt,6);pscIronBars(x,30,Hp-270,98,Hp,13);pscFace(x,64,Hp-326,14,9);pscIvy(x,W,Hp,871,10,.4,true)},{v:2});
   T.gate=gyTile('texBlack_1',3.9,{fac:{img:'gatesC_0',i:0,n:1},gain:1.2,tag:'pscgate',emit:.28,rgb:[.8,1,.88]});
   return PSC.T=T}
-/* hedges: silver and dark yew (the two new kinds are put in the garden table) */
+/* hedges: silver and dark yew (the two new kinds are put in the garden table); slate green-grey, not leaf green (the castle palette: the clipped hedges read lime under the sick lamps) */
 function pscHedges(){
   if(PSC._hed)return PSC._hed;
-  GMH.pscsilver={base:'#0b1610',cols:['#26402f','#315040','#1d3226','#3d5e47','#172a1f'],len:[9,13],ratio:.42,n:1.35,shape:'oval'};
-  GMH.pscyew={base:'#050c08',cols:['#14301f','#1c3d28','#0e2216','#254a30','#173a26'],len:[10,15],ratio:.14,n:1.6,shape:'needle'};
-  GMH.pscbloom={base:'#0c1a12',cols:['#1d3828','#244230','#183024'],len:[7,10],ratio:.5,n:1.25,shape:'oval',acc:[{k:'bloom',cs:['#6c8a78','#5d7868','#7a9486'],n:12,s:4.4,p:6}]};
+  GMH.pscsilver={base:'#0a1111',cols:['#24332f','#2d3d3a','#1b2725','#364845','#161f1e'],len:[9,13],ratio:.42,n:1.35,shape:'oval'};
+  GMH.pscyew={base:'#050a09',cols:['#13221e','#1a2b27','#0e1916','#21342f','#162622'],len:[10,15],ratio:.14,n:1.6,shape:'needle'};
+  GMH.pscbloom={base:'#0b1312',cols:['#1c2b28','#233431','#172321'],len:[7,10],ratio:.5,n:1.25,shape:'oval',acc:[{k:'bloom',cs:['#6c8a78','#5d7868','#7a9486'],n:12,s:4.4,p:6}]};
   const H={low:[],high:[],bloom:[],yew:[]};
   for(let v=0;v<4;v++){H.low.push(gmHedge('pscsilver',v,1.05));H.high.push(gmHedge('pscsilver',v,2.4));H.bloom.push(gmHedge('pscbloom',v,1.6));H.yew.push(gmHedge('pscyew',v,2.6))}
   return PSC._hed=H}
@@ -556,7 +556,7 @@ function pscBuild(info){
   plaque(50,26,'cloister',['THE CLOISTER','DOOR'],'A plaque beside a carved door in the east wing. THE CLOISTER DOOR. It leads to the cloister, the chapel and the library. The leaves on the door are carved so well that they look wet.');
   plaque(34,50,'court',['THE COURT','OF STATUES'],'A black stone plaque. THE COURT OF STATUES. Under it, in smaller letters: Keep to the cobbles. Do not stare at the ones that stare. Do not touch the roses. The clock tower is straight ahead, to the north.');
   /* ===== the gate yard and the Torstrasse: gate piers, urns, an arch, the street climbs north ===== */
-  lampAt(30,49,SK);lampAt(34,49,SK);for(const [x,y,n] of [[30,47,'lantern_red_a'],[34,47,'lantern_red_b'],[31,35,'lantern_red_a'],[33,35,'lantern_red_b'],[31,18,'lantern_red_a'],[33,18,'lantern_red_b']]){if(C.isOpen(x,y)){Q(n,x,y);lampAt(x,y,PSG_RED)}}
+  lampAt(30,49,SK);lampAt(34,49,SK);for(const [x,y] of [[30,47],[34,47],[31,35],[33,35],[31,18],[33,18]]){const wd=C.isOpen(x,y)&&sideWd(x,y,5);if(wd){hang('lantern_red_a',x,y,wd,.9);lampAt(x,y,PSG_RED)}}   // red lanterns hang on the lane walls (free-standing they read as red streaks along the walls)
   S('st_veiled',31,44);S('st_hand',32,43);S('st_bishop',31,40);
   for(const y of [40,47])B('urn_big',32,y,{sc:1});
   /* ===== the clock tower and the walk-under passage ===== */

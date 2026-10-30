@@ -51,7 +51,7 @@ const PSP_CREATURES={};
   ['bridge_arch',2.8,['gy_crypt','gy_column']],['bridge_rail',1.2,['fence','gy_fence']],
   ['schnoor_a',3.2,['gy_hut','gy_chapel']],['schnoor_b',3.2,['gy_hut','gy_chapel']],['schnoor_c',3.4,['gy_hut','gy_chapel']],['schnoor_d',3.0,['gy_hut','gy_chapel']],['schnoor_door',2.4,['gy_hut','gy_chapel']],
   ['brick_wall_high',3.4,['gy_crypt','gy_mausoleum']],['brick_gable',3.6,['gy_crypt','gy_mausoleum']],['lantern_bracket',1.2,['gy_lantern','lantern']],['lantern_hanging',1.2,['gy_lantern','lantern']],
-  ['well_pale',1.3,['ww_well','gy_urn']],['cart_old',1.1,['kh_cart1_0','gy_slab']],['statue_plinth',2.2,['gy_angel','statue']],['urn_big',1.4,['gy_urn','urn']],['cobble_heap',.5,['gy_slab','gy_stone1']],
+  ['well_pale',1.3,['ww_well','gy_urn']],['cart_old',1.1,['kh_cart1_0','gy_slab']],['statue_plinth',2.2,['gy_angel','statue']],['urn_big',1.0,['gy_urn','urn']],['cobble_heap',.5,['gy_slab','gy_stone1']],
   ['castle_view',9.0,['gy_crypt','gy_mausoleum']],['castle_view_near',9.0,['gy_crypt','gy_mausoleum']]])P(n,h,src);
  /* S7 people (living or ghosts); not tinted pale unless 'ghost' */
  for(const [n,s,g] of [['garrick','kh_ohfolk1_0'],['isaude','kh_ohfolk2_0'],['peck','kh_ohfolk3_0'],['sedge','kh_ohfolk4_0'],['calpurnia','kh_ohfolk5_0'],['harrow','kh_ohsold1_0'],['gaunt','kh_ohfolk6_0'],['stamford','kh_ohsold1_1'],['yseult','kh_ohfolk7_0'],

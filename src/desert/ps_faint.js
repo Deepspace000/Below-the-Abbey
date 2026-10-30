@@ -10,13 +10,13 @@ function psfMake(src){
   const mk=()=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
   const bl=Math.max(1,Math.round(h/260));
   const body=mk(),b=body.getContext('2d');
-  try{b.filter='saturate(.12) brightness(1.5) contrast(.85) blur('+bl+'px)'}catch(e){}
+  try{b.filter='saturate(.15) brightness(1.15) contrast(1.05) blur('+bl+'px)'}catch(e){}
   b.drawImage(src,0,0,w,h);b.filter='none';
-  b.globalCompositeOperation='source-atop';b.fillStyle='rgba(140,190,255,.5)';b.fillRect(0,0,w,h);          // pale blue-white
+  b.globalCompositeOperation='source-atop';b.fillStyle='rgba(140,190,255,.3)';b.fillRect(0,0,w,h);          // pale blue-white (lighter tint: at .5 with a 1.5 brightening the face and robe went to a flat white shape)
   const vg=b.createLinearGradient(0,0,0,h);vg.addColorStop(0,'rgba(230,242,255,.2)');vg.addColorStop(.55,'rgba(214,230,255,.1)');vg.addColorStop(1,'rgba(214,230,255,.3)');
   b.fillStyle=vg;b.fillRect(0,0,w,h);                                                                          // the veil
   const out=mk(),o=out.getContext('2d');
-  try{o.filter='blur('+Math.max(3,Math.round(h/60))+'px) brightness(1.7)'}catch(e){}
+  try{o.filter='blur('+Math.max(3,Math.round(h/60))+'px) brightness(1.4)'}catch(e){}
   o.globalAlpha=.3;o.drawImage(body,0,0);o.filter='none';                                                       // the glow
   o.globalAlpha=.42;o.drawImage(body,0,0);o.globalAlpha=1;                                                       // the body, translucent
   o.globalCompositeOperation='destination-in';
