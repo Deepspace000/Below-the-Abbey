@@ -343,11 +343,14 @@ function pspSkyFrame(){
   const col=az=>((((az/TAU)%1)+1)%1*1024+t*11)%1024;                    // the engine drifts the sky sideways: pieces are drawn against the drift
   const put=(img,cu,vc,wRows,alpha,wm)=>{if(!img||!img.width)return;const h=wRows,w=h*img.width/img.height*.57*(wm||1);x.globalAlpha=alpha===undefined?1:alpha;for(const o of [-1024,0,1024])x.drawImage(img,cu-w/2+o,vc-h/2,w,h);x.globalAlpha=1};
   // the moon over the shoulder of the castle, and a flock of bats that drifts round the sky
-  const baseAz=cs?Math.atan2(cs.at[1]-py,cs.at[0]-px):-Math.PI/2;
+  // the castle stands still on the horizon (owner: it was moving): its direction is worked out once, from where the level starts, and its size and height do not change as the party walks
+  const cf=PSPK.cf||(PSPK.cf={});let fx=cf[LEVEL];
+  if(!fx&&cs){const st=L.start||{x:px-.5,y:py-.5};fx=cf[LEVEL]={az:Math.atan2(cs.at[1]-(st.y+.5),cs.at[0]-(st.x+.5))}}
+  const baseAz=cs&&fx?fx.az:-Math.PI/2;
   put(IMG[pspPic('moon_crescent')],col(baseAz+.5),64,50);
   put(IMG[pspPic('bat_flock')],col(baseAz-.9+t*.02),84+5*Math.sin(t*.6),38,.9);put(IMG[pspPic('bat_flock')],col(baseAz+1.9-t*.013),100+4*Math.sin(t*.45+2),26,.8);
   if(cs){
-    const dist=Math.hypot(cs.at[0]-px,cs.at[1]-py),prog=Math.max(0,Math.min(1,(cs.far-dist)/(cs.far-cs.near)));          // 0 at the foot of the climb, 1 at the barbican
+    const prog=.42;          // fixed: the castle neither grows nor slides as the party walks
     const H=Math.round((cs.h0||38)+((cs.h1||106)-(cs.h0||38))*prog*prog*(3-2*prog)),near=prog>.45,mix=Math.max(0,Math.min(1,(prog-.35)/.2));   // rows tall on screen (the sky shows about 105 rows above the horizon)
     const lift=Math.round((cs.lift||0)*(1-prog)+(cs.lift1||0)*prog),base=150-lift,cu=col(baseAz);
     const draw=(img,alpha)=>put(img,cu,base-H/2+Math.round(H*.02),H,alpha,cs.wm||1);
