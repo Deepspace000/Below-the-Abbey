@@ -10308,6 +10308,9 @@ async function khPrepareRun(){
   const rowCodes=new Array(H);for(let y=0;y<H;y++)rowCodes[y]=new Uint16Array(W);
   const WALL_DEFAULT='#'.charCodeAt(0),DOT='.'.charCodeAt(0);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++)rowCodes[y][x]=C.solid[idx(x,y)]?WALL_DEFAULT:DOT;
+  {const seen=new Uint8Array(W*H),q=[[KH.CX,H-KH.WALL-4]];seen[idx(KH.CX,H-KH.WALL-4)]=1; // pockets of open ground that no street reaches are filled in, so nothing (a herb, a pond) can be put where nobody can walk
+    while(q.length){const [x,y]=q.pop();for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;const i=idx(nx,ny);if(C.solid[i]||seen[i])continue;seen[i]=1;q.push([nx,ny])}}
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(!C.solid[idx(x,y)]&&!seen[idx(x,y)]){rowCodes[y][x]=WALL_DEFAULT;C.solid[idx(x,y)]=1}}
   const gateMod=C.modules.find(m=>m.kind==='castle'&&m.face===0&&m.cells.some(([x,y])=>x===KH.CX&&y===H-KH.WALL));
   const eastMods=C.modules.filter(m=>m.kind==='castle'&&m.cells.some(([x,y])=>x>=W-KH.WALL&&y>=199&&y<=201));
   for(const m of eastMods)m.doorCells=m.cells.filter(([x,y])=>y>=199&&y<=201);
@@ -10735,7 +10738,7 @@ function khRoomCellar(b){
   const en=(b.enemies||[]);
   return {w:15,h:11,floor:'kh3',amb:.34,noExtras:true,lights:[[2,2],[12,2],[7,6],[3,8],[11,8]],
     enemies:en.map((t,i)=>[t,2+((i*5)%11),1+(i%3)*3,15]),items:[{k:'potion',x:13,y:9},{k:'potion',x:1,y:9}],
-    build:({put,raw})=>{for(const [x,y] of [[3,3],[4,3],[7,3],[8,3],[11,3],[3,6],[7,6],[8,6],[11,6],[4,9],[10,9]])raw(((x+y)&1)?'barrel':'crate',x,y);raw('sacks',6,1);raw('sacks',9,9)}};
+    build:({put,raw})=>{for(const [x,y] of [[3,3],[4,3],[7,3],[8,3],[11,3],[3,6],[7,6],[8,6],[11,6],[4,9],[10,9]])raw(((x+y)&1)?'barrel':'crate',x,y);raw('sacks',5,1);raw('sacks',9,9)}};   // the sacks keep clear of the cellar's creatures (the fourth stands at 6,1)
 }
 function khRoomRuin(b){
   const en=(b.enemies||[]);
@@ -11339,7 +11342,7 @@ function khBuildCisterns(){
   const decor=[],enemies=[],items=[];
   const free=(x,y)=>rows[y][x]==='.';
   const cell=(x,y)=>({k:'bones',x,y,block:false,walk:true});
-  for(let i=0;i<40;i++){const x=1+((rng()*(W-2))|0),y=1+((rng()*(H-2))|0);if(free(x,y)&&Math.abs(x-1)+Math.abs(y-H+2)>6)decor.push(cell(x,y))}
+  for(let i=0;i<40;i++){const x=1+((rng()*(W-2))|0),y=1+((rng()*(H-2))|0);if(free(x,y)&&Math.abs(x-1)+Math.abs(y-H+2)>6&&!decor.some(d=>d.x===x&&d.y===y))decor.push(cell(x,y))} // one heap of bones to a square
   const types=['skel','skel','ghost','scorpion','bat','skel','ghost','mummy'];
   for(let i=0;i<13;i++){let x,y,t=0;do{x=1+((rng()*(W-2))|0);y=1+((rng()*(H-4))|0);t++}while((!free(x,y)||Math.abs(x-1)+Math.abs(y-H+2)<10)&&t<80);if(free(x,y))enemies.push({t:types[i%types.length],x,y,lvl:16})}
   for(const [x,y] of [[5,6],[17,5],[30,11],[7,19],[22,22],[34,24]])if(free(x,y))decor.push({k:'chest',x,y,block:true,deco:false});
@@ -11372,14 +11375,14 @@ function khBuildWorld(){
   const pal=khBuildPalace();
   LEVELS[KH_PALACE]={rows:pal.rows,start:pal.start,enemies:[],items:[],decor:pal.decor,day:0,amb:.72,floor:'kh2',ceil:'beam',name:'The Palace of Khemetra',label:'Palace',lights:pal.lights,portals:[back(44,KH_PALACE_FRONT.x,KH_PALACE_FRONT.y,KH_PALACE_FRONT.f)],diff:16,chars:wall?{w:wall}:undefined};
   const cis=khBuildCisterns();
-  LEVELS[KH_CISTERN]={rows:cis.rows,start:cis.start,enemies:cis.enemies,items:cis.items,decor:cis.decor,day:0,amb:.28,floor:'kh3',ceil:'beam',name:'The Cisterns beneath Khemetra',label:'Cisterns',lights:[[1,28],[11,27],[21,16],[31,5],[39,2]],portals:[back(44,KH_HATCH.x,KH_HATCH.y+1,2),back(KH_STUDY,7,9,0)],diff:17,noExtras:true,chars:{w:khInteriorWall('cellar')||undefined}};
+  LEVELS[KH_CISTERN]={rows:cis.rows,start:cis.start,enemies:cis.enemies,items:cis.items,decor:cis.decor,day:0,amb:.28,floor:'kh3',ceil:'beam',name:'The Cisterns beneath Khemetra',label:'Cisterns',lights:[[1,28],[11,27],[21,16],[31,5],[39,1]],portals:[back(44,KH_HATCH.x,KH_HATCH.y+1,2),back(KH_STUDY,7,9,0)],diff:17,noExtras:true,chars:{w:khInteriorWall('cellar')||undefined}};
   if(!LEVELS[KH_CISTERN].chars.w)delete LEVELS[KH_CISTERN].chars;
   const st=khBuildStudy();
-  LEVELS[KH_STUDY]={rows:st.rows,start:st.start,enemies:[],items:[],decor:st.decor,day:0,amb:.7,floor:'kh2',ceil:'beam',name:"Ishkander's Study",label:'The Wizards Study',lights:st.lights,portals:[back(KH_CISTERN,KH_CIST_END.x,KH_CIST_END.y,2)],diff:17,chars:wall?{w:wall}:undefined};
+  LEVELS[KH_STUDY]={rows:st.rows,start:st.start,enemies:[],items:[],decor:st.decor,day:0,amb:.7,floor:'kh2',ceil:'beam',name:"Ishkander's Study",label:'The Wizards Study',lights:st.lights,portals:[back(KH_CISTERN,KH_CIST_END.x,KH_CIST_END.y,cis.rows[KH_CIST_END.y+1][KH_CIST_END.x]==='.'?2:3)],diff:17,chars:wall?{w:wall}:undefined};
   const tn=khBuildSeaTunnel();
   LEVELS[KH_SEATUNNEL]={rows:tn.rows,start:tn.start,enemies:[],items:[],decor:tn.decor,day:.55,amb:.55,floor:'sand',ceil:'cloud',name:'The Tunnel to the Narrow Sea',label:'Sea Tunnel',lights:tn.lights,portals:[back(62,KH_SEA_MOUTH.x,KH_SEA_MOUTH.y+1,2)],diff:20,noExtras:true,seaTunnel:true};
 }
-const KH_PALACE_FRONT={x:200,y:206,f:2},KH_HATCH={x:108,y:112},KH_CIST_END={x:39,y:2},KH_SEA_MOUTH={x:292,y:150};
+const KH_PALACE_FRONT={x:200,y:206,f:2},KH_HATCH={x:108,y:112},KH_CIST_END={x:39,y:1},KH_SEA_MOUTH={x:292,y:150};
 // the mouth of the tunnel to the sea stands in the east of the Violet Erg from the start
 (function(){const V=LEVELS[62];if(V){V.decor=V.decor||[];V.decor.push({k:'dburrow',x:KH_SEA_MOUTH.x,y:KH_SEA_MOUTH.y,block:true,enter:{to:KH_SEATUNNEL,x:15,y:17,f:0}})}})();
 
@@ -14085,14 +14088,14 @@ const YR_TPL={
   }})
 };
 
-/* ---- the cottages: seven squares by six, a wooden floor, a hearth or a bed or a loom, and the things of the trade. Some have someone at home. ---- */
+/* ---- the cottages: seven squares by six with the walls (the floor is x 1 to 5, y 1 to 4; everything stands on it, the way in at x 3 is kept clear), a wooden floor, a hearth or a bed or a loom, and the things of the trade. Some have someone at home. ---- */
 const YR_COT0=1500;   // the level numbers of the cottage rooms
 const YR_COT_SETS=[
-  {n:"A Fisherman's Cottage",tele:[1,4],item:[5,4],res:[2,2],who:0,build:({put,raw})=>{put('hearth',3,1);put('bed',1,1);put('table',5,3);put('chair',4,3);put('rope',1,3);raw('yar_bucket2',5,1);raw('barrel',6,1);put('sail',6,4)}},
-  {n:"A Net-Mender's Cottage",tele:[6,4],item:[2,4],res:[4,2],who:1,build:({put,raw})=>{put('loom',5,1);put('potshelf',1,1);put('table',1,3);put('chair',2,3);put('sail',6,3);put('sail',6,2);raw('crate',5,4);raw('yar_bucket4',1,4)}},
-  {n:"A Widow's Cottage",tele:[6,4],item:[4,4],res:[2,3],who:2,build:({put,raw})=>{put('hearth',5,1);put('kitchenshelf',2,1);put('bed',1,2);put('birdcage',1,4);put('table',5,3);put('chair',6,3)}},
-  {n:"A Boatbuilder's House",tele:[1,4],item:[2,4],res:[4,2],who:3,build:({put,raw})=>{raw('crate',1,1);raw('barrel',2,1);put('wheel',5,1);put('ship',6,1);put('anchor',6,3);put('rope',1,3);put('seachest',5,4)}},
-  {n:"A Poor Fisher's Hut",tele:[6,2],item:[4,4],res:[2,3],who:4,build:({put,raw})=>{put('bed',1,1);put('potshelf',5,1);put('amphora',1,4);put('table',5,3);put('chair',5,4);raw('yar_bucket3',6,4)}}
+  {n:"A Fisherman's Cottage",tele:[1,4],item:[2,4],res:[2,2],who:0,build:({put,raw})=>{put('hearth',3,1);put('bed',1,1);put('table',5,3);put('chair',4,3);put('rope',1,3);raw('yar_bucket2',5,1);raw('barrel',4,1);put('sail',5,4)}},
+  {n:"A Net-Mender's Cottage",tele:[4,4],item:[2,4],res:[4,2],who:1,build:({put,raw})=>{put('loom',5,1);put('potshelf',1,1);put('table',1,3);put('chair',2,3);put('sail',5,3);put('sail',5,2);raw('crate',5,4);raw('yar_bucket4',1,4)}},
+  {n:"A Widow's Cottage",tele:[5,4],item:[4,4],res:[2,3],who:2,build:({put,raw})=>{put('hearth',5,1);put('kitchenshelf',2,1,Object.assign({bob:.42},KH_WALLPIECE));put('bed',1,2);put('birdcage',1,4);put('table',5,3);put('chair',4,3)}},
+  {n:"A Boatbuilder's House",tele:[1,4],item:[2,4],res:[4,2],who:3,build:({put,raw})=>{raw('crate',1,1);raw('barrel',2,1);put('wheel',5,1);put('ship',4,1);put('anchor',5,3);put('rope',1,3);put('seachest',5,4)}},
+  {n:"A Poor Fisher's Hut",tele:[5,2],item:[4,4],res:[2,3],who:4,build:({put,raw})=>{put('bed',1,1);put('potshelf',5,1);put('amphora',1,4);put('table',5,3);put('chair',5,4);raw('yar_bucket3',4,1)}}
 ];
 const YR_COT_ITEMS=['bread','herring','ale','apple'];
 function YR_COT_TPL(c){
@@ -15479,7 +15482,7 @@ function seaBuild(id){
   for(const [x0,y0,x1,y1,ch] of sp.walls||[])for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){rows[y][x]=ch;block[y*W+x]=1}
   const portals=[];
   if(sp.gate){rows[sp.gate[1]][sp.gate[0]]='1';block[sp.gate[1]*W+sp.gate[0]]=1;portals[1]={to:305,x:74,y:141,f:0,tex:'citygate',req:'oldhavenOpen',lock:'The great gate of Oldhaven is barred until noon. Speak to the herald.'}}
-  const spot=(dx,dy)=>{for(let r=0;r<14;r++)for(let yy=-r;yy<=r;yy++)for(let xx=-r;xx<=r;xx++){if(Math.max(Math.abs(xx),Math.abs(yy))!==r)continue;const x=cx+dx+xx,y=cy+dy+yy;if(x<2||y<2||x>=W-2||y>=H-2)continue;if(!block[y*W+x]&&rows[y][x]==='.')return [x,y]}return null};
+  const spot=(dx,dy,skip)=>{for(let r=0;r<14;r++)for(let yy=-r;yy<=r;yy++)for(let xx=-r;xx<=r;xx++){if(Math.max(Math.abs(xx),Math.abs(yy))!==r)continue;const x=cx+dx+xx,y=cy+dy+yy;if(x<2||y<2||x>=W-2||y>=H-2)continue;if(!block[y*W+x]&&rows[y][x]==='.'&&!(skip&&skip.has(x+','+y)))return [x,y]}return null};   // skip: squares already taken
   // the pier and the ship
   let sy=-1;for(let y=H-2;y>0;y--)if(!block[y*W+cx]&&h[y*W+cx]>-.06){sy=y;break}
   const plank=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;block[i]=0;h[i]=.08;rk[i]=0;fm[i]='2'}};
@@ -15505,8 +15508,8 @@ function seaBuild(id){
   isleBeachProps(W,H,fm,h,block,rows,used,scenery,sp.seed,cx,cy,.16,[cx,sy-2]);
   for(let q=0;q<26;q++){const a=hash2(id,q,91)*TAU,rr=sp.rx*(.55+hash2(id,q,92)*.4),x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr*(sp.ry/sp.rx),cxl=x|0,cyl=y|0;
     if(cxl<2||cyl<2||cxl>=W-2||cyl>=H-2||block[cyl*W+cxl]||used.has(cxl+','+cyl))continue;scenery.push({k:'yar_gull_stand',wx:x,wy:y,sc:.8+hash2(id,q,93)*.4,decor:{k:'yar_gull_stand',walk:true,x:cxl,y:cyl}})}
-  const enemies=[];
-  for(const [t,n,dx,dy,r] of sp.enemies){for(let q=0;q<n;q++){const a=hash2(id,q+40,t.length)*TAU,rr=hash2(id,q+50,t.length)*r,s=spot(dx+Math.cos(a)*rr|0,dy+Math.sin(a)*rr|0);if(s&&Math.abs(s[0]-cx)+Math.abs(s[1]-(sy-2))>12)enemies.push({t,x:s[0],y:s[1]})}}
+  const enemies=[],foeAt=new Set(decor.filter(d=>d.block).map(d=>d.x+','+d.y));   // a creature never stands on a solid piece (an altar, a tree) or on another creature
+  for(const [t,n,dx,dy,r] of sp.enemies){for(let q=0;q<n;q++){const a=hash2(id,q+40,t.length)*TAU,rr=hash2(id,q+50,t.length)*r,s=spot(dx+Math.cos(a)*rr|0,dy+Math.sin(a)*rr|0,foeAt);if(s&&Math.abs(s[0]-cx)+Math.abs(s[1]-(sy-2))>12){enemies.push({t,x:s[0],y:s[1]});foeAt.add(s[0]+','+s[1])}}}
   const start={x:cx,y:sy-2,f:0};
   const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[],decor,scenery,floorSet:sp.floors,floor:sp.floors[0],ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:sp.name,label:sp.label,noExtras:true,diff:sp.diff,tele:{x:start.x,y:start.y},
@@ -19228,7 +19231,8 @@ const UW={
 const UWS={}; // per level: where the vents are, and what swims by
 const UW_THEME={
   reef:{big:['staghorn','brain','rocks','tubes'],small:['softcoral','anemone','seafan','seagrass','kelp'],props:['clam','amphora']},
-  abbey:{big:['yar_arch','timber','rocks','brain'],small:['kelp','seagrass','softcoral','anemone'],props:['amphora','clam']},
+  abbey:{big:['rocks','timber','rocks','brain'],   // the bell arch is not scattered: one great bell in its broken arch stands ahead of the start (below)
+   small:['kelp','seagrass','softcoral','anemone'],props:['amphora','clam']},
   vent:{big:['rocks','tubes','staghorn','yar_crystals'],small:['anemone','seafan','seagrass','softcoral'],props:['clam','amphora']},
   wreck:{big:['timber','yar_wreck','rocks','brain'],small:['kelp','kelp','seagrass','softcoral','anemone'],props:['amphora','clam']}
 };
@@ -19278,7 +19282,7 @@ function uwBuild(id){
   const vents=[],vspots=[[start.x-6,start.y-6],[26,66],[84,60],[54,34]];
   for(const [vx,vy] of vspots){let s=null;for(let r=0;r<8&&!s;r++)for(let yy=-r;yy<=r&&!s;yy++)for(let xx=-r;xx<=r&&!s;xx++){const x=vx+xx,y=vy+yy;if(!block[y*W+x]&&rows[y][x]==='.')s=[x,y]}if(s){vents.push(s);used.add(s[0]+','+s[1])}}
   // a landmark or two ahead of the start, so that each reef opens on its own picture
-  {const LM={reef:['staghorn','brain','staghorn'],abbey:['yar_arch','yar_arch','timber'],vent:['tubes','rocks','tubes'],wreck:['yar_wreck','timber','rocks']}[sp.theme]||[];
+  {const LM={reef:['staghorn','brain','staghorn'],abbey:['timber','yar_arch','rocks'],vent:['tubes','rocks','tubes'],wreck:['yar_wreck','timber','rocks']}[sp.theme]||[];
     LM.forEach((k,i)=>{const x=start.x-7+i*7,y=start.y-8-(i%2)*2;if(free(x,y))dc(k.startsWith('yar_')?k:'uw_'+k,x,y,{sc:1.35+(i%2)*.25})})}
   // the dive line up, the prize, and the boss
   dc('uw_buoy',start.x+2,start.y-1,{npc:'uw_up',cat:id,deco:false});
@@ -19582,7 +19586,7 @@ function isleBuild(id){
   }
   isleBeachProps(W,H,fm,h,block,rows,used,scenery,seed,cx,cy,.14,[cx,sy-2]);
   for(let q=0;q<S.w/3;q++){const s=spot();if(s)scenery.push({k:'yar_gull_stand',wx:s[0]+.5,wy:s[1]+.5,sc:.9,decor:{k:'yar_gull_stand',walk:true,x:s[0],y:s[1]}})}
-  for(const [t,n] of S.foes)for(let q=0;q<n;q++){const s=spot();if(s)enemies.push({t,x:s[0],y:s[1]})}
+  for(const [t,n] of S.foes)for(let q=0;q<n;q++){const s=spot();if(s){enemies.push({t,x:s[0],y:s[1]});used.add(s[0]+','+s[1])}}   // one creature to a square
   const start={x:cx,y:sy-2,f:0};
   const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[{k:'potion',x:cx+3,y:sy-5}],decor,scenery,floorSet:['isleSand','lush','wood','bluesand','bluewater',S.pf||'isleGrassEdge'],floor:'isleSand',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:I.n[0].toUpperCase()+I.n.slice(1),label:I.n,noExtras:true,diff:18+S.tier*2,tele:{x:start.x,y:start.y},chars:{D:LEVEL41_DATA.chars.D},lights:[],portals:[]};
@@ -58089,6 +58093,7 @@ fplDef(44,c=>{
     const cx=(p.x0+p.x1)>>1,cy=(p.y0+p.y1)>>1;let done=false;
     for(let k=0;k<offs.length&&!done;k++){
       const px=cx+offs[k][0],py=cy+offs[k][1],cells=c.ellipse(px,py,3.4,2.3,(px*7+py)|0);
+      if(cells.some(([x,y])=>[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>{const r=c.L.rows[y+dy];return !r||r[x+dx]!=='.'})))continue; // a dry path between the pond and every wall, so no pond lies against a door
       if(!c.lake(cells,{floor:'water',quiet:true,into:'2'}))continue;
       done=true;c.quietStands=true;let s=0;
       s+=c.edgeStand(cells,'N',px)?1:0;s+=c.edgeStand(cells,'S',px)?1:0;s+=c.edgeStand(cells,'W',py)?1:0;s+=c.edgeStand(cells,'E',py)?1:0;

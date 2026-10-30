@@ -231,7 +231,7 @@ function isleBuild(id){
   }
   isleBeachProps(W,H,fm,h,block,rows,used,scenery,seed,cx,cy,.14,[cx,sy-2]);
   for(let q=0;q<S.w/3;q++){const s=spot();if(s)scenery.push({k:'yar_gull_stand',wx:s[0]+.5,wy:s[1]+.5,sc:.9,decor:{k:'yar_gull_stand',walk:true,x:s[0],y:s[1]}})}
-  for(const [t,n] of S.foes)for(let q=0;q<n;q++){const s=spot();if(s)enemies.push({t,x:s[0],y:s[1]})}
+  for(const [t,n] of S.foes)for(let q=0;q<n;q++){const s=spot();if(s){enemies.push({t,x:s[0],y:s[1]});used.add(s[0]+','+s[1])}}   // one creature to a square
   const start={x:cx,y:sy-2,f:0};
   const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[{k:'potion',x:cx+3,y:sy-5}],decor,scenery,floorSet:['isleSand','lush','wood','bluesand','bluewater',S.pf||'isleGrassEdge'],floor:'isleSand',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:I.n[0].toUpperCase()+I.n.slice(1),label:I.n,noExtras:true,diff:18+S.tier*2,tele:{x:start.x,y:start.y},chars:{D:LEVEL41_DATA.chars.D},lights:[],portals:[]};

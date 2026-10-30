@@ -287,7 +287,7 @@ function khRoomCellar(b){
   const en=(b.enemies||[]);
   return {w:15,h:11,floor:'kh3',amb:.34,noExtras:true,lights:[[2,2],[12,2],[7,6],[3,8],[11,8]],
     enemies:en.map((t,i)=>[t,2+((i*5)%11),1+(i%3)*3,15]),items:[{k:'potion',x:13,y:9},{k:'potion',x:1,y:9}],
-    build:({put,raw})=>{for(const [x,y] of [[3,3],[4,3],[7,3],[8,3],[11,3],[3,6],[7,6],[8,6],[11,6],[4,9],[10,9]])raw(((x+y)&1)?'barrel':'crate',x,y);raw('sacks',6,1);raw('sacks',9,9)}};
+    build:({put,raw})=>{for(const [x,y] of [[3,3],[4,3],[7,3],[8,3],[11,3],[3,6],[7,6],[8,6],[11,6],[4,9],[10,9]])raw(((x+y)&1)?'barrel':'crate',x,y);raw('sacks',5,1);raw('sacks',9,9)}};   // the sacks keep clear of the cellar's creatures (the fourth stands at 6,1)
 }
 function khRoomRuin(b){
   const en=(b.enemies||[]);
