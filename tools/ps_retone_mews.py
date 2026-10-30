@@ -52,7 +52,7 @@ save('c_psfalconer', a)
 print('retoned c_psraven, c_psfalconer')
 
 # the red lanterns read pink: pull the blue out of the lit glass so they are a deep red
-for nm in ('lantern_red_a', 'lantern_red_b'):
+for nm in ('lantern_red_a', 'lantern_red_b', 'pillar_lantern', 'lantern_hanging', 'lantern_bracket', 'sconce_black'):
     a = defringe(load(nm))
     r, g, b = a[..., 0], a[..., 1], a[..., 2]
     pink = (r > 120) & (b > g + 8) & (r > g + 30)
@@ -61,3 +61,9 @@ for nm in ('lantern_red_a', 'lantern_red_b'):
     a[..., 0] = np.where(pink, np.minimum(255, r * 1.05), r)
     save(nm, a)
 print('retoned red lanterns')
+
+# the gardener (a straw-hatted villager in bright green-brown) goes dark and weary like the porter
+a = defringe(load('p_gardener'))
+a = tone(a, .62, .5, (.95, 1.0, 1.05), keep_hi=252)
+save('p_gardener', a)
+print('retoned gardener')

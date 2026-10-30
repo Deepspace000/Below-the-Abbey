@@ -48,7 +48,7 @@ function pcrBuild(info){
   const lamp=(x,y,col)=>{if(!C.free(x,y))return;C.dec('gy_lantern',x,y,{block:false,sc:1.05});C.light(x,y,col||SI)};
   const edge=(x,y)=>open(x,y)&&D(x,y)===2;                // the outer row of the road
   const far=(x,y,d)=>open(x,y)&&D(x,y)>=(d||5)&&C.free(x,y);   // well off the route: solid props only here
-  const TREES=['gy_dead','ww_crowtree','gy_dead','ww_stump'],tree=(x,y,sc,k)=>{if(far(x,y,3))C.dec(T(k||TREES[(hs(x,y,8)*TREES.length)|0]),x,y,{block:true,sc:sc||1.2+hs(x,y,7)*.4})};
+  const TREES=['gy_dead','ww_crowtree','gy_dead','ww_stump'],tree=(x,y,sc,k)=>{if(far(x,y,3))C.dec(T(k||TREES[(hs(x,y,8)*TREES.length)|0]),x,y,{block:true,sc:sc||.95+hs(x,y,7)*.3})};
   /* the iron fence along the outer row, with gaps, and a leaning lamp every few squares (walk-through pictures) */
   for(const [cx,cy] of cl){
     for(const [dx,dy] of [[-2,0],[2,0],[0,-2],[0,2]]){const x=cx+dx,y=cy+dy;
@@ -70,7 +70,7 @@ function pcrBuild(info){
   for(const [x,y,k] of [[26,48,0],[29,53,1],[22,51,0],[33,50,2]])if(open(x,y)&&C.free(x,y))C.dec(k===0?T('gy_bones'):k===1?pspPic('cobble_heap'):pspPic('moss_rock'),x,y,{block:false,sc:.75})
   /* the Glade of Crosses: rows of crosses and a great old tree */
   for(let x=33;x<=43;x+=2)for(const y of [29,35])if(far(x,y,3)&&((x>>1)+y)%3)C.dec(T(['gy_ccross','gy_wcross','gy_stone1'][(x>>1)%3]),x,y,{block:true,sc:1});
-  tree(42,29,1.7,'gy_yew');tree(31,35,1.6,'ww_crowtree');
+  tree(42,29,1.3,'gy_yew');tree(31,35,1.2,'ww_crowtree');
   /* the Leaning Lamps: lamps that lean over the road, a ring of them */
   for(const [x,y] of [[5,19],[8,19],[11,19],[15,19],[5,25],[8,25],[15,25],[17,22],[5,22]])if(open(x,y))lamp(x,y,hs(x,y,9)<.5?SI:[.8,1.2,.6]);
   /* the Wayside Shrine: a safe place with a bench, a warm lantern, a free rest */

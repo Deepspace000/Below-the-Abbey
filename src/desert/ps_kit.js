@@ -28,7 +28,7 @@ const PSP_PAL={
   stone:[.72,.84,.97],stoneGain:1.0,          // rgb multipliers and gain for wall stone: black and charcoal with a slate-blue cast, wet
   copper:'#7898a4',copperHi:'#b4d0d8',copperDk:'#38505a',   // slate-teal trim; verdigris only as small accents (spire tips): verdigris:'#5aa890'
   verdigris:'#5aa890',bone:'#d0d4d8',brass:'#b08a40',brassHi:'#e0b860',banner:'#8a4a22',iron:'#181c22',moss:'#2a3e3a',mossHi:'#44605a',ivy:['#1a2c2e','#24383a','#122224','#30484a'],
-  glass:['#3a2a1a','#d8923a','#241810'],     // window glass, top to bottom: tiny lit windows, aged amber
+  glass:['#2a2016','#80602e','#18120c'],     // window glass, top to bottom: tiny lit windows, aged amber
   silver:[.78,.95,1.1],violet:[.55,.8,1.1],green:[.6,.95,1.1],warm:[1.5,1.05,.55],   // light colours: cold teal moonlight; warm only in rest rooms (violet and green are kept as names for old callers and are teal-blue now)
   amb:{out:.8,in:.2},sky:{top:[16,34,50],mid:[34,66,86],low:[78,116,130]},mist:[64,92,108],moon:[220,236,240],
   floorTint:{flag:[.72,.82,.92],cobble:[.62,.74,.86],wet:[.55,.68,.82]}};
@@ -50,7 +50,7 @@ function pspWallGid(style,v,wh){
     case 'win':gid=g(pspTex('ashlar','texBlack_2'),{tag:'psw'+v,draw:(x,w,h)=>{const top=h-h*.9,bot=h-34,x0=48,x1=80;x.save();pspPointed(x,x0-6,x1+6,top-6,bot+6,36);x.fillStyle=P.copper;x.fill();pspPointed(x,x0,x1,top,bot,34);const gr=x.createLinearGradient(0,top,0,bot);gr.addColorStop(0,P.glass[1]);gr.addColorStop(.5,P.glass[0]);gr.addColorStop(1,P.glass[2]);x.fillStyle=gr;x.fill();x.clip();
       x.strokeStyle='#4a5a64';x.lineWidth=2.4;x.beginPath();x.moveTo(64,top);x.lineTo(64,bot);for(let yy=top+36;yy<bot;yy+=38){x.moveTo(x0,yy);x.lineTo(x1,yy)}x.stroke();
       x.fillStyle='rgba(180,255,210,.35)';x.beginPath();x.arc(64,top+36,8,0,6.3);x.fill();x.restore();wet(x,w,h)}});break;   // tall thin lancet, green glass
-    case 'pier':gid=g(pspTex('ashlar','texBlack_1'),{tag:'psr'+v,draw:(x,w,h)=>{const gr=x.createLinearGradient(30,0,98,0);gr.addColorStop(0,'rgba(10,20,16,.6)');gr.addColorStop(.3,'rgba(150,176,190,.12)');gr.addColorStop(.7,'rgba(120,150,165,.05)');gr.addColorStop(1,'rgba(8,16,12,.62)');x.fillStyle=gr;x.fillRect(30,0,68,h);x.fillStyle=P.copperDk;x.fillRect(26,h-14,76,14);x.fillRect(26,0,76,10);x.fillStyle=P.copper;x.fillRect(26,10,76,3)}});break;
+    case 'pier':gid=g(pspTex('ashlar','texBlack_1'),{tag:'psr'+v,draw:(x,w,h)=>{const gr=x.createLinearGradient(30,0,98,0);gr.addColorStop(0,'rgba(10,20,16,.6)');gr.addColorStop(.3,'rgba(150,176,190,.12)');gr.addColorStop(.7,'rgba(120,150,165,.05)');gr.addColorStop(1,'rgba(8,16,12,.62)');x.fillStyle=gr;x.fillRect(30,0,68,h);x.fillStyle='#1c262c';x.fillRect(26,h-14,76,14);x.fillRect(26,0,76,10);x.fillStyle='#34444c';x.fillRect(26,10,76,3)}});break;
     case 'string':gid=g(pspTex('ashlar','texBlack_2'),{tag:'psst'+v,draw:(x,w,h)=>{const y1=h-128*2.05,y2=h-14;   // a plinth at the foot, a projecting string course two squares up, a drip line under the cornice
       x.fillStyle='rgba(8,12,16,.5)';x.fillRect(0,y2,w,14);x.fillStyle='rgba(150,176,190,.22)';x.fillRect(0,y2,w,2);
       x.fillStyle='rgba(6,10,14,.55)';x.fillRect(0,y1+8,w,8);x.fillStyle='rgba(150,176,190,.3)';x.fillRect(0,y1-2,w,3);x.fillStyle='rgba(40,52,62,.55)';x.fillRect(0,y1+1,w,7);
@@ -69,8 +69,8 @@ function pspWallGid(style,v,wh){
 function pspDoorGid(style,wh){
   const k='door_'+style+'|'+wh;if(PSPK.tiles[k]!==undefined)return PSPK.tiles[k];let gid;const P=PSP_PAL;
   const frame=(x,w,h,x0,x1,top,ap,fill)=>{pspPointed(x,x0-9,x1+9,top-9,h,ap+4);x.fillStyle='#10181a';x.fill();x.strokeStyle=P.copper;x.lineWidth=3;x.stroke();pspPointed(x,x0,x1,top,h,ap);x.fillStyle=fill;x.fill()};
-  const DP={great:'door_great',oak:'door_oak',iron:'door_ironbound',dungeon:'door_dungeon',stair:'door_stair'}[style];
-  if(DP&&typeof IMG!=='undefined'&&IMG['ps_'+DP]&&IMG['ps_'+DP].width){IMG['gyp_psd_'+DP]=IMG['ps_'+DP];gid=gyTile(pspTex('ashlar','texBlack_2'),wh,{fac:{img:'psd_'+DP,i:0,n:1},gain:1.3,rgb:[.78,.9,.92],tag:'psdp'+style+wh,emit:.24})}
+  const DP={great:'door_great',oak:'door_oak',iron:'door_ironbound',dungeon:'door_dungeon',stair:'door_stair',gate:'door_great'}[style];
+  if(DP&&typeof IMG!=='undefined'&&IMG['ps_'+DP]&&IMG['ps_'+DP].width){IMG['gyp_psd_'+DP]=IMG['ps_'+DP];gid=gyTile(pspTex('ashlar','texBlack_2'),wh,{fac:{img:'psd_'+DP,i:0,n:1},gain:.9,rgb:[.58,.7,.8],tag:'psdp2'+style+wh,emit:.06})}
   else if(style==='stair')gid=gyTile('texBlack_1',wh,{fac:{img:'stairFix_0',i:0,n:1},gain:1.2,rgb:[.8,1,.9],tag:'psstair'+wh,emit:.3});
   else if(style==='gate')gid=gyTile('texBlack_1',wh,{fac:{img:'gatesC_0',i:0,n:1},gain:1.0,rgb:[.7,1,.85],tag:'psgate'+wh,emit:.3});
   else gid=gyTile('texBlack_2',wh,{gain:1.2,rgb:[.76,.92,.82],tag:'psdoor'+style,draw:(x,w,h)=>{
@@ -138,6 +138,7 @@ function pspDefringe(k){
     const A=(xx,yy)=>xx<0||yy<0||xx>=w||yy>=h?0:p[(yy*w+xx)*4+3];
     for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){const i=(yy*w+xx)*4,a=p[i+3];if(a===0)continue;
       let edge=a<250;if(!edge){for(let r=1;r<=3&&!edge;r++)if(A(xx-r,yy)<40||A(xx+r,yy)<40||A(xx,yy-r)<40||A(xx,yy+r)<40)edge=true}
+      if(a<22){p[i+3]=0;n++;continue}   // a faint haze left by the keying (it showed as a pale rectangle round the piece)
       if(!edge)continue;const R=p[i],G=p[i+1],B=p[i+2];
       if(R>G+12&&B>G+12){p[i]=Math.min(R,G*1.12+3);p[i+2]=Math.min(B,G*1.05+3);p[i+1]=G*.94;n++}}
     if(n){x.putImageData(d,0,0);c._psfd=1;IMG[k]=c}else im._psfd=1}catch(e){}}

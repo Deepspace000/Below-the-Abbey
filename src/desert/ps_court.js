@@ -341,7 +341,7 @@ const pscGone=d=>{if(d){d.found=true;d.hidden=true;d.block=false}};
 const pscTint=(key,src,filter,h)=>{if(IMG[key])return key;if(!bl3Tint(key,src,filter,h))return src;return key};
 const pscDecorOf=id=>G.decor&&G.decor.find(d=>d.npc===id);
 const pscHeal=(f)=>{try{G.heroes.forEach(h=>{if(h.alive)h.hp=Math.min(h.max,h.hp+Math.ceil(h.max*f))})}catch(e){}};
-khNpc('psc_gardener','Hobb Ashby, the gardener','ps_c_pshedger',d=>{
+khNpc('psc_gardener','Hobb Ashby, the gardener','ps_p_gardener',d=>{
   const F=pscF();
   return say(F.hobb?"Sit down, sit down. There is hot water on the stove and the bed is made. Nobody has ever come into the lodge to hurt me, and I have never worked out why. I do not ask.":"Oh! A living face. Come in and shut the door, the draught is bad for the seedlings. I am Hobb Ashby, gardener to the Pale Sovereign, and I have not been told to stop, so I have not stopped. The roses want cutting, the hedges want clipping, and the statues want something I cannot name.",
     [['Rest by the stove (free).',()=>{F.hobb=1;G.talk=null;restParty(true);return say('You sleep in the lodge by the stove. Nothing comes in. You wake warm and healed.',[BYE])}],
@@ -727,7 +727,7 @@ function pscLodge(info){
   /* the north wall: a cold hearth, a vine, the desk, a sconce each side; the bed against the east wall; a chest and barrels in the two south corners; one urn each side of the door */
   C.prop('hearth_cold',4,3,{block:true,sc:.8});C.prop('furn_desk',9,3,{block:true,sc:.8});
   C.picture('vine_a',7,3,[0,-1]);C.picture('sconce_black',6,3,[0,-1],{bob:1.0});C.picture('sconce_black',11,3,[0,-1],{bob:1.0});
-  C.prop('straw_bed',12,7,{block:true,sc:1.2});C.picture('window_sheeted_c',3,7,[-1,0]);
+  C.prop('straw_bed',12,7,{block:true,sc:1.0});C.picture('window_sheeted_c',3,7,[-1,0]);
   const ch=C.chest(4,10,{tier:0});if(ch)ch.sc=.75;PSC.chest['9731:4,10']={pot:3,mana:2,elixir:1,gold:900};
   C.prop('barrels',12,10,{block:true,sc:.9});
   C.prop('urn_big',7,11,{block:true,sc:.75});C.prop('urn_big',9,11,{block:true,sc:.75});
@@ -746,11 +746,11 @@ function pscMews(info){
   psgDim(['window_sheeted_a'],'brightness(.58) saturate(.55)');
   C.links({style:{'out of the mews':'oak'}});
   C.prop('col_twist',8,3,{block:true,sc:.9});C.prop('col_twist',12,3,{block:true,sc:.9});
-  for(const x of [5,15])C.prop('gy_rpost',x,3,{block:true,sc:1.1});
+  for(const x of [5,15])C.dec('gy_rpost',x,3,{block:true,sc:1.1});
   C.prop('font',3,8,{block:true,sc:.9});C.prop('font',16,8,{block:true,sc:.9});
   C.dec('gy_rpost',7,11,{npc:'psc_feather',block:true,solid:1,deco:false,sc:1.0});
   C.dec('gy_chest',3,12,{npc:'psc_glovechest',block:true,solid:1,deco:false,sc:.8});
-  C.picture('window_sheeted_a',10,3,[0,-1]);C.picture('chains',3,5,[-1,0]);C.picture('chains',16,5,[1,0]);
+  C.picture('window_sheeted_a',10,3,[0,-1]);
   C.picture('cobweb_corner_a',3,3,[0,-1]);C.picture('cobweb_corner_b',16,3,[0,-1]);
   for(const [x,y] of [[4,5],[15,5],[5,9],[14,10]])pspFoe(C,'psraven',x,y);
   for(const [x,y] of [[5,4],[14,4],[10,8],[5,11],[15,11]])C.light(x,y,G1);
