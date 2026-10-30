@@ -94,7 +94,11 @@ def main():
               const D = F2_WATER.DOOR; T.bump(D[0], D[1]); if (T.bag('psf_chest')) o.push('chest through a locked door');
               T.opt('f2w_mask_moon', /Hang/); if (R().open) o.push('wrong mask opened'); if (T.foes() <= f0) o.push('wrong mask woke nothing');
               T.opt('f2w_mask_plague', /Hang/); if (!R().open) o.push('right mask did not open');
-              T.bump(D[0], D[1]); if (T.bag('psf_chest') !== 1) o.push('chest ' + T.bag('psf_chest')); T.bump(D[0], D[1]); if (T.bag('psf_chest') !== 1) o.push('chest twice'); return o }""",
+              T.bump(D[0], D[1]); if (T.bag('psf_chest') !== 1) o.push('chest ' + T.bag('psf_chest')); T.bump(D[0], D[1]); if (T.bag('psf_chest') !== 1) o.push('chest twice');
+              // the gondola ferry: up the Rio of Sighs to the steps of the campo, and back down to the Riva
+              for (const up of [true, false]) { f2WaterRide(up); for (let i = 0; i < 600 && F2.ride; i++) await T.wait(100); const L = up ? F2_WATER.FERRY.upLand : F2_WATER.FERRY.downLand;
+                if (F2.ride || G.P.x !== L[0] || G.P.y !== L[1]) o.push('ride ' + (up ? 'up' : 'down') + ' ended at ' + G.P.x + ',' + G.P.y); if (G.time < G.lockT) o.push('still locked after the ride') }
+              return o }""",
             9825: """async () => { const o = []; const R = () => f2S(9825); const at = s => F2_DESERT.PLATES.find(p => p[2] === s); const f0 = T.foes();
               F2.step[9825](...at('scarab')); F2.step[9825](...at('sun').slice(0, 2)); if ((R().seq || []).length) o.push('wrong plate did not reset'); if (T.foes() <= f0) o.push('wrong plate released nothing');
               if (T.opts('f2d_sarc').some(t => /Take/.test(t))) o.push('sarcophagus open too early');
