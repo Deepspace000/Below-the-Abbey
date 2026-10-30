@@ -192,7 +192,7 @@ function blhBuild(p){
   C.flatten(2,3,81,40);
   C.gate('E',38);C.gate('W',38);
   // the precinct wall: ruined, with a gap at the gate
-  for(let x=14;x<=70;x++){if(x>=40&&x<=42){}else if(hs(x,31,3)<.9)C.DB('bl_fence',x,31,{sc:.95});if(hs(x,4,3)<.9)C.DB('bl_fence',x,4,{sc:.95})}
+  for(let x=14;x<=70;x++){if(x>=40&&x<=42){}else if(hs(x,31,3)<.9)C.DB('bl_fence',x,31,{sc:.95});if(hs(x,4,3)<.9&&!(x>=20&&x<=25))C.DB('bl_fence',x,4,{sc:.95})}   // no fence inside the bell tower (21 to 24) or touching it
   for(let y=5;y<=30;y++){if(hs(14,y,3)<.88)C.DB('bl_fence',14,y,{sc:.95});if(hs(70,y,3)<.88)C.DB('bl_fence',70,y,{sc:.95})}
   for(const [x,y] of [[14,4],[70,4],[14,31],[70,31],[39,31],[43,31]]){C.DB('bl_column',x,y,{sc:1.1,npc:x===39||x===43?undefined:'blh_ruin'});}
   C.dec('gy_lych',41,31,{sc:1.1});C.light(40,30,C.pale);C.light(42,30,C.pale);
@@ -213,9 +213,9 @@ function blhBuild(p){
   C.picHouse({img:'bl_tower',x0:21,x1:24,y0:4,y1:8,w:4.6,wh:3.4,to:BLH.TOWER,door:[22,8]});C.light(21,10,C.pale);C.light(25,10,C.pale);
   C.dec('bl_urn',20,10,{block:true,sc:.8});C.dec('bl_urn',26,10,{block:true,sc:.8});
   // the dormitory ruin, the infirmary garden, the herb beds
-  C.dec('bl_chapel',22,26,{block:true,npc:'blh_dorm',sc:1.15});C.light(22,28,C.pale);C.dec('gy_bones',25,27,{});C.dec('gy_web',19,26,{sc:.7});
-  for(let x=33;x<=45;x+=2){C.dec('bl_fence',x,28,{block:true,sc:.7});C.dec('ww_twig2',x,29,{sc:.55})}
-  C.dec('gy_rose',40,28,{block:true,npc:'blh_infirmary',sc:1});
+  C.dec('bl_chapel',22,26,{block:true,npc:'blh_dorm',sc:1.15});C.light(22,28,C.pale);C.dec('gy_bones',25,27,{});
+  for(let x=33;x<=45;x+=2){if(x>=40&&x<=42)continue;C.dec('bl_fence',x,28,{block:true,sc:.7});C.dec('ww_twig2',x,29,{sc:.55})}   // the lane to the gate (40 to 42) is kept clear
+  C.dec('gy_rose',38,28,{block:true,npc:'blh_infirmary',sc:1});
   // the brothers' graves: seven mounds, seven boards, in a railed plot in the north east
   for(let x=57;x<=69;x++)C.dec('bl_fence',x,11,{block:true,sc:.85});
   BLH_GRAVES.forEach((g,i)=>{const x=58+i*2,y=7;C.dec('gy_mound',x,y+1,{block:true,sc:.75});C.dec(blSlab('bl_hbg'+i,[g[0].replace('BR. ',''),'BROTHER'],{h:.95,top:.2,span:.55}),x,y,{block:true,npc:'blh_grave'+i})});
@@ -244,7 +244,7 @@ function blhBuild(p){
     ['blringer',24,11],['blringer',19,10],['blghoul',26,24],['blghoul',60,14],['blghoul',40,27],['blbones',37,15],['blbones',39,21],['blbones',50,20],['blbones',24,19],['blbones',64,27],['blshade',46,8],['blshade',30,8],['blshade',66,28],
     ['blbones',33,54],['blbones',45,57],['blghoul',39,60],['blghoul',51,54],['blshade',36,62],['blbloat',42,58],['blbones',69,47],['blhusk',58,45],['blhusk',24,56],
     ['bldeadwarden',60,38],['bldeadwarden',28,38],['blhusk',50,40],['blcrow',22,34],['blcrow',56,34],['blcrow',70,43],['blhound',34,44],['blhound',12,50],['blcrowflock',72,8]]);
-  for(const [k,x,y] of [['potion6',27,31],['potion6',70,34],['potion6',44,66]])C.items.push({k,x,y,taken:false});
+  for(const [k,x,y] of [['potion6',27,33],['potion6',70,34],['potion6',44,66]])C.items.push({k,x,y,taken:false});
   C.mapNames.push({t:'Hollowbell Abbey',x:41,y:15,k:'place'},{t:'The Abbey Gate',x:41,y:31,k:'place'},{t:'The Fallen Church',x:37,y:7,k:'place'},{t:'The Cloister',x:38,y:18,k:'place'},{t:'The Scriptorium',x:19,y:14,k:'place'},{t:'The Chapter House',x:54,y:14,k:'place'},{t:'The Refectory',x:60,y:23,k:'place'},{t:'The Bell Tower',x:22,y:6,k:'place'},{t:"The Brothers' Graves",x:63,y:7,k:'place'},{t:'The Dormitory',x:22,y:26,k:'place'},{t:'The Gate Lodge',x:16,y:44,k:'place'},{t:'The Bell Foundry',x:68,y:50,k:'place'},{t:"The Pilgrims' Graves",x:38,y:54,k:'place'},{t:'To the Vault of Maldrake',x:78,y:36,k:'place'},{t:'To the Rookery Mill',x:6,y:36,k:'place'});
   const lv=C.finish({start:{x:79,y:38,f:3}});
   lv.tele=undefined;
@@ -275,7 +275,7 @@ function blhScript(){
     enemies:[['blbrother',10,6]],
     build:C=>{const P=(n,x,y,o)=>bl3Prop(C,n,x,y,o);
       P('bookshelf',2,1,{h:1.1});P('bookshelf',4,1,{h:1.1});P('bookshelf',10,1,{h:1.1});P('scrollrack',8,1,{h:1.0});
-      P('readdesk',3,4,{h:.85});P('readdesk',6,4,{h:.85});P('readdesk',9,4,{h:.85});P('readdesk',6,6,{h:.85});
+      P('readdesk',3,4,{h:.85});P('readdesk',6,4,{h:.85});P('readdesk',9,4,{h:.85});   // (a fourth desk stood in front of the door)
       if(!F.letter&&!F.letterRead)C.raw('gy_book',6,4,{npc:'blh_letter',solid:1,deco:false,bob:.38,sc:1});
       C.npc('blh_osmund',4,6);C.raw('gy_book',3,4,{npc:'blh_rule',solid:1,deco:false,bob:.38,sc:.9});
       P('candlerack',11,5,{h:1.0});P('waterbarrel',11,7,{h:.7});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_bones',9,7,{block:false,sc:.6})}})}
@@ -289,7 +289,7 @@ function blhRefec(){
       C.raw('gy_candles',3,1,{npc:'blh_kitchen',solid:1,deco:false,sc:.8});
       P('longtable',5,4,{h:.6,free:true});P('longtable',9,4,{h:.6,free:true});P('longtable',13,4,{h:.6,free:true});
       for(const x of [4,6,8,10,12,14]){C.raw('gy_skel',x,3,{npc:'blh_seated',solid:1,deco:false,sc:.7})}
-      C.raw('gy_candles',9,6,{npc:'blh_table',solid:1,deco:false,sc:.45});
+      C.raw('gy_candles',9,4,{npc:'blh_table',solid:1,deco:false,sc:.4,bob:.5});   // on the middle table, not in front of the door
       C.npc('blh_anselm',3,3);
       P('lectern',17,3,{h:1.0});P('waterbarrel',17,6,{h:.7});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_bones',7,7,{block:false,sc:.6});C.raw('gy_bones',14,7,{block:false,sc:.6})}})}
 function blhTowerRoom(){

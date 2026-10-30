@@ -14,6 +14,8 @@
     {"code": "NPC_UNREACH", "level": 9640, "key": "^bl_mk1$", "x": 67, "y": 11, "reason": "Gallowmere: Heron Isle is reached by Osk's rowing boat (blg_boat1 at the jetty), which the audit does not model"},
     {"code": "NPC_UNREACH", "level": 9640, "key": "^gy_ghost1$", "x": 68, "y": 12, "reason": "Gallowmere: Heron Isle is reached by Osk's rowing boat (blg_boat1 at the jetty), which the audit does not model"},
     {"code": "NPC_UNREACH", "level": 9640, "key": "^gy_mound$", "x": 70, "y": 12, "reason": "Gallowmere: Heron Isle is reached by Osk's rowing boat (blg_boat1 at the jetty), which the audit does not model"},
-    {"code": "NPC_UNREACH", "level": 9640, "key": "^b34_heron$", "x": 63, "y": 15, "reason": "Gallowmere: Heron Isle is reached by Osk's rowing boat (blg_boat1 at the jetty), which the audit does not model"}
+    {"code": "NPC_UNREACH", "level": 9640, "key": "^b34_heron$", "x": 63, "y": 15, "reason": "Gallowmere: Heron Isle is reached by Osk's rowing boat (blg_boat1 at the jetty), which the audit does not model"},
+    {"code": "FLOAT", "level": 9661, "key": "^lamp$", "x": 7, "y": 5, "reason": "Lanternrest inn: the chandelier (a glowing lamp drawn with the picture wl2_inn_4) hangs from the ceiling on its chain; looked at in the room, it is not standing on anything by design"},
+    {"code": "ONEWAY", "level": 9715, "key": "door", "x": 30, "y": 4, "reason": "the Crooked Road gate into the Never-Ending Tower: the tower's own south gate leads back (tools/ps_test.py dest checks it)"}
   ]
 }

@@ -180,10 +180,11 @@ function bgrScatter(L,id){
     const under=['bl_grass0','bl_grass1','bl_grass2','bl_grass3','ww_twig2','bl_grow_4','bl_grow_ring'].filter(k=>IMG[k]),took=new Set();
     if(under.length&&!isSale)for(const t of added.slice()){if(!t.block||!/bl_twist|bl_grow_5|bl_canker/.test(t.k)||rnd()>.62)continue;
       for(let n=1+(rnd()<.4?1:0);n>0&&nU<120;n--){const a=((rnd()*3)|0)-1,b=((rnd()*3)|0)-1;if(!a&&!b)continue;const x=t.x+a,y=t.y+b;if(x<1||y<1||x>=W-1||y>=H-1)continue;const i=idx(x,y),tk=x+','+y;
-        if(!base[i]||blk[i]||prot[i]||pd[i]===0||took.has(tk)||!okFm(L.fmap[y][x]))continue;took.add(tk);
+        if(!base[i]||blk[i]||prot[i]||occ[i]||pd[i]===0||took.has(tk)||!okFm(L.fmap[y][x]))continue;took.add(tk);occ[i]=1;   // never on a square that already has a piece (no two growths in one square)
         L.decor.push({k:under[(rnd()*under.length)|0],x,y,block:false,walk:true,deco:true,sc:+(.7+rnd()*.6).toFixed(2),ox:+((rnd()-.5)*.5).toFixed(2),oy:+((rnd()-.5)*.5).toFixed(2),_bgru:1});nU++}}
-    // a bramble arch or two over the straight road, far from every gate, door and person
-    if(IMG.bl_arch&&[9610,9620,9630,9640,9650,9680,9690].includes(id)){
+    // a bramble arch or two over the straight road, far from every gate, door and person: switched off (game fix pass, 30 Oct 2026): an arch standing free on the open road
+    // is a loose arch in the middle of the road (the owner's rule: arches and gates are set into walls), so none is placed any more
+    if(false&&IMG.bl_arch&&[9610,9620,9630,9640,9650,9680,9690].includes(id)){
       const cells=[...paths].map(k=>k.split(',').map(Number)).filter(([x,y])=>x>6&&y>6&&x<W-7&&y<H-7);
       const has=(x,y)=>paths.has(x+','+y),tgt=(x,y)=>{for(const g of targets)if(Math.abs(g[0]-x)<=7&&Math.abs(g[1]-y)<=7)return true;return false};
       const ok=cells.filter(([x,y])=>(has(x-2,y)&&has(x-1,y)&&has(x+1,y)&&has(x+2,y))&&gateD(x,y)>=10&&!tgt(x,y)&&!blk[idx(x,y)]&&!prot[idx(x,y)]&&!L.decor.some(d=>d.x===x&&d.y===y));
@@ -197,7 +198,7 @@ function bgrScatter(L,id){
       for(const [a,b] of faces){const nx=x+a,ny=y+b,i=idx(nx,ny),fk=nx+','+ny+','+a+','+b;
         if(!base[i]||blk[i]||wp.has(fk))continue;
         if(wk&&IMG.bl_win_a){const lit=(id===9630||id===9680)?.8:.55;if(rnd()<lit){const k=(id===9630||id===9680)&&IMG.bl_win_b?'bl_win_b':'bl_win_a';
-          if(nWn<110){blWindowGlow(L,{x:nx,y:ny,wd:[-a,-b],k,cy:BGR.winCy});wp.add(fk);nWn++;if(wk==='gwin'&&IMG.bl_win_c&&rnd()<.25){blWindowGlow(L,{x:nx,y:ny,wd:[-a,-b],k:'bl_win_c',cy:BGR.winLo});nWn++}}}}
+          if(nWn<110){blWindowGlow(L,{x:nx,y:ny,wd:[-a,-b],k,cy:BGR.winCy});wp.add(fk);nWn++;if(wk==='gwin'&&IMG.bl_win_c)rnd()}}}   // (a second, round window low on the same face was dropped: two pictures on one wall face; rnd() keeps the seeded sequence)
         else if(!isDoor&&IMG.bl_moss&&nM<46&&!prot[i]&&rnd()<.09){L.decor.push({k:'bl_moss',x:nx,y:ny,wd:[-a,-b],pic:1,hx:1,block:false,walk:true,deco:true,bob:.22,_bgru:1});wp.add(fk);nM++}}}
     // painted buildings (a picture over a hidden block: the churches, the chapter house): lit windows standing in front of the picture, at the painted windows
     for(const e of (L.sky||[])){if(!e.big)continue;const m=BGR_BWIN[e.k],im=IMG[e.k];if(!m||!im||!im.width)continue;const hh=e.w*im.height/im.width;

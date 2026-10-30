@@ -62,6 +62,11 @@ function ttArt(){
     if(t.id==='tt0'){x.fillStyle='#2a0608';x.strokeStyle='#d89a8a';x.lineWidth=1.4;for(let k=0;k<9;k++){const px=W*(.32+.36*((k*37)%10)/10),py=H*(.42+.34*((k*53)%10)/10);x.beginPath();x.ellipse(px,py,W*.035,H*.02,0,0,6.3);x.fill();x.stroke()}}
     IMG['art_'+t.id]=c;NPC_H['art_'+t.id]=t.ph;ENEMY_DEF[t.id].w=+(t.ph*W/H).toFixed(2)}
   TT._art=TT.list.every(t=>IMG['art_'+t.id])}
+/* the size of a giant on screen (game fix pass, 30 Oct 2026): the engine shrinks a big creature to fit the view but never below 0.3 of its size, so at that floor a giant of 4.2 to 5
+   squares stood 1.3 to 1.5 high and the fight window showed only its legs (Mother Sallowtide, Old Nine-Hands) or cut off its eyes (Old White Eyes, Brannock). A giant is now scaled
+   so that the top of the picture is at TT.TOP squares: still the tallest thing on the road, and the whole giant, head and face too, is in the fight window. */
+TT.TOP=1.0;
+{const _fs=fitScale;fitScale=function(t,def,base){const v=_fs.apply(this,arguments);try{if(def&&def.tt&&base&&base.width){const h=def.w*base.height/base.width;if(h>0)return Math.min(v,TT.TOP/h)}}catch(e){}return v}}
 /* a giant stands in a place: placed when its map is built, far from the arrival square */
 function ttPlace(){
   const n=ttPlaceOf(LEVEL);if(!n||n===6||!BL_ROAD.find(q=>q.id===LEVEL))return;
