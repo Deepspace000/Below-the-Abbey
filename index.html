@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.722';
+const VERSION='3.723';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -6570,7 +6570,7 @@ function questShow(qid){ // a quest picked in the log: show where it is, whateve
   const loc=questWorldLoc(qid); // somewhere else: the map of the whole land, with that place circled
   if(loc){
     G.qFocus.loc=loc.k;G.menu=false;G.map=false;G.overview=true;G.world=true;G.teleMode=false;G.qNote=null;
-    const z=1.6;G.wv={z,x:clamp(-(loc.x-240)*z,-1000*z,700*z),y:clamp(-(loc.y-160)*z,-170*z,260*z)};G._wvT=G.time;return; // _wvT: the map was only just opened, so it is not re-centred on the party
+    const z=1.6;G.wv={z,x:clamp(-(loc.x-240)*z,-1000*z,1500*z),y:clamp(-(loc.y-160)*z,-170*z,260*z)};G._wvT=G.time;return; // _wvT: the map was only just opened, so it is not re-centred on the party
   }
   G.qFocus=null;G.qNote={t:G.time,text:`"${q.title}" cannot be placed on a map yet.`};
 }
@@ -7530,14 +7530,14 @@ function drawDragGhost(){
   if(d.hover){ctx.strokeStyle='#ffe36a';ctx.lineWidth=2;rrect(ctx,d.hover.x-1,d.hover.y-1,d.hover.w+2,d.hover.h+2,4);ctx.stroke()}
   ctx.globalAlpha=.92;if(def)itemIcon(def,d.x,d.y,1.5);ctx.globalAlpha=1;
 }
-const wvDefault=()=>{const z=.85,wc=typeof wvCentre==='function'?wvCentre():null;if(wc)return {z,x:clamp(-(wc[0]-240)*z,-1000*z,700*z),y:clamp(-(wc[1]-160)*z,-170*z,260*z)};const l=typeof WORLD_LOCS!=='undefined'?WORLD_LOCS.find(q=>q.lv.includes(LEVEL)):null;if(!l)return {z,x:-30,y:0};   // the map opens with the party in the middle of it
+const wvDefault=()=>{const z=.85,wc=typeof wvCentre==='function'?wvCentre():null;if(wc)return {z,x:clamp(-(wc[0]-240)*z,-1000*z,1500*z),y:clamp(-(wc[1]-160)*z,-170*z,260*z)};const l=typeof WORLD_LOCS!=='undefined'?WORLD_LOCS.find(q=>q.lv.includes(LEVEL)):null;if(!l)return {z,x:-30,y:0};   // the map opens with the party in the middle of it
   return {z,x:clamp(-(l.x-240)*z,-1000*z,700*z),y:clamp(-(l.y-160)*z,-170*z,260*z)}};
 function setWorldZoom(nz,cx,cy){
   const V=G.wv||(G.wv=wvDefault());nz=clamp(nz,.6,5);
   const px=240+(cx-240-V.x)/V.z,py=160+(cy-160-V.y)/V.z; // the map point under the cursor stays under it
   V.z=nz;V.x=cx-240-(px-240)*nz;V.y=cy-160-(py-160)*nz;clampWorld();
 }
-function clampWorld(){const V=G.wv;V.x=clamp(V.x,-1000*V.z,900*V.z);V.y=clamp(V.y,-170*V.z,260*V.z)}
+function clampWorld(){const V=G.wv;V.x=clamp(V.x,-1000*V.z,1500*V.z);V.y=clamp(V.y,-170*V.z,260*V.z)}
 cv.addEventListener('pointerdown',e=>{
   e.preventDefault();audioInit();
   if(G.overview&&G.world){
