@@ -69,7 +69,7 @@ function pspWallGid(style,v,wh){
 function pspDoorGid(style,wh){
   const k='door_'+style+'|'+wh;if(PSPK.tiles[k]!==undefined)return PSPK.tiles[k];let gid;const P=PSP_PAL;
   const frame=(x,w,h,x0,x1,top,ap,fill)=>{pspPointed(x,x0-9,x1+9,top-9,h,ap+4);x.fillStyle='#10181a';x.fill();x.strokeStyle=P.copper;x.lineWidth=3;x.stroke();pspPointed(x,x0,x1,top,h,ap);x.fillStyle=fill;x.fill()};
-  const DP={great:'door_great',oak:'door_oak',iron:'door_ironbound',dungeon:'door_dungeon',stair:'door_stair',gate:'door_great'}[style];
+  const DP={great:'door_great',oak:'door_oak',iron:'door_ironbound',dungeon:'door_dungeon',stair:'door_stair',gate:'door_great',igate:'cell_door',stairarch:'arch_stair',cell:'cell_door'}[style];
   if(DP&&typeof IMG!=='undefined'&&IMG['ps_'+DP]&&IMG['ps_'+DP].width){IMG['gyp_psd_'+DP]=IMG['ps_'+DP];gid=gyTile(pspTex('ashlar','texBlack_2'),wh,{fac:{img:'psd_'+DP,i:0,n:1},gain:.9,rgb:[.58,.7,.8],tag:'psdp2'+style+wh,emit:.06})}
   else if(style==='stair')gid=gyTile('texBlack_1',wh,{fac:{img:'stairFix_0',i:0,n:1},gain:1.2,rgb:[.8,1,.9],tag:'psstair'+wh,emit:.3});
   else if(style==='gate')gid=gyTile('texBlack_1',wh,{fac:{img:'gatesC_0',i:0,n:1},gain:1.0,rgb:[.7,1,.85],tag:'psgate'+wh,emit:.3});
