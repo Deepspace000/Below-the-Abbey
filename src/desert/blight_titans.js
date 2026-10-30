@@ -101,10 +101,10 @@ function ttMapMarks(V,z){
   if(typeof WMB_ROAD==='undefined')return;ttSync(ttPlaceOf(LEVEL));ttArt();const F=ttF(),c=ctx,byPlace={};
   for(const t of TT.list){if(F.dead[t.id])continue;const n=F.at[t.id];(byPlace[n]=byPlace[n]||[]).push(t)}
   for(const n in byPlace){const loc=WORLD_LOCS.find(l=>l.k===WMB_ROAD[+n]);if(!loc)continue;const list=byPlace[n],pl=.5+.5*Math.sin(G.time*3);
-    list.forEach((t,i)=>{const mx=loc.x+(i-(list.length-1)/2)*15,my=loc.y-30,im=IMG['art_'+t.id],h=19;
-      c.save();c.fillStyle='rgba(176,24,30,'+(.28+.2*pl)+')';c.beginPath();c.arc(mx,my-h*.4,h*.62+pl*2,0,TAU);c.fill();c.strokeStyle='#5a0a0e';c.lineWidth=1.1;c.stroke();
+    list.forEach((t,i)=>{const mx=loc.x+(i-(list.length-1)/2)*9,my=loc.y-20,im=IMG['art_'+t.id],h=10;
+      c.save();c.fillStyle='rgba(176,24,30,'+(.28+.2*pl)+')';c.beginPath();c.arc(mx,my-h*.4,h*.6+pl*1.2,0,TAU);c.fill();c.strokeStyle='#5a0a0e';c.lineWidth=1.1;c.stroke();
       if(im&&im.width){const w=h*im.width/im.height;c.shadowColor='rgba(60,0,4,.8)';c.shadowBlur=3;c.drawImage(im,mx-w/2,my-h,w,h)}else{c.fillStyle='#3a0808';c.fillRect(mx-3,my-h,6,h)}
-      if(z>=1.6){c.font='italic bold 5px '+FUI;c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=1.8;c.strokeStyle='rgba(238,226,190,.95)';c.strokeText(t.n,mx,my+4);c.fillStyle='#6a0c10';c.fillText(t.n,mx,my+4)}
+      if(z>=1.6){c.font='italic bold 4px '+FUI;c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=1.8;c.strokeStyle='rgba(238,226,190,.95)';c.strokeText(t.n,mx,my+4);c.fillStyle='#6a0c10';c.fillText(t.n,mx,my+4)}
       c.restore()})}}
 /* killing one */
 {const _he=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;_he.apply(this,arguments);
