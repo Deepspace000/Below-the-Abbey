@@ -8,18 +8,20 @@ const mpWorldM={ready:false,zz:1,fontOK:false};
 const mpWorldInk='#2a1a0c';
 const mpWorldTints={sand:'#dcc088',red:'#cf8a60',blue:'#a4b8cc',white:'#efe9da',gold:'#e0b850',violet:'#a98cbb'};
 const mpWorldSm=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t)};
-const mpWorldGb=(y,y0,s,h)=>h*Math.exp(-((y-y0)*(y-y0))/(2*s*s));                              // a headland (positive h) or a bay (negative h) on a coast
+const mpWorldGb=(y,y0,s,h)=>h*Math.exp(-((y-y0)*(y-y0))/(2*s*s));                              // a headland on a coast: a smooth round hump of height h and half-width s
 const mpWorldRc=(u,R)=>u>=R?0:u<=0?R:R-Math.sqrt(Math.max(0,R*R-(R-u)*(R-u)));                  // a rounded corner of radius R: how far the shore stands back at distance u from the corner
-/* the three shores of the Narrow Sea: a ragged coast with headlands that jut out, bays and inlets, and rounded corners (no right angles). Every shore only ever moves OUT into the sea from the old straight line (never back into the land), so the towns on the shore and the islands in the sea keep their places. */
+const mpWorldAv=(t,cs,w,mn)=>{let m=1;for(const c of cs)m*=1-Math.exp(-((t-c)*(t-c))/(2*w*w));mn=mn===undefined?.5:mn;return mn+(1-mn)*m};   // about .5 at each place where a river reaches the sea or the Pilgrim's Path runs, so the coast changes only a little there; 1 away from them
+/* the shores of the Narrow Sea: a gently ragged coast of a few low, broad, rounded headlands and bays at uneven spacing, and rounded corners (no right angles). No narrow inlets (they read as rivers).
+   Every shore only ever moves OUT into the sea from the old line, and only a little where a river reaches the sea and along the Pilgrim's Path, so the rivers, roads, towns and islands keep their places. */
 const mpWorldCxo=y=>714+10*Math.sin(y*.045)+6*Math.sin(y*.13+1)-8*mpWorldSm((y-190)/20)                // the west shore of the Narrow Sea
-  +Math.max(0,16+9*Math.sin(y*.031+.7)+6*Math.sin(y*.083+2.2)+3*Math.sin(y*.19+.4)+mpWorldGb(y,-75,9,62)+mpWorldGb(y,-5,10,-14)+mpWorldGb(y,250,10,74)+mpWorldGb(y,315,8,52)+mpWorldGb(y,205,9,-14))
-  +mpWorldRc(y+150,70);
+  +Math.max(0,8+5*Math.sin(y*.031+.7)+3*Math.sin(y*.083+2.2)+mpWorldGb(y,-70,30,24)+mpWorldGb(y,250,28,32)+mpWorldGb(y,322,22,22))
+  +mpWorldRc(y+150,30);
 const mpWorldCxe=y=>1140+8*Math.sin(y*.04+2)+5*Math.sin(y*.11)                                           // the east shore
-  -Math.max(0,18+9*Math.sin(y*.027+1.4)+6*Math.sin(y*.071+.3)+3*Math.sin(y*.17+2.8)+mpWorldGb(y,-60,10,84)+mpWorldGb(y,0,9,-14)+mpWorldGb(y,60,9,50)+mpWorldGb(y,110,10,-20)+mpWorldGb(y,160,11,96)+mpWorldGb(y,215,9,-16)+mpWorldGb(y,265,10,70))
-  -mpWorldRc(y+150,70);
+  -mpWorldAv(y,[-50,112],24,.12)*mpWorldAv(y,[36],34,.45)*Math.max(0,6+4*Math.sin(y*.027+1.4)+3*Math.sin(y*.071+.3)+mpWorldGb(y,-105,24,24)+mpWorldGb(y,5,22,20)+mpWorldGb(y,75,18,16)+mpWorldGb(y,160,34,34)+mpWorldGb(y,242,26,32)+mpWorldGb(y,312,20,22))
+  -mpWorldRc(y+150,60);
 const mpWorldNs=x=>-150-7*Math.sin(x*.05)-4*Math.sin(x*.17)                                             // the north shore, where the two lands join
-  +Math.max(0,14+8*Math.sin(x*.029+.2)+5*Math.sin(x*.078+1.9)+3*Math.sin(x*.21+.9)+mpWorldGb(x,800,8,52)+mpWorldGb(x,855,9,-12)+mpWorldGb(x,905,10,76)+mpWorldGb(x,960,9,-12)+mpWorldGb(x,1015,9,56))
-  +mpWorldRc(x-714,70)+mpWorldRc(1140-x,70);
+  +mpWorldAv(x,[705,1030],26,.15)*Math.max(0,5+3*Math.sin(x*.029+.2)+mpWorldGb(x,775,45,14)+mpWorldGb(x,862,22,20)+mpWorldGb(x,945,60,12)+mpWorldGb(x,1088,30,16))
+  +mpWorldRc(x-714,30)+mpWorldRc(1140-x,60);
 const mpWorldLw=b=>Math.max(b,.8/mpWorldM.zz);                                                // ink never thins out when zoomed far out
 
 /* a smooth line through points: midpoint quadratics (p is a Path2D or the context) */
