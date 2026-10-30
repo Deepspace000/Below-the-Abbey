@@ -1,12 +1,12 @@
 /* ==========================================================================
    INTELLIGENT ADJUSTMENT (Menu > Gameplay, on by default). The game watches how the party is doing and helps either way:
-   1. If the party falls four times in a row in the same area (without winning five fights in between), the death screen offers help: make the game a bit easier for good
+   1. (Once per play session.) If the party falls four times in a row in the same area (without winning five fights in between), the death screen offers help: make the game a bit easier for good
       (difficulty 30 percent lower), weaker enemies for 15 minutes (difficulty 50 percent lower for a while, then back), or a 15 minute boost of +5 to strength, dexterity and intelligence.
    2. If the party wins fights very fast (eight quick wins in a row: each enemy dead within two rounds, enemies not far below the party's level), the game puts the difficulty up one step
       (10 percent) and says "master player detected, putting difficulty up. ;)". If the wins stay that fast, it goes up another step, and so on (never more than 12 steps in all).
    Turn it off in Menu > Gameplay to play at exactly the difficulty that is set. State is kept in G.flags.ada (saved with the game); the death count and the fast-win count live only in the session.
    ========================================================================== */
-const ADA={deaths:0,lastLv:-1,killsSince:0,counted:false,offer:false,fast:0,boostRounds:0};
+const ADA={deaths:0,lastLv:-1,killsSince:0,counted:false,offer:false,shown:false,fast:0,boostRounds:0};
 const adaOn=()=>!(G.flags&&G.flags.noAdapt);
 function adaF(){return G.flags.ada||(G.flags.ada={up:0,boostLeft:0,boostOn:0,lowLeft:0,lowDelta:0})}
 function adaAvgLvl(){const a=G.heroes.filter(h=>h.alive);return a.length?a.reduce((s,h)=>s+h.lvl,0)/a.length:1}
@@ -16,7 +16,7 @@ function adaTick(dt){
   if(G.state==='dead'){
     if(!ADA.counted){ADA.counted=true;
       if(adaOn()){ADA.deaths=(ADA.lastLv===LEVEL||ADA.lastLv===-1)?ADA.deaths+1:1;ADA.lastLv=LEVEL;ADA.killsSince=0;ADA.fast=0;
-        if(ADA.deaths>=4){ADA.offer=true;ADA.deaths=0}}}
+        if(ADA.deaths>=4){ADA.deaths=0;if(!ADA.shown){ADA.shown=true;ADA.offer=true}}}}   // the offer appears once a play session, so it never nags
   }else{ADA.counted=false;if(ADA.offer&&G.state!=='dead')ADA.offer=false}
   if(G.state==='play'&&G.flags&&G.flags.ada){const F=G.flags.ada;
     if(F.boostOn){F.boostLeft-=dt;if(F.boostLeft<=0){adaBoost(false);msg('The boost wears off. Your stats are back to normal.','#c8c8e8')}}
