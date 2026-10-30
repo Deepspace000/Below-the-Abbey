@@ -44,7 +44,7 @@ function pssignFlat(nm){
     x.save();x.translate(w/2,h/2+2);x.scale(sx,1);x.lineWidth=Math.max(3,fs*.14);x.strokeStyle='rgba(2,4,8,.95)';x.strokeText(nm,0,0);x.fillStyle='#d6e2ea';x.fillText(nm,0,0);x.restore();
   })}
 {const _sl=spriteList;spriteList=function(){const L=_sl.apply(this,arguments);
-  if(pssignOn()&&!window.PSSIGN_FLATOFF)for(const s of L){const d=s.decor;if(!d||d.k!=='sign_gy'||!s.hang||!d.txt||!d.wd)continue;
+  if((pssignOn()||(typeof NT!=='undefined'&&LEVEL===NT.BASE))&&!window.PSSIGN_FLATOFF)for(const s of L){const d=s.decor;if(!d||d.k!=='sign_gy'||!s.hang||!d.txt||!d.wd)continue;
     try{const nm=String(d.txt[0]);s.img=pssignFlat(nm);const k=s.hang;s.hang=null;s.mount=null;s.flat=[k[0],k[1]];s.pic=1;
       s.x=d.x+.5+k[0]*.47;s.y=d.y+.5+k[1]*.47;s.w=.95;s.bob=Math.max(.3,Math.min(.62,CEILH-.5))}catch(e){console.error('ps sign flat',e)}}
   return L}}
