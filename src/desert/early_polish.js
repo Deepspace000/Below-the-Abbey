@@ -74,7 +74,7 @@ function epApply(n,late){const S=self.EP_OFF?null:EP_SPEC[n],L=LEVELS[n];
   if(S.street&&!G.decor.some(d=>d.epSt))epStreet(n,S.street);
   if(S.decals)L._f2dec=epDecals(n,S);
   L._epf=epFloorFx(n,S);
-  if(S.grime){if(!L._eptm){L._eptm=new Map();const seen=new Set();for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(g<100||seen.has(g)||(typeof KH_DOOR!=='undefined'&&KH_DOOR[g]))continue;seen.add(g);const ti=T_TILE[g];if(ti===undefined||L._eptm.has(ti)||!TEX[ti]||!TEX[ti].d)continue;const nt=epGrime(ti,S.grime,g);if(nt!==null)L._eptm.set(ti,nt)}}L._epf.tm=L._eptm}
+  if(S.grime){if(!L._eptm){L._eptm=new Map();const seen=new Set();for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(seen.has(g))continue;seen.add(g);const ti=g>=100?(typeof KH_DOOR!=='undefined'&&KH_DOOR[g]?undefined:T_TILE[g]):(g>=9&&g<=14)||(g>=20&&g<=22)?T_WALL[g]:(g===7&&S.grime.gate)?T_GATE:undefined;if(ti===undefined||L._eptm.has(ti)||!TEX[ti]||!TEX[ti].d)continue;const nt=epGrime(ti,S.grime,g);if(nt!==null)L._eptm.set(ti,nt)}}L._epf.tm=L._eptm}
   if(S.walls&&S.walls.vars&&EP.wall){const W=EP.wall;if(!W.wv){W.wv={};for(const g of [1,2]){const v=S.walls.vars[g];if(!v)continue;const ids=[g===1?W.stone:W.brick];for(const t of v){const d=epTex('ep_tex_'+t.tex,t.o||(g===1?S.walls.so:S.walls.bo));if(d)ids.push(addTex(d))}W.wv[g]=ids}}L._epf.wv=W.wv}
   if(S.grade)F2GRADE[n]=S.grade;
   if(S.amb!==undefined)G.amb=Math.max(G.amb||0,S.amb);
@@ -136,6 +136,24 @@ function epAutoProps(n,A){const L=LEVELS[n],R=L.rows,H=R.length,W=R[0].length,op
   for(const s of L){const d=s.decor;if(!d||d.npc||s.e||s.pic||s.hang||!s.img||!s.img.width||/chest|sign|lamp|gate|door/.test(String(d.k)))continue;const h=s.w*s.img.height/s.img.width;if(h<1.05&&s.w<1.1)continue;
     const ds=Math.hypot(s.x-cx,s.y-cy),thr=Math.max(1.5,.5+.45*Math.max(h,s.w));if(ds>=thr)continue;const f=Math.max(.2,Math.min(1,(ds-.55)/(thr-.55)));s.fade=s.fade===undefined?f:Math.min(s.fade,f)}
   return L}}
+/* a dungeon finish like the crypts' (level 1), on crypt stone, cave rock or a timbered mine wall */
+function epDungeon(kind,n,o){o=o||{};const W={crypt:{name:'crypt',stone:'cryptwall',so:{k:[.7,.66,.6],sat:.78,foot:[.34,.62],top:[.2,.4]},brick:'cellarbrick',bo:{k:[.74,.68,.64],sat:.5,foot:[.34,.65],top:[.2,.4]},
+      vars:{1:[{tex:'cryptroots'},{tex:'cryptdamp'},{tex:'cryptwall',o:{k:[.6,.57,.52],sat:.7,foot:[.38,.7],top:[.22,.45],flip:1,blot:.35,seed:1.3}}],2:[{tex:'cellarbrick',o:{k:[.58,.52,.5],sat:.45,foot:[.4,.75],top:[.22,.5],flip:1,blot:.45,seed:.7}}]}},
+    cave:{name:'cave',stone:'caverock',so:{k:[.72,.68,.62],sat:.75,foot:[.34,.6],top:[.24,.5]},brick:'caverock',bo:{k:[.6,.56,.52],sat:.7,foot:[.34,.6],top:[.24,.5],flip:1},
+      vars:{1:[{tex:'caverock',o:{k:[.62,.6,.55],sat:.7,foot:[.36,.66],top:[.24,.5],flip:1,blot:.4,seed:1.1}},{tex:'caverock',o:{k:[.68,.64,.58],sat:.72,foot:[.34,.6],top:[.24,.5],blot:.35,seed:2.7}}]}},
+    mine:{name:'mine',stone:'minewall',so:{k:[.72,.68,.62],sat:.75,foot:[.34,.6],top:[.24,.5]},brick:'caverock',bo:{k:[.66,.62,.56],sat:.7,foot:[.34,.6],top:[.24,.5]},
+      vars:{1:[{tex:'caverock',o:{k:[.66,.62,.56],sat:.72,foot:[.36,.64],top:[.24,.5],blot:.3,seed:1.6}},{tex:'caverock',o:{k:[.6,.57,.52],sat:.7,foot:[.36,.66],top:[.24,.5],flip:1,blot:.4,seed:2.2}},{tex:'minewall',o:{k:[.64,.6,.55],sat:.7,foot:[.36,.66],top:[.24,.5],flip:1}}]}}}[kind];
+  const S={walls:W,decals:{keys:kind==='crypt'?['straw','droppings','soot','crack','rubble','bones','damp','shards','rag','grain','pebbles','straw','wax']:kind==='cave'?['rubble','pebbles','bones','damp','crack','droppings','mud','leaves','pebbles']:['rubble','pebbles','crack','soot','mud','shards','straw','pebbles'],p:.85,wallBias:.5,sz:[.5,.7],far:14,gain:[1.08,1,.9],a:1},
+    shadow:.65,glow:.5,glowSz:3.2,glowCol:[1,.6,.32],ao:.8,aoW:.55,amb:.07,
+    grade:{c:1.1,s:.84,b:1.05,tone:[150,110,70,.12],vig:.4,vc:[10,7,4]},
+    pics:{p:.3,keys:(kind==='mine'?[{k:'chains',h:.55,bob:.55},{k:'soot',h:.5,bob:.6},{k:'damp',h:.75,bob:.48},{k:'web_hang',h:.5,bob:.7},{k:'planks_x',h:.4,bob:.4},{k:'ring',h:.16,bob:.45}]:
+      kind==='cave'?[{k:'moss',h:.2,bob:.1},{k:'moss',h:.2,bob:.1},{k:'damp',h:.75,bob:.48},{k:'web_corner',h:.42,bob:.76,corner:1},{k:'web_hang',h:.5,bob:.7}]:
+      [{k:'web_corner',h:.42,bob:.76,corner:1},{k:'web_hang',h:.5,bob:.7},{k:'chains',h:.55,bob:.55},{k:'moss',h:.2,bob:.1},{k:'ring',h:.16,bob:.45},{k:'soot',h:.5,bob:.6},{k:'damp',h:.75,bob:.48},{k:'shelf',h:.3,bob:.5},{k:'planks_x',h:.4,bob:.4}])},
+    auto:{keys:kind==='mine'?['rubble','planks','bucket','crate','sacks','jar']:kind==='cave'?['rubble','bonepile','ratnest','rubble','jar']:['sacks','crate','rubble','ratnest','bucket','bonepile','planks','jar'],p:.7}};
+  if(!o.nofloor){S.floor={name:kind+'floor',tex:kind==='crypt'?'flagfloor':'earthfloor',o:{k:[.8,.75,.68],sat:.7}};S.fvar=[{name:kind+'earth',tex:'earthfloor',o:{k:[.72,.66,.58],sat:.7,flip:1},at:.38},{name:kind+'flagdk',tex:kind==='crypt'?'flagfloor':'earthfloor',o:{k:[.62,.58,.54],sat:.6,flip:1,blot:.4,seed:1.9},at:.62}];S.soft=.38}
+  S.ceil=kind==='cave'?{name:'caveceil',tex:'caverock',o:{k:[.55,.52,.48],sat:.6,flip:1}}:{name:'cryptbeams',img:'ep_tex_beams',o:{k:[.9,.82,.72],sat:.6}};
+  S.grime={k:.82,sat:.62,foot:.34,footK:.6,streak:.35,blot:.45,tint:[1.1,.98,.84],gate:1};
+  return S}
 const EP_GRIME=['straw','droppings','puddle','soot','crack','rubble','bones','damp','shards','rag','grain','mud','pebbles','wax'];
 const EP_SPEC={
   /* the crypts below the Abbey: the starting dungeon */
@@ -156,6 +174,8 @@ const EP_SPEC={
      floors:{0:{name:'tw_cob',tex:'wetcobble',o:{k:[1.3,1.26,1.2],sat:.85}},1:{name:'tw_grass',tex:'villgrass',o:{k:[1.2,1.22,1.05],sat:1}},2:{name:'tw_mud',tex:'mudtrack',o:{k:[1.22,1.16,1.06],sat:.9}},3:{name:'tw_cobm',tex:'wetcobble',o:{k:[1.12,1.18,1.02],sat:.85,flip:1}},4:{name:'tw_cobs',tex:'wetcobble',o:{k:[1.1,1.05,1],sat:.75,blot:.4,seed:2}},5:{name:'tw_cobw',tex:'wetcobble',o:{k:[1.05,1.08,1.1],sat:.75,flip:1,blot:.3,seed:3}}},
      grime:{k:.8,sat:.7,foot:.36,footK:.7,streak:.45,blot:.55,tint:[1,.96,.9]},jitter:[{re:/^fence$/,sc:0},{re:/^(pjuniper|pheather|pbracken|greeds|gfungus|bush)/,sc:.14},{re:/^(ptree|gtree)/,sc:.1}],
      grade:{c:1.08,s:.82,b:1.0,tone:[140,110,80,.12],vig:.36,vc:[12,10,8]},
-     street:{keys:['firewood','haybale','dung','wheel','flour','rainbarrel','veg','sacks','crate','bucket'],p:.5,gap:3,on:'12',fence:1,fenceRe:/^(fence|ptree|gtree|pjuniper|pbracken|grocks|gboulder|well)/}}
+     street:{keys:['firewood','haybale','dung','wheel','flour','rainbarrel','veg','sacks','crate','bucket'],p:.5,gap:3,on:'12',fence:1,fenceRe:/^(fence|ptree|gtree|pjuniper|pbracken|grocks|gboulder|well)/}},
+  /* the other early dungeons share the crypts' finish, each with its own stone (see epDungeon) */
+  8:epDungeon('cave',8),23:epDungeon('cave',23),25:epDungeon('cave',25),9:epDungeon('crypt',9),12:epDungeon('crypt',12,{nofloor:1}),501:epDungeon('crypt',501,{nofloor:1}),11:epDungeon('mine',11),18:epDungeon('mine',18)
 };
 setTimeout(()=>{try{epLoad()}catch(e){}},4000); // the early polish pictures are small: fetch them soon after the start, so every first visit has them
