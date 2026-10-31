@@ -2687,9 +2687,9 @@ function render3D(){
     const face=side===0?(stx>0?3:1):(sty>0?0:2);
     let ti;
     if(g>=100)ti=T_TILE[g];else if(g===1)ti=(LEVEL===22&&T_SKY[0]!==undefined)?T_SKY[((mx+MH-1-my)*100/(MW+MH-2))<32?0:((mx+MH-1-my)*100/(MW+MH-2))<65?1:2]:(LEVEL===31&&T_GOLD!==undefined)?T_GOLD:(LEVEL===22&&T_ROCK!==undefined)?T_ROCK:(LEVEL===2&&T_ABBEY!==undefined)?T_ABBEY:T_STONE;else if(g===2)ti=(LEVEL===2&&T_ABBEY!==undefined)?T_ABBEY:T_BRICK;else if(g===8&&LEVEL===2&&T_ABDOOR!==undefined)ti=T_ABDOOR;else if(g===3||g===8)ti=T_DOOR;else if(g===4)ti=T_LOCK;else if(g===6)ti=forestWallFor(LEVEL);else if(g===7)ti=T_GATE;else if((g>=9&&g<=14)||(g>=20&&g<=22))ti=T_WALL[g];else if(g>=15&&g<=19)ti=[T_DOORS.house,T_DOORS.bakery,T_DOORS.house2,T_DOORS.farm,T_DOORS.ruin][g-15];else if(g>=30&&g<100)ti=T_DOORS[(G.portals[g-30]||{}).tex]||T_DOORS.house;else ti=T_EXIT;
-    if(EPCT&&g===1){const t2=EPCT.get(my*MW+mx);if(t2!==undefined)ti=t2} // opt-in single wall squares with their own face (early_polish.js)
     if(EPTM&&g>=7){const t2=EPTM.get(ti);if(t2!==undefined)ti=t2} // opt-in grimed copies of a level's wall pictures (early_polish.js)
     if(EPWV&&(g===1||g===2)&&EPWV[g]){const vv=EPWV[g];ti=vv[((Math.imul(mx,73856093)^Math.imul(my,19349663)^Math.imul(face,83492791))>>>4)%vv.length]} // opt-in painted wall variants (early_polish.js)
+    if(EPCT&&g===1){const t2=EPCT.get(my*MW+mx);if(t2!==undefined)ti=t2} // opt-in single wall squares with their own face (early_polish.js)
     const tv=(g===1||g===2)?torchAt.get((my*MW+mx)*4+face):0;
     if(tv&&LEVEL===31&&T_TORCH_GOLD!==undefined){ti=T_TORCH_GOLD+((fr+((mx*7+my*3)&3)*2)&7)}else if(tv){const ph=((mx*7+my*3)&3);ti=(g===1?(tv===2?T_TORCH_STONE_R:T_TORCH_STONE):(tv===2?T_TORCH_BRICK_R:T_TORCH_BRICK))+((fr+ph*2)&7)}
     if(LEVEL===22&&g===1&&T_SKY[0]!==undefined)tx=(tx+((t*5)|0))&(TS-1); // the sky drifts past
@@ -81280,7 +81280,8 @@ function epLoad(){if(EP.loading)return EP.loading;
   return EP.loading}
 /* a painted swatch as a 128x128 texture, graded (k: [r,g,b] gain, sat, an optional darker band at the foot of a wall) */
 function epTex(key,o){o=o||{};const im=IMG[key];if(!im||!im.width)return null;const c=document.createElement('canvas');c.width=c.height=TS;const x=c.getContext('2d');if(o.flip){x.translate(TS,0);x.scale(-1,1)}if(o.soft)x.filter=`blur(${o.soft}px) contrast(${o.con||.86})`;x.drawImage(im,0,0,TS,TS);x.filter='none';x.setTransform(1,0,0,1,0,0);const d=x.getImageData(0,0,TS,TS),a=d.data,g=o.k||[1,1,1],s=o.sat===undefined?1:o.sat;
-  for(let i=0;i<a.length;i+=4){const py=(i>>2)/TS|0;let r=a[i],gg=a[i+1],b=a[i+2];const l=r*.3+gg*.59+b*.11;r=l+(r-l)*s;gg=l+(gg-l)*s;b=l+(b-l)*s;let f=1;if(o.blot){const px=(i>>2)%TS;f*=1-o.blot*Math.max(0,Math.sin(px*.07+o.seed)*Math.sin(py*.05-o.seed*1.7)+Math.sin(px*.19+py*.11+o.seed*3)*.35)}if(o.foot){const t=(py/TS-(1-o.foot[0]))/o.foot[0];if(t>0)f*=1-o.foot[1]*t*t}if(o.top){const t=1-py/TS/o.top[0];if(t>0)f*=1-o.top[1]*t*t}a[i]=r*g[0]*f;a[i+1]=gg*g[1]*f;a[i+2]=b*g[2]*f}
+  let mL=0;if(o.match){for(let i=0;i<a.length;i+=4)mL+=a[i]*.3+a[i+1]*.59+a[i+2]*.11;mL/=a.length/4}
+  for(let i=0;i<a.length;i+=4){const py=(i>>2)/TS|0;let r=a[i],gg=a[i+1],b=a[i+2];const l=r*.3+gg*.59+b*.11;if(o.match){const q=l/mL,M=o.match;r=M[0]*q*.85+(r-l)*.15+l*.0;gg=M[1]*q*.85+(gg-l)*.15;b=M[2]*q*.85+(b-l)*.15}else{r=l+(r-l)*s;gg=l+(gg-l)*s;b=l+(b-l)*s}let f=1;if(o.blot){const px=(i>>2)%TS;f*=1-o.blot*Math.max(0,Math.sin(px*.07+o.seed)*Math.sin(py*.05-o.seed*1.7)+Math.sin(px*.19+py*.11+o.seed*3)*.35)}if(o.foot){const t=(py/TS-(1-o.foot[0]))/o.foot[0];if(t>0)f*=1-o.foot[1]*t*t}if(o.top){const t=1-py/TS/o.top[0];if(t>0)f*=1-o.top[1]*t*t}a[i]=r*g[0]*f;a[i+1]=gg*g[1]*f;a[i+2]=b*g[2]*f}
   return a}
 /* the stone and brick walls (and their torches) are swapped for painted ones while the party is in a level that asks for it, and put back when it leaves */
 function epFlame(id0,t){if(!t)return;for(let f=0;f<FLAME_FRAMES;f++){const T=TEX[id0+f];if(!T||!T.e)continue;const e=T.e;for(let i=0;i<e.length;i+=4){e[i]*=t[0]*t[3];e[i+1]*=t[1]*t[3];e[i+2]*=t[2]*t[3]}}}
@@ -81347,7 +81348,8 @@ function epApply(n,late){const S=self.EP_OFF?null:EP_SPEC[n],L=LEVELS[n];
   if(EP_SECRETS[n])S.big=EP_SECRETS[n].map(q=>({k:'rubble',x:q.from[0]+.5+(q.door[0]-q.from[0])*.32,y:q.from[1]+.5+(q.door[1]-q.from[1])*.32,sz:.55,a:.9}));
   if(S.decals)L._f2dec=epDecals(n,S);
   L._epf=epFloorFx(n,S);
-  if(S.grime){if(!L._eptm){L._eptm=new Map();const seen=new Set();for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(seen.has(g))continue;seen.add(g);const ti=g>=100?(typeof KH_DOOR!=='undefined'&&KH_DOOR[g]?undefined:T_TILE[g]):(g>=9&&g<=14)||(g>=20&&g<=22)?T_WALL[g]:(g===7&&S.grime.gate)?T_GATE:undefined;if(ti===undefined||L._eptm.has(ti)||!TEX[ti]||!TEX[ti].d)continue;const nt=epGrime(ti,S.grime,g);if(nt!==null)L._eptm.set(ti,nt)}}L._epf.tm=L._eptm}
+  if(S.retile&&EP.wall&&EP.wall.wv&&EP.wall.wv[1]){if(!L._eptmR){L._eptmR=1;L._eptm=L._eptm||new Map();const vv=EP.wall.wv[1];let k=0;const seen=new Set();for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(g<100||seen.has(g)||(typeof KH_DOOR!=='undefined'&&KH_DOOR[g]))continue;seen.add(g);const ti=T_TILE[g];if(ti!==undefined)L._eptm.set(ti,vv[1+(k++%(vv.length-1))])}}L._epf.tm=L._eptm}
+  if(S.grime){if(!L._eptm||!L._eptmG){L._eptmG=1;L._eptm=L._eptm||new Map();const seen=new Set();for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(seen.has(g))continue;seen.add(g);const por=g>=30&&g<100,ti=S.grime.only==='portal'?(por?(T_DOORS[(G.portals[g-30]||{}).tex]||T_DOORS.house):undefined):g>=100?(typeof KH_DOOR!=='undefined'&&KH_DOOR[g]?undefined:T_TILE[g]):(g>=9&&g<=14)||(g>=20&&g<=22)?T_WALL[g]:(g===7&&S.grime.gate)?T_GATE:(por&&S.grime.gate)?(T_DOORS[(G.portals[g-30]||{}).tex]||T_DOORS.house):undefined;if(ti===undefined||L._eptm.has(ti)||!TEX[ti]||!TEX[ti].d)continue;const nt=epGrime(ti,S.grime,g);if(nt!==null)L._eptm.set(ti,nt)}}L._epf.tm=L._eptm}
   if(S.walls&&S.walls.vars&&EP.wall){const W=EP.wall;if(!W.wv){W.wv={};for(const g of [1,2]){const v=S.walls.vars[g];if(!v)continue;const ids=[g===1?W.stone:W.brick];for(const t of v){const d=epTex('ep_tex_'+t.tex,t.o||(g===1?S.walls.so:S.walls.bo));if(d)ids.push(addTex(d))}W.wv[g]=ids}}L._epf.wv=W.wv}
   if(S.grade)F2GRADE[n]=S.grade;
   if(S.amb!==undefined)G.amb=Math.max(G.amb||0,S.amb);
@@ -81404,7 +81406,7 @@ const EP_SECRETS={1:[
   {id:'a',door:[4,12],from:[3,12],cells:[[5,11],[6,11],[5,12],[6,12]],chest:[6,12],pots:3,lamp:[5,12],props:[['web_corner',6,11,[0,-1]],['skel_slump',5,11,null],['candles',5,12,null]]},
   {id:'b',door:[12,13],from:[13,13],cells:[[9,13],[10,13],[11,13],[9,14],[10,14],[11,14]],chest:[9,14],pots:3,lamp:[10,13],props:[['web_hang',10,14,[0,1]],['bonepile',11,14,null],['candles',10,13,null]]},
   {id:'c',door:[15,10],from:[16,10],cells:[[13,10],[14,10],[13,11],[14,11]],chest:[13,10],pots:2,lamp:[14,10],props:[['web_corner',13,11,[-1,0]],['lantern',14,10,null],['potrubble',13,11,null]]},
-  {id:'d',door:[25,3],from:[24,3],cells:[[26,3],[26,4],[26,5]],chest:[26,3],pots:4,lamp:[26,5],props:[['skel_hang',26,4,[1,0]],['candles',26,5,null]]}]};
+  {id:'d',door:[25,3],from:[24,3],cells:[[26,3],[26,4],[26,5]],chest:[26,3],pots:4,lamp:[26,5],props:[['skel_hang',26,4,[1,0]],['candles',26,5,null],['web_corner',26,5,[0,1]],['bonepile',26,4,null]]}]};
 /* the rooms stay solid in the level's rows (so the torches, the map and every route are exactly as before) and are hollowed out of G.grid on each visit; only the chests are listed in the level's decor */
 {const L=LEVELS[1];if(L&&L.decor&&!L._epSecD){L._epSecD=1;for(const s of EP_SECRETS[1])L.decor.push({k:'chest',x:s.chest[0],y:s.chest[1],block:true,kname:'epsec_'+s.id})}}
 const epSecF=()=>{const F=G.flags;return F.ep_sec=F.ep_sec||{}};
@@ -81412,14 +81414,16 @@ function epSecretsApply(n){const list=EP_SECRETS[n],F=epSecF();
   for(const s of list){const [dx,dy]=s.door;for(const [x,y] of s.cells)if(G.grid[y]&&G.grid[y][x]===1)G.grid[y][x]=0;if(F[s.id]&&G.grid[dy]&&G.grid[dy][dx]!==0)G.grid[dy][dx]=0;
     const ch=G.decor.find(d=>d.kname==='epsec_'+s.id);if(ch){if(!ch.contents)ch.contents=[{id:'potion',n:s.pots}];ch.gold=0;ch.loot=true;if(IMG.ep_chest_s)ch.lk='ep_chest_s'}
     if(!G.decor.some(d=>d.epSecP===s.id))for(const [k,x,y,wd] of s.props){if(!IMG['ep_'+k])continue;const d={k:'ep_'+k,x,y,block:false,deco:true,loot:false,shop:false,epSecP:s.id};if(wd){d.wd=wd;d.pic=1;d.bob=k==='skel_hang'?.5:.72;NPC_H['ep_'+k]=k==='skel_hang'?.95:.45}else{d.ox=(x===s.chest[0]?.2:-.2);d.oy=.15;d.sc=k==='lantern'?.8:k==='candles'?.7:.9}G.decor.push(d)}
-    if(s.lamp&&!LIGHTS.some(l=>l.epSec===s.id))LIGHTS.push({x:s.lamp[0]+.5,y:s.lamp[1]+.5,ph:hash2(s.lamp[0],s.lamp[1],3)*6.28,key:-5000-LIGHTS.length,taken:false,red:false,free:true,lamp:true,calm:false,kI:.75,col:[1.4,.82,.45],range2:30,epSec:s.id})}
-  const L=LEVELS[n];if(L._epf){const m=L._epf.ct=L._epf.ct||new Map();for(const s of list)if(!F[s.id]){const t=epSusTex();if(t!==null)m.set(s.door[1]*MW+s.door[0],t)}}}
+    if(s.lamp&&!LIGHTS.some(l=>l.epSec===s.id))LIGHTS.push({x:s.lamp[0]+.5,y:s.lamp[1]+.5,ph:hash2(s.lamp[0],s.lamp[1],3)*6.28,key:-5000-LIGHTS.length,taken:false,red:false,free:true,lamp:true,calm:false,kI:.5,col:[1.2,.86,.56],range2:30,epSec:s.id})}
+  const L=LEVELS[n];if(L._epf){const m=L._epf.ct=L._epf.ct||new Map();for(const s of list)if(!F[s.id]){const t=epSusTex(s);if(t!==null)m.set(s.door[1]*MW+s.door[0],t)}}}
 /* the suspicious face: the crypt's own painted wall with one ragged block of stones a little out of line and a hairline gap round it, dust at its foot */
-function epSusTex(){if(EP.susT!==undefined)return EP.susT;const W=EP.wall;if(!W||!TEX[W.stone])return null;const d=new Uint8ClampedArray(TEX[W.stone].d),o=TEX[W.stone].d,N=TS;
-  const x0=38,x1=92,y0=40,y1=118;for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){const sx=Math.min(N-1,x+3),sy=Math.max(0,y-2),i=(y*N+x)*4,j=(sy*N+sx)*4;const k=.9;d[i]=o[j]*k;d[i+1]=o[j+1]*k;d[i+2]=o[j+2]*k*.97}
-  for(let y=y0-1;y<=y1;y++)for(let x=x0-1;x<=x1;x++){const edge=(x===x0-1||x===x1||y===y0-1)&&hash2(x,y,9)<.8;if(!edge)continue;const i=(y*N+x)*4;d[i]*=.42;d[i+1]*=.4;d[i+2]*=.38}
-  for(let y=y1-6;y<N;y++)for(let x=x0-6;x<x1+6;x++){if(x<0||x>=N)continue;if(hash2(x,y,31)<.25){const i=(y*N+x)*4;d[i]=Math.min(255,d[i]+22);d[i+1]=Math.min(255,d[i+1]+20);d[i+2]=Math.min(255,d[i+2]+16)}}
-  return EP.susT=addTex(d)}
+function epSusTex(s){const key='sus'+s.id;EP.sus=EP.sus||{};if(EP.sus[key]!==undefined)return EP.sus[key];const W=EP.wall;if(!W||!TEX[W.stone])return null;
+  const [mx,my]=s.door,[fx,fy]=s.from,face=fx>mx?1:fx<mx?3:fy>my?2:0,vv=W.wv&&W.wv[1];let src=W.stone;if(vv)src=vv[((Math.imul(mx,73856093)^Math.imul(my,19349663)^Math.imul(face,83492791))>>>4)%vv.length]; // the same painted face the engine would draw here
+  const o=TEX[src].d,d=new Uint8ClampedArray(o),N=TS,x0=40,x1=90,y0=46,y1=104;
+  for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){const sx=Math.min(N-1,x+4),sy=Math.max(0,y-3),i=(y*N+x)*4,j=(sy*N+sx)*4;d[i]=o[j]*.94;d[i+1]=o[j+1]*.94;d[i+2]=o[j+2]*.93}   // one block of stones a little out of line
+  for(let y=y0-2;y<=y1+1;y++)for(let x=x0-2;x<=x1+1;x++){if(x<0||y<0||x>=N||y>=N)continue;const gap=(x<=x0-1||x>=x1||y<=y0-1||y>=y1);if(!gap)continue;const hh=Math.sin(x*.9+y*1.3)*.5+Math.sin(x*.37-y*.71+2)*.5;if(hh<-.15)continue;const i=(y*N+x)*4,k=(x===x0-2||y===y0-2)?.86:.6+.15*hh;d[i]*=k;d[i+1]*=k;d[i+2]*=k}   // a hairline gap round it
+  for(let y=y1+2;y<N;y++)for(let x=x0-8;x<x1+8;x++){if(x<0||x>=N)continue;const t=(y-y1)/(N-y1);if(hash2(x,y,31)<.35*(1-t*.4)){const i=(y*N+x)*4;d[i]=Math.min(255,d[i]*1.18+10);d[i+1]=Math.min(255,d[i+1]*1.16+9);d[i+2]=Math.min(255,d[i+2]*1.12+7)}}   // pale dust where the stones were moved
+  return EP.sus[key]=addTex(d)}
 {const _sb=secretBump;secretBump=function(nx,ny){try{const list=!self.EP_OFF&&EP_SECRETS[LEVEL];if(list){const s=list.find(q=>q.door[0]===nx&&q.door[1]===ny);const F=epSecF();
     if(s&&!F[s.id]){F[s.id]=1;G.grid[ny][nx]=0;const L=LEVELS[LEVEL];if(L._epf&&L._epf.ct)L._epf.ct.delete(ny*MW+nx);sfx('door');G.shake=.3;msg('The stones here are loose. A hidden door swings open.','#ffe9a0');EP.cur=-1;return true}}}catch(e){console.error('ep secret',e)}
   return _sb.apply(this,arguments)}}
@@ -81443,7 +81447,7 @@ function epAutoProps(n,A){const L=LEVELS[n],R=L.rows,H=R.length,W=R[0].length,op
     if(hash2(x,y,n*31+5)>=(A.p||.6))continue;
     const ks=A.keys,nb=placed.filter(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)<7).map(p=>p[2]);let k=ks[(hash2(x,y,n*31+6)*ks.length)|0];for(let t=0;t<ks.length&&nb.includes(k);t++)k=ks[(ks.indexOf(k)+1)%ks.length];
     placed.push([x,y,k]);L.decor.push({k:'ep_'+k,x,y,deco:true,block:false,ox:(E?.26:Wt?-.26:0),oy:(S?.26:N?-.26:0),sc:+(.85+hash2(x,y,n*31+7)*.3).toFixed(2)})}}
-{const _ll=loadLevel;loadLevel=function(n){try{epProps(n,EP_SPEC[n])}catch(e){console.error('ep props',e)}const r=_ll.apply(this,arguments);try{if(EP_SPEC[n])epLoad();epSwapWalls(null)}catch(e){console.error(e)}return r}}
+{const _ll=loadLevel;loadLevel=function(n){try{epSwapWalls(null);epProps(n,EP_SPEC[n])}catch(e){console.error('ep props',e)}const r=_ll.apply(this,arguments);try{if(EP_SPEC[n])epLoad()}catch(e){console.error(e)}return r}} // our walls are put back before the level's own swaps (the well's, the ruby maze's) run, so theirs keep the true originals
 {const _dw=drawWorld;drawWorld=function(){try{if(typeof LEVEL!=='undefined'&&(EP.cur!==LEVEL||EP.gd!==G.decor||EP.rd!==EP.ready)){EP.cur=LEVEL;EP.gd=G.decor;EP.rd=EP.ready;epApply(LEVEL)}}catch(e){console.error('ep',e)}return _dw.apply(this,arguments)}}
 /* a big painted piece right in front of the party thins out instead of filling the view with a blurred close-up (opt-in: S.nearFade) */
 {const _sl=spriteList;spriteList=function(){const L=_sl.apply(this,arguments);const S=typeof LEVEL!=='undefined'&&!self.EP_OFF&&EP_SPEC[LEVEL];if(!S||!S.nearFade||!G.C)return L;const a=G.C.a||0,cx=G.C.x+.5-Math.cos(a)*.28,cy=G.C.y+.5-Math.sin(a)*.28;
@@ -81466,7 +81470,7 @@ function epDungeon(kind,n,o){o=o||{};const W={crypt:{name:'crypt',stone:'cryptwa
     auto:{keys:kind==='mine'?['rubble','planks','bucket','crate','sacks','jar']:kind==='cave'?['rubble','bonepile','ratnest','rubble','jar']:['sacks','crate','rubble','ratnest','bucket','bonepile','planks','jar'],p:.7}};
   if(!o.nofloor){S.floor={name:kind+'floor',tex:kind==='crypt'?'flagfloor':'earthfloor',o:{k:[.8,.75,.68],sat:.7}};S.fvar=[{name:kind+'earth',tex:'earthfloor',o:{k:[.72,.66,.58],sat:.7,flip:1},at:.38},{name:kind+'flagdk',tex:kind==='crypt'?'flagfloor':'earthfloor',o:{k:[.62,.58,.54],sat:.6,flip:1,blot:.4,seed:1.9},at:.62}];S.soft=.38}
   S.ceil=kind==='cave'?{name:'caveceil',tex:'caverock',o:{k:[.55,.52,.48],sat:.6,flip:1}}:{name:'cryptbeams',img:'ep_tex_beams',o:{k:[.9,.82,.72],sat:.6}};
-  S.grime={k:.82,sat:.62,foot:.34,footK:.6,streak:.35,blot:.45,tint:[1.1,.98,.84],gate:1};
+  S.grime={k:.84,sat:.85,foot:.34,footK:.6,streak:.35,blot:.45,tint:[1,1,1],gate:1}; // grime in the level's own colours: never shift its hue
   return S}
 /* the five great deserts share one sparse dressing */
 function epDes(n){return {desert:{palms:['f2_de_palm'],ruins:['f2_de_amphora','f2_de_skull','f2_de_cairn'],bones:['f2_dx_oxskull','f2_de_skull','f2_de_cairn','f2_de_amphora'],oasisP:.45,oasisN:1,oasisGap:12,ruinP:.3,ruinN:1,ruinGap:16,lone:7,loneGap:40}}}
@@ -81480,6 +81484,18 @@ function epWood(n,o){const S={decals:{keys:['leaves','pebbles','mud','droppings'
   else if(o.road)S.floors={0:{name:'rd_mud',tex:'mudtrack',o:{k:[1.05,1.0,.92],sat:.85}},1:{name:'rd_trail',tex:'villgrass',o:{k:[1.05,1.08,.95],sat:.9,flip:1}}};
   else S.floors={0:{name:'wd_floor',tex:'forestfloor',o:{k:[1.4,1.34,1.2],sat:.95}},1:{name:'wd_trail',tex:'mudtrack',o:{k:[1.3,1.24,1.12],sat:.9,flip:1}}};
   return S}
+/* Under the Well (501) keeps its own cold blue-grey stone, floor and ceiling (thornwick_well.js): only grime in its own cool palette, wet shade and pools */
+const EP_WELL={lightK:.78,grime:{only:'portal',k:.72,sat:.35,foot:.3,footK:.5,streak:.3,blot:.4,tint:[.86,.96,1.12]},flame:[.92,.82,.72,.72],walls:{name:'well',stone:'cryptwall',so:{match:[66,100,160],foot:[.42,.72],top:[.25,.5]},
+    vars:{1:[{tex:'cryptdamp',o:{match:[76,106,144],foot:[.42,.74],top:[.25,.5]}},{tex:'cryptwall',o:{match:[60,102,156],foot:[.44,.76],top:[.25,.5],flip:1,blot:.35,seed:1.7}},{tex:'cryptroots',o:{match:[70,99,150],foot:[.42,.74],top:[.25,.5],blot:.3,seed:2.9}},{tex:'cryptdamp',o:{match:[63,97,155],foot:[.44,.76],top:[.25,.5],flip:1,blot:.3,seed:3.3}}]}},retile:1,
+  decals:{keys:['damp','crack','pebbles','rubble','bones','damp','droppings'],p:.6,wallBias:.5,sz:[.45,.7],far:14,gain:[1.05,1.12,1.25],a:1,big:{keys:['damp','damp','rubble','crack','pebbles'],p:.26,sz:[1.1,1.7],gap:2.4,a:.9}},
+  shadow:.7,shadowSz:1.25,glow:.3,glowSz:3.0,glowCol:[.86,.82,.74],ao:.8,aoW:.58,amb:.06,
+  grade:{c:1.1,s:1.0,b:1.02,tone:[80,112,160,.16],vig:.42,vc:[4,7,12]},
+  pics:{p:.4,keys:[{k:'moss',h:.2,bob:.1},{k:'moss',h:.2,bob:.1},{k:'web_corner',h:.42,bob:.76,corner:1},{k:'web_hang',h:.5,bob:.7},{k:'chains',h:.55,bob:.55},{k:'ring',h:.16,bob:.45}]},
+  auto:{keys:['rubble','bonepile','bucket','jar','rubble'],p:.6}};
+/* the Ironhill Tunnel (11) was sandy tan masonry: the crypt finish, lighter and warmer, so it keeps its colour */
+const EP_TUNNEL=(()=>{const S=epDungeon('crypt',11);S.walls=JSON.parse(JSON.stringify(S.walls));S.walls.name='tunnel';const tan=o=>Object.assign({},o||{},{k:[.98,.88,.72],sat:.85});S.walls.so=tan(S.walls.so);S.walls.bo=tan(S.walls.bo);
+  S.walls.vars={1:[{tex:'cryptdamp',o:tan({foot:[.34,.6],top:[.2,.4]})},{tex:'cryptwall',o:tan({foot:[.36,.62],top:[.2,.4],flip:1,blot:.3,seed:1.3})},{tex:'cryptroots',o:tan({foot:[.34,.6],top:[.2,.4],blot:.25,seed:2.1})}]};
+  S.floor={name:'tunnelfloor',tex:'earthfloor',o:{k:[.95,.86,.72],sat:.8}};S.amb=.1;S.grade={c:1.08,s:.88,b:1.04,tone:[160,125,85,.12],vig:.36,vc:[10,7,4]};return S})();
 const EP_GRIME=['straw','droppings','puddle','soot','crack','rubble','bones','damp','shards','rag','grain','mud','pebbles','wax'];
 const EP_SPEC={
   /* the crypts below the Abbey: the starting dungeon */
@@ -81505,7 +81521,7 @@ const EP_SPEC={
      grade:{c:1.08,s:.82,b:1.0,tone:[140,110,80,.12],vig:.36,vc:[12,10,8]},
      street:{keys:['firewood','haybale','dung','wheel','flour','rainbarrel','veg','sacks','crate','bucket'],p:.5,gap:3,on:'12',fence:1,fenceRe:/^(fence|ptree|gtree|pjuniper|pbracken|grocks|gboulder|well)/}},
   /* the other early dungeons share the crypts' finish, each with its own stone (see epDungeon) */
-  8:epDungeon('cave',8),23:epDungeon('cave',23),25:epDungeon('cave',25),9:epDungeon('crypt',9),12:epDungeon('crypt',12,{nofloor:1}),501:epDungeon('crypt',501,{nofloor:1}),11:epDungeon('mine',11),18:epDungeon('mine',18),
+  8:epDungeon('cave',8),23:epDungeon('cave',23),25:epDungeon('cave',25),9:epDungeon('crypt',9),12:epDungeon('crypt',12,{nofloor:1}),501:EP_WELL,11:EP_TUNNEL,18:epDungeon('mine',18),
   /* the deserts: a few painted palms by the oases, broken pieces at the ruins, lone bones far apart; the dunes themselves are not touched */
   41:{desert:{palms:[],ruins:['f2_de_amphora','f2_de_skull','f2_de_cairn'],bones:['f2_dx_oxskull','f2_de_skull','f2_de_cairn','f2_de_amphora'],oasisP:0,oasisN:1,ruinP:.35,ruinN:1,lone:8,loneGap:26}},
   43:{desert:{palms:[],ruins:['f2_de_amphora','f2_de_skull','f2_de_cairn'],bones:['f2_dx_oxskull','f2_de_skull','f2_de_cairn','f2_de_amphora'],oasisP:0,ruinP:.35,ruinN:1,lone:8,loneGap:26}},
