@@ -383,5 +383,131 @@
 "h": 128,
 "kind": "tex",
 "sheet": "tex_grounds1"
+},
+"tex_cf_plain": {
+"file": "tex_cf_plain.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_cryptfloors"
+},
+"tex_cf_crack": {
+"file": "tex_cf_crack.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_cryptfloors"
+},
+"tex_cf_damp": {
+"file": "tex_cf_damp.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_cryptfloors"
+},
+"tex_cf_drain": {
+"file": "tex_cf_drain.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_cryptfloors"
+},
+"tex_cf_straw": {
+"file": "tex_cf_straw.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_cryptfloors"
+},
+"tex_cf_bones": {
+"file": "tex_cf_bones.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_cryptfloors"
+},
+"tex_cf_soot": {
+"file": "tex_cf_soot.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_cryptfloors"
+},
+"tex_cf_broken": {
+"file": "tex_cf_broken.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_cryptfloors"
+},
+"tex_cf_stain": {
+"file": "tex_cf_stain.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_cryptfloors"
+},
+"barrel2": {
+"file": "barrel2.webp",
+"w": 307,
+"h": 420,
+"kind": "sprite",
+"sheet": "props_crypt2"
+},
+"crates2": {
+"file": "crates2.webp",
+"w": 299,
+"h": 420,
+"kind": "sprite",
+"sheet": "props_crypt2"
+},
+"sarc": {
+"file": "sarc.webp",
+"w": 572,
+"h": 273,
+"kind": "sprite",
+"sheet": "props_crypt2"
+},
+"skel_hang": {
+"file": "skel_hang.webp",
+"w": 240,
+"h": 420,
+"kind": "sprite",
+"sheet": "props_crypt2"
+},
+"candles": {
+"file": "candles.webp",
+"w": 332,
+"h": 345,
+"kind": "sprite",
+"sheet": "props_crypt2"
+},
+"lantern": {
+"file": "lantern.webp",
+"w": 192,
+"h": 420,
+"kind": "sprite",
+"sheet": "props_crypt2"
+},
+"skel_slump": {
+"file": "skel_slump.webp",
+"w": 376,
+"h": 420,
+"kind": "sprite",
+"sheet": "props_crypt2"
+},
+"chest_s": {
+"file": "chest_s.webp",
+"w": 403,
+"h": 302,
+"kind": "sprite",
+"sheet": "props_crypt2"
+},
+"potrubble": {
+"file": "potrubble.webp",
+"w": 604,
+"h": 283,
+"kind": "sprite",
+"sheet": "props_crypt2"
 }
 }
