@@ -7,10 +7,10 @@
    new pieces are appended to a level's decor (never inserted), never block, and never stand on a square that something else uses.
    Art: assets/ep/ (tools/ep_ingest.py cuts the Gemini sheets kept in ART-HOLD/ep), listed in assets/ep/list.json, loaded only when a level needs it.
    ========================================================================== */
-const EP_EXTRA={tex_beams:'assets/ps/tex_beam_ceiling.jpg'};
+const EP_EXTRA={tex_beams:'assets/ps/tex_beam_ceiling.jpg',f2_de_palm:'assets/ps/f2_de_palm.webp',f2_dv_doum:'assets/ps/f2_dv_doum.webp',f2_dv_tamarisk:'assets/ps/f2_dv_tamarisk.webp',f2_dv_acacia:'assets/ps/f2_dv_acacia.webp',f2_de_column:'assets/ps/f2_de_column.webp',f2_de_shard:'assets/ps/f2_de_shard.webp',f2_de_pillar:'assets/ps/f2_de_pillar.webp',f2_dx_ribs:'assets/ps/f2_dx_ribs.webp',f2_dx_stele:'assets/ps/f2_dx_stele.webp',f2_dx_oxskull:'assets/ps/f2_dx_oxskull.webp',f2_dx_jars:'assets/ps/f2_dx_jars.webp',f2_de_skull:'assets/ps/f2_de_skull.webp',f2_de_amphora:'assets/ps/f2_de_amphora.webp',f2_de_cairn:'assets/ps/f2_de_cairn.webp',f2_de_shrub:'assets/ps/f2_de_shrub.webp',f2_dv_boulders:'assets/ps/f2_dv_boulders.webp'};
 const EP={list:null,loading:null,img:{},wall:null,walls:{},on:0,lv:0};
 /* heights in squares of the painted props */
-const EP_H={ep_firewood:.5,ep_haybale:.55,ep_trough:.42,ep_dung:.42,ep_wheel:.6,ep_flour:.55,ep_bench:.42,ep_rainbarrel:.62,ep_veg:.42,ep_sacks:.62,ep_crate:.55,ep_rubble:.4,ep_ratnest:.3,ep_bucket:.34,ep_chair:.42,ep_bonepile:.42,ep_planks:.95,ep_jar:.42};
+const EP_H={ep_f2_de_palm:3.8,ep_f2_dv_doum:3.2,ep_f2_dv_tamarisk:2.8,ep_f2_dv_acacia:2.8,ep_f2_de_column:3.0,ep_f2_de_shard:0.5,ep_f2_de_pillar:3.2,ep_f2_dx_ribs:1.4,ep_f2_dx_stele:1.1,ep_f2_dx_oxskull:0.8,ep_f2_dx_jars:1.3,ep_f2_de_skull:0.5,ep_f2_de_amphora:0.6,ep_f2_de_cairn:0.6,ep_f2_de_shrub:0.8,ep_f2_dv_boulders:1.3,ep_firewood:.4,ep_haybale:.55,ep_trough:.42,ep_dung:.42,ep_wheel:.6,ep_flour:.55,ep_bench:.42,ep_rainbarrel:.62,ep_veg:.42,ep_sacks:.62,ep_crate:.55,ep_rubble:.4,ep_ratnest:.3,ep_bucket:.34,ep_chair:.42,ep_bonepile:.42,ep_planks:.95,ep_jar:.42};
 function epLoad(){if(EP.loading)return EP.loading;
   EP.loading=fetch('assets/ep/list.json?v='+VERSION).then(r=>r.json()).then(L=>{for(const k in EP_EXTRA)L[k]={file:'../../'+EP_EXTRA[k]};EP.list=L;return Promise.all(Object.keys(L).map(k=>new Promise(res=>{const i=new Image();i.onload=()=>{IMG['ep_'+k]=i;if(EP_H['ep_'+k])NPC_H['ep_'+k]=EP_H['ep_'+k];res()};i.onerror=()=>res();i.src=(L[k].file.startsWith('../../')?L[k].file.slice(6):'assets/ep/'+L[k].file)+'?v='+VERSION})))}).then(()=>{EP.ready=1;try{epApply(LEVEL,1)}catch(e){console.error('ep apply',e)}}).catch(e=>{console.error('ep load',e);EP.ready=1});
   return EP.loading}
@@ -72,6 +72,7 @@ function epApply(n,late){const S=self.EP_OFF?null:EP_SPEC[n],L=LEVELS[n];
   if(S.jitter)for(const J of S.jitter)epJitter(n,J);
   if(S.pics&&!G.decor.some(d=>d.epPic))epWallPics(n,S.pics);
   if(S.street&&!G.decor.some(d=>d.epSt))epStreet(n,S.street);
+  if(S.desert&&!G.decor.some(d=>d.epDes))epDesert(n,S.desert);
   if(S.decals)L._f2dec=epDecals(n,S);
   L._epf=epFloorFx(n,S);
   if(S.grime){if(!L._eptm){L._eptm=new Map();const seen=new Set();for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(seen.has(g))continue;seen.add(g);const ti=g>=100?(typeof KH_DOOR!=='undefined'&&KH_DOOR[g]?undefined:T_TILE[g]):(g>=9&&g<=14)||(g>=20&&g<=22)?T_WALL[g]:(g===7&&S.grime.gate)?T_GATE:undefined;if(ti===undefined||L._eptm.has(ti)||!TEX[ti]||!TEX[ti].d)continue;const nt=epGrime(ti,S.grime,g);if(nt!==null)L._eptm.set(ti,nt)}}L._epf.tm=L._eptm}
@@ -109,6 +110,18 @@ function epGrime(ti,o,seed){const T=TEX[ti],d=T.d;if(!d||d.length!==TS*TS*4)retu
   const n=addTex(a,T.e);for(const k of Object.keys(T))if(k!=='d'&&k!=='e')TEX[n][k]=T[k];return n}
 /* small per-piece variety for repeated pieces: a mirrored copy on some, a slightly different size (visual only) */
 function epJitter(n,J){for(const d of G.decor){if(d.npc||d.epJ||!J.re.test(String(d.k)))continue;d.epJ=1;const h=hash2(d.x,d.y,n*41+9);if(h<.5&&typeof f2Flip==='function'){const fk=f2Flip(d.k);if(IMG[fk]){if(NPC_H[d.k]&&!NPC_H[fk])NPC_H[fk]=NPC_H[d.k];d.k=fk}}if(J.sc)d.sc=+((d.sc||1)*(1-J.sc+2*J.sc*hash2(d.x,d.y,n*41+10))).toFixed(2)}}
+/* the deserts stay very sparse: a few painted palms beside the oases that are already there, one or two broken pieces at the old ruins,
+   and a handful of lone bones and stones far apart in the open sand. Never on a used square, never near the arrival, never blocking. */
+function epDesert(n,P){const open=(x,y)=>x>=1&&y>=1&&x<MW-1&&y<MH-1&&G.grid[y][x]===0&&!(TERR_BLOCK&&TERR_BLOCK[y*MW+x]),used=new Set(),placed=[];
+  for(const d of G.decor)used.add(Math.round(d.x)+','+Math.round(d.y));for(const e of G.enemies||[])used.add(e.x+','+e.y);for(const i of G.items||[])used.add(i.x+','+i.y);
+  const st=LEVELS[n].start,far=(x,y,r)=>!placed.some(p=>Math.hypot(p[0]-x,p[1]-y)<r),free=(x,y)=>open(x,y)&&!used.has(x+','+y)&&Math.hypot(x-st.x,y-st.y)>5;
+  const put=(k,x,y,o)=>{const key=IMG['ep_'+k]?'ep_'+k:IMG[k]?k:null;if(!key)return false;used.add(x+','+y);placed.push([x,y,k]);G.decor.push(Object.assign({k:key,x,y,block:false,walk:true,deco:true,epDes:1,loot:false,shop:false,ox:(hash2(x,y,n*53+1)-.5)*.5,oy:(hash2(x,y,n*53+2)-.5)*.5,sc:+(.82+hash2(x,y,n*53+3)*.3).toFixed(2)},o||{}));return true};
+  const near=(ax,ay,cnt,keys,r0,r1,seed)=>{let c=0;for(let t=0;t<40&&c<cnt;t++){const a=hash2(ax,ay,seed+t*3)*6.283,r=r0+(r1-r0)*hash2(ax,ay,seed+t*3+1),x=Math.round(ax+Math.cos(a)*r),y=Math.round(ay+Math.sin(a)*r);if(!free(x,y)||!far(x,y,1.6))continue;const nb=placed.filter(p=>Math.hypot(p[0]-x,p[1]-y)<5).map(p=>p[2]);let k=keys[(hash2(x,y,seed+7)*keys.length)|0];for(let q=0;q<keys.length&&nb.includes(k);q++)k=keys[(keys.indexOf(k)+1)%keys.length];if(put(k,x,y))c++}};
+  const groups=(re,gap)=>{const g=[];for(const d of G.decor){if(d.epDes||!re.test(String(d.k)))continue;if(g.some(q=>Math.hypot(q[0]-d.x,q[1]-d.y)<gap))continue;g.push([d.x,d.y])}return g};
+  let oi=0;for(const [x,y] of groups(P.oasisRe||/^dpalm/,P.oasisGap||8)){if(hash2(x,y,n*53+9)>=(P.oasisP||.7))continue;near(x,y,1+((hash2(x,y,n*53+10)*(P.oasisN||3))|0),P.palms,1.5,3.5,n*53+100+oi*17);oi++}
+  let ri=0;for(const [x,y] of groups(P.ruinRe||/^(dpillar|dobelisk|dsphinx|druinstairs|dcrypt)/,P.ruinGap||10)){if(hash2(x,y,n*53+11)>=(P.ruinP||.5))continue;near(x,y,1+((hash2(x,y,n*53+12)*(P.ruinN||2))|0),P.ruins,1.5,3,n*53+500+ri*13);ri++}
+  for(let t=0,c=0;t<4000&&c<(P.lone||8);t++){const x=1+((hash2(t,n,n*53+20)*(MW-2))|0),y=1+((hash2(n,t,n*53+21)*(MH-2))|0);if(!free(x,y)||!far(x,y,P.loneGap||24))continue;if(put(P.bones[(hash2(x,y,n*53+22)*P.bones.length)|0],x,y))c++}
+  return placed.length}
 /* neighbour-aware variety: a repeated key gets one of its painted variants so that no two neighbours show the same picture (visual only) */
 function epVary(n,V){const seen=new Map();for(const d of G.decor){const v=V[d.k];if(!v||d.npc)continue;const near=new Set();for(const e of G.decor){if(e===d||Math.abs(e.x-d.x)>1||Math.abs(e.y-d.y)>1)continue;near.add(e.k)}
   const opts=[d.k].concat(v).filter(k=>IMG[k]);let pick=opts[(hash2(d.x,d.y,n*7+3)*opts.length)|0];for(let t=0;t<opts.length&&near.has(pick);t++)pick=opts[(opts.indexOf(pick)+1)%opts.length];d.k=pick}}
@@ -154,6 +167,18 @@ function epDungeon(kind,n,o){o=o||{};const W={crypt:{name:'crypt',stone:'cryptwa
   S.ceil=kind==='cave'?{name:'caveceil',tex:'caverock',o:{k:[.55,.52,.48],sat:.6,flip:1}}:{name:'cryptbeams',img:'ep_tex_beams',o:{k:[.9,.82,.72],sat:.6}};
   S.grime={k:.82,sat:.62,foot:.34,footK:.6,streak:.35,blot:.45,tint:[1.1,.98,.84],gate:1};
   return S}
+/* the five great deserts share one sparse dressing */
+function epDes(n){return {desert:{palms:['f2_de_palm','f2_dv_doum','f2_dv_tamarisk','f2_dv_acacia','dpalm1','dpalm3'],ruins:['f2_dx_stele','f2_de_shard','f2_dx_jars','f2_de_amphora'],bones:['f2_dx_oxskull','f2_dx_ribs','f2_de_skull','f2_de_cairn','f2_dv_boulders'],oasisP:.9,oasisN:3,ruinP:.45,ruinN:2,ruinGap:14,lone:12,loneGap:30}}}
+/* the finish of an early outdoor level: painted forest floor, mud track and grass, leaf and mud decals, shade under the trees, lamp pools, mirrored repeats */
+function epWood(n,o){const S={decals:{keys:['leaves','pebbles','mud','droppings'],on:{0:o.town?['mud','straw','droppings','puddle','pebbles','leaves','soot']:['leaves','leaves','pebbles','mud','bones','droppings'],1:['mud','puddle','straw','pebbles','droppings','leaves'],2:['mud','straw','droppings','pebbles','puddle','leaves'],3:['mud','leaves','straw'],4:['mud','straw','soot','droppings'],5:['mud','puddle','straw']},p:.6,wallBias:.3,sz:[.5,.7],far:16,gain:[1,.95,.88],a:1},
+    soft:.45,shadow:.6,shadowSz:1.4,ao:o.town?.6:.3,aoW:o.town?.55:.35,nearFade:1,glow:.6,glowSz:2.6,glowCol:[1,.7,.42],
+    grade:{c:1.08,s:.82,b:1.03,tone:[130,110,80,.12],vig:.34,vc:[10,10,6]},
+    jitter:[{re:/^fence$/,sc:0},{re:/^(pjuniper|pheather|pbracken|greeds|gfungus|gbramble|bush|flora)/,sc:.14},{re:/^(ptree|gtree|tree)/,sc:.1}]};
+  if(o.keepFloor){}
+  else if(o.town)S.floors={0:{name:'ih_cob',tex:'wetcobble',o:{k:[1.45,1.4,1.32],sat:.85}},1:{name:'tw_grass',tex:'villgrass',o:{k:[1.2,1.22,1.05],sat:1}},2:{name:'tw_mud',tex:'mudtrack',o:{k:[1.22,1.16,1.06],sat:.9}},3:{name:'tw_cobm',tex:'wetcobble',o:{k:[1.12,1.18,1.02],sat:.85,flip:1}},4:{name:'tw_cobs',tex:'wetcobble',o:{k:[1.1,1.05,1],sat:.75,blot:.4,seed:2}},5:{name:'tw_cobw',tex:'wetcobble',o:{k:[1.05,1.08,1.1],sat:.75,flip:1,blot:.3,seed:3}}};
+  else if(o.road)S.floors={0:{name:'rd_mud',tex:'mudtrack',o:{k:[1.05,1.0,.92],sat:.85}},1:{name:'rd_trail',tex:'villgrass',o:{k:[1.05,1.08,.95],sat:.9,flip:1}}};
+  else S.floors={0:{name:'wd_floor',tex:'forestfloor',o:{k:[1.4,1.34,1.2],sat:.95}},1:{name:'wd_trail',tex:'mudtrack',o:{k:[1.3,1.24,1.12],sat:.9,flip:1}}};
+  return S}
 const EP_GRIME=['straw','droppings','puddle','soot','crack','rubble','bones','damp','shards','rag','grain','mud','pebbles','wax'];
 const EP_SPEC={
   /* the crypts below the Abbey: the starting dungeon */
@@ -176,6 +201,16 @@ const EP_SPEC={
      grade:{c:1.08,s:.82,b:1.0,tone:[140,110,80,.12],vig:.36,vc:[12,10,8]},
      street:{keys:['firewood','haybale','dung','wheel','flour','rainbarrel','veg','sacks','crate','bucket'],p:.5,gap:3,on:'12',fence:1,fenceRe:/^(fence|ptree|gtree|pjuniper|pbracken|grocks|gboulder|well)/}},
   /* the other early dungeons share the crypts' finish, each with its own stone (see epDungeon) */
-  8:epDungeon('cave',8),23:epDungeon('cave',23),25:epDungeon('cave',25),9:epDungeon('crypt',9),12:epDungeon('crypt',12,{nofloor:1}),501:epDungeon('crypt',501,{nofloor:1}),11:epDungeon('mine',11),18:epDungeon('mine',18)
+  8:epDungeon('cave',8),23:epDungeon('cave',23),25:epDungeon('cave',25),9:epDungeon('crypt',9),12:epDungeon('crypt',12,{nofloor:1}),501:epDungeon('crypt',501,{nofloor:1}),11:epDungeon('mine',11),18:epDungeon('mine',18),
+  /* the deserts: a few painted palms by the oases, broken pieces at the ruins, lone bones far apart; the dunes themselves are not touched */
+  41:{desert:{palms:['f2_de_palm','f2_dv_doum','f2_dv_tamarisk','dpalm1','dpalm3','f2_de_shrub'],ruins:['f2_dx_stele','f2_de_shard','f2_dx_jars','f2_de_amphora'],bones:['f2_dx_oxskull','f2_dx_ribs','f2_de_skull','f2_de_cairn'],oasisP:.35,oasisN:2,ruinP:.6,lone:10,loneGap:22}},
+  43:{desert:{palms:['f2_dv_acacia','f2_dv_tamarisk','f2_de_shrub'],ruins:['f2_dx_stele','f2_de_shard','f2_dx_jars','f2_de_amphora'],bones:['f2_dx_oxskull','f2_dx_ribs','f2_de_skull','f2_de_cairn','f2_dv_boulders'],oasisRe:/^ddead/,oasisGap:14,oasisP:.25,oasisN:2,ruinP:.6,ruinN:2,lone:10,loneGap:24}},
+  60:epDes(60),61:epDes(61),62:epDes(62),63:epDes(63),64:epDes(64),
+  /* the early woods and roads */
+  2:epWood(2,{}),7:epWood(7,{keepFloor:1}),10:epWood(10,{keepFloor:1}),
+  /* Ironhill: the second town, a mining town (Thornwick's finish, sootier) */
+  13:Object.assign(epWood(13,{town:1}),{grime:{k:.9,sat:.66,foot:.38,footK:.7,streak:.5,blot:.55,tint:[1,.95,.88]},
+     street:{keys:['firewood','haybale','dung','wheel','flour','rainbarrel','veg','sacks','crate','bucket','rubble','planks'],p:.5,gap:3,on:'12',fence:1,fenceRe:/^(fence|ptree|gtree|pjuniper|pbracken|grocks|gboulder|well)/},
+     grade:{c:1.1,s:.72,b:.98,tone:[150,115,80,.16],vig:.38,vc:[12,10,8]}})
 };
 setTimeout(()=>{try{epLoad()}catch(e){}},4000); // the early polish pictures are small: fetch them soon after the start, so every first visit has them
