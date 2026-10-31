@@ -9,7 +9,7 @@
 const F2_SWAMP={HUT:[21,4,27,6],CAUL:[24,9],NOTE:[27,9],ING:[['toad','f2_toadstool',8,18,'a clump of red toadstools','The toadstool'],['eel','f2_eelpost',40,20,'a dead eel hanging from a hook on a post','The eel'],['moss','f2_moss',9,31,'a clump of bright green marsh moss on a flat stone','The marsh moss']]};
 function f2SwampBuild(){
   const SMd=f2TexFloor('ps_f2_tex_swmud','f2t_swmud',1.0)||'mud',SB=f2TexFloor('ps_f2_tex_swboard','f2t_swboard',1.0)||'wl2f0',SBX=f2TexFloor('ps_f2_tex_swboardx','f2t_swboardx',1.0)||SB,SWt=f2TexFloor('ps_f2_tex_swwater','f2t_swwater',.9)||'bogwater',SMo=f2TexFloor('ps_f2_tex_swmoss','f2t_swmoss',.85)||'wwf_moss';
-  const C=f2Room({id:9826,ground:SMd,path:SB,band:[1,4],wh:3.2,softRet:1,rw:0,mistH:.01,feather:/f2_sw_glowstump|f2_stump|f2_wv_stump|f2_sx_(log|knees)/,soil:[58,64,40],
+  const C=f2Room({id:9826,ground:SMd,path:SB,band:[1,4],guard:1,guardKeep:(x,y)=>x>=17&&x<=31&&y<=11,wh:3.2,softRet:1,rw:0,mistH:.01,feather:/f2_sw_glowstump|f2_stump|f2_wv_stump|f2_sx_(log|knees)/,soil:[58,64,40],
     routes:[[[24,35],[24,27],[16,23],[16,14],[24,12],[24,10]],[[24,27],[34,24],[39,20]],[[16,18],[9,18]],[[22,31],[10,31]]],
     clear:[[17,3,31,11,SMo,'The Witch\'s Hut',1],[4,14,12,22,SMd,'The Toadstool Ring',1],[35,15,43,24,SMd,'The Eel Pool',1],[5,27,14,34,SMo,'The Moss Bank',1]],
     edge:(C,x,y)=>{if(C.E[y*48+x]<=8){C.water(x,y,SWt);return true}return false}});
@@ -23,11 +23,12 @@ function f2SwampBuild(){
   {const [cx,cy]=F2_SWAMP.CAUL;C.used.delete(cx+','+cy);C.dec('ww_cauldron',cx,cy,{block:true,npc:'f2m_cauldron',sc:1.1});C.light(cx,cy,[1.0,2.2,.8]);C.light(24,7,[2.2,1.4,.5])}
   {const [nx,ny]=F2_SWAMP.NOTE;C.used.delete(nx+','+ny);C.dec(pspPic(IMG.ps_f2_sx_notepost?'f2_sx_notepost':'f2_notepost'),nx,ny,{block:true,npc:'f2m_note',sc:.9})}
   for(const [x,y] of [[20,8],[28,8]])if(C.free(x,y))C.dec('ww_totem',x,y,{block:true,sc:.9});
+  for(const x of [22,23,25,26])if(C.open(x,7)&&C.free(x,7)){const d=C.dec(x%2?pspPic('f2_reeds'):f2Flip(pspPic('f2_reeds')),x,7,{block:true,sc:.8+((x*7)%3)*.08});if(d)d.oy=-.3}   // a bed of reeds along the front of the hut either side of its barred door (the square before the door stays open)
   // the three marked spots
   for(const [k,pic,x,y] of F2_SWAMP.ING){C.used.delete(x+','+y);C.dec(pspPic(pic),x,y,{block:true,npc:'f2m_'+k});const sx=x+1,sy=y;if(C.open(sx,sy)){C.used.delete(sx+','+sy);C.dec(pspPic('f2_stake'),sx,sy,{block:false})}}
   // the swamp: dead trees hung with moss, willows, reeds, stumps; toadstool rings
   // still black pools between the trees (never beside a way, so every path stays a path)
-  for(let y=3;y<37;y++)for(let x=3;x<45;x++){if(!C.open(x,y)||!C.free(x,y)||C.nearPath(x,y,1)||(x>=17&&x<=31&&y<=11)||Math.hypot(x-24,y-35)<6)continue;if(C.vn(x,y,4,301)>.55&&[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1],[2,0],[-2,0],[0,2],[0,-2]].every(([a,b])=>C.open(x+a,y+b)&&!C.block[(y+b)*48+x+a]))C.water(x,y,SWt)}   // pools only inside open ground, so no way becomes a dead-end corridor
+  for(let y=3;y<37;y++)for(let x=3;x<45;x++){if(!C.open(x,y)||!C.free(x,y)||C.nearPath(x,y,1)||(x>=17&&x<=31&&y<=11)||Math.hypot(x-24,y-35)<6)continue;if(C.vn(x,y,4,301)>.46&&[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1],[2,0],[-2,0],[0,2],[0,-2]].every(([a,b])=>C.open(x+a,y+b)&&!C.block[(y+b)*48+x+a]))C.water(x,y,SWt)}   // pools only inside open ground, so no way becomes a dead-end corridor
   const ST=[pspPic('f2_sw_dead'),pspPic('f2_sw_cypress'),pspPic('f2_swamptree'),pspPic('f2_wv_cypress'),pspPic('f2_wv_lean')];ST.push(...ST.map(f2Flip));
   C.fill(ST.concat([pspPic('f2_stump'),pspPic('f2_sx_knees')]),{p1:.1,p2:.32,p3:.6});
   for(const [x,y] of [[12,25],[36,27],[30,9],[6,24]])if(C.free(x,y)&&!C.nearPath(x,y,1))C.dec(f2PickVar(C,[pspPic('f2_sx_log'),f2Flip(pspPic('f2_sx_log'))],x,y,C.hs2(x,y,79)),x,y,{block:true,sc:.85});
@@ -37,7 +38,7 @@ function f2SwampBuild(){
   C.scrub([pspPic('f2_reeds'),pspPic('f2_sw_rushes'),pspPic('f2_wv_iris'),f2Flip(pspPic('f2_sw_rushes')),pspPic('f2_sx_cattail'),f2Flip(pspPic('f2_sx_cattail'))],.14,{sc:.8});
   for(const [x,y,sc] of [[13,20,.75],[37,22,.55],[11,29,.65]])if(C.free(x,y)&&!C.nearPath(x,y,0)){C.dec(pspPic('f2_sw_glowstump'),x,y,{block:true,sc});C.light(x,y,[.4,1.3,1.2])}
   for(const [x,y] of [[23,30],[25,22],[17,16],[25,12],[15,21],[33,24],[23,31],[25,29],[25,23],[23,20],[17,15],[23,13],[29,26]])if(C.free(x,y)&&!C.pathM[y*48+x]&&C.nearPath(x,y,1)){const d=C.dec(pspPic(IMG.ps_f2_sx_lantern?'f2_sx_lantern':'f2_sw_post'),x,y,{block:false,sc:1.25});if(d)d.lift=1;C.light(x,y,[4.2,2.6,.8])}
-  f2Edge(C,{img:'f2_sw_wall',wh:.9,veil:.1,pillar:ST,innerP:.55,tall:[pspPic('f2_sw_cypress'),pspPic('f2_wv_cypress'),pspPic('f2_wv_lean'),pspPic('f2_sw_dead')].map(k=>k.replace(/^ps_/,'')),tallP:.7,tallSc:[1.0,1.6],innerKeep:(x,y)=>x>=17&&x<=31&&y<=11,top:{base:.05,amp:.3,k:1.4},fog:.5,footCol:[44,52,34,.75],footDress:{keys:[pspPic('f2_reeds'),pspPic('f2_sw_rushes'),f2Flip(pspPic('f2_sw_rushes')),pspPic('f2_sx_cattail')],p:.55,sc:.75,keep:(x,y)=>x>=17&&x<=31&&y<=11}});
+  f2Edge(C,{img:'f2_sw_wall',wh:.9,veil:.1,pillar:ST,innerP:.55,tall:[pspPic('f2_sw_cypress'),pspPic('f2_wv_cypress'),pspPic('f2_wv_lean'),pspPic('f2_sw_dead')].map(k=>k.replace(/^ps_/,'')),tallP:.45,tallSc:[.75,1.9],innerKeep:(x,y)=>x>=17&&x<=31&&y<=11,top:{base:.05,amp:.3,k:1.4},fog:.5,footCol:[44,52,34,.75],footDress:{keys:[pspPic('f2_reeds'),pspPic('f2_sw_rushes'),f2Flip(pspPic('f2_sw_rushes')),pspPic('f2_sx_cattail')],p:.55,sc:.75,keep:(x,y)=>x>=17&&x<=31&&y<=11}});
   {const g=C.chars[C.rows[hy1][24]],ec=C._edgeCh&&C._edgeCh(24,hy1),eg=ec&&C.chars[ec];if(g!==undefined&&eg!==undefined)T_TILE[g]=T_TILE[eg]}   // the hut's barred door square looks like the swamp behind the painted hut
   C.capTrees(/swamptree|oakmoss|f2_sw_(dead|cypress)|f2_wv_(cypress|lean)/,2.2);
   pspSafeZone(C,24,35,6);
@@ -50,6 +51,9 @@ function f2SwampBuild(){
   {const dk=a=>a.map(k=>'f2_dc_fs_'+k);C.f2.decals={keys:dk(['scum','rotleaf','wetmoss','spawn','crackmud','reedmat','scum','bones','rotleaf']),on:{[SB]:dk(['rotleaf','wetmoss','scum']),[SBX]:dk(['rotleaf','wetmoss','scum'])},p:.55,sz:[.4,.75],far:13,gain:[.5,.55,.45],keep:(x,y)=>F2_SWAMP.ING.some(q=>q[2]===x&&q[3]===y)}}
   return C.done({glow:7})}
 pspRegister(9826,f2SwampBuild);
+/* past the edge of the nightmare the engine painted the ground below the horizon in a dark band (a hard black bar under the tree line): there it is the red haze of the sky, darkening towards the viewer */
+{const _tb=terrBack;terrBack=function(D,hzr,hzmax,lbm){if(typeof LEVEL==='undefined'||LEVEL!==9827)return _tb.apply(this,arguments);_tb.apply(this,arguments);
+  for(let y=Math.max(0,HH-1);y<VH;y++){const t=Math.min(1,(y-HH+1)/Math.max(1,VH-HH)*5),r=150+(52-150)*t,g=44+(14-44)*t,b=38+(14-38)*t;let o=y*VW*4;for(let x=0;x<VW;x++,o+=4){D[o]=r;D[o+1]=g;D[o+2]=b}}}}
 const f2SwampHas=k=>{const R=f2S(9826);return !!(R.got&&R.got[k])};
 const f2SwampIn=k=>{const R=f2S(9826);return !!(R.in&&R.in[k])};
 for(const [k,pic,x,y,desc,nm] of F2_SWAMP.ING)khNpc('f2m_'+k,nm,'ps_'+pic,()=>{const R=f2S(9826);R.got=R.got||{};
@@ -74,8 +78,8 @@ f2OnArrive(9826,()=>f2SwampApply());
 /* ---------- 7. THE NIGHTMARE (9827): the brain ---------- */
 const F2_NIGHT={JAR:[24,7],LAMP:[[21,5,'north-west'],[27,5,'north-east'],[27,9,'south-east'],[21,9,'south-west']]};
 function f2NightBuild(){
-  const NC=f2TexFloor('ps_f2_tex_nmcrack','f2t_nmcrack',1.1)||'tombdark',NQ=f2TexFloor('ps_f2_tex_nmchequer','f2t_nmchequer',.8)||'wl2f5',NB=f2TexFloor('ps_f2_tex_nmbones','f2t_nmbones',1.0)||'ash',NF=f2TexFloor('ps_f2_tex_nmflesh','f2t_nmflesh',.95)||'blood';
-  const C=f2Room({id:9827,ground:NC,path:NQ,band:[1,4],wh:3.4,softRet:1,rw:0,mistH:.02,shade:{edge:.35,pool:.55},
+  const NC=f2TexFloor(f2Soft('ps_f2_tex_r3night',{filter:'brightness(1.75) contrast(1.35)',tag:'r3'}),'f2t_r3night3',1.0)||f2TexFloor('ps_f2_tex_nmcrack','f2t_nmcrack',1.1)||'tombdark',NQ=f2TexFloor('ps_f2_tex_nmchequer','f2t_nmchequer',.8)||'wl2f5',NB=f2TexFloor('ps_f2_tex_nmbones','f2t_nmbones',1.0)||'ash',NF=f2TexFloor('ps_f2_tex_nmflesh','f2t_nmflesh',.95)||'blood';
+  const C=f2Room({id:9827,ground:NC,path:NQ,band:[1,4],guard:1,guardKeep:(x,y)=>x>=16&&x<=32&&y<=12,wh:3.4,softRet:1,rw:0,mistH:.02,shade:{edge:.35,pool:.55},
     routes:[[[24,35],[24,27],[31,23],[31,15],[24,13],[24,11]],[[24,27],[14,25],[9,20]],[[31,19],[40,19]],[[22,31],[11,31]]],
     clear:[[17,2,31,12,NF,'The Ring of Lanterns',1],[4,15,13,24,NB,'The Doll Room',1],[35,14,44,24,NB,'The Hall of Eyes',1],[5,27,15,34,NF,'The Broken Clocks',1]],
     edge:(C,x,y)=>false});
@@ -91,7 +95,7 @@ function f2NightBuild(){
   for(const [x,y] of [[9,29],[13,32]])if(C.free(x,y))C.dec(pspPic('f2_nm_clock'),x,y,{block:true});
   
   for(const [x,y] of [[23,30],[25,24],[30,20],[30,16],[25,13]])if(C.free(x,y)){C.dec(pspPic('f2_nm_lamp'),x,y,{block:false});C.light(x,y,[1.8,.5,.4])}
-  f2Edge(C,{img:'f2_nm_wall',wh:.06,veil:.1,pillar:NT,innerP:.55,ring:30,tall:[pspPic('f2_nv_spire'),pspPic('f2_nv_handtree'),pspPic('f2_eyetree'),pspPic('f2_nv_thorn'),pspPic('f2_nm_tree')].map(k=>k.replace(/^ps_/,'')),tallP:.85,tallSc:[1.0,1.7],innerKeep:(x,y)=>x>=16&&x<=32&&y<=12});
+  f2Edge(C,{img:'f2_nm_wall',wh:.06,veil:0,fogCol:[118,34,30,.88],fogH:1.0,footCol:[60,22,20,.5],pillar:NT,innerP:.55,ring:30,tall:[pspPic('f2_nv_spire'),pspPic('f2_nv_handtree'),pspPic('f2_eyetree'),pspPic('f2_nv_thorn'),pspPic('f2_nm_tree')].map(k=>k.replace(/^ps_/,'')),tallP:.5,tallSc:[.7,1.9],innerKeep:(x,y)=>x>=16&&x<=32&&y<=12});
   for(const [x,y,sc] of [[8,19,.9],[9,19,.7],[8,20,.8],[10,20,.6],[6,16,1],[12,22,.85]])if(C.free(x,y))C.dec(pspPic('f2_doll'),x,y,{block:true,sc});
   for(const [x,y] of [[7,28],[13,29],[10,33],[6,32]])if(C.free(x,y))C.dec(pspPic('f2_clock'),x,y,{block:true});
   C.scrub(['gy_bones',pspPic('f2_nv_books'),'gy_bones',pspPic('f2_doll')],.05,{sc:.5});

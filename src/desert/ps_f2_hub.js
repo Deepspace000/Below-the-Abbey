@@ -27,10 +27,20 @@ const psf2Placed=()=>PSF2.PARTS.filter(p=>psf2F().placed[p]).length;
 /* the bier and the pieces on it: the painting of the Sleeper on her bier is cut into the seven pieces (head to foot); a piece not yet laid there is taken out of the picture (and the hair that hangs over the side goes with the head) */
 const PSF2_CUT={brain:[.05,.13],face:[.13,.21],chest:[.21,.3],heart:[.3,.36],hand:[.36,.46],legs:[.46,.86],foot:[.86,1]},PSF2_TOP=.32;
 function psf2Blank(){if(!IMG.psf2_blank){const c=document.createElement('canvas');c.width=c.height=4;IMG.psf2_blank=c;NPC_H.psf2_blank=.1}return 'psf2_blank'}
-function psf2BierEnd(){const k='psf2_bierend';if(IMG[k])return k;const im=IMG[pspPic('f2_sleeper')];if(!im||!im.width)return pspPic('f2_bier');const sx=Math.round(im.width*.88),sy=Math.round(im.height*PSF2_TOP),c=document.createElement('canvas');c.width=im.width-sx;c.height=im.height-sy;c.getContext('2d').drawImage(im,sx,sy,c.width,c.height,0,0,c.width,c.height);IMG[k]=c;NPC_H[k]=NPC_H[pspPic('f2_sleeper')]*(1-PSF2_TOP);return k}
-function psf2BierKey(){const F=psf2F(),woke=!!F.woke,mask=woke?'w':PSF2.PARTS.map(p=>F.placed[p]?1:0).join(''),k='psf2_bier_'+mask;if(IMG[k])return k;
-  const im=IMG[pspPic('f2_sleeper')];if(!im||!im.width)return pspPic('f2_bier');const W=im.width,H=im.height,top=Math.round(H*PSF2_TOP),c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.drawImage(im,0,0);
-  if(!woke&&!PSF2.PARTS.some(p=>F.placed[p])){const cl=IMG[pspPic('f2_bier')];if(cl&&cl.width){x.clearRect(0,0,W,H);x.drawImage(cl,0,top-8,W,H-top+8);IMG[k]=c;NPC_H[k]=NPC_H[pspPic('f2_sleeper')];return k}}   // the empty bier: the painted plinth with its pale cloth hanging in soft folds, at the size of the plinth under the Sleeper
+/* the plinth (f2_bier2, round 3): black carved stone with seven silver-ringed sockets under their symbols; a socket shows its piece once that piece is laid on the table. f2_sleeper2 is the Sleeper on that plinth (f2_sleeper2_nh without the hair over the side). Made by tools/f2_bier_make.py. */
+const PSF2_SOCK=[.116,.244,.371,.499,.626,.754,.882],PSF2_SOCKY=.70,PSF2_SOCKR=.028,PSF2_ORDER=['hand','foot','face','chest','legs','heart','brain'];
+const psf2SlKey=nh=>{const k=pspPic(nh?'f2_sleeper2_nh':'f2_sleeper2');return IMG[k]&&IMG[k].width?k:pspPic('f2_sleeper')};
+const psf2PlKey=()=>{const k=pspPic('f2_bier2');return IMG[k]&&IMG[k].width?k:pspPic('f2_bier')};
+function psf2BierEnd(){const k='psf2_bierend';if(IMG[k])return k;const im=IMG[psf2SlKey(1)];if(!im||!im.width)return pspPic('f2_bier');const sx=Math.round(im.width*.88),sy=Math.round(im.height*PSF2_TOP),c=document.createElement('canvas');c.width=im.width-sx;c.height=im.height-sy;c.getContext('2d').drawImage(im,sx,sy,c.width,c.height,0,0,c.width,c.height);IMG[k]=c;NPC_H[k]=NPC_H[pspPic('f2_sleeper')]*(1-PSF2_TOP);return k}
+function psf2BierKey(){const F=psf2F(),woke=!!F.woke,mask=woke?'w':PSF2.PARTS.map(p=>F.placed[p]?1:0).join(''),k='psf2_bier3_'+mask;if(IMG[k])return k;
+  const nh=woke||!F.placed.face||!F.placed.brain,sk=psf2SlKey(nh),im=IMG[sk];if(!im||!im.width)return pspPic('f2_bier');const W=im.width,H=im.height,top=Math.round(H*PSF2_TOP),c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.drawImage(im,0,0);
+  const sockets=()=>{if(woke)return;PSF2_ORDER.forEach((p,i)=>{if(!F.placed[p])return;const s=IMG[pspPic('f2_sock_'+p)];if(!s||!s.width)return;const r=PSF2_SOCKR*W;x.drawImage(s,PSF2_SOCK[i]*W-r,PSF2_SOCKY*H-r,2*r,2*r)})};   // a filled socket shows its piece
+  const v2=sk!==pspPic('f2_sleeper');
+  if(!woke&&!PSF2.PARTS.some(p=>F.placed[p])){const cl=IMG[v2?psf2PlKey():pspPic('f2_bier')];if(cl&&cl.width){x.clearRect(0,0,W,H);if(v2)x.drawImage(cl,0,0,W,H);else x.drawImage(cl,0,top-8,W,H-top+8);IMG[k]=c;NPC_H[k]=NPC_H[sk];return k}}   // the empty bier: the painted plinth with its pale cloth, at the size of the plinth under the Sleeper
+  if(v2){x.globalCompositeOperation='destination-out';
+    for(const p of PSF2.PARTS){if(!woke&&F.placed[p])continue;const [a,b]=PSF2_CUT[p],x0=a*W,x1=b*W,fe=W*.018,g=x.createLinearGradient(x0-fe,0,x1+fe,0),k0=fe/(x1-x0+2*fe);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(k0,'rgba(0,0,0,1)');g.addColorStop(1-k0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(x0-fe,0,x1-x0+2*fe,top)}
+    x.globalCompositeOperation='destination-over';{const pl=IMG[psf2PlKey()];if(pl&&pl.width)x.drawImage(pl,0,0,W,H)}   // where a piece is missing, the plinth and its cloth show
+    x.globalCompositeOperation='source-over';sockets();IMG[k]=c;NPC_H[k]=NPC_H[sk];return k}
   x.globalCompositeOperation='destination-out';
   for(const p of PSF2.PARTS){if(!woke&&F.placed[p])continue;const [a,b]=PSF2_CUT[p],x0=a*W,x1=b*W,fe=W*.018,g=x.createLinearGradient(x0-fe,0,x1+fe,0),k0=fe/(x1-x0+2*fe);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(k0,'rgba(0,0,0,1)');g.addColorStop(1-k0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');
     const gv=x.createLinearGradient(0,0,0,top);x.fillStyle=g;x.fillRect(x0-fe,0,x1-x0+2*fe,top-6);x.fillStyle='rgba(0,0,0,1)';x.fillRect(x0+fe*.5,0,x1-x0-fe,top-10)}   // feathered, so the pieces end softly in the cloth
@@ -52,16 +62,16 @@ function psf2HubBuild(info){
   const ROOMS=[]; // [name, style]
   const R=(x0,y0,x1,y1,floor,name,style,at)=>{const r=ROOMS.length;ROOMS.push([name,style]);C.room(x0,y0,x1,y1,{floor,name,at});for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)room[ix(x,y)]=r;return r};
   const P=(x0,y0,x1,y1,r,floor)=>{C.carve(x0,y0,x1,y1);C.setFloor(x0,y0,x1,y1,floor||'h_chq');for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)room[ix(x,y)]=r};
-  const rG=R(4,4,51,6,'h_chq','The Gallery of Doors','gallery',[28,5]);
+  const rG=R(4,4,51,6,'h_flag','The Gallery of Doors','hall',[28,5]);
   const rN=R(24,7,32,33,'h_chq','The Hall of Illusions','hall',[28,13]);
   const rW=R(3,20,23,24,'h_chq','The West Arm','statues',[12,22]);
   const rE=R(33,20,52,24,'h_chq','The East Arm','statues',[44,22]);
   const rS=R(24,34,32,40,'h_flag','The Stair Landing','stair',[28,36]);
   const rQ=R(16,35,21,39,'h_wood','The Quiet Chapel','lady',[18,37]);
   const rY=R(35,35,40,39,'h_flag','The Gallery of the Sleeper','gallery',[37,37]);
-  const rM=R(6,9,12,16,'h_black','The Room of Mirrors','salon',[9,12]);
+  const rM=R(6,9,12,16,'h_chq','The Room of Mirrors','salon',[9,12]);
   const rB=R(15,9,21,16,'h_wood','The Library of Dreams','trophy',[18,12]);
-  const rK=R(35,9,41,16,'h_flag','The Room of Masks','banquet',[38,12]);
+  const rK=R(35,9,41,16,'h_carpet','The Room of Masks','banquet',[38,12]);
   const rD=R(44,9,50,16,'h_wood',"The Sleepers' Beds",'lady',[47,12]);
   // passages: from the gallery south into the side rooms (under the forest, island, waterways and desert doors), from the side rooms into the arms, between the side rooms, the chapel and the Sleeper's gallery
   P(9,7,9,8,rM);P(9,17,9,19,rM);P(19,7,19,8,rB);P(18,17,18,19,rB);P(13,12,14,12,rM);P(22,12,23,12,rB);
@@ -73,9 +83,11 @@ function psf2HubBuild(info){
   C.setFloor(26,19,30,25,'h_run');   // the violet runner cloth under the bier (the pale dais stone looked bare)
   // ---- the links (the contract table): the seven illusion doors and the Grand Stair down; painted doors of the castle ----
   const doorGid=(st)=>{try{return pspDoorGid(st,PSF2H.WH)}catch(e){return null}};
-  for(const l of pspLinksFrom(id)){if(!l.at)continue;const g=pspPortal(C,l,{style:'great'});const st=/Grand Stair/.test(l.name)?'stairarch':'great',b=doorGid(st);if(g!=null&&b!=null&&T_TILE[b]!==undefined){T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b]}}
+  // every illusion door has its own painted front, in the world it opens into: living oak and ivy, driftwood and shells, frosted oak and icicles, a red and gilded Venetian door, carved sandstone, rotting planks and moss, a door of eyes
+  const HD={9821:'forest',9822:'island',9823:'snow',9824:'water',9825:'desert',9826:'swamp',9827:'night'},hdGid=k=>IMG['ps_f2_hd_'+k]&&IMG['ps_f2_hd_'+k].width?f2FacGid('ps_f2_hd_'+k,0,1,PSF2H.WH,{tex:'texBlack_2',fit:false,emit:.06,rgb:[.86,.86,.88]}):null;
+  for(const l of pspLinksFrom(id)){if(!l.at)continue;const g=pspPortal(C,l,{style:'great'});const st=/Grand Stair/.test(l.name)?'stairarch':'great',b=(HD[l.to]&&hdGid(HD[l.to]))||doorGid(st);if(g!=null&&b!=null&&T_TILE[b]!==undefined){T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b]}}
   // the stair to the third floor: an iron door that does not open yet
-  {const b=doorGid('iron'),g=KH_NEXT_GID++;T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b];KH_DOOR[g]={psf2:'stair3'};C.carve(51,5,51,5);C.solid(52,5,C.ch(g));C.used.add('52,5')}
+  {const b=hdGid('iron')||doorGid('iron'),g=KH_NEXT_GID++;T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b];KH_DOOR[g]={psf2:'stair3'};C.carve(51,5,51,5);C.solid(52,5,C.ch(g));C.used.add('52,5')}
   // keep clear: every landing (3 by 3), the stair arrival, the passages
   for(const l of PSP.LINKS)if(l.to===id&&l.land)C.reserve(l.land[0]-1,l.land[1]-1,l.land[0]+1,l.land[1]+1);
   C.reserve(27,37,29,40);C.reserve(50,4,51,6);
@@ -85,13 +97,15 @@ function psf2HubBuild(info){
   const cand=(x,y,col)=>{if(!C.free(x,y))return;C.cand(x,y,col||PSH_COL.cold)};
   // the gallery: a painted name plaque beside every door, banners and mirrors between the doors (the place of illusions: mirrors everywhere)
   const NAMES={9821:'THE PERFECT FOREST',9822:'THE ISLAND BY THE SEA',9823:'THE CABIN IN THE SNOW',9824:'THE WATERWAYS',9825:'THE DESERT',9826:'THE SWAMP',9827:'THE NIGHTMARE'};
+  // the name of each door on a small plaque of cream marble in a gilded frame beside it (the castle's black sign boards were too big beside the painted doors)
+  const plq=(x,y,wd,id2)=>{const w=NAMES[id2].split(' '),h=Math.ceil(w.length/2),k=IMG.ps_f2_plaque_blank&&IMG.ps_f2_plaque_blank.width?f2Lettered('f2_plaque_blank','f2_hubpl_'+id2,[w.slice(0,h).join(' '),w.slice(h).join(' ')],{h:.62,col:'#100800',box:[.2,.28,.8,.74]}):null;if(!k){C.sign(x,y,wd,NAMES[id2]);return}const d=pic(k.replace(/^ps_/,''),x,y,wd,{bob:1.35,sc:1});if(!d)C.sign(x,y,wd,NAMES[id2])};
   for(const l of pspLinksFrom(id)){if(!NAMES[l.to])continue;const [x,y]=l.at;
-    if(y===3){C.sign(x+1,4,[0,-1],NAMES[l.to]);cand(x-2,4)}
-    else if(x===2){C.sign(4,20,[0,-1],NAMES[l.to]);cand(4,24)}
-    else{C.sign(51,20,[0,-1],NAMES[l.to]);cand(51,24)}}
+    if(y===3){for(const cx2 of [x-1,x+1]){const d=pic('sconce_black',cx2,4,[0,-1],{bob:1.45,sc:1});if(d)C.light(cx2,4,[.85,.7,.52])}plq(x+2,4,[0,-1],l.to);cand(x-2,4)}   // a pair of black iron sconces flanks every door of the gallery
+    else if(x===2){plq(4,20,[0,-1],l.to);cand(4,24)}
+    else{plq(51,20,[0,-1],l.to);cand(51,24)}}
   // each door throws a little of its own world's light into the hall: green for the forest, sea blue for the island, cold white for the snow, rose for the canals, gold for the desert, bog green for the swamp, red for the nightmare
   {const TINT={9821:[.7,1.5,.6],9822:[.5,1.1,1.6],9823:[1.2,1.3,1.6],9824:[1.5,.9,1.0],9825:[1.7,1.25,.5],9826:[.8,1.2,.5],9827:[1.6,.35,.35]};
-   for(const l of pspLinksFrom(id)){if(!TINT[l.to]||!l.at)continue;const [x,y]=l.at,lx=y===3?x:x===2?4:51,ly=y===3?4:22;C.light(lx,ly,TINT[l.to])}}
+   for(const l of pspLinksFrom(id)){if(!TINT[l.to]||!l.at)continue;const [x,y]=l.at,lx=y===3?x:x===2?4:51,ly=y===3?4:22;C.light(lx,ly,TINT[l.to].map(v=>.42+v*.22))}}   // softened: a hint of the world's colour on the stone, not a coloured floor
   for(const [x,n] of [[12,'alcove_weeper'],[22,'alcove_monk'],[32,'alcove_maiden'],[42,'alcove_knight']])pic(n,x,4,[0,-1]);for(const [x,n] of [[11,'alcove_maiden'],[21,'alcove_knight'],[41,'alcove_weeper'],[46,'alcove_monk']])pic(n,x,6,[0,1]);   // statues in niches between the doors, so the long wall is not one run of empty panels
   for(const x of [14,24,34,44]){pic(x===24||x===34?'mirror_haunted_a':'banner_long_a',x,4,[0,-1]);pic('banner_long_b',x,6,[0,1])}
   for(const x of [5,50])pic('window_stained_tall',x,6,[0,1]);
@@ -118,7 +132,7 @@ function psf2HubBuild(info){
   cand(9,12);cand(7,14,[.8,.95,1.3]);cand(11,10,[.8,.95,1.3]);   // (the free-standing mirrors showed a blank white glass at close range: the room keeps its wall mirrors only)
   // the Library of Dreams: bookcases along the walls, a reading desk and a lectern with the book of dreams
   for(const [x,y] of [[15,9],[17,9],[21,9],[15,16],[21,16]])prop('bookcase_tall',x,y);
-  prop('reading_desk',18,13);if(C.free(16,12)){C.used.delete('16,12');C.dec(pspPic('lectern'),16,12,{block:true,npc:'psf2_book'})}cand(20,11,[1.3,1.0,.6]);
+  prop('reading_desk',18,13);C.light(18,11,[1.5,1.15,.7]);C.light(16,14,[1.2,1.0,.7]);C.light(20,14,[1.2,1.0,.7]);if(C.free(16,12)){C.used.delete('16,12');C.dec(pspPic('lectern'),16,12,{block:true,npc:'psf2_book'})}cand(20,11,[1.3,1.0,.6]);
   // the Room of Masks: masks of carnivals painted on the walls (portraits of masked faces), a long table, candles
   for(const [x,y,wd,n] of [[36,9,[0,-1],'f2_mask_plague'],[38,9,[0,-1],'f2_mask_moon'],[40,9,[0,-1],'f2_mask_harlequin'],[35,11,[-1,0],'f2_mask_moon'],[41,14,[1,0],'f2_mask_plague'],[35,14,[-1,0],'f2_mask_harlequin']])pic(n,x,y,wd,{bob:1.1,sc:1.6});   // carnival masks hung on the walls at eye height
   prop('furn_table_long_black',38,13);prop('furn_chair_dining_black',37,13);prop('furn_chair_dining_black',39,13);cand(36,15);cand(40,10);cand(36,10,[1.3,1.0,.6]);C.light(38,12,[1.3,1.0,.7]);
@@ -146,6 +160,8 @@ function psf2HubBuild(info){
     C.solid(x,y,C.ch(pshTile(st,kind,kind==='plain'?(hs(x,y,3)*2)|0:0)))}
   C.glow(6.5,PSH_COL.cold);
   const lv=C.finish({start:{x:28,y:38,f:0}});if(C.f2x)lv._f2x=C.f2x;
+  // painted detail on the floors (drawn in the floor pass, never in the way): dust and cracks, a few dry leaves blown in, broken glass by the mirrors; a star of black and silver marble set in the floor of the Room of Mirrors, a brass moon plate in the Gallery of the Sleeper
+  try{lv._f2dec=f2Decals(C,lv,{keys:['leaves','glass','flag','leaves'].map(k=>'f2_dc_nh_'+k),p:.16,sz:[.45,.8],far:12,gain:[.8,.82,.9],keep:(x,y)=>(x>=26&&x<=30&&y>=19&&y<=25)||(x>=27&&x<=29&&y>=35),big:[{k:'f2_dc_nhi_star',x:9.5,y:12.5,sz:2.6,a:.95},{k:'f2_dc_nhi_moonplate',x:37.5,y:38.2,sz:1.3,a:.9}]})}catch(e){console.error('psf2 decals',e)}
   lv.floorSet=C.floorNames.map(n=>FK[n]||pspFloor(n));while(lv.floorSet.length<7)lv.floorSet.push(lv.floorSet[0]);lv.floor=lv.floorSet[0];lv.floor2=lv.floorSet[1];
   lv.ceil='psc_hall';lv.ceilH=PSF2H.WH;
   {const sp=lv.decor.filter(d=>d.span);lv.decor=lv.decor.filter(d=>!d.span);try{if(typeof pswaHang==='function')pswaHang(id,lv)}catch(e){console.error('psf2 wallart',e)}lv.decor.push(...sp)}

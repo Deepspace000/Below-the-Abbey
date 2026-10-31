@@ -45,7 +45,7 @@ function f2aNs(k){return f2Soft(pspPic(k),{tag:'_lt'})}
 function f2ForestBuild(){
   const FG=f2TexFloor('ps_f2_tex_fograss','f2t_fograss2',1.16,[1.0,1.06,.86])||'lush',FM=f2TexFloor('ps_f2_tex_fomeadow','f2t_fomeadow3',.96,[1.0,1.04,.9])||'grass',FV=f2TexFloor('ps_f2_tex_foleaves','f2t_foleaves3',1.02,[.96,1.0,.88])||'grass';
   const FT=f2TexFloor('ps_f2_tex_fotrail','f2t_fotrail',1.05)||'trail';
-  const C=f2Room({id:9821,ground:FG,path:FG,glowK:.55,band:[2,5],softRet:1,rw:0,mistH:.08,shade:{edge:.34,pool:.6,tree:/f2_f[ov]_(oak|beech|fir|maple|birch|lime|ash|hawthorn|hornbeam|yew|cherry)|ltree/},
+  const C=f2Room({id:9821,ground:FG,path:FG,glowK:.55,guard:1,guardKeep:(x,y)=>x>=14&&x<=34&&y<=13,band:[2,5],softRet:1,rw:0,mistH:.08,shade:{edge:.34,pool:.6,tree:/f2_f[ov]_(oak|beech|fir|maple|birch|lime|ash|hawthorn|hornbeam|yew|cherry)|ltree/},
     routes:[[[24,35],[24,28],[17,24],[17,15],[24,12],[24,10]],[[24,28],[34,25],[38,19]],[[17,19],[8,18]],[[22,32],[10,30]],[[18,8],[9,6]]],
     clear:[[16,2,32,12,FM,'The Glade of the Four Stones',1],[4,13,12,23,FG,'The Wolf Hollow',1],[33,13,43,23,FM,'The Bramble Glade',1],[5,26,13,34,FV,'The Fern Dell',1],[3,2,11,9,FV,'The Old Ring',1]],
     keep:(x,y)=>Math.abs(x-24)<=1&&(y>=36||(y>=11&&y<=17))});
@@ -105,7 +105,7 @@ function f2ForestBuild(){
    for(let y=3;y<37;y++)for(let x=3;x<45;x++){if(!C.free(x,y)||C.nearPath(x,y,1)||!edgeN(x,y)||(x>=15&&x<=33&&y>=3&&y<=11)||Math.hypot(x-24,y-35)<5)continue;if(C.hs2(x,y,161)<.82){const d=C.dec(f2PickVar(C,T2,x,y,C.hs2(x,y,162)),x,y,{block:true,sc:.95+C.hs2(x,y,163)*.35});if(d){d.ox=(C.hs2(x,y,164)-.5)*.6;d.oy=(C.hs2(x,y,165)-.5)*.5}}}}
   for(const [x,k,sc] of [[22,'f2_fo_ruin',.6],[26,'f2_fo_boulder',.7],[21,'f2_fo_foxglove',.8],[27,'f2_fo_fern',.8]]){const d=C.dec(pspPic(k),x,37,{block:!/fox|fern/.test(k),sc});if(d&&/ruin/.test(k)&&x>24)d.k=f2Flip(pspPic(k))}   // old broken stones round the gate
   for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(!d.block&&!d.npc&&!d.fly&&!d.mv&&d.x>=19&&d.x<=29&&d.y>=7&&d.y<=12&&d.ox===undefined&&/f2_fo_(grass|fern|toadstools)/.test(String(d.k))){C.decor.splice(i,1)}}
-  S.decals={keys:['leaves','moss','clover','twig','mushring','leaves','clover','moss','pebbles'].map(k=>'f2_dc_fs_'+k),p:.5,sz:[.36,.66],far:13,keep:(x,y)=>x>=22&&x<=26&&y>=5&&y<=9};
+  S.decals={keys:['moss','clover','leaves','moss','clover','mushring','twig','clover','moss','pebbles'].map(k=>'f2_dc_fs_'+k),p:.55,sz:[.32,.62],far:13,gain:[.9,.95,.85],keep:(x,y)=>x>=22&&x<=26&&y>=5&&y<=9};
   const lv=C.done({glow:8});
   f2aDapple(9821,C,{amp:.34,pools:[[24,7,6,.1],[38,18,3.5,.16],[9,30,3,.14],[24,28,3,.12],[8,18,4.5,-.16]]});   // the wolf hollow lies in shadow
   lv.mapNames.push({t:'The Hollow Oak',x:24,y:6,k:'place'});
@@ -129,7 +129,7 @@ f2OnArrive(9821,()=>f2ForestApply());
 const F2_ISLAND={PATCH:[[17,5,'conch','a conch shell'],[21,3,'scallop','a scallop shell'],[27,3,'starfish','a starfish'],[31,5,'spiral','a spiral snail shell']],ANSWER:'starfish',BOTTLE:[20,32],SPADE:[37,28]};
 function f2IslandBuild(){
   const IS=f2TexFloor('ps_f2_tex_issand','f2t_issand',1.0)||'sand',IW=f2TexFloor('ps_f2_tex_iswet','f2t_iswet2',.9,[.96,.96,.98])||'seabed1',IG=f2TexFloor('ps_f2_tex_isgrass','f2t_isgrass',1.0)||'sand',ISE=f2TexFloor('ps_f2_tex_issea','f2t_issea2',1.22,[.92,1.04,1.08])||'seawater';
-  const C=f2Room({id:9822,ground:ISE,path:IG,band:[0,2],softRet:1,rw:0,mistH:.08,shade:{edge:0,pool:.74,tree:/palm|f2_is_rock|f2_iv_(rock|banana|lean|palms3)/},feather:/f2_iv_rock|f2_is_rock/,soil:[214,192,150],
+  const C=f2Room({id:9822,ground:ISE,path:IG,band:[0,2],capW:1.9,softRet:1,rw:0,mistH:.08,glowK:.45,shade:{edge:0,pool:.74,tree:/palm|f2_is_rock|f2_iv_(rock|banana|lean|palms3)/},feather:/f2_iv_rock|f2_is_rock|f2_is_(dunegrass|frangi|creeper|shells)|f2_iv_fern/,featherDeep:/f2_is_(dunegrass|frangi|creeper|shells)|f2_iv_fern/,soil:[214,192,150],
     routes:[[[24,35],[24,26],[16,22],[16,12],[24,8],[24,6]],[[24,30],[33,29]],[[16,18],[9,18]],[[24,8],[37,13]]],
     clear:[[14,2,34,8,IS,'The North Beach',1],[29,24,40,31,IS,"The Fisherman's Hut",1],[6,14,12,22,IS,'The Siren Rocks',1],[32,10,40,17,IS,'The Gull Cove',1],[19,31,29,37,IS,null,1]],
     edge:(C,x,y)=>{if(x>=13&&x<=34&&y>=10&&y<=24)return true;C.water(x,y,ISE);return true}});   // the middle of the island is land (a palm grove), the sea lies round the outside
@@ -137,14 +137,15 @@ function f2IslandBuild(){
   // the shore: wet sand next to the water
   // the fisherman's hut (a small timber hut with a thatched roof; the door is shut), nets, the spade by the door
   if(!(IMG.ps_f2_is_hut&&IMG.ps_f2_is_hut.width&&C.picHouse({img:'ps_f2_is_hut',x0:34,y0:26,x1:36,y1:26,w:3.5,door:[35,26],wh:2.1})))C.house({x0:34,y0:25,x1:36,y1:26,face:'S',sty:'flint',roof:'thatch2',wh:2.3,lit:false});   // the painted hut front (driftwood walls, a thatched roof), its sides of driftwood logs
-  {const lw=f2TexWall(f2Soft('ps_f2_tex_logwall',{filter:'saturate(.15) brightness(1.7) contrast(.95)',tag:'g2'}),2.1,{gain:1.2,rgb:[.98,.98,1.0]});if(lw!=null)for(let y=25;y<=26;y++)for(let x=34;x<=36;x++){const g=C.chars[C.rows[y][x]];if(C.rows[y][x]!=='.'&&!(g!==undefined&&KH_DOOR[g]))C.solid(x,y,C.ch(lw))}}   // a hut of driftwood logs, not castle flint
+  for(const [x,y,k,ox] of [[33,26,'f2_iv_banana',.3],[37,26,'f2_iv_banana',-.3],[37,25,'f2_is_palm2',-.2],[33,25,'f2_iv_lean',.2]])if(C.open(x,y)&&!C.decor.some(q=>q.x===x&&q.y===y)){C.used.delete(x+','+y);const d=C.dec(/banana|lean/.test(k)&&x>35?f2Flip(pspPic(k)):pspPic(k),x,y,{block:true,sc:.85});if(d){d.ox=ox;d.oy=-.25}}   // greenery at the corners of the hut hides its plain log sides
+  {const lw=f2TexWall(f2Soft('ps_f2_tex_logwall',{filter:'saturate(.4) brightness(1.15) contrast(1.05)',tag:'g3'}),2.1,{gain:1.0,rgb:[.92,.9,.86]});if(lw!=null)for(let y=25;y<=26;y++)for(let x=34;x<=36;x++){const g=C.chars[C.rows[y][x]];if(C.rows[y][x]!=='.'&&!(g!==undefined&&KH_DOOR[g]))C.solid(x,y,C.ch(lw))}}   // a hut of driftwood logs, not castle flint
   const [sx,sy]=F2_ISLAND.SPADE;C.used.delete(sx+','+sy);C.dec(pspPic('f2_spade'),sx,sy,{block:true,npc:'f2i_spade',sc:.75});
   {let n=0;for(let r=1;r<8&&n<2;r++)for(const [x,y] of [[42+r,30],[42+r,27],[40,33+r]]){if(n<2&&C.rows[y]&&C.rows[y][x]==='.'&&C.block[y*48+x]&&!C.decor.some(d=>d.x===x&&d.y===y)){C.dec('yar_boat_row',x,y,{block:false,sc:.9});n++}}}   // two rowing boats drawn up in the shallows by the hut
   // the bottle on the south shore, the four sand patches on the north beach
   {const [bx,by]=F2_ISLAND.BOTTLE;C.used.delete(bx+','+by);C.dec(pspPic('f2_bottle'),bx,by,{block:true,npc:'f2i_bottle',sc:1.15})}
   F2_ISLAND.PATCH.forEach(([x,y,s],i)=>{C.used.delete(x+','+y);C.dec(f2Soft(pspPic('f2_patch_'+s),{filter:'contrast(1.35) brightness(.9) saturate(1.2)',tag:'c'}),x,y,{block:true,npc:'f2i_patch'+i,sc:1.35})});
   // palms, dune grass and rocks
-  {const IS2=f2TexFloor('ps_f2_tex_issand','f2t_issand2',.93,[1.03,.97,.88])||IS;f2Patches(C,[[IS,.48],[IS2,.36],[IG,.16]],{cs:6,onPath:true})}
+  {const IS2=f2TexFloor(f2Soft('ps_f2_tex_r3sand',{filter:'blur(1.2px) contrast(.6) brightness(1.02)',tag:'rb'}),'f2t_r3sandb',1.0)||IS,IS3=f2TexFloor(f2Soft('ps_f2_tex_r3sand',{filter:'blur(1.2px) contrast(.55) brightness(.94) saturate(1.1)',tag:'rb2'}),'f2t_r3sandb2',1.0,[1.02,.98,.92])||IS;f2Patches(C,[[IS2,.5],[IS3,.34],[IG,.16]],{cs:6,onPath:true})}   // fine painted beach sand (the old sand read as wood grain)
   {const wet=C.fl(IW);for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++)if(C.open(x,y)&&[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>C.block[(y+b)*W+x+a]&&C.rows[y+b][x+a]==='.'))C.fm[y*W+x]=wet}   // damp sand along the water (after the patches, so it stays)
    // the ground of the map itself is the sea (it runs on past the edge to the horizon); every square of land is sand or grass
   const PT=[pspPic('f2_is_palm'),pspPic('f2_is_palm2'),pspPic('f2_iv_palms3'),pspPic('f2_iv_lean'),pspPic('f2_iv_banana')];PT.push(...PT.map(f2Flip));
@@ -171,7 +172,7 @@ function f2IslandBuild(){
   C.foes(['f2spawn','f2crab','f2spawn'],[29,24,41,33],4);
   for(const [x,y] of [[6,15],[39,11],[39,30]])C.chestAt(x,y,1);
   C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[.9,.95,1.05]});
-  C.f2.decals={keys:['shells','weed','starfish','feet','pebbles','crab','drift','frags','shells','feet'].map(k=>'f2_dc_bd_'+k),p:.45,sz:[.36,.66],far:13,keep:(x,y)=>F2_ISLAND.PATCH.some(([a,b])=>Math.abs(x-a)<=1&&Math.abs(y-b)<=1)};
+  C.f2.decals={keys:['shells','weed','starfish','feet','pebbles','crab','drift','frags','shells','feet'].map(k=>'f2_dc_bd_'+k),p:.62,sz:[.42,.8],far:13,keep:(x,y)=>F2_ISLAND.PATCH.some(([a,b])=>Math.abs(x-a)<=1&&Math.abs(y-b)<=1)};
   const lv=C.done({glow:8});f2aDapple(9822,C,{amp:.24,cs:3.4});   // damp and dry patches on the sand
   return lv}
 pspRegister(9822,f2IslandBuild);
@@ -201,7 +202,7 @@ f2OnArrive(9822,()=>f2IslandApply());
 const F2_SNOW={LOGS:[[8,23],[40,22],[10,31]],FLINT:[28,10],HEARTH:[41,4],MIRROR:[43,4],IN:[41,7,0],OUT:[24,9,2]};
 function f2SnowBuild(){
   const SD=f2TexFloor('ps_f2_tex_sndrift','f2t_sndrift3',1.1,[.9,.98,1.12])||'snow',SP=f2TexFloor('ps_f2_tex_snpath','f2t_snpath',.98)||'snowpath',SR=f2TexFloor('ps_f2_tex_snrock','f2t_snrock',1.0)||'snow',SI=f2TexFloor('ps_f2_tex_snice','f2t_snice2',1.3,[.92,1.0,1.12])||'canal',PL=f2TexFloor('ps_f2_tex_planks','f2t_planks',1.0)||'wl2f0';
-  const C=f2Room({id:9823,ground:SD,path:SD,band:[2,5],wh:3.2,softRet:1,rw:0,shade:{edge:.3,pool:.66,tree:/f2_s[nv]_(pine|spruce|fir|birch|icetree|juniper|rock|rocks)/},feather:/f2_sv_rock|f2_sn_rocks|f2_sn_boulder|f2_log/,soil:[226,232,242],
+  const C=f2Room({id:9823,ground:SD,path:SD,band:[2,5],guard:1,guardKeep:(x,y)=>(x>=36&&y<=10)||(x>=14&&x<=34&&y<=13),wh:3.2,softRet:1,rw:0,shade:{edge:.3,pool:.66,tree:/f2_s[nv]_(pine|spruce|fir|birch|icetree|juniper|rock|rocks)/},feather:/f2_sv_rock|f2_sn_rocks|f2_sn_boulder|f2_log/,soil:[226,232,242],
     routes:[[[24,35],[24,26],[30,21],[30,14],[24,12],[24,9]],[[24,29],[12,28],[10,31]],[[30,18],[40,20]],[[24,24],[12,23],[8,23]]],
     clear:[[14,3,34,13,SD,'The Cabin',1],[4,15,13,24,SD,'The Frozen Pond',1],[35,16,44,26,SD,"The Bear's Den",1],[5,27,15,34,SD,'The Birch Stand',1]],
     keep:(x,y)=>x>=39&&x<=44&&y>=3&&y<=8});   // nothing grows inside the cabin room
@@ -230,7 +231,7 @@ function f2SnowBuild(){
   {const [fx,fy]=F2_SNOW.FLINT;C.used.delete(fx+','+fy);C.dec(pspPic('f2_flintpost'),fx,fy,{block:true,npc:'f2s_flint'})}
   F2_SNOW.LOGS.forEach(([x,y],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_log'),x,y,{block:true,npc:'f2s_log'+i,sc:1.15});C.light(x,y,[.9,.7,.4])});
   // the ground: deep drifts, trampled snow by the cabin, rocks and frozen grass showing through here and there
-  {const SD2=f2TexFloor('ps_f2_tex_sndrift','f2t_sndrift5',1.04,[.88,.97,1.13])||SD;f2Patches(C,[[SD,.56],[SD2,.4],[SP,.04]],{cs:9,onPath:true,keep:(x,y)=>x>=38&&y<=9})}   // no ruled path: drifts, blue hollows, a little trampled snow and rock
+  {const SD2=f2TexFloor('ps_f2_tex_sndrift','f2t_sndrift5',1.04,[.88,.97,1.13])||SD,SD3=f2TexFloor(f2Soft('ps_f2_tex_r3snow',{filter:'contrast(1.25) brightness(.97)',tag:'r'}),'f2t_r3snow',1.0,[.94,.98,1.06])||SD;f2Patches(C,[[SD3,.46],[SD,.26],[SD2,.24],[SP,.04]],{cs:9,onPath:true,keep:(x,y)=>x>=38&&y<=9})}   // no ruled path: drifts, blue hollows, a little trampled snow and rock
   // the frozen pond: ice you walk round, reeds of frozen grass and rocks on its banks
   for(let y=17;y<=21;y++)for(let x=6;x<=11;x++)if(Math.hypot((x-8.5)/3,(y-19)/2.4)<1&&C.free(x,y))C.water(x,y,SI);
   // the snowbound forest: painted snowy pines, firs, spruces and frosted birches, never in rows; bushes, frozen grass, snowy boulders
@@ -253,7 +254,7 @@ function f2SnowBuild(){
   C.foes(['f2iceelem','f2snowwolf'],[14,3,34,13],4);
   for(const [x,y] of [[12,16],[43,25],[6,33]])C.chestAt(x,y,1);
   C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[.9,.95,1.05]});
-  {const PLk=C.fl(PL);C.f2.decals={keys:['paw','boot','needles','stones','bird','cones','boot','needles','frozen'].map(k=>'f2_dc_sv_'+k),p:.45,sz:[.4,.7],far:13,keep:(x,y)=>(x>=38&&y<=9)||C.fm[y*48+x]===PLk||F2_SNOW.LOGS.some(([a,b])=>a===x&&b===y)}}
+  {const PLk=C.fl(PL);C.f2.decals={keys:['paw','boot','needles','stones','bird','cones','boot','needles','frozen'].map(k=>'f2_dc_sv_'+k),p:.6,sz:[.45,.8],gain:[.92,.94,1.0],far:13,keep:(x,y)=>(x>=38&&y<=9)||C.fm[y*48+x]===PLk||F2_SNOW.LOGS.some(([a,b])=>a===x&&b===y)}}
   const lv=C.done({glow:8});
   for(const [k,x,y,sc] of [['bed_four',43,7,.62],['f2_cb_chair',40,5,.9],['f2_cb_barrel',40,4,.85],['f2_cb_stool',42,7,.8]])lv.decor.push({k:pspPic(k),x,y,block:k!=='f2_cb_stool',sc});   // the cabin furniture goes in after the castle wall-art pass, which clears beds and chairs it does not know
   return lv}

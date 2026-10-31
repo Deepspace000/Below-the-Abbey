@@ -5877,5 +5877,33 @@
 "h": 0.2,
 "kind": "sprite",
 "sheet": "f2r3"
+},
+"f2_tex_r3sand": {
+"file": "f2_tex_r3sand.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "f2tg"
+},
+"f2_tex_r3desand": {
+"file": "f2_tex_r3desand.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "f2tg"
+},
+"f2_tex_r3snow": {
+"file": "f2_tex_r3snow.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "f2tg"
+},
+"f2_tex_r3night": {
+"file": "f2_tex_r3night.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "f2tg"
 }
 }

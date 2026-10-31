@@ -278,11 +278,21 @@ function f2Room(S){
   // finish: no sealed pockets, lights, the level's air
   C.done=o=>{o=o||{};
     // rocks and ruins cut out of a sheet often end in a straight edge: their foot (and a straight side) is feathered into the ground with a little drift of the room's own soil
-    if(S.feather)for(const d of C.decor){if(d.npc||d.span||!S.feather.test(String(d.k)))continue;const nk=f2Feather(d.k,S.soil);if(nk)d.k=nk}
+    if(S.feather)for(const d of C.decor){if(d.npc||d.span||!S.feather.test(String(d.k)))continue;const nk=f2Feather(d.k,S.soil,S.featherDeep&&S.featherDeep.test(String(d.k)));if(nk)d.k=nk}
+    // the party never stands right against the painted edge (seen from one square away its painting is a blur): every open square beside it, off the ways, is a tree or a rock of the room standing on the ground in front of the edge
+    if(S.guard&&C._edgeChars&&C._edgeSpec&&C._edgeSpec.pillar){const P=S.guardKeys||C._edgeSpec.pillar,isE=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&C._edgeChars.has(rows[y][x]);
+      const soft=d=>!d.block&&!d.npc&&!d.span&&!d.roof&&!d.fly&&!d.mv&&!d.wd&&!/chest|lamp|lantern/.test(String(d.k)),fd=new Set(),oth=new Set();for(const d of C.decor)(soft(d)?fd:oth).add(d.x+','+d.y);const freeG=(x,y)=>!oth.has(x+','+y)&&!C.enemies.some(e=>e.x===x&&e.y===y);
+      for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!C.open(x,y)||!freeG(x,y)||path[ix(x,y)]||Math.hypot(x-24,y-35)<4.5||(S.guardKeep&&S.guardKeep(x,y))||![[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>isE(x+a,y+b)))continue;
+        if(fd.has(x+','+y)){for(let i=C.decor.length-1;i>=0;i--){const q=C.decor[i];if(soft(q)&&q.x===x&&q.y===y)C.decor.splice(i,1)}C.used.delete(x+','+y)}
+        const d=C.dec(f2PickVar(C,P,x,y,hs(x,y,191)),x,y,{block:true,sc:+(.85+hs(x,y,192)*.3).toFixed(2)});if(d){d.edgeTree=1;d.ox=(hs(x,y,193)-.5)*.4;d.oy=(hs(x,y,194)-.5)*.4}}}
     // nothing tall stands right beside the way: big pieces next to a path are kept to a height that the narrow view shows whole, and moved back a little
     for(const d of C.decor){if(!d.block||d.npc||d.span||d.roof||typeof d.k!=='string')continue;const im=IMG[d.k];if(!im||!im.width)continue;const hh=(NPC_H[d.k]||1)*(d.sc||1);if(hh<=1.9)continue;
       const nb=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>{const xx=d.x+a,yy=d.y+b;return xx>=0&&yy>=0&&xx<W&&yy<H&&path[ix(xx,yy)]});if(!nb.length)continue;
       d.sc=+((d.sc||1)*1.9/hh).toFixed(3);d.ox=Math.max(-.35,Math.min(.35,(d.ox||0)-nb.reduce((t,q)=>t+q[0],0)*.25));d.oy=Math.max(-.35,Math.min(.35,(d.oy||0)-nb.reduce((t,q)=>t+q[1],0)*.25))}
+    // and nothing very wide stands beside a square the party can walk on: a rock or a mesa three squares wide filled the whole view up close
+    if(S.capW){const bs=new Set();for(const d of C.decor)if(d.block)bs.add(d.x+','+d.y);const wk=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&C.open(x,y)&&!bs.has(x+','+y);
+     for(const d of C.decor){if(!d.block||d.npc||d.span||d.roof||d.goldAmt||typeof d.k!=='string'||/chest/.test(d.k))continue;const im=IMG[d.k];if(!im||!im.width)continue;const wd=(NPC_H[d.k]||1)*im.width/im.height*(d.sc||1),cap=S.capW||1.8;if(wd<=cap)continue;
+       if([[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>wk(d.x+a,d.y+b)))d.sc=+((d.sc||1)*cap/wd).toFixed(3)}}
     {const bs=new Set();for(const d of C.decor)if(d.block)bs.add(d.x+','+d.y);
      const reach=new Uint8Array(W*H),q=[ix(24,35)];reach[q[0]]=1;for(const [a,b] of C.warpTo||[]){if(!reach[ix(a,b)]){reach[ix(a,b)]=1;q.push(ix(a,b))}}
      for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||reach[ix(nx,ny)]||!C.open(nx,ny)||bs.has(nx+','+ny))continue;reach[ix(nx,ny)]=1;q.push(ix(nx,ny))}}
@@ -365,19 +375,19 @@ pspOnArrive(n=>{const L=LEVELS[n];if(!L||!L._f2x||!G.decor)return;for(const d of
   // contact shadows: terraced levels draw no round shadow under things, so each standing piece gets a soft dark oval at its foot (a flat picture just in front of it)
   if(f2Is(LEVEL)&&!f2InRoof()&&!window.F2_NOSHADOW){const sh=f2ShadowImg(),fx=Math.cos(G.C.a),fy=Math.sin(G.C.a),fx2=G.C.x+.5,fy2=G.C.y+.5,x2=LV&&LV._f2x,add=[];
     for(const s of out){const d=s.decor;if(!d||s.pic||d.span||d.npc&&!d.block||s.bob>.05||d.fly||(d.kname&&x2&&x2[d.kname]&&(x2[d.kname].fly||x2[d.kname].mv))||!s.img||!s.w)continue;
-      const k=String(d.k);if(k==='f2shadow'||/^(sign|fl_|pgrass|pflw|hlant|cfire|brazier)|mist|_lt$/.test(k))continue;
+      const k=String(d.k);if(k==='f2shadow'||/^(sign|fl_|pgrass|pflw|hlant|cfire|brazier)|mist|_lt(_fed?)?$/.test(k))continue;
       const dx=s.x-fx2,dy=s.y-fy2,dd=dx*dx+dy*dy;if(dd>400||dd<.2)continue;const tall=s.img.height/s.img.width*s.w,ww=Math.min(1.6,s.w*(tall>1.4?.8:1.05));
-      {const q={x:s.x-dx/Math.sqrt(dd)*.04,y:s.y-dy/Math.sqrt(dd)*.04,img:sh,w:ww,drop:0,bob:0};q.decor={k:'f2shadow',x:d.x,y:d.y,deco:true,walk:true};add.push(q)}}
+      for(let r=0;r<(tall<1.1?2:1);r++){const q={x:s.x-dx/Math.sqrt(dd)*(.04+r*.02),y:s.y-dy/Math.sqrt(dd)*(.04+r*.02),img:sh,w:ww*(r?.8:tall<1.1?1.15:1),drop:0,bob:0};q.decor={k:'f2shadow',x:d.x,y:d.y,deco:true,walk:true};add.push(q)}}   // low things (chests, jars, logs) sit in a deeper shade, so they never look as if they float
     for(const a of add)out.push(a)}
   return out}}
-function f2Feather(k,soil){const nk=k+'_fe';if(IMG[nk]&&IMG[nk].width)return nk;const im=IMG[k];if(!im||!im.width)return null;const w=im.width,h=im.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(im,0,0);
+function f2Feather(k,soil,deep){const nk=k+'_fe'+(deep?'d':'');if(IMG[nk]&&IMG[nk].width)return nk;const im=IMG[k];if(!im||!im.width)return null;const w=im.width,h=im.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(im,0,0);
   let D;try{D=x.getImageData(0,0,w,h)}catch(e){return null}const a=D.data,hh=(i,s)=>{const v=Math.sin(i*12.9898+s*78.233)*43758.5453;return v-Math.floor(v)};
   const sm=(i,s,n)=>{const f=i/n,i0=Math.floor(f),u=f-i0;return hh(i0,s)*(1-u)+hh(i0+1,s)*u};
-  const fb=Math.max(4,Math.round(h*.09)),fs=Math.max(3,Math.round(w*.07));
+  const fb=Math.max(4,Math.round(h*(deep?.2:.09))),fs=Math.max(3,Math.round(w*.07)),m0=deep?0:.55;   // deep: the foot fades right out (tufts cut straight at the ground line)
   let opL=0,opR=0;for(let y=0;y<h;y++){if(a[(y*w)*4+3]>200)opL++;if(a[(y*w+w-1)*4+3]>200)opR++}const cutL=opL>h*.25,cutR=opR>h*.25;
   const sc=soil||[214,182,128];
   for(let y=0;y<h;y++)for(let X=0;X<w;X++){const o=(y*w+X)*4;if(!a[o+3])continue;let m=1;
-    const yb=h-1-y,lim=fb*(.45+.9*sm(X,3,w*.08));if(yb<lim){const t=yb/lim;m*=.55+.45*t*t*(3-2*t);   // the foot fades irregularly, and takes the colour of the soil heaped against it
+    const yb=h-1-y,lim=fb*(.45+.9*sm(X,3,w*.08));if(yb<lim){const t=yb/lim;m*=m0+(1-m0)*t*t*(3-2*t);   // the foot fades irregularly, and takes the colour of the soil heaped against it
       const s=(1-t)*.7;a[o]=a[o]*(1-s)+sc[0]*s;a[o+1]=a[o+1]*(1-s)+sc[1]*s;a[o+2]=a[o+2]*(1-s)+sc[2]*s}
     if(cutL){const lim2=fs*(.5+sm(y,5,h*.06));if(X<lim2){const t=X/lim2;m*=t}}
     if(cutR){const lim2=fs*(.5+sm(y,6,h*.06)),xr=w-1-X;if(xr<lim2){const t=xr/lim2;m*=t}}
@@ -467,7 +477,7 @@ function f2Edge(C,o){const W=48,H=40,rows=C.rows,ix=(x,y)=>y*W+x,hs=C.hs2;if(!IM
     if(cnt>=3||(e&&w)||(s&&nn)){rows[y][x]='.';C.block[ix(x,y)]=0;C.fm[ix(x,y)]=C.fm[ix(x+(e?1:w?-1:0),y+(s?1:nn?-1:0))];C.used.delete(x+','+y);const key=f2PickVar(C,o.pillar,x,y,hs(x,y,134));const d=C.dec(key,x,y,{block:true,sc:.9+hs(x,y,135)*.3});if(d)d.edgeTree=1}}
   for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!mistCh.has(rows[y][x])||(o.only&&!o.only(x,y)))continue;const nb=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>open(x+a,y+b));if(!nb.length)continue;
     const horiz=nb.some(([a,b])=>b!==0),p=horiz?x:y,i=((p%(2*n))+2*n)%(2*n);if(gid[i]==null)continue;C.solid(x,y,gid[i]);k++;edge.push([x,y])}
-  C._edgeCh=(x,y)=>gid[((x%(2*n))+2*n)%(2*n)];if(o.noTall)return k;
+  C._edgeCh=(x,y)=>gid[((x%(2*n))+2*n)%(2*n)];C._edgeChars=new Set(gid.filter(g=>g!=null).concat([...mistCh]));if(o.noTall)return k;
   if(o.footDress){const F=o.footDress;   // low painted growth along the foot of the painted edge (ferns, reeds, drifts, stones), pushed against it, so the wall stands in the ground instead of on a ruled line; never blocking
     for(const [x,y] of edge)for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(!open(nx,ny)||!C.free(nx,ny)||C.pathM[ny*W+nx]||Math.hypot(nx-24,ny-35)<4||(F.keep&&F.keep(nx,ny))||hs(nx,ny,171+a+3*b)>=(F.p||.5))continue;
       const d=C.dec(f2PickVar(C,F.keys,nx,ny,hs(nx,ny,172)),nx,ny,{block:false,sc:(F.sc||1)*(.75+hs(nx,ny,173)*.5)});if(d){d.ox=-a*.44+(b?(hs(nx,ny,174)-.5)*.5:0);d.oy=-b*.44+(a?(hs(nx,ny,175)-.5)*.5:0);d.footDress=1}}}
@@ -659,9 +669,9 @@ function f2DecTex(k){const K=F2.decT=F2.decT||{};if(K[k]!==undefined)return K[k]
   const mk=N=>{const c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(im,0,0,N,N);return {N,d:x.getImageData(0,0,N,N).data}};
   const t=mk(Math.min(256,Math.max(64,im.width)));t.m=mk(32);return K[k]=t}
 function f2DecReady(D){if(D.ok)return D;let all=true;for(let j=0;j<D.keys.length;j++){if(!D.tx[j]){D.tx[j]=f2DecTex(D.keys[j]);if(!D.tx[j])all=false}}if(all)D.ok=1;return D}
-function f2Decals(C,lv,o){const W=48,H=40,hs=C.hs2,keys=[],kix={},ki=k=>{if(kix[k]===undefined){kix[k]=keys.length;keys.push(k)}return kix[k]};
-  const inst=[],cell=new Int32Array(W*H).fill(-1),cell2=new Int32Array(W*H).fill(-1),TB=TERRS[lv.id||C.id]&&TERRS[lv.id||C.id].block;
-  const fmAt=(x,y)=>C.fm[y*W+x],onM={};for(const n of Object.keys(o.on||{}))onM[f2Fl(C,n)]=o.on[n];
+function f2Decals(C,lv,o){const W=lv.rows[0].length,H=lv.rows.length,hs=C.hs2||((a,b,c)=>hash2(a,b,c+(C.id||0))),keys=[],kix={},ki=k=>{if(kix[k]===undefined){kix[k]=keys.length;keys.push(k)}return kix[k]};
+  const inst=[],cell=new Int32Array(W*H).fill(-1),cell2=new Int32Array(W*H).fill(-1);
+  const fmAt=(x,y)=>C.fm?C.fm[y*W+x]:0,onM={};for(const n of Object.keys(o.on||{}))onM[f2Fl(C,n)]=o.on[n];
   const add=(k,cx,cy,sz,rot,a,mip)=>{const n=inst.length/8;inst.push(cx,cy,Math.cos(rot),Math.sin(rot),1/sz,ki(k),a===undefined?1:a,mip||7);return n};
   const put=(n,x,y)=>{const i=y*W+x;if(cell[i]<0){cell[i]=n;cell2[i]=n}else if(cell2[i]===cell[i])cell2[i]=n;else{cell[i]=cell2[i];cell2[i]=n}};
   const [lo,hi]=o.sz||[.45,.8],p=o.p===undefined?.55:o.p;
@@ -678,7 +688,7 @@ const F2GRADE={9820:{c:1.14,s:1.08,b:1.0,tone:[70,96,150,.16],vig:.42,vc:[6,8,16
   9821:{c:1.17,s:1.2,b:1.02,tone:[255,206,120,.12],vig:.34,vc:[10,18,6]},9822:{c:1.14,s:1.2,b:1.03,tone:[255,226,170,.1],vig:.3,vc:[8,20,36]},
   9823:{c:1.16,s:1.05,b:1.0,tone:[150,184,230,.16],vig:.36,vc:[10,16,30]},9824:{c:1.16,s:1.18,b:1.0,tone:[255,170,120,.14],vig:.4,vc:[24,10,28]},
   9825:{c:1.18,s:1.14,b:1.0,tone:[255,190,110,.14],vig:.36,vc:[34,16,4]},9826:{c:1.2,s:1.12,b:1.0,tone:[150,190,110,.14],vig:.48,vc:[4,12,6]},
-  9827:{c:1.22,s:1.15,b:.98,tone:[200,40,40,.12],vig:.55,vc:[12,0,2]}};
+  9827:{c:1.2,s:1.15,b:1.04,tone:[200,40,40,.12],vig:.42,vc:[12,0,2]}};
 function f2Grade(g){if(!g||typeof ctx==='undefined')return;const T=ctx.getTransform(),pw=Math.max(1,Math.round(420*T.a)),ph=Math.max(1,Math.round(210*T.d));
   let c=F2.gc;if(!c){c=F2.gc=document.createElement('canvas');F2.gx=c.getContext('2d')}if(c.width!==pw||c.height!==ph){c.width=pw;c.height=ph}
   F2.gx.clearRect(0,0,pw,ph);F2.gx.drawImage(ctx.canvas,T.e,T.f,pw,ph,0,0,pw,ph);
@@ -688,5 +698,10 @@ function f2Grade(g){if(!g||typeof ctx==='undefined')return;const T=ctx.getTransf
     ctx.globalCompositeOperation='source-over';ctx.globalAlpha=g.vig;ctx.drawImage(F2.vg,0,0);ctx.globalAlpha=1}
   ctx.restore()}
 {const _dw=drawWorld;drawWorld=function(){const r=_dw.apply(this,arguments);try{if(typeof LEVEL!=='undefined'&&F2GRADE[LEVEL]&&!window.F2_NOGRADE&&!(G.inv&&G.inv.open)&&!G.map)f2Grade(F2GRADE[LEVEL])}catch(e){}return r}}
+/* in the illusion rooms a big painted piece right in front of the party (a tree trunk, a rock, a palm) thins out like mist, instead of filling the view with a blurred close-up of the painting; never people, creatures, chests or the puzzle pieces */
+{const _sl=spriteList;spriteList=function(){const L=_sl.apply(this,arguments);if(typeof LEVEL==='undefined'||!f2Is(LEVEL)||!G.C||window.F2_NONEAR)return L;const a=G.C.a||0,cx=G.C.x+.5-Math.cos(a)*.28,cy=G.C.y+.5-Math.sin(a)*.28;
+  for(const s of L){const d=s.decor;if(!d||d.npc||d.span||d.roof||d.fly||d.goldAmt||s.e||s.pic||s.hang||!s.img||!s.img.width||/chest/.test(String(d.k)))continue;const h=s.w*s.img.height/s.img.width;if(h<1.05&&s.w<1.1)continue;
+    const ds=Math.hypot(s.x-cx,s.y-cy),thr=Math.max(1.7,.6+.5*Math.max(h,s.w));if(ds>=thr)continue;const f=Math.max(.16,Math.min(1,(ds-.6)/(thr-.6)));s.fade=s.fade===undefined?f:Math.min(s.fade,f)}
+  return L}}
 /* every arrival in a room: say where the party is the first time, apply the puzzle state */
 pspOnArrive((n,restored)=>{if(!f2Is(n))return;const S=f2S(n);if(!S.seen&&!restored){S.seen=1;try{msg(F2B[n].text,'#d8e4f0')}catch(e){}}});
