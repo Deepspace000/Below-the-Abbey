@@ -24,7 +24,7 @@ const F2B={
     text:'Snow falls without a sound. It is bitterly cold, and the light is grey and even.'},
   9824:{k:'water',sky:{top:[46,44,104],mid:[206,124,118],low:[255,196,128]},cloud:1.9,fog:[214,176,160,.006],haze:.1,silver:.62,amb:1.0,lcol:[1.45,1.05,.7],wn:'Evening haze',fx:null,
     text:'The canals lie still under a pink evening sky. Water laps at the steps, and somewhere a bell rings the hour.'},
-  9825:{k:'desert',sky:{top:[70,140,214],mid:[176,200,214],low:[246,214,150]},cloud:.4,silver:.18,fog:[230,210,170,.007],haze:.12,amb:1.15,lcol:[1.3,1.1,.75],wn:'Heat',fx:'heat',
+  9825:{k:'desert',sky:{top:[38,92,190],mid:[170,180,206],low:[255,190,120]},cloud:.4,silver:.18,fog:[240,196,140,.0022],haze:.02,amb:.95,lcol:[1.42,1.04,.68],wn:'Heat',fx:null,
     text:'The sun beats down on the sand. The air shimmers with heat, and there is no wind.'},
   9826:{k:'swamp',sky:{top:[38,48,44],mid:[78,94,80],low:[118,130,104]},cloud:1.0,fog:[92,110,84,.022],amb:.8,lcol:[.85,1.1,.7],wn:'Bog mist',fx:null,
     text:'A thick green mist lies on the black water. Frogs croak, and the mud bubbles and stinks.'},
@@ -254,8 +254,8 @@ function f2Room(S){
   // filler: blocking props in the open band (never on the core), denser further out
   C.fill=(keys,o)=>{o=o||{};for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){
     if(!C.open(x,y)||!C.free(x,y)||core[ix(x,y)]||(S.keep&&S.keep(x,y)))continue;const e=E[ix(x,y)],cl=vn(x,y,4,51)*1.1+.45,p=Math.min(.95,(e===1?(o.p1||.25):e===2?(o.p2||.62):e===3?(o.p3||.85):.93)*cl);
-    if(hs(x,y,52)<p){const k=keys[(hs(x,y,8)*keys.length)|0],d=C.dec(k,x,y,{block:true,sc:(o.sc||1)*(.85+hs(x,y,7)*.35)});if(d){d.ox=(hs(x,y,53)-.5)*.6;d.oy=(hs(x,y,54)-.5)*.4}}}};
-  C.scrub=(keys,p,o)=>{o=o||{};for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!C.open(x,y)||!C.free(x,y)||(path[ix(x,y)]&&!o.onPath)||(S.keep&&S.keep(x,y)))continue;if(hs(x,y,55)<p)C.dec(keys[(hs(x,y,56)*keys.length)|0],x,y,{block:false,sc:(o.sc||1)*(.7+hs(x,y,57)*.6)})}};
+    if(hs(x,y,52)<p){let ki=(hs(x,y,8)*keys.length)|0;const near=new Set();for(const [a,b] of [[-1,0],[-2,0],[0,-1],[0,-2],[-1,-1],[1,-1]]){const q=C._fk&&C._fk[(y+b)*W+x+a];if(q)near.add(String(q).replace(/_fl$/,''))}for(let t=0;t<keys.length&&near.has(String(keys[ki]).replace(/_fl$/,''));t++)ki=(ki+1)%keys.length;const k=keys[ki];(C._fk=C._fk||{})[y*W+x]=k;const d=C.dec(k,x,y,{block:true,sc:(o.sc||1)*(.85+hs(x,y,7)*.35)});if(d){d.ox=(hs(x,y,53)-.5)*.6;d.oy=(hs(x,y,54)-.5)*.4}}}};
+  C.scrub=(keys,p,o)=>{o=o||{};for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!C.open(x,y)||!C.free(x,y)||(path[ix(x,y)]&&!o.onPath)||(S.keep&&S.keep(x,y)))continue;if(hs(x,y,55)<p)C.dec(f2PickVar(C,keys,x,y,hs(x,y,56)),x,y,{block:false,sc:(o.sc||1)*(.7+hs(x,y,57)*.6)})}};
   // a spot for a creature or a chest inside a rect, off the path, free, not near the arrival
   const nearPath=(x,y,r)=>{for(let b=-r;b<=r;b++)for(let a=-r;a<=r;a++){const xx=x+a,yy=y+b;if(xx>=0&&yy>=0&&xx<W&&yy<H&&path[ix(xx,yy)])return true}return false};C.nearPath=nearPath;
   C.spot=(x0,y0,x1,y1,seed,o)=>{o=o||{};const pr=o.pr===undefined?2:o.pr;for(let k=0;k<160;k++){const x=x0+((hs(k,seed,61)*(x1-x0+1))|0),y=y0+((hs(k,seed,62)*(y1-y0+1))|0);
@@ -277,6 +277,8 @@ function f2Room(S){
     for(let pass=0;pass<6;pass++)for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const i=ix(x,y);for(const j of [i-1,i+1,i-W,i+W]){if(hg[i]>hg[j]+.25&&rows[y][x]==='.'&&!block[i])hg[i]=hg[j]+.24}}};
   // finish: no sealed pockets, lights, the level's air
   C.done=o=>{o=o||{};
+    // rocks and ruins cut out of a sheet often end in a straight edge: their foot (and a straight side) is feathered into the ground with a little drift of the room's own soil
+    if(S.feather)for(const d of C.decor){if(d.npc||d.span||!S.feather.test(String(d.k)))continue;const nk=f2Feather(d.k,S.soil);if(nk)d.k=nk}
     // nothing tall stands right beside the way: big pieces next to a path are kept to a height that the narrow view shows whole, and moved back a little
     for(const d of C.decor){if(!d.block||d.npc||d.span||d.roof||typeof d.k!=='string')continue;const im=IMG[d.k];if(!im||!im.width)continue;const hh=(NPC_H[d.k]||1)*(d.sc||1);if(hh<=1.9)continue;
       const nb=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>{const xx=d.x+a,yy=d.y+b;return xx>=0&&yy>=0&&xx<W&&yy<H&&path[ix(xx,yy)]});if(!nb.length)continue;
@@ -321,8 +323,8 @@ F2.step={};F2.last='';
   try{if(typeof LEVEL!=='undefined'&&F2.step[LEVEL]&&G.state==='play'&&G.P){const x=Math.round(G.P.x),y=Math.round(G.P.y),k=LEVEL+':'+x+','+y;if(k!==F2.last){F2.last=k;F2.step[LEVEL](x,y)}}}catch(e){console.error('f2 step',e)}
   return r}}
 /* a painted piece of a sheet used as a wall face across n tiles (gyTile fac fit) */
-function f2FacGid(img,i,n,wh,o){o=o||{};const k='fac'+img+i+'/'+n+'|'+wh+(o.fit===false?'nf':'');if(F2.tiles[k]!==undefined)return F2.tiles[k];if(!IMG[img]||!IMG[img].width)return null;IMG['gyp_'+img]=IMG[img];
-  return F2.tiles[k]=gyTile(o.tex||'texBlack_2',wh,{fac:o.fit===false?{img,i,n}:{img,i,n,fit:true,at:o.at},gain:o.gain||1.0,rgb:o.rgb||[1,1,1],tag:'f2fac'+img,emit:o.emit===undefined?.12:o.emit})}
+function f2FacGid(img,i,n,wh,o){o=o||{};const k='fac'+img+i+'/'+n+'|'+wh+(o.fit===false?'nf':'')+(o.dtag||'');if(F2.tiles[k]!==undefined)return F2.tiles[k];if(!IMG[img]||!IMG[img].width)return null;IMG['gyp_'+img]=IMG[img];
+  return F2.tiles[k]=gyTile(o.tex||'texBlack_2',wh,{fac:o.fit===false?{img,i,n}:{img,i,n,fit:true,at:o.at},gain:o.gain||1.0,rgb:o.rgb||[1,1,1],tag:'f2fac'+img+(o.dtag||''),emit:o.emit===undefined?.12:o.emit,draw:o.draw})}
 /* a painted texture (assets/ps, kind tex) as a floor of the engine (128 x 128) */
 function f2TexFloor(key,out,g,tn,rim){if(FLOORS[out])return out;const im=IMG[key];if(!im||!im.width)return null;try{const N=128,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.drawImage(im,0,0,N,N);
   if(rim){x.strokeStyle='rgba(30,18,8,.85)';x.lineWidth=7;x.strokeRect(4,4,N-8,N-8);x.strokeStyle='rgba(255,230,170,.5)';x.lineWidth=2;x.strokeRect(9,9,N-18,N-18)}   // a carved plate: a dark sunk rim and a bright lip
@@ -358,7 +360,31 @@ pspOnArrive(n=>{const L=LEVELS[n];if(!L||!L._f2x||!G.decor)return;for(const d of
     if(d.span&&s.pic){s.x=d.span.x;s.y=d.span.y;s.w=d.span.w;s.bob=d.span.bob;s.flat=[d.wd[0],d.wd[1]]}
     else if(F2_TREE_RX.test(d.k)&&!d.roof){s.decor=Object.create(d,{k:{value:'tree0'}})}   // a painted tree casts no round shadow and fades into the green like the woodland trees
     else if(d.mv&&d.mvFlip&&!s.pic){const C=G.C,fx=Math.cos(C.a),fy=Math.sin(C.a),rx=-fy,ry=fx;const right=(d.mvDx*rx+d.mvDy*ry)>0;const im=IMG[right?d.mvFlip:d.k];if(im)s.img=im}}   // a boat seen moving to the right shows its prow on the right
-  return drop?L.filter(s=>!s._f2drop):L}}
+  const out=drop?L.filter(s=>!s._f2drop):L;
+  // contact shadows: terraced levels draw no round shadow under things, so each standing piece gets a soft dark oval at its foot (a flat picture just in front of it)
+  if(f2Is(LEVEL)&&!f2InRoof()&&!window.F2_NOSHADOW){const sh=f2ShadowImg(),fx=Math.cos(G.C.a),fy=Math.sin(G.C.a),fx2=G.C.x+.5,fy2=G.C.y+.5,x2=LV&&LV._f2x,add=[];
+    for(const s of out){const d=s.decor;if(!d||s.pic||d.span||d.npc&&!d.block||s.bob>.05||d.fly||(d.kname&&x2&&x2[d.kname]&&(x2[d.kname].fly||x2[d.kname].mv))||!s.img||!s.w)continue;
+      const k=String(d.k);if(k==='f2shadow'||/^(sign|fl_|pgrass|pflw|hlant|cfire|brazier)|mist|_lt$/.test(k))continue;
+      const dx=s.x-fx2,dy=s.y-fy2,dd=dx*dx+dy*dy;if(dd>400||dd<.2)continue;const tall=s.img.height/s.img.width*s.w,ww=Math.min(1.6,s.w*(tall>1.4?.8:1.05));
+      {const q={x:s.x-dx/Math.sqrt(dd)*.04,y:s.y-dy/Math.sqrt(dd)*.04,img:sh,w:ww,drop:0,bob:0};q.decor={k:'f2shadow',x:d.x,y:d.y,deco:true,walk:true};add.push(q)}}
+    for(const a of add)out.push(a)}
+  return out}}
+function f2Feather(k,soil){const nk=k+'_fe';if(IMG[nk]&&IMG[nk].width)return nk;const im=IMG[k];if(!im||!im.width)return null;const w=im.width,h=im.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(im,0,0);
+  let D;try{D=x.getImageData(0,0,w,h)}catch(e){return null}const a=D.data,hh=(i,s)=>{const v=Math.sin(i*12.9898+s*78.233)*43758.5453;return v-Math.floor(v)};
+  const sm=(i,s,n)=>{const f=i/n,i0=Math.floor(f),u=f-i0;return hh(i0,s)*(1-u)+hh(i0+1,s)*u};
+  const fb=Math.max(4,Math.round(h*.09)),fs=Math.max(3,Math.round(w*.07));
+  let opL=0,opR=0;for(let y=0;y<h;y++){if(a[(y*w)*4+3]>200)opL++;if(a[(y*w+w-1)*4+3]>200)opR++}const cutL=opL>h*.25,cutR=opR>h*.25;
+  const sc=soil||[214,182,128];
+  for(let y=0;y<h;y++)for(let X=0;X<w;X++){const o=(y*w+X)*4;if(!a[o+3])continue;let m=1;
+    const yb=h-1-y,lim=fb*(.45+.9*sm(X,3,w*.08));if(yb<lim){const t=yb/lim;m*=.55+.45*t*t*(3-2*t);   // the foot fades irregularly, and takes the colour of the soil heaped against it
+      const s=(1-t)*.7;a[o]=a[o]*(1-s)+sc[0]*s;a[o+1]=a[o+1]*(1-s)+sc[1]*s;a[o+2]=a[o+2]*(1-s)+sc[2]*s}
+    if(cutL){const lim2=fs*(.5+sm(y,5,h*.06));if(X<lim2){const t=X/lim2;m*=t}}
+    if(cutR){const lim2=fs*(.5+sm(y,6,h*.06)),xr=w-1-X;if(xr<lim2){const t=xr/lim2;m*=t}}
+    a[o+3]=a[o+3]*m}
+  x.putImageData(D,0,0);IMG[nk]=c;NPC_H[nk]=NPC_H[k];return nk}
+/* the dream rooms keep their colour: the screen-wide aged finish (a grey saturation wash, 40% by default) is cut to its light setting there, as the engine already does for a few bright levels */
+{const _ui=ui;ui=function(){if(typeof LEVEL==='undefined'||!f2Is(LEVEL)||!GFX||GFX.color>=1)return _ui.apply(this,arguments);const c=GFX.color;GFX.color=1;try{return _ui.apply(this,arguments)}finally{GFX.color=c}}}
+function f2ShadowImg(){if(F2.shadowImg)return F2.shadowImg;const c=document.createElement('canvas');c.width=128;c.height=20;const x=c.getContext('2d');x.translate(64,10);x.scale(1,10/60);const g=x.createRadialGradient(0,0,2,0,0,60);g.addColorStop(0,'rgba(8,5,3,.8)');g.addColorStop(.55,'rgba(8,5,3,.5)');g.addColorStop(1,'rgba(8,5,3,0)');x.fillStyle=g;x.beginPath();x.arc(0,0,60,0,Math.PI*2);x.fill();return F2.shadowImg=c}
 /* a mirrored copy of a picture (a boat going the other way) */
 function f2Flip(k){const nk=k+'_fl';if(IMG[nk]&&IMG[nk].width)return nk;const im=IMG[k];if(!im||!im.width)return k;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.translate(im.width,0);x.scale(-1,1);x.drawImage(im,0,0);IMG[nk]=c;NPC_H[nk]=NPC_H[k];return nk}
 /* ---------- things that move by themselves (a gondola rowing up and down a canal): decor with mv = {path:[[x,y],...], speed, t} ---------- */
@@ -411,6 +437,8 @@ function f2Roof(C,key,x,y,o){o=o||{};const d={k:'kroof',lk:key,x,y,block:false,d
 function f2Veil(key,a,tag){const nk=key+'_veil'+(tag||'');if(IMG[nk]&&IMG[nk].width)return nk;const im=IMG[key];if(!im||!im.width)return key;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);
   const g=x.createLinearGradient(0,c.height,0,c.height*.45);g.addColorStop(0,'rgba(222,230,240,'+a+')');g.addColorStop(.35,'rgba(214,224,236,'+(a*.45)+')');g.addColorStop(1,'rgba(214,224,236,0)');x.fillStyle=g;x.fillRect(0,0,c.width,c.height);
   IMG[nk]=c;NPC_H[nk]=NPC_H[key];return nk}
+/* a piece for (x,y) from a list, never the same as its near neighbours already placed (no rows of one tree) */
+function f2PickVar(C,list,x,y,r){let ki=(r*list.length)|0;const M=C._fk=C._fk||{},W=48,near=new Set();for(const [a,b] of [[-1,0],[-2,0],[0,-1],[0,-2],[-1,-1],[1,-1],[1,0],[0,1]]){const q=M[(y+b)*W+x+a];if(q)near.add(String(q).replace(/_fl$/,''))}for(let t=0;t<list.length&&near.has(String(list[ki]).replace(/_fl$/,''));t++)ki=(ki+1)%list.length;M[y*W+x]=list[ki];return list[ki]}
 function f2Edge(C,o){const W=48,H=40,rows=C.rows,ix=(x,y)=>y*W+x,hs=C.hs2;if(!IMG['ps_'+o.img])return 0;o.tall=(o.tall||[]).map(k=>k.replace(/^ps_/,''));C._edgeSpec=o;
   const wh=o.wh||2.6,gid=[];   // each picture is fitted by height (n squares carry one copy); the copies follow each other plain and mirrored, and a second picture (img2) between them
   for(const nm of [o.img].concat(o.img2&&IMG['ps_'+o.img2]?[o.img2]:[])){const base=f2Veil('ps_'+nm,o.veil===undefined?.55:o.veil),im0=IMG[base],n=Math.max(1,Math.round(wh*im0.width/im0.height));
@@ -423,14 +451,14 @@ function f2Edge(C,o){const W=48,H=40,rows=C.rows,ix=(x,y)=>y*W+x,hs=C.hs2;if(!IM
   if(o.pillar){const seen=new Uint8Array(W*H),q=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++)if((x<2||y<2||x>W-3||y>H-3)&&rows[y][x]!=='.'){seen[ix(x,y)]=1;q.push([x,y])}
     for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||seen[ix(nx,ny)]||rows[ny][nx]==='.')continue;seen[ix(nx,ny)]=1;q.push([nx,ny])}}
     const inner=(x,y)=>x>=(o.ring||3)&&y>=(o.ring||3)&&x<=W-1-(o.ring||3)&&y<=H-1-(o.ring||3)&&!(y>=36&&x>=20&&x<=28);
-    for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if((seen[ix(x,y)]&&!inner(x,y))||!mistCh.has(rows[y][x]))continue;rows[y][x]='.';C.block[ix(x,y)]=0;C.used.delete(x+','+y);const key=o.pillar[(hs(x,y,134)*o.pillar.length)|0];const d=C.dec(key,x,y,{block:true,sc:.85+hs(x,y,135)*.35});if(d){d.edgeTree=1;d.ox=(hs(x,y,136)-.5)*.5;d.oy=(hs(x,y,137)-.5)*.4}}}
+    for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if((seen[ix(x,y)]&&!inner(x,y))||!mistCh.has(rows[y][x]))continue;rows[y][x]='.';C.block[ix(x,y)]=0;C.used.delete(x+','+y);const key=f2PickVar(C,o.pillar,x,y,hs(x,y,134));const d=C.dec(key,x,y,{block:true,sc:.85+hs(x,y,135)*.35});if(d){d.edgeTree=1;d.ox=(hs(x,y,136)-.5)*.5;d.oy=(hs(x,y,137)-.5)*.4}}}
   if(o.pillar)for(let pass=0;pass<2;pass++)for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!mistCh.has(rows[y][x]))continue;const e=open(x+1,y),w=open(x-1,y),s=open(x,y+1),nn=open(x,y-1),cnt=e+w+s+nn;
-    if(cnt>=3||(e&&w)||(s&&nn)){rows[y][x]='.';C.block[ix(x,y)]=0;C.fm[ix(x,y)]=C.fm[ix(x+(e?1:w?-1:0),y+(s?1:nn?-1:0))];C.used.delete(x+','+y);const key=o.pillar[(hs(x,y,134)*o.pillar.length)|0];const d=C.dec(key,x,y,{block:true,sc:.9+hs(x,y,135)*.3});if(d)d.edgeTree=1}}
+    if(cnt>=3||(e&&w)||(s&&nn)){rows[y][x]='.';C.block[ix(x,y)]=0;C.fm[ix(x,y)]=C.fm[ix(x+(e?1:w?-1:0),y+(s?1:nn?-1:0))];C.used.delete(x+','+y);const key=f2PickVar(C,o.pillar,x,y,hs(x,y,134));const d=C.dec(key,x,y,{block:true,sc:.9+hs(x,y,135)*.3});if(d)d.edgeTree=1}}
   for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!mistCh.has(rows[y][x])||(o.only&&!o.only(x,y)))continue;const nb=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>open(x+a,y+b));if(!nb.length)continue;
     const horiz=nb.some(([a,b])=>b!==0),p=horiz?x:y,i=((p%(2*n))+2*n)%(2*n);if(gid[i]==null)continue;C.solid(x,y,gid[i]);k++;edge.push([x,y])}
   C._edgeCh=(x,y)=>gid[((x%(2*n))+2*n)%(2*n)];if(o.noTall)return k;
   if(o.innerP&&o.pillar){const edgeN=(x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>rows[y+b]&&rows[y+b][x+a]!=='.');   // a row of trees just inside the painted edge, so the edge is never the last thing in view
-    for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!C.free(x,y)||C.nearPath(x,y,1)||!edgeN(x,y)||(o.innerKeep&&o.innerKeep(x,y))||Math.hypot(x-24,y-35)<5)continue;if(hs(x,y,161)<o.innerP){const d=C.dec(o.pillar[(hs(x,y,162)*o.pillar.length)|0],x,y,{block:true,sc:.95+hs(x,y,163)*.35});if(d){d.ox=(hs(x,y,164)-.5)*.6;d.oy=(hs(x,y,165)-.5)*.5}}}}
+    for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!C.free(x,y)||C.nearPath(x,y,1)||!edgeN(x,y)||(o.innerKeep&&o.innerKeep(x,y))||Math.hypot(x-24,y-35)<5)continue;if(hs(x,y,161)<o.innerP){const d=C.dec(f2PickVar(C,o.pillar,x,y,hs(x,y,162)),x,y,{block:true,sc:.95+hs(x,y,163)*.35});if(d){d.ox=(hs(x,y,164)-.5)*.6;d.oy=(hs(x,y,165)-.5)*.5}}}}
   if(o.tall&&o.tall.length){const [lo,hi]=o.tallSc||[.85,1.25];let last='';for(const [x,y] of edge){if(hs(x,y,131)>(o.tallP===undefined?.45:o.tallP))continue;let key=o.tall[(hs(x,y,132)*o.tall.length)|0];if(key===last)key=o.tall[(o.tall.indexOf(key)+1)%o.tall.length];last=key;f2Roof(C,pspPic(key),x,y,{sc:+(lo+(hi-lo)*hs(x,y,133)).toFixed(2)})}}
   return k}
 /* patches of ground: open squares off the paths take one of several floors by a soft noise (big patches, not a checker) */
@@ -458,7 +486,7 @@ function f2SignPlaque(C,x,y,src,out,lines,npc,text,o){o=o||{};const k=f2Lettered
 function f2RetGate(C,img,o){o=o||{};const im=IMG[img];if(!im||!im.width)return;
   const k=f2Lettered(img.replace(/^ps_/,''),img.replace(/^ps_/,'')+'_lt',['THE HALL','OF ILLUSIONS'],{box:o.box||[.4,.065,.6,.115],col:'#d8e4f0',h:NPC_H[img]});
   const wh=2.3,rows=C.rows;
-  if(o.one){const g0=f2FacGid(k,0,1,o.wh||3.4,{tex:o.tex||'texBlack_2',emit:.3,fit:false,rgb:o.rgb}),g=C.chars[rows[38][24]];if(g0!=null&&g!==undefined&&KH_DOOR[g])T_TILE[g]=T_TILE[g0]}
+  if(o.one){const g0=f2FacGid(k,0,1,Math.min(o.wh||3.4,+(im.height/im.width).toFixed(2)),{tex:o.tex||'texBlack_2',emit:.3,fit:false,rgb:o.rgb}),g=C.chars[rows[38][24]];if(g0!=null&&g!==undefined&&KH_DOOR[g])T_TILE[g]=T_TILE[g0]}
   else for(let i=0;i<3;i++){const x=23+i,g0=f2FacGid(k,i,3,wh,{tex:'texBlack_2',emit:.25});if(g0==null)continue;
     if(x===24){const g=C.chars[rows[38][24]];if(g!==undefined&&KH_DOOR[g])T_TILE[g]=T_TILE[g0]}else C.solid(x,38,C.ch(g0))}
   for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(d.k==='sign_gy'&&d.y===37&&d.x===23)C.decor.splice(i,1)}
@@ -515,10 +543,11 @@ function f2Terrace(x,rX,rY){
   if(rY<0){sty=-1;sdy=(cy-my)*ddy}else{sty=1;sdy=(my+1-cy)*ddy}
   const watA=T.wat,wlA=T.wl;
   const fcAt=(a,b)=>(a<0||b<0||a>=W||b>=Hh||grid[b][a]!==0)?-1:(fm?fm.charCodeAt(b*W+a):48);
-  let yb=VH,tIn=0,itIn=Infinity,side=0,nh=0,lastK=-1,slopeMax=-1e9,tStop=70,hprev=-1e9,first=true;
+  let yb=VH,ybO=VH,tIn=0,itIn=Infinity,side=0,nh=0,lastK=-1,slopeMax=-1e9,tStop=70,hprev=-1e9,first=true;
   CY_A=0;
   for(let guard=0;guard<150;guard++){
     const tOut=Math.min(sdx,sdy),itO=1/tOut,inside=mx>=0&&my>=0&&mx<W&&my<Hh,i=inside?my*W+mx:(Math.min(Hh-1,Math.max(0,my))*W+Math.min(W-1,Math.max(0,mx)));
+    if(!inside&&!first){const yv=Math.max(0,Math.min(VH,Math.ceil(ybO))),kb=YBK-1;for(let k=lastK+1;k<=kb;k++)YB[base+k]=yv;break}   // past the edge of the map: open sky (no wall of plain stone round the world)
     const g=inside?grid[my][mx]:1;
     if(!first&&g>0){
       const foot=h[i];let wh=CEILH;if(g>=100){const tt=T_TILE[g];if(tt!==undefined&&TEX[tt])wh=TEX[tt].wh||CEILH}
@@ -540,7 +569,7 @@ function f2Terrace(x,rX,rY){
           let o=(ys*VW+x)*4;const zkR=tIn/Fv;
           for(let y=ys;y<ye;y++,o+=VW*4){const z=cz-(y+.5-HHv)*zkR,v=((hc-z)*TSv)&TSm,ti=(v*TSv+u)*4;D[o]=fdd[ti]*kR*iv+hz[0]*sk;D[o+1]=fdd[ti+1]*kG*iv+hz[1]*sk;D[o+2]=fdd[ti+2]*kB*iv+hz[2]*sk}
         }
-        if(yTop<yb)yb=yTop;
+        if(yTop<yb)yb=yTop;if(yTop<ybO)ybO=yTop;
       }
       if(hc<cz){if(!wTop){ // the top of the cell, with its borders mixed into the neighbours' floors
         const k1=(cz-hc)*Fv,yFar=HHv+k1*itO,yNear=HHv+k1*Math.min(itIn,1000),ys=Math.max(0,Math.ceil(yFar)),ye=Math.min(Math.ceil(yb),Math.ceil(yNear),VH);
@@ -566,7 +595,7 @@ function f2Terrace(x,rX,rY){
           }
         }
         if(yFar<yb)yb=yFar;
-      }}else{const yT=HHv-(hc-cz)*Fv*Math.min(itIn,1000);if(yT<yb)yb=yT}
+      }}else{const yT=HHv-(hc-cz)*Fv*Math.min(itIn,1000);if(yT<yb)yb=yT;if(yT<ybO)ybO=yT}
       if(wI){
         if(wTop){const k1=(cz-zw)*Fv,yFarS=HHv+k1*itO,yNearS=HHv+k1*Math.min(itIn,1000),ys=Math.max(0,Math.ceil(yFarS)),ye=Math.min(ybIn,Math.ceil(yNearS),VH);if(ye>ys){if(fdd===null){fdd=fds[fc0-48]||fds[0]};terrWaterTop(x,rX,rY,mx,my,zw,hc,ys,ye,fdd)}if(yFarS<yb)yb=yFarS}
         else terrCeilPaint(1,x,rX,rY,tIn,tOut,zw,yb,0);
@@ -574,7 +603,7 @@ function f2Terrace(x,rX,rY){
       hprev=hc0;
     }
     first=false;
-    const kb=Math.min(YBK-1,(tOut*YBS)|0),yv=Math.max(0,Math.min(VH,Math.ceil(yb)));
+    const kb=Math.min(YBK-1,(tOut*YBS)|0),yv=Math.max(0,Math.min(VH,Math.ceil(ybO)));   // what hides a standing thing: risers and walls in front of it, never the flat ground it stands on
     for(let k=lastK+1;k<=kb;k++)YB[base+k]=yv;
     if(kb>lastK)lastK=kb;
     if(!inside||yb<=0||tOut>tStop||CY_A>=yb)break;

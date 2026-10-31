@@ -192,45 +192,50 @@ function f2WaterMask(k,x,y){const R=f2S(9824);if(R.open)return;
 /* ---------- 5. THE DESERT (9825): the legs ---------- */
 const F2_DESERT={ORDER:['scarab','eye','ankh','sun'],PLATES:[[20,6,'scarab'],[22,6,'sun'],[26,6,'ankh'],[28,6,'eye'],[20,8,'eye'],[22,8,'ankh'],[26,8,'sun'],[28,8,'scarab']],SARC:[24,3]};
 function f2DesertBuild(){
-  const DS=f2TexFloor('ps_f2_tex_desand','f2t_desand',1.0)||'sand',DC=f2TexFloor('ps_f2_tex_decrack','f2t_decrack',1.0)||'sand',DP=f2TexFloor('ps_f2_tex_depave','f2t_depave2',.72,[.95,.95,1.0])||'tombslab',DB=f2TexFloor('ps_f2_tex_depebble','f2t_depebble2',1.35,[1.08,1.0,.88])||'sand';
-  const C=f2Room({id:9825,ground:DS,path:DB,band:[2,5],wh:3.4,softRet:1,rw:0,
+  const DS=f2TexFloor('ps_f2_tex_desand','f2t_desand',1.0)||'sand',DC=f2TexFloor('ps_f2_tex_decrack','f2t_decrack',1.0)||'sand',DP=f2TexFloor('ps_f2_tex_depave','f2t_depave3',.8,[1.12,1.0,.82])||'tombslab',DB=f2TexFloor('ps_f2_tex_depebble','f2t_depebble2',1.35,[1.08,1.0,.88])||'sand';
+  const C=f2Room({id:9825,ground:DS,path:DB,band:[2,5],wh:3.4,softRet:1,rw:0,mistH:.08,shade:{edge:.3,pool:.6},feather:/f2_de_(mesa|pillar|pharaoh|column|shard)|f2_dv_(rockbow|boulders|foot)|f2_dx_(ribs|stele|sphinx|oxskull)|drock|dobelisk/,soil:[222,184,128],
     routes:[[[24,35],[24,26],[16,21],[16,15],[24,12],[24,11]],[[24,27],[34,23],[38,19]],[[16,18],[8,18]],[[22,32],[10,30]]],
     clear:[[16,1,32,12,DP,'The Sunken Temple'],[4,13,13,23,DS,'The Oasis',1],[33,14,43,24,DS,'The Fallen King',1],[5,26,14,34,DS,'The Bone Dunes',1]]});
   const W=48,{rows,block,fm}=C,hs=C.hs2;
   // the temple court: sandstone walls round x 18..30, y 3..10, the way in at the south (23..25,11); the frieze on the north wall (x 19..21)
   const tw=f2TexWall(f2Soft('ps_f2_de_wall',{filter:'saturate(.55) brightness(1.1)',tag:'t'}),3.0,{gain:1.08,rgb:[1.16,1.0,.76]}),sand=[0,1,2].map(v=>C.ch(tw!=null?tw:gyTile('texBone_'+(1+v),3.4,{gain:1.2,rgb:[1.18,1.0,.74],tag:'f2sandst'+v})));
-  for(let y=2;y<=11;y++)for(let x=17;x<=31;x++){const ring=x===17||x===31||y===2||y===11;if(!ring)continue;if(y===11&&x>=23&&x<=25)continue;C.solid(x,y,sand[(x*3+y)%3])}
-  {const fz=f2Soft('ps_f2_frieze',{filter:'contrast(1.6) brightness(.9)',tag:'c'});for(let x=20;x<=22;x++){const f=f2FacGid(fz,x-20,3,3.0,{tex:'texBone_1',rgb:[1.1,1.0,.85],fit:false,emit:.45});if(f!=null)C.solid(x,2,C.ch(f))}
-   for(let x=26;x<=28;x++){const f=f2FacGid(fz,x-26,3,3.0,{tex:'texBone_1',rgb:[1.1,1.0,.85],fit:false,emit:.45});if(f!=null)C.solid(x,2,C.ch(f))}}   // the frieze twice, either side of the sarcophagus: the same four signs in the same order
+  for(let y=2;y<=11;y++)for(let x=17;x<=31;x++){const ring=x===17||x===31||y===2||y===11;if(!ring)continue;if(y===11&&x>=23&&x<=25)continue;const tg=f2FacGid(f2Soft('ps_f2_de_twall2',{filter:'contrast(1.45) saturate(1.3) brightness(.9)',tag:'k'}),((y===2||y===11)?x:y)%5,5,3.0,{tex:'texBone_1',rgb:[1.06,1.0,.9],emit:.1});C.solid(x,y,tg!=null?C.ch(tg):sand[(x*3+y)%3])}   // the painted temple wall (courses of carved signs, cornice on top)
+  {if(IMG.ps_f2_de_twtile)IMG.gyp_f2_de_twtile=IMG.ps_f2_de_twtile;const fz=f2Soft('ps_f2_frieze',{filter:'contrast(1.6) brightness(.9)',tag:'c'});for(let x=20;x<=22;x++){const f=f2FacGid(fz,x-20,3,3.0,{tex:IMG.ps_f2_de_twtile?'f2_de_twtile':'texBone_1',rgb:[1.1,1.0,.85],fit:false,emit:.45});if(f!=null)C.solid(x,2,C.ch(f))}
+   for(let x=26;x<=28;x++){const f=f2FacGid(fz,x-26,3,3.0,{tex:IMG.ps_f2_de_twtile?'f2_de_twtile':'texBone_1',rgb:[1.1,1.0,.85],fit:false,emit:.45});if(f!=null)C.solid(x,2,C.ch(f))}}   // the frieze twice, either side of the sarcophagus: the same four signs in the same order
   for(let y=1;y<=1;y++)for(let x=16;x<=32;x++)C.mist(x,y);
   // the floor plates (painted carved tiles) and the sarcophagus
-  const TF={};for(const s of ['scarab','eye','ankh','sun']){const k=f2TexFloor(f2Soft('ps_f2_tile_'+s,{filter:'contrast(1.8) saturate(1.3)',tag:'c'}),'f2t6_'+s,1.0,[1.1,.97,.75],1);TF[s]=k?C.fl(k):C.fl('tombslab')}
+  const TF={};for(const s of ['scarab','eye','ankh','sun']){const k=f2TexFloor(f2Soft('ps_f2_tile_'+s,{filter:'contrast(1.9) saturate(1.05) brightness(.97)',tag:'c4'}),'f2t10_'+s,1.0,[1.1,.98,.82],1);TF[s]=k?C.fl(k):C.fl('tombslab')}
   for(const [x,y,s] of F2_DESERT.PLATES){fm[y*W+x]=TF[s];C.reserve(x,y,x,y)}
   {const [sx,sy]=F2_DESERT.SARC;C.used.delete(sx+','+sy);C.dec(pspPic('f2_sarc_shut'),sx,sy,{block:true,npc:'f2d_sarc'})}
   C.plaque(19,10,'f2_desert_plaque',['READ THE WALL','AND WALK IT'],'f2d_plaque','A slab of sandstone by the way in. Cut into it: READ THE WALL FROM LEFT TO RIGHT, AND WALK IT. Above you, on the north wall of the court, a frieze is carved: a scarab, an eye, an ankh and a sun disc, in that order from left to right. Eight carved plates are set in the floor.');
   for(const [x,y] of [[18,3],[30,3],[18,9],[30,9]])C.prop('f2_column_lotus',x,y,{sc:.85});
-  for(const [x,y] of [[22,4],[26,4]]){const b=IMG.brazier0?C.dec('brazier',x,y,{block:true,sc:1.1}):C.prop('brazier',x,y,{block:true});if(b)b.lift=.95;C.light(x,y,[2.4,1.5,.6])}
+  for(const [x,y,k] of [[18,5,'f2_de_amphora'],[30,7,'f2_de_amphora'],[18,7,'f2_de_shard'],[30,5,'f2_de_cairn'],[21,10,'f2_de_amphora']])if(C.free(x,y))C.dec(pspPic(k),x,y,{block:true,sc:.8});
+  for(const [x,y] of [[22,4],[26,4]]){const b=IMG.brazier0?C.dec('brazier',x,y,{block:true,sc:1.1}):C.prop('brazier',x,y,{block:true});if(b)b.lift=.95;C.light(x,y,[3.4,2.0,.7])}
   // the dunes: palms at the oasis, rocks, obelisks and a fallen head
   for(const [x,y] of [[8,18],[9,18],[8,19],[9,19]])if(C.free(x,y))C.dec(pspPic('f2_reeds'),x,y,{block:true,sc:1.1});   // reeds round the spring of the oasis
   f2Patches(C,[[DS,.7],[DB,.3]],{cs:6,keep:(x,y)=>x>=17&&x<=31&&y<=11});
-  const PALE={filter:'saturate(.55) brightness(1.18) contrast(.95)',tag:'p'},DT=[f2Soft(pspPic('f2_de_pillar'),PALE),f2Soft(pspPic('f2_de_mesa'),PALE),pspPic('f2_de_palm'),f2Soft(pspPic('f2_de_pillar'),PALE),'dpalm1','dpalm3'];DT.push(...DT.map(f2Flip));
+  const PALE={filter:'saturate(.9) brightness(1.08) contrast(1.05)',tag:'p2'},DT=[f2Soft(pspPic('f2_de_pillar'),PALE),f2Soft(pspPic('f2_de_mesa'),PALE),pspPic('f2_de_palm'),pspPic('f2_dv_doum'),pspPic('f2_dv_tamarisk'),pspPic('f2_dv_acacia'),f2Soft(pspPic('f2_dv_rockbow'),PALE),f2Soft(pspPic('f2_dv_boulders'),PALE),'dpalm1','dpalm3'];DT.push(...DT.map(f2Flip));
   C.fill(DT.concat(['drock0','drock1','drock2']),{p1:.08,p2:.35,p3:.6,sc:.9});
-  for(const d of C.decor)if(/f2_de_|drock/.test(d.k)&&d.block){d.sc=+((d.sc||1)*(.8+C.hs2(d.x,d.y,171)*.45)).toFixed(2);d.ox=(C.hs2(d.x,d.y,172)-.5)*.8;d.oy=(C.hs2(d.x,d.y,173)-.5)*.6}
-  C.scrub([pspPic('f2_de_shrub'),pspPic('f2_de_cairn'),pspPic('f2_de_shrub'),pspPic('f2_de_shard')],.06,{sc:.75});
-  for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if((!d.block||/drock|f2_de_(pillar|mesa)/.test(d.k))&&!d.npc&&/f2_de_|drock/.test(d.k)&&((d.x>=16&&d.x<=31&&d.y<=11)||Math.hypot(d.x-24,d.y-36)<3)){C.used.delete(d.x+','+d.y);C.decor.splice(i,1)}}   // the temple court and the gate stay clear
-  for(const [x,y,k] of [[9,29,'gy_bones'],[12,31,'f2_de_amphora'],[7,27,'gy_bones'],[40,22,'f2_de_amphora'],[36,16,'f2_de_column'],[42,19,'f2_de_column'],[11,14,'f2_de_amphora'],[37,18,'f2_de_shard'],[39,18,'f2_de_shard'],[38,19,'f2_de_column'],[39,16,'f2_de_shard'],[37,16,'f2_de_shard'],[39,17,'f2_de_column'],[37,17,'f2_de_column']])if(C.free(x,y)&&!C.nearPath(x,y,0))C.dec(/^gy_/.test(k)?k:pspPic(k),x,y,{block:/column|shard/.test(k),sc:/^gy_/.test(k)?.55:1});
+  for(const d of C.decor)if(/f2_d[ev]_|drock/.test(d.k)&&d.block){d.sc=+((d.sc||1)*(.8+C.hs2(d.x,d.y,171)*.45)).toFixed(2);d.ox=(C.hs2(d.x,d.y,172)-.5)*.8;d.oy=(C.hs2(d.x,d.y,173)-.5)*.6}
+  C.scrub([pspPic('f2_de_shrub'),pspPic('f2_de_cairn'),f2Flip(pspPic('f2_de_shrub')),pspPic('f2_de_amphora')],.14,{sc:.55});C.scrub(['gy_bones',pspPic('f2_de_shrub'),pspPic('f2_de_shard')],.04,{sc:.36});
+  for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if((!d.block||/drock|f2_de_(pillar|mesa)|f2_dv_/.test(d.k))&&!d.npc&&/f2_d[ev]_|drock/.test(d.k)&&((d.x>=16&&d.x<=31&&d.y<=11)||Math.hypot(d.x-24,d.y-36)<3)){C.used.delete(d.x+','+d.y);C.decor.splice(i,1)}}   // the temple court and the gate stay clear
+  for(const [x,y,k] of [[9,29,'gy_bones'],[12,31,'f2_de_amphora'],[7,27,'gy_bones'],[40,22,'f2_de_amphora'],[36,16,'f2_de_column'],[42,19,'f2_de_column'],[11,14,'f2_de_amphora'],[37,18,'f2_de_shard'],[39,18,'f2_de_shard'],[38,19,'f2_dv_boulders'],[39,16,'f2_de_shard'],[37,16,'f2_de_shard'],[39,17,'f2_de_column'],[37,17,'f2_de_columnF']])if(C.free(x,y)&&!C.nearPath(x,y,0))C.dec(/^gy_/.test(k)?k:/F$/.test(k)?f2Flip(pspPic(k.slice(0,-1))):pspPic(k),x,y,{block:/column|shard|boulders/.test(k),sc:/^gy_/.test(k)?.55:/F$/.test(k)?.78:1});
+  for(const [x,y,sc] of [[9,31,1.5],[12,28,.9]])if(C.free(x,y)&&!C.nearPath(x,y,0))C.dec(f2Feather(pspPic('f2_de_skull'),[222,184,128])||pspPic('f2_de_skull'),x,y,{block:true,sc});   // the bone dunes: a great skull half in the sand
+  for(const [x,y,k,sc] of [[7,30,'ribs',1.3],[12,33,'ribs',1.0],[10,27,'oxskull',.9],[5,32,'oxskull',.8],[36,33,'oxskull',.8],[30,18,'stele',1.0],[14,26,'stele',.9],[40,30,'stele',1.1],[33,28,'sphinx',1.1],[19,16,'sphinx',1.0],[6,20,'jars',.9],[11,15,'jars',.8],[7,16,'basket',.8]])if(C.free(x,y)&&!C.nearPath(x,y,0))C.dec(pspPic('f2_dx_'+k),x,y,{block:true,sc});   // bones, a stele, a sphinx, jars and a basket of dates
   for(const [x,y] of [[5,15],[12,16],[6,22],[11,22],[5,19]])if(C.free(x,y))C.dec(['dpalm0','dpalm1','dpalm2','dpalm3'][(x+y)%4],x,y,{block:true});
   C.used.delete('38,17');C.dec(pspPic('f2_de_pharaoh'),38,17,{block:true,sc:1.1});C.used.delete('35,21');C.dec('dobelisk',35,21,{block:true});C.used.delete('41,21');C.dec('dobelisk',41,21,{block:true});
   C.scrub(['drock1','yar_shells'],.02);
-  C.capTrees(/dpalm|f2_de_(palm|pillar|mesa|cactus)/,2.6);
-  f2Edge(C,{img:f2Soft('ps_f2_de_wall',PALE).replace(/^ps_/,''),wh:2.0,veil:.12,pillar:DT,innerP:.45,innerKeep:(x,y)=>x>=15&&x<=33&&y<=12,tall:[f2Soft(pspPic('f2_de_mesa'),PALE).replace(/^ps_/,''),f2Soft(pspPic('f2_de_pillar'),PALE).replace(/^ps_/,'')],tallP:.35,tallSc:[1.0,1.5]});
+  C.used.delete('41,17');if(C.free(41,17))C.dec(f2Soft(pspPic('f2_dv_foot'),PALE),41,17,{block:true,sc:1.25});
+  C.capTrees(/dpalm|f2_de_(palm|pillar|mesa|cactus)|f2_dv_(doum|tamarisk|acacia|rockbow)/,2.6);
+  f2Edge(C,{img:f2Soft('ps_f2_de_wall',PALE).replace(/^ps_/,''),wh:1.1,veil:.12,pillar:DT,innerP:.5,innerKeep:(x,y)=>x>=15&&x<=33&&y<=12,tall:[f2Soft(pspPic('f2_de_mesa'),PALE),f2Soft(pspPic('f2_de_pillar'),PALE),f2Flip(f2Soft(pspPic('f2_de_mesa'),PALE)),f2Soft(pspPic('f2_dv_rockbow'),PALE),f2Soft(pspPic('f2_dv_boulders'),PALE),f2Flip(f2Soft(pspPic('f2_dv_rockbow'),PALE))].map(k=>k.replace(/^ps_/,'')),tallP:.5,tallSc:[1.0,1.6]});
+  for(const [x,y,k,sc] of [[19,37,'f2_de_mesa',1.3],[21,37,'f2_dv_boulders',1.1],[27,37,'f2_dv_rockbow',1.0],[29,37,'f2_de_pillar',1.2],[17,36,'f2_dv_acacia',1.0],[31,36,'f2_dv_doum',1.0]])if(C.free(x,y)&&!C.nearPath(x,y,0)){const d=C.dec(f2Soft(pspPic(k),PALE),x,y,{block:true,sc});if(d){d.oy=.3}}   // the south rim behind the arrival: rocks and trees in front of the low cliff
   pspSafeZone(C,24,35,6);
   C.foes(['f2scorpion','f2scorpion','f2dustdevil'],[4,13,13,23],1);
   C.foes(['f2mummy','f2mummy','f2sandwraith'],[33,14,43,24],2);
   C.foes(['f2sandwraith','f2dustdevil','f2scorpion'],[5,26,14,34],3);
   C.foes(['f2mummy','f2dustdevil'],[30,26,44,36],4);
   for(const [x,y] of [[12,14],[42,15],[6,33]])C.chestAt(x,y,1);
-  C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[.9,.95,1.05]});
+  C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[1.2,1.02,.78]});if(C.rows[39]&&C.rows[39][23]&&!KH_DOOR[C.chars[C.rows[39][24]]])C.rows[39][24]=C.rows[39][23];   // nothing taller stands behind the gate
   return C.done({glow:8})}
 pspRegister(9825,f2DesertBuild);
 F2.step[9825]=(x,y)=>{
