@@ -95,7 +95,7 @@ function f2WaterBuild(){
   for(const [x,y] of [[16,8],[32,8]])C.dec(pspPic('f2_putto'),x,y,{block:true});
   for(const [x,y] of [[20,7],[28,7]]){C.dec(pspPic('f2_lamp3'),x,y,{block:false});C.light(x,y,[2.0,1.35,.7])}
   for(const [x,y] of [[19,6],[29,6]])C.dec(pspPic('f2_flagpole'),x,y,{block:true,sc:.62});
-  for(const [x,y,w] of [[27.3,5.6,1.2],[18.6,8.4,1.1],[20.4,30.8,1.1],[30.5,32.4,1.2],[22.7,4.8,1.0],[25.9,33.7,1.0],[21.6,9.6,.9]])f2Span(C,pspPic('f2_pigeons'),x,y,0,1,w,0);
+  for(const [x,y,w] of [[18.6,8.4,1.1],[30.5,32.4,1.2]])f2Span(C,pspPic('f2_pigeons'),x,y,0,1,w,0);
   for(const [x,y,nx,ny] of [[23.15,14.5,1,0],[25.85,19.5,1,0],[23.15,22.5,1,0]])f2Span(C,pspPic('f2_pole_green'),x,y,nx,ny,.3,-.25);   // mooring poles along the rio, passed on the ride
   if(C.isOpen(15,25))C.dec(pspPic('f2_w_balcony2'),15,25,{wd:[0,-1],block:false,bob:.85,sc:.85});
 
@@ -235,7 +235,7 @@ function f2DesertBuild(){
   C.foes(['f2sandwraith','f2dustdevil','f2scorpion'],[5,26,14,34],3);
   C.foes(['f2mummy','f2dustdevil'],[30,26,44,36],4);
   for(const [x,y] of [[12,14],[42,15],[6,33]])C.chestAt(x,y,1);
-  C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[1.2,1.02,.78]});if(C.rows[39]&&C.rows[39][23]&&!KH_DOOR[C.chars[C.rows[39][24]]])C.rows[39][24]=C.rows[39][23];   // nothing taller stands behind the gate
+  C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[1.2,1.02,.78]});
   return C.done({glow:8})}
 pspRegister(9825,f2DesertBuild);
 F2.step[9825]=(x,y)=>{

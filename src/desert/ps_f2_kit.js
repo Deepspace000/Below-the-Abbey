@@ -28,7 +28,7 @@ const F2B={
     text:'The sun beats down on the sand. The air shimmers with heat, and there is no wind.'},
   9826:{k:'swamp',sky:{top:[26,44,62],mid:[92,116,108],low:[218,178,112]},cloud:1.0,fog:[74,90,78,.006],haze:.02,amb:1.12,lcol:[1.15,1.1,.8],wn:'Bog mist',fx:null,
     text:'A thick green mist lies on the black water. Frogs croak, and the mud bubbles and stinks.'},
-  9827:{k:'nightmare',sky:{top:[8,0,6],mid:[56,10,16],low:[116,30,24]},cloud:.7,fog:[40,10,14,.014],haze:0,amb:.72,lcol:[1.3,.55,.5],wn:'Red dark',fx:null,
+  9827:{k:'nightmare',sky:{top:[6,0,10],mid:[70,8,22],low:[190,60,36]},cloud:.7,fog:[70,6,14,.004],haze:0,amb:.72,lcol:[1.3,.55,.5],wn:'Red dark',fx:null,
     text:'The sky is the colour of a bruise, and the air is thick and still. Things move just out of sight.'}};
 /* ---------- floors: f2 names to engine FLOORS keys (some re-toned here) ---------- */
 const F2_FLMAKE={snow:['scree',1.62,[.97,1.0,1.07]],snowpath:['wwf_dirt',1.05,[.9,.94,1.02]],bogwater:['water',.78,[.66,.86,.58]],canal:['water',.66,[.62,.92,.98]],
@@ -298,7 +298,7 @@ function f2Room(S){
     for(const d of C.decor)if(d.fly){if(d.kname&&C.f2x&&C.f2x[d.kname])C.f2x[d.kname].fly=1;else f2X(C,d,['fly'])}   // flyers stay marked in the live level (birds, butterflies, floating islands)
     C.glow(o.glow||7,B.lcol);
     const lv=C.finish({start:{x:24,y:35,f:0}});
-    try{const T=TERRS[id];if(T&&T.terr)T.s=f2Shade(C,lv,S.shade)}catch(e){console.error('f2 shade',e)}
+    try{const T=TERRS[id];if(T&&T.terr){T.s=f2Shade(C,lv,S.shade);lv._f2glow=f2GlowMap(C,S.glowK)}}catch(e){console.error('f2 shade',e)}
     lv.fogAt=()=>B.fog;lv.amb=B.amb;lv.f2=1;lv._noTidy=true;
     // last check on the finished level (the same walk as tools/ps_test.py reach): an open square nothing reaches becomes mist wall
     {const TB=TERRS[id]&&TERRS[id].block,bs=new Set();for(const d of lv.decor)if(d.block||(d.npc&&d.solid))bs.add(d.x+','+d.y);
@@ -459,7 +459,7 @@ function f2Edge(C,o){const W=48,H=40,rows=C.rows,ix=(x,y)=>y*W+x,hs=C.hs2;if(!IM
   C._edgeCh=(x,y)=>gid[((x%(2*n))+2*n)%(2*n)];if(o.noTall)return k;
   if(o.innerP&&o.pillar){const edgeN=(x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>rows[y+b]&&rows[y+b][x+a]!=='.');   // a row of trees just inside the painted edge, so the edge is never the last thing in view
     for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!C.free(x,y)||C.nearPath(x,y,1)||!edgeN(x,y)||(o.innerKeep&&o.innerKeep(x,y))||Math.hypot(x-24,y-35)<5)continue;if(hs(x,y,161)<o.innerP){const d=C.dec(f2PickVar(C,o.pillar,x,y,hs(x,y,162)),x,y,{block:true,sc:.95+hs(x,y,163)*.35});if(d){d.ox=(hs(x,y,164)-.5)*.6;d.oy=(hs(x,y,165)-.5)*.5}}}}
-  if(o.tall&&o.tall.length){const [lo,hi]=o.tallSc||[.85,1.25];let last='';for(const [x,y] of edge){if(hs(x,y,131)>(o.tallP===undefined?.45:o.tallP))continue;let key=o.tall[(hs(x,y,132)*o.tall.length)|0];if(key===last)key=o.tall[(o.tall.indexOf(key)+1)%o.tall.length];last=key;f2Roof(C,pspPic(key),x,y,{sc:+(lo+(hi-lo)*hs(x,y,133)).toFixed(2)})}}
+  if(o.tall&&o.tall.length){const [lo,hi]=o.tallSc||[.85,1.25];let last='';for(const [x,y] of edge){if(hs(x,y,131)>(o.tallP===undefined?.45:o.tallP))continue;const M2=C._fkT=C._fkT||{},near=new Set();for(const [a,b] of [[-1,0],[-2,0],[0,-1],[0,-2],[1,0],[0,1],[2,0],[0,2]]){const q=M2[(y+b)*48+x+a];if(q)near.add(q)}let ki=(hs(x,y,132)*o.tall.length)|0;for(let t=0;t<o.tall.length&&near.has(o.tall[ki]);t++)ki=(ki+1)%o.tall.length;let key=o.tall[ki];M2[y*48+x]=key;last=key;f2Roof(C,pspPic(key),x,y,{sc:+(lo+(hi-lo)*hs(x,y,133)).toFixed(2)})}}
   return k}
 /* patches of ground: open squares off the paths take one of several floors by a soft noise (big patches, not a checker) */
 function f2Patches(C,list,o){o=o||{};const W=48,H=40;for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!C.open(x,y)||(C.pathM[y*W+x]&&!o.onPath)||(o.keep&&o.keep(x,y)))continue;
@@ -490,6 +490,7 @@ function f2RetGate(C,img,o){o=o||{};const im=IMG[img];if(!im||!im.width)return;
   else for(let i=0;i<3;i++){const x=23+i,g0=f2FacGid(k,i,3,wh,{tex:'texBlack_2',emit:.25});if(g0==null)continue;
     if(x===24){const g=C.chars[rows[38][24]];if(g!==undefined&&KH_DOOR[g])T_TILE[g]=T_TILE[g0]}else C.solid(x,38,C.ch(g0))}
   for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(d.k==='sign_gy'&&d.y===37&&d.x===23)C.decor.splice(i,1)}
+  if(o.one&&C.rows[39]&&C.rows[39][23]&&!KH_DOOR[C.chars[C.rows[39][24]]])C.rows[39][24]=C.rows[39][23];   // nothing taller stands behind the gate
   C.light(24,37,[.85,1.0,1.25])}
 /* ---------- the parchment area maps of the second floor: each square in the colour of its own floor or wall (sampled from the painted textures), inked on parchment;
    trees as round crowns, water with ripple strokes, the puzzle pieces and people as small marks, places numbered with a key (the cloud cover of ps_fog.js applies as on every castle map) ---------- */
@@ -534,7 +535,7 @@ if(typeof mplInstall==='function')mplInstall({name:'palespire2',levels:[9820,982
 const F2_BAND=.34;
 function f2EdgeNoise(along,at,seed){return Math.sin(along*4.7+at*2.3+seed)*.55+Math.sin(along*11.9-at*1.7+seed*2.1)*.3+Math.sin(along*23.3+at*5.1)*.15}
 function f2Terrace(x,rX,rY){
-  const T=TERR_NOW,W=T.W,Hh=T.H,h=T.h,sh=T.s,C=TC,D=C.D,cx=C.cx,cy=C.cy,cz=CAMZ,grid=G.grid,fm=C.fmp,fds=C.fds.length<7?(C.fds7||(C.fds7=C.fds.concat([G.fl7||C.fds[5]]))):C.fds,hz=C.hzr,hzmax=C.hzmax,hzrate=C.hzrate,lbm=C.lbm,nl=C.nl,nn=C.nn,tbR=C.tbR,tbG=C.tbG,tbB=C.tbB,ncr=C.ncr,ncg=C.ncg,ncb=C.ncb,HHv=HH,Fv=F,TSv=TS,TSm=TS-1,SD=T.sd,B=F2_BAND,iB=1/(2*B);
+  const GLW=(LEVELS[LEVEL]&&LEVELS[LEVEL]._f2glow&&!f2InRoof())?LEVELS[LEVEL]._f2glow:null,T=TERR_NOW,W=T.W,Hh=T.H,h=T.h,sh=T.s,C=TC,D=C.D,cx=C.cx,cy=C.cy,cz=CAMZ,grid=G.grid,fm=C.fmp,fds=C.fds.length<7?(C.fds7||(C.fds7=C.fds.concat([G.fl7||C.fds[5]]))):C.fds,hz=C.hzr,hzmax=C.hzmax,hzrate=C.hzrate,lbm=C.lbm,nl=C.nl,nn=C.nn,tbR=C.tbR,tbG=C.tbG,tbB=C.tbB,ncr=C.ncr,ncg=C.ncg,ncb=C.ncb,HHv=HH,Fv=F,TSv=TS,TSm=TS-1,SD=T.sd,B=F2_BAND,iB=1/(2*B);
   const rl=Math.hypot(rX,rY),base=x*YBK;
   let mx=Math.floor(cx),my=Math.floor(cy);
   const ddx=Math.abs(1/rX),ddy=Math.abs(1/rY);
@@ -585,13 +586,13 @@ function f2Terrace(x,rX,rY){
             // the shade map is mixed between cells too (soft pools of shadow, not squares)
             const sx=fx<.5?cellShade+(shW-cellShade)*(.5-fx)*.9:cellShade+(shE-cellShade)*(fx-.5)*.9,ssh=fy<.5?sx+(shN-cellShade)*(.5-fy)*.9:sx+(shS-cellShade)*(fy-.5)*.9;
             const lb=Math.max(baseL(dist),lbm),sk=(lb*.55+lt*.45+.05)*smv,kR=(lb*tbR+lR)*ssh,kG=(lb*tbG+lG)*ssh,kB=(lb*tbB+lB)*ssh;
-            let r=fdd[ti],gg=fdd[ti+1],b=fdd[ti+2];
+            let r=fdd[ti],gg=fdd[ti+1],b=fdd[ti+2];let gR=0,gG=0,gB=0;if(GLW){const gi=i*3,gx=fx<.5?(mx>0?gi-3:gi):(mx<W-1?gi+3:gi),gy=fy<.5?(my>0?gi-W*3:gi):(my<Hh-1?gi+W*3:gi),ax=Math.abs(fx-.5),ay=Math.abs(fy-.5);gR=GLW[gi]+(GLW[gx]-GLW[gi])*ax+(GLW[gy]-GLW[gi])*ay;gG=GLW[gi+1]+(GLW[gx+1]-GLW[gi+1])*ax+(GLW[gy+1]-GLW[gi+1])*ay;gB=GLW[gi+2]+(GLW[gx+2]-GLW[gi+2])*ax+(GLW[gy+2]-GLW[gi+2])*ay}
             if(any&&dist<26){
               if(dW&&fx<B){const n=f2EdgeNoise(py,mx,1)*B*.85,w=1-f2SS(.5+(fx+n)*iB);r+=(dW[ti]-r)*w;gg+=(dW[ti+1]-gg)*w;b+=(dW[ti+2]-b)*w}
               else if(dE&&fx>1-B){const n=f2EdgeNoise(py,mx+1,1)*B*.85,w=f2SS(.5+(fx-1+n)*iB);r+=(dE[ti]-r)*w;gg+=(dE[ti+1]-gg)*w;b+=(dE[ti+2]-b)*w}
               if(dN&&fy<B){const n=f2EdgeNoise(px,my,7)*B*.85,w=1-f2SS(.5+(fy+n)*iB);r+=(dN[ti]-r)*w;gg+=(dN[ti+1]-gg)*w;b+=(dN[ti+2]-b)*w}
               else if(dS&&fy>1-B){const n=f2EdgeNoise(px,my+1,7)*B*.85,w=f2SS(.5+(fy-1+n)*iB);r+=(dS[ti]-r)*w;gg+=(dS[ti+1]-gg)*w;b+=(dS[ti+2]-b)*w}}
-            D[o]=r*kR*iv+hz[0]*sk;D[o+1]=gg*kG*iv+hz[1]*sk;D[o+2]=b*kB*iv+hz[2]*sk;
+            D[o]=r*(kR+gR)*iv+hz[0]*sk;D[o+1]=gg*(kG+gG)*iv+hz[1]*sk;D[o+2]=b*(kB+gB)*iv+hz[2]*sk;
           }
         }
         if(yFar<yb)yb=yFar;
@@ -617,6 +618,10 @@ function f2Terrace(x,rX,rY){
 function f2SS(t){t=t<0?0:t>1?1:t;return t*t*(3-2*t)}
 {const _tt=terrTerrace;terrTerrace=function(x,rX,rY){if(typeof LEVEL!=='undefined'&&(f2Is(LEVEL))&&!window.F2_PLAINGROUND)return f2Terrace(x,rX,rY);return _tt.apply(this,arguments)}}
 /* the shade of the ground: soft pools of shadow under trees and big pieces, darker near the painted edge and in hollows, a little lighter on rises (the terrace shade map, mixed between cells when drawn) */
+/* light pools on the ground: every lamp of the room (C.light) warms the floor round it in its own colour, so a lantern at dusk lights its patch of the boardwalk (the engine's own lights barely show by day) */
+function f2GlowMap(C,k){k=k===undefined?1.1:k;const W=48,H=40,g=new Float32Array(W*H*3);let any=0;
+  for(const [lx,ly] of C.lights){const c=C.lcol[lx+','+ly]||[1.2,1,.7],m=Math.max(c[0],c[1],c[2])||1;for(let y=Math.max(0,ly-3);y<=Math.min(H-1,ly+3);y++)for(let x=Math.max(0,lx-3);x<=Math.min(W-1,lx+3);x++){const d=Math.hypot(x-lx,y-ly),f=Math.max(0,1-d/3.2);if(f<=0)continue;const w=f*f*k*Math.min(1.6,m)/m,i=(y*W+x)*3;g[i]+=c[0]*w;g[i+1]+=c[1]*w;g[i+2]+=c[2]*w;any=1}}
+  return any?g:null}
 function f2Shade(C,lv,o){o=o||{};const W=48,H=40,N=W*H,s=new Float32Array(N).fill(1),E=C.E,hg=C.hgt;
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;let v=1;
     // nearness to the painted edge: a soft vignette
