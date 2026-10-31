@@ -115,7 +115,8 @@ function campRun(id){
     done[hi]={cook:'cooked',sharpen:'sharpened the gear',tend:'tended the sick',stories:'told stories',spar:'sparred',forage:'foraged'}[id]||id;
   }
   G._campInfo=null;a.run(hi);
-  if(id!=='rest')campMoment(id,hi);
+  if(id==='rest'){if(G.menu==='jp:camp')G.menu=false}   // after the night's rest the game returns to the play screen, not to the camp page
+  else campMoment(id,hi);
 }
 /* a few lines that describe the moment, shown when a hero spends the day's choice */
 const CAMP_SCENES={
