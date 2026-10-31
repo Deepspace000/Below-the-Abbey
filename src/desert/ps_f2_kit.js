@@ -24,7 +24,7 @@ const F2B={
     text:'Snow falls without a sound. It is bitterly cold, and the light is grey and even.'},
   9824:{k:'water',sky:{top:[46,44,104],mid:[206,124,118],low:[255,196,128]},cloud:1.9,fog:[214,176,160,.006],haze:.1,silver:.62,amb:1.0,lcol:[1.45,1.05,.7],wn:'Evening haze',fx:null,
     text:'The canals lie still under a pink evening sky. Water laps at the steps, and somewhere a bell rings the hour.'},
-  9825:{k:'desert',sky:{top:[84,146,212],mid:[200,202,192],low:[242,216,160]},cloud:.55,fog:[228,206,166,.012],amb:1.1,lcol:[1.3,1.1,.75],wn:'Heat',fx:'heat',
+  9825:{k:'desert',sky:{top:[84,146,212],mid:[200,202,192],low:[242,216,160]},cloud:.55,fog:[230,210,170,.007],haze:.12,amb:1.15,lcol:[1.3,1.1,.75],wn:'Heat',fx:'heat',
     text:'The sun beats down on the sand. The air shimmers with heat, and there is no wind.'},
   9826:{k:'swamp',sky:{top:[38,48,44],mid:[78,94,80],low:[118,130,104]},cloud:1.0,fog:[92,106,84,.034],amb:.62,lcol:[.85,1.1,.7],wn:'Bog mist',fx:null,
     text:'A thick green mist lies on the black water. Frogs croak, and the mud bubbles and stinks.'},
@@ -313,7 +313,9 @@ F2.step={};F2.last='';
 function f2FacGid(img,i,n,wh,o){o=o||{};const k='fac'+img+i+'/'+n+'|'+wh+(o.fit===false?'nf':'');if(F2.tiles[k]!==undefined)return F2.tiles[k];if(!IMG[img]||!IMG[img].width)return null;IMG['gyp_'+img]=IMG[img];
   return F2.tiles[k]=gyTile(o.tex||'texBlack_2',wh,{fac:o.fit===false?{img,i,n}:{img,i,n,fit:true,at:o.at},gain:o.gain||1.0,rgb:o.rgb||[1,1,1],tag:'f2fac'+img,emit:o.emit===undefined?.12:o.emit})}
 /* a painted texture (assets/ps, kind tex) as a floor of the engine (128 x 128) */
-function f2TexFloor(key,out,g,tn){if(FLOORS[out])return out;const im=IMG[key];if(!im||!im.width)return null;try{const N=128,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.drawImage(im,0,0,N,N);const s=x.getImageData(0,0,N,N).data,d=new Uint8ClampedArray(N*N*4);
+function f2TexFloor(key,out,g,tn,rim){if(FLOORS[out])return out;const im=IMG[key];if(!im||!im.width)return null;try{const N=128,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.drawImage(im,0,0,N,N);
+  if(rim){x.strokeStyle='rgba(30,18,8,.85)';x.lineWidth=7;x.strokeRect(4,4,N-8,N-8);x.strokeStyle='rgba(255,230,170,.5)';x.lineWidth=2;x.strokeRect(9,9,N-18,N-18)}   // a carved plate: a dark sunk rim and a bright lip
+  const s=x.getImageData(0,0,N,N).data,d=new Uint8ClampedArray(N*N*4);
   for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,s[i]*(g||1)*(tn?tn[0]:1));d[i+1]=Math.min(255,s[i+1]*(g||1)*(tn?tn[1]:1));d[i+2]=Math.min(255,s[i+2]*(g||1)*(tn?tn[2]:1));d[i+3]=255}FLOORS[out]=d;return out}catch(e){return null}}
 /* the re-toned creatures exist as soon as the castle's pictures are in (a fight or a test may meet them before any room is built) */
 {const _pp=pspPics;pspPics=function(){const r=_pp.apply(this,arguments);try{F2.art=0;f2Art()}catch(e){console.error('f2Art',e)}return r}}
@@ -374,7 +376,7 @@ function f2RideTick(dt){const R=F2.ride;if(!R)return;if(LEVEL!==R.lv){F2.ride=nu
 {const _u2=update;update=function(dt){const r=_u2.apply(this,arguments);try{if(typeof LEVEL!=='undefined'&&f2Is(LEVEL)&&G.state==='play'){const d=Math.min(dt,.05);f2MoveTick(d);if(F2.ride)f2RideTick(d)}}catch(e){console.error('f2 move',e);F2.ride=null;G.lockT=0}return r}}
 /* ---------- a painted far skyline on the sky of a room (domes and towers over the roofs, a mountain range, a sea horizon), fixed to the world while the clouds drift ----------
    F2SKY[id] = {img, rows (height in sky rows), base (sky row of its foot; 150 is the horizon), rep (copies round the sky), haze (0..1)} */
-const F2SKY={9824:{img:'f2_sky_venice',rows:118,base:156,rep:3,haze:.32},9821:{img:'f2_sky_forest',rows:46,base:154,rep:3,haze:.25},9823:{img:'f2_sky_snow',rows:70,base:154,rep:3,haze:.3}};
+const F2SKY={9824:{img:'f2_sky_venice',rows:118,base:156,rep:3,haze:.32},9821:{img:'f2_sky_forest',rows:46,base:154,rep:3,haze:.25},9823:{img:'f2_sky_snow',rows:70,base:154,rep:3,haze:.3},9825:{img:'f2_sky_desert',rows:40,base:153,rep:2,haze:.25}};
 function f2SkylineBuf(id){const S=F2SKY[id];if(!S)return null;if(S.buf)return S;const im=IMG['ps_'+S.img];if(!im||!im.width)return null;
   const R=S.rows,c=document.createElement('canvas');c.width=1024;c.height=R;const x=c.getContext('2d');x.imageSmoothingQuality='high';
   const n=S.rep||2,w=1024/n,B=F2B[id],fc=B.fog;
@@ -398,7 +400,7 @@ function f2Roof(C,key,x,y,o){o=o||{};const d={k:'kroof',lk:key,x,y,block:false,d
 function f2Veil(key,a,tag){const nk=key+'_veil'+(tag||'');if(IMG[nk]&&IMG[nk].width)return nk;const im=IMG[key];if(!im||!im.width)return key;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);
   const g=x.createLinearGradient(0,c.height,0,c.height*.45);g.addColorStop(0,'rgba(222,230,240,'+a+')');g.addColorStop(.35,'rgba(214,224,236,'+(a*.45)+')');g.addColorStop(1,'rgba(214,224,236,0)');x.fillStyle=g;x.fillRect(0,0,c.width,c.height);
   IMG[nk]=c;NPC_H[nk]=NPC_H[key];return nk}
-function f2Edge(C,o){const W=48,H=40,rows=C.rows,ix=(x,y)=>y*W+x,hs=C.hs2;if(!IMG['ps_'+o.img])return 0;C._edgeSpec=o;
+function f2Edge(C,o){const W=48,H=40,rows=C.rows,ix=(x,y)=>y*W+x,hs=C.hs2;if(!IMG['ps_'+o.img])return 0;o.tall=(o.tall||[]).map(k=>k.replace(/^ps_/,''));C._edgeSpec=o;
   const wh=o.wh||2.6,gid=[];   // each picture is fitted by height (n squares carry one copy); the copies follow each other plain and mirrored, and a second picture (img2) between them
   for(const nm of [o.img].concat(o.img2&&IMG['ps_'+o.img2]?[o.img2]:[])){const base=f2Veil('ps_'+nm,o.veil===undefined?.55:o.veil),im0=IMG[base],n=Math.max(1,Math.round(wh*im0.width/im0.height));
     for(const pic of [base,f2Flip(base)])for(let i=0;i<n;i++){const g=f2FacGid(pic,i,n,wh,{tex:'texBlack_2',rgb:o.rgb||[1,1,1],emit:.06});gid.push(g==null?null:C.ch(g))}}
