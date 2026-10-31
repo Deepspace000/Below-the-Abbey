@@ -5117,5 +5117,101 @@
 "h": 1.0,
 "kind": "sprite",
 "sheet": "f2v"
+},
+"f2_is_hut": {
+"file": "f2_is_hut.webp",
+"w": 580,
+"px_h": 512,
+"h": 2.9,
+"kind": "sprite",
+"sheet": "a4hut"
+},
+"f2_is_dunegrass": {
+"file": "f2_is_dunegrass.webp",
+"w": 536,
+"px_h": 512,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "a4beach"
+},
+"f2_is_shells": {
+"file": "f2_is_shells.webp",
+"w": 882,
+"px_h": 397,
+"h": 0.5,
+"kind": "sprite",
+"sheet": "a4beach"
+},
+"f2_is_creeper": {
+"file": "f2_is_creeper.webp",
+"w": 980,
+"px_h": 400,
+"h": 0.4,
+"kind": "sprite",
+"sheet": "a4beach"
+},
+"f2_is_frangi": {
+"file": "f2_is_frangi.webp",
+"w": 739,
+"px_h": 512,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "a4beach"
+},
+"f2_fo_bluebells": {
+"file": "f2_fo_bluebells.webp",
+"w": 655,
+"px_h": 512,
+"h": 0.7,
+"kind": "sprite",
+"sheet": "a4wood"
+},
+"f2_fo_roots": {
+"file": "f2_fo_roots.webp",
+"w": 949,
+"px_h": 448,
+"h": 0.6,
+"kind": "sprite",
+"sheet": "a4wood"
+},
+"f2_fo_daisies": {
+"file": "f2_fo_daisies.webp",
+"w": 776,
+"px_h": 512,
+"h": 0.5,
+"kind": "sprite",
+"sheet": "a4wood"
+},
+"f2_fo_fronds": {
+"file": "f2_fo_fronds.webp",
+"w": 495,
+"px_h": 512,
+"h": 0.7,
+"kind": "sprite",
+"sheet": "a4wood"
+},
+"f2_sn_reeds": {
+"file": "f2_sn_reeds.webp",
+"w": 344,
+"px_h": 340,
+"h": 0.7,
+"kind": "sprite",
+"sheet": "a4snow"
+},
+"f2_sn_holly": {
+"file": "f2_sn_holly.webp",
+"w": 356,
+"px_h": 264,
+"h": 0.7,
+"kind": "sprite",
+"sheet": "a4snow"
+},
+"f2_sn_rocks": {
+"file": "f2_sn_rocks.webp",
+"w": 463,
+"px_h": 240,
+"h": 0.8,
+"kind": "sprite",
+"sheet": "a4snow"
 }
 }

@@ -78560,6 +78560,8 @@ function f2aGrove(C,rx,o){o=o||{};const W=48,hs=C.hs2,E=C.E,keep=o.keep||(()=>fa
     if(e===1&&hs(d.x,d.y,303)<(o.fg||.3)){d.sc=+((d.sc||1)*1.22).toFixed(2);const dk=f2Soft(String(d.k).replace(/_fl$/,''),{filter:o.dark||'brightness(.74) saturate(1.08)',tag:'dk'});d.k=/_fl$/.test(String(d.k))?f2Flip(dk):dk}}
   if(under.length)for(const d of C.decor.slice()){if(!d.block||d.npc||!rx.test(String(d.k)))continue;const nb=[[0,1],[1,0],[-1,0],[0,-1]].filter(([a,b])=>C.open(d.x+a,d.y+b)&&!C.decor.some(q=>q.block&&q.x===d.x+a&&q.y===d.y+b));if(!nb.length||hs(d.x,d.y,304)>(o.underP||.55))continue;
     const [a,b]=nb[0],u=C.dec(under[(hs(d.x,d.y,305)*under.length)|0],d.x,d.y,{block:false,sc:+((o.underSc||.55)*(.8+hs(d.x,d.y,306)*.4)).toFixed(2)});if(u){u.ox=Math.max(-.45,Math.min(.45,(d.ox||0)+a*.42));u.oy=Math.max(-.45,Math.min(.45,(d.oy||0)+b*.42))}}}
+/* a copy of a painted edge picture with a few columns cut off each side: the outermost columns of a painting are often darker, and where a copy meets its mirror image they made a dark seam like a post */
+function f2aTrim(key,px){const nk=key+'_tr';if(IMG[nk]&&IMG[nk].width)return nk;const im=IMG[key];if(!im||!im.width)return key;const c=document.createElement('canvas');c.width=im.width-2*px;c.height=im.height;c.getContext('2d').drawImage(im,px,0,im.width-2*px,im.height,0,0,c.width,c.height);IMG[nk]=c;NPC_H[nk]=NPC_H[key];return nk}
 /* dappled light: the shade map of a room gets soft patches of sun and shadow on the open ground, and brighter pools at the given places */
 function f2aDapple(id,C,o){o=o||{};const T=TERRS[id];if(!T||!T.s)return;const W=48,H=40;
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;let v=1+(C.vn(x,y,o.cs||2.6,311)-.5)*(o.amp||.32);for(const [px,py,r,k] of o.pools||[]){const dd=Math.hypot(x-px,y-py);if(dd<r)v*=1+k*(1-dd/r)}T.s[i]=Math.max(.45,Math.min(1.4,T.s[i]*v))}}
@@ -78586,7 +78588,7 @@ function f2ForestBuild(){
   C.reserve(22,5,26,7);C.reserve(22,9,22,9);C.reserve(26,9,26,9);
   for(const [x,y,k] of [[15,2,'f2_fo_fir'],[17,2,'f2_fo_beech'],[19,3,'f2_fv_cherry'],[21,2,'f2_fo_fir'],[27,2,'f2_fo_maple'],[29,3,'f2_fv_cherry'],[31,2,'f2_fo_beech'],[33,2,'f2_fo_fir'],[23,2,'f2_fo_birch'],[25,2,'f2_fo_birch']])if(C.free(x,y)){C.used.delete(x+','+y);const d=C.dec(pspPic(k),x,y,{block:true,sc:/birch/.test(k)?.85:1.1});if(d)d.oy=-.35}   // great trees at the back of the glade, in front of the forest wallC.reserve(23,8,25,9);   // nothing grows in front of the oak's door
   // the glade floor in front of the stones stays clean: no tufts, only flowers and a fern at the foot of each stone; two blossom trees stand at the way in, one the mirror of the other (the forest is a little too perfect)
-  for(const [x,y] of F2_FOREST.STONES)for(const [k,ox,sc] of [['f2_fo_flowers',-.38,.5],['f2_fo_fern',.4,.48]]){const u=C.dec(f2aNs(k),x,y,{block:false,sc});if(u){u.ox=ox;u.oy=.42}}
+  for(const [x,y] of F2_FOREST.STONES)for(const [k,ox,sc] of [['f2_fo_bluebells',-.38,.5],['f2_fo_fronds',.4,.5]]){const u=C.dec(f2aNs(k),x,y,{block:false,sc});if(u){u.ox=ox;u.oy=.42}}
   for(const [x,fl] of [[20,0],[28,1]]){C.used.delete(x+',12');if(C.open(x,12)&&!C.nearPath(x,12,0)){const d=C.dec(fl?f2Flip(pspPic('f2_fv_cherry')):pspPic('f2_fv_cherry'),x,12,{block:true,sc:1.0});if(d){d.ox=fl?-.2:.2;d.oy=-.2}}}
   for(const [x,y,k] of [[21,34,'f2_fo_rose'],[27,34,'f2_fo_foxglove'],[21,36,'f2_fo_fern'],[27,36,'f2_fo_flowers']])if(C.free(x,y))C.dec(f2aNs(k),x,y,{block:false,sc:.75});   // a frame of flowers round the arrival
   // the ground: grass, with drifts of fallen leaves and meadow flowers
@@ -78596,17 +78598,17 @@ function f2ForestBuild(){
   {const TF=TR.slice(1);TF.push(...TF.map(f2Flip));C.fill(TF,{sc:1,p1:.08,p2:.5,p3:.88})}
   // copses: small groves out in the open ground (never within two squares of a way, never in the glade or by the arrival), so there are groves and meadows, not one even ring of trees
   {for(let y=3;y<37;y++)for(let x=3;x<45;x++){if(!C.free(x,y)||!C.open(x,y)||C.nearPath(x,y,2)||(x>=14&&x<=34&&y<=13)||Math.hypot(x-24,y-35)<6||C.E[y*48+x]>0)continue;const g=C.vn(x,y,5,401);if(g>.62&&C.hs2(x,y,402)<.5+(g-.62)*1.6){const d=C.dec(f2PickVar(C,TR,x,y,C.hs2(x,y,403)),x,y,{block:true,sc:+(.95+C.hs2(x,y,404)*.5).toFixed(2)});if(d){d.ox=(C.hs2(x,y,405)-.5)*.7;d.oy=(C.hs2(x,y,406)-.5)*.6}}}}
-  C.scrub([f2aNs('f2_fo_grass'),f2aNs('f2_fo_flowers'),f2aNs('f2_fo_fern'),f2aNs('f2_fo_flowers'),f2aNs('f2_fo_flowers')],.22,{sc:.75});
+  C.scrub(['f2_fo_daisies','f2_fo_flowers','f2_fo_fern','f2_fo_bluebells','f2_fo_grass','f2_fo_fronds','f2_fo_daisies'].map(f2aNs),.22,{sc:.7});
   // a landmark in every clearing: a fallen log with a robin on it, a ring of stumps, an old broken pillar
   for(const [x,y,k] of [[8,17,'f2_fo_log'],[38,18,'f2_fo_ruin'],[9,30,'f2_fo_stump'],[6,6,'f2_fo_ruin'],[10,6,'f2_fo_stump']])if(C.free(x,y)&&!C.nearPath(x,y,0)){C.dec(pspPic(k),x,y,{block:true,sc:k==='f2_fo_ruin'?.75:1.05});if(k==='f2_fo_log'){const r=C.dec(pspPic('f2_fo_robin'),x,y,{block:false,bob:.32,sc:1.2});if(r)r.fly=1}if(k==='f2_fo_ruin'){const q=C.near(x+1,y,1,true);if(q)C.dec(f2aNs('f2_fo_toadstools'),q[0],q[1],{block:false,sc:.9})}}
   C.scrub([f2aNs('f2_fo_toadstools')],.008);
   for(const [x,y] of [[6,15],[10,21],[35,15],[41,21],[7,28],[11,33],[5,4],[9,8],[36,20],[12,30]])if(C.free(x,y)&&!C.nearPath(x,y,0))C.dec(pspPic((x+y)%3?'f2_fo_log':'f2_fo_boulder'),x,y,{block:true,sc:.9});
   for(const d of C.decor)if(/f2_f[ov]_(oak|beech|fir|maple|birch|lime|ash|hawthorn|hornbeam|yew|cherry)|ltree/.test(d.k)&&d.block){d.sc=+((d.sc||1)*(.72+C.hs2(d.x,d.y,171)*.62)).toFixed(2);d.ox=(C.hs2(d.x,d.y,172)-.5)*.85;d.oy=(C.hs2(d.x,d.y,173)-.5)*.7}   // no rows: every tree a little off its square
-  f2aGrove(C,/f2_f[ov]_(oak|beech|fir|maple|birch|lime|ash|hawthorn|hornbeam|yew|cherry)/,{keep:(x,y)=>x>=14&&x<=34&&y<=12,under:['f2_fo_fern','f2_fo_grass','f2_fo_fern','f2_fo_foxglove','f2_fo_flowers','f2_fo_grass'].map(f2aNs)});
+  f2aGrove(C,/f2_f[ov]_(oak|beech|fir|maple|birch|lime|ash|hawthorn|hornbeam|yew|cherry)/,{keep:(x,y)=>x>=14&&x<=34&&y<=12,under:['f2_fo_fern','f2_fo_roots','f2_fo_bluebells','f2_fo_fronds','f2_fo_roots','f2_fo_daisies','f2_fo_foxglove'].map(f2aNs),underP:.7});
   C.capTrees(/ltree|f2_f[ov]_(oak|beech|fir|maple|birch|lime|ash|hawthorn|hornbeam|yew|cherry)/,2.4);
-  C.scrub([f2aNs('f2_fo_grass'),f2aNs('f2_fo_flowers'),f2aNs('f2_fo_grass')],.05,{onPath:true,sc:.5});   // tufts that break the edge of the leaf path
+  C.scrub([f2aNs('f2_fo_daisies'),f2aNs('f2_fo_flowers'),f2aNs('f2_fo_bluebells')],.05,{onPath:true,sc:.45});   // tufts that break the edge of the leaf path
   // shrubs and flowers at the feet of the trees, a few stumps
-  {const S2=['f2_fo_foxglove','f2_fo_fern','f2_fo_rose','f2_fo_grass','f2_fo_flowers'].map(f2aNs);let n=0;
+  {const S2=['f2_fo_foxglove','f2_fo_fern','f2_fo_rose','f2_fo_daisies','f2_fo_bluebells','f2_fo_fronds'].map(f2aNs);let n=0;
    for(let y=3;y<37;y++)for(let x=3;x<45;x++){if(!C.free(x,y)||C.nearPath(x,y,0)||C.core[y*48+x]&&C.hs2(x,y,151)>.08)continue;if(C.hs2(x,y,152)<.075){C.dec(S2[n%S2.length],x,y,{block:false,sc:.62+C.hs2(x,y,153)*.25});n++}}}
   // the glade: soft shafts of sunlight fall on the hollow oak, fireflies hang in them, butterflies cross the glades, small birds fly over
   {const sh0=f2Compose('f2_fo_shaft_c',IMG.ps_f2_fo_shaft?IMG.ps_f2_fo_shaft.width:10,IMG.ps_f2_fo_shaft?Math.round(IMG.ps_f2_fo_shaft.height*.78):10,[['ps_f2_fo_shaft',0,0,0,Math.round((IMG.ps_f2_fo_shaft||{height:10}).height*.78),0,0,(IMG.ps_f2_fo_shaft||{width:10}).width,Math.round((IMG.ps_f2_fo_shaft||{height:10}).height*.78)]],3.2),sh=f2Soft(sh0,{l:.35,r:.35,t:.05,b:.3,a:.3,tag:'g2'});
@@ -78655,34 +78657,42 @@ f2OnArrive(9821,()=>f2ForestApply());
 /* ---------- 2. THE ISLAND BY THE SEA (9822): the foot ---------- */
 const F2_ISLAND={PATCH:[[17,5,'conch','a conch shell'],[21,3,'scallop','a scallop shell'],[27,3,'starfish','a starfish'],[31,5,'spiral','a spiral snail shell']],ANSWER:'starfish',BOTTLE:[20,32],SPADE:[37,28]};
 function f2IslandBuild(){
-  const IS=f2TexFloor('ps_f2_tex_issand','f2t_issand',1.0)||'sand',IW=f2TexFloor('ps_f2_tex_iswet','f2t_iswet',1.0)||'seabed1',IG=f2TexFloor('ps_f2_tex_isgrass','f2t_isgrass',1.0)||'sand',ISE=f2TexFloor('ps_f2_tex_issea','f2t_issea',1.0)||'seawater';
-  const C=f2Room({id:9822,ground:ISE,path:IG,band:[0,2],softRet:1,rw:0,mistH:.08,
+  const IS=f2TexFloor('ps_f2_tex_issand','f2t_issand',1.0)||'sand',IW=f2TexFloor('ps_f2_tex_iswet','f2t_iswet2',.9,[.96,.96,.98])||'seabed1',IG=f2TexFloor('ps_f2_tex_isgrass','f2t_isgrass',1.0)||'sand',ISE=f2TexFloor('ps_f2_tex_issea','f2t_issea2',1.22,[.92,1.04,1.08])||'seawater';
+  const C=f2Room({id:9822,ground:ISE,path:IG,band:[0,2],softRet:1,rw:0,mistH:.08,shade:{edge:0,pool:.74,tree:/palm|f2_is_rock|f2_iv_(rock|banana|lean|palms3)/},feather:/f2_iv_rock|f2_is_rock/,soil:[214,192,150],
     routes:[[[24,35],[24,26],[16,22],[16,12],[24,8],[24,6]],[[24,30],[33,29]],[[16,18],[9,18]],[[24,8],[37,13]]],
     clear:[[14,2,34,8,IS,'The North Beach',1],[29,24,40,31,IS,"The Fisherman's Hut",1],[6,14,12,22,IS,'The Siren Rocks',1],[32,10,40,17,IS,'The Gull Cove',1],[19,31,29,37,IS,null,1]],
-    edge:(C,x,y)=>{C.water(x,y,ISE);return true}});
+    edge:(C,x,y)=>{if(x>=13&&x<=34&&y>=10&&y<=24)return true;C.water(x,y,ISE);return true}});   // the middle of the island is land (a palm grove), the sea lies round the outside
   const W=48,H=40;
   // the shore: wet sand next to the water
-  {const wet=C.fl(IW);for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++)if(C.open(x,y)&&[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>C.block[(y+b)*W+x+a]&&C.rows[y+b][x+a]==='.'))C.fm[y*W+x]=wet}
   // the fisherman's hut (a small timber hut with a thatched roof; the door is shut), nets, the spade by the door
-  C.house({x0:34,y0:25,x1:36,y1:26,face:'S',sty:'flint',roof:'thatch2',wh:2.3,lit:false});
-  {const lw=f2TexWall('ps_f2_tex_logwall',2.3,{gain:1.2,rgb:[1.08,1.0,.9]});if(lw!=null)for(let y=25;y<=26;y++)for(let x=34;x<=36;x++){const g=C.chars[C.rows[y][x]];if(C.rows[y][x]!=='.'&&!(g!==undefined&&KH_DOOR[g]))C.solid(x,y,C.ch(lw))}}   // a hut of driftwood logs, not castle flint
-  const [sx,sy]=F2_ISLAND.SPADE;C.used.delete(sx+','+sy);C.dec(pspPic('f2_spade'),sx,sy,{block:true,npc:'f2i_spade'});
+  if(!(IMG.ps_f2_is_hut&&IMG.ps_f2_is_hut.width&&C.picHouse({img:'ps_f2_is_hut',x0:34,y0:26,x1:36,y1:26,w:3.5,door:[35,26],wh:2.1})))C.house({x0:34,y0:25,x1:36,y1:26,face:'S',sty:'flint',roof:'thatch2',wh:2.3,lit:false});   // the painted hut front (driftwood walls, a thatched roof), its sides of driftwood logs
+  {const lw=f2TexWall(f2Soft('ps_f2_tex_logwall',{filter:'saturate(.15) brightness(1.7) contrast(.95)',tag:'g2'}),2.1,{gain:1.2,rgb:[.98,.98,1.0]});if(lw!=null)for(let y=25;y<=26;y++)for(let x=34;x<=36;x++){const g=C.chars[C.rows[y][x]];if(C.rows[y][x]!=='.'&&!(g!==undefined&&KH_DOOR[g]))C.solid(x,y,C.ch(lw))}}   // a hut of driftwood logs, not castle flint
+  const [sx,sy]=F2_ISLAND.SPADE;C.used.delete(sx+','+sy);C.dec(pspPic('f2_spade'),sx,sy,{block:true,npc:'f2i_spade',sc:.75});
   {let n=0;for(let r=1;r<8&&n<2;r++)for(const [x,y] of [[42+r,30],[42+r,27],[40,33+r]]){if(n<2&&C.rows[y]&&C.rows[y][x]==='.'&&C.block[y*48+x]&&!C.decor.some(d=>d.x===x&&d.y===y)){C.dec('yar_boat_row',x,y,{block:false,sc:.9});n++}}}   // two rowing boats drawn up in the shallows by the hut
   // the bottle on the south shore, the four sand patches on the north beach
-  {const [bx,by]=F2_ISLAND.BOTTLE;C.used.delete(bx+','+by);C.dec(pspPic('f2_bottle'),bx,by,{block:true,npc:'f2i_bottle',sc:1.8});C.light(bx,by,[1.4,1.3,1.0])}
-  F2_ISLAND.PATCH.forEach(([x,y,s],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_patch_'+s),x,y,{block:true,npc:'f2i_patch'+i,sc:1.7})});
+  {const [bx,by]=F2_ISLAND.BOTTLE;C.used.delete(bx+','+by);C.dec(pspPic('f2_bottle'),bx,by,{block:true,npc:'f2i_bottle',sc:1.15})}
+  F2_ISLAND.PATCH.forEach(([x,y,s],i)=>{C.used.delete(x+','+y);C.dec(f2Soft(pspPic('f2_patch_'+s),{filter:'contrast(1.35) brightness(.9) saturate(1.2)',tag:'c'}),x,y,{block:true,npc:'f2i_patch'+i,sc:1.35})});
   // palms, dune grass and rocks
-  f2Patches(C,[[IS,.8],[IG,.2]],{cs:5,onPath:true});   // the ground of the map itself is the sea (it runs on past the edge to the horizon); every square of land is sand or grass
-  const PT=[pspPic('f2_is_palm'),pspPic('f2_is_palm2'),'dpalm0','dpalm2'];PT.push(...PT.map(f2Flip));
-  C.fill(PT.concat([pspPic('f2_is_rock'),'hgxrock1']),{p1:.12,p2:.4,p3:.6});for(const d of C.decor)if(/f2_is_rock/.test(d.k))d.sc=.7;
-  for(const d of C.decor)if(d.block&&/palm|f2_is_rock/.test(d.k)){d.sc=+((d.sc||1)*(.8+C.hs2(d.x,d.y,171)*.45)).toFixed(2);d.ox=(C.hs2(d.x,d.y,172)-.5)*.8;d.oy=(C.hs2(d.x,d.y,173)-.5)*.6}
-  C.scrub(['yar_shells',pspPic('f2_is_shrub'),'yar_shells'],.04,{sc:.8});
+  {const IS2=f2TexFloor('ps_f2_tex_issand','f2t_issand2',.93,[1.03,.97,.88])||IS;f2Patches(C,[[IS,.48],[IS2,.36],[IG,.16]],{cs:6,onPath:true})}
+  {const wet=C.fl(IW);for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++)if(C.open(x,y)&&[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>C.block[(y+b)*W+x+a]&&C.rows[y+b][x+a]==='.'))C.fm[y*W+x]=wet}   // damp sand along the water (after the patches, so it stays)
+   // the ground of the map itself is the sea (it runs on past the edge to the horizon); every square of land is sand or grass
+  const PT=[pspPic('f2_is_palm'),pspPic('f2_is_palm2'),pspPic('f2_iv_palms3'),pspPic('f2_iv_lean'),pspPic('f2_iv_banana')];PT.push(...PT.map(f2Flip));
+  C.fill(PT.concat([pspPic('f2_is_rock'),pspPic('f2_iv_rock'),f2Flip(pspPic('f2_iv_rock'))]),{p1:.12,p2:.4,p3:.6});for(const d of C.decor)if(/f2_is_rock/.test(d.k))d.sc=.7;
+  f2aGrove(C,/palm|f2_iv_(lean|banana|palms3)/,{gap:.42,cs:6,keep:(x,y)=>y<=9||(x>=28&&y>=23),under:['f2_iv_fern','f2_is_dunegrass','f2_is_frangi','f2_is_creeper'].map(k=>f2aNs(k)),underP:.4,underSc:.5,dark:'brightness(.8) saturate(1.1)'});
+  for(const d of C.decor)if(d.block&&/palm|f2_is_rock|f2_iv_/.test(d.k)){d.sc=+((d.sc||1)*(.8+C.hs2(d.x,d.y,171)*.45)).toFixed(2);d.ox=(C.hs2(d.x,d.y,172)-.5)*.8;d.oy=(C.hs2(d.x,d.y,173)-.5)*.6}
+  C.scrub([f2aNs('f2_is_shells'),f2aNs('f2_is_dunegrass'),f2aNs('f2_is_creeper'),f2aNs('f2_iv_fern'),f2aNs('f2_is_frangi'),f2Flip(f2aNs('f2_is_dunegrass')),'yar_shells',f2Flip(f2aNs('f2_is_creeper'))],.15,{sc:.85});
+  for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(!d.npc&&!d.fly&&!d.edgeTree&&(F2_ISLAND.PATCH.some(([x,y])=>Math.abs(d.x-x)<=1&&Math.abs(d.y-y)<=1)||(!d.block&&d.x>=15&&d.x<=33&&d.y>=2&&d.y<=6&&!/shells/.test(String(d.k))))){C.used.delete(d.x+','+d.y);C.decor.splice(i,1)}}   // the sand round the four mounds stays bare   // dune grass, shells, creepers, ferns and flowering shrubs on the sandC.scrub([pspPic('f2_iv_drift'),f2Flip(pspPic('f2_iv_drift'))],.04,{sc:.6});   // shells, ferns and driftwood on the sand
   for(const [x,y] of [[38,27],[33,28],[36,31]])if(C.free(x,y))C.dec(pspPic('f2_is_nets'),x,y,{block:false});
   f2Mover(C,'yar_gull_fly0'in IMG?'yar_gull_fly0':pspPic('f2_fo_birds'),[[4,6],[44,6]],1.2,{pingpong:true,bob:3}).fly=1;
-  for(const [x,y] of [[7,16],[8,21],[11,15],[6,19]])if(C.free(x,y))C.dec('hgxrock1',x,y,{block:true,sc:1.1});
-  C.capTrees(/dpalm|yar_palms|f2_is_palm|f2_is_rock/,2.6);
-  f2Edge(C,{img:'f2_is_wall',wh:2.8,veil:.1,rgb:[1.2,1.1,.92],only:(x,y)=>x<=2||x>=45||y>=37});
+  for(const [x,y,sc] of [[7,16,1.0],[8,21,.8],[11,15,.7],[6,19,1.15]])if(C.free(x,y))C.dec(x%2?f2Flip(pspPic('f2_iv_rock')):pspPic('f2_iv_rock'),x,y,{block:true,sc});   // the siren rocks
+  C.capTrees(/dpalm|yar_palms|f2_is_palm|f2_is_rock|f2_iv_(lean|banana|palms3)/,2.6);
+  f2Edge(C,{img:f2aTrim('ps_f2_is_wall',14).replace(/^ps_/,''),wh:2.0,veil:.06,rgb:[1.2,1.1,.92],only:(x,y)=>y>=37});
   for(let y=0;y<40;y++)for(let x=0;x<48;x++)if(C.rows[y][x]!=='.')C.fm[y*48+x]=C.fl(ISE);   // under the low mist of the edge lies the sea, out to the horizon   // sea cliffs at the two ends of the island; to the north the sea runs to the horizon
+  // the outer ring where the sea runs out (north, east and west): sea floor (blocked), not a low wall of mist, so the sea goes on to the horizon with no dark rim; only the south, round the gate, is cliff
+  for(let y=0;y<40;y++)for(let x=0;x<48;x++){if(!(x<2||y<2||x>45||y>37))continue;const g=C.chars[C.rows[y][x]];if(C.rows[y][x]==='.'||(g!==undefined&&KH_DOOR[g]))continue;const nb=[[1,0],[-1,0],[0,1],[0,-1],[2,0],[-2,0],[0,2],[0,-2]].some(([a,b])=>{const xx=x+a,yy=y+b;return xx>=0&&yy>=0&&xx<48&&yy<40&&C.rows[yy][xx]==='.'&&C.block[yy*48+xx]});
+    if(y<38){C.rows[y][x]='.';C.block[y*48+x]=1;C.fm[y*48+x]=C.fl(ISE);C.used.add(x+','+y)}}
+  // sea stacks and boulders standing in the surf before the cliffs at the two ends (they break up the long cliff face)
+  {const RK=[pspPic('f2_is_rock'),pspPic('f2_iv_rock'),f2Flip(pspPic('f2_is_rock')),f2Flip(pspPic('f2_iv_rock'))];for(let y=3;y<37;y++)for(const x of [2,3,4,43,44,45]){if(C.rows[y][x]!=='.'||!C.block[y*48+x]||C.decor.some(d=>d.x===x&&d.y===y))continue;const near=x<10?x-2:45-x;if(C.hs2(x,y,421)<(near===0?.42:near===1?.22:.1)){const k=RK[(C.hs2(x,y,422)*RK.length)|0],d=C.dec(k,x,y,{block:true,sc:+((/is_rock/.test(k)?.75:1.2)*(.55+C.hs2(x,y,423)*.95)).toFixed(2)});if(d){d.ox=(C.hs2(x,y,424)-.5)*.6;d.oy=(C.hs2(x,y,425)-.5)*.6}}}}
   pspSafeZone(C,24,35,6);
   C.foes(['f2crab','f2crab'],[14,2,34,8],1);
   C.foes(['f2siren','f2siren','f2spawn'],[5,13,13,23],2);
@@ -78690,7 +78700,8 @@ function f2IslandBuild(){
   C.foes(['f2spawn','f2crab','f2spawn'],[29,24,41,33],4);
   for(const [x,y] of [[6,15],[39,11],[39,30]])C.chestAt(x,y,1);
   C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[.9,.95,1.05]});
-  return C.done({glow:8})}
+  const lv=C.done({glow:8});f2aDapple(9822,C,{amp:.24,cs:3.4});   // damp and dry patches on the sand
+  return lv}
 pspRegister(9822,f2IslandBuild);
 khNpc('f2i_bottle','A bottle on the shore','ps_f2_bottle',()=>{const R=f2S(9822);R.read=1;
   return say('A green glass bottle lies half in the wet sand, corked with wax. Inside is a rolled note. It reads: DIG WHERE THE TIDE LEAVES THE FIRST FOOTPRINT OF THE DAY. Under the words is a small drawing of a starfish, and an arrow pointing north.',[BYE])});
@@ -78711,6 +78722,9 @@ function f2IslandApply(){const R=f2S(9822);if(LEVEL!==9822)return;
   if(R.spade){const [sx,sy]=F2_ISLAND.SPADE;f2Hide(pspPic('f2_spade'),sx,sy,true)}
   for(const [x,y,s] of F2_ISLAND.PATCH)if(R.dug&&R.dug[s])for(const d of G.decor||[])if(d.npc&&Math.round(d.x)===x&&Math.round(d.y)===y)d.k=pspPic('f2_patch_dug')}
 f2OnArrive(9822,()=>f2IslandApply());
+/* past the edge of the island the engine paints the ground below the horizon in the haze colour, darkened; here it is the open sea, light at the horizon and deeper blue nearer */
+{const _tb=terrBack;terrBack=function(D,hzr,hzmax,lbm){if(typeof LEVEL==='undefined'||LEVEL!==9822)return _tb.apply(this,arguments);
+  for(let y=Math.max(0,HH-1);y<VH;y++){const t=Math.min(1,(y-HH+1)/Math.max(1,VH-HH)*6),r=176+(56-176)*t,g=204+(128-204)*t,b=218+(150-218)*t;let o=y*VW*4;for(let x=0;x<VW;x++,o+=4){D[o]=r;D[o+1]=g;D[o+2]=b}}}}
 /* ---------- 3. THE CABIN IN THE SNOW (9823): the face ---------- */
 const F2_SNOW={LOGS:[[8,23],[40,22],[10,31]],FLINT:[28,10],HEARTH:[41,4],MIRROR:[43,4],IN:[41,7,0],OUT:[24,9,2]};
 function f2SnowBuild(){
