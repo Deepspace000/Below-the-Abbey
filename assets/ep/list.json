@@ -1,0 +1,387 @@
+{
+"dc_straw": {
+"file": "dc_straw.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grime1"
+},
+"dc_droppings": {
+"file": "dc_droppings.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grime1"
+},
+"dc_puddle": {
+"file": "dc_puddle.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grime1"
+},
+"dc_soot": {
+"file": "dc_soot.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grime1"
+},
+"dc_crack": {
+"file": "dc_crack.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grime1"
+},
+"dc_rubble": {
+"file": "dc_rubble.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grime1"
+},
+"dc_bones": {
+"file": "dc_bones.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grime1"
+},
+"dc_damp": {
+"file": "dc_damp.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grime1"
+},
+"dc_shards": {
+"file": "dc_shards.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grime1"
+},
+"dc_rag": {
+"file": "dc_rag.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grime1"
+},
+"dc_grain": {
+"file": "dc_grain.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grime1"
+},
+"dc_leaves": {
+"file": "dc_leaves.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grime1"
+},
+"dc_wax": {
+"file": "dc_wax.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grime1"
+},
+"dc_mud": {
+"file": "dc_mud.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grime1"
+},
+"dc_blood": {
+"file": "dc_blood.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grime1"
+},
+"dc_pebbles": {
+"file": "dc_pebbles.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grime1"
+},
+"tex_cryptwall": {
+"file": "tex_cryptwall.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_crypt1"
+},
+"tex_cellarbrick": {
+"file": "tex_cellarbrick.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_crypt1"
+},
+"tex_flagfloor": {
+"file": "tex_flagfloor.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_crypt1"
+},
+"tex_earthfloor": {
+"file": "tex_earthfloor.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_crypt1"
+},
+"sacks": {
+"file": "sacks.webp",
+"w": 533,
+"h": 420,
+"kind": "sprite",
+"sheet": "props_dungeon1"
+},
+"crate": {
+"file": "crate.webp",
+"w": 544,
+"h": 389,
+"kind": "sprite",
+"sheet": "props_dungeon1"
+},
+"rubble": {
+"file": "rubble.webp",
+"w": 613,
+"h": 279,
+"kind": "sprite",
+"sheet": "props_dungeon1"
+},
+"ratnest": {
+"file": "ratnest.webp",
+"w": 619,
+"h": 305,
+"kind": "sprite",
+"sheet": "props_dungeon1"
+},
+"bucket": {
+"file": "bucket.webp",
+"w": 321,
+"h": 420,
+"kind": "sprite",
+"sheet": "props_dungeon1"
+},
+"chair": {
+"file": "chair.webp",
+"w": 589,
+"h": 316,
+"kind": "sprite",
+"sheet": "props_dungeon1"
+},
+"bonepile": {
+"file": "bonepile.webp",
+"w": 607,
+"h": 343,
+"kind": "sprite",
+"sheet": "props_dungeon1"
+},
+"planks": {
+"file": "planks.webp",
+"w": 267,
+"h": 420,
+"kind": "sprite",
+"sheet": "props_dungeon1"
+},
+"jar": {
+"file": "jar.webp",
+"w": 324,
+"h": 420,
+"kind": "sprite",
+"sheet": "props_dungeon1"
+},
+"tex_cryptroots": {
+"file": "tex_cryptroots.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_walls2"
+},
+"tex_cryptdamp": {
+"file": "tex_cryptdamp.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_walls2"
+},
+"tex_caverock": {
+"file": "tex_caverock.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_walls2"
+},
+"tex_minewall": {
+"file": "tex_minewall.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_walls2"
+},
+"web_corner": {
+"file": "web_corner.webp",
+"w": 358,
+"h": 360,
+"kind": "sprite",
+"sheet": "wall_details1"
+},
+"web_hang": {
+"file": "web_hang.webp",
+"w": 168,
+"h": 360,
+"kind": "sprite",
+"sheet": "wall_details1"
+},
+"chains": {
+"file": "chains.webp",
+"w": 80,
+"h": 360,
+"kind": "sprite",
+"sheet": "wall_details1"
+},
+"moss": {
+"file": "moss.webp",
+"w": 618,
+"h": 310,
+"kind": "sprite",
+"sheet": "wall_details1"
+},
+"ring": {
+"file": "ring.webp",
+"w": 299,
+"h": 336,
+"kind": "sprite",
+"sheet": "wall_details1"
+},
+"planks_x": {
+"file": "planks_x.webp",
+"w": 457,
+"h": 360,
+"kind": "sprite",
+"sheet": "wall_details1"
+},
+"soot": {
+"file": "soot.webp",
+"w": 280,
+"h": 360,
+"kind": "sprite",
+"sheet": "wall_details1"
+},
+"shelf": {
+"file": "shelf.webp",
+"w": 488,
+"h": 337,
+"kind": "sprite",
+"sheet": "wall_details1"
+},
+"damp": {
+"file": "damp.webp",
+"w": 193,
+"h": 360,
+"kind": "sprite",
+"sheet": "wall_details1"
+},
+"firewood": {
+"file": "firewood.webp",
+"w": 570,
+"h": 355,
+"kind": "sprite",
+"sheet": "props_village1"
+},
+"haybale": {
+"file": "haybale.webp",
+"w": 597,
+"h": 418,
+"kind": "sprite",
+"sheet": "props_village1"
+},
+"trough": {
+"file": "trough.webp",
+"w": 585,
+"h": 211,
+"kind": "sprite",
+"sheet": "props_village1"
+},
+"dung": {
+"file": "dung.webp",
+"w": 454,
+"h": 420,
+"kind": "sprite",
+"sheet": "props_village1"
+},
+"wheel": {
+"file": "wheel.webp",
+"w": 413,
+"h": 413,
+"kind": "sprite",
+"sheet": "props_village1"
+},
+"flour": {
+"file": "flour.webp",
+"w": 522,
+"h": 419,
+"kind": "sprite",
+"sheet": "props_village1"
+},
+"bench": {
+"file": "bench.webp",
+"w": 591,
+"h": 263,
+"kind": "sprite",
+"sheet": "props_village1"
+},
+"rainbarrel": {
+"file": "rainbarrel.webp",
+"w": 319,
+"h": 420,
+"kind": "sprite",
+"sheet": "props_village1"
+},
+"veg": {
+"file": "veg.webp",
+"w": 457,
+"h": 420,
+"kind": "sprite",
+"sheet": "props_village1"
+},
+"tex_mudtrack": {
+"file": "tex_mudtrack.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_grounds1"
+},
+"tex_villgrass": {
+"file": "tex_villgrass.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_grounds1"
+},
+"tex_wetcobble": {
+"file": "tex_wetcobble.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_grounds1"
+},
+"tex_forestfloor": {
+"file": "tex_forestfloor.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_grounds1"
+}
+}
