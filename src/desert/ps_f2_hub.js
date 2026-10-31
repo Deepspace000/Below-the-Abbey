@@ -30,6 +30,7 @@ function psf2Blank(){if(!IMG.psf2_blank){const c=document.createElement('canvas'
 function psf2BierEnd(){const k='psf2_bierend';if(IMG[k])return k;const im=IMG[pspPic('f2_sleeper')];if(!im||!im.width)return pspPic('f2_bier');const sx=Math.round(im.width*.88),sy=Math.round(im.height*PSF2_TOP),c=document.createElement('canvas');c.width=im.width-sx;c.height=im.height-sy;c.getContext('2d').drawImage(im,sx,sy,c.width,c.height,0,0,c.width,c.height);IMG[k]=c;NPC_H[k]=NPC_H[pspPic('f2_sleeper')]*(1-PSF2_TOP);return k}
 function psf2BierKey(){const F=psf2F(),woke=!!F.woke,mask=woke?'w':PSF2.PARTS.map(p=>F.placed[p]?1:0).join(''),k='psf2_bier_'+mask;if(IMG[k])return k;
   const im=IMG[pspPic('f2_sleeper')];if(!im||!im.width)return pspPic('f2_bier');const W=im.width,H=im.height,top=Math.round(H*PSF2_TOP),c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.drawImage(im,0,0);
+  if(!woke&&!PSF2.PARTS.some(p=>F.placed[p])){const cl=IMG[pspPic('f2_bier')];if(cl&&cl.width){x.clearRect(0,0,W,H);x.drawImage(cl,0,top-8,W,H-top+8);IMG[k]=c;NPC_H[k]=NPC_H[pspPic('f2_sleeper')];return k}}   // the empty bier: the painted plinth with its pale cloth hanging in soft folds, at the size of the plinth under the Sleeper
   x.globalCompositeOperation='destination-out';
   for(const p of PSF2.PARTS){if(!woke&&F.placed[p])continue;const [a,b]=PSF2_CUT[p],x0=a*W,x1=b*W,fe=W*.018,g=x.createLinearGradient(x0-fe,0,x1+fe,0),k0=fe/(x1-x0+2*fe);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(k0,'rgba(0,0,0,1)');g.addColorStop(1-k0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');
     const gv=x.createLinearGradient(0,0,0,top);x.fillStyle=g;x.fillRect(x0-fe,0,x1-x0+2*fe,top-6);x.fillStyle='rgba(0,0,0,1)';x.fillRect(x0+fe*.5,0,x1-x0-fe,top-10)}   // feathered, so the pieces end softly in the cloth
@@ -46,7 +47,7 @@ function psf2HubBuild(info){
   const fl=pshFloors();   // marble chequer, flags, violet runner, wood, carpet, dais, black marble (the Great Halls' own floors) and the ribbed vault psc_hall
   const FK={h_chq:fl[0],h_flag:fl[1],h_run:fl[2],h_wood:fl[3],h_carpet:fl[4],h_dais:fl[5],h_black:'psf_black'};
   for(const k in FK)PSPK.floors[k]=FK[k];
-  const C=pspMake({id,start:{x:28,y:38,f:0},floor:'h_chq',wh:PSF2H.WH,amb:.3,lcol:PSH_COL.cold,kind:'in'});
+  const C=pspMake({id,start:{x:28,y:38,f:0},floor:'h_chq',wh:PSF2H.WH,amb:.36,lcol:PSH_COL.cold,kind:'in'});
   const {rows,block}=C,hs=(a,b,c)=>hash2(a,b,c+id),room=new Int8Array(W*H).fill(-1),ix=(x,y)=>y*W+x;
   const ROOMS=[]; // [name, style]
   const R=(x0,y0,x1,y1,floor,name,style,at)=>{const r=ROOMS.length;ROOMS.push([name,style]);C.room(x0,y0,x1,y1,{floor,name,at});for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)room[ix(x,y)]=r;return r};
@@ -56,20 +57,20 @@ function psf2HubBuild(info){
   const rW=R(3,20,23,24,'h_chq','The West Arm','statues',[12,22]);
   const rE=R(33,20,52,24,'h_chq','The East Arm','statues',[44,22]);
   const rS=R(24,34,32,40,'h_flag','The Stair Landing','stair',[28,36]);
-  const rQ=R(16,35,21,39,'h_carpet','The Quiet Chapel','lady',[18,37]);
+  const rQ=R(16,35,21,39,'h_wood','The Quiet Chapel','lady',[18,37]);
   const rY=R(35,35,40,39,'h_flag','The Gallery of the Sleeper','gallery',[37,37]);
   const rM=R(6,9,12,16,'h_black','The Room of Mirrors','salon',[9,12]);
   const rB=R(15,9,21,16,'h_wood','The Library of Dreams','trophy',[18,12]);
   const rK=R(35,9,41,16,'h_flag','The Room of Masks','banquet',[38,12]);
-  const rD=R(44,9,50,16,'h_carpet',"The Sleepers' Beds",'lady',[47,12]);
+  const rD=R(44,9,50,16,'h_wood',"The Sleepers' Beds",'lady',[47,12]);
   // passages: from the gallery south into the side rooms (under the forest, island, waterways and desert doors), from the side rooms into the arms, between the side rooms, the chapel and the Sleeper's gallery
   P(9,7,9,8,rM);P(9,17,9,19,rM);P(19,7,19,8,rB);P(18,17,18,19,rB);P(13,12,14,12,rM);P(22,12,23,12,rB);
   P(39,7,39,8,rK);P(38,17,38,19,rK);P(49,7,49,8,rD);P(47,17,47,19,rD);P(42,12,43,12,rK);P(33,12,34,12,rK);
-  P(22,37,23,37,rQ,'h_carpet');P(33,37,34,37,rY,'h_flag');
+  P(22,37,23,37,rQ,'h_wood');P(33,37,34,37,rY,'h_flag');
   P(3,22,3,22,rW);P(52,22,52,22,rE);
   // runners and the dais
   C.setFloor(6,5,49,5,'h_run');C.setFloor(28,7,28,17,'h_run');C.setFloor(28,27,28,37,'h_run');C.setFloor(5,22,23,22,'h_run');C.setFloor(33,22,50,22,'h_run');
-  C.setFloor(26,19,30,25,'h_dais');
+  C.setFloor(26,19,30,25,'h_run');   // the violet runner cloth under the bier (the pale dais stone looked bare)
   // ---- the links (the contract table): the seven illusion doors and the Grand Stair down; painted doors of the castle ----
   const doorGid=(st)=>{try{return pspDoorGid(st,PSF2H.WH)}catch(e){return null}};
   for(const l of pspLinksFrom(id)){if(!l.at)continue;const g=pspPortal(C,l,{style:'great'});const st=/Grand Stair/.test(l.name)?'stairarch':'great',b=doorGid(st);if(g!=null&&b!=null&&T_TILE[b]!==undefined){T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b]}}
@@ -88,6 +89,10 @@ function psf2HubBuild(info){
     if(y===3){C.sign(x+1,4,[0,-1],NAMES[l.to]);cand(x-2,4)}
     else if(x===2){C.sign(4,20,[0,-1],NAMES[l.to]);cand(4,24)}
     else{C.sign(51,20,[0,-1],NAMES[l.to]);cand(51,24)}}
+  // each door throws a little of its own world's light into the hall: green for the forest, sea blue for the island, cold white for the snow, rose for the canals, gold for the desert, bog green for the swamp, red for the nightmare
+  {const TINT={9821:[.7,1.5,.6],9822:[.5,1.1,1.6],9823:[1.2,1.3,1.6],9824:[1.5,.9,1.0],9825:[1.7,1.25,.5],9826:[.8,1.2,.5],9827:[1.6,.35,.35]};
+   for(const l of pspLinksFrom(id)){if(!TINT[l.to]||!l.at)continue;const [x,y]=l.at,lx=y===3?x:x===2?4:51,ly=y===3?4:22;C.light(lx,ly,TINT[l.to])}}
+  for(const [x,n] of [[12,'alcove_weeper'],[22,'alcove_monk'],[32,'alcove_maiden'],[42,'alcove_knight']])pic(n,x,4,[0,-1]);for(const [x,n] of [[11,'alcove_maiden'],[21,'alcove_knight'],[41,'alcove_weeper'],[46,'alcove_monk']])pic(n,x,6,[0,1]);   // statues in niches between the doors, so the long wall is not one run of empty panels
   for(const x of [14,24,34,44]){pic(x===24||x===34?'mirror_haunted_a':'banner_long_a',x,4,[0,-1]);pic('banner_long_b',x,6,[0,1])}
   for(const x of [5,50])pic('window_stained_tall',x,6,[0,1]);
   // the nave: two rows of columns, stained windows high on the side walls, candelabra by the dais
@@ -100,7 +105,8 @@ function psf2HubBuild(info){
   for(const x of [27,28,29]){C.used.delete(x+',22');const d=C.dec(psf2Blank(),x,22,{block:true,npc:x===28?'psf2_table':undefined});if(d){d.fly=1;if(x!==28){d.npc='psf2_table';d.solid=1}}}
   {const m=f2Span(C,psf2BierKey(),28.5,22.5,0,1,3.0,0);m.bierMain=1;C.f2x[m.kname].bierMain=1;
    for(const [x,s] of [[27.03,-1],[29.97,1]]){const e=f2Span(C,psf2BierEnd(),x,22.5,1,0,1.0,0);e.bierEnd=s}}
-  C.light(28,22,[.85,.95,1.3]);
+  {const sh=f2Soft(pspPic('f2_fo_shaft'),{filter:'saturate(0) brightness(1.25)',l:.3,r:.3,t:.05,b:.25,a:.32,tag:'hub'});const d=f2Span(C,sh,28.5,21.55,0,1,2.6,0);d.lift=.2;C.f2x[d.kname].lift=.2}   // a pale shaft of light falls on the bier from the vault
+  C.light(28,22,[1.2,1.15,1.4]);C.light(28,21,[1.0,.85,1.2]);
   {C.used.delete('28,24');const d=C.dec(pspPic('f2_sleeper_up'),28,24,{block:false,npc:'psf2_sleeper'});if(d)d.hidden=true}
   // the arms: columns in rows (aisles), alcoves with statues, candles
   for(const x of [8,11,14,17,20]){prop('col_fluted',x,20);prop('col_fluted',x,24)}
@@ -109,17 +115,17 @@ function psf2HubBuild(info){
     [13,20,[0,-1],'mirror_haunted_b'],[22,20,[0,-1],'portrait_ancestor_3'],[34,20,[0,-1],'portrait_ancestor_5'],[44,20,[0,-1],'mirror_haunted_c']])pic(n,x,y,wd);
   // the Room of Mirrors: mirrors on every wall, a single candelabra in the middle
   for(const [x,y,wd] of [[7,9,[0,-1]],[11,9,[0,-1]],[6,11,[-1,0]],[6,14,[-1,0]],[12,10,[1,0]],[12,15,[1,0]],[7,16,[0,1]],[11,16,[0,1]]])pic(['mirror_haunted_a','mirror_haunted_b','mirror_haunted_c'][(x+y)%3],x,y,wd);
-  cand(9,12);prop('furn_mirror_gothic',7,12);prop('furn_mirror_gothic',11,13);
+  cand(9,12);cand(7,14,[.8,.95,1.3]);cand(11,10,[.8,.95,1.3]);   // (the free-standing mirrors showed a blank white glass at close range: the room keeps its wall mirrors only)
   // the Library of Dreams: bookcases along the walls, a reading desk and a lectern with the book of dreams
   for(const [x,y] of [[15,9],[17,9],[21,9],[15,16],[21,16]])prop('bookcase_tall',x,y);
   prop('reading_desk',18,13);if(C.free(16,12)){C.used.delete('16,12');C.dec(pspPic('lectern'),16,12,{block:true,npc:'psf2_book'})}cand(20,11,[1.3,1.0,.6]);
   // the Room of Masks: masks of carnivals painted on the walls (portraits of masked faces), a long table, candles
-  for(const [x,y,wd] of [[36,9,[0,-1]],[40,9,[0,-1]],[35,11,[-1,0]],[41,14,[1,0]]])pic('portrait_ancestor_'+(1+(x+y)%8),x,y,wd);
-  prop('furn_table_long_black',38,13);prop('furn_chair_dining_black',37,13);prop('furn_chair_dining_black',39,13);cand(36,15);cand(40,10);
+  for(const [x,y,wd,n] of [[36,9,[0,-1],'f2_mask_plague'],[38,9,[0,-1],'f2_mask_moon'],[40,9,[0,-1],'f2_mask_harlequin'],[35,11,[-1,0],'f2_mask_moon'],[41,14,[1,0],'f2_mask_plague'],[35,14,[-1,0],'f2_mask_harlequin']])pic(n,x,y,wd,{bob:1.1,sc:1.6});   // carnival masks hung on the walls at eye height
+  prop('furn_table_long_black',38,13);prop('furn_chair_dining_black',37,13);prop('furn_chair_dining_black',39,13);cand(36,15);cand(40,10);cand(36,10,[1.3,1.0,.6]);C.light(38,12,[1.3,1.0,.7]);
   // the Sleepers' Beds: four canopied beds with cobwebs, people who once slept here and never woke
   for(const [x,y] of [[45,10],[49,10],[45,15],[49,15]])prop((x+y)&1?'furn_bed_canopy':'bed_four',x,y);
   pic('portrait_ancestor_6',47,9,[0,-1]);pic('window_sheeted_a',50,13,[1,0]);pic('window_sheeted_b',44,12,[-1,0]);
-  cand(47,12,[.75,.9,1.25]);
+  cand(47,12,[.75,.9,1.25]);cand(45,12,[1.3,1.0,.6]);cand(49,13,[1.3,1.0,.6]);C.light(47,10,[1.1,.9,.7]);
   // the Quiet Chapel (rest): a bed, a chest, warm candles; the Gallery of the Sleeper: her portrait and her story
   pspRest(C,{x0:16,y0:35,x1:21,y1:39,bed:[17,36],chest:[20,39],name:'The Quiet Chapel',line:'A small quiet chapel. Warm candles burn here, and nothing that lives in the illusions can come in.'});
   pic('window_stained',18,35,[0,-1]);pic('altar',16,38,[-1,0]);
@@ -128,7 +134,7 @@ function psf2HubBuild(info){
   cand(36,38,[1.3,1.0,.6]);
   // the Stair Landing: the Dreamkeeper beside the stair, candelabra, banners
   C.used.delete(PSF2H.KEEPER.join(','));C.dec(pspPic('f2_dreamkeeper'),PSF2H.KEEPER[0],PSF2H.KEEPER[1],{block:true,npc:'psf2_keeper'});
-  C.setFloor(27,35,29,36,'h_dais');C.light(28,36,[1.35,1.15,1.3]);cand(26,36);cand(30,36);cand(25,40);cand(31,40);   // he stands on a violet carpet between two candelabra, straight ahead of the stairfor(const x of [25,31])pic('banner_long_a',x,34,[0,-1]);
+  C.setFloor(27,35,29,36,'h_run');C.light(28,36,[1.35,1.15,1.3]);cand(26,36);cand(30,36);cand(25,40);cand(31,40);   // he stands on a violet carpet between two candelabra, straight ahead of the stairfor(const x of [25,31])pic('banner_long_a',x,34,[0,-1]);
   pic('window_great',32,36,[1,0]);pic('window_great',24,39,[-1,0]);
   // no creatures on this floor's hub: it is a safe hall
   pspSafeRect(C,2,2,W-3,H-3);
