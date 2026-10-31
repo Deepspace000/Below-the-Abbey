@@ -107,11 +107,12 @@ function f2IslandBuild(){
   {const wet=C.fl(IW);for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++)if(C.open(x,y)&&[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>C.block[(y+b)*W+x+a]&&C.rows[y+b][x+a]==='.'))C.fm[y*W+x]=wet}
   // the fisherman's hut (a small timber hut with a thatched roof; the door is shut), nets, the spade by the door
   C.house({x0:34,y0:25,x1:36,y1:26,face:'S',sty:'flint',roof:'thatch2',wh:2.3,lit:false});
+  {const lw=f2TexWall('ps_f2_tex_logwall',2.3,{gain:1.2,rgb:[1.08,1.0,.9]});if(lw!=null)for(let y=25;y<=26;y++)for(let x=34;x<=36;x++){const g=C.chars[C.rows[y][x]];if(C.rows[y][x]!=='.'&&!(g!==undefined&&KH_DOOR[g]))C.solid(x,y,C.ch(lw))}}   // a hut of driftwood logs, not castle flint
   const [sx,sy]=F2_ISLAND.SPADE;C.used.delete(sx+','+sy);C.dec(pspPic('f2_spade'),sx,sy,{block:true,npc:'f2i_spade'});
   {let n=0;for(let r=1;r<8&&n<2;r++)for(const [x,y] of [[42+r,30],[42+r,27],[40,33+r]]){if(n<2&&C.rows[y]&&C.rows[y][x]==='.'&&C.block[y*48+x]&&!C.decor.some(d=>d.x===x&&d.y===y)){C.dec('yar_boat_row',x,y,{block:false,sc:.9});n++}}}   // two rowing boats drawn up in the shallows by the hut
   // the bottle on the south shore, the four sand patches on the north beach
-  {const [bx,by]=F2_ISLAND.BOTTLE;C.used.delete(bx+','+by);C.dec(pspPic('f2_bottle'),bx,by,{block:true,npc:'f2i_bottle'})}
-  F2_ISLAND.PATCH.forEach(([x,y,s],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_patch_'+s),x,y,{block:true,npc:'f2i_patch'+i})});
+  {const [bx,by]=F2_ISLAND.BOTTLE;C.used.delete(bx+','+by);C.dec(pspPic('f2_bottle'),bx,by,{block:true,npc:'f2i_bottle',sc:1.8});C.light(bx,by,[1.4,1.3,1.0])}
+  F2_ISLAND.PATCH.forEach(([x,y,s],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_patch_'+s),x,y,{block:true,npc:'f2i_patch'+i,sc:1.7})});
   // palms, dune grass and rocks
   f2Patches(C,[[IS,.8],[IG,.2]],{cs:5,onPath:true});   // the ground of the map itself is the sea (it runs on past the edge to the horizon); every square of land is sand or grass
   const PT=[pspPic('f2_is_palm'),pspPic('f2_is_palm2'),'dpalm0','dpalm2'];PT.push(...PT.map(f2Flip));
@@ -122,7 +123,7 @@ function f2IslandBuild(){
   f2Mover(C,'yar_gull_fly0'in IMG?'yar_gull_fly0':pspPic('f2_fo_birds'),[[4,6],[44,6]],1.2,{pingpong:true,bob:3}).fly=1;
   for(const [x,y] of [[7,16],[8,21],[11,15],[6,19]])if(C.free(x,y))C.dec('hgxrock1',x,y,{block:true,sc:1.1});
   C.capTrees(/dpalm|yar_palms|f2_is_palm|f2_is_rock/,2.6);
-  f2Edge(C,{img:'f2_is_wall',wh:2.2,veil:.12,only:(x,y)=>x<=2||x>=45||y>=37});
+  f2Edge(C,{img:'f2_is_wall',wh:2.8,veil:.1,rgb:[1.2,1.1,.92],only:(x,y)=>x<=2||x>=45||y>=37});
   for(let y=0;y<40;y++)for(let x=0;x<48;x++)if(C.rows[y][x]!=='.')C.fm[y*48+x]=C.fl(ISE);   // under the low mist of the edge lies the sea, out to the horizon   // sea cliffs at the two ends of the island; to the north the sea runs to the horizon
   pspSafeZone(C,24,35,6);
   C.foes(['f2crab','f2crab'],[14,2,34,8],1);
