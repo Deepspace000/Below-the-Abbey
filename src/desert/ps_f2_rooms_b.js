@@ -198,7 +198,7 @@ function f2DesertBuild(){
     clear:[[16,1,32,12,DP,'The Sunken Temple'],[4,13,13,23,DS,'The Oasis',1],[33,14,43,24,DS,'The Fallen King',1],[5,26,14,34,DS,'The Bone Dunes',1]]});
   const W=48,{rows,block,fm}=C,hs=C.hs2;
   // the temple court: sandstone walls round x 18..30, y 3..10, the way in at the south (23..25,11); the frieze on the north wall (x 19..21)
-  const tw=f2TexWall(f2Soft('ps_f2_de_wall',{filter:'saturate(.55) brightness(1.1)',tag:'t'}),3.0,{gain:1.0,rgb:[1.02,.98,.9]}),sand=[0,1,2].map(v=>C.ch(tw!=null?tw:gyTile('texBone_'+(1+v),3.4,{gain:1.2,rgb:[1.18,1.0,.74],tag:'f2sandst'+v})));
+  const tw=f2TexWall(f2Soft('ps_f2_de_wall',{filter:'saturate(.55) brightness(1.1)',tag:'t'}),3.0,{gain:1.08,rgb:[1.16,1.0,.76]}),sand=[0,1,2].map(v=>C.ch(tw!=null?tw:gyTile('texBone_'+(1+v),3.4,{gain:1.2,rgb:[1.18,1.0,.74],tag:'f2sandst'+v})));
   for(let y=2;y<=11;y++)for(let x=17;x<=31;x++){const ring=x===17||x===31||y===2||y===11;if(!ring)continue;if(y===11&&x>=23&&x<=25)continue;C.solid(x,y,sand[(x*3+y)%3])}
   {const fz=f2Soft('ps_f2_frieze',{filter:'contrast(1.6) brightness(.9)',tag:'c'});for(let x=20;x<=22;x++){const f=f2FacGid(fz,x-20,3,3.0,{tex:'texBone_1',rgb:[1.1,1.0,.85],fit:false,emit:.45});if(f!=null)C.solid(x,2,C.ch(f))}
    for(let x=26;x<=28;x++){const f=f2FacGid(fz,x-26,3,3.0,{tex:'texBone_1',rgb:[1.1,1.0,.85],fit:false,emit:.45});if(f!=null)C.solid(x,2,C.ch(f))}}   // the frieze twice, either side of the sarcophagus: the same four signs in the same order
@@ -209,7 +209,7 @@ function f2DesertBuild(){
   {const [sx,sy]=F2_DESERT.SARC;C.used.delete(sx+','+sy);C.dec(pspPic('f2_sarc_shut'),sx,sy,{block:true,npc:'f2d_sarc'})}
   C.plaque(19,10,'f2_desert_plaque',['READ THE WALL','AND WALK IT'],'f2d_plaque','A slab of sandstone by the way in. Cut into it: READ THE WALL FROM LEFT TO RIGHT, AND WALK IT. Above you, on the north wall of the court, a frieze is carved: a scarab, an eye, an ankh and a sun disc, in that order from left to right. Eight carved plates are set in the floor.');
   for(const [x,y] of [[18,3],[30,3],[18,9],[30,9]])C.prop('f2_column_lotus',x,y,{sc:.85});
-  for(const [x,y] of [[22,4],[26,4]]){const b=C.prop('brazier',x,y,{block:true});if(b)b.lift=.95;C.light(x,y,[2.4,1.5,.6]);C.dec('cfire',x,y+1,{block:false,sc:.5})}
+  for(const [x,y] of [[22,4],[26,4]]){const b=IMG.brazier0?C.dec('brazier',x,y,{block:true,sc:1.1}):C.prop('brazier',x,y,{block:true});if(b)b.lift=.95;C.light(x,y,[2.4,1.5,.6])}
   // the dunes: palms at the oasis, rocks, obelisks and a fallen head
   for(const [x,y] of [[8,18],[9,18],[8,19],[9,19]])if(C.free(x,y))C.dec(pspPic('f2_reeds'),x,y,{block:true,sc:1.1});   // reeds round the spring of the oasis
   f2Patches(C,[[DS,.7],[DB,.3]],{cs:6,keep:(x,y)=>x>=17&&x<=31&&y<=11});

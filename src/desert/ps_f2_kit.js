@@ -24,7 +24,7 @@ const F2B={
     text:'Snow falls without a sound. It is bitterly cold, and the light is grey and even.'},
   9824:{k:'water',sky:{top:[46,44,104],mid:[206,124,118],low:[255,196,128]},cloud:1.9,fog:[214,176,160,.006],haze:.1,silver:.62,amb:1.0,lcol:[1.45,1.05,.7],wn:'Evening haze',fx:null,
     text:'The canals lie still under a pink evening sky. Water laps at the steps, and somewhere a bell rings the hour.'},
-  9825:{k:'desert',sky:{top:[84,146,212],mid:[200,202,192],low:[242,216,160]},cloud:.55,fog:[230,210,170,.007],haze:.12,amb:1.15,lcol:[1.3,1.1,.75],wn:'Heat',fx:'heat',
+  9825:{k:'desert',sky:{top:[70,140,214],mid:[176,200,214],low:[246,214,150]},cloud:.4,silver:.18,fog:[230,210,170,.007],haze:.12,amb:1.15,lcol:[1.3,1.1,.75],wn:'Heat',fx:'heat',
     text:'The sun beats down on the sand. The air shimmers with heat, and there is no wind.'},
   9826:{k:'swamp',sky:{top:[38,48,44],mid:[78,94,80],low:[118,130,104]},cloud:1.0,fog:[92,106,84,.034],amb:.62,lcol:[.85,1.1,.7],wn:'Bog mist',fx:null,
     text:'A thick green mist lies on the black water. Frogs croak, and the mud bubbles and stinks.'},
@@ -376,7 +376,7 @@ function f2RideTick(dt){const R=F2.ride;if(!R)return;if(LEVEL!==R.lv){F2.ride=nu
 {const _u2=update;update=function(dt){const r=_u2.apply(this,arguments);try{if(typeof LEVEL!=='undefined'&&f2Is(LEVEL)&&G.state==='play'){const d=Math.min(dt,.05);f2MoveTick(d);if(F2.ride)f2RideTick(d)}}catch(e){console.error('f2 move',e);F2.ride=null;G.lockT=0}return r}}
 /* ---------- a painted far skyline on the sky of a room (domes and towers over the roofs, a mountain range, a sea horizon), fixed to the world while the clouds drift ----------
    F2SKY[id] = {img, rows (height in sky rows), base (sky row of its foot; 150 is the horizon), rep (copies round the sky), haze (0..1)} */
-const F2SKY={9824:{img:'f2_sky_venice',rows:118,base:156,rep:3,haze:.32},9821:{img:'f2_sky_forest',rows:46,base:154,rep:3,haze:.25},9823:{img:'f2_sky_snow',rows:70,base:154,rep:3,haze:.3},9825:{img:'f2_sky_desert',rows:40,base:153,rep:2,haze:.25}};
+const F2SKY={9824:{img:'f2_sky_venice',rows:118,base:156,rep:3,haze:.32},9821:{img:'f2_sky_forest',rows:46,base:154,rep:3,haze:.25},9823:{img:'f2_sky_snow',rows:70,base:154,rep:3,haze:.3},9825:{img:'f2_sky_desert',rows:56,base:126,rep:2,haze:.15}};
 function f2SkylineBuf(id){const S=F2SKY[id];if(!S)return null;if(S.buf)return S;const im=IMG['ps_'+S.img];if(!im||!im.width)return null;
   const R=S.rows,c=document.createElement('canvas');c.width=1024;c.height=R;const x=c.getContext('2d');x.imageSmoothingQuality='high';
   const n=S.rep||2,w=1024/n,B=F2B[id],fc=B.fog;
