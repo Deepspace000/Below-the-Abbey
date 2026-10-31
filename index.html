@@ -79052,7 +79052,7 @@ function f2SwampBuild(){
   for(const [k,pic,x,y] of F2_SWAMP.ING){C.used.delete(x+','+y);C.dec(pspPic(pic),x,y,{block:true,npc:'f2m_'+k});const sx=x+1,sy=y;if(C.open(sx,sy)){C.used.delete(sx+','+sy);C.dec(pspPic('f2_stake'),sx,sy,{block:false})}}
   // the swamp: dead trees hung with moss, willows, reeds, stumps; toadstool rings
   // still black pools between the trees (never beside a way, so every path stays a path)
-  for(let y=3;y<37;y++)for(let x=3;x<45;x++){if(!C.open(x,y)||!C.free(x,y)||C.nearPath(x,y,1)||(x>=17&&x<=31&&y<=11)||Math.hypot(x-24,y-35)<6)continue;if(C.vn(x,y,4,301)>.5)C.water(x,y,SWt)}
+  for(let y=3;y<37;y++)for(let x=3;x<45;x++){if(!C.open(x,y)||!C.free(x,y)||C.nearPath(x,y,1)||(x>=17&&x<=31&&y<=11)||Math.hypot(x-24,y-35)<6)continue;if(C.vn(x,y,4,301)>.55&&[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1],[2,0],[-2,0],[0,2],[0,-2]].every(([a,b])=>C.open(x+a,y+b)&&!C.block[(y+b)*48+x+a]))C.water(x,y,SWt)}   // pools only inside open ground, so no way becomes a dead-end corridor
   const ST=[pspPic('f2_sw_dead'),pspPic('f2_sw_cypress'),pspPic('f2_swamptree'),pspPic('f2_wv_cypress'),pspPic('f2_wv_lean')];ST.push(...ST.map(f2Flip));
   C.fill(ST.concat([pspPic('f2_stump'),pspPic('f2_sx_knees')]),{p1:.1,p2:.32,p3:.6});
   for(const [x,y] of [[12,25],[36,27],[30,9],[6,24]])if(C.free(x,y)&&!C.nearPath(x,y,1))C.dec(f2PickVar(C,[pspPic('f2_sx_log'),f2Flip(pspPic('f2_sx_log'))],x,y,C.hs2(x,y,79)),x,y,{block:true,sc:.85});
