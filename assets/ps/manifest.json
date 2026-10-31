@@ -4254,5 +4254,129 @@
 "h": 4.0,
 "kind": "sprite",
 "sheet": "b1t"
+},
+"f2_tex_logwall": {
+"file": "f2_tex_logwall.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b4t"
+},
+"f2_tex_roof": {
+"file": "f2_tex_roof.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b4t"
+},
+"f2_tex_planks": {
+"file": "f2_tex_planks.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b4t"
+},
+"f2_tex_logsnow": {
+"file": "f2_tex_logsnow.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b4t"
+},
+"f2_cb_chair": {
+"file": "f2_cb_chair.webp",
+"w": 287,
+"px_h": 350,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "b4p"
+},
+"f2_cb_table": {
+"file": "f2_cb_table.webp",
+"w": 312,
+"px_h": 299,
+"h": 0.8,
+"kind": "sprite",
+"sheet": "b4p"
+},
+"f2_cb_shelf": {
+"file": "f2_cb_shelf.webp",
+"w": 319,
+"px_h": 293,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "b4p"
+},
+"f2_cb_bed": {
+"file": "f2_cb_bed.webp",
+"w": 280,
+"px_h": 373,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "b4p"
+},
+"f2_cb_snowshoes": {
+"file": "f2_cb_snowshoes.webp",
+"w": 315,
+"px_h": 342,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "b4p"
+},
+"f2_cb_barrel": {
+"file": "f2_cb_barrel.webp",
+"w": 225,
+"px_h": 327,
+"h": 0.8,
+"kind": "sprite",
+"sheet": "b4p"
+},
+"f2_sn_fox": {
+"file": "f2_sn_fox.webp",
+"w": 320,
+"px_h": 350,
+"h": 0.6,
+"kind": "sprite",
+"sheet": "b4l"
+},
+"f2_sn_owl": {
+"file": "f2_sn_owl.webp",
+"w": 217,
+"px_h": 417,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "b4l"
+},
+"f2_sn_finches": {
+"file": "f2_sn_finches.webp",
+"w": 325,
+"px_h": 285,
+"h": 0.4,
+"kind": "sprite",
+"sheet": "b4l"
+},
+"f2_sn_sign": {
+"file": "f2_sn_sign.webp",
+"w": 305,
+"px_h": 418,
+"h": 1.3,
+"kind": "sprite",
+"sheet": "b4l"
+},
+"f2_sn_sled": {
+"file": "f2_sn_sled.webp",
+"w": 339,
+"px_h": 271,
+"h": 0.7,
+"kind": "sprite",
+"sheet": "b4l"
+},
+"f2_sn_lantern": {
+"file": "f2_sn_lantern.webp",
+"w": 149,
+"px_h": 408,
+"h": 1.4,
+"kind": "sprite",
+"sheet": "b4l"
 }
 }

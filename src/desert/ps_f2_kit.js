@@ -58,10 +58,20 @@ function f2SkyArr(id){
   return F2.sky[id]=d}
 /* the castle kit draws its night sky on every outdoor castle level: in an illusion room the room's own sky is shown instead */
 {const _sf=pspSkyFrame;pspSkyFrame=function(){
-  if(f2Is(LEVEL)&&LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor){if(!PSPK.live)PSPK.live=new Uint8ClampedArray(1024*256*4);self.BKSKY_LV=LEVEL;self.BKSKY_PAN=f2SkyArr(LEVEL);return}
+  if(f2Is(LEVEL)&&LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor){if(!PSPK.live)PSPK.live=new Uint8ClampedArray(1024*256*4);self.BKSKY_LV=LEVEL;self.BKSKY_PAN=f2InRoof()?f2RoofPan(F2.inside[LEVEL][4]):f2SkyArr(LEVEL);return}
   return _sf.apply(this,arguments)}}
+/* a room inside an outdoor illusion (the snow cabin): F2.inside[id]=[x0,y0,x1,y1,roof texture]; while the party stands in it the sky is a roof and no weather falls */
+F2.inside={};
+function f2InRoof(){const r=F2.inside[LEVEL];if(!r||!G.P)return false;const x=Math.round(G.C?G.C.x:G.P.x),y=Math.round(G.C?G.C.y:G.P.y);return x>=r[0]&&x<=r[2]&&y>=r[1]&&y<=r[3]}
+function f2RoofPan(key){F2.roof=F2.roof||{};if(F2.roof[key])return F2.roof[key];const im=IMG[key];const c=document.createElement('canvas');c.width=1024;c.height=256;const x=c.getContext('2d');x.fillStyle='#1c120a';x.fillRect(0,0,1024,256);
+  if(im&&im.width)for(let yy=0;yy<256;yy+=128)for(let xx=0;xx<1024;xx+=128)x.drawImage(im,xx,yy,128,128);
+  const g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,'rgba(10,6,3,.55)');g.addColorStop(.7,'rgba(30,18,8,.2)');g.addColorStop(1,'rgba(60,36,16,.1)');x.fillStyle=g;x.fillRect(0,0,1024,256);
+  return F2.roof[key]=x.getImageData(0,0,1024,256).data}
+/* a painted texture (assets/ps tex) as a wall tile */
+function f2TexWall(key,wh,o){o=o||{};const im=IMG[key];if(!im||!im.width)return null;const nm='f2w_'+key;IMG['gyp_'+nm]=im;return gyTile(nm,wh,{gain:o.gain||1.0,rgb:o.rgb||[1,1,1],tag:'f2tw'+key})}
 /* the air: each room's own mist, light and weather effect (snow falling, heat shimmer) */
 {const _w=weatherNow;weatherNow=function(){
+  if(f2Is(LEVEL)&&f2InRoof())return {id:'fog',n:'Indoors',fog:.01,haze:0,dark:0,mix:.2,col:[60,40,24],text:'',fx:null};
   if(f2Is(LEVEL)){const B=F2B[LEVEL];return {id:'fog',n:B.wn,fog:B.fog[3],haze:B.haze===undefined?.25:B.haze,dark:0,mix:.4,col:B.fog.slice(0,3),text:B.text,fx:B.fx||null}}
   return _w.apply(this,arguments)}}
 /* ---------- the mist wall: the edge of every illusion. Pale silver mist with cracks where the black stone of the castle shows through (made in code, like the castle walls) ---------- */
@@ -362,7 +372,7 @@ function f2RideTick(dt){const R=F2.ride;if(!R)return;if(LEVEL!==R.lv){F2.ride=nu
 {const _u2=update;update=function(dt){const r=_u2.apply(this,arguments);try{if(typeof LEVEL!=='undefined'&&f2Is(LEVEL)&&G.state==='play'){const d=Math.min(dt,.05);f2MoveTick(d);if(F2.ride)f2RideTick(d)}}catch(e){console.error('f2 move',e);F2.ride=null;G.lockT=0}return r}}
 /* ---------- a painted far skyline on the sky of a room (domes and towers over the roofs, a mountain range, a sea horizon), fixed to the world while the clouds drift ----------
    F2SKY[id] = {img, rows (height in sky rows), base (sky row of its foot; 150 is the horizon), rep (copies round the sky), haze (0..1)} */
-const F2SKY={9824:{img:'f2_sky_venice',rows:118,base:156,rep:3,haze:.32},9821:{img:'f2_sky_forest',rows:46,base:154,rep:3,haze:.25}};
+const F2SKY={9824:{img:'f2_sky_venice',rows:118,base:156,rep:3,haze:.32},9821:{img:'f2_sky_forest',rows:46,base:154,rep:3,haze:.25},9823:{img:'f2_sky_snow',rows:70,base:154,rep:3,haze:.3}};
 function f2SkylineBuf(id){const S=F2SKY[id];if(!S)return null;if(S.buf)return S;const im=IMG['ps_'+S.img];if(!im||!im.width)return null;
   const R=S.rows,c=document.createElement('canvas');c.width=1024;c.height=R;const x=c.getContext('2d');x.imageSmoothingQuality='high';
   const n=S.rep||2,w=1024/n,B=F2B[id],fc=B.fog;
@@ -376,7 +386,7 @@ function f2SkyLive(id){const base=f2SkyArr(id),S=f2SkylineBuf(id);if(!S)return b
     for(let col=0;col<1024;col++){const sc=(col-off+1024)&1023,si=so+sc*4,a=d[si+3];if(!a)continue;const k=a/255,o=ro+col*4;live[o]+=(d[si]-live[o])*k;live[o+1]+=(d[si+1]-live[o+1])*k;live[o+2]+=(d[si+2]-live[o+2])*k}}
   return live}
 {const _sf2=pspSkyFrame;pspSkyFrame=function(){
-  if(typeof LEVEL!=='undefined'&&f2Is(LEVEL)&&F2SKY[LEVEL]&&LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor){if(!PSPK.live)PSPK.live=new Uint8ClampedArray(1024*256*4);self.BKSKY_LV=LEVEL;self.BKSKY_PAN=f2SkyLive(LEVEL);return}
+  if(typeof LEVEL!=='undefined'&&f2Is(LEVEL)&&F2SKY[LEVEL]&&LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor&&!f2InRoof()){if(!PSPK.live)PSPK.live=new Uint8ClampedArray(1024*256*4);self.BKSKY_LV=LEVEL;self.BKSKY_PAN=f2SkyLive(LEVEL);return}
   return _sf2.apply(this,arguments)}}
 /* a building seen over the roofs (a dome, a tower): drawn only where it rises above the nearest wall (the engine's skyline sprites); it stands on a wall square */
 function f2Roof(C,key,x,y,o){o=o||{};const d={k:'kroof',lk:key,x,y,block:false,deco:true,roof:1};if(o.sc)d.sc=o.sc;if(o.bob)d.bob=o.bob;C.decor.push(d);return d}
