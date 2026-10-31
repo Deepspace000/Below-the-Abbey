@@ -1,6 +1,8 @@
 """End-to-end test of the second floor of the Pale Spire: the Hall of Illusions (9820) and the seven illusion rooms (9821 to 9827). See tools/PS_F2_SPEC.md.
    python tools/ps_f2_test.py        (on your OWN server: python -m http.server <port> from the repo root; env PS_PORT, BTA_CHROME)
 Checks, from a fresh state (the second floor flags wiped):
+  ferry     the gondola ferry is stepped by hand both ways; each bridge plane is drawn alone and its box on screen measured at every step (tools/ps_f2_ridechk.js):
+            no jump in width between steps, and on a straight stretch its height grows as one over its distance (a bridge drawn as a billboard sized by its centre fails)
   levels    all eight build, the arrival squares are open, every room has 10 to 16 creatures at level 103 or 104 and none within 6 of the arrival
   links     every hub door leads into its room on an open landing and every room's way back leads to the hub, both ways, by pressing the doors (khBump)
   puzzles   each room's puzzle is solved by the real talk options and step calls, after a wrong answer first (which must not lock it): the forest stones,
@@ -93,6 +95,8 @@ def main():
             9824: """async () => { const o = []; const R = () => f2S(9824); const f0 = T.foes();
               const D = F2_WATER.DOOR; T.bump(D[0], D[1]); if (T.bag('psf_chest')) o.push('chest through a locked door');
               T.opt('f2w_mask_moon', /Hang/); if (R().open) o.push('wrong mask opened'); if (T.foes() <= f0) o.push('wrong mask woke nothing');
+              { const nw = G.enemies.filter(e => e.hp > 0); if (nw.some(e => e.t !== 'f2cutthroat')) o.push('wrong mask brought ' + nw.map(e => e.t)); if (nw.some(e => G.grid[e.y][e.x] !== 0 || (TERRS[9824] && TERRS[9824].block && TERRS[9824].block[e.y * LEVELS[9824].rows[0].length + e.x]))) o.push('a released creature stands in the water or a wall');
+                if (/eel/i.test(G.msgs.map(m => m.text).join(' '))) o.push('the wrong-mask text still speaks of eels') }
               T.opt('f2w_mask_plague', /Hang/); if (!R().open) o.push('right mask did not open');
               T.bump(D[0], D[1]); if (T.bag('psf_chest') !== 1) o.push('chest ' + T.bag('psf_chest')); T.bump(D[0], D[1]); if (T.bag('psf_chest') !== 1) o.push('chest twice');
               // the gondola ferry: up the Rio of Sighs to the steps of the campo, and back down to the Riva
@@ -116,6 +120,19 @@ def main():
               T.opt('f2n_lamp' + wrong, /Touch/); if (T.foes() <= f0) o.push('wrong lantern brought no shadows'); if (R().pos) o.push('wrong lantern did not reset');
               await T.wait(200); R().showing = 0; const seq = R().seq.slice(); for (const i of seq) T.opt('f2n_lamp' + i, /Touch/); if (!R().solved) o.push('not solved ' + seq + ' pos ' + R().pos);
               if (!T.opt('f2n_jar', /Take/)) o.push('no brain'); if (T.bag('psf_brain') !== 1) o.push('brain ' + T.bag('psf_brain')); return o }"""}
+        # ---- the waterways: land creatures only, no eels ----
+        r = pg.evaluate("() => { if (!LEVELS[9824]) KH_LAZY[9824](); return { foes: LEVELS[9824].enemies.map(e => e.t), def: !!ENEMY_DEF.f2eel } }")
+        check('the waterways have no eels (all creatures are land creatures or the water sprite)', not r['def'] and all(t in ('f2cutthroat', 'f2gondolier', 'f2sprite') for t in r['foes']), r)
+        # ---- the gondola ferry: the bridges keep their true size as the boat passes under them ----
+        RIDECHK = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ps_f2_ridechk.js'), encoding='utf-8').read()
+        pg.evaluate("() => T.go(9824, 28, 30, 0)")
+        pg.wait_for_timeout(800)
+        pg.evaluate("() => { for (const e of G.enemies) e.hp = 0; G.enemies.length = 0; G.flags.noFog = 0 }")
+        for up in (True, False):
+            r = pg.evaluate(RIDECHK, [up])
+            seen = sorted(set(q[1] for q in r['log']))
+            check('ferry %s: every bridge on the way is seen and keeps its size (no jump, no squash)' % ('up' if up else 'down'), not r['bad'] and len(seen) >= 3, {'bad': r['bad'][:6], 'planes seen': seen})
+            pg.evaluate("() => { for (let i = 0; i < 4000 && F2.ride; i++) f2RideTick(.05) }")
         for id_ in range(9821, 9828):
             pg.evaluate("(id) => T.go(id)", id_)
             pg.wait_for_timeout(800)

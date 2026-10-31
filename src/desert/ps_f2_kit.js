@@ -147,7 +147,6 @@ const F2_FOES=[
   ['f2frostwraith','Frost Wraith','f2i_frostwraith',1.7,84,[9,14],'chills',{fly:true,floatH:.12,glow:.3}],
   ['f2snowbear','Snow Bear','f2i_snowbear',1.35,118,[10,16],'mauls',{}],
   ['f2iceelem','Ice Elemental','f2i_icegolem',1.9,124,[10,15],'crushes',{}],
-  ['f2eel','Canal Eel','uw_eel_0',.9,76,[8,13],'bites',{}],
   ['f2gondolier','Drowned Gondolier','ps_c_psdrowned',1.7,96,[9,14],'strikes with an oar at',{}],
   ['f2sprite','Water Sprite','f2i_watersprite',.9,58,[8,12],'splashes',{fly:true,floatH:.35,ranged:2,glow:.35}],
   ['f2cutthroat','Masked Cutthroat','assassin',1.7,88,[10,15],'stabs',{speed:2}],

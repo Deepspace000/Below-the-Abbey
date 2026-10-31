@@ -1,7 +1,7 @@
 /* ==========================================================================
    ps_f2_rooms_b.js: the illusion rooms 4 and 5 of the Hall of Illusions. See tools/PS_F2_SPEC.md and tools/PS_F2_NOTES.md. Built with f2Room (ps_f2_kit.js).
    9824 The Waterways (the chest): canals, bridges, gondolas, palazzi; the locked palazzo door at the north end of the Campo of the Doge has three carnival masks
-        beside it; the plaque says the Doge admits only the one who watches and says nothing: the plague doctor's mask (owl eyes, a beak that never opens). A wrong mask wakes eels.
+        beside it; the plaque says the Doge admits only the one who watches and says nothing: the plague doctor's mask (owl eyes, a beak that never opens). A wrong mask brings out two masked cutthroats.
    9825 The Desert (the legs): the sunken temple court; the frieze on its north wall shows a scarab, an eye, an ankh and a sun, from left to right; the eight carved floor
         plates (two of each symbol) must be stepped on in that order; then the sarcophagus opens. A wrong step lets out scorpions.
    ========================================================================== */
@@ -148,11 +148,11 @@ function f2WaterBuild(){
   C.mapNames.push({t:'The Campo of the Doge',x:24,y:6,k:'place'},{t:'The Fish Market',x:7,y:14,k:'place'},{t:"The Mask Makers' Square",x:39,y:15,k:'place'},{t:'The Grand Canal',x:34,y:28,k:'place'},{t:'The Rio of Sighs',x:24,y:18,k:'place'},{t:'The Riva',x:9,y:31,k:'place'},{t:'The South Quay',x:37,y:34,k:'place'});
   // ---- creatures, chests ----
   pspSafeZone(C,24,35,6);pspSafeRect(C,22,3,26,12);
-  C.foes(['f2eel','f2eel','f2cutthroat'],[4,13,11,17],1);
+  C.foes(['f2cutthroat','f2cutthroat','f2cutthroat'],[4,13,11,17],1);
   C.foes(['f2cutthroat','f2cutthroat','f2sprite'],[36,13,43,18],2);
-  C.foes(['f2gondolier','f2gondolier','f2eel'],[3,18,13,26],3,{pr:1});
+  C.foes(['f2gondolier','f2gondolier','f2cutthroat'],[3,18,13,26],3,{pr:1});
   C.foes(['f2sprite','f2gondolier','f2sprite'],[33,32,42,36],4,{pr:1});
-  C.foes(['f2gondolier','f2eel'],[28,19,44,26],5,{pr:1});
+  C.foes(['f2gondolier','f2cutthroat'],[28,19,44,26],5,{pr:1});
   for(const [x,y] of [[4,17],[43,13],[41,35]])C.chestAt(x,y,1);
   C.ret();
   // the way back is a palazzo too: house fronts either side, the great door of a palazzo, Venetian lamps instead of the castle's pillars
@@ -183,7 +183,7 @@ for(const [x,y,k,desc] of F2_WATER.MASK)khNpc('f2w_mask_'+k,'A carnival mask','p
   return say('Hanging on a hook beside the door: '+desc+'.',[['Hang this mask on the hook by the door.',()=>{f2WaterMask(k,x,y);G.talk=null;return null}],BYE])});
 function f2WaterMask(k,x,y){const R=f2S(9824);if(R.open)return;
   if(k===F2_WATER.ANSWER){R.open=1;f2Chime('open');msg('You hang the plague doctor mask on the hook by the door. Somewhere inside, a bell rings once. The lock turns, and the door of the palazzo swings open.','#ffe36a')}
-  else{f2Chime('bad');msg('A bell rings, harsh and loud. The water of the canal heaves, and something long and dark slides out onto the stones.','#e0c8a0');f2Release('f2eel',2,x,y+2)}}
+  else{f2Chime('bad');msg('A bell rings, harsh and loud. Masked cutthroats step out of the alleys.','#e0c8a0');f2Release('f2cutthroat',2,x,y+2)}}
 {const _k=khBump;khBump=function(nx,ny,g){const d=KH_DOOR[g];
   if(d&&d.psf2==='palazzo'){const R=f2S(9824);
     if(!R.open){sfx('locked');msg('A heavy door of dark wood, studded with iron, with no handle on this side. A hook for a mask hangs beside it.','#c8c4e0');return true}
