@@ -490,6 +490,7 @@ function f2RetGate(C,img,o){o=o||{};const im=IMG[img];if(!im||!im.width)return;
   else for(let i=0;i<3;i++){const x=23+i,g0=f2FacGid(k,i,3,wh,{tex:'texBlack_2',emit:.25});if(g0==null)continue;
     if(x===24){const g=C.chars[rows[38][24]];if(g!==undefined&&KH_DOOR[g])T_TILE[g]=T_TILE[g0]}else C.solid(x,38,C.ch(g0))}
   for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(d.k==='sign_gy'&&d.y===37&&d.x===23)C.decor.splice(i,1)}
+  if(o.one&&C.rows[39]&&C.rows[39][23]&&!KH_DOOR[C.chars[C.rows[39][24]]])C.rows[39][24]=C.rows[39][23];   // nothing taller stands behind the gate
   C.light(24,37,[.85,1.0,1.25])}
 /* ---------- the parchment area maps of the second floor: each square in the colour of its own floor or wall (sampled from the painted textures), inked on parchment;
    trees as round crowns, water with ripple strokes, the puzzle pieces and people as small marks, places numbered with a key (the cloud cover of ps_fog.js applies as on every castle map) ---------- */

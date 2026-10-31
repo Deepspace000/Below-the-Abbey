@@ -235,7 +235,7 @@ function f2DesertBuild(){
   C.foes(['f2sandwraith','f2dustdevil','f2scorpion'],[5,26,14,34],3);
   C.foes(['f2mummy','f2dustdevil'],[30,26,44,36],4);
   for(const [x,y] of [[12,14],[42,15],[6,33]])C.chestAt(x,y,1);
-  C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[1.2,1.02,.78]});if(C.rows[39]&&C.rows[39][23]&&!KH_DOOR[C.chars[C.rows[39][24]]])C.rows[39][24]=C.rows[39][23];   // nothing taller stands behind the gate
+  C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[1.2,1.02,.78]});
   return C.done({glow:8})}
 pspRegister(9825,f2DesertBuild);
 F2.step[9825]=(x,y)=>{
