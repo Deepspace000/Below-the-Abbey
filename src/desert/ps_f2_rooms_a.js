@@ -97,13 +97,14 @@ f2OnArrive(9821,()=>f2ForestApply());
 /* ---------- 2. THE ISLAND BY THE SEA (9822): the foot ---------- */
 const F2_ISLAND={PATCH:[[17,5,'conch','a conch shell'],[21,3,'scallop','a scallop shell'],[27,3,'starfish','a starfish'],[31,5,'spiral','a spiral snail shell']],ANSWER:'starfish',BOTTLE:[20,32],SPADE:[37,28]};
 function f2IslandBuild(){
-  const C=f2Room({id:9822,ground:'sand',path:'sandpath',band:[0,2],
+  const IS=f2TexFloor('ps_f2_tex_issand','f2t_issand',1.0)||'sand',IW=f2TexFloor('ps_f2_tex_iswet','f2t_iswet',1.0)||'seabed1',IG=f2TexFloor('ps_f2_tex_isgrass','f2t_isgrass',1.0)||'sand',ISE=f2TexFloor('ps_f2_tex_issea','f2t_issea',1.0)||'seawater';
+  const C=f2Room({id:9822,ground:ISE,path:IG,band:[0,2],softRet:1,rw:0,mistH:.08,
     routes:[[[24,35],[24,26],[16,22],[16,12],[24,8],[24,6]],[[24,30],[33,29]],[[16,18],[9,18]],[[24,8],[37,13]]],
-    clear:[[14,2,34,8,'sand','The North Beach',1],[29,24,40,31,'sand',"The Fisherman's Hut",1],[6,14,12,22,'sand','The Siren Rocks',1],[32,10,40,17,'sand','The Gull Cove',1],[19,31,29,37,'sand',null,1]],
-    edge:(C,x,y)=>{C.water(x,y,'seawater');return true}});
+    clear:[[14,2,34,8,IS,'The North Beach',1],[29,24,40,31,IS,"The Fisherman's Hut",1],[6,14,12,22,IS,'The Siren Rocks',1],[32,10,40,17,IS,'The Gull Cove',1],[19,31,29,37,IS,null,1]],
+    edge:(C,x,y)=>{C.water(x,y,ISE);return true}});
   const W=48,H=40;
   // the shore: wet sand next to the water
-  {const wet=C.fl('seabed1');for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++)if(C.open(x,y)&&[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>C.block[(y+b)*W+x+a]&&C.rows[y+b][x+a]==='.'))C.fm[y*W+x]=wet}
+  {const wet=C.fl(IW);for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++)if(C.open(x,y)&&[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>C.block[(y+b)*W+x+a]&&C.rows[y+b][x+a]==='.'))C.fm[y*W+x]=wet}
   // the fisherman's hut (a small timber hut with a thatched roof; the door is shut), nets, the spade by the door
   C.house({x0:34,y0:25,x1:36,y1:26,face:'S',sty:'flint',roof:'thatch2',wh:2.3,lit:false});
   const [sx,sy]=F2_ISLAND.SPADE;C.used.delete(sx+','+sy);C.dec(pspPic('f2_spade'),sx,sy,{block:true,npc:'f2i_spade'});
@@ -112,17 +113,24 @@ function f2IslandBuild(){
   {const [bx,by]=F2_ISLAND.BOTTLE;C.used.delete(bx+','+by);C.dec(pspPic('f2_bottle'),bx,by,{block:true,npc:'f2i_bottle'})}
   F2_ISLAND.PATCH.forEach(([x,y,s],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_patch_'+s),x,y,{block:true,npc:'f2i_patch'+i})});
   // palms, dune grass and rocks
-  C.fill(['dpalm0','dpalm1','dpalm2','dpalm3','yar_palms','dpalm0','hgxrock1','boulder'],{p1:.12,p2:.4,p3:.6});
-  C.scrub(['yar_shells','hgxrock3','lbush0_1'],.035);
+  f2Patches(C,[[IS,.8],[IG,.2]],{cs:5,onPath:true});   // the ground of the map itself is the sea (it runs on past the edge to the horizon); every square of land is sand or grass
+  const PT=[pspPic('f2_is_palm'),pspPic('f2_is_palm2'),'dpalm0','dpalm2'];PT.push(...PT.map(f2Flip));
+  C.fill(PT.concat([pspPic('f2_is_rock'),'hgxrock1']),{p1:.12,p2:.4,p3:.6});for(const d of C.decor)if(/f2_is_rock/.test(d.k))d.sc=.7;
+  for(const d of C.decor)if(d.block&&/palm|f2_is_rock/.test(d.k)){d.sc=+((d.sc||1)*(.8+C.hs2(d.x,d.y,171)*.45)).toFixed(2);d.ox=(C.hs2(d.x,d.y,172)-.5)*.8;d.oy=(C.hs2(d.x,d.y,173)-.5)*.6}
+  C.scrub(['yar_shells',pspPic('f2_is_shrub'),'yar_shells'],.04,{sc:.8});
+  for(const [x,y] of [[38,27],[33,28],[36,31]])if(C.free(x,y))C.dec(pspPic('f2_is_nets'),x,y,{block:false});
+  f2Mover(C,'yar_gull_fly0'in IMG?'yar_gull_fly0':pspPic('f2_fo_birds'),[[4,6],[44,6]],1.2,{pingpong:true,bob:3}).fly=1;
   for(const [x,y] of [[7,16],[8,21],[11,15],[6,19]])if(C.free(x,y))C.dec('hgxrock1',x,y,{block:true,sc:1.1});
-  C.capTrees(/dpalm|yar_palms/,2.8);
+  C.capTrees(/dpalm|yar_palms|f2_is_palm|f2_is_rock/,2.6);
+  f2Edge(C,{img:'f2_is_wall',wh:2.2,veil:.12,only:(x,y)=>x<=2||x>=45||y>=37});
+  for(let y=0;y<40;y++)for(let x=0;x<48;x++)if(C.rows[y][x]!=='.')C.fm[y*48+x]=C.fl(ISE);   // under the low mist of the edge lies the sea, out to the horizon   // sea cliffs at the two ends of the island; to the north the sea runs to the horizon
   pspSafeZone(C,24,35,6);
   C.foes(['f2crab','f2crab'],[14,2,34,8],1);
   C.foes(['f2siren','f2siren','f2spawn'],[5,13,13,23],2);
   C.foes(['f2gull','f2gull','f2gull','f2crab'],[31,9,41,18],3);
   C.foes(['f2spawn','f2crab','f2spawn'],[29,24,41,33],4);
   for(const [x,y] of [[6,15],[39,11],[39,30]])C.chestAt(x,y,1);
-  C.ret();
+  C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[.9,.95,1.05]});
   return C.done({glow:8})}
 pspRegister(9822,f2IslandBuild);
 khNpc('f2i_bottle','A bottle on the shore','ps_f2_bottle',()=>{const R=f2S(9822);R.read=1;

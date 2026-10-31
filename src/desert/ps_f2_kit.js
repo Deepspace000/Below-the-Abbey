@@ -415,7 +415,7 @@ function f2Edge(C,o){const W=48,H=40,rows=C.rows,ix=(x,y)=>y*W+x,hs=C.hs2;if(!IM
     for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if((seen[ix(x,y)]&&!inner(x,y))||!mistCh.has(rows[y][x]))continue;rows[y][x]='.';C.block[ix(x,y)]=0;C.used.delete(x+','+y);const key=o.pillar[(hs(x,y,134)*o.pillar.length)|0];const d=C.dec(key,x,y,{block:true,sc:.85+hs(x,y,135)*.35});if(d){d.edgeTree=1;d.ox=(hs(x,y,136)-.5)*.5;d.oy=(hs(x,y,137)-.5)*.4}}}
   if(o.pillar)for(let pass=0;pass<2;pass++)for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!mistCh.has(rows[y][x]))continue;const e=open(x+1,y),w=open(x-1,y),s=open(x,y+1),nn=open(x,y-1),cnt=e+w+s+nn;
     if(cnt>=3||(e&&w)||(s&&nn)){rows[y][x]='.';C.block[ix(x,y)]=0;C.fm[ix(x,y)]=C.fm[ix(x+(e?1:w?-1:0),y+(s?1:nn?-1:0))];C.used.delete(x+','+y);const key=o.pillar[(hs(x,y,134)*o.pillar.length)|0];const d=C.dec(key,x,y,{block:true,sc:.9+hs(x,y,135)*.3});if(d)d.edgeTree=1}}
-  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!mistCh.has(rows[y][x]))continue;const nb=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>open(x+a,y+b));if(!nb.length)continue;
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!mistCh.has(rows[y][x])||(o.only&&!o.only(x,y)))continue;const nb=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>open(x+a,y+b));if(!nb.length)continue;
     const horiz=nb.some(([a,b])=>b!==0),p=horiz?x:y,i=((p%(2*n))+2*n)%(2*n);if(gid[i]==null)continue;C.solid(x,y,gid[i]);k++;edge.push([x,y])}
   C._edgeCh=(x,y)=>gid[((x%(2*n))+2*n)%(2*n)];if(o.noTall)return k;
   if(o.innerP&&o.pillar){const edgeN=(x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>rows[y+b]&&rows[y+b][x+a]!=='.');   // a row of trees just inside the painted edge, so the edge is never the last thing in view
