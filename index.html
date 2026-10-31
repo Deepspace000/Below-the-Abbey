@@ -78450,6 +78450,12 @@ const PSF2_SOCK=[.116,.244,.371,.499,.626,.754,.882],PSF2_SOCKY=.70,PSF2_SOCKR=.
 const psf2SlKey=nh=>{const k=pspPic(nh?'f2_sleeper2_nh':'f2_sleeper2');return IMG[k]&&IMG[k].width?k:pspPic('f2_sleeper')};
 const psf2PlKey=()=>{const k=pspPic('f2_bier2');return IMG[k]&&IMG[k].width?k:pspPic('f2_bier')};
 function psf2BierEnd(){const k='psf2_bierend';if(IMG[k])return k;const im=IMG[psf2SlKey(1)];if(!im||!im.width)return pspPic('f2_bier');const sx=Math.round(im.width*.88),sy=Math.round(im.height*PSF2_TOP),c=document.createElement('canvas');c.width=im.width-sx;c.height=im.height-sy;c.getContext('2d').drawImage(im,sx,sy,c.width,c.height,0,0,c.width,c.height);IMG[k]=c;NPC_H[k]=NPC_H[pspPic('f2_sleeper')]*(1-PSF2_TOP);return k}
+/* the stone bed (round 4): the bier picture cut into the plinth (the long side faces) and the Sleeper on her cloth (the middle plane); f2_bier_end (Gemini) is the short end */
+const PSF2_BED={cut:112/329,topRow:126/329,d:.74};PSF2_BED.bob=3.0*329/862*(1-PSF2_BED.topRow)-.012;   // the picture is 862 x 329 at 3 squares wide
+function psf2BedKeys(){const base=psf2BierKey(),im=IMG[base],out={side:base,side2:base,top:base,end:psf2BierEnd()};if(!im||!im.width)return out;
+  const mk=(k,y0,y1)=>{if(IMG[k])return k;const W=im.width,H=im.height,a=Math.round(H*y0),b=Math.round(H*y1),c=document.createElement('canvas');c.width=W;c.height=b-a;c.getContext('2d').drawImage(im,0,a,W,b-a,0,0,W,b-a);IMG[k]=c;NPC_H[k]=3.0*(b-a)/W;return k};
+  out.side=mk(base+'_bs',PSF2_BED.cut,1);out.side2=mk(base+'_bn',PSF2_BED.cut,1);/* the far side is its own copy: two pieces of one key on one square read as a duplicate */out.top=mk(base+'_bt',0,PSF2_BED.topRow);
+  const e=IMG.ps_f2_bier_end;if(e&&e.width)out.end='ps_f2_bier_end';return out}
 function psf2BierKey(){const F=psf2F(),woke=!!F.woke,mask=woke?'w':PSF2.PARTS.map(p=>F.placed[p]?1:0).join(''),k='psf2_bier3_'+mask;if(IMG[k])return k;
   const nh=woke||!F.placed.face||!F.placed.brain,sk=psf2SlKey(nh),im=IMG[sk];if(!im||!im.width)return pspPic('f2_bier');const W=im.width,H=im.height,top=Math.round(H*PSF2_TOP),c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.drawImage(im,0,0);
   const sockets=()=>{if(woke)return;PSF2_ORDER.forEach((p,i)=>{if(!F.placed[p])return;const s=IMG[pspPic('f2_sock_'+p)];if(!s||!s.width)return;const r=PSF2_SOCKR*W;x.drawImage(s,PSF2_SOCK[i]*W-r,PSF2_SOCKY*H-r,2*r,2*r)})};   // a filled socket shows its piece
@@ -78539,8 +78545,12 @@ function psf2HubBuild(info){
   // the Sleeper's table at the crossing
   // the bier: a long plinth of black stone across three squares (27..29); the pieces of the Sleeper appear on it one by one as they are laid there
   for(const x of [27,28,29]){C.used.delete(x+',22');const d=C.dec(psf2Blank(),x,22,{block:true,npc:x===28?'psf2_table':undefined});if(d){d.fly=1;if(x!==28){d.npc='psf2_table';d.solid=1}}}
-  {const m=f2Span(C,psf2BierKey(),28.5,22.5,0,1,3.0,0);m.bierMain=1;C.f2x[m.kname].bierMain=1;
-   for(const [x,s] of [[27.03,-1],[29.97,1]]){const e=f2Span(C,psf2BierEnd(),x,22.5,1,0,1.0,0);e.bierEnd=s}}
+  // the bed is a solid box of painted planes: the two long sides (the plinth with its seven sockets, x 27..30) at y 22.5 +- PSF2_BED.d/2, the two short ends (a painted end panel) at x 27 and 30,
+  // and the Sleeper with her cloth as one plane down the middle, standing on the top of the plinth (its top is above eye height, so no lid is needed); she fades when seen end on
+  {const B=PSF2_BED,pk=psf2BedKeys(),face=(k,x,y,nx,ny,w,bob,role)=>{const d=f2Span(C,k,x,y,nx,ny,w,bob);d.walk=false;d.bierFace=role;C.f2x[d.kname].bierFace=role;return d};
+   face(pk.side2,28.5,22.5-B.d/2,0,1,3.0,0,'side2');face(pk.side,28.5,22.5+B.d/2,0,1,3.0,0,'side');
+   {const ei=IMG[pk.end],ew=ei&&ei.width?Math.max(B.d*1.12,3.0*217/862*ei.width/ei.height):B.d;for(const x of [27.0,30.0])face(pk.end,x,22.5,1,0,ew,0,'end')}   // as tall as the plinth
+   face(pk.top,28.5,22.5,0,1,3.0,B.bob,'top')}
   {const sh=f2Soft(pspPic('f2_fo_shaft'),{filter:'saturate(0) brightness(1.25)',l:.3,r:.3,t:.05,b:.25,a:.32,tag:'hub'});const d=f2Span(C,sh,28.5,21.55,0,1,2.6,0);d.lift=.2;C.f2x[d.kname].lift=.2}   // a pale shaft of light falls on the bier from the vault
   C.light(28,22,[1.2,1.15,1.4]);C.light(28,21,[1.0,.85,1.2]);
   {C.used.delete('28,24');const d=C.dec(pspPic('f2_sleeper_up'),28,24,{block:false,npc:'psf2_sleeper'});if(d)d.hidden=true}
@@ -78645,8 +78655,12 @@ khNpc('psf2_sleeper','The Sleeper','ps_f2_sleeper_up',()=>say("Thank you. I was 
 /* the live level follows the flags: the empty bier, the whole Sleeper lying on it, then the woken Sleeper standing beside it */
 function psf2Apply(){
   if(LEVEL!==PSF2H.ID||!G.decor)return;const F=psf2F(),whole=psf2Placed()>=7;
-  for(const d of G.decor){if(d.bierMain){const k=psf2BierKey();if(d.k!==k)d.k=k}
+  const BK=psf2BedKeys();for(const d of G.decor){if(d.bierFace&&BK[d.bierFace]&&d.k!==BK[d.bierFace])d.k=BK[d.bierFace];
     if(d.npc==='psf2_sleeper'){d.hidden=!F.woke;d.found=!F.woke;d.block=!!F.woke}}}
+/* the Sleeper's plane fades out when the bed is seen end on (a plane seen edge on would be a sliver) */
+{const _sl=spriteList;spriteList=function(){const L=_sl.apply(this,arguments);if(typeof LEVEL==='undefined'||LEVEL!==PSF2H.ID||!G.C)return L;
+  for(const s of L){const d=s.decor;if(!d||d.bierFace!=='top')continue;const rx=28.5-(G.C.x+.5),ry=22.5-(G.C.y+.5),dl=Math.hypot(rx,ry)||1,c=Math.abs(ry/dl);s.fade=Math.max(0,Math.min(1,(c-.1)/.2))}
+  return L}}
 pspOnArrive(n=>{if(n===PSF2H.ID)try{psf2Apply()}catch(e){console.error('psf2Apply',e)}});
 /* the stair to the third floor (stub) */
 {const _k=khBump;khBump=function(nx,ny,g){const d=KH_DOOR[g];

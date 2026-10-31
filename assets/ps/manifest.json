@@ -6052,5 +6052,13 @@
 "h": 819,
 "kind": "tex",
 "sheet": "doors6c"
+},
+"f2_bier_end": {
+"file": "f2_bier_end.webp",
+"w": 532,
+"px_h": 512,
+"h": 0.76,
+"kind": "sprite",
+"sheet": "f2be"
 }
 }
