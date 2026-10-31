@@ -77889,7 +77889,7 @@ function f2Tick(){
 function f2Room(S){
   const id=S.id,W=48,H=40,B=F2B[id],wh=S.wh||3.2;
   f2Art();
-  const C=pspMake({id,start:{x:24,y:35,f:0},floor:'f2:'+(S.ground||'lush'),wh,amb:B.amb,wind:S.wind===undefined?.25:S.wind,lcol:B.lcol});
+  const C=pspMake({id,start:{x:24,y:35,f:0},floor:'f2:'+(S.ground||'lush'),wh,amb:B.amb,wind:S.wind===undefined?.25:S.wind,lcol:B.lcol,terrace:true});
   if(typeof PSPK!=='undefined')PSPK.floors['f2:'+(S.ground||'lush')]=f2FloorKey(S.ground||'lush');
   const {rows,block,fm}=C,ix=(x,y)=>y*W+x,hs=(a,b,c)=>hash2(a,b,c+id);C.f2=S;C.hs2=hs;
   const vn=(x,y,cs,sd)=>{const u=x/cs,v=y/cs,i=Math.floor(u),j=Math.floor(v),fx=u-i,fy=v-j,sx=fx*fx*(3-2*fx),sy=fy*fy*(3-2*fy);return(hs(i,j,sd)*(1-sx)+hs(i+1,j,sd)*sx)*(1-sy)+(hs(i,j+1,sd)*(1-sx)+hs(i+1,j+1,sd)*sx)*sy};C.vn=vn;
@@ -77946,8 +77946,17 @@ function f2Room(S){
   C.warp=(x,y,style,to,msgText)=>{const b=style==='house'?null:pspDoorGid(style||'oak',wh),g=KH_NEXT_GID++;if(b!=null){T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b]}KH_DOOR[g]={psf2:'warp',psh:'warp',to,A:to,B:to,lvl:id,at:{x:to[0],y:to[1],f:to[2]},msg:msgText};(C.warpTo=C.warpTo||[]).push(to);C.solid(x,y,C.ch(g));C.used.add(x+','+y);return g};
   C.foes=(list,rect,seed,o)=>{let n=0;list.forEach((t,i)=>{const q=C.spot(rect[0],rect[1],rect[2],rect[3],seed*31+i,o);if(q&&f2Foe(C,t,q[0],q[1]))n++});return n};
   C.chestAt=(x,y,tier)=>{if(C.enemies.some(e=>e.x===x&&e.y===y)||!C.open(x,y)){const q=C.near(x,y,3,true);if(!q)return null;x=q[0];y=q[1]}C.used.delete(x+','+y);return C.chest(x,y,{tier:tier===undefined?1:tier})};
+  // relief: gentle terraces away from the paths (dunes, banks, knolls); paths, clearings' centres and the arrival stay level; neighbours never differ by more than a walkable step
+  C.relief=(o)=>{o=o||{};const amp=o.amp||.4,cs=o.cs||5,stp=o.step||.12,hg=C.hgt,keep=o.keep||(()=>false);
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=ix(x,y);if(path[i]||keep(x,y)||Math.hypot(x-24,y-35)<4){continue}
+      const e=Math.min(3,E[i]+ (core[i]?0:1)),n=vn(x,y,cs,191)*.7+vn(x,y,cs*.45,192)*.3,raw=amp*Math.max(0,n-.35)/.65*Math.min(1,(o.inCore?1:.35)+e*.3);hg[i]=.3+Math.round(raw/stp)*stp+(o.low&&rows[y][x]==='.'&&block[i]?-.12:0)}
+    for(let pass=0;pass<6;pass++)for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const i=ix(x,y);for(const j of [i-1,i+1,i-W,i+W]){if(hg[i]>hg[j]+.25&&rows[y][x]==='.'&&!block[i])hg[i]=hg[j]+.24}}};
   // finish: no sealed pockets, lights, the level's air
   C.done=o=>{o=o||{};
+    // nothing tall stands right beside the way: big pieces next to a path are kept to a height that the narrow view shows whole, and moved back a little
+    for(const d of C.decor){if(!d.block||d.npc||d.span||d.roof||typeof d.k!=='string')continue;const im=IMG[d.k];if(!im||!im.width)continue;const hh=(NPC_H[d.k]||1)*(d.sc||1);if(hh<=1.9)continue;
+      const nb=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>{const xx=d.x+a,yy=d.y+b;return xx>=0&&yy>=0&&xx<W&&yy<H&&path[ix(xx,yy)]});if(!nb.length)continue;
+      d.sc=+((d.sc||1)*1.9/hh).toFixed(3);d.ox=Math.max(-.35,Math.min(.35,(d.ox||0)-nb.reduce((t,q)=>t+q[0],0)*.25));d.oy=Math.max(-.35,Math.min(.35,(d.oy||0)-nb.reduce((t,q)=>t+q[1],0)*.25))}
     {const bs=new Set();for(const d of C.decor)if(d.block)bs.add(d.x+','+d.y);
      const reach=new Uint8Array(W*H),q=[ix(24,35)];reach[q[0]]=1;for(const [a,b] of C.warpTo||[]){if(!reach[ix(a,b)]){reach[ix(a,b)]=1;q.push(ix(a,b))}}
      for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||reach[ix(nx,ny)]||!C.open(nx,ny)||bs.has(nx+','+ny))continue;reach[ix(nx,ny)]=1;q.push(ix(nx,ny))}}
@@ -77963,6 +77972,7 @@ function f2Room(S){
     for(const d of C.decor)if(d.fly){if(d.kname&&C.f2x&&C.f2x[d.kname])C.f2x[d.kname].fly=1;else f2X(C,d,['fly'])}   // flyers stay marked in the live level (birds, butterflies, floating islands)
     C.glow(o.glow||7,B.lcol);
     const lv=C.finish({start:{x:24,y:35,f:0}});
+    try{const T=TERRS[id];if(T&&T.terr)T.s=f2Shade(C,lv,S.shade)}catch(e){console.error('f2 shade',e)}
     lv.fogAt=()=>B.fog;lv.amb=B.amb;lv.f2=1;lv._noTidy=true;
     // last check on the finished level (the same walk as tools/ps_test.py reach): an open square nothing reaches becomes mist wall
     {const TB=TERRS[id]&&TERRS[id].block,bs=new Set();for(const d of lv.decor)if(d.block||(d.npc&&d.solid))bs.add(d.x+','+d.y);
@@ -78165,6 +78175,106 @@ function f2MapDraw(c,x,L,api){
     names.forEach((n,i)=>{api.text(x,(i+1)+'  '+n.t.replace(/^The /,''),a+5,b+17+i*lh,5.2,INK,'left')})}
   {const a=6,b=46,w=84,h=22;api.panel(x,a,b,w,h);api.text(x,'The Pale Spire',a+w/2,b+8,5.6,'#4a2a6a');api.text(x,'Second floor',a+w/2,b+17,5.2,INK)}}
 if(typeof mplInstall==='function')mplInstall({name:'palespire2',levels:[9820,9821,9822,9823,9824,9825,9826,9827],draw:f2MapDraw,tint:[3,2,6],foot:'You are the yellow arrow. The numbers on the map are listed on the right; gold squares are the doors of the Hall of Illusions, dark green rounds are trees, red dots are people and things to touch.'});
+/* ---------- the ground of the illusion rooms: soft, irregular borders between floors ----------
+   The rooms are terraced levels (pspMake terrace: per-cell heights, a shade map). Their ground is drawn by this copy of the engine's terrTerrace (terrain.js), changed in one place:
+   near the edge of a square whose neighbour has another floor, the two pictures are mixed across a band about a third of a square wide, and the line of the mix wanders
+   (a noise that is the same seen from both sides, so the seam is continuous). Sand runs into grass, grass into leaves, the quay into the water, without a ruler-straight edge. */
+const F2_BAND=.34;
+function f2EdgeNoise(along,at,seed){return Math.sin(along*4.7+at*2.3+seed)*.55+Math.sin(along*11.9-at*1.7+seed*2.1)*.3+Math.sin(along*23.3+at*5.1)*.15}
+function f2Terrace(x,rX,rY){
+  const T=TERR_NOW,W=T.W,Hh=T.H,h=T.h,sh=T.s,C=TC,D=C.D,cx=C.cx,cy=C.cy,cz=CAMZ,grid=G.grid,fm=C.fmp,fds=C.fds.length<7?(C.fds7||(C.fds7=C.fds.concat([G.fl7||C.fds[5]]))):C.fds,hz=C.hzr,hzmax=C.hzmax,hzrate=C.hzrate,lbm=C.lbm,nl=C.nl,nn=C.nn,tbR=C.tbR,tbG=C.tbG,tbB=C.tbB,ncr=C.ncr,ncg=C.ncg,ncb=C.ncb,HHv=HH,Fv=F,TSv=TS,TSm=TS-1,SD=T.sd,B=F2_BAND,iB=1/(2*B);
+  const rl=Math.hypot(rX,rY),base=x*YBK;
+  let mx=Math.floor(cx),my=Math.floor(cy);
+  const ddx=Math.abs(1/rX),ddy=Math.abs(1/rY);
+  let stx,sty,sdx,sdy;
+  if(rX<0){stx=-1;sdx=(cx-mx)*ddx}else{stx=1;sdx=(mx+1-cx)*ddx}
+  if(rY<0){sty=-1;sdy=(cy-my)*ddy}else{sty=1;sdy=(my+1-cy)*ddy}
+  const watA=T.wat,wlA=T.wl;
+  const fcAt=(a,b)=>(a<0||b<0||a>=W||b>=Hh||grid[b][a]!==0)?-1:(fm?fm.charCodeAt(b*W+a):48);
+  let yb=VH,tIn=0,itIn=Infinity,side=0,nh=0,lastK=-1,slopeMax=-1e9,tStop=70,hprev=-1e9,first=true;
+  CY_A=0;
+  for(let guard=0;guard<150;guard++){
+    const tOut=Math.min(sdx,sdy),itO=1/tOut,inside=mx>=0&&my>=0&&mx<W&&my<Hh,i=inside?my*W+mx:(Math.min(Hh-1,Math.max(0,my))*W+Math.min(W-1,Math.max(0,mx)));
+    const g=inside?grid[my][mx]:1;
+    if(!first&&g>0){
+      const foot=h[i];let wh=CEILH;if(g>=100){const tt=T_TILE[g];if(tt!==undefined&&TEX[tt])wh=TEX[tt].wh||CEILH}
+      const slope=(foot+wh-cz)*Math.min(itIn,20);
+      if(slope>slopeMax&&nh<THN){THX[nh]=mx;THC[nh]=my;THS[nh]=side;THG[nh]=g;THP[nh]=tIn;THB[nh]=yb;THF[nh]=foot;THA[nh]=CY_A;nh++;slopeMax=slope;
+        if(slope>0){const ts=(T.zmax-cz)/slope;if(ts<tStop)tStop=ts}}
+      hprev=-1e9;
+    }else{
+      const ybIn=yb,hc0=h[i],hc=first?Math.min(hc0,cz-.05):hc0;let fdd=null,cellShade=1,gaN=-1;
+      const wI=watA?watA[i]:0,zw=wI?wlA[i]:0,wTop=wI>0&&cz>zw+.01;
+      const fc0=(fm&&inside)?fm.charCodeAt(i):48;
+      if(!first&&hprev>-1e8&&hc>hprev){ // the riser of a step up, in the picture of its floor
+        const yTop=HHv-(hc-cz)*Fv*itIn,yBot=HHv-(hprev-cz)*Fv*itIn,ys=Math.max(0,Math.ceil(yTop)),ye=Math.min(Math.ceil(yb),Math.ceil(yBot),VH);
+        if(ye>ys){
+          if(fdd===null){fdd=fds[fc0-48]||fds[0];cellShade=sh[i]};if(gaN<0)gaN=terrCellLights(nl,nn,ncr,ncg,ncb,mx,my);
+          const px=cx+rX*tIn,py=cy+rY*tIn,along=side===0?py:px,u=((along-Math.floor(along))*TSv)&TSm,dist=tIn*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv;
+          let lt=0,lR=0,lG=0,lB=0;for(let j=0;j<gaN;j++){const ax=px-GLX[j],ay=py-GLY[j],q=GLA[j]/(1+1.15*(ax*ax+ay*ay+.44));lt+=q;lR+=q*GLR[j];lG+=q*GLG[j];lB+=q*GLB[j]}
+          const lb=Math.max(baseL(dist),lbm),sk=(lb*.55+lt*.45+.05)*smv,rs=(side===0?(stx>0?.9:.58):(sty>0?1:.68))*.85,kR=(lb*tbR+lR)*rs*cellShade,kG=(lb*tbG+lG)*rs*cellShade,kB=(lb*tbB+lB)*rs*cellShade;
+          let o=(ys*VW+x)*4;const zkR=tIn/Fv;
+          for(let y=ys;y<ye;y++,o+=VW*4){const z=cz-(y+.5-HHv)*zkR,v=((hc-z)*TSv)&TSm,ti=(v*TSv+u)*4;D[o]=fdd[ti]*kR*iv+hz[0]*sk;D[o+1]=fdd[ti+1]*kG*iv+hz[1]*sk;D[o+2]=fdd[ti+2]*kB*iv+hz[2]*sk}
+        }
+        if(yTop<yb)yb=yTop;
+      }
+      if(hc<cz){if(!wTop){ // the top of the cell, with its borders mixed into the neighbours' floors
+        const k1=(cz-hc)*Fv,yFar=HHv+k1*itO,yNear=HHv+k1*Math.min(itIn,1000),ys=Math.max(0,Math.ceil(yFar)),ye=Math.min(Math.ceil(yb),Math.ceil(yNear),VH);
+        if(ye>ys){
+          if(fdd===null){fdd=fds[fc0-48]||fds[0];cellShade=sh[i]};if(gaN<0)gaN=terrCellLights(nl,nn,ncr,ncg,ncb,mx,my);
+          const fW=fcAt(mx-1,my),fE=fcAt(mx+1,my),fN=fcAt(mx,my-1),fS=fcAt(mx,my+1);
+          const dW=fW>=0&&fW!==fc0?(fds[fW-48]||null):null,dE=fE>=0&&fE!==fc0?(fds[fE-48]||null):null,dN=fN>=0&&fN!==fc0?(fds[fN-48]||null):null,dS=fS>=0&&fS!==fc0?(fds[fS-48]||null):null,any=dW||dE||dN||dS;
+          const shW=mx>0?sh[i-1]:cellShade,shE=mx<W-1?sh[i+1]:cellShade,shN=my>0?sh[i-W]:cellShade,shS=my<Hh-1?sh[i+W]:cellShade;
+          let o=(ys*VW+x)*4;
+          for(let y=ys;y<ye;y++,o+=VW*4){
+            const t=k1*RCP[y],px=cx+rX*t,py=cy+rY*t,fx=px-mx,fy=py-my,u=((fx*TSv)|0)&TSm,v=((fy*TSv)|0)&TSm,ti=(v*TSv+u)*4,dist=t*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv;
+            let lt=0,lR=0,lG=0,lB=0;for(let j=0;j<gaN;j++){const ax=px-GLX[j],ay=py-GLY[j],q=GLA[j]/(1+1.15*(ax*ax+ay*ay+.44));lt+=q;lR+=q*GLR[j];lG+=q*GLG[j];lB+=q*GLB[j]}
+            // the shade map is mixed between cells too (soft pools of shadow, not squares)
+            const sx=fx<.5?cellShade+(shW-cellShade)*(.5-fx)*.9:cellShade+(shE-cellShade)*(fx-.5)*.9,ssh=fy<.5?sx+(shN-cellShade)*(.5-fy)*.9:sx+(shS-cellShade)*(fy-.5)*.9;
+            const lb=Math.max(baseL(dist),lbm),sk=(lb*.55+lt*.45+.05)*smv,kR=(lb*tbR+lR)*ssh,kG=(lb*tbG+lG)*ssh,kB=(lb*tbB+lB)*ssh;
+            let r=fdd[ti],gg=fdd[ti+1],b=fdd[ti+2];
+            if(any&&dist<26){
+              if(dW&&fx<B){const n=f2EdgeNoise(py,mx,1)*B*.85,w=1-f2SS(.5+(fx+n)*iB);r+=(dW[ti]-r)*w;gg+=(dW[ti+1]-gg)*w;b+=(dW[ti+2]-b)*w}
+              else if(dE&&fx>1-B){const n=f2EdgeNoise(py,mx+1,1)*B*.85,w=f2SS(.5+(fx-1+n)*iB);r+=(dE[ti]-r)*w;gg+=(dE[ti+1]-gg)*w;b+=(dE[ti+2]-b)*w}
+              if(dN&&fy<B){const n=f2EdgeNoise(px,my,7)*B*.85,w=1-f2SS(.5+(fy+n)*iB);r+=(dN[ti]-r)*w;gg+=(dN[ti+1]-gg)*w;b+=(dN[ti+2]-b)*w}
+              else if(dS&&fy>1-B){const n=f2EdgeNoise(px,my+1,7)*B*.85,w=f2SS(.5+(fy-1+n)*iB);r+=(dS[ti]-r)*w;gg+=(dS[ti+1]-gg)*w;b+=(dS[ti+2]-b)*w}}
+            D[o]=r*kR*iv+hz[0]*sk;D[o+1]=gg*kG*iv+hz[1]*sk;D[o+2]=b*kB*iv+hz[2]*sk;
+          }
+        }
+        if(yFar<yb)yb=yFar;
+      }}else{const yT=HHv-(hc-cz)*Fv*Math.min(itIn,1000);if(yT<yb)yb=yT}
+      if(wI){
+        if(wTop){const k1=(cz-zw)*Fv,yFarS=HHv+k1*itO,yNearS=HHv+k1*Math.min(itIn,1000),ys=Math.max(0,Math.ceil(yFarS)),ye=Math.min(ybIn,Math.ceil(yNearS),VH);if(ye>ys){if(fdd===null){fdd=fds[fc0-48]||fds[0]};terrWaterTop(x,rX,rY,mx,my,zw,hc,ys,ye,fdd)}if(yFarS<yb)yb=yFarS}
+        else terrCeilPaint(1,x,rX,rY,tIn,tOut,zw,yb,0);
+      }
+      hprev=hc0;
+    }
+    first=false;
+    const kb=Math.min(YBK-1,(tOut*YBS)|0),yv=Math.max(0,Math.min(VH,Math.ceil(yb)));
+    for(let k=lastK+1;k<=kb;k++)YB[base+k]=yv;
+    if(kb>lastK)lastK=kb;
+    if(!inside||yb<=0||tOut>tStop||CY_A>=yb)break;
+    if(sdx<sdy){sdx+=ddx;mx+=stx;side=0}else{sdy+=ddy;my+=sty;side=1}
+    tIn=tOut;itIn=itO;
+  }
+  const yv=Math.max(0,Math.min(VH,Math.ceil(yb)));
+  for(let k=lastK+1;k<YBK;k++)YB[base+k]=yv;
+  return nh;
+}
+function f2SS(t){t=t<0?0:t>1?1:t;return t*t*(3-2*t)}
+{const _tt=terrTerrace;terrTerrace=function(x,rX,rY){if(typeof LEVEL!=='undefined'&&(f2Is(LEVEL))&&!window.F2_PLAINGROUND)return f2Terrace(x,rX,rY);return _tt.apply(this,arguments)}}
+/* the shade of the ground: soft pools of shadow under trees and big pieces, darker near the painted edge and in hollows, a little lighter on rises (the terrace shade map, mixed between cells when drawn) */
+function f2Shade(C,lv,o){o=o||{};const W=48,H=40,N=W*H,s=new Float32Array(N).fill(1),E=C.E,hg=C.hgt;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;let v=1;
+    // nearness to the painted edge: a soft vignette
+    let dmin=9;for(let r=1;r<=3&&dmin>3;r++)for(let b=-r;b<=r;b++)for(let a=-r;a<=r;a++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const xx=x+a,yy=y+b;if(xx<0||yy<0||xx>=W||yy>=H||lv.rows[yy][xx]!=='.'){dmin=Math.min(dmin,r)}}
+    if(dmin<=3)v*=1-(o.edge===undefined?.18:o.edge)*(4-dmin)/3;
+    v*=1+(hg[i]-.3)*(o.rise===undefined?.35:o.rise);
+    s[i]=v}
+  for(const d of lv.decor){if(!d.block||d.npc||d.span)continue;const k=String(d.k);if(!(o.tree||/tree|pine|spruce|fir|birch|beech|oak|maple|lime|palm|cypress|willow|dead|pillar|mesa|rock/i).test(k))continue;
+    for(let b=-1;b<=1;b++)for(let a=-1;a<=1;a++){const xx=d.x+a,yy=d.y+b;if(xx<0||yy<0||xx>=W||yy>=H)continue;s[yy*W+xx]*=a===0&&b===0?(o.pool||.72):1-((1-(o.pool||.72))*.45)}}
+  for(let i=0;i<N;i++)s[i]=Math.max(.45,Math.min(1.25,s[i]*(o.gain||1)));
+  return s}
 /* every arrival in a room: say where the party is the first time, apply the puzzle state */
 pspOnArrive((n,restored)=>{if(!f2Is(n))return;const S=f2S(n);if(!S.seen&&!restored){S.seen=1;try{msg(F2B[n].text,'#d8e4f0')}catch(e){}}});
 
