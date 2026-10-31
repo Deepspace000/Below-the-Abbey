@@ -77974,7 +77974,7 @@ function f2Room(S){
     for(const d of C.decor)if(d.fly){if(d.kname&&C.f2x&&C.f2x[d.kname])C.f2x[d.kname].fly=1;else f2X(C,d,['fly'])}   // flyers stay marked in the live level (birds, butterflies, floating islands)
     C.glow(o.glow||7,B.lcol);
     const lv=C.finish({start:{x:24,y:35,f:0}});
-    try{const T=TERRS[id];if(T&&T.terr)T.s=f2Shade(C,lv,S.shade)}catch(e){console.error('f2 shade',e)}
+    try{const T=TERRS[id];if(T&&T.terr){T.s=f2Shade(C,lv,S.shade);lv._f2glow=f2GlowMap(C,S.glowK)}}catch(e){console.error('f2 shade',e)}
     lv.fogAt=()=>B.fog;lv.amb=B.amb;lv.f2=1;lv._noTidy=true;
     // last check on the finished level (the same walk as tools/ps_test.py reach): an open square nothing reaches becomes mist wall
     {const TB=TERRS[id]&&TERRS[id].block,bs=new Set();for(const d of lv.decor)if(d.block||(d.npc&&d.solid))bs.add(d.x+','+d.y);
@@ -78211,7 +78211,7 @@ if(typeof mplInstall==='function')mplInstall({name:'palespire2',levels:[9820,982
 const F2_BAND=.34;
 function f2EdgeNoise(along,at,seed){return Math.sin(along*4.7+at*2.3+seed)*.55+Math.sin(along*11.9-at*1.7+seed*2.1)*.3+Math.sin(along*23.3+at*5.1)*.15}
 function f2Terrace(x,rX,rY){
-  const T=TERR_NOW,W=T.W,Hh=T.H,h=T.h,sh=T.s,C=TC,D=C.D,cx=C.cx,cy=C.cy,cz=CAMZ,grid=G.grid,fm=C.fmp,fds=C.fds.length<7?(C.fds7||(C.fds7=C.fds.concat([G.fl7||C.fds[5]]))):C.fds,hz=C.hzr,hzmax=C.hzmax,hzrate=C.hzrate,lbm=C.lbm,nl=C.nl,nn=C.nn,tbR=C.tbR,tbG=C.tbG,tbB=C.tbB,ncr=C.ncr,ncg=C.ncg,ncb=C.ncb,HHv=HH,Fv=F,TSv=TS,TSm=TS-1,SD=T.sd,B=F2_BAND,iB=1/(2*B);
+  const GLW=(LEVELS[LEVEL]&&LEVELS[LEVEL]._f2glow&&!f2InRoof())?LEVELS[LEVEL]._f2glow:null,T=TERR_NOW,W=T.W,Hh=T.H,h=T.h,sh=T.s,C=TC,D=C.D,cx=C.cx,cy=C.cy,cz=CAMZ,grid=G.grid,fm=C.fmp,fds=C.fds.length<7?(C.fds7||(C.fds7=C.fds.concat([G.fl7||C.fds[5]]))):C.fds,hz=C.hzr,hzmax=C.hzmax,hzrate=C.hzrate,lbm=C.lbm,nl=C.nl,nn=C.nn,tbR=C.tbR,tbG=C.tbG,tbB=C.tbB,ncr=C.ncr,ncg=C.ncg,ncb=C.ncb,HHv=HH,Fv=F,TSv=TS,TSm=TS-1,SD=T.sd,B=F2_BAND,iB=1/(2*B);
   const rl=Math.hypot(rX,rY),base=x*YBK;
   let mx=Math.floor(cx),my=Math.floor(cy);
   const ddx=Math.abs(1/rX),ddy=Math.abs(1/rY);
@@ -78262,13 +78262,13 @@ function f2Terrace(x,rX,rY){
             // the shade map is mixed between cells too (soft pools of shadow, not squares)
             const sx=fx<.5?cellShade+(shW-cellShade)*(.5-fx)*.9:cellShade+(shE-cellShade)*(fx-.5)*.9,ssh=fy<.5?sx+(shN-cellShade)*(.5-fy)*.9:sx+(shS-cellShade)*(fy-.5)*.9;
             const lb=Math.max(baseL(dist),lbm),sk=(lb*.55+lt*.45+.05)*smv,kR=(lb*tbR+lR)*ssh,kG=(lb*tbG+lG)*ssh,kB=(lb*tbB+lB)*ssh;
-            let r=fdd[ti],gg=fdd[ti+1],b=fdd[ti+2];
+            let r=fdd[ti],gg=fdd[ti+1],b=fdd[ti+2];let gR=0,gG=0,gB=0;if(GLW){const gi=i*3,gx=fx<.5?(mx>0?gi-3:gi):(mx<W-1?gi+3:gi),gy=fy<.5?(my>0?gi-W*3:gi):(my<Hh-1?gi+W*3:gi),ax=Math.abs(fx-.5),ay=Math.abs(fy-.5);gR=GLW[gi]+(GLW[gx]-GLW[gi])*ax+(GLW[gy]-GLW[gi])*ay;gG=GLW[gi+1]+(GLW[gx+1]-GLW[gi+1])*ax+(GLW[gy+1]-GLW[gi+1])*ay;gB=GLW[gi+2]+(GLW[gx+2]-GLW[gi+2])*ax+(GLW[gy+2]-GLW[gi+2])*ay}
             if(any&&dist<26){
               if(dW&&fx<B){const n=f2EdgeNoise(py,mx,1)*B*.85,w=1-f2SS(.5+(fx+n)*iB);r+=(dW[ti]-r)*w;gg+=(dW[ti+1]-gg)*w;b+=(dW[ti+2]-b)*w}
               else if(dE&&fx>1-B){const n=f2EdgeNoise(py,mx+1,1)*B*.85,w=f2SS(.5+(fx-1+n)*iB);r+=(dE[ti]-r)*w;gg+=(dE[ti+1]-gg)*w;b+=(dE[ti+2]-b)*w}
               if(dN&&fy<B){const n=f2EdgeNoise(px,my,7)*B*.85,w=1-f2SS(.5+(fy+n)*iB);r+=(dN[ti]-r)*w;gg+=(dN[ti+1]-gg)*w;b+=(dN[ti+2]-b)*w}
               else if(dS&&fy>1-B){const n=f2EdgeNoise(px,my+1,7)*B*.85,w=f2SS(.5+(fy-1+n)*iB);r+=(dS[ti]-r)*w;gg+=(dS[ti+1]-gg)*w;b+=(dS[ti+2]-b)*w}}
-            D[o]=r*kR*iv+hz[0]*sk;D[o+1]=gg*kG*iv+hz[1]*sk;D[o+2]=b*kB*iv+hz[2]*sk;
+            D[o]=r*(kR+gR)*iv+hz[0]*sk;D[o+1]=gg*(kG+gG)*iv+hz[1]*sk;D[o+2]=b*(kB+gB)*iv+hz[2]*sk;
           }
         }
         if(yFar<yb)yb=yFar;
@@ -78294,6 +78294,10 @@ function f2Terrace(x,rX,rY){
 function f2SS(t){t=t<0?0:t>1?1:t;return t*t*(3-2*t)}
 {const _tt=terrTerrace;terrTerrace=function(x,rX,rY){if(typeof LEVEL!=='undefined'&&(f2Is(LEVEL))&&!window.F2_PLAINGROUND)return f2Terrace(x,rX,rY);return _tt.apply(this,arguments)}}
 /* the shade of the ground: soft pools of shadow under trees and big pieces, darker near the painted edge and in hollows, a little lighter on rises (the terrace shade map, mixed between cells when drawn) */
+/* light pools on the ground: every lamp of the room (C.light) warms the floor round it in its own colour, so a lantern at dusk lights its patch of the boardwalk (the engine's own lights barely show by day) */
+function f2GlowMap(C,k){k=k===undefined?1.1:k;const W=48,H=40,g=new Float32Array(W*H*3);let any=0;
+  for(const [lx,ly] of C.lights){const c=C.lcol[lx+','+ly]||[1.2,1,.7],m=Math.max(c[0],c[1],c[2])||1;for(let y=Math.max(0,ly-3);y<=Math.min(H-1,ly+3);y++)for(let x=Math.max(0,lx-3);x<=Math.min(W-1,lx+3);x++){const d=Math.hypot(x-lx,y-ly),f=Math.max(0,1-d/3.2);if(f<=0)continue;const w=f*f*k*Math.min(1.6,m)/m,i=(y*W+x)*3;g[i]+=c[0]*w;g[i+1]+=c[1]*w;g[i+2]+=c[2]*w;any=1}}
+  return any?g:null}
 function f2Shade(C,lv,o){o=o||{};const W=48,H=40,N=W*H,s=new Float32Array(N).fill(1),E=C.E,hg=C.hgt;
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;let v=1;
     // nearness to the painted edge: a soft vignette
@@ -78862,7 +78866,7 @@ function f2WaterBuild(){
   for(const [x,y] of [[16,8],[32,8]])C.dec(pspPic('f2_putto'),x,y,{block:true});
   for(const [x,y] of [[20,7],[28,7]]){C.dec(pspPic('f2_lamp3'),x,y,{block:false});C.light(x,y,[2.0,1.35,.7])}
   for(const [x,y] of [[19,6],[29,6]])C.dec(pspPic('f2_flagpole'),x,y,{block:true,sc:.62});
-  for(const [x,y,w] of [[27.3,5.6,1.2],[18.6,8.4,1.1],[20.4,30.8,1.1],[30.5,32.4,1.2],[22.7,4.8,1.0],[25.9,33.7,1.0],[21.6,9.6,.9]])f2Span(C,pspPic('f2_pigeons'),x,y,0,1,w,0);
+  for(const [x,y,w] of [[18.6,8.4,1.1],[30.5,32.4,1.2]])f2Span(C,pspPic('f2_pigeons'),x,y,0,1,w,0);
   for(const [x,y,nx,ny] of [[23.15,14.5,1,0],[25.85,19.5,1,0],[23.15,22.5,1,0]])f2Span(C,pspPic('f2_pole_green'),x,y,nx,ny,.3,-.25);   // mooring poles along the rio, passed on the ride
   if(C.isOpen(15,25))C.dec(pspPic('f2_w_balcony2'),15,25,{wd:[0,-1],block:false,bob:.85,sc:.85});
 
