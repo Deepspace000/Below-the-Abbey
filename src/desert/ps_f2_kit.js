@@ -16,7 +16,7 @@ const f2Room0=n=>F2.ROOMS.includes(n);
 const f2S=id=>{const F=psf2F(),n=id-9820;return F.rooms[n]||(F.rooms[n]={})};
 /* ---------- the biomes ---------- */
 const F2B={
-  9821:{k:'forest',sky:{top:[64,104,140],mid:[150,186,196],low:[214,222,186]},cloud:.85,fog:[150,176,150,.014],amb:.95,lcol:[1.1,1.08,.85],wn:'Morning mist',fx:null,
+  9821:{k:'forest',sky:{top:[40,110,200],mid:[126,186,236],low:[240,230,190]},cloud:.95,silver:.3,fog:[228,214,156,.005],haze:.08,amb:1.2,lcol:[1.3,1.18,.86],wn:'Morning mist',fx:null,
     text:'A soft morning mist hangs between the trees. Birds sing somewhere. Everything here is a little too perfect.'},
   9822:{k:'island',sky:{top:[40,104,196],mid:[110,168,228],low:[206,226,240]},cloud:1.05,fog:[186,208,228,.008],amb:1.05,lcol:[1.15,1.1,.95],wn:'Sea air',fx:null,
     text:'A warm wind blows off the sea. The sun is bright, and the waves come in slow and even, always the same.'},
@@ -112,6 +112,10 @@ function f2Tint(nk,src,filt,ov){
   IMG[nk]=mk(im);if(NPC_H[src]!==undefined)NPC_H[nk]=NPC_H[src];
   const A=IMG[src+'A'];if(A&&A.width)IMG[nk+'A']=mk(A);
   return nk}
+/* painted trees of the rooms go by tree names of the engine (ltree81 and up), so they cast no round shadow and fade like the woodland trees */
+const F2_TREES=['f2_fo_oak','f2_fo_beech','f2_fo_fir','f2_fo_maple','f2_fo_birch','f2_fo_lime','f2_sn_pine','f2_sn_spruce','f2_sn_birch','f2_sn_fir','f2_sn_dead','f2_de_palm','f2_hollowoak'];
+function f2Tree(name){return pspPic(name)}
+const F2_TREE_RX=new RegExp('^ps_('+F2_TREES.join('|')+')(_fl)?$');
 function f2Art(){
   if(F2.art)return;F2.art=1;
   for(const t of F2_TINT)try{f2Tint(t[0],t[1],t[2],t[3])}catch(e){console.error('f2 tint',t[0],e)}
@@ -233,9 +237,9 @@ function f2Room(S){
   for(const c of S.clear||[])if(c[4]){const [x0,y0,x1,y1,f,,ell]=c,cx=(x0+x1)/2,cy=(y0+y1)/2,rx=(x1-x0)/2+.5,ry=(y1-y0)/2+.5,ch=f2Fl(C,f);for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(ell&&((x-cx)/rx)**2+((y-cy)/ry)**2>1.05)continue;if(C.open(x,y))fm[ix(x,y)]=ch}}
   for(const c of S.clear||[])if(c[5])C.mapNames.push({t:c[5],x:(c[0]+c[2])>>1,y:(c[1]+c[3])>>1,k:'place'});
   // the way back: castle stone round the door at (24,38), two lantern pillars, a plaque with the name of the hall
-  C.ret=()=>{for(let y=38;y<=39;y++)for(let x=20;x<=28;x++)C.solid(x,y,C.ch(pspWallGid(x===24?'pier':'dark',(hs(x,y,4)*4)|0,3.6)));
+  C.ret=()=>{for(let y=38;y<=39;y++)for(let x=20;x<=28;x++){if(S.softRet&&x!==24)C.mist(x,y);else C.solid(x,y,C.ch(pspWallGid(x===24?'pier':'dark',(hs(x,y,4)*4)|0,3.6)))}
     C.links({style:{'Hall of Illusions':'great'}});
-    for(const x of [22,26]){C.used.delete(x+',37');C.dec(pspPic('pillar_lantern'),x,37,{block:true,sc:.85});C.light(x,37,C.silver)}
+    for(const x of [22,26]){C.used.delete(x+',37');if(!S.softRet)C.dec(pspPic('pillar_lantern'),x,37,{block:true,sc:.85});C.light(x,37,C.silver)}
     C.used.delete('23,37');C.sign(23,37,[0,1],'THE HALL OF ILLUSIONS')};
   // filler: blocking props in the open band (never on the core), denser further out
   C.fill=(keys,o)=>{o=o||{};for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){
@@ -267,6 +271,7 @@ function f2Room(S){
      for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(!d.block||d.npc||d.pic||d.goldAmt||/chest/.test(String(d.k)))continue;const x=d.x,y=d.y;if(!op(x,y))continue;
        const n=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>op(x+a,y+b)).length,st=(op(x+1,y)&&op(x-1,y))||(op(x,y+1)&&op(x,y-1));
        if(n===2&&st){C.decor.splice(i,1);C.mist(x,y)}}}
+    if(C._edgeSpec)f2Edge(C,Object.assign({},C._edgeSpec,{noTall:1}));   // squares sealed just now take the painted edge too
     C.glow(o.glow||7,B.lcol);
     const lv=C.finish({start:{x:24,y:35,f:0}});
     lv.fogAt=()=>B.fog;lv.amb=B.amb;lv.f2=1;lv._noTidy=true;
@@ -274,14 +279,14 @@ function f2Room(S){
     {const TB=TERRS[id]&&TERRS[id].block,bs=new Set();for(const d of lv.decor)if(d.block||(d.npc&&d.solid))bs.add(d.x+','+d.y);
      const seen=new Uint8Array(W*H),q=[];const push=(x,y)=>{if(x<0||y<0||x>=W||y>=H||seen[ix(x,y)])return;seen[ix(x,y)]=1;q.push([x,y])};push(24,35);for(const t of C.warpTo||[])push(t[0],t[1]);
      for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||seen[ix(nx,ny)]||lv.rows[ny][nx]!=='.'||bs.has(nx+','+ny)||(TB&&TB[ix(nx,ny)]))continue;seen[ix(nx,ny)]=1;q.push([nx,ny])}}
-     const mc=C.ch(f2MistGid(1,S.mistH||2.9));let n=0;
-     for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(lv.rows[y][x]==='.'&&!seen[ix(x,y)]&&!bs.has(x+','+y)&&!(TB&&TB[ix(x,y)])){lv.rows[y]=lv.rows[y].slice(0,x)+mc+lv.rows[y].slice(x+1);if(TB)TB[ix(x,y)]=1;n++;
+     const mc0=C.ch(f2MistGid(1,S.mistH||2.9)),mcAt=(x,y)=>(C._edgeCh&&C._edgeCh(x,y))||mc0;let n=0;
+     for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(lv.rows[y][x]==='.'&&!seen[ix(x,y)]&&!bs.has(x+','+y)&&!(TB&&TB[ix(x,y)])){lv.rows[y]=lv.rows[y].slice(0,x)+mcAt(x,y)+lv.rows[y].slice(x+1);if(TB)TB[ix(x,y)]=1;n++;
        lv.decor=lv.decor.filter(d=>!(d.x===x&&d.y===y));lv.enemies=lv.enemies.filter(e=>!(e.x===x&&e.y===y))}
      // and again: a blocking prop left standing in a straight one-wide gap goes, its square becomes mist
      for(let pass=0;pass<3;pass++){const op=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&lv.rows[y][x]==='.';let k=0;
        lv.decor=lv.decor.filter(d=>{if(!d.block||d.npc||d.pic||d.goldAmt||/chest/.test(String(d.k)))return true;const x=d.x,y=d.y;if(!op(x,y))return true;
          const nb=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>op(x+a,y+b)).length,st=(op(x+1,y)&&op(x-1,y))||(op(x,y+1)&&op(x,y-1));
-         if(nb===2&&st){lv.rows[y]=lv.rows[y].slice(0,x)+mc+lv.rows[y].slice(x+1);if(TB)TB[ix(x,y)]=1;k++;return false}return true});if(!k)break}
+         if(nb===2&&st){lv.rows[y]=lv.rows[y].slice(0,x)+mcAt(x,y)+lv.rows[y].slice(x+1);if(TB)TB[ix(x,y)]=1;k++;return false}return true});if(!k)break}
      lv._f2sealed=n}
     {const sp=lv.decor.filter(d=>d.span);lv.decor=lv.decor.filter(d=>!d.span);try{if(typeof pswaHang==='function')pswaHang(id,lv)}catch(e){console.error('f2 wallart',e)}lv.decor.push(...sp)}   // spans are not wall pictures
     if(C.f2x)lv._f2x=C.f2x;
@@ -326,6 +331,7 @@ pspOnArrive(n=>{const L=LEVELS[n];if(!L||!L._f2x||!G.decor)return;for(const d of
   for(const s of L){const d=s.decor;if(!d)continue;
     if(d.span&&d.span.deck&&((d.span.deck==='hide')===onDeck)){s._f2drop=1;drop=true;continue}
     if(d.span&&s.pic){s.x=d.span.x;s.y=d.span.y;s.w=d.span.w;s.bob=d.span.bob;s.flat=[d.wd[0],d.wd[1]]}
+    else if(F2_TREE_RX.test(d.k)&&!d.roof){s.decor=Object.create(d,{k:{value:'tree0'}})}   // a painted tree casts no round shadow and fades into the green like the woodland trees
     else if(d.mv&&d.mvFlip&&!s.pic){const C=G.C,fx=Math.cos(C.a),fy=Math.sin(C.a),rx=-fy,ry=fx;const right=(d.mvDx*rx+d.mvDy*ry)>0;const im=IMG[right?d.mvFlip:d.k];if(im)s.img=im}}   // a boat seen moving to the right shows its prow on the right
   return drop?L.filter(s=>!s._f2drop):L}}
 /* a mirrored copy of a picture (a boat going the other way) */
@@ -356,7 +362,7 @@ function f2RideTick(dt){const R=F2.ride;if(!R)return;if(LEVEL!==R.lv){F2.ride=nu
 {const _u2=update;update=function(dt){const r=_u2.apply(this,arguments);try{if(typeof LEVEL!=='undefined'&&f2Is(LEVEL)&&G.state==='play'){const d=Math.min(dt,.05);f2MoveTick(d);if(F2.ride)f2RideTick(d)}}catch(e){console.error('f2 move',e);F2.ride=null;G.lockT=0}return r}}
 /* ---------- a painted far skyline on the sky of a room (domes and towers over the roofs, a mountain range, a sea horizon), fixed to the world while the clouds drift ----------
    F2SKY[id] = {img, rows (height in sky rows), base (sky row of its foot; 150 is the horizon), rep (copies round the sky), haze (0..1)} */
-const F2SKY={9824:{img:'f2_sky_venice',rows:118,base:156,rep:3,haze:.32}};
+const F2SKY={9824:{img:'f2_sky_venice',rows:118,base:156,rep:3,haze:.32},9821:{img:'f2_sky_forest',rows:46,base:154,rep:3,haze:.25}};
 function f2SkylineBuf(id){const S=F2SKY[id];if(!S)return null;if(S.buf)return S;const im=IMG['ps_'+S.img];if(!im||!im.width)return null;
   const R=S.rows,c=document.createElement('canvas');c.width=1024;c.height=R;const x=c.getContext('2d');x.imageSmoothingQuality='high';
   const n=S.rep||2,w=1024/n,B=F2B[id],fc=B.fog;
@@ -374,6 +380,35 @@ function f2SkyLive(id){const base=f2SkyArr(id),S=f2SkylineBuf(id);if(!S)return b
   return _sf2.apply(this,arguments)}}
 /* a building seen over the roofs (a dome, a tower): drawn only where it rises above the nearest wall (the engine's skyline sprites); it stands on a wall square */
 function f2Roof(C,key,x,y,o){o=o||{};const d={k:'kroof',lk:key,x,y,block:false,deco:true,roof:1};if(o.sc)d.sc=o.sc;if(o.bob)d.bob=o.bob;C.decor.push(d);return d}
+/* ---------- the painted edges of a room: the mist wall squares that face the open become a painted biome wall (a tree line, a cliff, a reed bed), with a faint silver mist along its foot (the seam of the illusion);
+   tall pieces (trees, rock spires) stand on some of those squares and rise over the wall (drawn as skyline sprites, only above the nearest wall).
+   o: {img (assets/ps key without ps_), wh (height), n (squares per copy of the picture; the copies alternate with mirrored ones so they join without a seam), veil (0..1 silver mist), tall:[keys], tallP, tallSc:[lo,hi], rgb} ---------- */
+function f2Veil(key,a,tag){const nk=key+'_veil'+(tag||'');if(IMG[nk]&&IMG[nk].width)return nk;const im=IMG[key];if(!im||!im.width)return key;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);
+  const g=x.createLinearGradient(0,c.height,0,c.height*.45);g.addColorStop(0,'rgba(222,230,240,'+a+')');g.addColorStop(.35,'rgba(214,224,236,'+(a*.45)+')');g.addColorStop(1,'rgba(214,224,236,0)');x.fillStyle=g;x.fillRect(0,0,c.width,c.height);
+  IMG[nk]=c;NPC_H[nk]=NPC_H[key];return nk}
+function f2Edge(C,o){const W=48,H=40,rows=C.rows,ix=(x,y)=>y*W+x,hs=C.hs2;if(!IMG['ps_'+o.img])return 0;C._edgeSpec=o;
+  const wh=o.wh||2.6,gid=[];   // each picture is fitted by height (n squares carry one copy); the copies follow each other plain and mirrored, and a second picture (img2) between them
+  for(const nm of [o.img].concat(o.img2&&IMG['ps_'+o.img2]?[o.img2]:[])){const base=f2Veil('ps_'+nm,o.veil===undefined?.55:o.veil),im0=IMG[base],n=Math.max(1,Math.round(wh*im0.width/im0.height));
+    for(const pic of [base,f2Flip(base)])for(let i=0;i<n;i++){const g=f2FacGid(pic,i,n,wh,{tex:'texBlack_2',rgb:o.rgb||[1,1,1],emit:.06});gid.push(g==null?null:C.ch(g))}}
+  const n=gid.length/2;
+  const mistCh=new Set();for(let v=0;v<5;v++)mistCh.add(C.ch(f2MistGid(v,C.f2.mistH||2.9)));
+  const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&rows[y][x]==='.';let k=0;const edge=[];
+  // a lone square of edge standing out into the open would be a cube of painted forest: it becomes a tree on open ground instead
+  // mist islands inside the room (not joined to the outer edge) become thickets of trees on open ground
+  if(o.pillar){const seen=new Uint8Array(W*H),q=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++)if((x<2||y<2||x>W-3||y>H-3)&&rows[y][x]!=='.'){seen[ix(x,y)]=1;q.push([x,y])}
+    for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||seen[ix(nx,ny)]||rows[ny][nx]==='.')continue;seen[ix(nx,ny)]=1;q.push([nx,ny])}}
+    const inner=(x,y)=>x>=(o.ring||3)&&y>=(o.ring||3)&&x<=W-1-(o.ring||3)&&y<=H-1-(o.ring||3)&&!(y>=36&&x>=20&&x<=28);
+    for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if((seen[ix(x,y)]&&!inner(x,y))||!mistCh.has(rows[y][x]))continue;rows[y][x]='.';C.block[ix(x,y)]=0;C.used.delete(x+','+y);const key=o.pillar[(hs(x,y,134)*o.pillar.length)|0];const d=C.dec(key,x,y,{block:true,sc:.85+hs(x,y,135)*.35});if(d){d.edgeTree=1;d.ox=(hs(x,y,136)-.5)*.5;d.oy=(hs(x,y,137)-.5)*.4}}}
+  if(o.pillar)for(let pass=0;pass<2;pass++)for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!mistCh.has(rows[y][x]))continue;const e=open(x+1,y),w=open(x-1,y),s=open(x,y+1),nn=open(x,y-1),cnt=e+w+s+nn;
+    if(cnt>=3||(e&&w)||(s&&nn)){rows[y][x]='.';C.block[ix(x,y)]=0;C.fm[ix(x,y)]=C.fm[ix(x+(e?1:w?-1:0),y+(s?1:nn?-1:0))];C.used.delete(x+','+y);const key=o.pillar[(hs(x,y,134)*o.pillar.length)|0];const d=C.dec(key,x,y,{block:true,sc:.9+hs(x,y,135)*.3});if(d)d.edgeTree=1}}
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!mistCh.has(rows[y][x]))continue;const nb=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>open(x+a,y+b));if(!nb.length)continue;
+    const horiz=nb.some(([a,b])=>b!==0),p=horiz?x:y,i=((p%(2*n))+2*n)%(2*n);if(gid[i]==null)continue;C.solid(x,y,gid[i]);k++;edge.push([x,y])}
+  C._edgeCh=(x,y)=>gid[((x%(2*n))+2*n)%(2*n)];if(o.noTall)return k;
+  if(o.tall&&o.tall.length){const [lo,hi]=o.tallSc||[.85,1.25];let last='';for(const [x,y] of edge){if(hs(x,y,131)>(o.tallP===undefined?.45:o.tallP))continue;let key=o.tall[(hs(x,y,132)*o.tall.length)|0];if(key===last)key=o.tall[(o.tall.indexOf(key)+1)%o.tall.length];last=key;f2Roof(C,pspPic(key),x,y,{sc:+(lo+(hi-lo)*hs(x,y,133)).toFixed(2)})}}
+  return k}
+/* patches of ground: open squares off the paths take one of several floors by a soft noise (big patches, not a checker) */
+function f2Patches(C,list,o){o=o||{};const W=48,H=40;for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!C.open(x,y)||(C.pathM[y*W+x]&&!o.onPath)||(o.keep&&o.keep(x,y)))continue;
+  const v=C.vn(x,y,o.cs||5,141)*.75+C.vn(x,y,2,142)*.25;let acc=0;for(const [fl,w] of list){acc+=w;if(v<acc){C.setFl(x,y,x,y,fl);break}}}}
 /* a painted plaque (assets/ps) with letters cut into its blank field: returns the decor key. o: {h (height in cells), box:[x0,y0,x1,y1] (the field, 0..1), col} */
 function f2Lettered(src,out,lines,o){o=o||{};const k='ps_'+out;if(IMG[k]&&IMG[k].width&&IMG[k]._f2l)return k;const im=IMG['ps_'+src];if(!im||!im.width)return pspPic(src);
   const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);
@@ -390,6 +425,8 @@ function f2Soft(key,o){o=o||{};const nk=key+'_s'+(o.tag||'');if(IMG[nk]&&IMG[nk]
   if(o.l||o.r||o.t||o.b||o.a!==undefined){const d=x.getImageData(0,0,W,H),a=d.data,f=(u,e)=>e?Math.min(1,u/e):1;
     for(let yy=0;yy<H;yy++){const v=yy/H,fy=f(v,o.t)*f(1-v,o.b);for(let xx=0;xx<W;xx++){const u=xx/W,k=fy*f(u,o.l)*f(1-u,o.r)*(o.a===undefined?1:o.a),i=(yy*W+xx)*4+3;a[i]=a[i]*k*k*(3-2*k)}}x.putImageData(d,0,0)}
   IMG[nk]=c;NPC_H[nk]=NPC_H[key];return nk}
+/* a painted sign board with lettering (a wooden sign in the forest, a slab in the desert): the same talk as C.plaque */
+function f2SignPlaque(C,x,y,src,out,lines,npc,text,o){o=o||{};const k=f2Lettered(src,out,lines,{box:o.box||[.1,.07,.9,.28],col:o.col||'#f0e6c8',h:o.h||NPC_H['ps_'+src]});if(npc&&!NPCS[npc])khNpc(npc,o.name||'A sign',k,()=>say(text,[BYE]));C.used.delete(x+','+y);return C.dec(k,x,y,{block:true,npc,sc:o.sc||1})}
 /* the way back to the hall in a room: a three-square gateway picture over x 23..25 of row 38 (the door is the middle square), its plaque lettered THE HALL OF ILLUSIONS; the castle sign there goes */
 function f2RetGate(C,img,o){o=o||{};const im=IMG[img];if(!im||!im.width)return;
   const k=f2Lettered(img.replace(/^ps_/,''),img.replace(/^ps_/,'')+'_lt',['THE HALL','OF ILLUSIONS'],{box:o.box||[.4,.065,.6,.115],col:'#d8e4f0',h:NPC_H[img]});

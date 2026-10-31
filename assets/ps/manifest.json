@@ -3714,5 +3714,545 @@
 "h": 256,
 "kind": "tex",
 "sheet": "v11w"
+},
+"f2_fo_wall": {
+"file": "f2_fo_wall.webp",
+"w": 1024,
+"px_h": 568,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "raw"
+},
+"f2_fo_oak": {
+"file": "f2_fo_oak.webp",
+"w": 388,
+"px_h": 426,
+"h": 4.2,
+"kind": "sprite",
+"sheet": "b1t"
+},
+"f2_fo_beech": {
+"file": "f2_fo_beech.webp",
+"w": 179,
+"px_h": 445,
+"h": 4.6,
+"kind": "sprite",
+"sheet": "b1t"
+},
+"f2_fo_fir": {
+"file": "f2_fo_fir.webp",
+"w": 242,
+"px_h": 432,
+"h": 4.4,
+"kind": "sprite",
+"sheet": "b1t"
+},
+"f2_fo_birch": {
+"file": "f2_fo_birch.webp",
+"w": 221,
+"px_h": 441,
+"h": 4.2,
+"kind": "sprite",
+"sheet": "b1t"
+},
+"f2_fo_lime": {
+"file": "f2_fo_lime.webp",
+"w": 329,
+"px_h": 441,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "b1t"
+},
+"f2_sky_forest": {
+"file": "f2_sky_forest.webp",
+"w": 1006,
+"px_h": 94,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "b1s"
+},
+"f2_tex_fograss": {
+"file": "f2_tex_fograss.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b1f"
+},
+"f2_tex_foleaves": {
+"file": "f2_tex_foleaves.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b1f"
+},
+"f2_tex_fotrail": {
+"file": "f2_tex_fotrail.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b1f"
+},
+"f2_tex_fomeadow": {
+"file": "f2_tex_fomeadow.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b1f"
+},
+"f2_fo_grass": {
+"file": "f2_fo_grass.webp",
+"w": 269,
+"px_h": 215,
+"h": 0.6,
+"kind": "sprite",
+"sheet": "b1c"
+},
+"f2_fo_flowers": {
+"file": "f2_fo_flowers.webp",
+"w": 269,
+"px_h": 156,
+"h": 0.4,
+"kind": "sprite",
+"sheet": "b1c"
+},
+"f2_fo_fern": {
+"file": "f2_fo_fern.webp",
+"w": 305,
+"px_h": 263,
+"h": 0.7,
+"kind": "sprite",
+"sheet": "b1c"
+},
+"f2_fo_toadstools": {
+"file": "f2_fo_toadstools.webp",
+"w": 247,
+"px_h": 159,
+"h": 0.4,
+"kind": "sprite",
+"sheet": "b1c"
+},
+"f2_fo_boulder": {
+"file": "f2_fo_boulder.webp",
+"w": 297,
+"px_h": 194,
+"h": 0.8,
+"kind": "sprite",
+"sheet": "b1c"
+},
+"f2_fo_log": {
+"file": "f2_fo_log.webp",
+"w": 332,
+"px_h": 181,
+"h": 0.5,
+"kind": "sprite",
+"sheet": "b1c"
+},
+"f2_sn_wall": {
+"file": "f2_sn_wall.webp",
+"w": 1024,
+"px_h": 493,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "raw"
+},
+"f2_de_wall": {
+"file": "f2_de_wall.webp",
+"w": 1024,
+"px_h": 517,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "raw"
+},
+"f2_sn_pine": {
+"file": "f2_sn_pine.webp",
+"w": 265,
+"px_h": 460,
+"h": 4.4,
+"kind": "sprite",
+"sheet": "b1st"
+},
+"f2_sn_spruce": {
+"file": "f2_sn_spruce.webp",
+"w": 220,
+"px_h": 439,
+"h": 4.2,
+"kind": "sprite",
+"sheet": "b1st"
+},
+"f2_sn_birch": {
+"file": "f2_sn_birch.webp",
+"w": 230,
+"px_h": 442,
+"h": 3.6,
+"kind": "sprite",
+"sheet": "b1st"
+},
+"f2_sn_fir": {
+"file": "f2_sn_fir.webp",
+"w": 317,
+"px_h": 426,
+"h": 3.8,
+"kind": "sprite",
+"sheet": "b1st"
+},
+"f2_sn_spire": {
+"file": "f2_sn_spire.webp",
+"w": 319,
+"px_h": 423,
+"h": 3.2,
+"kind": "sprite",
+"sheet": "b1st"
+},
+"f2_sn_dead": {
+"file": "f2_sn_dead.webp",
+"w": 252,
+"px_h": 419,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "b1st"
+},
+"f2_sky_snow": {
+"file": "f2_sky_snow.webp",
+"w": 1024,
+"px_h": 130,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "b1ss"
+},
+"f2_tex_sndrift": {
+"file": "f2_tex_sndrift.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b1sf"
+},
+"f2_tex_snpath": {
+"file": "f2_tex_snpath.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b1sf"
+},
+"f2_tex_snice": {
+"file": "f2_tex_snice.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b1sf"
+},
+"f2_tex_snrock": {
+"file": "f2_tex_snrock.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b1sf"
+},
+"f2_sn_bush": {
+"file": "f2_sn_bush.webp",
+"w": 299,
+"px_h": 181,
+"h": 0.7,
+"kind": "sprite",
+"sheet": "b1sc"
+},
+"f2_sn_grass": {
+"file": "f2_sn_grass.webp",
+"w": 305,
+"px_h": 163,
+"h": 0.45,
+"kind": "sprite",
+"sheet": "b1sc"
+},
+"f2_sn_boulder": {
+"file": "f2_sn_boulder.webp",
+"w": 286,
+"px_h": 197,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "b1sc"
+},
+"f2_sn_woodpile": {
+"file": "f2_sn_woodpile.webp",
+"w": 304,
+"px_h": 219,
+"h": 0.8,
+"kind": "sprite",
+"sheet": "b1sc"
+},
+"f2_sn_sapling": {
+"file": "f2_sn_sapling.webp",
+"w": 220,
+"px_h": 292,
+"h": 1.1,
+"kind": "sprite",
+"sheet": "b1sc"
+},
+"f2_sn_fence": {
+"file": "f2_sn_fence.webp",
+"w": 314,
+"px_h": 213,
+"h": 0.8,
+"kind": "sprite",
+"sheet": "b1sc"
+},
+"f2_de_pillar": {
+"file": "f2_de_pillar.webp",
+"w": 197,
+"px_h": 429,
+"h": 3.2,
+"kind": "sprite",
+"sheet": "b1dc"
+},
+"f2_de_column": {
+"file": "f2_de_column.webp",
+"w": 141,
+"px_h": 434,
+"h": 3.0,
+"kind": "sprite",
+"sheet": "b1dc"
+},
+"f2_de_cactus": {
+"file": "f2_de_cactus.webp",
+"w": 176,
+"px_h": 442,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "b1dc"
+},
+"f2_de_palm": {
+"file": "f2_de_palm.webp",
+"w": 301,
+"px_h": 436,
+"h": 3.8,
+"kind": "sprite",
+"sheet": "b1dc"
+},
+"f2_de_pharaoh": {
+"file": "f2_de_pharaoh.webp",
+"w": 319,
+"px_h": 313,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "b1dc"
+},
+"f2_de_mesa": {
+"file": "f2_de_mesa.webp",
+"w": 320,
+"px_h": 398,
+"h": 3.4,
+"kind": "sprite",
+"sheet": "b1dc"
+},
+"f2_sky_desert": {
+"file": "f2_sky_desert.webp",
+"w": 1024,
+"px_h": 89,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "b1ds"
+},
+"f2_tex_desand": {
+"file": "f2_tex_desand.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b1df"
+},
+"f2_tex_decrack": {
+"file": "f2_tex_decrack.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b1df"
+},
+"f2_tex_depave": {
+"file": "f2_tex_depave.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b1df"
+},
+"f2_tex_depebble": {
+"file": "f2_tex_depebble.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b1df"
+},
+"f2_de_shrub": {
+"file": "f2_de_shrub.webp",
+"w": 265,
+"px_h": 244,
+"h": 0.8,
+"kind": "sprite",
+"sheet": "b1dd"
+},
+"f2_de_skull": {
+"file": "f2_de_skull.webp",
+"w": 287,
+"px_h": 280,
+"h": 0.5,
+"kind": "sprite",
+"sheet": "b1dd"
+},
+"f2_de_cairn": {
+"file": "f2_de_cairn.webp",
+"w": 276,
+"px_h": 201,
+"h": 0.6,
+"kind": "sprite",
+"sheet": "b1dd"
+},
+"f2_de_amphora": {
+"file": "f2_de_amphora.webp",
+"w": 310,
+"px_h": 196,
+"h": 0.6,
+"kind": "sprite",
+"sheet": "b1dd"
+},
+"f2_de_barrel": {
+"file": "f2_de_barrel.webp",
+"w": 239,
+"px_h": 134,
+"h": 0.45,
+"kind": "sprite",
+"sheet": "b1dd"
+},
+"f2_de_shard": {
+"file": "f2_de_shard.webp",
+"w": 322,
+"px_h": 164,
+"h": 0.5,
+"kind": "sprite",
+"sheet": "b1dd"
+},
+"f2_fo_butterflies": {
+"file": "f2_fo_butterflies.webp",
+"w": 203,
+"px_h": 233,
+"h": 0.5,
+"kind": "sprite",
+"sheet": "b2l"
+},
+"f2_fo_bluefly": {
+"file": "f2_fo_bluefly.webp",
+"w": 233,
+"px_h": 148,
+"h": 0.3,
+"kind": "sprite",
+"sheet": "b2l"
+},
+"f2_fo_shaft": {
+"file": "f2_fo_shaft.webp",
+"w": 194,
+"px_h": 512,
+"h": 3.4,
+"kind": "sprite",
+"sheet": "b2l"
+},
+"f2_fo_fireflies": {
+"file": "f2_fo_fireflies.webp",
+"w": 182,
+"px_h": 200,
+"h": 0.6,
+"kind": "sprite",
+"sheet": "b2l"
+},
+"f2_fo_robin": {
+"file": "f2_fo_robin.webp",
+"w": 191,
+"px_h": 218,
+"h": 0.3,
+"kind": "sprite",
+"sheet": "b2l"
+},
+"f2_fo_robin2": {
+"file": "f2_fo_robin2.webp",
+"w": 218,
+"px_h": 200,
+"h": 0.3,
+"kind": "sprite",
+"sheet": "b2l"
+},
+"f2_fo_robin3": {
+"file": "f2_fo_robin3.webp",
+"w": 216,
+"px_h": 169,
+"h": 0.3,
+"kind": "sprite",
+"sheet": "b2l"
+},
+"f2_fo_birds": {
+"file": "f2_fo_birds.webp",
+"w": 219,
+"px_h": 113,
+"h": 0.5,
+"kind": "sprite",
+"sheet": "b2l"
+},
+"f2_fo_sign": {
+"file": "f2_fo_sign.webp",
+"w": 247,
+"px_h": 435,
+"h": 1.4,
+"kind": "sprite",
+"sheet": "b2p"
+},
+"f2_fo_bench": {
+"file": "f2_fo_bench.webp",
+"w": 322,
+"px_h": 240,
+"h": 0.6,
+"kind": "sprite",
+"sheet": "b2p"
+},
+"f2_fo_stump": {
+"file": "f2_fo_stump.webp",
+"w": 323,
+"px_h": 292,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "b2p"
+},
+"f2_fo_rose": {
+"file": "f2_fo_rose.webp",
+"w": 321,
+"px_h": 273,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "b2p"
+},
+"f2_fo_foxglove": {
+"file": "f2_fo_foxglove.webp",
+"w": 339,
+"px_h": 431,
+"h": 1.1,
+"kind": "sprite",
+"sheet": "b2p"
+},
+"f2_fo_ruin": {
+"file": "f2_fo_ruin.webp",
+"w": 317,
+"px_h": 263,
+"h": 0.8,
+"kind": "sprite",
+"sheet": "b2p"
+},
+"f2_fo_wall2": {
+"file": "f2_fo_wall2.webp",
+"w": 1024,
+"px_h": 572,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "raw"
+},
+"f2_fo_maple": {
+"file": "f2_fo_maple.webp",
+"w": 356,
+"px_h": 442,
+"h": 4.0,
+"kind": "sprite",
+"sheet": "b1t"
 }
 }
