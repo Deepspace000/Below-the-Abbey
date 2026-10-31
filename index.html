@@ -78192,6 +78192,21 @@ const PSF2_HINT={
   heart:"The Swamp. The witch's note by her cauldron asks for a toadstool, an eel and a clump of marsh moss. All three are out in the swamp, at small marked places. Put them in the pot.",
   brain:"The Nightmare. Four lanterns stand in a ring. Watch them light one after another, then touch them in the same order. Get it wrong and the shadows come. Get it right and the jar opens."};
 const psf2Placed=()=>PSF2.PARTS.filter(p=>psf2F().placed[p]).length;
+/* the bier and the pieces on it: the painting of the Sleeper on her bier is cut into the seven pieces (head to foot); a piece not yet laid there is taken out of the picture (and the hair that hangs over the side goes with the head) */
+const PSF2_CUT={brain:[.05,.13],face:[.13,.21],chest:[.21,.3],heart:[.3,.36],hand:[.36,.46],legs:[.46,.86],foot:[.86,1]},PSF2_TOP=.32;
+function psf2Blank(){if(!IMG.psf2_blank){const c=document.createElement('canvas');c.width=c.height=4;IMG.psf2_blank=c;NPC_H.psf2_blank=.1}return 'psf2_blank'}
+function psf2BierEnd(){const k='psf2_bierend';if(IMG[k])return k;const im=IMG[pspPic('f2_sleeper')];if(!im||!im.width)return pspPic('f2_bier');const sx=Math.round(im.width*.88),sy=Math.round(im.height*PSF2_TOP),c=document.createElement('canvas');c.width=im.width-sx;c.height=im.height-sy;c.getContext('2d').drawImage(im,sx,sy,c.width,c.height,0,0,c.width,c.height);IMG[k]=c;NPC_H[k]=NPC_H[pspPic('f2_sleeper')]*(1-PSF2_TOP);return k}
+function psf2BierKey(){const F=psf2F(),woke=!!F.woke,mask=woke?'w':PSF2.PARTS.map(p=>F.placed[p]?1:0).join(''),k='psf2_bier_'+mask;if(IMG[k])return k;
+  const im=IMG[pspPic('f2_sleeper')];if(!im||!im.width)return pspPic('f2_bier');const W=im.width,H=im.height,top=Math.round(H*PSF2_TOP),c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.drawImage(im,0,0);
+  x.globalCompositeOperation='destination-out';
+  for(const p of PSF2.PARTS){if(!woke&&F.placed[p])continue;const [a,b]=PSF2_CUT[p],x0=a*W,x1=b*W,fe=W*.018,g=x.createLinearGradient(x0-fe,0,x1+fe,0),k0=fe/(x1-x0+2*fe);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(k0,'rgba(0,0,0,1)');g.addColorStop(1-k0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');
+    const gv=x.createLinearGradient(0,0,0,top);x.fillStyle=g;x.fillRect(x0-fe,0,x1-x0+2*fe,top-6);x.fillStyle='rgba(0,0,0,1)';x.fillRect(x0+fe*.5,0,x1-x0-fe,top-10)}   // feathered, so the pieces end softly in the cloth
+  x.globalCompositeOperation='destination-over';{const cl=IMG[pspPic('f2_bier')];if(cl&&cl.width&&!woke)x.drawImage(cl,cl.width*.2,0,cl.width*.55,cl.height*.12,W*.05,top-Math.round(H*.07),W*.92,Math.round(H*.09))}   // where a piece is missing, the pale cloth on the stone shows
+  x.globalCompositeOperation='source-over';
+  if(woke||!F.placed.face||!F.placed.brain){   // the hair over the side: the clean stone of the far end is painted over it
+    const sx=Math.round(.55*W),sw=Math.round(.31*W);x.drawImage(im,sx,top-2,sw,Math.round(H*.45),Math.round(.02*W),top-2,sw,Math.round(H*.45))}
+  if(woke){const cl=IMG[pspPic('f2_bier')];if(cl&&cl.width){x.clearRect(0,0,W,top-2)}}
+  IMG[k]=c;NPC_H[k]=NPC_H[pspPic('f2_sleeper')];return k}
 /* ---------- the level ---------- */
 function psf2HubBuild(info){
   const W=PSF2H.W,H=PSF2H.H,id=PSF2H.ID;
@@ -78249,7 +78264,10 @@ function psf2HubBuild(info){
   for(const y of [10,14,28,31])for(const [x,wd] of [[24,[-1,0]],[32,[1,0]]])pic(y===14||y===28?'window_stained_tall':'portrait_ancestor_'+(1+((y+x)%8)),x,y,wd);
   for(const [x,y] of [[26,20],[30,20],[26,24],[30,24]])cand(x,y,[.75,.9,1.25]);
   // the Sleeper's table at the crossing
-  C.used.delete('28,22');C.dec(pspPic('f2_bier'),28,22,{block:true,npc:'psf2_table',sc:1});
+  // the bier: a long plinth of black stone across three squares (27..29); the pieces of the Sleeper appear on it one by one as they are laid there
+  for(const x of [27,28,29]){C.used.delete(x+',22');const d=C.dec(psf2Blank(),x,22,{block:true,npc:x===28?'psf2_table':undefined});if(d){d.fly=1;if(x!==28){d.npc='psf2_table';d.solid=1}}}
+  {const m=f2Span(C,psf2BierKey(),28.5,22.5,0,1,3.0,0);m.bierMain=1;C.f2x[m.kname].bierMain=1;
+   for(const [x,s] of [[27.03,-1],[29.97,1]]){const e=f2Span(C,psf2BierEnd(),x,22.5,1,0,1.0,0);e.bierEnd=s}}
   C.light(28,22,[.85,.95,1.3]);
   {C.used.delete('28,24');const d=C.dec(pspPic('f2_sleeper_up'),28,24,{block:false,npc:'psf2_sleeper'});if(d)d.hidden=true}
   // the arms: columns in rows (aisles), alcoves with statues, candles
@@ -78289,10 +78307,10 @@ function psf2HubBuild(info){
     if(!edge&&(y===3||y===41)&&x%5===2)kind='win';else if(!edge&&(x===23||x===33)&&y>=8&&y<=32&&y%4===0)kind='pilaster';
     C.solid(x,y,C.ch(pshTile(st,kind,kind==='plain'?(hs(x,y,3)*2)|0:0)))}
   C.glow(6.5,PSH_COL.cold);
-  const lv=C.finish({start:{x:28,y:38,f:0}});
+  const lv=C.finish({start:{x:28,y:38,f:0}});if(C.f2x)lv._f2x=C.f2x;
   lv.floorSet=C.floorNames.map(n=>FK[n]||pspFloor(n));while(lv.floorSet.length<7)lv.floorSet.push(lv.floorSet[0]);lv.floor=lv.floorSet[0];lv.floor2=lv.floorSet[1];
   lv.ceil='psc_hall';lv.ceilH=PSF2H.WH;
-  try{if(typeof pswaHang==='function')pswaHang(id,lv)}catch(e){console.error('psf2 wallart',e)}
+  {const sp=lv.decor.filter(d=>d.span);lv.decor=lv.decor.filter(d=>!d.span);try{if(typeof pswaHang==='function')pswaHang(id,lv)}catch(e){console.error('psf2 wallart',e)}lv.decor.push(...sp)}
   return lv}
 pspRegister(PSF2H.ID,psf2HubBuild);
 /* ---------- the people and the things to touch ---------- */
@@ -78335,7 +78353,7 @@ khNpc('psf2_sleeper','The Sleeper','ps_f2_sleeper_up',()=>say("Thank you. I was 
 /* the live level follows the flags: the empty bier, the whole Sleeper lying on it, then the woken Sleeper standing beside it */
 function psf2Apply(){
   if(LEVEL!==PSF2H.ID||!G.decor)return;const F=psf2F(),whole=psf2Placed()>=7;
-  for(const d of G.decor){if(d.npc==='psf2_table'){const k=whole&&!F.woke?pspPic('f2_sleeper'):pspPic('f2_bier');if(d.k!==k)d.k=k}
+  for(const d of G.decor){if(d.bierMain){const k=psf2BierKey();if(d.k!==k)d.k=k}
     if(d.npc==='psf2_sleeper'){d.hidden=!F.woke;d.found=!F.woke;d.block=!!F.woke}}}
 pspOnArrive(n=>{if(n===PSF2H.ID)try{psf2Apply()}catch(e){console.error('psf2Apply',e)}});
 /* the stair to the third floor (stub) */
