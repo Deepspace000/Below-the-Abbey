@@ -114,12 +114,12 @@ function epJitter(n,J){for(const d of G.decor){if(d.npc||d.epJ||!J.re.test(Strin
    and a handful of lone bones and stones far apart in the open sand. Never on a used square, never near the arrival, never blocking. */
 function epDesert(n,P){const open=(x,y)=>x>=1&&y>=1&&x<MW-1&&y<MH-1&&G.grid[y][x]===0&&!(TERR_BLOCK&&TERR_BLOCK[y*MW+x]),used=new Set(),placed=[];
   for(const d of G.decor)used.add(Math.round(d.x)+','+Math.round(d.y));for(const e of G.enemies||[])used.add(e.x+','+e.y);for(const i of G.items||[])used.add(i.x+','+i.y);
-  const st=LEVELS[n].start,far=(x,y,r)=>!placed.some(p=>Math.hypot(p[0]-x,p[1]-y)<r),free=(x,y)=>open(x,y)&&!used.has(x+','+y)&&Math.hypot(x-st.x,y-st.y)>5;
-  const put=(k,x,y,o)=>{const key=IMG['ep_'+k]?'ep_'+k:IMG[k]?k:null;if(!key)return false;used.add(x+','+y);placed.push([x,y,k]);G.decor.push(Object.assign({k:key,x,y,block:false,walk:true,deco:true,epDes:1,loot:false,shop:false,ox:(hash2(x,y,n*53+1)-.5)*.5,oy:(hash2(x,y,n*53+2)-.5)*.5,sc:+(.82+hash2(x,y,n*53+3)*.3).toFixed(2)},o||{}));return true};
+  const st=LEVELS[n].start,far=(x,y,r)=>!placed.some(p=>Math.hypot(p[0]-x,p[1]-y)<r),free=(x,y)=>{if(!open(x,y)||Math.hypot(x-st.x,y-st.y)<=5)return false;for(let b=-2;b<=2;b++)for(let a=-2;a<=2;a++)if(used.has((x+a)+','+(y+b)))return false;return true};
+  const put=(k,x,y,o)=>{P.sc=P.sc||{f2_de_palm:.72,f2_dx_oxskull:.65,f2_de_skull:.8,f2_de_amphora:.85,f2_de_cairn:.9};const key=IMG['ep_'+k]?'ep_'+k:IMG[k]?k:null;if(!key)return false;used.add(x+','+y);placed.push([x,y,k]);G.decor.push(Object.assign({k:key,x,y,block:false,walk:true,deco:true,epDes:1,loot:false,shop:false,ox:(hash2(x,y,n*53+1)-.5)*.5,oy:(hash2(x,y,n*53+2)-.5)*.5,sc:+(((P.sc&&P.sc[k])||1)*(.8+hash2(x,y,n*53+3)*.2)).toFixed(2)},o||{}));return true};
   const near=(ax,ay,cnt,keys,r0,r1,seed)=>{let c=0;for(let t=0;t<40&&c<cnt;t++){const a=hash2(ax,ay,seed+t*3)*6.283,r=r0+(r1-r0)*hash2(ax,ay,seed+t*3+1),x=Math.round(ax+Math.cos(a)*r),y=Math.round(ay+Math.sin(a)*r);if(!free(x,y)||!far(x,y,1.6))continue;const nb=placed.filter(p=>Math.hypot(p[0]-x,p[1]-y)<5).map(p=>p[2]);let k=keys[(hash2(x,y,seed+7)*keys.length)|0];for(let q=0;q<keys.length&&nb.includes(k);q++)k=keys[(keys.indexOf(k)+1)%keys.length];if(put(k,x,y))c++}};
   const groups=(re,gap)=>{const g=[];for(const d of G.decor){if(d.epDes||!re.test(String(d.k)))continue;if(g.some(q=>Math.hypot(q[0]-d.x,q[1]-d.y)<gap))continue;g.push([d.x,d.y])}return g};
-  let oi=0;for(const [x,y] of groups(P.oasisRe||/^dpalm/,P.oasisGap||8)){if(hash2(x,y,n*53+9)>=(P.oasisP||.7))continue;near(x,y,1+((hash2(x,y,n*53+10)*(P.oasisN||3))|0),P.palms,1.5,3.5,n*53+100+oi*17);oi++}
-  let ri=0;for(const [x,y] of groups(P.ruinRe||/^(dpillar|dobelisk|dsphinx|druinstairs|dcrypt)/,P.ruinGap||10)){if(hash2(x,y,n*53+11)>=(P.ruinP||.5))continue;near(x,y,1+((hash2(x,y,n*53+12)*(P.ruinN||2))|0),P.ruins,1.5,3,n*53+500+ri*13);ri++}
+  let oi=0;for(const [x,y] of groups(P.oasisRe||/^dpalm/,P.oasisGap||8)){if(hash2(x,y,n*53+9)>=(P.oasisP||.7))continue;if(P.palms.length)near(x,y,Math.max(1,((hash2(x,y,n*53+10)*(P.oasisN||3))|0)),P.palms,2,3.5,n*53+100+oi*17);oi++}
+  let ri=0;for(const [x,y] of groups(P.ruinRe||/^(dpillar|dobelisk|dsphinx|druinstairs|dcrypt)/,P.ruinGap||10)){if(hash2(x,y,n*53+11)>=(P.ruinP||.5))continue;near(x,y,Math.max(1,((hash2(x,y,n*53+12)*(P.ruinN||2))|0)),P.ruins,2,3.5,n*53+500+ri*13);ri++}
   for(let t=0,c=0;t<4000&&c<(P.lone||8);t++){const x=1+((hash2(t,n,n*53+20)*(MW-2))|0),y=1+((hash2(n,t,n*53+21)*(MH-2))|0);if(!free(x,y)||!far(x,y,P.loneGap||24))continue;if(put(P.bones[(hash2(x,y,n*53+22)*P.bones.length)|0],x,y))c++}
   return placed.length}
 /* neighbour-aware variety: a repeated key gets one of its painted variants so that no two neighbours show the same picture (visual only) */
@@ -168,7 +168,7 @@ function epDungeon(kind,n,o){o=o||{};const W={crypt:{name:'crypt',stone:'cryptwa
   S.grime={k:.82,sat:.62,foot:.34,footK:.6,streak:.35,blot:.45,tint:[1.1,.98,.84],gate:1};
   return S}
 /* the five great deserts share one sparse dressing */
-function epDes(n){return {desert:{palms:['f2_de_palm','f2_dv_doum','f2_dv_tamarisk','f2_dv_acacia','dpalm1','dpalm3'],ruins:['f2_dx_stele','f2_de_shard','f2_dx_jars','f2_de_amphora'],bones:['f2_dx_oxskull','f2_dx_ribs','f2_de_skull','f2_de_cairn','f2_dv_boulders'],oasisP:.9,oasisN:3,ruinP:.45,ruinN:2,ruinGap:14,lone:12,loneGap:30}}}
+function epDes(n){return {desert:{palms:['f2_de_palm'],ruins:['f2_de_amphora','f2_de_skull','f2_de_cairn'],bones:['f2_dx_oxskull','f2_de_skull','f2_de_cairn','f2_de_amphora'],oasisP:.45,oasisN:1,oasisGap:12,ruinP:.35,ruinN:1,ruinGap:14,lone:10,loneGap:32}}}
 /* the finish of an early outdoor level: painted forest floor, mud track and grass, leaf and mud decals, shade under the trees, lamp pools, mirrored repeats */
 function epWood(n,o){const S={decals:{keys:['leaves','pebbles','mud','droppings'],on:{0:o.town?['mud','straw','droppings','puddle','pebbles','leaves','soot']:['leaves','leaves','pebbles','mud','bones','droppings'],1:['mud','puddle','straw','pebbles','droppings','leaves'],2:['mud','straw','droppings','pebbles','puddle','leaves'],3:['mud','leaves','straw'],4:['mud','straw','soot','droppings'],5:['mud','puddle','straw']},p:.6,wallBias:.3,sz:[.5,.7],far:16,gain:[1,.95,.88],a:1},
     soft:.45,shadow:.6,shadowSz:1.4,ao:o.town?.6:.3,aoW:o.town?.55:.35,nearFade:1,glow:.6,glowSz:2.6,glowCol:[1,.7,.42],
@@ -203,8 +203,8 @@ const EP_SPEC={
   /* the other early dungeons share the crypts' finish, each with its own stone (see epDungeon) */
   8:epDungeon('cave',8),23:epDungeon('cave',23),25:epDungeon('cave',25),9:epDungeon('crypt',9),12:epDungeon('crypt',12,{nofloor:1}),501:epDungeon('crypt',501,{nofloor:1}),11:epDungeon('mine',11),18:epDungeon('mine',18),
   /* the deserts: a few painted palms by the oases, broken pieces at the ruins, lone bones far apart; the dunes themselves are not touched */
-  41:{desert:{palms:['f2_de_palm','f2_dv_doum','f2_dv_tamarisk','dpalm1','dpalm3','f2_de_shrub'],ruins:['f2_dx_stele','f2_de_shard','f2_dx_jars','f2_de_amphora'],bones:['f2_dx_oxskull','f2_dx_ribs','f2_de_skull','f2_de_cairn'],oasisP:.35,oasisN:2,ruinP:.6,lone:10,loneGap:22}},
-  43:{desert:{palms:['f2_dv_acacia','f2_dv_tamarisk','f2_de_shrub'],ruins:['f2_dx_stele','f2_de_shard','f2_dx_jars','f2_de_amphora'],bones:['f2_dx_oxskull','f2_dx_ribs','f2_de_skull','f2_de_cairn','f2_dv_boulders'],oasisRe:/^ddead/,oasisGap:14,oasisP:.25,oasisN:2,ruinP:.6,ruinN:2,lone:10,loneGap:24}},
+  41:{desert:{palms:['f2_de_palm'],ruins:['f2_de_amphora','f2_de_skull','f2_de_cairn'],bones:['f2_dx_oxskull','f2_de_skull','f2_de_cairn','f2_de_amphora'],oasisP:.3,oasisN:1,ruinP:.35,ruinN:1,lone:8,loneGap:26}},
+  43:{desert:{palms:[],ruins:['f2_de_amphora','f2_de_skull','f2_de_cairn'],bones:['f2_dx_oxskull','f2_de_skull','f2_de_cairn','f2_de_amphora'],oasisP:0,ruinP:.35,ruinN:1,lone:8,loneGap:26}},
   60:epDes(60),61:epDes(61),62:epDes(62),63:epDes(63),64:epDes(64),
   /* the early woods and roads */
   2:epWood(2,{}),7:epWood(7,{keepFloor:1}),10:epWood(10,{keepFloor:1}),
