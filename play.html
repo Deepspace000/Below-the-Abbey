@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.744';
+const VERSION='3.745';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1308,11 +1308,11 @@ function areaAudio(){
     else if(LEVEL===476){T.music_underlevel=.6;loadLazy('music_underlevel')} // the Underlevel: Dark Cavern Ambient
     else if(LEVEL===35){T.music_tavern=.5;T.village_ambience=.15}
     else if(LEVEL===44){T.village_ambience=.8}
-    else if(LEVEL===496){T.village_ambience=.26;T.wind_loop=.05}
+    else if(LEVEL===496){T.village_ambience=.26;T.wind_loop=.05;T.music_embers=.4;loadLazy('music_embers')}
     else if(LEVEL===600){T.wind_loop=.2} // Sale: cold wind, no village (src/desert/sale_sound.js adds the bell, crows and notes)
     else if(LEVEL>=601&&LEVEL<=603){T.dungeon_ambience=.3} // the cellar, the crypt and the belfry of Sale
-    else if(LEVEL===305){T.village_ambience=.5}
-    else if(typeof yarSea==='function'&&yarSea(LEVEL)){T.village_ambience=LEVEL===290||LEVEL===304?.22:.06}
+    else if(LEVEL===305){T.village_ambience=.5;T.music_embers=.4;loadLazy('music_embers')} // the first dungeon's music plays in the towns (not Khemetra)
+    else if(typeof yarSea==='function'&&yarSea(LEVEL)){T.village_ambience=LEVEL===290||LEVEL===304?.22:.06;if(LEVEL===290||LEVEL===304){T.music_embers=.4;loadLazy('music_embers')}}
     else if(STREAM_LISTS[LEVEL]&&LEVEL>=50&&!(LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)){T.dungeon_ambience=.18}
     else if(EMBERS_LEVELS.includes(LEVEL)){T.dungeon_ambience=.22;T.music_embers=.55;loadLazy('music_embers')}
     else if(DUNGEON_LEVELS.includes(LEVEL)){T.dungeon_ambience=.3;T.music_dungeon1=.5}
@@ -1322,7 +1322,7 @@ function areaAudio(){
     else if(LEVEL===2){T.music_andorios=.55;loadLazy('music_andorios')}
     else if(LEVEL===7){T.music_wanderer=.55;loadLazy('music_wanderer')}
     else if(LEVEL===10){T.rain_loop=.7}
-    else if(LEVEL===3||LEVEL===13){T.village_ambience=.5;T.music_feast=.2}
+    else if(LEVEL===3||LEVEL===13){T.village_ambience=.5;T.music_embers=.4;loadLazy('music_embers')}
     else if(LEVEL===4||LEVEL===15||LEVEL===17||LEVEL===24){T.village_ambience=.12}
     else if(LEVEL===5||LEVEL===14)T.music_feast=.4;
     else if(LEVEL===6||LEVEL===16){T.music_tavern=.55;T.village_ambience=.18}
