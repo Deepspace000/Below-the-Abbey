@@ -509,5 +509,187 @@
 "h": 283,
 "kind": "sprite",
 "sheet": "props_crypt2"
+},
+"torch_a": {
+"file": "torch_a.webp",
+"w": 215,
+"h": 360,
+"kind": "sprite",
+"sheet": "torch_bodies"
+},
+"torch_b": {
+"file": "torch_b.webp",
+"w": 243,
+"h": 360,
+"kind": "sprite",
+"sheet": "torch_bodies"
+},
+"torch_c": {
+"file": "torch_c.webp",
+"w": 219,
+"h": 360,
+"kind": "sprite",
+"sheet": "torch_bodies"
+},
+"torch_d": {
+"file": "torch_d.webp",
+"w": 209,
+"h": 360,
+"kind": "sprite",
+"sheet": "torch_bodies"
+},
+"flame_0": {
+"file": "flame_0.webp",
+"w": 137,
+"h": 200,
+"kind": "flame",
+"sheet": "torch_flames"
+},
+"flame_1": {
+"file": "flame_1.webp",
+"w": 137,
+"h": 200,
+"kind": "flame",
+"sheet": "torch_flames"
+},
+"flame_2": {
+"file": "flame_2.webp",
+"w": 137,
+"h": 200,
+"kind": "flame",
+"sheet": "torch_flames"
+},
+"flame_3": {
+"file": "flame_3.webp",
+"w": 137,
+"h": 200,
+"kind": "flame",
+"sheet": "torch_flames"
+},
+"flame_4": {
+"file": "flame_4.webp",
+"w": 137,
+"h": 200,
+"kind": "flame",
+"sheet": "torch_flames"
+},
+"flame_5": {
+"file": "flame_5.webp",
+"w": 137,
+"h": 200,
+"kind": "flame",
+"sheet": "torch_flames"
+},
+"dc_grass1": {
+"file": "dc_grass1.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grass_path_crop"
+},
+"dc_grass2": {
+"file": "dc_grass2.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grass_path_crop"
+},
+"dc_grass3": {
+"file": "dc_grass3.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grass_path_crop"
+},
+"dc_grass4": {
+"file": "dc_grass4.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grass_path_crop"
+},
+"dc_weeds1": {
+"file": "dc_weeds1.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grass_path_crop"
+},
+"dc_weeds2": {
+"file": "dc_weeds2.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grass_path_crop"
+},
+"dc_weeds3": {
+"file": "dc_weeds3.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grass_path_crop"
+},
+"dc_weeds4": {
+"file": "dc_weeds4.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grass_path_crop"
+},
+"dc_ruts": {
+"file": "dc_ruts.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grass_path_crop"
+},
+"dc_hoof": {
+"file": "dc_hoof.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grass_path_crop"
+},
+"dc_rutpuddle": {
+"file": "dc_rutpuddle.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grass_path_crop"
+},
+"dc_stones": {
+"file": "dc_stones.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grass_path_crop"
+},
+"dc_paledirt": {
+"file": "dc_paledirt.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grass_path_crop"
+},
+"dc_strawmud": {
+"file": "dc_strawmud.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grass_path_crop"
+},
+"dc_gravel": {
+"file": "dc_gravel.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grass_path_crop"
+},
+"dc_bracken": {
+"file": "dc_bracken.webp",
+"w": 192,
+"h": 192,
+"kind": "decal",
+"sheet": "dc_grass_path_crop"
 }
 }
