@@ -55,7 +55,7 @@ function f2ForestBuild(){
    for(let y=3;y<37;y++)for(let x=3;x<45;x++){if(!C.free(x,y)||C.nearPath(x,y,0)||C.core[y*48+x]&&C.hs2(x,y,151)>.08)continue;if(C.hs2(x,y,152)<.075){C.dec(S2[n%S2.length],x,y,{block:false,sc:.62+C.hs2(x,y,153)*.25});n++}}}
   // the glade: soft shafts of sunlight fall on the hollow oak, fireflies hang in them, butterflies cross the glades, small birds fly over
   {const sh0=f2Compose('f2_fo_shaft_c',IMG.ps_f2_fo_shaft?IMG.ps_f2_fo_shaft.width:10,IMG.ps_f2_fo_shaft?Math.round(IMG.ps_f2_fo_shaft.height*.78):10,[['ps_f2_fo_shaft',0,0,0,Math.round((IMG.ps_f2_fo_shaft||{height:10}).height*.78),0,0,(IMG.ps_f2_fo_shaft||{width:10}).width,Math.round((IMG.ps_f2_fo_shaft||{height:10}).height*.78)]],3.2),sh=f2Soft(sh0,{l:.35,r:.35,t:.05,b:.3,a:.3,tag:'g2'});
-   for(const [x,y,w] of [[24.5,6.6,1.3],[21.7,8.4,.9]]){const d=f2Span(C,sh,x,y,0,1,w,0);d.lift=.95;f2X(C,d,['lift'])}
+   for(const [x,y,w] of [[24.5,6.6,1.3],[21.7,8.4,.9]]){const d=f2Span(C,sh,x,y,0,1,w,0);d.lift=.95;C.f2x[d.kname].lift=.95}
    for(const [x,y] of [[24,6],[24,8]])C.light(x,y,[1.6,1.4,.9])}
   f2Mover(C,pspPic('f2_fo_butterflies'),[[19,9],[22,4],[29,5],[27,10],[19,9]],.35,{bob:.8}).fly=1;
   f2Mover(C,pspPic('f2_fo_bluefly'),[[6,30],[11,28],[9,33],[6,30]],.3,{bob:.7}).fly=1;

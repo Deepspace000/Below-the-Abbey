@@ -284,6 +284,7 @@ function f2Room(S){
        const n=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>op(x+a,y+b)).length,st=(op(x+1,y)&&op(x-1,y))||(op(x,y+1)&&op(x,y-1));
        if(n===2&&st){C.decor.splice(i,1);C.mist(x,y)}}}
     if(C._edgeSpec)f2Edge(C,Object.assign({},C._edgeSpec,{noTall:1}));   // squares sealed just now take the painted edge too
+    for(const d of C.decor)if(d.fly){if(d.kname&&C.f2x&&C.f2x[d.kname])C.f2x[d.kname].fly=1;else f2X(C,d,['fly'])}   // flyers stay marked in the live level (birds, butterflies, floating islands)
     C.glow(o.glow||7,B.lcol);
     const lv=C.finish({start:{x:24,y:35,f:0}});
     lv.fogAt=()=>B.fog;lv.amb=B.amb;lv.f2=1;lv._noTidy=true;

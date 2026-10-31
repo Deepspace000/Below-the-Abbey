@@ -168,7 +168,7 @@ function f2WaterBuild(){
    for(const L of lots){if(L.cells.length<2||hs(L.cells[0][0],L.cells[0][1],97)>.42)continue;const [bx,by]=L.cells[L.cells.length>>1];
      for(const [a,b] of [[0,1],[0,-1],[1,0],[-1,0]]){const x=bx+a,y=by+b;if(!C.isOpen(x,y)||!open(x,y)||taken.has(x+','+y))continue;const k=PCS[n%PCS.length];n++;taken.add(x+','+y);
        C.dec(pspPic(k),x,y,{wd:[-a,-b],block:false,bob:k==='f2_w_balcony2'?1.3:k==='f2_w_flowerbox'?1.15:.62,sc:.8});if(k==='f2_w_lantern2')C.light(x,y,[2.4,1.6,.8]);break}}}
-  for(const d of C.decor)if(/lamp|lantern/.test(String(d.k))&&!d.wd){d.lift=.95;f2X(C,d,['lift'])}   // the lanterns shine by their own light
+  for(const d of C.decor)if(/lamp|lantern/.test(String(d.k))&&!d.wd){d.lift=.95;if(d.kname&&C.f2x[d.kname])C.f2x[d.kname].lift=.95;else f2X(C,d,['lift'])}   // the lanterns shine by their own light
   const lv=C.done({glow:6});lv._f2deck=[14,25,16,31];
   return lv}
 pspRegister(9824,f2WaterBuild);

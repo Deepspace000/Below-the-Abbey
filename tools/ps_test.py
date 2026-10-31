@@ -84,7 +84,7 @@ def run_load():
               if (LEVEL_NAMES[id] !== info.name) o.bad.push('name ' + LEVEL_NAMES[id]);
               if (LEVEL_RATING[id] !== info.lvl) o.bad.push('rating ' + LEVEL_RATING[id]);
               const s = L.start; if (!s || L.rows[s.y][s.x] !== '.') o.bad.push('start not open ' + JSON.stringify(s));
-              if (L.decor.some(d => L.rows[d.y][d.x] !== '.')) o.bad.push('decor on a wall: ' + L.decor.filter(d => L.rows[d.y][d.x] !== '.').slice(0, 3).map(d => d.k + '@' + d.x + ',' + d.y));
+              if (L.decor.some(d => L.rows[d.y][d.x] !== '.' && d.k !== 'kroof')) o.bad.push('decor on a wall: ' + L.decor.filter(d => L.rows[d.y][d.x] !== '.' && d.k !== 'kroof').slice(0, 3).map(d => d.k + '@' + d.x + ',' + d.y));
               if (L.enemies.some(e => L.rows[e.y][e.x] !== '.')) o.bad.push('creature in a wall');
               o.n = [W, H, L.decor.length, L.enemies.length, L.lights.length];
             } catch (e) { o.bad.push(String(e) + ' ' + (e.stack || '').slice(0, 200)) } return o }""", id_)

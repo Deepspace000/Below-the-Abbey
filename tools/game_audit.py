@@ -226,7 +226,10 @@ AUDIT = r"""([ids, tol, castleKeys]) => {
         const wp = wallPic(d), sky = SKYLINE.test(k) || d.over || d.sky, s = spr.get(d), im = s && s.img;
         if (s && !im && !pictureless(k)) add('MISSINGPIC', k, rx, ry, d.npc ? 'npc ' + d.npc : '');
         if (d.npc && !d.goat && typeof NPCS !== 'undefined' && !NPCS[d.npc]) add('NPCDEF', k, rx, ry, 'npc ' + d.npc);
-        if (wp) {
+        const f2x = d.kname && LEVELS[id] && LEVELS[id]._f2x && LEVELS[id]._f2x[d.kname];   // the second floor keeps the extra fields of its planes and flyers by name
+        if (f2x && f2x.fly) d.fly = 1;
+        if (wp && (d.span || (f2x && f2x.span))) { /* a free-standing painted plane of the second floor (ps_f2_kit.js f2Span: a bridge, boat, fog or plaque): not a wall picture */ }
+        else if (wp) {
           const bx = rx + d.wd[0], by = ry + d.wd[1], g = gv(bx, by);
           if (g <= 0 && !/cell_door|iron_gate/.test(k)) add('NOWALL', k, rx, ry, 'wall side ' + d.wd + (g < 0 ? ' off the map' : ' is open'));
           else if (g > 0 && isDoorG(g) && (castle || !d.txt)) add('OVERDOOR', k, rx, ry, 'door ' + g);
