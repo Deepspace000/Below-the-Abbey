@@ -145,9 +145,9 @@ function f2IslandApply(){const R=f2S(9822);if(LEVEL!==9822)return;
   for(const [x,y,s] of F2_ISLAND.PATCH)if(R.dug&&R.dug[s])for(const d of G.decor||[])if(d.npc&&Math.round(d.x)===x&&Math.round(d.y)===y)d.k=pspPic('f2_patch_dug')}
 f2OnArrive(9822,()=>f2IslandApply());
 /* ---------- 3. THE CABIN IN THE SNOW (9823): the face ---------- */
-const F2_SNOW={LOGS:[[8,23],[40,22],[10,31]],FLINT:[29,9],HEARTH:[41,4],MIRROR:[43,4],IN:[41,7,0],OUT:[24,9,2]};
+const F2_SNOW={LOGS:[[8,23],[40,22],[10,31]],FLINT:[28,10],HEARTH:[41,4],MIRROR:[43,4],IN:[41,7,0],OUT:[24,9,2]};
 function f2SnowBuild(){
-  const SD=f2TexFloor('ps_f2_tex_sndrift','f2t_sndrift',1.0)||'snow',SP=f2TexFloor('ps_f2_tex_snpath','f2t_snpath',.98)||'snowpath',SR=f2TexFloor('ps_f2_tex_snrock','f2t_snrock',1.0)||'snow',SI=f2TexFloor('ps_f2_tex_snice','f2t_snice',1.05)||'canal',PL=f2TexFloor('ps_f2_tex_planks','f2t_planks',1.0)||'wl2f0';
+  const SD=f2TexFloor('ps_f2_tex_sndrift','f2t_sndrift',1.0)||'snow',SP=f2TexFloor('ps_f2_tex_snpath','f2t_snpath',.98)||'snowpath',SR=f2TexFloor('ps_f2_tex_snrock','f2t_snrock',1.0)||'snow',SI=f2TexFloor('ps_f2_tex_snice','f2t_snice2',1.3,[.92,1.0,1.12])||'canal',PL=f2TexFloor('ps_f2_tex_planks','f2t_planks',1.0)||'wl2f0';
   const C=f2Room({id:9823,ground:SD,path:SP,band:[2,5],wh:3.2,softRet:1,rw:0,
     routes:[[[24,35],[24,26],[30,21],[30,14],[24,12],[24,9]],[[24,29],[12,28],[10,31]],[[30,18],[40,20]],[[24,24],[12,23],[8,23]]],
     clear:[[14,3,34,13,SD,'The Cabin',1],[4,15,13,24,SD,'The Frozen Pond',1],[35,16,44,26,SD,"The Bear's Den",1],[5,27,15,34,SD,'The Birch Stand',1]],
@@ -155,7 +155,7 @@ function f2SnowBuild(){
   const W=48,{rows,block,fm}=C;
   // the cabin: a small timber house with a snowy roof; its door opens into the room inside (built in the north-east corner, walled all round)
   try{pspDefringe('ps_f2_cabin')}catch(e){}
-  if(IMG.ps_f2_cabin&&IMG.ps_f2_cabin.width&&!IMG.ps_f2_cabin._ps){C.picHouse({img:'ps_f2_cabin',x0:22,y0:5,x1:26,y1:8,w:5.4,door:[24,8],wh:2.6});const lw=f2TexWall('ps_f2_tex_logsnow',2.6),wd=C.ch(lw!=null?lw:C.TM.make('plain',(WL.sty&&WL.sty.black)||'timber',2.6).gid);for(let y=5;y<=8;y++)for(let x=22;x<=26;x++)if(!(x===24&&y===8)&&!(y===8&&x>=22&&x<=26))C.solid(x,y,wd)}   // the sides of the cabin are dark boardselse C.house({x0:21,y0:5,x1:27,y1:8,face:'S',sty:'timber',roof:'thatch2',wh:2.6,col:[1.5,1.05,.55]});
+  if(IMG.ps_f2_cabin&&IMG.ps_f2_cabin.width&&!IMG.ps_f2_cabin._ps){C.picHouse({img:'ps_f2_cabin',x0:22,y0:5,x1:26,y1:8,w:5.4,door:[24,8],wh:2.6});const lw=f2TexWall('ps_f2_tex_logwall',2.6,{gain:.85,rgb:[.95,.97,1.05]}),wd=C.ch(lw!=null?lw:C.TM.make('plain',(WL.sty&&WL.sty.black)||'timber',2.6).gid);for(let y=5;y<=8;y++)for(let x=22;x<=26;x++)if(!(x===24&&y===8)&&!(y===8&&x>=22&&x<=26))C.solid(x,y,wd)}   // the sides of the cabin are dark boardselse C.house({x0:21,y0:5,x1:27,y1:8,face:'S',sty:'timber',roof:'thatch2',wh:2.6,col:[1.5,1.05,.55]});
   for(const x of [22,26])C.light(x,9,[1.5,1.05,.55]);
   {const [dx,dy]=[24,8],g=C.chars[rows[dy][dx]];KH_DOOR[g]={psf2:'warp',psh:'warp',to:F2_SNOW.IN,A:F2_SNOW.IN,B:F2_SNOW.IN,lvl:9823,at:{x:F2_SNOW.IN[0],y:F2_SNOW.IN[1],f:0},msg:'You step inside the cabin. The hearth is cold, and the room is dim and quiet.'};(C.warpTo=C.warpTo||[]).push(F2_SNOW.IN)}
   // inside: walls of timber round x 38..43, y 4..7; the hearth on the north wall, the mirror beside it, a bed, a table
@@ -167,12 +167,14 @@ function f2SnowBuild(){
    C.dec(pspPic('bed_four'),43,7,{block:true,sc:.62});C.dec(pspPic('f2_cb_chair'),40,5,{block:true,sc:.9});C.dec(pspPic('f2_cb_barrel'),40,7,{block:true,sc:.85});
    C.dec(pspPic('f2_cb_shelf'),43,5,{wd:[1,0],block:false,bob:.8,sc:.9});C.dec(pspPic('f2_cb_snowshoes'),40,6,{wd:[-1,0],block:false,bob:.6,sc:.9});C.dec(pspPic('trophy_stag'),42,7,{wd:[0,1],block:false,bob:1.2,sc:.8});
    C.light(41,5,[1.2,.95,.75]);C.light(42,6,[1.1,.9,.7])}
-  // the woodpile and the flint post beside the cabin, the three logs out in the snow
+  // snowy pines close round the sides of the cabin; the woodpile and the flint post (lit) beside it, the three logs out in the snow
+  for(const [x,y,k] of [[21,6,'f2_sn_spruce'],[21,8,'f2_sn_pine'],[27,6,'f2_sn_fir'],[27,8,'f2_sn_spruce'],[21,4,'f2_sn_fir'],[27,4,'f2_sn_pine']])if(C.free(x,y)){C.used.delete(x+','+y);const d=C.dec(pspPic(k),x,y,{block:true,sc:.75});if(d)d.ox=x<24?.25:-.25}
+  C.light(28,10,[1.5,1.1,.6]);
   C.used.delete('30,9');C.dec(pspPic('f2_log'),30,9,{block:true,sc:1.6});C.used.delete('31,9');C.dec(pspPic('f2_log'),31,9,{block:true,sc:1.4});
   {const [fx,fy]=F2_SNOW.FLINT;C.used.delete(fx+','+fy);C.dec(pspPic('f2_flintpost'),fx,fy,{block:true,npc:'f2s_flint'})}
   F2_SNOW.LOGS.forEach(([x,y],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_log'),x,y,{block:true,npc:'f2s_log'+i,sc:1.3})});
   // the ground: deep drifts, trampled snow by the cabin, rocks and frozen grass showing through here and there
-  f2Patches(C,[[SD,.72],[SR,.28]],{cs:5,keep:(x,y)=>x>=38&&y<=9});
+  f2Patches(C,[[SD,.88],[SR,.12]],{cs:5,keep:(x,y)=>x>=38&&y<=9});
   // the frozen pond: ice you walk round, reeds of frozen grass and rocks on its banks
   for(let y=17;y<=21;y++)for(let x=6;x<=11;x++)if(Math.hypot((x-8.5)/3,(y-19)/2.4)<1&&C.free(x,y))C.water(x,y,SI);
   // the snowbound forest: painted snowy pines, firs, spruces and frosted birches, never in rows; bushes, frozen grass, snowy boulders
@@ -185,7 +187,7 @@ function f2SnowBuild(){
   for(const [x,y,k] of [[12,25,'f2_sn_fox'],[37,19,'f2_sn_owl'],[18,30,'f2_sn_finches'],[33,10,'f2_sn_sled'],[6,30,'f2_sn_owl'],[42,24,'f2_sn_fox']])if(C.free(x,y)&&!C.nearPath(x,y,0))C.dec(pspPic(k),x,y,{block:k==='f2_sn_sled'});
   for(const [x,y] of [[23,30],[25,22],[29,17],[26,10],[22,10]])if(C.free(x,y)){C.dec(pspPic('f2_sn_lantern'),x,y,{block:false,sc:.85});C.light(x,y,[1.6,1.1,.6])}
   for(const [x,y] of [[20,9],[28,9]])if(C.free(x,y))C.dec(pspPic('f2_sn_fence'),x,y,{block:false,sc:.9});
-  f2Edge(C,{img:'f2_sn_wall',wh:1.9,veil:.15,pillar:TS,tall:['f2_sn_pine','f2_sn_spruce','f2_sn_fir','f2_sn_spire','f2_sn_pine'],tallP:.8,tallSc:[1.0,1.5]});
+  f2Edge(C,{img:'f2_sn_wall',wh:1.9,veil:.15,pillar:TS,innerP:.6,innerKeep:(x,y)=>x>=15&&x<=33&&y<=12,tall:['f2_sn_pine','f2_sn_spruce','f2_sn_fir','f2_sn_spire','f2_sn_pine'],tallP:.8,tallSc:[1.0,1.5]});
   pspSafeZone(C,24,35,6);
   C.foes(['f2snowwolf','f2snowwolf','f2frostwraith'],[4,15,13,24],1);
   C.foes(['f2snowbear','f2snowwolf','f2frostwraith'],[35,16,44,26],2);

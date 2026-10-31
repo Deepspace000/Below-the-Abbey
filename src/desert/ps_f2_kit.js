@@ -275,7 +275,9 @@ function f2Room(S){
     {const bs=new Set();for(const d of C.decor)if(d.block)bs.add(d.x+','+d.y);
      const reach=new Uint8Array(W*H),q=[ix(24,35)];reach[q[0]]=1;for(const [a,b] of C.warpTo||[]){if(!reach[ix(a,b)]){reach[ix(a,b)]=1;q.push(ix(a,b))}}
      for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||reach[ix(nx,ny)]||!C.open(nx,ny)||bs.has(nx+','+ny))continue;reach[ix(nx,ny)]=1;q.push(ix(nx,ny))}}
-     for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++)if(C.open(x,y)&&!reach[ix(x,y)]&&!bs.has(x+','+y)){C.mist(x,y);for(let i=C.decor.length-1;i>=0;i--)if(C.decor[i].x===x&&C.decor[i].y===y)C.decor.splice(i,1);for(let i=C.lights.length-1;i>=0;i--)if(C.lights[i][0]===x&&C.lights[i][1]===y)C.lights.splice(i,1);for(let i=C.enemies.length-1;i>=0;i--)if(C.enemies[i].x===x&&C.enemies[i].y===y)C.enemies.splice(i,1)}}
+     const P0=C._edgeSpec&&C._edgeSpec.pillar;
+     for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++)if(C.open(x,y)&&!reach[ix(x,y)]&&!bs.has(x+','+y)){if(P0){C.used.delete(x+','+y);for(let i=C.decor.length-1;i>=0;i--)if(C.decor[i].x===x&&C.decor[i].y===y)C.decor.splice(i,1);const d=C.dec(P0[(hs(x,y,181)*P0.length)|0],x,y,{block:true,sc:.9+hs(x,y,182)*.3});if(d){d.ox=(hs(x,y,183)-.5)*.5;d.oy=(hs(x,y,184)-.5)*.4}continue}   // a pocket nothing reaches is a thicket, not a cube of wall
+       C.mist(x,y);for(let i=C.decor.length-1;i>=0;i--)if(C.decor[i].x===x&&C.decor[i].y===y)C.decor.splice(i,1);for(let i=C.lights.length-1;i>=0;i--)if(C.lights[i][0]===x&&C.lights[i][1]===y)C.lights.splice(i,1);for(let i=C.enemies.length-1;i>=0;i--)if(C.enemies[i].x===x&&C.enemies[i].y===y)C.enemies.splice(i,1)}}
     // a blocking prop in a straight one-wide gap between walls is not a passage piece: that square becomes mist wall (the way round is unchanged, the prop already blocked it)
     {const op=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&rows[y][x]==='.';
      for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(!d.block||d.npc||d.pic||d.goldAmt||/chest/.test(String(d.k)))continue;const x=d.x,y=d.y;if(!op(x,y))continue;
@@ -290,7 +292,7 @@ function f2Room(S){
      const seen=new Uint8Array(W*H),q=[];const push=(x,y)=>{if(x<0||y<0||x>=W||y>=H||seen[ix(x,y)])return;seen[ix(x,y)]=1;q.push([x,y])};push(24,35);for(const t of C.warpTo||[])push(t[0],t[1]);
      for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||seen[ix(nx,ny)]||lv.rows[ny][nx]!=='.'||bs.has(nx+','+ny)||(TB&&TB[ix(nx,ny)]))continue;seen[ix(nx,ny)]=1;q.push([nx,ny])}}
      const mc0=C.ch(f2MistGid(1,S.mistH||2.9)),mcAt=(x,y)=>(C._edgeCh&&C._edgeCh(x,y))||mc0;let n=0;
-     for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(lv.rows[y][x]==='.'&&!seen[ix(x,y)]&&!bs.has(x+','+y)&&!(TB&&TB[ix(x,y)])){lv.rows[y]=lv.rows[y].slice(0,x)+mcAt(x,y)+lv.rows[y].slice(x+1);if(TB)TB[ix(x,y)]=1;n++;
+     for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(lv.rows[y][x]==='.'&&!seen[ix(x,y)]&&!bs.has(x+','+y)&&!(TB&&TB[ix(x,y)])){const P1=C._edgeSpec&&C._edgeSpec.pillar;if(P1){lv.decor=lv.decor.filter(d=>!(d.x===x&&d.y===y));lv.enemies=lv.enemies.filter(e=>!(e.x===x&&e.y===y));lv.decor.push({k:P1[(hs(x,y,185)*P1.length)|0],x,y,block:true,sc:1,ox:(hs(x,y,186)-.5)*.5});n++;continue}lv.rows[y]=lv.rows[y].slice(0,x)+mcAt(x,y)+lv.rows[y].slice(x+1);if(TB)TB[ix(x,y)]=1;n++;
        lv.decor=lv.decor.filter(d=>!(d.x===x&&d.y===y));lv.enemies=lv.enemies.filter(e=>!(e.x===x&&e.y===y))}
      // and again: a blocking prop left standing in a straight one-wide gap goes, its square becomes mist
      for(let pass=0;pass<3;pass++){const op=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&lv.rows[y][x]==='.';let k=0;
@@ -414,6 +416,8 @@ function f2Edge(C,o){const W=48,H=40,rows=C.rows,ix=(x,y)=>y*W+x,hs=C.hs2;if(!IM
   for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!mistCh.has(rows[y][x]))continue;const nb=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>open(x+a,y+b));if(!nb.length)continue;
     const horiz=nb.some(([a,b])=>b!==0),p=horiz?x:y,i=((p%(2*n))+2*n)%(2*n);if(gid[i]==null)continue;C.solid(x,y,gid[i]);k++;edge.push([x,y])}
   C._edgeCh=(x,y)=>gid[((x%(2*n))+2*n)%(2*n)];if(o.noTall)return k;
+  if(o.innerP&&o.pillar){const edgeN=(x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>rows[y+b]&&rows[y+b][x+a]!=='.');   // a row of trees just inside the painted edge, so the edge is never the last thing in view
+    for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!C.free(x,y)||C.nearPath(x,y,1)||!edgeN(x,y)||(o.innerKeep&&o.innerKeep(x,y))||Math.hypot(x-24,y-35)<5)continue;if(hs(x,y,161)<o.innerP){const d=C.dec(o.pillar[(hs(x,y,162)*o.pillar.length)|0],x,y,{block:true,sc:.95+hs(x,y,163)*.35});if(d){d.ox=(hs(x,y,164)-.5)*.6;d.oy=(hs(x,y,165)-.5)*.5}}}}
   if(o.tall&&o.tall.length){const [lo,hi]=o.tallSc||[.85,1.25];let last='';for(const [x,y] of edge){if(hs(x,y,131)>(o.tallP===undefined?.45:o.tallP))continue;let key=o.tall[(hs(x,y,132)*o.tall.length)|0];if(key===last)key=o.tall[(o.tall.indexOf(key)+1)%o.tall.length];last=key;f2Roof(C,pspPic(key),x,y,{sc:+(lo+(hi-lo)*hs(x,y,133)).toFixed(2)})}}
   return k}
 /* patches of ground: open squares off the paths take one of several floors by a soft noise (big patches, not a checker) */
@@ -446,5 +450,41 @@ function f2RetGate(C,img,o){o=o||{};const im=IMG[img];if(!im||!im.width)return;
     if(x===24){const g=C.chars[rows[38][24]];if(g!==undefined&&KH_DOOR[g])T_TILE[g]=T_TILE[g0]}else C.solid(x,38,C.ch(g0))}
   for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(d.k==='sign_gy'&&d.y===37&&d.x===23)C.decor.splice(i,1)}
   C.light(24,37,[.85,1.0,1.25])}
+/* ---------- the parchment area maps of the second floor: each square in the colour of its own floor or wall (sampled from the painted textures), inked on parchment;
+   trees as round crowns, water with ripple strokes, the puzzle pieces and people as small marks, places numbered with a key (the cloud cover of ps_fog.js applies as on every castle map) ---------- */
+F2.mapCol={};
+function f2AvgCol(key,src){const k=key;if(F2.mapCol[k])return F2.mapCol[k];let r=0,g=0,b=0,n=0;try{if(src&&src.length){for(let i=0;i<src.length;i+=4*61){r+=src[i];g+=src[i+1];b+=src[i+2];n++}}}catch(e){}return F2.mapCol[k]=n?[r/n,g/n,b/n]:[180,170,150]}
+function f2MapDraw(c,x,L,api){
+  const R=L.rows,W=R[0].length,H=R.length,F=api.fit(W,H),s=F.s,X=F.X,Y=F.Y,PX=F.ox,PY=F.oy,PW=W*s,PH=H*s,INK=MPL.INK,id=LEVEL,TB=TERRS[id]&&TERRS[id].block;
+  const parch=[226,212,178],mix=(c0,k)=>[c0[0]*(1-k)+parch[0]*k,c0[1]*(1-k)+parch[1]*k,c0[2]*(1-k)+parch[2]*k],rgb=c0=>`rgb(${c0[0]|0},${c0[1]|0},${c0[2]|0})`;
+  const wall=(cx,cy)=>!(R[cy]&&R[cy][cx]==='.');
+  const mistG=new Set(Object.keys(F2.tiles).filter(k=>/^mist/.test(k)).map(k=>F2.tiles[k])),WC=({forest:[28,46,26],island:[128,112,86],snow:[150,160,172],water:[170,100,74],desert:[176,132,80],swamp:[30,40,28],nightmare:[70,30,34]})[(F2B[id]||{}).k];
+  x.save();x.shadowColor='rgba(40,30,10,.5)';x.shadowBlur=14;x.shadowOffsetX=3;x.shadowOffsetY=5;x.fillStyle='#3a3226';x.fillRect(PX-1.6,PY-1.6,PW+3.2,PH+3.2);x.restore();
+  x.save();x.beginPath();x.rect(PX,PY,PW,PH);x.clip();
+  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){let col;
+    if(wall(cx,cy)){const g=L.chars&&L.chars[R[cy][cx]],gc=(GY.col&&GY.col[g])||[90,86,80];col=mistG.has(g)?[200,206,214]:WC?mix(WC.map((v,i)=>v*(.85+.3*(gc[i]/255))),.08):mix(gc.map(v=>v*.7),.38)}
+    else{const f=L.fmap&&L.fmap[cy]?+L.fmap[cy][cx]:0,fk=(L.floorSet&&L.floorSet[f])||L.floor;col=mix(f2AvgCol(fk,FLOORS[fk]),.3)}
+    const v=hash2(cx,cy,9)*10-5;x.fillStyle=rgb([col[0]+v,col[1]+v,col[2]+v]);x.fillRect(X(cx)-.1,Y(cy)-.1,s+.2,s+.2);
+    if(!wall(cx,cy)&&TB&&TB[cy*W+cx]){x.strokeStyle='rgba(30,50,70,.35)';x.lineWidth=.5;x.beginPath();for(let k=1;k<3;k++){const yy=Y(cy)+s*k/3;x.moveTo(X(cx)+s*.15,yy);x.quadraticCurveTo(X(cx)+s*.5,yy-s*.12,X(cx)+s*.85,yy)}x.stroke()}}   // water and ice: ripple strokes
+  // the outline of everything walkable, in ink
+  x.strokeStyle=INK;x.lineWidth=.6;x.lineCap='round';x.beginPath();
+  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(wall(cx,cy))continue;const X0=X(cx),Y0=Y(cy);
+    if(wall(cx,cy-1)){x.moveTo(X0,Y0);x.lineTo(X0+s,Y0)}if(wall(cx,cy+1)){x.moveTo(X0,Y0+s);x.lineTo(X0+s,Y0+s)}if(wall(cx-1,cy)){x.moveTo(X0,Y0);x.lineTo(X0,Y0+s)}if(wall(cx+1,cy)){x.moveTo(X0+s,Y0);x.lineTo(X0+s,Y0+s)}}
+  x.stroke();
+  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){const ch=R[cy][cx];if(ch==='.')continue;const g=L.chars&&L.chars[ch],d=g!==undefined&&KH_DOOR[g];if(d&&(d.psp||d.psf2)){x.fillStyle=d.psp?'#d8b050':'#8a6a3a';x.fillRect(X(cx)+s*.12,Y(cy)+s*.12,s*.76,s*.76)}}
+  const TREE=/tree|pine|spruce|fir|birch|beech|oak|maple|lime|palm|willow|swamptree|eyetree|nightoak|thorn|reeds|cactus|ww_/i;
+  for(const d of L.decor){if(d.found||d.hidden||d.span||d.roof)continue;const k=String(d.lk||d.k||'');const px=X(d.x+.5+(d.ox||0)),py=Y(d.y+.5+(d.oy||0));
+    if(d.npc){x.fillStyle='#7a2a1a';x.beginPath();x.arc(px,py,Math.max(.8,s*.22),0,6.3);x.fill()}
+    else if(/chest/.test(k)){x.fillStyle='#b08a30';x.fillRect(px-s*.2,py-s*.15,s*.4,s*.3)}
+    else if(d.block&&TREE.test(k)){x.fillStyle='rgba(52,74,44,.85)';x.beginPath();x.arc(px,py,Math.max(.7,s*.36),0,6.3);x.fill();x.fillStyle='rgba(120,150,96,.6)';x.beginPath();x.arc(px-s*.1,py-s*.1,Math.max(.3,s*.14),0,6.3);x.fill()}
+    else if(d.block){x.fillStyle='rgba(70,62,52,.7)';x.beginPath();x.arc(px,py,Math.max(.5,s*.2),0,6.3);x.fill()}}
+  x.restore();
+  const names=L.mapNames||[];
+  names.forEach((n,i)=>{const px=X(n.x+.5),py=Y(n.y+.5);x.save();x.fillStyle='rgba(250,240,220,.94)';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(px,py,3.6,0,6.3);x.fill();x.stroke();x.restore();api.text(x,String(i+1),px,py+.2,5.4,INK)});
+  api.title(x,LEVEL_NAMES[LEVEL]||L.name||'The Hall of Illusions','',12,5);api.compass(x,50,262,15);
+  if(names.length){const a=392,b=40,w=92,lh=10.4,h=14+names.length*lh;api.panel(x,a,b,w,h);api.text(x,'Places',a+w/2,b+8,6.6,'#4a2a6a');
+    names.forEach((n,i)=>{api.text(x,(i+1)+'  '+n.t.replace(/^The /,''),a+5,b+17+i*lh,5.2,INK,'left')})}
+  {const a=6,b=46,w=84,h=22;api.panel(x,a,b,w,h);api.text(x,'The Pale Spire',a+w/2,b+8,5.6,'#4a2a6a');api.text(x,'Second floor',a+w/2,b+17,5.2,INK)}}
+if(typeof mplInstall==='function')mplInstall({name:'palespire2',levels:[9820,9821,9822,9823,9824,9825,9826,9827],draw:f2MapDraw,tint:[3,2,6],foot:'You are the yellow arrow. The numbers on the map are listed on the right; gold squares are the doors of the Hall of Illusions, dark green rounds are trees, red dots are people and things to touch.'});
 /* every arrival in a room: say where the party is the first time, apply the puzzle state */
 pspOnArrive((n,restored)=>{if(!f2Is(n))return;const S=f2S(n);if(!S.seen&&!restored){S.seen=1;try{msg(F2B[n].text,'#d8e4f0')}catch(e){}}});
