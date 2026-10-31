@@ -8,14 +8,15 @@
 /* ---------- 6. THE SWAMP (9826): the heart ---------- */
 const F2_SWAMP={HUT:[21,4,27,6],CAUL:[24,9],NOTE:[27,9],ING:[['toad','f2_toadstool',8,18,'a clump of red toadstools','The toadstool'],['eel','f2_eelpost',40,20,'a dead eel hanging from a hook on a post','The eel'],['moss','f2_moss',9,31,'a clump of bright green marsh moss on a flat stone','The marsh moss']]};
 function f2SwampBuild(){
-  const C=f2Room({id:9826,ground:'mud',path:'wl2f0',band:[1,4],wh:3.2,
+  const SMd=f2TexFloor('ps_f2_tex_swmud','f2t_swmud',1.0)||'mud';
+  const C=f2Room({id:9826,ground:SMd,path:'wl2f0',band:[1,4],wh:3.2,softRet:1,rw:0,
     routes:[[[24,35],[24,27],[16,23],[16,14],[24,12],[24,10]],[[24,27],[34,24],[39,20]],[[16,18],[9,18]],[[22,31],[10,31]]],
     clear:[[17,3,31,11,'wwf_moss','The Witch\'s Hut',1],[4,14,12,22,'blf_mud','The Toadstool Ring',1],[35,15,43,24,'blf_mud','The Eel Pool',1],[5,27,14,34,'wwf_moss','The Moss Bank',1]],
     edge:(C,x,y)=>{if(C.E[y*48+x]<=8){C.water(x,y,'bogwater');return true}return false}});
   // the witch's hut (a painted front over a block of wall; its door is barred), the cauldron and the note before it
   const [hx0,hy0,hx1,hy1]=F2_SWAMP.HUT;
   try{pspDefringe('ps_f2_witchhut')}catch(e){}
-  if(IMG.ps_f2_witchhut&&IMG.ps_f2_witchhut.width&&!IMG.ps_f2_witchhut._ps)C.picHouse({img:'ps_f2_witchhut',x0:22,y0:hy0,x1:26,y1:hy1,w:5.6,door:[24,hy1],wh:2.6});
+  if(IMG.ps_f2_witchhut&&IMG.ps_f2_witchhut.width&&!IMG.ps_f2_witchhut._ps){C.picHouse({img:'ps_f2_witchhut',x0:22,y0:hy0,x1:26,y1:hy1,w:5.6,door:[24,hy1],wh:2.6});for(let y=hy0;y<=hy1;y++)for(let x=22;x<=26;x++)if(!(x===24&&y===hy1))C.mist(x,y)}   // behind the painted hut: the swamp, not a grey block
   else C.house({x0:hx0,y0:hy0,x1:hx1,y1:hy1,face:'S',sty:'black',roof:'thatch2',wh:2.4});
   {const g=C.chars[C.rows[hy1][24]];if(g!==undefined)KH_DOOR[g]={psf2:'hutdoor'}}
   {const [cx,cy]=F2_SWAMP.CAUL;C.used.delete(cx+','+cy);C.dec('ww_cauldron',cx,cy,{block:true,npc:'f2m_cauldron',sc:1.1});C.light(cx,cy,[.7,1.4,.6])}
@@ -24,16 +25,22 @@ function f2SwampBuild(){
   // the three marked spots
   for(const [k,pic,x,y] of F2_SWAMP.ING){C.used.delete(x+','+y);C.dec(pspPic(pic),x,y,{block:true,npc:'f2m_'+k});const sx=x+1,sy=y;if(C.open(sx,sy)){C.used.delete(sx+','+sy);C.dec(pspPic('f2_stake'),sx,sy,{block:false})}}
   // the swamp: dead trees hung with moss, willows, reeds, stumps; toadstool rings
-  C.fill([pspPic('f2_swamptree'),'ww_willow','ww_oakmoss','f2i_bogwillow',pspPic('f2_swamptree'),pspPic('f2_stump')],{p1:.18,p2:.5,p3:.8});
-  C.scrub([pspPic('f2_reeds'),'logm',pspPic('f2_reeds')],.05);
-  C.capTrees(/swamptree|willow|oakmoss/,2.4);
+  const ST=[pspPic('f2_sw_dead'),pspPic('f2_sw_cypress'),pspPic('f2_swamptree'),'ww_willow',pspPic('f2_sw_cypress')];ST.push(...ST.map(f2Flip));
+  C.fill(ST.concat([pspPic('f2_stump')]),{p1:.18,p2:.5,p3:.8});
+  for(const d of C.decor)if(d.block&&/f2_sw_|swamptree|willow/.test(d.k)){d.sc=+((d.sc||1)*(.8+C.hs2(d.x,d.y,171)*.45)).toFixed(2);d.ox=(C.hs2(d.x,d.y,172)-.5)*.8;d.oy=(C.hs2(d.x,d.y,173)-.5)*.6}
+  C.scrub([pspPic('f2_reeds'),pspPic('f2_sw_rushes'),pspPic('f2_sw_rushes')],.07,{sc:.85});
+  for(const [x,y] of [[13,20],[37,22],[11,29],[30,14],[18,28],[33,30]])if(C.free(x,y)&&!C.nearPath(x,y,0)){C.dec(pspPic('f2_sw_glowstump'),x,y,{block:true,sc:.65});C.light(x,y,[.4,1.3,1.2])}
+  for(const [x,y] of [[23,30],[25,22],[17,16],[25,12]])if(C.free(x,y)){C.dec(pspPic('f2_sw_post'),x,y,{block:false,sc:.85});C.light(x,y,[1.6,1.2,.6])}
+  f2Edge(C,{img:'f2_sw_wall',wh:2.6,veil:.15,pillar:ST,innerP:.35,innerKeep:(x,y)=>x>=17&&x<=31&&y<=11});
+  {const g=C.chars[C.rows[hy1][24]],ec=C._edgeCh&&C._edgeCh(24,hy1),eg=ec&&C.chars[ec];if(g!==undefined&&eg!==undefined)T_TILE[g]=T_TILE[eg]}   // the hut's barred door square looks like the swamp behind the painted hut
+  C.capTrees(/swamptree|willow|oakmoss|f2_sw_(dead|cypress)/,2.2);
   pspSafeZone(C,24,35,6);
   C.foes(['f2frog','f2leech','f2wisp'],[4,14,12,22],1);
   C.foes(['f2leech','f2leech','f2hag','f2troll'],[35,15,43,24],2);
   C.foes(['f2frog','f2wisp','f2hag'],[5,27,14,34],3);
   C.foes(['f2troll','f2wisp'],[28,26,44,36],4);
   for(const [x,y] of [[5,15],[42,16],[13,33]])C.chestAt(x,y,1);
-  C.ret();
+  C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[.9,.95,1.05]});
   return C.done({glow:7})}
 pspRegister(9826,f2SwampBuild);
 const f2SwampHas=k=>{const R=f2S(9826);return !!(R.got&&R.got[k])};
@@ -60,26 +67,35 @@ f2OnArrive(9826,()=>f2SwampApply());
 /* ---------- 7. THE NIGHTMARE (9827): the brain ---------- */
 const F2_NIGHT={JAR:[24,7],LAMP:[[21,5,'north-west'],[27,5,'north-east'],[27,9,'south-east'],[21,9,'south-west']]};
 function f2NightBuild(){
-  const C=f2Room({id:9827,ground:'tombdark',path:'wl2f5',band:[1,4],wh:3.4,
+  const NC=f2TexFloor('ps_f2_tex_nmcrack','f2t_nmcrack',1.1)||'tombdark',NQ=f2TexFloor('ps_f2_tex_nmchequer','f2t_nmchequer',.8)||'wl2f5',NB=f2TexFloor('ps_f2_tex_nmbones','f2t_nmbones',1.0)||'ash',NF=f2TexFloor('ps_f2_tex_nmflesh','f2t_nmflesh',.95)||'blood';
+  const C=f2Room({id:9827,ground:NC,path:NQ,band:[1,4],wh:3.4,softRet:1,rw:0,
     routes:[[[24,35],[24,27],[31,23],[31,15],[24,13],[24,11]],[[24,27],[14,25],[9,20]],[[31,19],[40,19]],[[22,31],[11,31]]],
-    clear:[[17,2,31,12,'blood','The Ring of Lanterns',1],[4,15,13,24,'ash','The Doll Room',1],[35,14,44,24,'ash','The Hall of Eyes',1],[5,27,15,34,'blood','The Broken Clocks',1]],
-    edge:(C,x,y)=>{const e=C.E[y*48+x];if(e<=5){const h=C.hs2(x,y,77);C.solid(x,y,C.ch(pspWallGid(h<.5?'dark':'moss',(h*7)|0,3.4)));return true}return false}});
+    clear:[[17,2,31,12,NF,'The Ring of Lanterns',1],[4,15,13,24,NB,'The Doll Room',1],[35,14,44,24,NB,'The Hall of Eyes',1],[5,27,15,34,NF,'The Broken Clocks',1]],
+    edge:(C,x,y)=>false});
   // the jar on its pedestal and the four lanterns round it
   {const [jx,jy]=F2_NIGHT.JAR;C.used.delete(jx+','+jy);C.dec(pspPic('f2_brainjar'),jx,jy,{block:true,npc:'f2n_jar'});C.light(jx,jy,[.6,1.1,.6])}
   F2_NIGHT.LAMP.forEach(([x,y],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_lantern_off'),x,y,{block:true,npc:'f2n_lamp'+i})});
   // the dark: dead trees full of eyes, warped clocks, dolls
-  C.fill([pspPic('f2_eyetree'),'f2i_nightoak','f2i_nightthorn',pspPic('f2_eyetree'),'f2i_nightthorn'],{p1:.12,p2:.45,p3:.75});
+  const NT=[pspPic('f2_eyetree'),pspPic('f2_nm_tree'),'f2i_nightthorn',pspPic('f2_nm_tree')];NT.push(...NT.map(f2Flip));
+  C.fill(NT.concat(['f2i_nightthorn','f2i_nightoak']),{p1:.08,p2:.35,p3:.65});
+  // the wrong stairs: stairs that climb to doors that stand alone, split three ways, end in eyes; floating islands of rock, melting clocks, piles of dolls; red lamps along the way
+  for(const [x,y,k] of [[20,30,'f2_nm_stairdoor'],[28,30,'f2_nm_stairsplit'],[14,10,'f2_nm_stairseye'],[34,9,'f2_nm_stairsplit'],[40,28,'f2_nm_stairseye'],[8,9,'f2_nm_stairdoor'],[19,22,'f2_nm_spiral']]){const q=C.near(x,y,3,true);if(q){C.dec(pspPic(k),q[0],q[1],{block:true,sc:.75})}}   // the wrong stairs
+  for(const [x,y,k,b] of [[12,6,'f2_nm_island',2.4],[36,4,'f2_nm_island',2.8],[42,32,'f2_nm_island',2.2],[6,26,'f2_nm_island',2.6]]){const d=C.dec(pspPic(k),x,y,{block:false,bob:b,sc:.9});if(d)d.fly=1}
+  for(const [x,y] of [[9,29],[13,32]])if(C.free(x,y))C.dec(pspPic('f2_nm_clock'),x,y,{block:true});
+  
+  for(const [x,y] of [[23,30],[25,24],[30,20],[30,16],[25,13]])if(C.free(x,y)){C.dec(pspPic('f2_nm_lamp'),x,y,{block:false});C.light(x,y,[1.8,.5,.4])}
+  f2Edge(C,{img:'f2_nm_wall',wh:2.6,veil:.18,pillar:NT,innerP:.3,innerKeep:(x,y)=>x>=16&&x<=32&&y<=12});
   for(const [x,y] of [[6,16],[11,17],[8,22],[12,21],[5,20]])if(C.free(x,y))C.dec(pspPic('f2_doll'),x,y,{block:true});
   for(const [x,y] of [[7,28],[13,29],[10,33],[6,32]])if(C.free(x,y))C.dec(pspPic('f2_clock'),x,y,{block:true});
   C.scrub(['gy_bones',pspPic('f2_doll')],.02);
-  C.capTrees(/eyetree|nightoak|nightthorn/,2.4);
+  C.capTrees(/eyetree|nightoak|nightthorn|f2_nm_tree/,2.2);
   pspSafeZone(C,24,35,6);
   C.foes(['f2doll','f2doll','f2hands'],[4,15,13,24],1);
   C.foes(['f2horror','f2hound','f2shadow'],[35,14,44,24],2);
   C.foes(['f2shadow','f2hands','f2hound'],[5,27,15,34],3);
   C.foes(['f2shadow','f2horror'],[28,26,44,36],4);
   for(const [x,y] of [[5,16],[43,15],[14,33]])C.chestAt(x,y,1);
-  C.ret();
+  C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[.9,.95,1.05]});
   const lv=C.done({glow:9});
   // staring doors: a few black wall squares that face a square the party can stand on become doors covered in eyes (they never open)
   {const f=f2FacGid('ps_f2_eyedoor',0,1,3.4,{tex:'texBlack_1',fit:false,rgb:[.95,.9,.9]}),TB=TERRS[9827]&&TERRS[9827].block,bs=new Set(lv.decor.filter(d=>d.block).map(d=>d.x+','+d.y));

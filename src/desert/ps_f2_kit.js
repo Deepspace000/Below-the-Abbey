@@ -26,9 +26,9 @@ const F2B={
     text:'The canals lie still under a pink evening sky. Water laps at the steps, and somewhere a bell rings the hour.'},
   9825:{k:'desert',sky:{top:[70,140,214],mid:[176,200,214],low:[246,214,150]},cloud:.4,silver:.18,fog:[230,210,170,.007],haze:.12,amb:1.15,lcol:[1.3,1.1,.75],wn:'Heat',fx:'heat',
     text:'The sun beats down on the sand. The air shimmers with heat, and there is no wind.'},
-  9826:{k:'swamp',sky:{top:[38,48,44],mid:[78,94,80],low:[118,130,104]},cloud:1.0,fog:[92,106,84,.034],amb:.62,lcol:[.85,1.1,.7],wn:'Bog mist',fx:null,
+  9826:{k:'swamp',sky:{top:[38,48,44],mid:[78,94,80],low:[118,130,104]},cloud:1.0,fog:[92,110,84,.022],amb:.8,lcol:[.85,1.1,.7],wn:'Bog mist',fx:null,
     text:'A thick green mist lies on the black water. Frogs croak, and the mud bubbles and stinks.'},
-  9827:{k:'nightmare',sky:{top:[8,0,6],mid:[56,10,16],low:[116,30,24]},cloud:.7,fog:[30,6,10,.018],haze:0,amb:.5,lcol:[1.3,.55,.5],wn:'Red dark',fx:null,
+  9827:{k:'nightmare',sky:{top:[8,0,6],mid:[56,10,16],low:[116,30,24]},cloud:.7,fog:[40,10,14,.014],haze:0,amb:.72,lcol:[1.3,.55,.5],wn:'Red dark',fx:null,
     text:'The sky is the colour of a bruise, and the air is thick and still. Things move just out of sight.'}};
 /* ---------- floors: f2 names to engine FLOORS keys (some re-toned here) ---------- */
 const F2_FLMAKE={snow:['scree',1.62,[.97,1.0,1.07]],snowpath:['wwf_dirt',1.05,[.9,.94,1.02]],bogwater:['water',.78,[.66,.86,.58]],canal:['water',.66,[.62,.92,.98]],
