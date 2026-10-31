@@ -80,6 +80,47 @@ def main():
             const o=[];for(const s of EP_SECRETS[1]){const ch=G.decor.find(d=>d.kname==='epsec_'+s.id);o.push([s.id,G.grid[s.door[1]][s.door[0]]===0,!!(G.flags.ep_sec&&G.flags.ep_sec[s.id]),ch&&ch.contents?ch.contents.length:'none'])}
             try{localStorage.removeItem('abbeySave_ep_sectest')}catch(e){}return {ok,o}}""")
         check('save and load keep every door open and every chest empty', r['ok'] and all(q[1] and q[2] and q[3] == 0 for q in r['o']), r)
+        # ---- every input opens a sealed wall: the keys W and Up, the on-screen forward arrow, the attack/use key, a click on the view ----
+        reseal = """s=>{const F=G.flags.ep_sec||{};delete F[s.id];G.grid[s.door[1]][s.door[0]]=1;EP.cur=-1}"""
+        inputs = [('key W', "key:w"), ('key ArrowUp', "key:ArrowUp"), ('on-screen forward arrow', "click:fwd"), ('Space (attack/use)', "key: "), ('click on the wall', "click:view")]
+        for k, (label, how) in enumerate(inputs):
+            s_ = secs[k % 4]
+            pg.evaluate("s=>{const F=G.flags.ep_sec||{};delete F[s.id];G.grid[s.door[1]][s.door[0]]=1;EP.cur=-1}", s_)
+            fx, fy = s_['from']; f = [[0, -1], [1, 0], [0, 1], [-1, 0]].index([s_['door'][0] - fx, s_['door'][1] - fy])
+            pg.evaluate("async a=>{await T.go(a[0],a[1],a[2]);G.lockT=0;G.msgs=[]}", [fx, fy, f])
+            pg.wait_for_timeout(600)
+            if how.startswith('key:'):
+                pg.keyboard.press(how[4:])
+            elif how == 'click:fwd':
+                b_ = pg.evaluate("()=>{const b=(BTNS||[]).find(q=>q.id==='fwd');if(!b)return null;const c=document.querySelector('canvas'),r=c.getBoundingClientRect(),sx=r.width/(c.width/(window.devicePixelRatio||1)||r.width);return {x:b.x,y:b.y,w:b.w,h:b.h,cw:c.width,rw:r.width,rh:r.height,rx:r.left,ry:r.top,ch:c.height}}")
+                if b_:
+                    # BTNS are in the game's logical units: scale to the canvas box on the page
+                    lw = pg.evaluate("()=>typeof DW!=='undefined'?DW:480"); lh = pg.evaluate("()=>typeof DH!=='undefined'?DH:320")
+                    px = b_['rx'] + (b_['x'] + b_['w'] / 2) * b_['rw'] / lw; py = b_['ry'] + (b_['y'] + b_['h'] / 2) * b_['rh'] / lh
+                    pg.mouse.click(px, py)
+                else:
+                    pg.evaluate("()=>act('fwd')")
+            else:
+                c = pg.evaluate("()=>{const r=document.querySelector('canvas').getBoundingClientRect();return [r.left+r.width*.42,r.top+r.height*.3]}")
+                pg.mouse.click(c[0], c[1])
+            pg.wait_for_timeout(700)
+            r = pg.evaluate("s=>({open:G.grid[s.door[1]][s.door[0]]===0,flag:!!(G.flags.ep_sec&&G.flags.ep_sec[s.id]),said:(G.msgs||[]).some(m=>/stones here are loose/.test(m.text||''))})", s_)
+            check('room %s opens with %s' % (s_['id'], label), r['open'] and r['flag'] and r['said'], r)
+        # ---- the hint: standing beside a sealed wall for a moment brings a draught message ----
+        s_ = secs[2]
+        pg.evaluate("s=>{const F=G.flags.ep_sec||{};delete F[s.id];G.grid[s.door[1]][s.door[0]]=1;EP.cur=-1;EP.hint={}}", s_)
+        fx, fy = s_['from']
+        pg.evaluate("async a=>{await T.go(a[0],a[1],0);G.msgs=[]}", [fx, fy]); pg.wait_for_timeout(2500)
+        r = pg.evaluate("()=>(G.msgs||[]).some(m=>/draught/.test(m.text||''))")
+        check('a draught is felt beside a sealed wall', r)
+        pg.evaluate("s=>{const F=G.flags.ep_sec=G.flags.ep_sec||{};F[s.id]=1;G.grid[s.door[1]][s.door[0]]=0}", s_)
+        # ---- a real saved game in a fresh page: the doors stay open ----
+        pg.evaluate("()=>{writeSave('ep_fresh')}")
+        pg.reload(wait_until='domcontentloaded'); pg.wait_for_function("()=>typeof G!=='undefined'&&G.state==='play'&&LEVEL===305", timeout=150000); pg.wait_for_timeout(4000)
+        pg.evaluate("()=>{restore(readSave('ep_fresh'));G.state='play';try{localStorage.removeItem('abbeySave_ep_fresh')}catch(e){}}"); pg.wait_for_timeout(1500); pg.evaluate(HELP)
+        pg.evaluate("async()=>{await T.go(3,18,0);for(let i=0;i<100;i++){if(LEVEL===1&&EP.ready&&EP_SECRETS[1].every(s=>s.cells.every(([x,y])=>G.grid[y][x]===0)))break;await T.wait(100)}}")
+        r = pg.evaluate("()=>EP_SECRETS[1].map(s=>[s.id,G.grid[s.door[1]][s.door[0]]===0])")
+        check('a fresh page with the saved game keeps every door open', all(q[1] for q in r), r)
         check('no page errors', not errs, errs[:5])
         b.close()
     print('ALL PASSED' if not FAILS else 'FAILED: ' + ', '.join(FAILS))
