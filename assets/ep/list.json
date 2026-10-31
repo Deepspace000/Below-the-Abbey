@@ -901,5 +901,54 @@
 "h": 128,
 "kind": "tex",
 "sheet": "ih_walls_sheet"
+},
+"orecart": {
+"file": "orecart.webp",
+"w": 244,
+"h": 209,
+"kind": "sprite",
+"sheet": "ih_props_sheet"
+},
+"coalheap": {
+"file": "coalheap.webp",
+"w": 287,
+"h": 110,
+"kind": "sprite",
+"sheet": "ih_props_sheet"
+},
+"coalsacks": {
+"file": "coalsacks.webp",
+"w": 250,
+"h": 200,
+"kind": "sprite",
+"sheet": "ih_props_sheet"
+},
+"toolrack": {
+"file": "toolrack.webp",
+"w": 280,
+"h": 231,
+"kind": "sprite",
+"sheet": "ih_props_sheet"
+},
+"anvil": {
+"file": "anvil.webp",
+"w": 279,
+"h": 200,
+"kind": "sprite",
+"sheet": "ih_props_sheet"
+},
+"orecrate": {
+"file": "orecrate.webp",
+"w": 242,
+"h": 215,
+"kind": "sprite",
+"sheet": "ih_props_sheet"
+},
+"brazier": {
+"file": "brazier.webp",
+"w": 175,
+"h": 183,
+"kind": "sprite",
+"sheet": "ih_props_sheet"
 }
 }
