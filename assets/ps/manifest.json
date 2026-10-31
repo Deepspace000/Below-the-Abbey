@@ -4378,5 +4378,225 @@
 "h": 1.4,
 "kind": "sprite",
 "sheet": "b4l"
+},
+"f2_cb_hearth": {
+"file": "f2_cb_hearth.webp",
+"w": 375,
+"px_h": 330,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "b5c"
+},
+"f2_cb_hearth_lit": {
+"file": "f2_cb_hearth_lit.webp",
+"w": 375,
+"px_h": 330,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "b5c"
+},
+"f2_cb_door": {
+"file": "f2_cb_door.webp",
+"w": 267,
+"px_h": 304,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "b5c"
+},
+"f2_cb_bench": {
+"file": "f2_cb_bench.webp",
+"w": 395,
+"px_h": 151,
+"h": 0.6,
+"kind": "sprite",
+"sheet": "b5c"
+},
+"f2_nm_stairdoor": {
+"file": "f2_nm_stairdoor.webp",
+"w": 236,
+"px_h": 290,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "b5s"
+},
+"f2_nm_spiral": {
+"file": "f2_nm_spiral.webp",
+"w": 269,
+"px_h": 287,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "b5s"
+},
+"f2_nm_stairsplit": {
+"file": "f2_nm_stairsplit.webp",
+"w": 360,
+"px_h": 252,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "b5s"
+},
+"f2_nm_stairseye": {
+"file": "f2_nm_stairseye.webp",
+"w": 265,
+"px_h": 294,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "b5s"
+},
+"f2_nm_wall": {
+"file": "f2_nm_wall.webp",
+"w": 1024,
+"px_h": 568,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "raw"
+},
+"f2_nm_island": {
+"file": "f2_nm_island.webp",
+"w": 295,
+"px_h": 423,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "b5p"
+},
+"f2_nm_clock": {
+"file": "f2_nm_clock.webp",
+"w": 173,
+"px_h": 451,
+"h": 2.2,
+"kind": "sprite",
+"sheet": "b5p"
+},
+"f2_nm_eyedoor2": {
+"file": "f2_nm_eyedoor2.webp",
+"w": 265,
+"px_h": 405,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "b5p"
+},
+"f2_nm_tree": {
+"file": "f2_nm_tree.webp",
+"w": 202,
+"px_h": 444,
+"h": 3.6,
+"kind": "sprite",
+"sheet": "b5p"
+},
+"f2_nm_dolls": {
+"file": "f2_nm_dolls.webp",
+"w": 339,
+"px_h": 352,
+"h": 0.9,
+"kind": "sprite",
+"sheet": "b5p"
+},
+"f2_nm_lamp": {
+"file": "f2_nm_lamp.webp",
+"w": 76,
+"px_h": 456,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "b5p"
+},
+"f2_tex_nmcrack": {
+"file": "f2_tex_nmcrack.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b5f"
+},
+"f2_tex_nmchequer": {
+"file": "f2_tex_nmchequer.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b5f"
+},
+"f2_tex_nmbones": {
+"file": "f2_tex_nmbones.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b5f"
+},
+"f2_tex_nmflesh": {
+"file": "f2_tex_nmflesh.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "b5f"
+},
+"f2_sw_wall": {
+"file": "f2_sw_wall.webp",
+"w": 1024,
+"px_h": 568,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "raw"
+},
+"f2_sw_dead": {
+"file": "f2_sw_dead.webp",
+"w": 288,
+"px_h": 417,
+"h": 3.6,
+"kind": "sprite",
+"sheet": "b5w"
+},
+"f2_sw_cypress": {
+"file": "f2_sw_cypress.webp",
+"w": 280,
+"px_h": 447,
+"h": 4.2,
+"kind": "sprite",
+"sheet": "b5w"
+},
+"f2_sw_rushes": {
+"file": "f2_sw_rushes.webp",
+"w": 212,
+"px_h": 414,
+"h": 1.3,
+"kind": "sprite",
+"sheet": "b5w"
+},
+"f2_sw_post": {
+"file": "f2_sw_post.webp",
+"w": 133,
+"px_h": 428,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "b5w"
+},
+"f2_sw_glowstump": {
+"file": "f2_sw_glowstump.webp",
+"w": 274,
+"px_h": 241,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "b5w"
+},
+"f2_sw_boat": {
+"file": "f2_sw_boat.webp",
+"w": 328,
+"px_h": 116,
+"h": 0.6,
+"kind": "sprite",
+"sheet": "b5w"
+},
+"f2_cb_stool": {
+"file": "f2_cb_stool.webp",
+"w": 235,
+"px_h": 256,
+"h": 0.6,
+"kind": "sprite",
+"sheet": "b5c"
+},
+"f2_cb_mirror": {
+"file": "f2_cb_mirror.webp",
+"w": 253,
+"px_h": 317,
+"h": 1.2,
+"kind": "sprite",
+"sheet": "b5c"
 }
 }
