@@ -2866,6 +2866,9 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(rx*rx+ry*ry>(s.sky?60000:far2))continue;
     if(s.decor&&s.img&&(G.day||0)>0&&!SKYLINE.test(s.decor.k)){const hh=s.w*s.img.height/s.img.width,mh=CEILH-.12;if(hh>mh)s.w*=mh/hh} // nothing grows through the sky
     const tX=inv*(dY*rx-dX*ry),tY=inv*(-pY*rx+pX*ry);
+    if(s.plane3d&&s.flat){ // a free-standing painted plane (opt-in, the second floor's bridges): kept while any part of it is in front of the camera, not only its centre
+      const hw=s.w/2,tx=-s.flat[1]*hw,ty2=s.flat[0]*hw,y1=inv*(-pY*(rx-tx)+pX*(ry-ty2)),y2=inv*(-pY*(rx+tx)+pX*(ry+ty2));
+      if(Math.max(y1,y2)<.25)continue;s.pnear=Math.max(.25,Math.min(y1,y2,tY));s.tX=tX;s.tY=Math.max(.26,tY);proj.push(s);continue}
     if(tY<.25)continue;
     if(TERR_NOW&&!PERF_SPR&&!s.pic&&!s.e&&!s.hang){const sxc=VW/2*(1+tX/tY),hwd=F*s.w/tY*.7+6;if(sxc+hwd<0||sxc-hwd>VW)continue} // far off to the side of the picture: not worked out at all (terraced levels only)
     s.tX=tX;s.tY=tY;proj.push(s);
@@ -2879,10 +2882,10 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(s.mount){const side=inv*(dY*s.mount[0]-dX*s.mount[1]);if(side>0)img=signFlip(img)}   // a hanging shop sign: its iron bracket is always on the wall (shop) side
     const iw=img.width,ih=img.height,ty=s.tY;
     if(s.decor&&s.decor.burn>0){const bp=s.decor.burn/5;s.fade=bp>.82?clamp((1-bp)/.18,0,1):1;if(s.fade<.03)continue}
-    if(s.hang||(s.decor&&(s.decor.walk||/^sign_|^lamp$/.test(s.decor.k)))){const f=s.decor&&s.decor.walk&&WALKTREE.test(s.decor.k)?(LEVEL===496?clamp((ty-1.7)/1.8,0,1):clamp((ty-1.15)/1,0,1)):clamp((ty-.35)/.55,0,1);if(f<.03)continue;s.fade=f} // signs, lanterns and walk-through people melt away when you stand beside them
-    let sw=F*s.w/ty;sw*=(1+(s.lunge||0)*.28);
+    if(!s.plane3d&&(s.hang||(s.decor&&(s.decor.walk||/^sign_|^lamp$/.test(s.decor.k))))){const f=s.decor&&s.decor.walk&&WALKTREE.test(s.decor.k)?(LEVEL===496?clamp((ty-1.7)/1.8,0,1):clamp((ty-1.15)/1,0,1)):clamp((ty-.35)/.55,0,1);if(f<.03)continue;s.fade=f} // signs, lanterns and walk-through people melt away when you stand beside them
+    let sw=F*s.w/(s.plane3d?s.pnear:ty);sw*=(1+(s.lunge||0)*.28);
     if(s.smallSky&&sw<7)continue; // a far roof too small to see is not painted
-    if(s.flat&&!(s.pic&&!TERR_NOW)){const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1;sw*=Math.max(.06,Math.abs((rx*s.flat[0]+ry*s.flat[1])/dl))}
+    if(s.flat&&!s.plane3d&&!(s.pic&&!TERR_NOW)){const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1;sw*=Math.max(.06,Math.abs((rx*s.flat[0]+ry*s.flat[1])/dl))}
     if(s.hang){const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1;sw*=Math.max(.07,Math.abs((rx*s.hang[1]-ry*s.hang[0])/dl))}
     const sh=sw*ih/iw*(1-(s.sink||0)*.6);
     if(TERR_NOW){const lq=sw<SPR_LOWQ?'low':'high';if(lq!==SPRQ){SPRQ=lq;SC.imageSmoothingQuality=lq}} // a picture only a few pixels wide is scaled with the cheap filter (the 'high' one costs most of the sprite time in the cities and shows no difference at that size)
@@ -2890,7 +2893,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     const bottom=HH+(TERR_NOW?CAMZ-(s.decor&&!s.e?terrFoot(s,cx,cy):terrH(s.x,s.y)):EYE)*F/ty-(s.bob||0)*F/ty+(s.sink||0)*sh*.25+(s.drop||0)*sh+(TERR_NOW&&s.decor&&!s.e?sh*.06:0);
     const left=scrX-sw/2,top=bottom-sh;
     if(s.e){s.e.sx=scrX;s.e.sy=top+sh*.45}
-    {const xa=Math.max(0,Math.floor(left)),xb=Math.min(VW-1,Math.ceil(left+sw));if(xb<xa||ty>(s.sky?400:farT))continue;let any=s.decor&&SKYLINE.test(s.decor.k);for(let xx=xa;xx<=xb&&!any;xx+=2)if(zbuf[xx]>ty){any=true;break}if(!any&&!(s.pic&&!TERR_NOW))continue} // skip hidden sprites
+    if(s.plane3d){if(ty>farT)continue}else{const xa=Math.max(0,Math.floor(left)),xb=Math.min(VW-1,Math.ceil(left+sw));if(xb<xa||ty>(s.sky?400:farT))continue;let any=s.decor&&SKYLINE.test(s.decor.k);for(let xx=xa;xx<=xb&&!any;xx+=2)if(zbuf[xx]>ty){any=true;break}if(!any&&!(s.pic&&!TERR_NOW))continue} // skip hidden sprites
     let anyVis=false;
     if(!TERR_NOW&&!s.hang&&!s.pic&&!(s.decor&&(NOSHADOW.test(s.decor.k)||SKYLINE.test(s.decor.k)||/^pgrass|^pflw/.test(s.decor.k)||s.decor.k==='hlant'||s.decor.k==='cfire'))&&!(s.e&&ENEMY_DEF[s.e.t].fly)){SC.save();const tr=s.decor&&NOSHADOW.test(s.decor.k);SC.globalAlpha=(s.fade!==undefined?Math.max(0,Math.min(1,s.fade)):1)*(tr?.5:.36);SC.fillStyle='#000';SC.beginPath();if(s.decor&&/^kh_int/.test(s.decor.lk||"")){const sy=Math.max(2,sw*.035);SC.fillRect(scrX-sw*.46,bottom-sy*.5,sw*.92,sy)}else{{ // a shadow is clipped to the columns where nothing nearer stands in front: it never paints over a wall or a trunk in front of it
         const xa2=Math.max(0,Math.floor(scrX-sw*.36)),xb2=Math.min(VW-1,Math.ceil(scrX+sw*.36));SC.save();SC.beginPath();let st=-1;
@@ -2954,13 +2957,14 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
       if(rs>=0){sprRun(SRC,left,ku,tw,th,sh,top,rs,rc,xb+1);rs=-1}
       SC.globalAlpha=1;continue;
     }
-    if(s.pic&&!TERR_NOW){ // a picture on a wall: drawn column by column in true perspective, so it lies flat on the wall from every angle
+    if(s.pic&&(!TERR_NOW||s.plane3d)){ // a picture on a wall (or a free-standing plane, opt-in s.plane3d, also on terraced ground): drawn column by column in true perspective, so it lies flat on the wall from every angle
       const tg=[-s.flat[1],s.flat[0]],hw=s.w/2,hh=s.w*ih/iw,prj=(px,py)=>{const rx=px-cx,ry=py-cy;return[inv*(dY*rx-dX*ry),inv*(-pY*rx+pX*ry)]};
       const P1=prj(s.x-tg[0]*hw,s.y-tg[1]*hw),P2=prj(s.x+tg[0]*hw,s.y+tg[1]*hw),dXc=P2[0]-P1[0],dYc=P2[1]-P1[1],bobv=s.bob||0;
+      const pz=s.plane3d?(TERR_NOW?CAMZ-terrFoot(s,cx,cy):EYE)+hh*.06:EYE,mir=s.plane3d&&((cx-s.x)*s.flat[0]+(cy-s.y)*s.flat[1])>0; // a plane stands on its ground and is never seen mirrored from its back
       const tAt=sx=>{const den=dXc-sx*dYc;return Math.abs(den)<1e-6?-1:(sx*P1[1]-P1[0])/den};
       for(let xx=0;xx<VW;xx++){const sx=(xx+.5-VW/2)/(VW/2),t=tAt(sx);if(t<0||t>1)continue;const Y=P1[1]+t*dYc;if(Y<.25||zbuf[xx]<=Y-.02)continue;
         const t2=tAt(sx+2/VW),dt=t2<0||t2>1?(1/Math.max(8,sw)):Math.abs(t2-t)/2;
-        const bot=HH+(EYE-bobv)*F/Y,tp=bot-hh*F/Y;SC.drawImage(SRC,Math.min(tw-1,t*tw),0,Math.max(.5,dt*tw),th,xx,tp,1.02,bot-tp)}
+        const bot=HH+(pz-bobv)*F/Y,tp=bot-hh*F/Y;SC.drawImage(SRC,Math.min(tw-1,Math.max(0,(mir?1-t-Math.max(.5,dt*tw)/tw:t)*tw)),0,Math.max(.5,dt*tw),th,xx,tp,1.02,bot-tp)}
       SC.globalAlpha=1;continue;
     }
     let x0=Math.max(0,Math.floor(left)),x1=Math.min(VW,Math.ceil(left+sw));
@@ -78048,11 +78052,11 @@ function f2X(C,d,keys){C.f2x=C.f2x||{};const n='f2x'+Object.keys(C.f2x).length;d
 pspOnArrive(n=>{const L=LEVELS[n];if(!L||!L._f2x||!G.decor)return;for(const d of G.decor){const o=d.kname&&L._f2x[d.kname];if(!o)continue;for(const k in o)if(d[k]===undefined)d[k]=k==='mv'?Object.assign({},o[k],{segs:null,t:0}):k==='span'?Object.assign({},o[k]):o[k]}});
 {const _sl=spriteList;spriteList=function(){const L=_sl.apply(this,arguments);
   if(typeof LEVEL==='undefined'||!(f2Is(LEVEL)||LEVEL===F2.HUB))return L;
-  const LV=LEVELS[LEVEL],dk=LV&&LV._f2deck,cx=G.C.x+.5,cy=G.C.y+.5,onDeck=!!(dk&&cx>=dk[0]&&cx<=dk[2]+1&&cy>=dk[1]&&cy<=dk[3]+1);   // standing on a bridge deck: its side faces give way to its parapets
+  const LV=LEVELS[LEVEL],dk=LV&&LV._f2deck,cx=G.C.x+.5,cy=G.C.y+.5,onDeck=!!(dk&&cx>=dk[0]&&cx<=dk[2]+1&&cy>=dk[1]&&cy<=dk[3]+1&&f2OnDeck(dk,cx,cy));   // standing on a bridge deck: its side faces give way to its parapets
   let drop=false;
   for(const s of L){const d=s.decor;if(!d)continue;
     if(d.span&&d.span.deck&&((d.span.deck==='hide')===onDeck)){s._f2drop=1;drop=true;continue}
-    if(d.span&&s.pic){s.x=d.span.x;s.y=d.span.y;s.w=d.span.w;s.bob=d.span.bob;s.flat=[d.wd[0],d.wd[1]]}
+    if(d.span&&s.pic){s.x=d.span.x;s.y=d.span.y;s.w=d.span.w;s.bob=d.span.bob;s.flat=[d.wd[0],d.wd[1]];s.plane3d=1}   // drawn as a true plane in perspective (core drawSprites, opt-in): a bridge keeps its size and passes overhead, it is not a billboard sized by its centre
     else if(F2_TREE_RX.test(d.k)&&!d.roof){s.decor=Object.create(d,{k:{value:'tree0'}})}   // a painted tree casts no round shadow and fades into the green like the woodland trees
     else if(d.mv&&d.mvFlip&&!s.pic){const C=G.C,fx=Math.cos(C.a),fy=Math.sin(C.a),rx=-fy,ry=fx;const right=(d.mvDx*rx+d.mvDy*ry)>0;const im=IMG[right?d.mvFlip:d.k];if(im)s.img=im}}   // a boat seen moving to the right shows its prow on the right
   let out=drop?L.filter(s=>!s._f2drop):L;if(window.F2_DBGHIDE)out=out.filter(s=>!(s.decor&&window.F2_DBGHIDE.test(String(s.decor.k))));
@@ -78064,6 +78068,9 @@ pspOnArrive(n=>{const L=LEVELS[n];if(!L||!L._f2x||!G.decor)return;for(const d of
       for(let r=0;r<(tall<1.1?2:1);r++){const q={x:s.x-dx/Math.sqrt(dd)*(.04+r*.02),y:s.y-dy/Math.sqrt(dd)*(.04+r*.02),img:sh,w:ww*(r?.8:tall<1.1?1.15:1),drop:0,bob:0};q.decor={k:'f2shadow',x:d.x,y:d.y,deco:true,walk:true};add.push(q)}}   // low things (chests, jars, logs) sit in a deeper shade, so they never look as if they float
     for(const a of add)out.push(a)}
   return out}}
+/* on a bridge deck: on the middle squares (over the water) always; on the two end squares at each foot only when facing along the bridge, so walking along the quay past its foot keeps the bridge whole */
+function f2OnDeck(dk,cx,cy){const ns=dk[3]-dk[1]>=dk[2]-dk[0],a=G.C.a||0,along=ns?Math.abs(Math.sin(a))>.6:Math.abs(Math.cos(a))>.6;if(along)return true;
+  return ns?(cy>=dk[1]+2&&cy<=dk[3]-1):(cx>=dk[0]+2&&cx<=dk[2]-1)}
 function f2Feather(k,soil,deep){const nk=k+'_fe'+(deep?'d':'');if(IMG[nk]&&IMG[nk].width)return nk;const im=IMG[k];if(!im||!im.width)return null;const w=im.width,h=im.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(im,0,0);
   let D;try{D=x.getImageData(0,0,w,h)}catch(e){return null}const a=D.data,hh=(i,s)=>{const v=Math.sin(i*12.9898+s*78.233)*43758.5453;return v-Math.floor(v)};
   const sm=(i,s,n)=>{const f=i/n,i0=Math.floor(f),u=f-i0;return hh(i0,s)*(1-u)+hh(i0+1,s)*u};

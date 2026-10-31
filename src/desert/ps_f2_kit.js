@@ -364,11 +364,11 @@ function f2X(C,d,keys){C.f2x=C.f2x||{};const n='f2x'+Object.keys(C.f2x).length;d
 pspOnArrive(n=>{const L=LEVELS[n];if(!L||!L._f2x||!G.decor)return;for(const d of G.decor){const o=d.kname&&L._f2x[d.kname];if(!o)continue;for(const k in o)if(d[k]===undefined)d[k]=k==='mv'?Object.assign({},o[k],{segs:null,t:0}):k==='span'?Object.assign({},o[k]):o[k]}});
 {const _sl=spriteList;spriteList=function(){const L=_sl.apply(this,arguments);
   if(typeof LEVEL==='undefined'||!(f2Is(LEVEL)||LEVEL===F2.HUB))return L;
-  const LV=LEVELS[LEVEL],dk=LV&&LV._f2deck,cx=G.C.x+.5,cy=G.C.y+.5,onDeck=!!(dk&&cx>=dk[0]&&cx<=dk[2]+1&&cy>=dk[1]&&cy<=dk[3]+1);   // standing on a bridge deck: its side faces give way to its parapets
+  const LV=LEVELS[LEVEL],dk=LV&&LV._f2deck,cx=G.C.x+.5,cy=G.C.y+.5,onDeck=!!(dk&&cx>=dk[0]&&cx<=dk[2]+1&&cy>=dk[1]&&cy<=dk[3]+1&&f2OnDeck(dk,cx,cy));   // standing on a bridge deck: its side faces give way to its parapets
   let drop=false;
   for(const s of L){const d=s.decor;if(!d)continue;
     if(d.span&&d.span.deck&&((d.span.deck==='hide')===onDeck)){s._f2drop=1;drop=true;continue}
-    if(d.span&&s.pic){s.x=d.span.x;s.y=d.span.y;s.w=d.span.w;s.bob=d.span.bob;s.flat=[d.wd[0],d.wd[1]]}
+    if(d.span&&s.pic){s.x=d.span.x;s.y=d.span.y;s.w=d.span.w;s.bob=d.span.bob;s.flat=[d.wd[0],d.wd[1]];s.plane3d=1}   // drawn as a true plane in perspective (core drawSprites, opt-in): a bridge keeps its size and passes overhead, it is not a billboard sized by its centre
     else if(F2_TREE_RX.test(d.k)&&!d.roof){s.decor=Object.create(d,{k:{value:'tree0'}})}   // a painted tree casts no round shadow and fades into the green like the woodland trees
     else if(d.mv&&d.mvFlip&&!s.pic){const C=G.C,fx=Math.cos(C.a),fy=Math.sin(C.a),rx=-fy,ry=fx;const right=(d.mvDx*rx+d.mvDy*ry)>0;const im=IMG[right?d.mvFlip:d.k];if(im)s.img=im}}   // a boat seen moving to the right shows its prow on the right
   let out=drop?L.filter(s=>!s._f2drop):L;if(window.F2_DBGHIDE)out=out.filter(s=>!(s.decor&&window.F2_DBGHIDE.test(String(s.decor.k))));
@@ -380,6 +380,9 @@ pspOnArrive(n=>{const L=LEVELS[n];if(!L||!L._f2x||!G.decor)return;for(const d of
       for(let r=0;r<(tall<1.1?2:1);r++){const q={x:s.x-dx/Math.sqrt(dd)*(.04+r*.02),y:s.y-dy/Math.sqrt(dd)*(.04+r*.02),img:sh,w:ww*(r?.8:tall<1.1?1.15:1),drop:0,bob:0};q.decor={k:'f2shadow',x:d.x,y:d.y,deco:true,walk:true};add.push(q)}}   // low things (chests, jars, logs) sit in a deeper shade, so they never look as if they float
     for(const a of add)out.push(a)}
   return out}}
+/* on a bridge deck: on the middle squares (over the water) always; on the two end squares at each foot only when facing along the bridge, so walking along the quay past its foot keeps the bridge whole */
+function f2OnDeck(dk,cx,cy){const ns=dk[3]-dk[1]>=dk[2]-dk[0],a=G.C.a||0,along=ns?Math.abs(Math.sin(a))>.6:Math.abs(Math.cos(a))>.6;if(along)return true;
+  return ns?(cy>=dk[1]+2&&cy<=dk[3]-1):(cx>=dk[0]+2&&cx<=dk[2]-1)}
 function f2Feather(k,soil,deep){const nk=k+'_fe'+(deep?'d':'');if(IMG[nk]&&IMG[nk].width)return nk;const im=IMG[k];if(!im||!im.width)return null;const w=im.width,h=im.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(im,0,0);
   let D;try{D=x.getImageData(0,0,w,h)}catch(e){return null}const a=D.data,hh=(i,s)=>{const v=Math.sin(i*12.9898+s*78.233)*43758.5453;return v-Math.floor(v)};
   const sm=(i,s,n)=>{const f=i/n,i0=Math.floor(f),u=f-i0;return hh(i0,s)*(1-u)+hh(i0+1,s)*u};
