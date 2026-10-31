@@ -40,9 +40,9 @@ const F2_FOREST={STONES:[[19,4,1],[29,4,3],[22,8,0],[26,8,2]],OAK:[24,6]};   // 
 /* small plants cast no oval shadow (the contact shadow is for things that stand): their keys end in _lt, which the shadow pass leaves out */
 function f2aNs(k){return f2Soft(pspPic(k),{tag:'_lt'})}
 function f2ForestBuild(){
-  const FG=f2TexFloor('ps_f2_tex_fograss','f2t_fograss2',1.16,[1.0,1.06,.86])||'lush',FM=f2TexFloor('ps_f2_tex_fomeadow','f2t_fomeadow2',1.1,[1.02,1.04,.9])||'grass',FV=f2TexFloor('ps_f2_tex_foleaves','f2t_foleaves3',1.02,[.96,1.0,.88])||'grass';
+  const FG=f2TexFloor('ps_f2_tex_fograss','f2t_fograss2',1.16,[1.0,1.06,.86])||'lush',FM=f2TexFloor('ps_f2_tex_fomeadow','f2t_fomeadow3',.96,[1.0,1.04,.9])||'grass',FV=f2TexFloor('ps_f2_tex_foleaves','f2t_foleaves3',1.02,[.96,1.0,.88])||'grass';
   const FT=f2TexFloor('ps_f2_tex_fotrail','f2t_fotrail',1.05)||'trail';
-  const C=f2Room({id:9821,ground:FG,path:FG,band:[2,5],softRet:1,rw:0,mistH:.08,shade:{edge:.34,pool:.6,tree:/f2_f[ov]_(oak|beech|fir|maple|birch|lime|ash|hawthorn|hornbeam|yew|cherry)|ltree/},
+  const C=f2Room({id:9821,ground:FG,path:FG,glowK:.55,band:[2,5],softRet:1,rw:0,mistH:.08,shade:{edge:.34,pool:.6,tree:/f2_f[ov]_(oak|beech|fir|maple|birch|lime|ash|hawthorn|hornbeam|yew|cherry)|ltree/},
     routes:[[[24,35],[24,28],[17,24],[17,15],[24,12],[24,10]],[[24,28],[34,25],[38,19]],[[17,19],[8,18]],[[22,32],[10,30]],[[18,8],[9,6]]],
     clear:[[16,2,32,12,FM,'The Glade of the Four Stones',1],[4,13,12,23,FG,'The Wolf Hollow',1],[33,13,43,23,FM,'The Bramble Glade',1],[5,26,13,34,FV,'The Fern Dell',1],[3,2,11,9,FV,'The Old Ring',1]],
     keep:(x,y)=>Math.abs(x-24)<=1&&(y>=36||(y>=11&&y<=17))});
@@ -103,7 +103,7 @@ function f2ForestBuild(){
   for(const [x,k,sc] of [[22,'f2_fo_ruin',.6],[26,'f2_fo_boulder',.7],[21,'f2_fo_foxglove',.8],[27,'f2_fo_fern',.8]]){const d=C.dec(pspPic(k),x,37,{block:!/fox|fern/.test(k),sc});if(d&&/ruin/.test(k)&&x>24)d.k=f2Flip(pspPic(k))}   // old broken stones round the gate
   for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(!d.block&&!d.npc&&!d.fly&&!d.mv&&d.x>=19&&d.x<=29&&d.y>=7&&d.y<=12&&d.ox===undefined&&/f2_fo_(grass|fern|toadstools)/.test(String(d.k))){C.decor.splice(i,1)}}
   const lv=C.done({glow:8});
-  f2aDapple(9821,C,{amp:.34,pools:[[24,7,6,.22],[38,18,3.5,.16],[9,30,3,.14],[24,28,3,.12],[8,18,4.5,-.16]]});   // the wolf hollow lies in shadow
+  f2aDapple(9821,C,{amp:.34,pools:[[24,7,6,.1],[38,18,3.5,.16],[9,30,3,.14],[24,28,3,.12],[8,18,4.5,-.16]]});   // the wolf hollow lies in shadow
   lv.mapNames.push({t:'The Hollow Oak',x:24,y:6,k:'place'});
   return lv}
 pspRegister(9821,f2ForestBuild);
