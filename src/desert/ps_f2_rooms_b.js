@@ -169,6 +169,8 @@ function f2WaterBuild(){
      for(const [a,b] of [[0,1],[0,-1],[1,0],[-1,0]]){const x=bx+a,y=by+b;if(!C.isOpen(x,y)||!open(x,y)||taken.has(x+','+y))continue;const k=PCS[n%PCS.length];n++;taken.add(x+','+y);
        C.dec(pspPic(k),x,y,{wd:[-a,-b],block:false,bob:k==='f2_w_balcony2'?1.3:k==='f2_w_flowerbox'?1.15:.62,sc:.8});if(k==='f2_w_lantern2')C.light(x,y,[2.4,1.6,.8]);break}}}
   for(const d of C.decor)if(/lamp|lantern/.test(String(d.k))&&!d.wd){d.lift=.95;if(d.kname&&C.f2x[d.kname])C.f2x[d.kname].lift=.95;else f2X(C,d,['lift'])}   // the lanterns shine by their own light
+  C.f2.decals={keys:['puddle','crack','plane','feather','moss','tiles','puddle','moss','crack'].map(k=>'f2_dc_sv_'+k),p:.42,sz:[.4,.7],far:13,keep:(x,y)=>(x>=22&&x<=26&&y>=4&&y<=8)||(x>=22&&x<=26&&y>=33&&y<=36),
+    big:[{k:'f2_dc_svi_compass',x:24.5,y:6.5,sz:3.0,a:.92},{k:'f2_dc_svi_rosette',x:24.5,y:35.0,sz:2.2,a:.9}]};   // the campo of the Doge has a great compass star of marble set in its paving, the campo of the way in a rosette
   const lv=C.done({glow:6});lv._f2deck=[14,25,16,31];
   return lv}
 pspRegister(9824,f2WaterBuild);
@@ -227,7 +229,7 @@ function f2DesertBuild(){
   C.scrub(['drock1','yar_shells'],.02);
   C.used.delete('41,17');if(C.free(41,17))C.dec(f2Soft(pspPic('f2_dv_foot'),PALE),41,17,{block:true,sc:1.25});
   C.capTrees(/dpalm|f2_de_(palm|pillar|mesa|cactus)|f2_dv_(doum|tamarisk|acacia|rockbow)/,2.6);
-  f2Edge(C,{img:f2Soft('ps_f2_de_wall',PALE).replace(/^ps_/,''),wh:1.1,veil:.12,pillar:DT,innerP:.5,innerKeep:(x,y)=>x>=15&&x<=33&&y<=12,tall:[f2Soft(pspPic('f2_de_mesa'),PALE),f2Soft(pspPic('f2_de_pillar'),PALE),f2Flip(f2Soft(pspPic('f2_de_mesa'),PALE)),f2Soft(pspPic('f2_dv_rockbow'),PALE),f2Soft(pspPic('f2_dv_boulders'),PALE),f2Flip(f2Soft(pspPic('f2_dv_rockbow'),PALE))].map(k=>k.replace(/^ps_/,'')),tallP:.5,tallSc:[1.0,1.6]});
+  f2Edge(C,{img:f2Soft('ps_f2_de_wall',PALE).replace(/^ps_/,''),wh:1.1,veil:.12,pillar:DT,innerP:.5,innerKeep:(x,y)=>x>=15&&x<=33&&y<=12,tall:[f2Soft(pspPic('f2_de_mesa'),PALE),f2Soft(pspPic('f2_de_pillar'),PALE),f2Flip(f2Soft(pspPic('f2_de_mesa'),PALE)),f2Soft(pspPic('f2_dv_rockbow'),PALE),f2Soft(pspPic('f2_dv_boulders'),PALE),f2Flip(f2Soft(pspPic('f2_dv_rockbow'),PALE))].map(k=>k.replace(/^ps_/,'')),tallP:.5,tallSc:[1.0,1.6],top:{mode:'rock',base:.03,amp:.26,k:.8},fog:.3,footCol:[226,190,136,.85],footH:.24,footDress:{keys:[pspPic('f2_de_shrub'),'drock1',f2Flip(pspPic('f2_de_shrub')),'drock0'],p:.4,sc:.6,keep:(x,y)=>x>=15&&x<=33&&y<=12}});
   for(const [x,y,k,sc] of [[19,37,'f2_de_mesa',1.3],[21,37,'f2_dv_boulders',1.1],[27,37,'f2_dv_rockbow',1.0],[29,37,'f2_de_pillar',1.2],[17,36,'f2_dv_acacia',1.0],[31,36,'f2_dv_doum',1.0]])if(C.free(x,y)&&!C.nearPath(x,y,0)){const d=C.dec(f2Soft(pspPic(k),PALE),x,y,{block:true,sc});if(d){d.oy=.3}}   // the south rim behind the arrival: rocks and trees in front of the low cliff
   pspSafeZone(C,24,35,6);
   C.foes(['f2scorpion','f2scorpion','f2dustdevil'],[4,13,13,23],1);
@@ -236,6 +238,7 @@ function f2DesertBuild(){
   C.foes(['f2mummy','f2dustdevil'],[30,26,44,36],4);
   for(const [x,y] of [[12,14],[42,15],[6,33]])C.chestAt(x,y,1);
   C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[1.2,1.02,.78]});
+  {const dk=a=>a.map(k=>'f2_dc_bd_'+k);C.f2.decals={keys:dk(['stones','camel','tumble','ripple','thorn','stones','ripple','skull']),on:{[DP]:dk(['tile','stones','clay','tile'])},p:.5,sz:[.38,.7],far:13,keep:(x,y)=>F2_DESERT.PLATES.some(([a,b])=>a===x&&b===y)}}
   return C.done({glow:8})}
 pspRegister(9825,f2DesertBuild);
 F2.step[9825]=(x,y)=>{

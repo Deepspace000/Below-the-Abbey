@@ -37,7 +37,7 @@ function f2SwampBuild(){
   C.scrub([pspPic('f2_reeds'),pspPic('f2_sw_rushes'),pspPic('f2_wv_iris'),f2Flip(pspPic('f2_sw_rushes')),pspPic('f2_sx_cattail'),f2Flip(pspPic('f2_sx_cattail'))],.14,{sc:.8});
   for(const [x,y,sc] of [[13,20,.75],[37,22,.55],[11,29,.65]])if(C.free(x,y)&&!C.nearPath(x,y,0)){C.dec(pspPic('f2_sw_glowstump'),x,y,{block:true,sc});C.light(x,y,[.4,1.3,1.2])}
   for(const [x,y] of [[23,30],[25,22],[17,16],[25,12],[15,21],[33,24],[23,31],[25,29],[25,23],[23,20],[17,15],[23,13],[29,26]])if(C.free(x,y)&&!C.pathM[y*48+x]&&C.nearPath(x,y,1)){const d=C.dec(pspPic(IMG.ps_f2_sx_lantern?'f2_sx_lantern':'f2_sw_post'),x,y,{block:false,sc:1.25});if(d)d.lift=1;C.light(x,y,[4.2,2.6,.8])}
-  f2Edge(C,{img:'f2_sw_wall',wh:.9,veil:.1,pillar:ST,innerP:.55,tall:[pspPic('f2_sw_cypress'),pspPic('f2_wv_cypress'),pspPic('f2_wv_lean'),pspPic('f2_sw_dead')].map(k=>k.replace(/^ps_/,'')),tallP:.7,tallSc:[1.0,1.6],innerKeep:(x,y)=>x>=17&&x<=31&&y<=11});
+  f2Edge(C,{img:'f2_sw_wall',wh:.9,veil:.1,pillar:ST,innerP:.55,tall:[pspPic('f2_sw_cypress'),pspPic('f2_wv_cypress'),pspPic('f2_wv_lean'),pspPic('f2_sw_dead')].map(k=>k.replace(/^ps_/,'')),tallP:.7,tallSc:[1.0,1.6],innerKeep:(x,y)=>x>=17&&x<=31&&y<=11,top:{base:.05,amp:.3,k:1.4},fog:.5,footCol:[44,52,34,.75],footDress:{keys:[pspPic('f2_reeds'),pspPic('f2_sw_rushes'),f2Flip(pspPic('f2_sw_rushes')),pspPic('f2_sx_cattail')],p:.55,sc:.75,keep:(x,y)=>x>=17&&x<=31&&y<=11}});
   {const g=C.chars[C.rows[hy1][24]],ec=C._edgeCh&&C._edgeCh(24,hy1),eg=ec&&C.chars[ec];if(g!==undefined&&eg!==undefined)T_TILE[g]=T_TILE[eg]}   // the hut's barred door square looks like the swamp behind the painted hut
   C.capTrees(/swamptree|oakmoss|f2_sw_(dead|cypress)|f2_wv_(cypress|lean)/,2.2);
   pspSafeZone(C,24,35,6);
@@ -47,6 +47,7 @@ function f2SwampBuild(){
   C.foes(['f2troll','f2wisp'],[28,26,44,36],4);
   for(const [x,y] of [[5,15],[42,16],[13,33]])C.chestAt(x,y,1);
   C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[.9,.95,1.05]});
+  {const dk=a=>a.map(k=>'f2_dc_fs_'+k);C.f2.decals={keys:dk(['scum','rotleaf','wetmoss','spawn','crackmud','reedmat','scum','bones','rotleaf']),on:{[SB]:dk(['rotleaf','wetmoss','scum']),[SBX]:dk(['rotleaf','wetmoss','scum'])},p:.55,sz:[.4,.75],far:13,gain:[.5,.55,.45],keep:(x,y)=>F2_SWAMP.ING.some(q=>q[2]===x&&q[3]===y)}}
   return C.done({glow:7})}
 pspRegister(9826,f2SwampBuild);
 const f2SwampHas=k=>{const R=f2S(9826);return !!(R.got&&R.got[k])};
@@ -103,6 +104,7 @@ function f2NightBuild(){
   C.foes(['f2shadow','f2horror'],[28,26,44,36],4);
   for(const [x,y] of [[5,16],[43,15],[14,33]])C.chestAt(x,y,1);
   C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[.9,.95,1.05]});
+  C.f2.decals={keys:['stain','fbones','fissure','gears','page','petals','claws','stain','fissure','petals','doll','glass'].map(k=>'f2_dc_nh_'+k),p:.5,sz:[.4,.75],far:13,keep:(x,y)=>x>=20&&x<=28&&y>=4&&y<=10};
   const lv=C.done({glow:9});
   // staring doors: a few black wall squares that face a square the party can stand on become doors covered in eyes (they never open)
   {const f=f2FacGid('ps_f2_eyedoor',0,1,3.4,{tex:'texBlack_1',fit:false,rgb:[.95,.9,.9]}),TB=TERRS[9827]&&TERRS[9827].block,bs=new Set(lv.decor.filter(d=>d.block).map(d=>d.x+','+d.y));

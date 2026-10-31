@@ -315,6 +315,7 @@ function f2Room(S){
      lv._f2sealed=n}
     {const sp=lv.decor.filter(d=>d.span);lv.decor=lv.decor.filter(d=>!d.span);try{if(typeof pswaHang==='function')pswaHang(id,lv)}catch(e){console.error('f2 wallart',e)}lv.decor.push(...sp)}   // spans are not wall pictures
     if(C.f2x)lv._f2x=C.f2x;
+    if(S.decals)try{lv._f2dec=f2Decals(C,lv,S.decals)}catch(e){console.error('f2 decals',e)}
     return lv};
   return C}
 /* stepping onto a square (pressure plates): F2.step[id](x,y) is called whenever the party's square changes in that room */
@@ -383,7 +384,7 @@ function f2Feather(k,soil){const nk=k+'_fe';if(IMG[nk]&&IMG[nk].width)return nk;
     a[o+3]=a[o+3]*m}
   x.putImageData(D,0,0);IMG[nk]=c;NPC_H[nk]=NPC_H[k];return nk}
 /* the dream rooms keep their colour: the screen-wide aged finish (a grey saturation wash, 40% by default) is cut to its light setting there, as the engine already does for a few bright levels */
-{const _ui=ui;ui=function(){if(typeof LEVEL==='undefined'||!f2Is(LEVEL)||!GFX||GFX.color>=1)return _ui.apply(this,arguments);const c=GFX.color;GFX.color=1;try{return _ui.apply(this,arguments)}finally{GFX.color=c}}}
+{const _ui=ui;ui=function(){if(typeof LEVEL==='undefined'||!(f2Is(LEVEL)||LEVEL===9820)||!GFX)return _ui.apply(this,arguments);const c=GFX.color,dt=GFX.dither;if(c<1)GFX.color=1;if(dt>1)GFX.dither=1;try{return _ui.apply(this,arguments)}finally{GFX.color=c;GFX.dither=dt}}}   // and the dither grain is kept light there (it greys the values)
 function f2ShadowImg(){if(F2.shadowImg)return F2.shadowImg;const c=document.createElement('canvas');c.width=128;c.height=20;const x=c.getContext('2d');x.translate(64,10);x.scale(1,10/60);const g=x.createRadialGradient(0,0,2,0,0,60);g.addColorStop(0,'rgba(8,5,3,.8)');g.addColorStop(.55,'rgba(8,5,3,.5)');g.addColorStop(1,'rgba(8,5,3,0)');x.fillStyle=g;x.beginPath();x.arc(0,0,60,0,Math.PI*2);x.fill();return F2.shadowImg=c}
 /* a mirrored copy of a picture (a boat going the other way) */
 function f2Flip(k){const nk=k+'_fl';if(IMG[nk]&&IMG[nk].width)return nk;const im=IMG[k];if(!im||!im.width)return k;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.translate(im.width,0);x.scale(-1,1);x.drawImage(im,0,0);IMG[nk]=c;NPC_H[nk]=NPC_H[k];return nk}
@@ -434,15 +435,25 @@ function f2Roof(C,key,x,y,o){o=o||{};const d={k:'kroof',lk:key,x,y,block:false,d
 /* ---------- the painted edges of a room: the mist wall squares that face the open become a painted biome wall (a tree line, a cliff, a reed bed), with a faint silver mist along its foot (the seam of the illusion);
    tall pieces (trees, rock spires) stand on some of those squares and rise over the wall (drawn as skyline sprites, only above the nearest wall).
    o: {img (assets/ps key without ps_), wh (height), n (squares per copy of the picture; the copies alternate with mirrored ones so they join without a seam), veil (0..1 silver mist), tall:[keys], tallP, tallSc:[lo,hi], rgb} ---------- */
-function f2Veil(key,a,tag){const nk=key+'_veil'+(tag||'');if(IMG[nk]&&IMG[nk].width)return nk;const im=IMG[key];if(!im||!im.width)return key;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);
+function f2Veil(key,a,tag,o){o=o||{};const nk=key+'_veil'+(tag||'')+(o.fog||o.footCol?'_r3':'');if(IMG[nk]&&IMG[nk].width)return nk;const im=IMG[key];if(!im||!im.width)return key;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);
   const g=x.createLinearGradient(0,c.height,0,c.height*.45);g.addColorStop(0,'rgba(222,230,240,'+a+')');g.addColorStop(.35,'rgba(214,224,236,'+(a*.45)+')');g.addColorStop(1,'rgba(214,224,236,0)');x.fillStyle=g;x.fillRect(0,0,c.width,c.height);
+  if(o.fog){const f=o.fog,q=x.createLinearGradient(0,0,0,c.height*(o.fogH||.7));q.addColorStop(0,`rgba(${f[0]},${f[1]},${f[2]},${f[3]})`);q.addColorStop(.5,`rgba(${f[0]},${f[1]},${f[2]},${f[3]*.4})`);q.addColorStop(1,`rgba(${f[0]},${f[1]},${f[2]},0)`);x.fillStyle=q;x.fillRect(0,0,c.width,c.height)}   // the far wall melts into the room's air towards the top
+  if(o.footCol){const f=o.footCol,q=x.createLinearGradient(0,c.height,0,c.height*(1-(o.footH||.16)));q.addColorStop(0,`rgba(${f[0]},${f[1]},${f[2]},${f[3]})`);q.addColorStop(1,`rgba(${f[0]},${f[1]},${f[2]},0)`);x.fillStyle=q;x.fillRect(0,0,c.width,c.height)}   // and its foot goes into the colour of the ground in front of it
   IMG[nk]=c;NPC_H[nk]=NPC_H[key];return nk}
+/* the broken top line of a painted edge: a profile (fraction of the wall height cut away from the top) for every texture column of the 2n slices of one plain+mirrored pair; it repeats exactly every pair, so the slices join */
+function f2TopProfile(n,o){const L=2*n*128,P=[],hz=(v)=>hash2(v|0,77,o.seed||5),k1=Math.max(2,Math.round(2*n*(o.k||1.6))),k2=Math.round(2*n*2.9)+1,k3=Math.round(2*n*7.3)+3;
+  for(let u=0;u<L;u++){const t=u/L,s2=Math.sin(6.2832*k2*t+1.3),s3=Math.sin(6.2832*k3*t+.4);let v;
+    if(o.mode==='rock'){v=.5+.32*Math.sin(6.2832*k1*.5*t+.7)+.12*s2+.06*s3}else{const b=Math.abs(Math.sin(Math.PI*k1*t+.3*s2));v=1-Math.pow(b,.55)*(.82+.18*s2)+.04*s3}   // crowns: rounded humps with notches between them
+    P.push(Math.max(0,(o.base||.06)+(o.amp||.22)*Math.max(0,Math.min(1,v))))}
+  return P}
 /* a piece for (x,y) from a list, never the same as its near neighbours already placed (no rows of one tree) */
 function f2PickVar(C,list,x,y,r){let ki=(r*list.length)|0;const M=C._fk=C._fk||{},W=48,near=new Set();for(const [a,b] of [[-1,0],[-2,0],[0,-1],[0,-2],[-1,-1],[1,-1],[1,0],[0,1]]){const q=M[(y+b)*W+x+a];if(q)near.add(String(q).replace(/_fl$/,''))}for(let t=0;t<list.length&&near.has(String(list[ki]).replace(/_fl$/,''));t++)ki=(ki+1)%list.length;M[y*W+x]=list[ki];return list[ki]}
 function f2Edge(C,o){const W=48,H=40,rows=C.rows,ix=(x,y)=>y*W+x,hs=C.hs2;if(!IMG['ps_'+o.img])return 0;o.tall=(o.tall||[]).map(k=>k.replace(/^ps_/,''));C._edgeSpec=o;
   const wh=o.wh||2.6,gid=[];   // each picture is fitted by height (n squares carry one copy); the copies follow each other plain and mirrored, and a second picture (img2) between them
-  for(const nm of [o.img].concat(o.img2&&IMG['ps_'+o.img2]?[o.img2]:[])){const base=f2Veil('ps_'+nm,o.veil===undefined?.55:o.veil),im0=IMG[base],n=Math.max(1,Math.round(wh*im0.width/im0.height));
-    for(const pic of [base,f2Flip(base)])for(let i=0;i<n;i++){const g=f2FacGid(pic,i,n,wh,{tex:'texBlack_2',rgb:o.rgb||[1,1,1],emit:.06});gid.push(g==null?null:C.ch(g))}}
+  const fogC=o.fog&&F2B[C.f2.id]?F2B[C.f2.id].fog.slice(0,3).concat([o.fog]):(o.fogCol||null);
+  for(const nm of [o.img].concat(o.img2&&IMG['ps_'+o.img2]?[o.img2]:[])){const base=f2Veil('ps_'+nm,o.veil===undefined?.55:o.veil,'',{fog:fogC,fogH:o.fogH,footCol:o.footCol,footH:o.footH}),im0=IMG[base],n=Math.max(1,Math.round(wh*im0.width/im0.height)),prof=o.top?f2TopProfile(n,o.top):null;
+    for(const pic of [base,f2Flip(base)])for(let i=0;i<n;i++){const g=f2FacGid(pic,i,n,wh,{tex:'texBlack_2',rgb:o.rgb||[1,1,1],emit:.06});gid.push(g==null?null:C.ch(g));
+      if(g!=null&&prof){const tx=TEX[T_TILE[g]],j=(pic===base?0:n)+i;if(tx){tx.topCut=new Float32Array(prof.slice(j*128,(j+1)*128));tx.topFeather=o.top.feather||.07}}}}
   const n=gid.length/2;
   const mistCh=new Set();for(let v=0;v<5;v++)mistCh.add(C.ch(f2MistGid(v,C.f2.mistH||2.9)));
   const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&rows[y][x]==='.';let k=0;const edge=[];
@@ -457,6 +468,9 @@ function f2Edge(C,o){const W=48,H=40,rows=C.rows,ix=(x,y)=>y*W+x,hs=C.hs2;if(!IM
   for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!mistCh.has(rows[y][x])||(o.only&&!o.only(x,y)))continue;const nb=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>open(x+a,y+b));if(!nb.length)continue;
     const horiz=nb.some(([a,b])=>b!==0),p=horiz?x:y,i=((p%(2*n))+2*n)%(2*n);if(gid[i]==null)continue;C.solid(x,y,gid[i]);k++;edge.push([x,y])}
   C._edgeCh=(x,y)=>gid[((x%(2*n))+2*n)%(2*n)];if(o.noTall)return k;
+  if(o.footDress){const F=o.footDress;   // low painted growth along the foot of the painted edge (ferns, reeds, drifts, stones), pushed against it, so the wall stands in the ground instead of on a ruled line; never blocking
+    for(const [x,y] of edge)for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(!open(nx,ny)||!C.free(nx,ny)||C.pathM[ny*W+nx]||Math.hypot(nx-24,ny-35)<4||(F.keep&&F.keep(nx,ny))||hs(nx,ny,171+a+3*b)>=(F.p||.5))continue;
+      const d=C.dec(f2PickVar(C,F.keys,nx,ny,hs(nx,ny,172)),nx,ny,{block:false,sc:(F.sc||1)*(.75+hs(nx,ny,173)*.5)});if(d){d.ox=-a*.44+(b?(hs(nx,ny,174)-.5)*.5:0);d.oy=-b*.44+(a?(hs(nx,ny,175)-.5)*.5:0);d.footDress=1}}}
   if(o.innerP&&o.pillar){const edgeN=(x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>rows[y+b]&&rows[y+b][x+a]!=='.');   // a row of trees just inside the painted edge, so the edge is never the last thing in view
     for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!C.free(x,y)||C.nearPath(x,y,1)||!edgeN(x,y)||(o.innerKeep&&o.innerKeep(x,y))||Math.hypot(x-24,y-35)<5)continue;if(hs(x,y,161)<o.innerP){const d=C.dec(f2PickVar(C,o.pillar,x,y,hs(x,y,162)),x,y,{block:true,sc:.95+hs(x,y,163)*.35});if(d){d.ox=(hs(x,y,164)-.5)*.6;d.oy=(hs(x,y,165)-.5)*.5}}}}
   if(o.tall&&o.tall.length){const [lo,hi]=o.tallSc||[.85,1.25];let last='';for(const [x,y] of edge){if(hs(x,y,131)>(o.tallP===undefined?.45:o.tallP))continue;const M2=C._fkT=C._fkT||{},near=new Set();for(const [a,b] of [[-1,0],[-2,0],[0,-1],[0,-2],[1,0],[0,1],[2,0],[0,2]]){const q=M2[(y+b)*48+x+a];if(q)near.add(q)}let ki=(hs(x,y,132)*o.tall.length)|0;for(let t=0;t<o.tall.length&&near.has(o.tall[ki]);t++)ki=(ki+1)%o.tall.length;let key=o.tall[ki];M2[y*48+x]=key;last=key;f2Roof(C,pspPic(key),x,y,{sc:+(lo+(hi-lo)*hs(x,y,133)).toFixed(2)})}}
@@ -535,6 +549,7 @@ if(typeof mplInstall==='function')mplInstall({name:'palespire2',levels:[9820,982
 const F2_BAND=.34;
 function f2EdgeNoise(along,at,seed){return Math.sin(along*4.7+at*2.3+seed)*.55+Math.sin(along*11.9-at*1.7+seed*2.1)*.3+Math.sin(along*23.3+at*5.1)*.15}
 function f2Terrace(x,rX,rY){
+  const DC=(LEVELS[LEVEL]&&LEVELS[LEVEL]._f2dec&&!f2InRoof())?f2DecReady(LEVELS[LEVEL]._f2dec):null,DCi=DC?DC.cell:null,DCf=DC?DC.f:null,DCt=DC?DC.tx:null,DCfar=DC?DC.far:0,DG0=DC?DC.g[0]:1,DG1=DC?DC.g[1]:1,DG2=DC?DC.g[2]:1;
   const GLW=(LEVELS[LEVEL]&&LEVELS[LEVEL]._f2glow&&!f2InRoof())?LEVELS[LEVEL]._f2glow:null,T=TERR_NOW,W=T.W,Hh=T.H,h=T.h,sh=T.s,C=TC,D=C.D,cx=C.cx,cy=C.cy,cz=CAMZ,grid=G.grid,fm=C.fmp,fds=C.fds.length<7?(C.fds7||(C.fds7=C.fds.concat([G.fl7||C.fds[5]]))):C.fds,hz=C.hzr,hzmax=C.hzmax,hzrate=C.hzrate,lbm=C.lbm,nl=C.nl,nn=C.nn,tbR=C.tbR,tbG=C.tbG,tbB=C.tbB,ncr=C.ncr,ncg=C.ncg,ncb=C.ncb,HHv=HH,Fv=F,TSv=TS,TSm=TS-1,SD=T.sd,B=F2_BAND,iB=1/(2*B);
   const rl=Math.hypot(rX,rY),base=x*YBK;
   let mx=Math.floor(cx),my=Math.floor(cy);
@@ -592,6 +607,9 @@ function f2Terrace(x,rX,rY){
               else if(dE&&fx>1-B){const n=f2EdgeNoise(py,mx+1,1)*B*.85,w=f2SS(.5+(fx-1+n)*iB);r+=(dE[ti]-r)*w;gg+=(dE[ti+1]-gg)*w;b+=(dE[ti+2]-b)*w}
               if(dN&&fy<B){const n=f2EdgeNoise(px,my,7)*B*.85,w=1-f2SS(.5+(fy+n)*iB);r+=(dN[ti]-r)*w;gg+=(dN[ti+1]-gg)*w;b+=(dN[ti+2]-b)*w}
               else if(dS&&fy>1-B){const n=f2EdgeNoise(px,my+1,7)*B*.85,w=f2SS(.5+(fy-1+n)*iB);r+=(dS[ti]-r)*w;gg+=(dS[ti+1]-gg)*w;b+=(dS[ti+2]-b)*w}}
+            if(DCi&&dist<DCfar){let ii=DCi[i];for(let pass=0;pass<2&&ii>=0;pass++){const I=ii*8,lx=px-DCf[I],ly=py-DCf[I+1],u=(lx*DCf[I+2]+ly*DCf[I+3])*DCf[I+4]+.5,v=(ly*DCf[I+2]-lx*DCf[I+3])*DCf[I+4]+.5;   // a painted decal lying on the ground (f2Decals)
+              if(u>=0&&u<1&&v>=0&&v<1){const TX=DCt[DCf[I+5]];if(TX){const md=dist>DCf[I+7]?TX.m:TX,N=md.N,q=(((v*N)|0)*N+((u*N)|0))*4,a=md.d[q+3]*DCf[I+6]*(dist>DCfar-4?(DCfar-dist)*.25:1)*.003922;if(a>.01){r+=(md.d[q]*DG0-r)*a;gg+=(md.d[q+1]*DG1-gg)*a;b+=(md.d[q+2]*DG2-b)*a}}}
+              ii=DC.cell2[i];if(ii===DCi[i])break}}
             D[o]=r*(kR+gR)*iv+hz[0]*sk;D[o+1]=gg*(kG+gG)*iv+hz[1]*sk;D[o+2]=b*(kB+gB)*iv+hz[2]*sk;
           }
         }
@@ -633,5 +651,42 @@ function f2Shade(C,lv,o){o=o||{};const W=48,H=40,N=W*H,s=new Float32Array(N).fil
     for(let b=-1;b<=1;b++)for(let a=-1;a<=1;a++){const xx=d.x+a,yy=d.y+b;if(xx<0||yy<0||xx>=W||yy>=H)continue;s[yy*W+xx]*=a===0&&b===0?(o.pool||.72):1-((1-(o.pool||.72))*.45)}}
   for(let i=0;i<N;i++)s[i]=Math.max(.45,Math.min(1.25,s[i]*(o.gain||1)));
   return s}
+/* ---------- ground decals: painted pieces of ground detail laid flat on the floor (fallen leaves, pebbles, hoofprints, shells, puddles, cracks, an inlay) ----------
+   They are drawn in the floor pass (f2Terrace), so they lie in perspective on the ground, take the room's light and shade, and never block the way.
+   S.decals = {keys:[...] (assets/ps decal names without ps_), on:{floorName:[keys]} (other pieces on that floor), p (chance per open square, two layers), sz:[lo,hi] (size in squares),
+               far (no decals beyond this distance), keep:(x,y)=>true (no decal there), big:[{k,x,y,sz,rot,a}] (set pieces, centre in squares, may span several squares)} */
+function f2DecTex(k){const K=F2.decT=F2.decT||{};if(K[k]!==undefined)return K[k];const im=IMG['ps_'+k]||IMG[k];if(!im||!im.width)return null;
+  const mk=N=>{const c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(im,0,0,N,N);return {N,d:x.getImageData(0,0,N,N).data}};
+  const t=mk(Math.min(256,Math.max(64,im.width)));t.m=mk(32);return K[k]=t}
+function f2DecReady(D){if(D.ok)return D;let all=true;for(let j=0;j<D.keys.length;j++){if(!D.tx[j]){D.tx[j]=f2DecTex(D.keys[j]);if(!D.tx[j])all=false}}if(all)D.ok=1;return D}
+function f2Decals(C,lv,o){const W=48,H=40,hs=C.hs2,keys=[],kix={},ki=k=>{if(kix[k]===undefined){kix[k]=keys.length;keys.push(k)}return kix[k]};
+  const inst=[],cell=new Int32Array(W*H).fill(-1),cell2=new Int32Array(W*H).fill(-1),TB=TERRS[lv.id||C.id]&&TERRS[lv.id||C.id].block;
+  const fmAt=(x,y)=>C.fm[y*W+x],onM={};for(const n of Object.keys(o.on||{}))onM[f2Fl(C,n)]=o.on[n];
+  const add=(k,cx,cy,sz,rot,a,mip)=>{const n=inst.length/8;inst.push(cx,cy,Math.cos(rot),Math.sin(rot),1/sz,ki(k),a===undefined?1:a,mip||7);return n};
+  const put=(n,x,y)=>{const i=y*W+x;if(cell[i]<0){cell[i]=n;cell2[i]=n}else if(cell2[i]===cell[i])cell2[i]=n;else{cell[i]=cell2[i];cell2[i]=n}};
+  const [lo,hi]=o.sz||[.45,.8],p=o.p===undefined?.55:o.p;
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(lv.rows[y][x]!=='.'||(o.keep&&o.keep(x,y)))continue;const fc=fmAt(x,y),list=onM[fc]||o.keys;if(!list||!list.length)continue;
+    for(let layer=0;layer<2;layer++){if(hs(x,y,301+layer*7)>=p*(layer?.6:1))continue;
+      const sz=lo+(hi-lo)*hs(x,y,302+layer*7),rot=hs(x,y,303+layer*7)*6.283,h=sz*.5*(Math.abs(Math.cos(rot))+Math.abs(Math.sin(rot))),m=Math.min(.5,h),cx=x+m+(1-2*m)*hs(x,y,304+layer*7),cy=y+m+(1-2*m)*hs(x,y,305+layer*7);
+      const k=list[(hs(x,y,306+layer*7)*list.length)|0];put(add(k,cx,cy,sz,rot,.9+.1*hs(x,y,307)),x,y)}}
+  for(const b of o.big||[]){const n=add(b.k,b.x,b.y,b.sz,b.rot||0,b.a,b.mip||12),R=b.sz*.71;for(let y=Math.floor(b.y-R);y<=Math.floor(b.y+R);y++)for(let x=Math.floor(b.x-R);x<=Math.floor(b.x+R);x++)if(x>=0&&y>=0&&x<W&&y<H){const i=y*W+x;cell[i]=n;cell2[i]=n}}
+  return {keys,tx:keys.map(()=>null),cell,cell2,f:new Float32Array(inst),far:o.far||16,g:o.gain||[1,1,1]}}
+/* ---------- the grade of the second floor: each room's own contrast, colour and tone over the 3D view (opt-in: only levels in F2GRADE) ----------
+   The game's aged finish (grey wash, dither, paper) flattens the values towards mid grey; the dream rooms are meant to look vivid, so the view is graded after it is drawn.
+   c contrast, s saturation, b brightness, tone [r,g,b,a] soft-light colour, vig darker corners (0..1), vc the corner colour */
+const F2GRADE={9820:{c:1.14,s:1.08,b:1.0,tone:[70,96,150,.16],vig:.42,vc:[6,8,16]},
+  9821:{c:1.17,s:1.2,b:1.02,tone:[255,206,120,.12],vig:.34,vc:[10,18,6]},9822:{c:1.14,s:1.2,b:1.03,tone:[255,226,170,.1],vig:.3,vc:[8,20,36]},
+  9823:{c:1.16,s:1.05,b:1.0,tone:[150,184,230,.16],vig:.36,vc:[10,16,30]},9824:{c:1.16,s:1.18,b:1.0,tone:[255,170,120,.14],vig:.4,vc:[24,10,28]},
+  9825:{c:1.18,s:1.14,b:1.0,tone:[255,190,110,.14],vig:.36,vc:[34,16,4]},9826:{c:1.2,s:1.12,b:1.0,tone:[150,190,110,.14],vig:.48,vc:[4,12,6]},
+  9827:{c:1.22,s:1.15,b:.98,tone:[200,40,40,.12],vig:.55,vc:[12,0,2]}};
+function f2Grade(g){if(!g||typeof ctx==='undefined')return;const T=ctx.getTransform(),pw=Math.max(1,Math.round(420*T.a)),ph=Math.max(1,Math.round(210*T.d));
+  let c=F2.gc;if(!c){c=F2.gc=document.createElement('canvas');F2.gx=c.getContext('2d')}if(c.width!==pw||c.height!==ph){c.width=pw;c.height=ph}
+  F2.gx.clearRect(0,0,pw,ph);F2.gx.drawImage(ctx.canvas,T.e,T.f,pw,ph,0,0,pw,ph);
+  ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();ctx.filter=`contrast(${g.c}) saturate(${g.s}) brightness(${g.b})`;ctx.drawImage(c,0,0,pw,ph,0,0,420,210);ctx.filter='none';
+  if(g.tone){ctx.globalCompositeOperation='soft-light';ctx.fillStyle=`rgba(${g.tone[0]},${g.tone[1]},${g.tone[2]},${g.tone[3]})`;ctx.fillRect(0,0,420,210)}
+  if(g.vig>0){const k=g.vc.join(',');if(!F2.vg||F2.vgk!==k){const v=document.createElement('canvas');v.width=420;v.height=210;const x=v.getContext('2d'),gr=x.createRadialGradient(210,112,60,210,112,250);gr.addColorStop(0,`rgba(${k},0)`);gr.addColorStop(.55,`rgba(${k},.28)`);gr.addColorStop(1,`rgba(${k},1)`);x.fillStyle=gr;x.fillRect(0,0,420,210);F2.vg=v;F2.vgk=k}
+    ctx.globalCompositeOperation='source-over';ctx.globalAlpha=g.vig;ctx.drawImage(F2.vg,0,0);ctx.globalAlpha=1}
+  ctx.restore()}
+{const _dw=drawWorld;drawWorld=function(){const r=_dw.apply(this,arguments);try{if(typeof LEVEL!=='undefined'&&F2GRADE[LEVEL]&&!window.F2_NOGRADE&&!(G.inv&&G.inv.open)&&!G.map)f2Grade(F2GRADE[LEVEL])}catch(e){}return r}}
 /* every arrival in a room: say where the party is the first time, apply the puzzle state */
 pspOnArrive((n,restored)=>{if(!f2Is(n))return;const S=f2S(n);if(!S.seen&&!restored){S.seen=1;try{msg(F2B[n].text,'#d8e4f0')}catch(e){}}});
