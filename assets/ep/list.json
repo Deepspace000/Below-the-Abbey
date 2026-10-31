@@ -691,5 +691,215 @@
 "h": 192,
 "kind": "decal",
 "sheet": "dc_grass_path_crop"
+},
+"tex_twh1": {
+"file": "tex_twh1.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_walls_sheet"
+},
+"tex_twh2": {
+"file": "tex_twh2.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_walls_sheet"
+},
+"tex_twh3": {
+"file": "tex_twh3.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_walls_sheet"
+},
+"tex_tww1": {
+"file": "tex_tww1.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_walls_sheet"
+},
+"tex_tww2": {
+"file": "tex_tww2.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_walls_sheet"
+},
+"tex_tww3": {
+"file": "tex_tww3.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_walls_sheet"
+},
+"tex_tws1": {
+"file": "tex_tws1.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_walls_sheet"
+},
+"tex_tws2": {
+"file": "tex_tws2.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_walls_sheet"
+},
+"tex_tws3": {
+"file": "tex_tws3.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_walls_sheet"
+},
+"tex_tst1": {
+"file": "tex_tst1.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_stone_sheet"
+},
+"tex_tst2": {
+"file": "tex_tst2.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_stone_sheet"
+},
+"tex_tst3": {
+"file": "tex_tst3.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_stone_sheet"
+},
+"tex_tst4": {
+"file": "tex_tst4.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_stone_sheet"
+},
+"tex_tst5": {
+"file": "tex_tst5.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_stone_sheet"
+},
+"tex_tst6": {
+"file": "tex_tst6.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_stone_sheet"
+},
+"tex_tst7": {
+"file": "tex_tst7.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_stone_sheet"
+},
+"tex_tst8": {
+"file": "tex_tst8.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_stone_sheet"
+},
+"tex_tst9": {
+"file": "tex_tst9.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_stone_sheet"
+},
+"tex_tst10": {
+"file": "tex_tst10.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_stone_sheet"
+},
+"tex_tst11": {
+"file": "tex_tst11.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_stone_sheet"
+},
+"tex_tst12": {
+"file": "tex_tst12.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tw_stone_sheet"
+},
+"tex_ihh1": {
+"file": "tex_ihh1.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "ih_walls_sheet"
+},
+"tex_ihh2": {
+"file": "tex_ihh2.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "ih_walls_sheet"
+},
+"tex_ihh3": {
+"file": "tex_ihh3.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "ih_walls_sheet"
+},
+"tex_ihw1": {
+"file": "tex_ihw1.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "ih_walls_sheet"
+},
+"tex_ihw2": {
+"file": "tex_ihw2.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "ih_walls_sheet"
+},
+"tex_ihw3": {
+"file": "tex_ihw3.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "ih_walls_sheet"
+},
+"tex_ihs1": {
+"file": "tex_ihs1.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "ih_walls_sheet"
+},
+"tex_ihs2": {
+"file": "tex_ihs2.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "ih_walls_sheet"
+},
+"tex_ihs3": {
+"file": "tex_ihs3.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "ih_walls_sheet"
 }
 }
