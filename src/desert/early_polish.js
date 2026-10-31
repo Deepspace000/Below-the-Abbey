@@ -168,7 +168,7 @@ function epDungeon(kind,n,o){o=o||{};const W={crypt:{name:'crypt',stone:'cryptwa
   S.grime={k:.82,sat:.62,foot:.34,footK:.6,streak:.35,blot:.45,tint:[1.1,.98,.84],gate:1};
   return S}
 /* the five great deserts share one sparse dressing */
-function epDes(n){return {desert:{palms:['f2_de_palm'],ruins:['f2_de_amphora','f2_de_skull','f2_de_cairn'],bones:['f2_dx_oxskull','f2_de_skull','f2_de_cairn','f2_de_amphora'],oasisP:.45,oasisN:1,oasisGap:12,ruinP:.35,ruinN:1,ruinGap:14,lone:10,loneGap:32}}}
+function epDes(n){return {desert:{palms:['f2_de_palm'],ruins:['f2_de_amphora','f2_de_skull','f2_de_cairn'],bones:['f2_dx_oxskull','f2_de_skull','f2_de_cairn','f2_de_amphora'],oasisP:.45,oasisN:1,oasisGap:12,ruinP:.3,ruinN:1,ruinGap:16,lone:7,loneGap:40}}}
 /* the finish of an early outdoor level: painted forest floor, mud track and grass, leaf and mud decals, shade under the trees, lamp pools, mirrored repeats */
 function epWood(n,o){const S={decals:{keys:['leaves','pebbles','mud','droppings'],on:{0:o.town?['mud','straw','droppings','puddle','pebbles','leaves','soot']:['leaves','leaves','pebbles','mud','bones','droppings'],1:['mud','puddle','straw','pebbles','droppings','leaves'],2:['mud','straw','droppings','pebbles','puddle','leaves'],3:['mud','leaves','straw'],4:['mud','straw','soot','droppings'],5:['mud','puddle','straw']},p:.6,wallBias:.3,sz:[.5,.7],far:16,gain:[1,.95,.88],a:1},
     soft:.45,shadow:.6,shadowSz:1.4,ao:o.town?.6:.3,aoW:o.town?.55:.35,nearFade:1,glow:.6,glowSz:2.6,glowCol:[1,.7,.42],
@@ -203,7 +203,7 @@ const EP_SPEC={
   /* the other early dungeons share the crypts' finish, each with its own stone (see epDungeon) */
   8:epDungeon('cave',8),23:epDungeon('cave',23),25:epDungeon('cave',25),9:epDungeon('crypt',9),12:epDungeon('crypt',12,{nofloor:1}),501:epDungeon('crypt',501,{nofloor:1}),11:epDungeon('mine',11),18:epDungeon('mine',18),
   /* the deserts: a few painted palms by the oases, broken pieces at the ruins, lone bones far apart; the dunes themselves are not touched */
-  41:{desert:{palms:['f2_de_palm'],ruins:['f2_de_amphora','f2_de_skull','f2_de_cairn'],bones:['f2_dx_oxskull','f2_de_skull','f2_de_cairn','f2_de_amphora'],oasisP:.3,oasisN:1,ruinP:.35,ruinN:1,lone:8,loneGap:26}},
+  41:{desert:{palms:[],ruins:['f2_de_amphora','f2_de_skull','f2_de_cairn'],bones:['f2_dx_oxskull','f2_de_skull','f2_de_cairn','f2_de_amphora'],oasisP:0,oasisN:1,ruinP:.35,ruinN:1,lone:8,loneGap:26}},
   43:{desert:{palms:[],ruins:['f2_de_amphora','f2_de_skull','f2_de_cairn'],bones:['f2_dx_oxskull','f2_de_skull','f2_de_cairn','f2_de_amphora'],oasisP:0,ruinP:.35,ruinN:1,lone:8,loneGap:26}},
   60:epDes(60),61:epDes(61),62:epDes(62),63:epDes(63),64:epDes(64),
   /* the early woods and roads */
