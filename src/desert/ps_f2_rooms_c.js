@@ -8,32 +8,38 @@
 /* ---------- 6. THE SWAMP (9826): the heart ---------- */
 const F2_SWAMP={HUT:[21,4,27,6],CAUL:[24,9],NOTE:[27,9],ING:[['toad','f2_toadstool',8,18,'a clump of red toadstools','The toadstool'],['eel','f2_eelpost',40,20,'a dead eel hanging from a hook on a post','The eel'],['moss','f2_moss',9,31,'a clump of bright green marsh moss on a flat stone','The marsh moss']]};
 function f2SwampBuild(){
-  const SMd=f2TexFloor('ps_f2_tex_swmud','f2t_swmud',1.0)||'mud';
-  const C=f2Room({id:9826,ground:SMd,path:'wl2f0',band:[1,4],wh:3.2,softRet:1,rw:0,
+  const SMd=f2TexFloor('ps_f2_tex_swmud','f2t_swmud',1.0)||'mud',SB=f2TexFloor('ps_f2_tex_swboard','f2t_swboard',1.0)||'wl2f0',SBX=f2TexFloor('ps_f2_tex_swboardx','f2t_swboardx',1.0)||SB,SWt=f2TexFloor('ps_f2_tex_swwater','f2t_swwater',.9)||'bogwater',SMo=f2TexFloor('ps_f2_tex_swmoss','f2t_swmoss',.85)||'wwf_moss';
+  const C=f2Room({id:9826,ground:SMd,path:SB,band:[1,4],wh:3.2,softRet:1,rw:0,mistH:.01,feather:/f2_sw_glowstump|f2_stump|f2_wv_stump|f2_sx_(log|knees)/,soil:[58,64,40],
     routes:[[[24,35],[24,27],[16,23],[16,14],[24,12],[24,10]],[[24,27],[34,24],[39,20]],[[16,18],[9,18]],[[22,31],[10,31]]],
-    clear:[[17,3,31,11,'wwf_moss','The Witch\'s Hut',1],[4,14,12,22,'blf_mud','The Toadstool Ring',1],[35,15,43,24,'blf_mud','The Eel Pool',1],[5,27,14,34,'wwf_moss','The Moss Bank',1]],
-    edge:(C,x,y)=>{if(C.E[y*48+x]<=8){C.water(x,y,'bogwater');return true}return false}});
+    clear:[[17,3,31,11,SMo,'The Witch\'s Hut',1],[4,14,12,22,SMd,'The Toadstool Ring',1],[35,15,43,24,SMd,'The Eel Pool',1],[5,27,14,34,SMo,'The Moss Bank',1]],
+    edge:(C,x,y)=>{if(C.E[y*48+x]<=8){C.water(x,y,SWt);return true}return false}});
+  {const pc=f2Fl(C,SB),px=f2Fl(C,SBX),P=C.pathM,W=48;for(let i=0;i<W*40;i++)if(C.fm[i]===pc){const h=P[i-1]||P[i+1],v=P[i-W]||P[i+W];if(h&&!v)C.fm[i]=px}}   // the boards run along the way
   // the witch's hut (a painted front over a block of wall; its door is barred), the cauldron and the note before it
   const [hx0,hy0,hx1,hy1]=F2_SWAMP.HUT;
   try{pspDefringe('ps_f2_witchhut')}catch(e){}
   if(IMG.ps_f2_witchhut&&IMG.ps_f2_witchhut.width&&!IMG.ps_f2_witchhut._ps){C.picHouse({img:'ps_f2_witchhut',x0:22,y0:hy0,x1:26,y1:hy1,w:5.6,door:[24,hy1],wh:2.6});for(let y=hy0;y<=hy1;y++)for(let x=22;x<=26;x++)if(!(x===24&&y===hy1))C.mist(x,y)}   // behind the painted hut: the swamp, not a grey block
   else C.house({x0:hx0,y0:hy0,x1:hx1,y1:hy1,face:'S',sty:'black',roof:'thatch2',wh:2.4});
   {const g=C.chars[C.rows[hy1][24]];if(g!==undefined)KH_DOOR[g]={psf2:'hutdoor'}}
-  {const [cx,cy]=F2_SWAMP.CAUL;C.used.delete(cx+','+cy);C.dec('ww_cauldron',cx,cy,{block:true,npc:'f2m_cauldron',sc:1.1});C.light(cx,cy,[.7,1.4,.6])}
-  {const [nx,ny]=F2_SWAMP.NOTE;C.used.delete(nx+','+ny);C.dec(pspPic('f2_notepost'),nx,ny,{block:true,npc:'f2m_note'})}
+  {const [cx,cy]=F2_SWAMP.CAUL;C.used.delete(cx+','+cy);C.dec('ww_cauldron',cx,cy,{block:true,npc:'f2m_cauldron',sc:1.1});C.light(cx,cy,[1.0,2.2,.8]);C.light(24,7,[2.2,1.4,.5])}
+  {const [nx,ny]=F2_SWAMP.NOTE;C.used.delete(nx+','+ny);C.dec(pspPic(IMG.ps_f2_sx_notepost?'f2_sx_notepost':'f2_notepost'),nx,ny,{block:true,npc:'f2m_note',sc:.9})}
   for(const [x,y] of [[20,8],[28,8]])if(C.free(x,y))C.dec('ww_totem',x,y,{block:true,sc:.9});
   // the three marked spots
   for(const [k,pic,x,y] of F2_SWAMP.ING){C.used.delete(x+','+y);C.dec(pspPic(pic),x,y,{block:true,npc:'f2m_'+k});const sx=x+1,sy=y;if(C.open(sx,sy)){C.used.delete(sx+','+sy);C.dec(pspPic('f2_stake'),sx,sy,{block:false})}}
   // the swamp: dead trees hung with moss, willows, reeds, stumps; toadstool rings
-  const ST=[pspPic('f2_sw_dead'),pspPic('f2_sw_cypress'),pspPic('f2_swamptree'),'ww_willow',pspPic('f2_sw_cypress')];ST.push(...ST.map(f2Flip));
-  C.fill(ST.concat([pspPic('f2_stump')]),{p1:.18,p2:.5,p3:.8});
+  // still black pools between the trees (never beside a way, so every path stays a path)
+  for(let y=3;y<37;y++)for(let x=3;x<45;x++){if(!C.open(x,y)||!C.free(x,y)||C.nearPath(x,y,1)||(x>=17&&x<=31&&y<=11)||Math.hypot(x-24,y-35)<6)continue;if(C.vn(x,y,4,301)>.5)C.water(x,y,SWt)}
+  const ST=[pspPic('f2_sw_dead'),pspPic('f2_sw_cypress'),pspPic('f2_swamptree'),pspPic('f2_wv_cypress'),pspPic('f2_wv_lean')];ST.push(...ST.map(f2Flip));
+  C.fill(ST.concat([pspPic('f2_stump'),pspPic('f2_sx_knees')]),{p1:.1,p2:.32,p3:.6});
+  for(const [x,y] of [[12,25],[36,27],[30,9],[6,24]])if(C.free(x,y)&&!C.nearPath(x,y,1))C.dec(f2PickVar(C,[pspPic('f2_sx_log'),f2Flip(pspPic('f2_sx_log'))],x,y,C.hs2(x,y,79)),x,y,{block:true,sc:.85});
+  for(const [x,y] of [[7,17],[8,17],[7,19],[8,19],[9,19],[7,18]])if(C.free(x,y)){const d=C.dec(f2PickVar(C,[pspPic('f2_sx_toads'),f2Flip(pspPic('f2_sx_toads'))],x,y,C.hs2(x,y,77)),x,y,{block:false,sc:.6+C.hs2(x,y,78)*.3});if(d)d.lift=.5}   // the toadstool ring round the marked clump
+  for(const [x,y,k] of [[21,5,'f2_wv_cypress'],[27,5,'f2_sw_cypress'],[21,3,'f2_wv_lean'],[27,3,'f2_sw_dead'],[21,6,'f2_sw_cypress'],[27,6,'f2_wv_cypress']])if(C.free(x,y)){C.used.delete(x+','+y);C.dec(pspPic(k),x,y,{block:true,sc:1.05})}   // trees round the hut hide the sides of its painted front
   for(const d of C.decor)if(d.block&&/f2_sw_|swamptree|willow/.test(d.k)){d.sc=+((d.sc||1)*(.8+C.hs2(d.x,d.y,171)*.45)).toFixed(2);d.ox=(C.hs2(d.x,d.y,172)-.5)*.8;d.oy=(C.hs2(d.x,d.y,173)-.5)*.6}
-  C.scrub([pspPic('f2_reeds'),pspPic('f2_sw_rushes'),pspPic('f2_sw_rushes')],.07,{sc:.85});
-  for(const [x,y] of [[13,20],[37,22],[11,29],[30,14],[18,28],[33,30]])if(C.free(x,y)&&!C.nearPath(x,y,0)){C.dec(pspPic('f2_sw_glowstump'),x,y,{block:true,sc:.65});C.light(x,y,[.4,1.3,1.2])}
-  for(const [x,y] of [[23,30],[25,22],[17,16],[25,12]])if(C.free(x,y)){C.dec(pspPic('f2_sw_post'),x,y,{block:false,sc:.85});C.light(x,y,[1.6,1.2,.6])}
-  f2Edge(C,{img:'f2_sw_wall',wh:2.6,veil:.15,pillar:ST,innerP:.35,innerKeep:(x,y)=>x>=17&&x<=31&&y<=11});
+  C.scrub([pspPic('f2_reeds'),pspPic('f2_sw_rushes'),pspPic('f2_wv_iris'),f2Flip(pspPic('f2_sw_rushes')),pspPic('f2_sx_cattail'),f2Flip(pspPic('f2_sx_cattail'))],.14,{sc:.8});
+  for(const [x,y,sc] of [[13,20,.75],[37,22,.55],[11,29,.65]])if(C.free(x,y)&&!C.nearPath(x,y,0)){C.dec(pspPic('f2_sw_glowstump'),x,y,{block:true,sc});C.light(x,y,[.4,1.3,1.2])}
+  for(const [x,y] of [[23,30],[25,22],[17,16],[25,12],[15,21],[33,24],[23,31],[25,29],[25,23],[23,20],[17,15],[23,13],[15,17],[29,26]])if(C.free(x,y)&&!C.pathM[y*48+x]&&C.nearPath(x,y,1)){const d=C.dec(pspPic(IMG.ps_f2_sx_lantern?'f2_sx_lantern':'f2_sw_post'),x,y,{block:false,sc:1.25});if(d)d.lift=1;C.light(x,y,[3.0,2.0,.7])}
+  f2Edge(C,{img:'f2_sw_wall',wh:.9,veil:.1,pillar:ST,innerP:.55,tall:[pspPic('f2_sw_cypress'),pspPic('f2_wv_cypress'),pspPic('f2_wv_lean'),pspPic('f2_sw_dead')].map(k=>k.replace(/^ps_/,'')),tallP:.7,tallSc:[1.0,1.6],innerKeep:(x,y)=>x>=17&&x<=31&&y<=11});
   {const g=C.chars[C.rows[hy1][24]],ec=C._edgeCh&&C._edgeCh(24,hy1),eg=ec&&C.chars[ec];if(g!==undefined&&eg!==undefined)T_TILE[g]=T_TILE[eg]}   // the hut's barred door square looks like the swamp behind the painted hut
-  C.capTrees(/swamptree|willow|oakmoss|f2_sw_(dead|cypress)/,2.2);
+  C.capTrees(/swamptree|oakmoss|f2_sw_(dead|cypress)|f2_wv_(cypress|lean)/,2.2);
   pspSafeZone(C,24,35,6);
   C.foes(['f2frog','f2leech','f2wisp'],[4,14,12,22],1);
   C.foes(['f2leech','f2leech','f2hag','f2troll'],[35,15,43,24],2);

@@ -5026,5 +5026,96 @@
 "h": 2.6,
 "kind": "sprite",
 "sheet": "f2v"
+},
+"f2_tex_swmud": {
+"file": "f2_tex_swmud.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "f2swt"
+},
+"f2_tex_swwater": {
+"file": "f2_tex_swwater.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "f2swt"
+},
+"f2_tex_swmoss": {
+"file": "f2_tex_swmoss.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "f2swt"
+},
+"f2_tex_swboard": {
+"file": "f2_tex_swboard.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "f2swb"
+},
+"f2_tex_swboardx": {
+"file": "f2_tex_swboardx.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "f2swb"
+},
+"f2_sx_notepost": {
+"file": "f2_sx_notepost.webp",
+"w": 268,
+"px_h": 382,
+"h": 1.7,
+"kind": "sprite",
+"sheet": "f2v"
+},
+"f2_sx_reedpool": {
+"file": "f2_sx_reedpool.webp",
+"w": 304,
+"px_h": 409,
+"h": 1.3,
+"kind": "sprite",
+"sheet": "f2v"
+},
+"f2_sx_toads": {
+"file": "f2_sx_toads.webp",
+"w": 311,
+"px_h": 136,
+"h": 0.7,
+"kind": "sprite",
+"sheet": "f2v"
+},
+"f2_sx_lantern": {
+"file": "f2_sx_lantern.webp",
+"w": 152,
+"px_h": 327,
+"h": 2.3,
+"kind": "sprite",
+"sheet": "f2v"
+},
+"f2_sx_log": {
+"file": "f2_sx_log.webp",
+"w": 313,
+"px_h": 205,
+"h": 0.8,
+"kind": "sprite",
+"sheet": "f2v"
+},
+"f2_sx_cattail": {
+"file": "f2_sx_cattail.webp",
+"w": 190,
+"px_h": 290,
+"h": 1.3,
+"kind": "sprite",
+"sheet": "f2v"
+},
+"f2_sx_knees": {
+"file": "f2_sx_knees.webp",
+"w": 307,
+"px_h": 276,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "f2v"
 }
 }

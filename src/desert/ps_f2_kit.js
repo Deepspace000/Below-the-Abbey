@@ -26,7 +26,7 @@ const F2B={
     text:'The canals lie still under a pink evening sky. Water laps at the steps, and somewhere a bell rings the hour.'},
   9825:{k:'desert',sky:{top:[38,92,190],mid:[170,180,206],low:[255,190,120]},cloud:.4,silver:.18,fog:[240,196,140,.0022],haze:.02,amb:.95,lcol:[1.42,1.04,.68],wn:'Heat',fx:null,
     text:'The sun beats down on the sand. The air shimmers with heat, and there is no wind.'},
-  9826:{k:'swamp',sky:{top:[38,48,44],mid:[78,94,80],low:[118,130,104]},cloud:1.0,fog:[92,110,84,.022],amb:.8,lcol:[.85,1.1,.7],wn:'Bog mist',fx:null,
+  9826:{k:'swamp',sky:{top:[26,44,62],mid:[92,116,108],low:[218,178,112]},cloud:1.0,fog:[74,90,78,.006],haze:.02,amb:1.12,lcol:[1.15,1.1,.8],wn:'Bog mist',fx:null,
     text:'A thick green mist lies on the black water. Frogs croak, and the mud bubbles and stinks.'},
   9827:{k:'nightmare',sky:{top:[8,0,6],mid:[56,10,16],low:[116,30,24]},cloud:.7,fog:[40,10,14,.014],haze:0,amb:.72,lcol:[1.3,.55,.5],wn:'Red dark',fx:null,
     text:'The sky is the colour of a bruise, and the air is thick and still. Things move just out of sight.'}};
@@ -360,7 +360,7 @@ pspOnArrive(n=>{const L=LEVELS[n];if(!L||!L._f2x||!G.decor)return;for(const d of
     if(d.span&&s.pic){s.x=d.span.x;s.y=d.span.y;s.w=d.span.w;s.bob=d.span.bob;s.flat=[d.wd[0],d.wd[1]]}
     else if(F2_TREE_RX.test(d.k)&&!d.roof){s.decor=Object.create(d,{k:{value:'tree0'}})}   // a painted tree casts no round shadow and fades into the green like the woodland trees
     else if(d.mv&&d.mvFlip&&!s.pic){const C=G.C,fx=Math.cos(C.a),fy=Math.sin(C.a),rx=-fy,ry=fx;const right=(d.mvDx*rx+d.mvDy*ry)>0;const im=IMG[right?d.mvFlip:d.k];if(im)s.img=im}}   // a boat seen moving to the right shows its prow on the right
-  const out=drop?L.filter(s=>!s._f2drop):L;
+  let out=drop?L.filter(s=>!s._f2drop):L;if(window.F2_DBGHIDE)out=out.filter(s=>!(s.decor&&window.F2_DBGHIDE.test(String(s.decor.k))));
   // contact shadows: terraced levels draw no round shadow under things, so each standing piece gets a soft dark oval at its foot (a flat picture just in front of it)
   if(f2Is(LEVEL)&&!f2InRoof()&&!window.F2_NOSHADOW){const sh=f2ShadowImg(),fx=Math.cos(G.C.a),fy=Math.sin(G.C.a),fx2=G.C.x+.5,fy2=G.C.y+.5,x2=LV&&LV._f2x,add=[];
     for(const s of out){const d=s.decor;if(!d||s.pic||d.span||d.npc&&!d.block||s.bob>.05||d.fly||(d.kname&&x2&&x2[d.kname]&&(x2[d.kname].fly||x2[d.kname].mv))||!s.img||!s.w)continue;
@@ -413,7 +413,7 @@ function f2RideTick(dt){const R=F2.ride;if(!R)return;if(LEVEL!==R.lv){F2.ride=nu
 {const _u2=update;update=function(dt){const r=_u2.apply(this,arguments);try{if(typeof LEVEL!=='undefined'&&f2Is(LEVEL)&&G.state==='play'){const d=Math.min(dt,.05);f2MoveTick(d);if(F2.ride)f2RideTick(d)}}catch(e){console.error('f2 move',e);F2.ride=null;G.lockT=0}return r}}
 /* ---------- a painted far skyline on the sky of a room (domes and towers over the roofs, a mountain range, a sea horizon), fixed to the world while the clouds drift ----------
    F2SKY[id] = {img, rows (height in sky rows), base (sky row of its foot; 150 is the horizon), rep (copies round the sky), haze (0..1)} */
-const F2SKY={9824:{img:'f2_sky_venice',rows:118,base:156,rep:3,haze:.32},9821:{img:'f2_sky_forest',rows:46,base:154,rep:3,haze:.25},9823:{img:'f2_sky_snow',rows:70,base:154,rep:3,haze:.3},9825:{img:'f2_sky_desert',rows:56,base:126,rep:2,haze:.15}};
+const F2SKY={9824:{img:'f2_sky_venice',rows:118,base:156,rep:3,haze:.32},9821:{img:'f2_sky_forest',rows:46,base:154,rep:3,haze:.25},9823:{img:'f2_sky_snow',rows:70,base:154,rep:3,haze:.3},9825:{img:'f2_sky_desert',rows:56,base:126,rep:2,haze:.15},9826:{img:'f2_sky_forest',rows:52,base:154,rep:3,haze:.55}};
 function f2SkylineBuf(id){const S=F2SKY[id];if(!S)return null;if(S.buf)return S;const im=IMG['ps_'+S.img];if(!im||!im.width)return null;
   const R=S.rows,c=document.createElement('canvas');c.width=1024;c.height=R;const x=c.getContext('2d');x.imageSmoothingQuality='high';
   const n=S.rep||2,w=1024/n,B=F2B[id],fc=B.fog;
