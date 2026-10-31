@@ -23,7 +23,7 @@ def check(name, ok, extra=''):
 HELP = r"""
 window.T = {
   wait: ms => new Promise(r => setTimeout(r, ms)),
-  go: async (x, y, f) => { if (LEVEL !== 1) { goToLevel(1, {x, y, f}); for (let i = 0; i < 60 && LEVEL !== 1; i++) await T.wait(100) }
+  go: async (x, y, f) => { for (let t = 0; t < 6 && LEVEL !== 1; t++) { goToLevel(1, {x, y, f}); for (let i = 0; i < 60 && LEVEL !== 1; i++) await T.wait(100); await T.wait(1200) } // the jump town may still be arriving: try again until the crypts stay
     G.P.x = x; G.P.y = y; G.P.f = f; G.P.angT = (f - 1) * Math.PI / 2; G.C = {x, y, a: G.P.angT}; G.enemies = []; G.lockT = 0; G.cut = null; G.talk = null; G.loot = null; await T.wait(700) },
   fwd: async () => { G.lockT = 0; doMove(0); await T.wait(450); G.lockT = 0 },
   face: (dx, dy) => [[0,-1],[1,0],[0,1],[-1,0]].findIndex(d => d[0] === dx && d[1] === dy),
@@ -41,9 +41,10 @@ def main():
         pg.on('pageerror', lambda e: errs.append('PAGE ' + str(e)))
         pg.goto('http://localhost:%s/index.html?town=oldhaven&lvl=10&v=%d' % (PORT, time.time()), wait_until='domcontentloaded', timeout=90000)
         pg.wait_for_function("()=>typeof G!=='undefined'&&G.state==='play'", timeout=150000)
-        pg.wait_for_timeout(1500)
+        pg.wait_for_function("()=>LEVEL===305", timeout=120000)   # let the jump to Oldhaven finish first, so it cannot land after our move
+        pg.wait_for_timeout(4000)
         pg.evaluate(HELP)
-        pg.evaluate("async()=>{delete G.flags.ep_sec;G.bag=[];await T.go(3,18,0);await T.wait(2500)}")  # the polish pictures load, the rooms are hollowed out
+        pg.evaluate("async()=>{delete G.flags.ep_sec;G.bag=[];await T.go(3,18,0);for(let i=0;i<200;i++){if(LEVEL===1&&typeof EP!=='undefined'&&EP.ready&&EP_SECRETS[1].every(s=>s.cells.every(([x,y])=>G.grid[y][x]===0)))break;await T.wait(100)}await T.wait(500)}")  # the polish pictures load, the rooms are hollowed out
         secs = pg.evaluate("()=>EP_SECRETS[1]")
         check('four secret rooms are listed', len(secs) == 4, len(secs))
         r = pg.evaluate("""()=>{const out=[],R=T.reach();for(const s of EP_SECRETS[1]){const cells=new Set(s.cells.map(c=>c+'')),bad=[];
@@ -52,7 +53,7 @@ def main():
               for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(cells.has([nx,ny]+'')||(nx===s.door[0]&&ny===s.door[1]))continue;if(G.grid[ny][nx]===0)bad.push('leak at '+nx+','+ny)}}
             if(!R.has(s.from+''.replace(/,/,',')))bad.push('corridor square not reachable');
             const ch=G.decor.find(d=>d.kname==='epsec_'+s.id);if(!ch||!ch.loot)bad.push('no chest');
-            out.push([s.id,bad])}return out}""")
+            if(bad.length)bad.push('LEVEL '+LEVEL+' ready '+EP.ready);out.push([s.id,bad])}return out}""")
         for sid, bad in r:
             check('room %s is sealed and hidden' % sid, not bad, bad)
         for s in secs:
