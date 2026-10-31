@@ -77,17 +77,17 @@ function f2NightBuild(){
   F2_NIGHT.LAMP.forEach(([x,y],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_lantern_off'),x,y,{block:true,npc:'f2n_lamp'+i})});
   // the dark: dead trees full of eyes, warped clocks, dolls
   const NT=[pspPic('f2_eyetree'),pspPic('f2_nm_tree'),'f2i_nightthorn',pspPic('f2_nm_tree')];NT.push(...NT.map(f2Flip));
-  C.fill(NT.concat(['f2i_nightthorn','f2i_nightoak']),{p1:.08,p2:.35,p3:.65});
+  C.fill(NT.concat(['f2i_nightthorn','f2i_nightoak']),{p1:.05,p2:.22,p3:.4});
   // the wrong stairs: stairs that climb to doors that stand alone, split three ways, end in eyes; floating islands of rock, melting clocks, piles of dolls; red lamps along the way
-  for(const [x,y,k] of [[20,30,'f2_nm_stairdoor'],[28,30,'f2_nm_stairsplit'],[14,10,'f2_nm_stairseye'],[34,9,'f2_nm_stairsplit'],[40,28,'f2_nm_stairseye'],[8,9,'f2_nm_stairdoor'],[19,22,'f2_nm_spiral']]){const q=C.near(x,y,3,true);if(q){C.dec(pspPic(k),q[0],q[1],{block:true,sc:.75})}}   // the wrong stairs
+  for(const [x,y,k] of [[20,30,'f2_nm_stairdoor'],[28,30,'f2_nm_stairsplit'],[14,10,'f2_nm_stairseye'],[34,9,'f2_nm_stairsplit'],[40,28,'f2_nm_stairseye'],[8,9,'f2_nm_stairdoor'],[19,22,'f2_nm_spiral']]){let q=null;for(let r=0;r<5&&!q;r++)for(let dy=-r;dy<=r&&!q;dy++)for(let dx=-r;dx<=r&&!q;dx++){const a=x+dx,b=y+dy;if(C.free(a,b)&&!C.nearPath(a,b,1))q=[a,b]}if(q)C.dec(pspPic(k),q[0],q[1],{block:true,sc:.75})}   // the wrong stairs
   for(const [x,y,k,b] of [[12,6,'f2_nm_island',2.4],[36,4,'f2_nm_island',2.8],[42,32,'f2_nm_island',2.2],[6,26,'f2_nm_island',2.6]]){const d=C.dec(pspPic(k),x,y,{block:false,bob:b,sc:.9});if(d)d.fly=1}
   for(const [x,y] of [[9,29],[13,32]])if(C.free(x,y))C.dec(pspPic('f2_nm_clock'),x,y,{block:true});
   
   for(const [x,y] of [[23,30],[25,24],[30,20],[30,16],[25,13]])if(C.free(x,y)){C.dec(pspPic('f2_nm_lamp'),x,y,{block:false});C.light(x,y,[1.8,.5,.4])}
-  f2Edge(C,{img:'f2_nm_wall',wh:2.6,veil:.18,pillar:NT,innerP:.3,innerKeep:(x,y)=>x>=16&&x<=32&&y<=12});
+  f2Edge(C,{img:'f2_nm_wall',wh:3.2,veil:.18,pillar:NT,innerP:.12,ring:30,innerKeep:(x,y)=>x>=16&&x<=32&&y<=12});
   for(const [x,y] of [[6,16],[11,17],[8,22],[12,21],[5,20]])if(C.free(x,y))C.dec(pspPic('f2_doll'),x,y,{block:true});
   for(const [x,y] of [[7,28],[13,29],[10,33],[6,32]])if(C.free(x,y))C.dec(pspPic('f2_clock'),x,y,{block:true});
-  C.scrub(['gy_bones',pspPic('f2_doll')],.02);
+  C.scrub(['gy_bones',pspPic('f2_doll')],.007);
   C.capTrees(/eyetree|nightoak|nightthorn|f2_nm_tree/,2.2);
   pspSafeZone(C,24,35,6);
   C.foes(['f2doll','f2doll','f2hands'],[4,15,13,24],1);
