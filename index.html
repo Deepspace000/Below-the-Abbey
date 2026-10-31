@@ -2754,8 +2754,8 @@ function render3D(){
     if(h.type!=='torch'||h.ty<.4)continue;
     const L=h.L,w=.42*F/h.ty,hh=w*1.5,base=h._fy!==undefined?h._fy+.42*F/h.ty*.35:HH-(CEILH*.5+TORCH_ZA+TORCH_RISE-EYE)*F/h.ty,fi=(Math.floor(t*10)+((L.key*7)&7))&7,ri=L.fl!==undefined?L.fl:L.red?1:((LEVEL===364||(LEVEL>=440&&LEVEL<=460))?2:0);   // L.fl: a torch of its own colour (3 blue, 4 yellow: see gy_boss.js)
     if(h._ept&&IMG.ep_flame_0&&ri===0){ // opt-in painted flame: six painted frames, each torch at its own pace and phase, laid on with 'screen' (soft, never white), and a wide soft glow
-      const ph=(Math.imul(L.key,2654435761)>>>11)%6,sp=7.5+((L.key*13)&3),fk=(Math.floor(t*sp)+ph)%6,FI=IMG['ep_flame_'+fk]||IMG.ep_flame_0,fw=Math.min(w*1.1,VW*.16),fh=fw*FI.height/FI.width,fl=.82+.1*Math.sin(t*11+L.ph)+.06*Math.sin(t*23.7+L.ph*2);
-      vctx.globalCompositeOperation='screen';vctx.globalAlpha=.16*fl;{const gr=Math.min(w*2.4,VW*.3);vctx.drawImage(GLOWS[0],h._fx-gr,h._fy-fh*.4-gr,gr*2,gr*2)}vctx.globalAlpha=1;vctx.drawImage(FI,h._fx-fw/2,h._fy-fh*.9,fw,fh);vctx.globalCompositeOperation='lighter';vctx.globalAlpha=.3*fl;vctx.drawImage(FI,h._fx-fw/2,h._fy-fh*.9,fw,fh);vctx.globalAlpha=1;continue}
+      const ph=(Math.imul(L.key,2654435761)>>>11)%6,sp=7.5+((L.key*13)&3),fk=(Math.floor(t*sp)+ph)%6,FI=IMG['ep_flame_'+fk]||IMG.ep_flame_0,fw=Math.min(w*.95,VW*.14),fh=fw*FI.height/FI.width,fl=.82+.1*Math.sin(t*11+L.ph)+.06*Math.sin(t*23.7+L.ph*2);
+      vctx.globalCompositeOperation='screen';vctx.globalAlpha=.26*fl;{const gr=Math.min(w*2.6,VW*.32);vctx.drawImage(GLOWS[0],h._fx-gr,h._fy-fh*.25-gr,gr*2,gr*2)}vctx.globalAlpha=1;vctx.drawImage(FI,h._fx-fw/2,h._fy-fh*.9,fw,fh);vctx.globalCompositeOperation='lighter';vctx.globalAlpha=.18*fl;vctx.drawImage(FI,h._fx-fw/2,h._fy-fh*.9,fw,fh);vctx.globalAlpha=1;continue}
     vctx.globalAlpha=.5+.12*Math.sin(t*13+L.ph);vctx.drawImage(GLOWS[ri],(h._fx||h.sx)-w*1.7,base-hh*.4-w*1.7,w*3.4,w*3.4);
     vctx.globalAlpha=1;vctx.drawImage(FLAMES[ri*8+fi],(h._fx||h.sx)-w/2,base-hh*.94,w,hh);
   }
