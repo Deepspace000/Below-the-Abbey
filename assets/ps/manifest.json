@@ -5213,5 +5213,13 @@
 "h": 0.8,
 "kind": "sprite",
 "sheet": "a4snow"
+},
+"f2_sn_cabin2": {
+"file": "f2_sn_cabin2.webp",
+"w": 973,
+"px_h": 699,
+"h": 4.2,
+"kind": "sprite",
+"sheet": "a4cabin"
 }
 }
