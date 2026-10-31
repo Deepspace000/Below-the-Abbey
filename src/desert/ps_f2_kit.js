@@ -28,7 +28,7 @@ const F2B={
     text:'The sun beats down on the sand. The air shimmers with heat, and there is no wind.'},
   9826:{k:'swamp',sky:{top:[26,44,62],mid:[92,116,108],low:[218,178,112]},cloud:1.0,fog:[74,90,78,.006],haze:.02,amb:1.12,lcol:[1.15,1.1,.8],wn:'Bog mist',fx:null,
     text:'A thick green mist lies on the black water. Frogs croak, and the mud bubbles and stinks.'},
-  9827:{k:'nightmare',sky:{top:[8,0,6],mid:[56,10,16],low:[116,30,24]},cloud:.7,fog:[40,10,14,.014],haze:0,amb:.72,lcol:[1.3,.55,.5],wn:'Red dark',fx:null,
+  9827:{k:'nightmare',sky:{top:[6,0,10],mid:[70,8,22],low:[190,60,36]},cloud:.7,fog:[70,6,14,.004],haze:0,amb:.72,lcol:[1.3,.55,.5],wn:'Red dark',fx:null,
     text:'The sky is the colour of a bruise, and the air is thick and still. Things move just out of sight.'}};
 /* ---------- floors: f2 names to engine FLOORS keys (some re-toned here) ---------- */
 const F2_FLMAKE={snow:['scree',1.62,[.97,1.0,1.07]],snowpath:['wwf_dirt',1.05,[.9,.94,1.02]],bogwater:['water',.78,[.66,.86,.58]],canal:['water',.66,[.62,.92,.98]],
@@ -459,7 +459,7 @@ function f2Edge(C,o){const W=48,H=40,rows=C.rows,ix=(x,y)=>y*W+x,hs=C.hs2;if(!IM
   C._edgeCh=(x,y)=>gid[((x%(2*n))+2*n)%(2*n)];if(o.noTall)return k;
   if(o.innerP&&o.pillar){const edgeN=(x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>rows[y+b]&&rows[y+b][x+a]!=='.');   // a row of trees just inside the painted edge, so the edge is never the last thing in view
     for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!C.free(x,y)||C.nearPath(x,y,1)||!edgeN(x,y)||(o.innerKeep&&o.innerKeep(x,y))||Math.hypot(x-24,y-35)<5)continue;if(hs(x,y,161)<o.innerP){const d=C.dec(f2PickVar(C,o.pillar,x,y,hs(x,y,162)),x,y,{block:true,sc:.95+hs(x,y,163)*.35});if(d){d.ox=(hs(x,y,164)-.5)*.6;d.oy=(hs(x,y,165)-.5)*.5}}}}
-  if(o.tall&&o.tall.length){const [lo,hi]=o.tallSc||[.85,1.25];let last='';for(const [x,y] of edge){if(hs(x,y,131)>(o.tallP===undefined?.45:o.tallP))continue;let key=o.tall[(hs(x,y,132)*o.tall.length)|0];if(key===last)key=o.tall[(o.tall.indexOf(key)+1)%o.tall.length];last=key;f2Roof(C,pspPic(key),x,y,{sc:+(lo+(hi-lo)*hs(x,y,133)).toFixed(2)})}}
+  if(o.tall&&o.tall.length){const [lo,hi]=o.tallSc||[.85,1.25];let last='';for(const [x,y] of edge){if(hs(x,y,131)>(o.tallP===undefined?.45:o.tallP))continue;const M2=C._fkT=C._fkT||{},near=new Set();for(const [a,b] of [[-1,0],[-2,0],[0,-1],[0,-2],[1,0],[0,1],[2,0],[0,2]]){const q=M2[(y+b)*48+x+a];if(q)near.add(q)}let ki=(hs(x,y,132)*o.tall.length)|0;for(let t=0;t<o.tall.length&&near.has(o.tall[ki]);t++)ki=(ki+1)%o.tall.length;let key=o.tall[ki];M2[y*48+x]=key;last=key;f2Roof(C,pspPic(key),x,y,{sc:+(lo+(hi-lo)*hs(x,y,133)).toFixed(2)})}}
   return k}
 /* patches of ground: open squares off the paths take one of several floors by a soft noise (big patches, not a checker) */
 function f2Patches(C,list,o){o=o||{};const W=48,H=40;for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!C.open(x,y)||(C.pathM[y*W+x]&&!o.onPath)||(o.keep&&o.keep(x,y)))continue;
