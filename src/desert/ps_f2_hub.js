@@ -84,8 +84,12 @@ function psf2HubBuild(info){
   // ---- the links (the contract table): the seven illusion doors and the Grand Stair down; painted doors of the castle ----
   const doorGid=(st)=>{try{return pspDoorGid(st,PSF2H.WH)}catch(e){return null}};
   // every illusion door has its own painted front, in the world it opens into: living oak and ivy, driftwood and shells, frosted oak and icicles, a red and gilded Venetian door, carved sandstone, rotting planks and moss, a door of eyes
-  const HD={9821:'forest',9822:'island',9823:'snow',9824:'water',9825:'desert',9826:'swamp',9827:'night'},hdGid=k=>IMG['ps_f2_hd_'+k]&&IMG['ps_f2_hd_'+k].width?f2FacGid('ps_f2_hd_'+k,0,1,PSF2H.WH,{tex:'texBlack_2',fit:false,emit:.06,rgb:[.86,.86,.88]}):null;
-  for(const l of pspLinksFrom(id)){if(!l.at)continue;const g=pspPortal(C,l,{style:'great'});const st=/Grand Stair/.test(l.name)?'stairarch':'great',b=(HD[l.to]&&hdGid(HD[l.to]))||doorGid(st);if(g!=null&&b!=null&&T_TILE[b]!==undefined){T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b]}}
+  // round 4: each door is a whole painted panel (Gemini, assets/ps/f2_wp_door_*): the carved black stone arch, the door leaf down to the floor and the wall above it up to the cornice, in the same stone as the painted wall panels round it
+  const hdPanel=k=>IMG['ps_f2_wp_door_'+k]&&IMG['ps_f2_wp_door_'+k].width?f2PanelGid('door_'+k,PSF2H.WH,{gain:1.3*({island:.74,desert:.6,snow:.86,swamp:1.75,night:1.2,stair:.9}[k]||1),con:1.1,rgb:[.94,.97,1.02],emit:.05}):null;
+  const HD={9821:'forest',9822:'island',9823:'snow',9824:'water',9825:'desert',9826:'swamp',9827:'night'},HDRGB={island:[.7,.76,.8],snow:[.72,.76,.82],desert:[.76,.7,.62]},hdGid=k=>hdPanel(k)||(IMG['ps_f2_hd_'+k]&&IMG['ps_f2_hd_'+k].width?(IMG.ps_f2_wp_ashlar&&IMG.ps_f2_wp_ashlar.width?f2Door256('ps_f2_hd_'+k,PSF2H.WH,{rgb:HDRGB[k]||[.86,.86,.88],gain:1.05,emit:.05}):null)||f2FacGid('ps_f2_hd_'+k,0,1,PSF2H.WH,{tex:'texBlack_2',fit:false,emit:.04,rgb:HDRGB[k]||[.86,.86,.88],dtag:HDRGB[k]?'t':''}):null);   // the pale doors (shells, frost, sandstone) are toned down so the hall's lights do not wash them out
+  // the glow of a world door: a soft rim of its world's colour along the edges of the door (engine opt-in kd.rim/kd.gcol), not the warm pool over the middle that whited out the pale doors
+  const HDGLOW={9821:[60,120,50],9822:[40,95,135],9823:[90,110,140],9824:[130,70,70],9825:[140,100,40],9826:[70,100,40],9827:[140,30,30]};
+  for(const l of pspLinksFrom(id)){if(!l.at)continue;const g=pspPortal(C,l,{style:'great'});const st=/Grand Stair/.test(l.name)?'stairarch':'great',b=(HD[l.to]&&hdGid(HD[l.to]))||(st==='stairarch'&&hdPanel('stair'))||doorGid(st);if(st==='stairarch'&&g!=null&&KH_DOOR[g]&&hdPanel('stair')!=null){KH_DOOR[g].rim=1;KH_DOOR[g].gcol=[60,70,95]}/* the open stair arch: a cold rim, not the warm pool that turned its darkness orange */if(g!=null&&b!=null&&T_TILE[b]!==undefined){T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b]}if(g!=null&&KH_DOOR[g]&&HDGLOW[l.to]){KH_DOOR[g].rim=1;KH_DOOR[g].gcol=HDGLOW[l.to]}}
   // the stair to the third floor: an iron door that does not open yet
   {const b=hdGid('iron')||doorGid('iron'),g=KH_NEXT_GID++;T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b];KH_DOOR[g]={psf2:'stair3'};C.carve(51,5,51,5);C.solid(52,5,C.ch(g));C.used.add('52,5')}
   // keep clear: every landing (3 by 3), the stair arrival, the passages
@@ -100,12 +104,12 @@ function psf2HubBuild(info){
   // the name of each door on a small plaque of cream marble in a gilded frame beside it (the castle's black sign boards were too big beside the painted doors)
   const plq=(x,y,wd,id2)=>{const w=NAMES[id2].split(' '),h=Math.ceil(w.length/2),k=IMG.ps_f2_plaque_blank&&IMG.ps_f2_plaque_blank.width?f2Lettered('f2_plaque_blank','f2_hubpl_'+id2,[w.slice(0,h).join(' '),w.slice(h).join(' ')],{h:.62,col:'#100800',box:[.2,.28,.8,.74]}):null;if(!k){C.sign(x,y,wd,NAMES[id2]);return}const d=pic(k.replace(/^ps_/,''),x,y,wd,{bob:1.35,sc:1});if(!d)C.sign(x,y,wd,NAMES[id2])};
   for(const l of pspLinksFrom(id)){if(!NAMES[l.to])continue;const [x,y]=l.at;
-    if(y===3){for(const cx2 of [x-1,x+1]){const d=pic('sconce_black',cx2,4,[0,-1],{bob:1.45,sc:1});if(d)C.light(cx2,4,[.85,.7,.52])}plq(x+2,4,[0,-1],l.to);cand(x-2,4)}   // a pair of black iron sconces flanks every door of the gallery
+    if(y===3){for(const cx2 of [x-1,x+1]){const d=pic('sconce_black',cx2,4,[0,-1],{bob:1.45,sc:1});if(d)C.light(cx2,4,[.62,.52,.4])}plq(x+2,4,[0,-1],l.to);cand(x-2,4)}   // a pair of black iron sconces flanks every door of the gallery
     else if(x===2){plq(4,20,[0,-1],l.to);cand(4,24)}
     else{plq(51,20,[0,-1],l.to);cand(51,24)}}
   // each door throws a little of its own world's light into the hall: green for the forest, sea blue for the island, cold white for the snow, rose for the canals, gold for the desert, bog green for the swamp, red for the nightmare
   {const TINT={9821:[.7,1.5,.6],9822:[.5,1.1,1.6],9823:[1.2,1.3,1.6],9824:[1.5,.9,1.0],9825:[1.7,1.25,.5],9826:[.8,1.2,.5],9827:[1.6,.35,.35]};
-   for(const l of pspLinksFrom(id)){if(!TINT[l.to]||!l.at)continue;const [x,y]=l.at,lx=y===3?x:x===2?4:51,ly=y===3?4:22;C.light(lx,ly,TINT[l.to].map(v=>.42+v*.22))}}   // softened: a hint of the world's colour on the stone, not a coloured floor
+   for(const l of pspLinksFrom(id)){if(!TINT[l.to]||!l.at)continue;const [x,y]=l.at,lx=y===3?x:x===2?5:50,ly=y===3?5:22;C.light(lx,ly,TINT[l.to].map(v=>.3+v*.16))}}   // a square out from the door, so it tints the floor and walls round it and does not burn the door itself   // softened: a hint of the world's colour on the stone, not a coloured floor
   for(const [x,n] of [[12,'alcove_weeper'],[22,'alcove_monk'],[32,'alcove_maiden'],[42,'alcove_knight']])pic(n,x,4,[0,-1]);for(const [x,n] of [[11,'alcove_maiden'],[21,'alcove_knight'],[41,'alcove_weeper'],[46,'alcove_monk']])pic(n,x,6,[0,1]);   // statues in niches between the doors, so the long wall is not one run of empty panels
   for(const x of [14,24,34,44]){pic(x===24||x===34?'mirror_haunted_a':'banner_long_a',x,4,[0,-1]);pic('banner_long_b',x,6,[0,1])}
   for(const x of [5,50])pic('window_stained_tall',x,6,[0,1]);
@@ -154,10 +158,26 @@ function psf2HubBuild(info){
   pspSafeRect(C,2,2,W-3,H-3);
   // ---- the walls: the Great Halls' carved stone, the style of the room beside it ----
   const styleAt=(x,y)=>{for(const [a,b] of [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]]){const xx=x+a,yy=y+b;if(xx>=0&&yy>=0&&xx<W&&yy<H&&rows[yy][xx]==='.'&&room[ix(xx,yy)]>=0)return ROOMS[room[ix(xx,yy)]][1]}return 'hall'};
+  // painted panels (Gemini, 256 texels a square): every run of wall is set out in bays, a pilaster between bays, a carved feature panel in the middle of each bay and plain ashlar either side;
+  // clustered shafts flank every door; each kind of room has its own feature panels. All panels share one plinth and one cornice, so the courses run on round the hall.
+  const isDoor=(x,y)=>{if(x<0||y<0||x>=W||y>=H||rows[y][x]==='.')return false;const g=C.chars[rows[y][x]];return g!==undefined&&!!KH_DOOR[g]};
+  const FEAT={hall:['tracery','quatre','frame','twin'],statues:['rosette','niche','frame','rosette'],salon:['twin','frame','quatre'],trophy:['vine','frame','vine'],banquet:['rosette','twin','frame'],lady:['moon','twin','moon'],stair:['quatre','frame','tracery'],gallery:['moon','frame','vine'],closet:['frame'],screens:['frame']};
+  const PANEL_OK=!!(IMG.ps_f2_wp_ashlar&&IMG.ps_f2_wp_ashlar.width);
+  const panelAt=(x,y,st)=>{const op=(a,b)=>a>=0&&b>=0&&a<W&&b<H&&rows[b][a]==='.';const ns=op(x,y-1)||op(x,y+1),ew=op(x-1,y)||op(x+1,y);
+    if(!ns&&!ew)return 'ashlar';const c=ns?x:y,dA=ns?[1,0]:[0,1];
+    if(isDoor(x+dA[0],y+dA[1])||isDoor(x-dA[0],y-dA[1]))return 'shafts';   // the door bay: clustered shafts either side of the door
+    for(const s2 of [2,3])for(const sg of [1,-1])if(isDoor(x+dA[0]*s2*sg,y+dA[1]*s2*sg)){const DB=['vine','quatre','rosette','twin','moon','tracery','frame'],di=(x*3+y*5)%DB.length;return s2===2?DB[di]:(hs(x,y,7)<.5?'ashlar':'ashlar2')}   // beside the shafts: one carved panel of its own for each door, then plain ashlar before the run's rhythm starts again
+    const ph=((st.length*3+(ns?y:x)*7)%4+4)%4,m=((c+ph)%4+4)%4;
+    if(m===0)return 'pilaster';
+    if(m===2){const f=FEAT[st]||FEAT.hall,b=Math.floor((c+ph)/4);return f[((b+(ns?y:x))%f.length+f.length)%f.length]}
+    return hs(x,y,5)<.5?'ashlar':'ashlar2'};
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(rows[y][x]==='.')continue;const g=C.chars[rows[y][x]];if(g!==undefined&&KH_DOOR[g])continue;
-    const st=styleAt(x,y),edge=x===0||y===0||x===W-1||y===H-1;let kind='plain';
+    const st=styleAt(x,y),edge=x===0||y===0||x===W-1||y===H-1;
+    if(PANEL_OK&&!edge){const pn=panelAt(x,y,st),fl=/^ashlar/.test(pn)&&hs(x,y,6)<.5,p=f2PanelGid(pn,PSF2H.WH,{gain:/lady|gallery|banquet|trophy/.test(st)?1.55:1.38,con:1.22,rgb:[.9,.96,1.06],flip:fl,tag:(fl?'f':'')+(/lady|gallery|banquet|trophy/.test(st)?'b':'')});if(p!=null){C.solid(x,y,C.ch(p));continue}}
+    let kind='plain';
     if(!edge&&(y===3||y===41)&&x%5===2)kind='win';else if(!edge&&(x===23||x===33)&&y>=8&&y<=32&&y%4===0)kind='pilaster';
     C.solid(x,y,C.ch(pshTile(st,kind,kind==='plain'?(hs(x,y,3)*2)|0:0)))}
+  for(const [x,y,c] of [[38,37,[.9,.82,.72]],[50,5,[.62,.68,.88]],[26,11,[.55,.62,.8]],[30,11,[.55,.62,.8]],[26,30,[.5,.56,.74]],[30,30,[.5,.56,.74]],[28,39,[.5,.56,.72]]])C.light(x,y,c);   // a little more light on the carved walls of the nave, the Gallery of the Sleeper and the iron stair door, which read as black
   C.glow(6.5,PSH_COL.cold);
   const lv=C.finish({start:{x:28,y:38,f:0}});if(C.f2x)lv._f2x=C.f2x;
   // painted detail on the floors (drawn in the floor pass, never in the way): dust and cracks, a few dry leaves blown in, broken glass by the mirrors; a star of black and silver marble set in the floor of the Room of Mirrors, a brass moon plate in the Gallery of the Sleeper

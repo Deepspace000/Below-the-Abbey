@@ -5736,64 +5736,64 @@
 },
 "f2_hd_forest": {
 "file": "f2_hd_forest.webp",
-"w": 183,
-"px_h": 512,
+"w": 351,
+"px_h": 1007,
 "h": 3.0,
 "kind": "sprite",
 "sheet": "f2hd"
 },
 "f2_hd_island": {
 "file": "f2_hd_island.webp",
-"w": 171,
-"px_h": 512,
+"w": 336,
+"px_h": 991,
 "h": 3.0,
 "kind": "sprite",
 "sheet": "f2hd"
 },
 "f2_hd_snow": {
 "file": "f2_hd_snow.webp",
-"w": 168,
-"px_h": 512,
+"w": 328,
+"px_h": 994,
 "h": 3.0,
 "kind": "sprite",
 "sheet": "f2hd"
 },
 "f2_hd_water": {
 "file": "f2_hd_water.webp",
-"w": 165,
-"px_h": 512,
+"w": 312,
+"px_h": 991,
 "h": 3.0,
 "kind": "sprite",
 "sheet": "f2hd"
 },
 "f2_hd_desert": {
 "file": "f2_hd_desert.webp",
-"w": 167,
-"px_h": 512,
+"w": 327,
+"px_h": 991,
 "h": 3.0,
 "kind": "sprite",
 "sheet": "f2hd"
 },
 "f2_hd_swamp": {
 "file": "f2_hd_swamp.webp",
-"w": 167,
-"px_h": 512,
+"w": 331,
+"px_h": 999,
 "h": 3.0,
 "kind": "sprite",
 "sheet": "f2hd"
 },
 "f2_hd_night": {
 "file": "f2_hd_night.webp",
-"w": 167,
-"px_h": 512,
+"w": 325,
+"px_h": 991,
 "h": 3.0,
 "kind": "sprite",
 "sheet": "f2hd"
 },
 "f2_hd_iron": {
 "file": "f2_hd_iron.webp",
-"w": 172,
-"px_h": 512,
+"w": 330,
+"px_h": 991,
 "h": 3.0,
 "kind": "sprite",
 "sheet": "f2hd"
@@ -5905,5 +5905,152 @@
 "h": 256,
 "kind": "tex",
 "sheet": "f2tg"
+},
+"f2_wp_frame": {
+"file": "f2_wp_frame.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "wall6_wide"
+},
+"f2_wp_tracery": {
+"file": "f2_wp_tracery.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "wall6_wide"
+},
+"f2_wp_pilaster": {
+"file": "f2_wp_pilaster.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "wall6_wide"
+},
+"f2_wp_niche": {
+"file": "f2_wp_niche.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "wall6_wide"
+},
+"f2_wp_rosette": {
+"file": "f2_wp_rosette.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "wall6_wide"
+},
+"f2_wp_vine": {
+"file": "f2_wp_vine.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "wall6_wide"
+},
+"f2_wp_ashlar": {
+"file": "f2_wp_ashlar.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "wall6_wide2"
+},
+"f2_wp_ashlar2": {
+"file": "f2_wp_ashlar2.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "wall6_wide2"
+},
+"f2_wp_twin": {
+"file": "f2_wp_twin.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "wall6_wide2"
+},
+"f2_wp_quatre": {
+"file": "f2_wp_quatre.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "wall6_wide2"
+},
+"f2_wp_shafts": {
+"file": "f2_wp_shafts.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "wall6_wide2"
+},
+"f2_wp_moon": {
+"file": "f2_wp_moon.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "wall6_wide2"
+},
+"f2_wp_door_forest": {
+"file": "f2_wp_door_forest.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "doors6b"
+},
+"f2_wp_door_island": {
+"file": "f2_wp_door_island.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "doors6b"
+},
+"f2_wp_door_snow": {
+"file": "f2_wp_door_snow.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "doors6b"
+},
+"f2_wp_door_water": {
+"file": "f2_wp_door_water.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "doors6b"
+},
+"f2_wp_door_desert": {
+"file": "f2_wp_door_desert.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "doors6b"
+},
+"f2_wp_door_swamp": {
+"file": "f2_wp_door_swamp.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "doors6b"
+},
+"f2_wp_door_night": {
+"file": "f2_wp_door_night.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "doors6c"
+},
+"f2_wp_door_iron": {
+"file": "f2_wp_door_iron.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "doors6c"
+},
+"f2_wp_door_stair": {
+"file": "f2_wp_door_stair.jpg",
+"w": 256,
+"h": 819,
+"kind": "tex",
+"sheet": "doors6c"
 }
 }

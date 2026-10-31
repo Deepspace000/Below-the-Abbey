@@ -214,7 +214,7 @@ const WCL=new Int16Array(THN),WCH=new Int16Array(THN),WLA=new Float64Array(32),W
    pixel is a cache miss. In the copy, a column is contiguous. The copy is made a little at a time (WTB bytes a frame); until it exists the plain picture is used, with the same result. */
 const WTD=[],WTSD=[],WTR=[],WTE=[],WTSE=[];let WTB=0;
 function wallTexT(ti,tex){ // -> the column-major copy of wall picture ti, or null if it is not made yet
-  const d=tex.d;if(!d)return null;
+  const d=tex.d;if(!d||tex.tw)return null;
   if(WTSD[ti]===d)return WTD[ti];
   if(WTB>600000||PERF_EXACT)return null;
   const rows=d.length/(TS*4);if(rows!==(rows|0)||rows<1)return null;
@@ -234,24 +234,25 @@ function wallTexE(ti,te){ // the same for the glow picture (windows lit at night
 // WSP: 0 y0, 1 stepT, 2 vmode, 3 wall height, 4 texture rows (0 = square), 5 yBot, 6 1/unit, 7 ivw, 8-10 haze r,g,b, 11-13 base light r,g,b, 14-15 red light r,g, 16 warm lights, 17 red lights, 18 corner shade, 19 wallAO, 20 wallSat, 21 look, 22 filtered, 23-25 filter x0,x1,frac, 26 door glow, 27 its strength, 28-30 door n,lf,i, 31 rows of a column-major picture (0 = row-major)
 const WSP=new Float64Array(40);
 function wallSpan(D,td,te,ya0,yz,x,tx){
-  const P=WSP,y0=P[0],stepT=P[1],vmode=P[2]|0,wh=P[3],texH=P[4]|0,yBot=P[5],iu=P[6],ivw=P[7],hz0=P[8],hz1=P[9],hz2=P[10],bR=P[11],bG=P[12],bB=P[13],RLRv=P[14],RLGv=P[15],na=P[16]|0,nra=P[17]|0,fk=P[18],wAO=P[19],wSat=P[20],hasHLK=P[21]!==0,bil=P[22]!==0,bx0=P[23]|0,bx1=P[24]|0,bfx=P[25],dg=P[26]!==0,dgs=P[27],kdn=P[28],kdlf=P[29],kdi=P[30],rowsT=P[31]|0,shn=P[32],shp=P[33],gfr=P[34]|0;
+  const P=WSP,y0=P[0],stepT=P[1],vmode=P[2]|0,wh=P[3],texH=P[4]|0,yBot=P[5],iu=P[6],ivw=P[7],hz0=P[8],hz1=P[9],hz2=P[10],bR=P[11],bG=P[12],bB=P[13],RLRv=P[14],RLGv=P[15],na=P[16]|0,nra=P[17]|0,fk=P[18],wAO=P[19],wSat=P[20],hasHLK=P[21]!==0,bil=P[22]!==0,bx0=P[23]|0,bx1=P[24]|0,bfx=P[25],dg=P[26]!==0,dgs=P[27],kdn=P[28],kdlf=P[29],kdi=P[30],rowsT=P[31]|0,shn=P[32],shp=P[33],gfr=P[34]|0,TW=P[35]|0||TS,gR=P[36],gG=P[37],gB=P[38],gRim=P[39]!==0; // 36-38: door glow colour (kd.gcol, default warm), 39: rim only (kd.rim) // 35: texels across (tex.tw, opt-in wider pictures)
   let tyf=(ya0-y0)*stepT;
   for(let y=ya0;y<=yz;y++,tyf+=stepT){
       const v=vmode===0?(((tyf*CEILH)|0)&(TS-1)):vmode===1?(((tyf*wh/1.55)|0)&(TS-1)):vmode===2?Math.min(texH-1,(tyf*texH/TS)|0):tyf>=TS?TS-1:(tyf|0); // sky walls tile upward instead of stretching
-      const i=rowsT?(tx*rowsT+v)*4:(v*TS+tx)*4,o=(y*VW+x)*4;
+      const i=rowsT?(tx*rowsT+v)*4:(v*TW+tx)*4,o=(y*VW+x)*4;
       const vg=VGT[y],zz=(yBot-y)*iu,dz=zz-.66,dz2=dz*dz;
       let lr=0,lg=0,lb2=0,lpr=0;
       for(let k=0;k<na;k++){const q=WLA[k]/(1+1.15*(WLC[k]+dz2));lr+=q*WLR[k];lg+=q*WLG[k];lb2+=q*WLB[k]}
       for(let k=0;k<nra;k++)lpr+=WRA[k]/(1+1.15*(WRC[k]+dz2));
       const kRp=bR+lr+lpr*RLRv,kGp=bG+lg+lpr*RLGv,kBp=bB+lb2+lpr*.1;
       let tr=td[i],tg=td[i+1],tb=td[i+2];
-      if(bil){const vf=tyf*texH/TS-.5,vy0=Math.floor(vf),fy=vf-vy0,ya=(vy0<0?0:vy0>texH-1?texH-1:vy0)*TS,yb=(vy0+1<0?0:vy0+1>texH-1?texH-1:vy0+1)*TS,i00=(ya+bx0)*4,i10=(ya+bx1)*4,i01=(yb+bx0)*4,i11=(yb+bx1)*4,w00=(1-bfx)*(1-fy),w10=bfx*(1-fy),w01=(1-bfx)*fy,w11=bfx*fy;tr=td[i00]*w00+td[i10]*w10+td[i01]*w01+td[i11]*w11;tg=td[i00+1]*w00+td[i10+1]*w10+td[i01+1]*w01+td[i11+1]*w11;tb=td[i00+2]*w00+td[i10+2]*w10+td[i01+2]*w01+td[i11+2]*w11} // close range: filtered magnification instead of blocks
+      if(bil){const vf=tyf*texH/TS-.5,vy0=Math.floor(vf),fy=vf-vy0,ya=(vy0<0?0:vy0>texH-1?texH-1:vy0)*TW,yb=(vy0+1<0?0:vy0+1>texH-1?texH-1:vy0+1)*TW,i00=(ya+bx0)*4,i10=(ya+bx1)*4,i01=(yb+bx0)*4,i11=(yb+bx1)*4,w00=(1-bfx)*(1-fy),w10=bfx*(1-fy),w01=(1-bfx)*fy,w11=bfx*fy;tr=td[i00]*w00+td[i10]*w10+td[i01]*w01+td[i11]*w11;tg=td[i00+1]*w00+td[i10+1]*w10+td[i01+1]*w01+td[i11+1]*w11;tb=td[i00+2]*w00+td[i10+2]*w10+td[i01+2]*w01+td[i11+2]*w11} // close range: filtered magnification instead of blocks
       let R=tr*kRp*vg*ivw+hz0,Gc=tg*kGp*vg*ivw+hz1,B=tb*kBp*vg*ivw+hz2;
       if(hasHLK){const dtp=(y-y0)*iu,ao=(zz<1.3?1-wAO*(1-zz*.77)*(1-zz*.77):1)*(zz<.32?1-.3*(1-zz/.32)*(1-zz/.32):1)*(dtp<.6?1-.22*(1-dtp/.6)*(1-dtp/.6):1)*fk,gk=zz>12?1:zz*.083,lm=R*.3+Gc*.59+B*.11;R=(lm+(R-lm)*wSat)*ao*(1.03-.07*gk);Gc=(lm+(Gc-lm)*wSat)*ao;B=(lm+(B-lm)*wSat)*ao*(.97+.1*gk);
         if(shn>0){const s=Math.sin(tx*.013+shp)-.62;if(s>0){const q=s*2.6*s*2.6*shn*ao*.4;R+=q*62;Gc+=q*54;B+=q*72} // pearl sheen: a slow highlight sweeps along every face
           if(((tx*131+y*197+gfr*53)&1023)===0){R+=shn*150;Gc+=shn*140;B+=shn*160}}} // and the odd glint on the nacre // nacre keeps its pink, aqua and cream; the foot of a wall is in shadow
       if(te){const a=te[i+3]/255;R+=te[i]*a*.95;Gc+=te[i+1]*a*.95;B+=te[i+2]*a*.95}
-      if(dg){const vp=Math.max(0,Math.min(1,(y-y0)/(yBot-y0))),u=kdn===2?((kdlf?kdi:1-kdi)+tx/TS)/2:.5+(tx/TS-.5)*.55,hw=(u-.5)/.17,f=dgs*Math.exp(-hw*hw)*(vp<.3?0:Math.min(1,(vp-.3)/.25))*.55;R+=170*f;Gc+=108*f;B+=30*f} // only the doorway itself: a warm pool of light on and round the door
+      if(dg&&gRim){const vp=Math.max(0,Math.min(1,(y-y0)/(yBot-y0))),ur=tx/TW,e=ur<1-ur?ur:1-ur,f=dgs*Math.exp(-e*e/.012)*(vp<.2?0:Math.min(1,(vp-.2)/.45))*.3;R+=gR*f;Gc+=gG*f;B+=gB*f} // opt-in (kd.rim, the Hall of Illusions): a soft coloured light along the edges of the door only, so the painted door itself is not washed out
+      else if(dg){const vp=Math.max(0,Math.min(1,(y-y0)/(yBot-y0))),u=kdn===2?((kdlf?kdi:1-kdi)+tx/TW)/2:.5+(tx/TW-.5)*.55,hw=(u-.5)/.17,f=dgs*Math.exp(-hw*hw)*(vp<.3?0:Math.min(1,(vp-.3)/.25))*.55;R+=gR*f;Gc+=gG*f;B+=gB*f} // only the doorway itself: a warm pool of light on and round the door
       D[o]=R;D[o+1]=Gc;D[o+2]=B;
   }
 }

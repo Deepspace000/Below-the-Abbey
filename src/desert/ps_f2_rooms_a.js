@@ -171,7 +171,7 @@ function f2IslandBuild(){
   C.foes(['f2gull','f2gull','f2gull','f2crab'],[31,9,41,18],3);
   C.foes(['f2spawn','f2crab','f2spawn'],[29,24,41,33],4);
   for(const [x,y] of [[6,15],[39,11],[39,30]])C.chestAt(x,y,1);
-  C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[.9,.95,1.05]});
+  C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[.78,.84,.94],gEmit:.12,soft:[60,85,120]});   // toned down with a soft blue rim: the mist gate washed out to white at one square
   C.f2.decals={keys:['shells','weed','starfish','feet','pebbles','crab','drift','frags','shells','feet'].map(k=>'f2_dc_bd_'+k),p:.62,sz:[.42,.8],far:13,keep:(x,y)=>F2_ISLAND.PATCH.some(([a,b])=>Math.abs(x-a)<=1&&Math.abs(y-b)<=1)};
   const lv=C.done({glow:8});f2aDapple(9822,C,{amp:.24,cs:3.4});   // damp and dry patches on the sand
   return lv}

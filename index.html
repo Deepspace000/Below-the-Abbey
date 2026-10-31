@@ -90,8 +90,8 @@ function wallMip(tex,k){ // a wall picture blurred over 2^k texels, made once: a
 var PSW_ON=true; // false: the castle's walls are read texel by texel as before
 function wallMipH(tex,j,e){ // a wall picture (any height) blurred sideways over 2^j texels, made once per picture: a box wide enough that every texel is counted by some screen column
   const key=(e?'he':'hd')+j;if(tex[key])return tex[key];
-  const src=e?tex.e:tex.d,H=src.length/(TS*4),w=1<<j,h0=w>>1,out=new Uint8ClampedArray(src.length);
-  for(let y=0;y<H;y++){const r=y*TS*4;for(let x=0;x<TS;x++){let a=0,b=0,c=0;const lo=x-h0;for(let d=0;d<w;d++){let xx=lo+d;xx=xx<0?0:xx>TS-1?TS-1:xx;const i=r+xx*4;a+=src[i];b+=src[i+1];c+=src[i+2]}const o=r+x*4;out[o]=a/w;out[o+1]=b/w;out[o+2]=c/w;out[o+3]=255}}
+  const src=e?tex.e:tex.d,TW=tex.tw||TS,H=src.length/(TW*4),w=1<<j,h0=w>>1,out=new Uint8ClampedArray(src.length); // tex.tw: a wider picture (opt-in, the painted walls of the Hall of Illusions)
+  for(let y=0;y<H;y++){const r=y*TW*4;for(let x=0;x<TW;x++){let a=0,b=0,c=0;const lo=x-h0;for(let d=0;d<w;d++){let xx=lo+d;xx=xx<0?0:xx>TW-1?TW-1:xx;const i=r+xx*4;a+=src[i];b+=src[i+1];c+=src[i+2]}const o=r+x*4;out[o]=a/w;out[o+1]=b/w;out[o+2]=c/w;out[o+3]=255}}
   return tex[key]=out;
 }
 function stoneTex(seed,o){
@@ -2688,7 +2688,8 @@ function render3D(){
     const wh=TEX[ti].wh||(LEVEL===3&&mx>0&&my>0&&mx<MW-1&&my<MH-1?1.55:CEILH); // Thornwick's houses are one storey under the high sky; the forest round it stays tall
     const skyW=(LEVEL===22&&g===1&&T_SKY[0]!==undefined)||(!!TEX[ti].sky&&!!SKYPAN),tileW=!skyW&&!TEX[ti].h&&wh>2&&(g>=100||g===1||g===2||g===6||(g>=9&&g<=14)||(g>=20&&g<=22)); // tall plain walls repeat their pattern instead of stretching
     const tex=TEX[ti],te=tex.e,wlv=fastW&&perp>4?Math.min(4,Math.floor(Math.log2(TS*perp/F*.7))):0,td=wlv>0&&tex.d&&tex.d.length===TS*TS*4?wallMip(tex,wlv):tex.d; // far facades are read from blurred copies
-    let tdW=td,teW=te;if(td&&wlv===0&&PSW_ON&&LEVEL>=9710&&LEVEL<=9998){const sp=TS*perp/(F*Math.abs(side===0?rX:rY));if(sp>1.5){const jw=Math.min(6,Math.ceil(Math.log2(sp)));tdW=wallMipH(tex,jw,0);if(te)teW=wallMipH(tex,jw,1)}} // castle: a wall seen far off or edge-on has many texels under one screen column; a thin gold frame or lit doorway was picked up by one column and missed by the next, so it showed as a lone bright strip (see wallMipH)
+    const TWt=tex.tw||TS;if(TWt!==TS){tx=(wx*TWt)|0;if((side===0&&rX>0)||(side===1&&rY<0))tx=TWt-1-tx} // opt-in wider pictures (tex.tw, only the painted walls of the Hall of Illusions): more texels across one square
+    let tdW=td,teW=te;if(td&&wlv===0&&PSW_ON&&LEVEL>=9710&&LEVEL<=9998){const sp=TWt*perp/(F*Math.abs(side===0?rX:rY));if(sp>1.5){const jw=Math.min(6,Math.ceil(Math.log2(sp)));tdW=wallMipH(tex,jw,0);if(te)teW=wallMipH(tex,jw,1)}} // castle: a wall seen far off or edge-on has many texels under one screen column; a thin gold frame or lit doorway was picked up by one column and missed by the next, so it showed as a lone bright strip (see wallMipH)
     const kd=doorLv&&g>=100?KH_DOOR[g]:undefined,dg=kd!==undefined&&kd.lvl!==undefined&&!kd.noGlow,dgs=dg?(.7+.18*Math.sin(t*2.1+mx*1.7+my*.9))*(1-Math.min(.55,perp*.008)):0; // a doorway that can be entered glows softly, brighter near the threshold
     const eyeR=TERRACE?CAMZ-THF[hi]:TERR_NOW?CAMZ-terrH(hx,hy):EYE,unit=F/perp,lineH=wh*unit,y0=HH-(wh-eyeR)*unit,yBot=HH+eyeR*unit;let yT=y0;
     if(tex.cren&&((wx*2)%1)>.55)yT=y0+tex.cren*unit; // a battlement: every other stretch of the wall top is a gap between two merlons
@@ -2715,11 +2716,11 @@ function render3D(){
     for(let k=0,j=0;k<nrP;k+=3,j++){const A=nr[k+2],c=wr2[j];if(A>LTHR*(1+1.15*c)){WRA[nra]=A;WRC[nra]=c;nra++}}
     const stepT=TS/lineH,smw=Math.min(hzmax,dist*hzrate),skw=(lb*.55+lt*.45+.05)*smw,ivw=(1-smw)*(HLK?HLK.wallGain:1);
     let fk=1;if(HLK){fk=HGW_FACE[face]*(.93+.14*(((Math.imul(mx,73856093)^Math.imul(my,19349663))>>>8&255)/255));const wxw=side===0?hy:hx,fr=wxw-Math.floor(wxw),eW=.08;if(fr<eW||fr>1-eW){const lo=fr<eW,ax=side===0?0:lo?-1:1,ay=side===0?(lo?-1:1):0,nx=side===0?-stx:0,ny=side===1?-sty:0,cA=hgwW(mx+ax,my+ay,grid),cB=hgwW(mx+ax+nx,my+ay+ny,grid),kk=(lo?fr:1-fr)/eW;if(cA&&cB)fk*=.6+.4*kk;else if(!cA&&!cB)fk*=1.32-.32*kk}} // concave corner: dark line, convex corner: light line, by facing
-    const bil=!!HLK&&!!tex.h&&!skyW&&!tileW&&unit>105;let bx0=0,bx1=0,bfx=0;if(bil){const fl=(side===0&&rX>0)||(side===1&&rY<0),c=(fl?TS-wx*TS:wx*TS)-.5,x0=Math.floor(c);bfx=c-x0;bx0=x0&(TS-1);bx1=(x0+1)&(TS-1)}
+    const bil=!!HLK&&!!tex.h&&!skyW&&!tileW&&unit>105;let bx0=0,bx1=0,bfx=0;if(bil){const fl=(side===0&&rX>0)||(side===1&&rY<0),c=(fl?TWt-wx*TWt:wx*TWt)-.5,x0=Math.floor(c);bfx=c-x0;bx0=x0&(TWt-1);bx1=(x0+1)&(TWt-1)}
     const iu=1/unit,hasHLK=!!HLK,texH=tex.h||0,vmode=skyW?0:tileW?1:texH?2:3;
     let tdU=tdW,teU=teW,rowsT=0; // on a terrace the painting reads a column-major copy of the picture where there is one (see wallTexT)
     if(TERRACE&&!bil&&td===tex.d&&td){const dT=wallTexT(ti,tex);if(dT){if(!te){tdU=dT;rowsT=WTR[ti]}else{const eT=wallTexE(ti,te);if(eT){tdU=dT;teU=eT;rowsT=WTR[ti]}}}}
-    {const P=WSP;P[0]=y0;P[1]=stepT;P[2]=vmode;P[3]=wh;P[4]=texH;P[5]=yBot;P[6]=iu;P[7]=ivw;P[8]=hzr[0]*skw;P[9]=hzr[1]*skw;P[10]=hzr[2]*skw;P[11]=lb*tbR;P[12]=lb*tbG;P[13]=lb*tbB;P[14]=RLR;P[15]=RLG;P[16]=na;P[17]=nra;P[18]=fk;P[19]=hasHLK?HLK.wallAO:0;P[20]=hasHLK?HLK.wallSat*(1+.25*day):1;P[21]=hasHLK?1:0;P[22]=bil?1:0;P[23]=bx0;P[24]=bx1;P[25]=bfx;P[26]=dg?1:0;P[27]=dgs;P[28]=dg?kd.n:0;P[29]=dg&&kd.lf?1:0;P[30]=dg?kd.i:0;P[31]=rowsT;P[32]=hasHLK&&hgtIsTown(LEVEL)?HLK.sheen*(.12+.88*day):0;P[33]=t*(hasHLK?HLK.sheenSpeed:0)+(mx*.7+my*.5);P[34]=Math.floor(t*4)}
+    {const P=WSP;P[0]=y0;P[1]=stepT;P[2]=vmode;P[3]=wh;P[4]=texH;P[5]=yBot;P[6]=iu;P[7]=ivw;P[8]=hzr[0]*skw;P[9]=hzr[1]*skw;P[10]=hzr[2]*skw;P[11]=lb*tbR;P[12]=lb*tbG;P[13]=lb*tbB;P[14]=RLR;P[15]=RLG;P[16]=na;P[17]=nra;P[18]=fk;P[19]=hasHLK?HLK.wallAO:0;P[20]=hasHLK?HLK.wallSat*(1+.25*day):1;P[21]=hasHLK?1:0;P[22]=bil?1:0;P[23]=bx0;P[24]=bx1;P[25]=bfx;P[26]=dg?1:0;P[27]=dgs;P[28]=dg?kd.n:0;P[29]=dg&&kd.lf?1:0;P[30]=dg?kd.i:0;P[31]=rowsT;P[32]=hasHLK&&hgtIsTown(LEVEL)?HLK.sheen*(.12+.88*day):0;P[33]=t*(hasHLK?HLK.sheenSpeed:0)+(mx*.7+my*.5);P[34]=Math.floor(t*4);P[35]=TWt;const gc=dg&&kd.gcol;P[36]=gc?gc[0]:170;P[37]=gc?gc[1]:108;P[38]=gc?gc[2]:30;P[39]=dg&&kd.rim?1:0}
     let tcN=0,tcY=0;if(tcut&&sy0<=sy1){tcY=Math.max(sy0,Math.ceil(yT));tcN=Math.min(TCUTB.length/3,sy1-tcY+1,Math.max(1,Math.round(lineH*(tex.topFeather||.05))));for(let k=0;k<tcN;k++){const o=((tcY+k)*VW+x)*4;TCUTB[k*3]=D[o];TCUTB[k*3+1]=D[o+1];TCUTB[k*3+2]=D[o+2]}}
     if(sy0<=sy1)wallSpan(D,tdU,teU,sy0,sy1,x,tx);
     if(sy2<=sy3)wallSpan(D,tdU,teU,sy2,sy3,x,tx);
@@ -9785,7 +9786,7 @@ const WCL=new Int16Array(THN),WCH=new Int16Array(THN),WLA=new Float64Array(32),W
    pixel is a cache miss. In the copy, a column is contiguous. The copy is made a little at a time (WTB bytes a frame); until it exists the plain picture is used, with the same result. */
 const WTD=[],WTSD=[],WTR=[],WTE=[],WTSE=[];let WTB=0;
 function wallTexT(ti,tex){ // -> the column-major copy of wall picture ti, or null if it is not made yet
-  const d=tex.d;if(!d)return null;
+  const d=tex.d;if(!d||tex.tw)return null;
   if(WTSD[ti]===d)return WTD[ti];
   if(WTB>600000||PERF_EXACT)return null;
   const rows=d.length/(TS*4);if(rows!==(rows|0)||rows<1)return null;
@@ -9805,24 +9806,25 @@ function wallTexE(ti,te){ // the same for the glow picture (windows lit at night
 // WSP: 0 y0, 1 stepT, 2 vmode, 3 wall height, 4 texture rows (0 = square), 5 yBot, 6 1/unit, 7 ivw, 8-10 haze r,g,b, 11-13 base light r,g,b, 14-15 red light r,g, 16 warm lights, 17 red lights, 18 corner shade, 19 wallAO, 20 wallSat, 21 look, 22 filtered, 23-25 filter x0,x1,frac, 26 door glow, 27 its strength, 28-30 door n,lf,i, 31 rows of a column-major picture (0 = row-major)
 const WSP=new Float64Array(40);
 function wallSpan(D,td,te,ya0,yz,x,tx){
-  const P=WSP,y0=P[0],stepT=P[1],vmode=P[2]|0,wh=P[3],texH=P[4]|0,yBot=P[5],iu=P[6],ivw=P[7],hz0=P[8],hz1=P[9],hz2=P[10],bR=P[11],bG=P[12],bB=P[13],RLRv=P[14],RLGv=P[15],na=P[16]|0,nra=P[17]|0,fk=P[18],wAO=P[19],wSat=P[20],hasHLK=P[21]!==0,bil=P[22]!==0,bx0=P[23]|0,bx1=P[24]|0,bfx=P[25],dg=P[26]!==0,dgs=P[27],kdn=P[28],kdlf=P[29],kdi=P[30],rowsT=P[31]|0,shn=P[32],shp=P[33],gfr=P[34]|0;
+  const P=WSP,y0=P[0],stepT=P[1],vmode=P[2]|0,wh=P[3],texH=P[4]|0,yBot=P[5],iu=P[6],ivw=P[7],hz0=P[8],hz1=P[9],hz2=P[10],bR=P[11],bG=P[12],bB=P[13],RLRv=P[14],RLGv=P[15],na=P[16]|0,nra=P[17]|0,fk=P[18],wAO=P[19],wSat=P[20],hasHLK=P[21]!==0,bil=P[22]!==0,bx0=P[23]|0,bx1=P[24]|0,bfx=P[25],dg=P[26]!==0,dgs=P[27],kdn=P[28],kdlf=P[29],kdi=P[30],rowsT=P[31]|0,shn=P[32],shp=P[33],gfr=P[34]|0,TW=P[35]|0||TS,gR=P[36],gG=P[37],gB=P[38],gRim=P[39]!==0; // 36-38: door glow colour (kd.gcol, default warm), 39: rim only (kd.rim) // 35: texels across (tex.tw, opt-in wider pictures)
   let tyf=(ya0-y0)*stepT;
   for(let y=ya0;y<=yz;y++,tyf+=stepT){
       const v=vmode===0?(((tyf*CEILH)|0)&(TS-1)):vmode===1?(((tyf*wh/1.55)|0)&(TS-1)):vmode===2?Math.min(texH-1,(tyf*texH/TS)|0):tyf>=TS?TS-1:(tyf|0); // sky walls tile upward instead of stretching
-      const i=rowsT?(tx*rowsT+v)*4:(v*TS+tx)*4,o=(y*VW+x)*4;
+      const i=rowsT?(tx*rowsT+v)*4:(v*TW+tx)*4,o=(y*VW+x)*4;
       const vg=VGT[y],zz=(yBot-y)*iu,dz=zz-.66,dz2=dz*dz;
       let lr=0,lg=0,lb2=0,lpr=0;
       for(let k=0;k<na;k++){const q=WLA[k]/(1+1.15*(WLC[k]+dz2));lr+=q*WLR[k];lg+=q*WLG[k];lb2+=q*WLB[k]}
       for(let k=0;k<nra;k++)lpr+=WRA[k]/(1+1.15*(WRC[k]+dz2));
       const kRp=bR+lr+lpr*RLRv,kGp=bG+lg+lpr*RLGv,kBp=bB+lb2+lpr*.1;
       let tr=td[i],tg=td[i+1],tb=td[i+2];
-      if(bil){const vf=tyf*texH/TS-.5,vy0=Math.floor(vf),fy=vf-vy0,ya=(vy0<0?0:vy0>texH-1?texH-1:vy0)*TS,yb=(vy0+1<0?0:vy0+1>texH-1?texH-1:vy0+1)*TS,i00=(ya+bx0)*4,i10=(ya+bx1)*4,i01=(yb+bx0)*4,i11=(yb+bx1)*4,w00=(1-bfx)*(1-fy),w10=bfx*(1-fy),w01=(1-bfx)*fy,w11=bfx*fy;tr=td[i00]*w00+td[i10]*w10+td[i01]*w01+td[i11]*w11;tg=td[i00+1]*w00+td[i10+1]*w10+td[i01+1]*w01+td[i11+1]*w11;tb=td[i00+2]*w00+td[i10+2]*w10+td[i01+2]*w01+td[i11+2]*w11} // close range: filtered magnification instead of blocks
+      if(bil){const vf=tyf*texH/TS-.5,vy0=Math.floor(vf),fy=vf-vy0,ya=(vy0<0?0:vy0>texH-1?texH-1:vy0)*TW,yb=(vy0+1<0?0:vy0+1>texH-1?texH-1:vy0+1)*TW,i00=(ya+bx0)*4,i10=(ya+bx1)*4,i01=(yb+bx0)*4,i11=(yb+bx1)*4,w00=(1-bfx)*(1-fy),w10=bfx*(1-fy),w01=(1-bfx)*fy,w11=bfx*fy;tr=td[i00]*w00+td[i10]*w10+td[i01]*w01+td[i11]*w11;tg=td[i00+1]*w00+td[i10+1]*w10+td[i01+1]*w01+td[i11+1]*w11;tb=td[i00+2]*w00+td[i10+2]*w10+td[i01+2]*w01+td[i11+2]*w11} // close range: filtered magnification instead of blocks
       let R=tr*kRp*vg*ivw+hz0,Gc=tg*kGp*vg*ivw+hz1,B=tb*kBp*vg*ivw+hz2;
       if(hasHLK){const dtp=(y-y0)*iu,ao=(zz<1.3?1-wAO*(1-zz*.77)*(1-zz*.77):1)*(zz<.32?1-.3*(1-zz/.32)*(1-zz/.32):1)*(dtp<.6?1-.22*(1-dtp/.6)*(1-dtp/.6):1)*fk,gk=zz>12?1:zz*.083,lm=R*.3+Gc*.59+B*.11;R=(lm+(R-lm)*wSat)*ao*(1.03-.07*gk);Gc=(lm+(Gc-lm)*wSat)*ao;B=(lm+(B-lm)*wSat)*ao*(.97+.1*gk);
         if(shn>0){const s=Math.sin(tx*.013+shp)-.62;if(s>0){const q=s*2.6*s*2.6*shn*ao*.4;R+=q*62;Gc+=q*54;B+=q*72} // pearl sheen: a slow highlight sweeps along every face
           if(((tx*131+y*197+gfr*53)&1023)===0){R+=shn*150;Gc+=shn*140;B+=shn*160}}} // and the odd glint on the nacre // nacre keeps its pink, aqua and cream; the foot of a wall is in shadow
       if(te){const a=te[i+3]/255;R+=te[i]*a*.95;Gc+=te[i+1]*a*.95;B+=te[i+2]*a*.95}
-      if(dg){const vp=Math.max(0,Math.min(1,(y-y0)/(yBot-y0))),u=kdn===2?((kdlf?kdi:1-kdi)+tx/TS)/2:.5+(tx/TS-.5)*.55,hw=(u-.5)/.17,f=dgs*Math.exp(-hw*hw)*(vp<.3?0:Math.min(1,(vp-.3)/.25))*.55;R+=170*f;Gc+=108*f;B+=30*f} // only the doorway itself: a warm pool of light on and round the door
+      if(dg&&gRim){const vp=Math.max(0,Math.min(1,(y-y0)/(yBot-y0))),ur=tx/TW,e=ur<1-ur?ur:1-ur,f=dgs*Math.exp(-e*e/.012)*(vp<.2?0:Math.min(1,(vp-.2)/.45))*.3;R+=gR*f;Gc+=gG*f;B+=gB*f} // opt-in (kd.rim, the Hall of Illusions): a soft coloured light along the edges of the door only, so the painted door itself is not washed out
+      else if(dg){const vp=Math.max(0,Math.min(1,(y-y0)/(yBot-y0))),u=kdn===2?((kdlf?kdi:1-kdi)+tx/TW)/2:.5+(tx/TW-.5)*.55,hw=(u-.5)/.17,f=dgs*Math.exp(-hw*hw)*(vp<.3?0:Math.min(1,(vp-.3)/.25))*.55;R+=gR*f;Gc+=gG*f;B+=gB*f} // only the doorway itself: a warm pool of light on and round the door
       D[o]=R;D[o+1]=Gc;D[o+2]=B;
   }
 }
@@ -77753,6 +77755,28 @@ function f2RoofPan(key){F2.roof=F2.roof||{};if(F2.roof[key])return F2.roof[key];
   return F2.roof[key]=x.getImageData(0,0,1024,256).data}
 /* a painted texture (assets/ps tex) as a wall tile */
 function f2TexWall(key,wh,o){o=o||{};const im=IMG[key];if(!im||!im.width)return null;const nm='f2w_'+key;IMG['gyp_'+nm]=im;return gyTile(nm,wh,{gain:o.gain||1.0,rgb:o.rgb||[1,1,1],tag:'f2tw'+key})}
+/* a painted wall panel (assets/ps/f2_wp_*, Gemini, cut by tools/f2_ingest_walls.py) as a wall tile 256 texels wide (the engine's opt-in tex.tw, render3D/wallSpan): the panel fills the whole face, plinth to cornice */
+function f2PanelGid(name,wh,o){o=o||{};const key='ps_f2_wp_'+name,k='wp'+name+'|'+wh+'|'+(o.tag||'');if(F2.tiles[k]!==undefined)return F2.tiles[k];const im=IMG[key];if(!im||!im.width)return null;
+  const TW=256,Hp=Math.round(TW*wh),c=document.createElement('canvas');c.width=TW;c.height=Hp;const x=c.getContext('2d');x.imageSmoothingQuality='high';
+  if(o.flip){x.translate(TW,0);x.scale(-1,1)}x.drawImage(im,0,0,TW,Hp);x.setTransform(1,0,0,1,0,0);
+  x.globalCompositeOperation='multiply';const gr=x.createLinearGradient(0,0,0,Hp);gr.addColorStop(0,'rgb(225,228,236)');gr.addColorStop(.6,'rgb(250,250,252)');gr.addColorStop(1,'rgb(190,192,196)');x.fillStyle=gr;x.fillRect(0,0,TW,Hp);x.globalCompositeOperation='source-over';   // a little darker under the vault and at the foot
+  const d=x.getImageData(0,0,TW,Hp).data,gain=o.gain||1.5,m=o.rgb||[1,1,1],cn=o.con||1,cp=v=>cn===1?v:Math.max(0,(v-40)*cn+40);   // con: more contrast round the dark stone, so the mouldings read
+  for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,cp(d[i])*gain*m[0]);d[i+1]=Math.min(255,cp(d[i+1])*gain*m[1]);d[i+2]=Math.min(255,cp(d[i+2])*gain*m[2])}
+  let em=null;if(o.emit){em=new Uint8ClampedArray(d.length);for(let i=0;i<d.length;i+=4){em[i]=d[i]*o.emit;em[i+1]=d[i+1]*o.emit;em[i+2]=d[i+2]*o.emit;em[i+3]=255}}   // a door panel is a little self lit, like gyTile's fronts
+  const id=addTex(d,em);TEX[id].h=Hp;TEX[id].wh=wh;TEX[id].tw=TW;const gid=KH_NEXT_GID++;T_TILE[gid]=id;
+  {let r=0,g=0,b=0,n=0;for(let i=0;i<d.length;i+=4*37){r+=d[i];g+=d[i+1];b+=d[i+2];n++}(GY.col=GY.col||{})[gid]=[r/n|0,g/n|0,b/n|0]}
+  return F2.tiles[k]=gid}
+/* a painted door (assets/ps sprite) as a 256 texel wide wall tile, standing on the floor at the full width of the square, the painted ashlar panel of the hall behind and above it; partly self lit (emit) like gyTile's fronts */
+function f2Door256(img,wh,o){o=o||{};const k='dr'+img+'|'+wh+'|'+(o.tag||'');if(F2.tiles[k]!==undefined)return F2.tiles[k];const f=IMG[img];if(!f||!f.width)return null;
+  const TW=256,Hp=Math.round(TW*wh),c=document.createElement('canvas');c.width=TW;c.height=Hp;const x=c.getContext('2d');x.imageSmoothingQuality='high';
+  const bg=IMG['ps_f2_wp_'+(o.bg||'ashlar')];if(bg&&bg.width)x.drawImage(bg,0,0,TW,Hp);else{x.fillStyle='#16181c';x.fillRect(0,0,TW,Hp)}
+  const fh=f.height*TW/f.width;x.drawImage(f,0,Hp-fh,TW,fh);
+  x.globalCompositeOperation='multiply';const gr=x.createLinearGradient(0,0,0,Hp);gr.addColorStop(0,'rgb(225,228,236)');gr.addColorStop(.6,'rgb(250,250,252)');gr.addColorStop(1,'rgb(200,202,206)');x.fillStyle=gr;x.fillRect(0,0,TW,Hp);x.globalCompositeOperation='source-over';
+  const d=x.getImageData(0,0,TW,Hp).data,gain=o.gain||1.0,m=o.rgb||[1,1,1],ek=o.emit===undefined?.06:o.emit,em=ek?new Uint8ClampedArray(d.length):null;
+  for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,d[i]*gain*m[0]);d[i+1]=Math.min(255,d[i+1]*gain*m[1]);d[i+2]=Math.min(255,d[i+2]*gain*m[2]);if(em){em[i]=d[i]*ek;em[i+1]=d[i+1]*ek;em[i+2]=d[i+2]*ek;em[i+3]=255}}
+  const id=addTex(d,em);TEX[id].h=Hp;TEX[id].wh=wh;TEX[id].tw=TW;const gid=KH_NEXT_GID++;T_TILE[gid]=id;
+  {let r=0,g=0,b=0,n=0;for(let i=0;i<d.length;i+=4*37){r+=d[i];g+=d[i+1];b+=d[i+2];n++}(GY.col=GY.col||{})[gid]=[r/n|0,g/n|0,b/n|0]}
+  return F2.tiles[k]=gid}
 /* the air: each room's own mist, light and weather effect (snow falling, heat shimmer) */
 {const _w=weatherNow;weatherNow=function(){
   if(f2Is(LEVEL)&&f2InRoof())return {id:'fog',n:'Indoors',fog:.01,haze:0,dark:0,mix:.2,col:[60,40,24],text:'',fx:null};
@@ -78194,11 +78218,12 @@ function f2SignPlaque(C,x,y,src,out,lines,npc,text,o){o=o||{};const k=f2Lettered
 function f2RetGate(C,img,o){o=o||{};const im=IMG[img];if(!im||!im.width)return;
   const k=f2Lettered(img.replace(/^ps_/,''),img.replace(/^ps_/,'')+'_lt',['THE HALL','OF ILLUSIONS'],{box:o.box||[.4,.065,.6,.115],col:'#d8e4f0',h:NPC_H[img]});
   const wh=2.3,rows=C.rows;
-  if(o.one){const g0=f2FacGid(k,0,1,Math.min(o.wh||3.4,+(im.height/im.width).toFixed(2)),{tex:o.tex||'texBlack_2',emit:.3,fit:false,rgb:o.rgb}),g=C.chars[rows[38][24]];if(g0!=null&&g!==undefined&&KH_DOOR[g])T_TILE[g]=T_TILE[g0]}
+  if(o.one){const g0=f2FacGid(k,0,1,Math.min(o.wh||3.4,+(im.height/im.width).toFixed(2)),{tex:o.tex||'texBlack_2',emit:o.gEmit===undefined?.3:o.gEmit,fit:false,rgb:o.rgb}),g=C.chars[rows[38][24]];if(g0!=null&&g!==undefined&&KH_DOOR[g])T_TILE[g]=T_TILE[g0]}
   else for(let i=0;i<3;i++){const x=23+i,g0=f2FacGid(k,i,3,wh,{tex:'texBlack_2',emit:.25});if(g0==null)continue;
     if(x===24){const g=C.chars[rows[38][24]];if(g!==undefined&&KH_DOOR[g])T_TILE[g]=T_TILE[g0]}else C.solid(x,38,C.ch(g0))}
   for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(d.k==='sign_gy'&&d.y===37&&d.x===23)C.decor.splice(i,1)}
   if(o.one&&C.rows[39]&&C.rows[39][23]&&!KH_DOOR[C.chars[C.rows[39][24]]])C.rows[39][24]=C.rows[39][23];   // nothing taller stands behind the gate
+  if(o.soft){const g=C.chars[rows[38][24]];if(g!==undefined&&KH_DOOR[g]){KH_DOOR[g].rim=1;KH_DOOR[g].gcol=o.soft}C.light(24,36,[.55,.66,.82]);return}   // opt-in: a soft coloured rim on the gate and a light a square further out, so the silver mist keeps its swirls (the island)
   C.light(24,37,[.85,1.0,1.25])}
 /* ---------- the parchment area maps of the second floor: each square in the colour of its own floor or wall (sampled from the painted textures), inked on parchment;
    trees as round crowns, water with ripple strokes, the puzzle pieces and people as small marks, places numbered with a key (the cloud cover of ps_fog.js applies as on every castle map) ---------- */
@@ -78477,8 +78502,12 @@ function psf2HubBuild(info){
   // ---- the links (the contract table): the seven illusion doors and the Grand Stair down; painted doors of the castle ----
   const doorGid=(st)=>{try{return pspDoorGid(st,PSF2H.WH)}catch(e){return null}};
   // every illusion door has its own painted front, in the world it opens into: living oak and ivy, driftwood and shells, frosted oak and icicles, a red and gilded Venetian door, carved sandstone, rotting planks and moss, a door of eyes
-  const HD={9821:'forest',9822:'island',9823:'snow',9824:'water',9825:'desert',9826:'swamp',9827:'night'},hdGid=k=>IMG['ps_f2_hd_'+k]&&IMG['ps_f2_hd_'+k].width?f2FacGid('ps_f2_hd_'+k,0,1,PSF2H.WH,{tex:'texBlack_2',fit:false,emit:.06,rgb:[.86,.86,.88]}):null;
-  for(const l of pspLinksFrom(id)){if(!l.at)continue;const g=pspPortal(C,l,{style:'great'});const st=/Grand Stair/.test(l.name)?'stairarch':'great',b=(HD[l.to]&&hdGid(HD[l.to]))||doorGid(st);if(g!=null&&b!=null&&T_TILE[b]!==undefined){T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b]}}
+  // round 4: each door is a whole painted panel (Gemini, assets/ps/f2_wp_door_*): the carved black stone arch, the door leaf down to the floor and the wall above it up to the cornice, in the same stone as the painted wall panels round it
+  const hdPanel=k=>IMG['ps_f2_wp_door_'+k]&&IMG['ps_f2_wp_door_'+k].width?f2PanelGid('door_'+k,PSF2H.WH,{gain:1.3*({island:.74,desert:.6,snow:.86,swamp:1.75,night:1.2,stair:.9}[k]||1),con:1.1,rgb:[.94,.97,1.02],emit:.05}):null;
+  const HD={9821:'forest',9822:'island',9823:'snow',9824:'water',9825:'desert',9826:'swamp',9827:'night'},HDRGB={island:[.7,.76,.8],snow:[.72,.76,.82],desert:[.76,.7,.62]},hdGid=k=>hdPanel(k)||(IMG['ps_f2_hd_'+k]&&IMG['ps_f2_hd_'+k].width?(IMG.ps_f2_wp_ashlar&&IMG.ps_f2_wp_ashlar.width?f2Door256('ps_f2_hd_'+k,PSF2H.WH,{rgb:HDRGB[k]||[.86,.86,.88],gain:1.05,emit:.05}):null)||f2FacGid('ps_f2_hd_'+k,0,1,PSF2H.WH,{tex:'texBlack_2',fit:false,emit:.04,rgb:HDRGB[k]||[.86,.86,.88],dtag:HDRGB[k]?'t':''}):null);   // the pale doors (shells, frost, sandstone) are toned down so the hall's lights do not wash them out
+  // the glow of a world door: a soft rim of its world's colour along the edges of the door (engine opt-in kd.rim/kd.gcol), not the warm pool over the middle that whited out the pale doors
+  const HDGLOW={9821:[60,120,50],9822:[40,95,135],9823:[90,110,140],9824:[130,70,70],9825:[140,100,40],9826:[70,100,40],9827:[140,30,30]};
+  for(const l of pspLinksFrom(id)){if(!l.at)continue;const g=pspPortal(C,l,{style:'great'});const st=/Grand Stair/.test(l.name)?'stairarch':'great',b=(HD[l.to]&&hdGid(HD[l.to]))||(st==='stairarch'&&hdPanel('stair'))||doorGid(st);if(st==='stairarch'&&g!=null&&KH_DOOR[g]&&hdPanel('stair')!=null){KH_DOOR[g].rim=1;KH_DOOR[g].gcol=[60,70,95]}/* the open stair arch: a cold rim, not the warm pool that turned its darkness orange */if(g!=null&&b!=null&&T_TILE[b]!==undefined){T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b]}if(g!=null&&KH_DOOR[g]&&HDGLOW[l.to]){KH_DOOR[g].rim=1;KH_DOOR[g].gcol=HDGLOW[l.to]}}
   // the stair to the third floor: an iron door that does not open yet
   {const b=hdGid('iron')||doorGid('iron'),g=KH_NEXT_GID++;T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b];KH_DOOR[g]={psf2:'stair3'};C.carve(51,5,51,5);C.solid(52,5,C.ch(g));C.used.add('52,5')}
   // keep clear: every landing (3 by 3), the stair arrival, the passages
@@ -78493,12 +78522,12 @@ function psf2HubBuild(info){
   // the name of each door on a small plaque of cream marble in a gilded frame beside it (the castle's black sign boards were too big beside the painted doors)
   const plq=(x,y,wd,id2)=>{const w=NAMES[id2].split(' '),h=Math.ceil(w.length/2),k=IMG.ps_f2_plaque_blank&&IMG.ps_f2_plaque_blank.width?f2Lettered('f2_plaque_blank','f2_hubpl_'+id2,[w.slice(0,h).join(' '),w.slice(h).join(' ')],{h:.62,col:'#100800',box:[.2,.28,.8,.74]}):null;if(!k){C.sign(x,y,wd,NAMES[id2]);return}const d=pic(k.replace(/^ps_/,''),x,y,wd,{bob:1.35,sc:1});if(!d)C.sign(x,y,wd,NAMES[id2])};
   for(const l of pspLinksFrom(id)){if(!NAMES[l.to])continue;const [x,y]=l.at;
-    if(y===3){for(const cx2 of [x-1,x+1]){const d=pic('sconce_black',cx2,4,[0,-1],{bob:1.45,sc:1});if(d)C.light(cx2,4,[.85,.7,.52])}plq(x+2,4,[0,-1],l.to);cand(x-2,4)}   // a pair of black iron sconces flanks every door of the gallery
+    if(y===3){for(const cx2 of [x-1,x+1]){const d=pic('sconce_black',cx2,4,[0,-1],{bob:1.45,sc:1});if(d)C.light(cx2,4,[.62,.52,.4])}plq(x+2,4,[0,-1],l.to);cand(x-2,4)}   // a pair of black iron sconces flanks every door of the gallery
     else if(x===2){plq(4,20,[0,-1],l.to);cand(4,24)}
     else{plq(51,20,[0,-1],l.to);cand(51,24)}}
   // each door throws a little of its own world's light into the hall: green for the forest, sea blue for the island, cold white for the snow, rose for the canals, gold for the desert, bog green for the swamp, red for the nightmare
   {const TINT={9821:[.7,1.5,.6],9822:[.5,1.1,1.6],9823:[1.2,1.3,1.6],9824:[1.5,.9,1.0],9825:[1.7,1.25,.5],9826:[.8,1.2,.5],9827:[1.6,.35,.35]};
-   for(const l of pspLinksFrom(id)){if(!TINT[l.to]||!l.at)continue;const [x,y]=l.at,lx=y===3?x:x===2?4:51,ly=y===3?4:22;C.light(lx,ly,TINT[l.to].map(v=>.42+v*.22))}}   // softened: a hint of the world's colour on the stone, not a coloured floor
+   for(const l of pspLinksFrom(id)){if(!TINT[l.to]||!l.at)continue;const [x,y]=l.at,lx=y===3?x:x===2?5:50,ly=y===3?5:22;C.light(lx,ly,TINT[l.to].map(v=>.3+v*.16))}}   // a square out from the door, so it tints the floor and walls round it and does not burn the door itself   // softened: a hint of the world's colour on the stone, not a coloured floor
   for(const [x,n] of [[12,'alcove_weeper'],[22,'alcove_monk'],[32,'alcove_maiden'],[42,'alcove_knight']])pic(n,x,4,[0,-1]);for(const [x,n] of [[11,'alcove_maiden'],[21,'alcove_knight'],[41,'alcove_weeper'],[46,'alcove_monk']])pic(n,x,6,[0,1]);   // statues in niches between the doors, so the long wall is not one run of empty panels
   for(const x of [14,24,34,44]){pic(x===24||x===34?'mirror_haunted_a':'banner_long_a',x,4,[0,-1]);pic('banner_long_b',x,6,[0,1])}
   for(const x of [5,50])pic('window_stained_tall',x,6,[0,1]);
@@ -78547,10 +78576,26 @@ function psf2HubBuild(info){
   pspSafeRect(C,2,2,W-3,H-3);
   // ---- the walls: the Great Halls' carved stone, the style of the room beside it ----
   const styleAt=(x,y)=>{for(const [a,b] of [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]]){const xx=x+a,yy=y+b;if(xx>=0&&yy>=0&&xx<W&&yy<H&&rows[yy][xx]==='.'&&room[ix(xx,yy)]>=0)return ROOMS[room[ix(xx,yy)]][1]}return 'hall'};
+  // painted panels (Gemini, 256 texels a square): every run of wall is set out in bays, a pilaster between bays, a carved feature panel in the middle of each bay and plain ashlar either side;
+  // clustered shafts flank every door; each kind of room has its own feature panels. All panels share one plinth and one cornice, so the courses run on round the hall.
+  const isDoor=(x,y)=>{if(x<0||y<0||x>=W||y>=H||rows[y][x]==='.')return false;const g=C.chars[rows[y][x]];return g!==undefined&&!!KH_DOOR[g]};
+  const FEAT={hall:['tracery','quatre','frame','twin'],statues:['rosette','niche','frame','rosette'],salon:['twin','frame','quatre'],trophy:['vine','frame','vine'],banquet:['rosette','twin','frame'],lady:['moon','twin','moon'],stair:['quatre','frame','tracery'],gallery:['moon','frame','vine'],closet:['frame'],screens:['frame']};
+  const PANEL_OK=!!(IMG.ps_f2_wp_ashlar&&IMG.ps_f2_wp_ashlar.width);
+  const panelAt=(x,y,st)=>{const op=(a,b)=>a>=0&&b>=0&&a<W&&b<H&&rows[b][a]==='.';const ns=op(x,y-1)||op(x,y+1),ew=op(x-1,y)||op(x+1,y);
+    if(!ns&&!ew)return 'ashlar';const c=ns?x:y,dA=ns?[1,0]:[0,1];
+    if(isDoor(x+dA[0],y+dA[1])||isDoor(x-dA[0],y-dA[1]))return 'shafts';   // the door bay: clustered shafts either side of the door
+    for(const s2 of [2,3])for(const sg of [1,-1])if(isDoor(x+dA[0]*s2*sg,y+dA[1]*s2*sg)){const DB=['vine','quatre','rosette','twin','moon','tracery','frame'],di=(x*3+y*5)%DB.length;return s2===2?DB[di]:(hs(x,y,7)<.5?'ashlar':'ashlar2')}   // beside the shafts: one carved panel of its own for each door, then plain ashlar before the run's rhythm starts again
+    const ph=((st.length*3+(ns?y:x)*7)%4+4)%4,m=((c+ph)%4+4)%4;
+    if(m===0)return 'pilaster';
+    if(m===2){const f=FEAT[st]||FEAT.hall,b=Math.floor((c+ph)/4);return f[((b+(ns?y:x))%f.length+f.length)%f.length]}
+    return hs(x,y,5)<.5?'ashlar':'ashlar2'};
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(rows[y][x]==='.')continue;const g=C.chars[rows[y][x]];if(g!==undefined&&KH_DOOR[g])continue;
-    const st=styleAt(x,y),edge=x===0||y===0||x===W-1||y===H-1;let kind='plain';
+    const st=styleAt(x,y),edge=x===0||y===0||x===W-1||y===H-1;
+    if(PANEL_OK&&!edge){const pn=panelAt(x,y,st),fl=/^ashlar/.test(pn)&&hs(x,y,6)<.5,p=f2PanelGid(pn,PSF2H.WH,{gain:/lady|gallery|banquet|trophy/.test(st)?1.55:1.38,con:1.22,rgb:[.9,.96,1.06],flip:fl,tag:(fl?'f':'')+(/lady|gallery|banquet|trophy/.test(st)?'b':'')});if(p!=null){C.solid(x,y,C.ch(p));continue}}
+    let kind='plain';
     if(!edge&&(y===3||y===41)&&x%5===2)kind='win';else if(!edge&&(x===23||x===33)&&y>=8&&y<=32&&y%4===0)kind='pilaster';
     C.solid(x,y,C.ch(pshTile(st,kind,kind==='plain'?(hs(x,y,3)*2)|0:0)))}
+  for(const [x,y,c] of [[38,37,[.9,.82,.72]],[50,5,[.62,.68,.88]],[26,11,[.55,.62,.8]],[30,11,[.55,.62,.8]],[26,30,[.5,.56,.74]],[30,30,[.5,.56,.74]],[28,39,[.5,.56,.72]]])C.light(x,y,c);   // a little more light on the carved walls of the nave, the Gallery of the Sleeper and the iron stair door, which read as black
   C.glow(6.5,PSH_COL.cold);
   const lv=C.finish({start:{x:28,y:38,f:0}});if(C.f2x)lv._f2x=C.f2x;
   // painted detail on the floors (drawn in the floor pass, never in the way): dust and cracks, a few dry leaves blown in, broken glass by the mirrors; a star of black and silver marble set in the floor of the Room of Mirrors, a brass moon plate in the Gallery of the Sleeper
@@ -78802,7 +78847,7 @@ function f2IslandBuild(){
   C.foes(['f2gull','f2gull','f2gull','f2crab'],[31,9,41,18],3);
   C.foes(['f2spawn','f2crab','f2spawn'],[29,24,41,33],4);
   for(const [x,y] of [[6,15],[39,11],[39,30]])C.chestAt(x,y,1);
-  C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[.9,.95,1.05]});
+  C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[.78,.84,.94],gEmit:.12,soft:[60,85,120]});   // toned down with a soft blue rim: the mist gate washed out to white at one square
   C.f2.decals={keys:['shells','weed','starfish','feet','pebbles','crab','drift','frags','shells','feet'].map(k=>'f2_dc_bd_'+k),p:.62,sz:[.42,.8],far:13,keep:(x,y)=>F2_ISLAND.PATCH.some(([a,b])=>Math.abs(x-a)<=1&&Math.abs(y-b)<=1)};
   const lv=C.done({glow:8});f2aDapple(9822,C,{amp:.24,cs:3.4});   // damp and dry patches on the sand
   return lv}

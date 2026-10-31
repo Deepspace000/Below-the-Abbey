@@ -69,6 +69,28 @@ function f2RoofPan(key){F2.roof=F2.roof||{};if(F2.roof[key])return F2.roof[key];
   return F2.roof[key]=x.getImageData(0,0,1024,256).data}
 /* a painted texture (assets/ps tex) as a wall tile */
 function f2TexWall(key,wh,o){o=o||{};const im=IMG[key];if(!im||!im.width)return null;const nm='f2w_'+key;IMG['gyp_'+nm]=im;return gyTile(nm,wh,{gain:o.gain||1.0,rgb:o.rgb||[1,1,1],tag:'f2tw'+key})}
+/* a painted wall panel (assets/ps/f2_wp_*, Gemini, cut by tools/f2_ingest_walls.py) as a wall tile 256 texels wide (the engine's opt-in tex.tw, render3D/wallSpan): the panel fills the whole face, plinth to cornice */
+function f2PanelGid(name,wh,o){o=o||{};const key='ps_f2_wp_'+name,k='wp'+name+'|'+wh+'|'+(o.tag||'');if(F2.tiles[k]!==undefined)return F2.tiles[k];const im=IMG[key];if(!im||!im.width)return null;
+  const TW=256,Hp=Math.round(TW*wh),c=document.createElement('canvas');c.width=TW;c.height=Hp;const x=c.getContext('2d');x.imageSmoothingQuality='high';
+  if(o.flip){x.translate(TW,0);x.scale(-1,1)}x.drawImage(im,0,0,TW,Hp);x.setTransform(1,0,0,1,0,0);
+  x.globalCompositeOperation='multiply';const gr=x.createLinearGradient(0,0,0,Hp);gr.addColorStop(0,'rgb(225,228,236)');gr.addColorStop(.6,'rgb(250,250,252)');gr.addColorStop(1,'rgb(190,192,196)');x.fillStyle=gr;x.fillRect(0,0,TW,Hp);x.globalCompositeOperation='source-over';   // a little darker under the vault and at the foot
+  const d=x.getImageData(0,0,TW,Hp).data,gain=o.gain||1.5,m=o.rgb||[1,1,1],cn=o.con||1,cp=v=>cn===1?v:Math.max(0,(v-40)*cn+40);   // con: more contrast round the dark stone, so the mouldings read
+  for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,cp(d[i])*gain*m[0]);d[i+1]=Math.min(255,cp(d[i+1])*gain*m[1]);d[i+2]=Math.min(255,cp(d[i+2])*gain*m[2])}
+  let em=null;if(o.emit){em=new Uint8ClampedArray(d.length);for(let i=0;i<d.length;i+=4){em[i]=d[i]*o.emit;em[i+1]=d[i+1]*o.emit;em[i+2]=d[i+2]*o.emit;em[i+3]=255}}   // a door panel is a little self lit, like gyTile's fronts
+  const id=addTex(d,em);TEX[id].h=Hp;TEX[id].wh=wh;TEX[id].tw=TW;const gid=KH_NEXT_GID++;T_TILE[gid]=id;
+  {let r=0,g=0,b=0,n=0;for(let i=0;i<d.length;i+=4*37){r+=d[i];g+=d[i+1];b+=d[i+2];n++}(GY.col=GY.col||{})[gid]=[r/n|0,g/n|0,b/n|0]}
+  return F2.tiles[k]=gid}
+/* a painted door (assets/ps sprite) as a 256 texel wide wall tile, standing on the floor at the full width of the square, the painted ashlar panel of the hall behind and above it; partly self lit (emit) like gyTile's fronts */
+function f2Door256(img,wh,o){o=o||{};const k='dr'+img+'|'+wh+'|'+(o.tag||'');if(F2.tiles[k]!==undefined)return F2.tiles[k];const f=IMG[img];if(!f||!f.width)return null;
+  const TW=256,Hp=Math.round(TW*wh),c=document.createElement('canvas');c.width=TW;c.height=Hp;const x=c.getContext('2d');x.imageSmoothingQuality='high';
+  const bg=IMG['ps_f2_wp_'+(o.bg||'ashlar')];if(bg&&bg.width)x.drawImage(bg,0,0,TW,Hp);else{x.fillStyle='#16181c';x.fillRect(0,0,TW,Hp)}
+  const fh=f.height*TW/f.width;x.drawImage(f,0,Hp-fh,TW,fh);
+  x.globalCompositeOperation='multiply';const gr=x.createLinearGradient(0,0,0,Hp);gr.addColorStop(0,'rgb(225,228,236)');gr.addColorStop(.6,'rgb(250,250,252)');gr.addColorStop(1,'rgb(200,202,206)');x.fillStyle=gr;x.fillRect(0,0,TW,Hp);x.globalCompositeOperation='source-over';
+  const d=x.getImageData(0,0,TW,Hp).data,gain=o.gain||1.0,m=o.rgb||[1,1,1],ek=o.emit===undefined?.06:o.emit,em=ek?new Uint8ClampedArray(d.length):null;
+  for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,d[i]*gain*m[0]);d[i+1]=Math.min(255,d[i+1]*gain*m[1]);d[i+2]=Math.min(255,d[i+2]*gain*m[2]);if(em){em[i]=d[i]*ek;em[i+1]=d[i+1]*ek;em[i+2]=d[i+2]*ek;em[i+3]=255}}
+  const id=addTex(d,em);TEX[id].h=Hp;TEX[id].wh=wh;TEX[id].tw=TW;const gid=KH_NEXT_GID++;T_TILE[gid]=id;
+  {let r=0,g=0,b=0,n=0;for(let i=0;i<d.length;i+=4*37){r+=d[i];g+=d[i+1];b+=d[i+2];n++}(GY.col=GY.col||{})[gid]=[r/n|0,g/n|0,b/n|0]}
+  return F2.tiles[k]=gid}
 /* the air: each room's own mist, light and weather effect (snow falling, heat shimmer) */
 {const _w=weatherNow;weatherNow=function(){
   if(f2Is(LEVEL)&&f2InRoof())return {id:'fog',n:'Indoors',fog:.01,haze:0,dark:0,mix:.2,col:[60,40,24],text:'',fx:null};
@@ -510,11 +532,12 @@ function f2SignPlaque(C,x,y,src,out,lines,npc,text,o){o=o||{};const k=f2Lettered
 function f2RetGate(C,img,o){o=o||{};const im=IMG[img];if(!im||!im.width)return;
   const k=f2Lettered(img.replace(/^ps_/,''),img.replace(/^ps_/,'')+'_lt',['THE HALL','OF ILLUSIONS'],{box:o.box||[.4,.065,.6,.115],col:'#d8e4f0',h:NPC_H[img]});
   const wh=2.3,rows=C.rows;
-  if(o.one){const g0=f2FacGid(k,0,1,Math.min(o.wh||3.4,+(im.height/im.width).toFixed(2)),{tex:o.tex||'texBlack_2',emit:.3,fit:false,rgb:o.rgb}),g=C.chars[rows[38][24]];if(g0!=null&&g!==undefined&&KH_DOOR[g])T_TILE[g]=T_TILE[g0]}
+  if(o.one){const g0=f2FacGid(k,0,1,Math.min(o.wh||3.4,+(im.height/im.width).toFixed(2)),{tex:o.tex||'texBlack_2',emit:o.gEmit===undefined?.3:o.gEmit,fit:false,rgb:o.rgb}),g=C.chars[rows[38][24]];if(g0!=null&&g!==undefined&&KH_DOOR[g])T_TILE[g]=T_TILE[g0]}
   else for(let i=0;i<3;i++){const x=23+i,g0=f2FacGid(k,i,3,wh,{tex:'texBlack_2',emit:.25});if(g0==null)continue;
     if(x===24){const g=C.chars[rows[38][24]];if(g!==undefined&&KH_DOOR[g])T_TILE[g]=T_TILE[g0]}else C.solid(x,38,C.ch(g0))}
   for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(d.k==='sign_gy'&&d.y===37&&d.x===23)C.decor.splice(i,1)}
   if(o.one&&C.rows[39]&&C.rows[39][23]&&!KH_DOOR[C.chars[C.rows[39][24]]])C.rows[39][24]=C.rows[39][23];   // nothing taller stands behind the gate
+  if(o.soft){const g=C.chars[rows[38][24]];if(g!==undefined&&KH_DOOR[g]){KH_DOOR[g].rim=1;KH_DOOR[g].gcol=o.soft}C.light(24,36,[.55,.66,.82]);return}   // opt-in: a soft coloured rim on the gate and a light a square further out, so the silver mist keeps its swirls (the island)
   C.light(24,37,[.85,1.0,1.25])}
 /* ---------- the parchment area maps of the second floor: each square in the colour of its own floor or wall (sampled from the painted textures), inked on parchment;
    trees as round crowns, water with ripple strokes, the puzzle pieces and people as small marks, places numbered with a key (the cloud cover of ps_fog.js applies as on every castle map) ---------- */
