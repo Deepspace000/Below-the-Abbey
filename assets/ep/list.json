@@ -355,5 +355,33 @@
 "h": 420,
 "kind": "sprite",
 "sheet": "props_village1"
+},
+"tex_mudtrack": {
+"file": "tex_mudtrack.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_grounds1"
+},
+"tex_villgrass": {
+"file": "tex_villgrass.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_grounds1"
+},
+"tex_wetcobble": {
+"file": "tex_wetcobble.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_grounds1"
+},
+"tex_forestfloor": {
+"file": "tex_forestfloor.webp",
+"w": 128,
+"h": 128,
+"kind": "tex",
+"sheet": "tex_grounds1"
 }
 }

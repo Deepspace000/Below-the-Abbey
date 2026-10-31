@@ -35,13 +35,13 @@ function epDecals(n,S){const L=LEVELS[n],W=MW,H=MH,hs=(x,y,s)=>hash2(x,y,s+n*13)
   const add=(k,cx,cy,sz,rot,a,mip)=>{const i=inst.length/8;inst.push(cx,cy,Math.cos(rot),Math.sin(rot),1/sz,ki(k),a===undefined?1:a,mip||7);return i};
   const put=(i,x,y)=>{if(x<0||y<0||x>=W||y>=H)return;const j=y*W+x;if(cell[j]<0){cell[j]=i;cell2[j]=i}else if(cell2[j]===cell[j])cell2[j]=i;else{cell[j]=cell2[j];cell2[j]=i}};
   const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&G.grid[y][x]===0;
-  const D=S.decals,[lo,hi]=D.sz||[.4,.8];
+  const D=S.decals,lo=Math.min(.7,(D.sz||[.4,.8])[0]),hi=Math.min(.7,(D.sz||[.4,.8])[1]);
   const fm=G.fmap;
   for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!open(x,y)||(D.keep&&D.keep(x,y)))continue;const fc=fm?fm.charCodeAt(y*W+x)-48:0,list=(D.on&&D.on[fc])||D.keys;if(!list||!list.length)continue;
     let nw=0;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]])if(!open(x+a,y+b))nw++;const p=(D.p||.4)*(1+(D.wallBias||0)*nw);
     for(let layer=0;layer<2;layer++){if(hs(x,y,301+layer*7)>=p*(layer?.55:1))continue;
-      const sz=lo+(hi-lo)*hs(x,y,302+layer*7),rot=hs(x,y,303+layer*7)*6.283,h=sz*.5*(Math.abs(Math.cos(rot))+Math.abs(Math.sin(rot))),cx=x+.15+.7*hs(x,y,304+layer*7),cy=y+.15+.7*hs(x,y,305+layer*7);
-      const k='ep_dc_'+list[(hs(x,y,306+layer*7)*list.length)|0];if(!IMG[k])continue;const di=add(k,cx,cy,sz,rot,(D.a||.92)*(.85+.15*hs(x,y,307)));put(di,x,y);for(let yy=Math.floor(cy-h);yy<=Math.floor(cy+h);yy++)for(let xx=Math.floor(cx-h);xx<=Math.floor(cx+h);xx++)if((xx!==x||yy!==y)&&open(xx,yy))put(di,xx,yy)}}
+      const sz=lo+(hi-lo)*hs(x,y,302+layer*7),rot=hs(x,y,303+layer*7)*6.283,h=sz*.5*(Math.abs(Math.cos(rot))+Math.abs(Math.sin(rot))),m=Math.min(.5,h),cx=x+m+(1-2*m)*hs(x,y,304+layer*7),cy=y+m+(1-2*m)*hs(x,y,305+layer*7);
+      const k='ep_dc_'+list[(hs(x,y,306+layer*7)*list.length)|0];if(!IMG[k])continue;const di=add(k,cx,cy,sz,rot,(D.a||.92)*(.85+.15*hs(x,y,307)));put(di,x,y)}}
   const big=(k,bx,by,sz,a)=>{const i=add(k,bx,by,sz,0,a,12),R=sz*.71;for(let y=Math.floor(by-R);y<=Math.floor(by+R);y++)for(let x=Math.floor(bx-R);x<=Math.floor(bx+R);x++){if(x<0||y<0||x>=W||y>=H)continue;const j=y*W+x;cell2[j]=cell[j];cell[j]=i}};
   for(const b of S.big||[])big('ep_dc_'+b.k,b.x,b.y,b.sz,b.a);
   return {keys,tx:keys.map(()=>null),cell,cell2,f:new Float32Array(inst),far:D.far||14,g:D.gain||[1,1,1]}}
@@ -63,15 +63,18 @@ function epApply(n,late){const S=self.EP_OFF?null:EP_SPEC[n],L=LEVELS[n];
   if(!EP.ready){epLoad();return}
   if(S.walls){const W=epWallSet(S.walls.name,epTex('ep_tex_'+S.walls.stone,S.walls.so),S.walls.brick?epTex('ep_tex_'+S.walls.brick,S.walls.bo):null);epSwapWalls(W)}else epSwapWalls(null);
   if(S.floor){const nm='ep_'+S.floor.name;if(!FLOORS[nm]){const d=epTex('ep_tex_'+S.floor.tex,S.floor.o);if(d)FLOORS[nm]=d}if(FLOORS[nm])G.fl=FLOORS[nm]}
+  if(S.floors){const keys=['fl','fl2','fl3','fl4','fl5','fl6'];for(const i in S.floors){const v=S.floors[i],nm='ep_'+v.name;if(!FLOORS[nm]){const d=epTex('ep_tex_'+v.tex,v.o);if(d)FLOORS[nm]=d}if(FLOORS[nm])G[keys[+i]]=FLOORS[nm]}}
   if(S.fvar&&!G.fmap){const fl=[];for(const v of S.fvar){const nm='ep_'+v.name;if(!FLOORS[nm]){const d=epTex('ep_tex_'+v.tex,v.o);if(d)FLOORS[nm]=d}fl.push(FLOORS[nm])}
     if(fl.every(Boolean)){const a=[];for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const nz=Math.sin(x*.55+y*.21+n)*.5+Math.sin(y*.47-x*.18+n*2.3)*.35+(hash2(x,y,n*5+11)-.5)*.5;let c=48;for(let j=0;j<S.fvar.length;j++)if(nz>S.fvar[j].at)c=49+j;a.push(String.fromCharCode(c))}
       G.fmap=a.join('');G.fl2=fl[0];G.fl3=fl[1]||fl[0];G.fl4=fl[2]||fl[0]}}
   if(S.ceil){const nm='ep_'+S.ceil.name;if(!CEILS[nm]){const d=epTex(S.ceil.img||('ep_tex_'+S.ceil.tex),S.ceil.o);if(d)CEILS[nm]=d}if(CEILS[nm])G.cl=CEILS[nm]}
   if(S.vary)epVary(n,S.vary);
+  if(S.jitter)for(const J of S.jitter)epJitter(n,J);
   if(S.pics&&!G.decor.some(d=>d.epPic))epWallPics(n,S.pics);
   if(S.street&&!G.decor.some(d=>d.epSt))epStreet(n,S.street);
   if(S.decals)L._f2dec=epDecals(n,S);
   L._epf=epFloorFx(n,S);
+  if(S.grime){if(!L._eptm){L._eptm=new Map();const seen=new Set();for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(g<100||seen.has(g)||(typeof KH_DOOR!=='undefined'&&KH_DOOR[g]))continue;seen.add(g);const ti=T_TILE[g];if(ti===undefined||L._eptm.has(ti)||!TEX[ti]||!TEX[ti].d)continue;const nt=epGrime(ti,S.grime,g);if(nt!==null)L._eptm.set(ti,nt)}}L._epf.tm=L._eptm}
   if(S.walls&&S.walls.vars&&EP.wall){const W=EP.wall;if(!W.wv){W.wv={};for(const g of [1,2]){const v=S.walls.vars[g];if(!v)continue;const ids=[g===1?W.stone:W.brick];for(const t of v){const d=epTex('ep_tex_'+t.tex,t.o||(g===1?S.walls.so:S.walls.bo));if(d)ids.push(addTex(d))}W.wv[g]=ids}}L._epf.wv=W.wv}
   if(S.grade)F2GRADE[n]=S.grade;
   if(S.amb!==undefined)G.amb=Math.max(G.amb||0,S.amb);
@@ -96,6 +99,16 @@ function epStreet(n,P){const open=(x,y)=>x>=0&&y>=0&&x<MW&&y<MH&&G.grid[y][x]===
     if(placed.some(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)<(P.gap||3)))continue;if(hash2(x,y,n*37+1)>=(P.p||.4))continue;
     const nb=placed.filter(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)<8).map(p=>p[2]);let k=ks[(hash2(x,y,n*37+2)*ks.length)|0];for(let t=0;t<ks.length&&nb.includes(k);t++)k=ks[(ks.indexOf(k)+1)%ks.length];
     placed.push([x,y,k]);G.decor.push({k:'ep_'+k,x,y,block:false,deco:true,epSt:1,loot:false,shop:false,ox:E?.28:Wt?-.28:(hash2(x,y,9)-.5)*.3,oy:S?.28:N?-.28:(hash2(x,y,8)-.5)*.3,sc:+(.85+hash2(x,y,n*37+3)*.3).toFixed(2)})}}
+/* a grimed copy of a painted wall picture: darker, sootier foot, a dirty top, faint damp streaks and blotches, a little less colour (processing of the painted art, never new drawing) */
+function epGrime(ti,o,seed){const T=TEX[ti],d=T.d;if(!d||d.length!==TS*TS*4)return null;const a=new Uint8ClampedArray(d);const e=T.e;
+  for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const i=(y*TS+x)*4;if(e&&e[i+3]>40)continue;let r=a[i],g=a[i+1],b=a[i+2];const l=r*.3+g*.59+b*.11,sa=o.sat||.8;r=l+(r-l)*sa;g=l+(g-l)*sa;b=l+(b-l)*sa;
+    const v=y/TS;let f=o.k||.9;const ft=(v-(1-(o.foot||.28)))/(o.foot||.28);if(ft>0)f*=1-(o.footK||.5)*ft*ft;const tp=1-v/.16;if(tp>0)f*=1-.25*tp*tp;
+    const st=Math.sin(x*.9+seed*1.7)*Math.sin(x*.23+seed)*.5+.5,stk=st>.82?(st-.82)/.18*(o.streak||.25)*Math.min(1,v*1.6):0;f*=1-stk;
+    const bl=Math.sin(x*.11+y*.07+seed)*Math.sin(y*.13-x*.05+seed*2.2);if(bl>.45)f*=1-(bl-.45)*(o.blot||.4);
+    a[i]=r*f*(o.tint?o.tint[0]:1);a[i+1]=g*f*(o.tint?o.tint[1]:1);a[i+2]=b*f*(o.tint?o.tint[2]:1)}
+  const n=addTex(a,T.e);for(const k of Object.keys(T))if(k!=='d'&&k!=='e')TEX[n][k]=T[k];return n}
+/* small per-piece variety for repeated pieces: a mirrored copy on some, a slightly different size (visual only) */
+function epJitter(n,J){for(const d of G.decor){if(d.npc||d.epJ||!J.re.test(String(d.k)))continue;d.epJ=1;const h=hash2(d.x,d.y,n*41+9);if(h<.5&&typeof f2Flip==='function'){const fk=f2Flip(d.k);if(IMG[fk]){if(NPC_H[d.k]&&!NPC_H[fk])NPC_H[fk]=NPC_H[d.k];d.k=fk}}if(J.sc)d.sc=+((d.sc||1)*(1-J.sc+2*J.sc*hash2(d.x,d.y,n*41+10))).toFixed(2)}}
 /* neighbour-aware variety: a repeated key gets one of its painted variants so that no two neighbours show the same picture (visual only) */
 function epVary(n,V){const seen=new Map();for(const d of G.decor){const v=V[d.k];if(!v||d.npc)continue;const near=new Set();for(const e of G.decor){if(e===d||Math.abs(e.x-d.x)>1||Math.abs(e.y-d.y)>1)continue;near.add(e.k)}
   const opts=[d.k].concat(v).filter(k=>IMG[k]);let pick=opts[(hash2(d.x,d.y,n*7+3)*opts.length)|0];for(let t=0;t<opts.length&&near.has(pick);t++)pick=opts[(opts.indexOf(pick)+1)%opts.length];d.k=pick}}
@@ -138,8 +151,10 @@ const EP_SPEC={
      pics:{p:.32,keys:[{k:'web_corner',h:.42,bob:.76,corner:1},{k:'web_hang',h:.5,bob:.7},{k:'chains',h:.55,bob:.55},{k:'moss',h:.2,bob:.1},{k:'moss',h:.2,bob:.1},{k:'ring',h:.16,bob:.45},{k:'soot',h:.5,bob:.6},{k:'damp',h:.75,bob:.48},{k:'damp',h:.75,bob:.48},{k:'shelf',h:.3,bob:.5},{k:'planks_x',h:.4,bob:.4}]},
      auto:{keys:['sacks','crate','rubble','ratnest','bucket','bonepile','planks','jar'],p:.75}},
   /* Thornwick: the first town (one main road through a forest clearing) */
-  3:{decals:{keys:['leaves','pebbles','droppings'],on:{0:['mud','straw','droppings','puddle','pebbles','leaves','soot'],1:['leaves','pebbles','droppings','straw'],2:['mud','straw','droppings','pebbles','puddle','leaves'],3:['mud','leaves','straw'],4:['mud','straw','soot','droppings'],5:['mud','puddle','straw']},p:.5,sz:[.5,1.0],far:16,gain:[1,.95,.85],a:.95},
-     soft:.42,shadow:.42,shadowSz:1.25,ao:.55,aoW:.5,nearFade:1,
+  3:{decals:{keys:['leaves','pebbles','droppings'],on:{0:['mud','straw','droppings','puddle','pebbles','leaves','soot'],1:['leaves','pebbles','droppings','straw'],2:['mud','straw','droppings','pebbles','puddle','leaves'],3:['mud','leaves','straw'],4:['mud','straw','soot','droppings'],5:['mud','puddle','straw']},p:.6,wallBias:.3,sz:[.5,.7],far:16,gain:[1,.95,.88],a:1},
+     soft:.45,shadow:.62,shadowSz:1.5,ao:.66,aoW:.6,nearFade:1,glow:.75,glowSz:2.6,glowCol:[1,.7,.42],
+     floors:{0:{name:'tw_cob',tex:'wetcobble',o:{k:[1.3,1.26,1.2],sat:.85}},1:{name:'tw_grass',tex:'villgrass',o:{k:[1.2,1.22,1.05],sat:1}},2:{name:'tw_mud',tex:'mudtrack',o:{k:[1.22,1.16,1.06],sat:.9}},3:{name:'tw_cobm',tex:'wetcobble',o:{k:[1.12,1.18,1.02],sat:.85,flip:1}},4:{name:'tw_cobs',tex:'wetcobble',o:{k:[1.1,1.05,1],sat:.75,blot:.4,seed:2}},5:{name:'tw_cobw',tex:'wetcobble',o:{k:[1.05,1.08,1.1],sat:.75,flip:1,blot:.3,seed:3}}},
+     grime:{k:.8,sat:.7,foot:.36,footK:.7,streak:.45,blot:.55,tint:[1,.96,.9]},jitter:[{re:/^fence$/,sc:0},{re:/^(pjuniper|pheather|pbracken|greeds|gfungus|bush)/,sc:.14},{re:/^(ptree|gtree)/,sc:.1}],
      grade:{c:1.08,s:.82,b:1.0,tone:[140,110,80,.12],vig:.36,vc:[12,10,8]},
      street:{keys:['firewood','haybale','dung','wheel','flour','rainbarrel','veg','sacks','crate','bucket'],p:.5,gap:3,on:'12',fence:1,fenceRe:/^(fence|ptree|gtree|pjuniper|pbracken|grocks|gboulder|well)/}}
 };
