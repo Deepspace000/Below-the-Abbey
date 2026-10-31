@@ -18,49 +18,74 @@
  P('f2_woodpile',.8,['plog','logm'],{keep:1});
  P('f2_mirror_ice',2.0,['furn_mirror_gothic','hl_p_mirror'],{keep:1});
  P('f2_mirror_face',2.0,['mirror_haunted_b','furn_mirror_gothic'],{keep:1})}
+/* the great trees seen over the painted tree line are cut at the top of the wall; the cut fell between two rows of pixels and left a thin line of sky there. In these rooms the cut is drawn two pixels lower, so the leaves overlap the top of the wall. */
+{const _sr=sprRun;sprRun=function(SRC,left,ku,tw,th,sh,top,rs,rc,xe){if(typeof LEVEL!=='undefined'&&LEVEL>=9820&&LEVEL<=9823&&rc<top+sh-2)rc=Math.min(top+sh,rc+2.5);return _sr.call(this,SRC,left,ku,tw,th,sh,top,rs,rc,xe)}}
+/* groves and gaps: the trees in the band are thinned into bays of open ground where a slow noise is low and grown a little bigger where it is high (groves);
+   trees right at the edge of a clearing are the foreground: larger and a shade darker; small plants grow at the feet of trees that face the open */
+function f2aGrove(C,rx,o){o=o||{};const W=48,hs=C.hs2,E=C.E,keep=o.keep||(()=>false),under=o.under||[];
+  for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(!d.block||d.npc||d.edgeTree||!rx.test(String(d.k))||keep(d.x,d.y))continue;const g=C.vn(d.x,d.y,o.cs||7,301),e=E[d.y*W+d.x];
+    if(e<=(o.gapE||2)&&g<(o.gap||.36)&&hs(d.x,d.y,302)<.8){C.decor.splice(i,1);C.used.delete(d.x+','+d.y);continue}
+    if(g>.6)d.sc=+((d.sc||1)*(1.08+(g-.6)*.6)).toFixed(2);
+    if(e===1&&hs(d.x,d.y,303)<(o.fg||.3)){d.sc=+((d.sc||1)*1.22).toFixed(2);const dk=f2Soft(String(d.k).replace(/_fl$/,''),{filter:o.dark||'brightness(.74) saturate(1.08)',tag:'dk'});d.k=/_fl$/.test(String(d.k))?f2Flip(dk):dk}}
+  if(under.length)for(const d of C.decor.slice()){if(!d.block||d.npc||!rx.test(String(d.k)))continue;const nb=[[0,1],[1,0],[-1,0],[0,-1]].filter(([a,b])=>C.open(d.x+a,d.y+b)&&!C.decor.some(q=>q.block&&q.x===d.x+a&&q.y===d.y+b));if(!nb.length||hs(d.x,d.y,304)>(o.underP||.55))continue;
+    const [a,b]=nb[0],u=C.dec(under[(hs(d.x,d.y,305)*under.length)|0],d.x,d.y,{block:false,sc:+((o.underSc||.55)*(.8+hs(d.x,d.y,306)*.4)).toFixed(2)});if(u){u.ox=Math.max(-.45,Math.min(.45,(d.ox||0)+a*.42));u.oy=Math.max(-.45,Math.min(.45,(d.oy||0)+b*.42))}}}
+/* dappled light: the shade map of a room gets soft patches of sun and shadow on the open ground, and brighter pools at the given places */
+function f2aDapple(id,C,o){o=o||{};const T=TERRS[id];if(!T||!T.s)return;const W=48,H=40;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;let v=1+(C.vn(x,y,o.cs||2.6,311)-.5)*(o.amp||.32);for(const [px,py,r,k] of o.pools||[]){const dd=Math.hypot(x-px,y-py);if(dd<r)v*=1+k*(1-dd/r)}T.s[i]=Math.max(.45,Math.min(1.4,T.s[i]*v))}}
+Object.assign(F2B[9821],{haze:.32,fog:[236,226,188,.012],lcol:[1.36,1.2,.84],amb:1.25});F2B[9821].sky.low=[250,232,190];
 const F2_FOREST_TREES=['ltree0','ltree4','ltree8','ltree12','ltree1','ltree5','ltree19','ltree9','ltree0','ltree8'];
 /* ---------- 1. THE PERFECT FOREST (9821): the hand ---------- */
 const F2_SEASON=[['spring','a bud opening on a twig','SPRING'],['summer','a round sun with straight rays','SUMMER'],['autumn','a single falling leaf','AUTUMN'],['winter','a six-pointed snowflake','WINTER']];
 const F2_FOREST={STONES:[[19,4,1],[29,4,3],[22,8,0],[26,8,2]],OAK:[24,6]};   // [x,y,season index]: the order of the year is not the order round the ring
+/* small plants cast no oval shadow (the contact shadow is for things that stand): their keys end in _lt, which the shadow pass leaves out */
+function f2aNs(k){return f2Soft(pspPic(k),{tag:'_lt'})}
 function f2ForestBuild(){
-  const FG=f2TexFloor('ps_f2_tex_fograss','f2t_fograss',1.0)||'lush',FM=f2TexFloor('ps_f2_tex_fomeadow','f2t_fomeadow',1.0)||'grass',FV=f2TexFloor('ps_f2_tex_foleaves','f2t_foleaves',1.0)||'grass';
+  const FG=f2TexFloor('ps_f2_tex_fograss','f2t_fograss2',1.16,[1.0,1.06,.86])||'lush',FM=f2TexFloor('ps_f2_tex_fomeadow','f2t_fomeadow2',1.1,[1.02,1.04,.9])||'grass',FV=f2TexFloor('ps_f2_tex_foleaves','f2t_foleaves3',1.02,[.96,1.0,.88])||'grass';
   const FT=f2TexFloor('ps_f2_tex_fotrail','f2t_fotrail',1.05)||'trail';
-  const C=f2Room({id:9821,ground:FG,path:FV,band:[2,5],softRet:1,rw:0,
+  const C=f2Room({id:9821,ground:FG,path:FG,band:[2,5],softRet:1,rw:0,mistH:.08,shade:{edge:.34,pool:.6,tree:/f2_f[ov]_(oak|beech|fir|maple|birch|lime|ash|hawthorn|hornbeam|yew|cherry)|ltree/},
     routes:[[[24,35],[24,28],[17,24],[17,15],[24,12],[24,10]],[[24,28],[34,25],[38,19]],[[17,19],[8,18]],[[22,32],[10,30]],[[18,8],[9,6]]],
     clear:[[16,2,32,12,FM,'The Glade of the Four Stones',1],[4,13,12,23,FG,'The Wolf Hollow',1],[33,13,43,23,FM,'The Bramble Glade',1],[5,26,13,34,FV,'The Fern Dell',1],[3,2,11,9,FV,'The Old Ring',1]],
     keep:(x,y)=>Math.abs(x-24)<=1&&(y>=36||(y>=11&&y<=17))});
   const S=C.f2;
   // the glade: the hollow oak in the middle, the four stones round it, the plaque at the way in
   const [ox,oy]=F2_FOREST.OAK;C.used.delete(ox+','+oy);C.dec(pspPic('f2_hollowoak'),ox,oy,{block:true,npc:'f2f_oak'});
-  F2_FOREST.STONES.forEach(([x,y,si],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_stone_'+F2_SEASON[si][0]),x,y,{block:true,npc:'f2f_stone'+i})});
+  F2_FOREST.STONES.forEach(([x,y,si],i)=>{C.used.delete(x+','+y);C.dec(f2Soft(pspPic('f2_stone_'+F2_SEASON[si][0]),{filter:'brightness(1.16) contrast(1.28) saturate(1.12)',tag:'b'}),x,y,{block:true,npc:'f2f_stone'+i});C.light(x,y+1,[1.3,1.12,.8])});
   f2SignPlaque(C,25,12,'f2_fo_sign','f2_forest_sign',['TOUCH THE STONES','IN THE ORDER','OF THE YEAR'],'f2f_plaque','A plaque of grey stone at the edge of the glade. The letters cut in it read: TOUCH THE STONES IN THE ORDER OF THE YEAR. Under it is a small carving of a bud, a sun, a leaf and a snowflake, in that order.');
-  for(const [x,y] of [[20,6],[28,6],[19,9],[29,9]])if(C.free(x,y))C.dec(pspPic(x<24?'f2_fo_foxglove':'f2_fo_rose'),x,y,{block:false,sc:.7});
+  for(const [x,y] of [[20,6],[28,6],[19,9],[29,9]])if(C.free(x,y))C.dec(f2aNs(x<24?'f2_fo_foxglove':'f2_fo_rose'),x,y,{block:false,sc:.7});
   C.reserve(22,5,26,7);C.reserve(22,9,22,9);C.reserve(26,9,26,9);
-  for(const [x,y,k] of [[15,2,'f2_fo_fir'],[17,2,'f2_fo_beech'],[19,3,'f2_fo_maple'],[21,2,'f2_fo_fir'],[27,2,'f2_fo_maple'],[29,3,'f2_fo_lime'],[31,2,'f2_fo_beech'],[33,2,'f2_fo_fir'],[23,2,'f2_fo_birch'],[25,2,'f2_fo_birch']])if(C.free(x,y)){C.used.delete(x+','+y);const d=C.dec(pspPic(k),x,y,{block:true,sc:/birch/.test(k)?.85:1.1});if(d)d.oy=-.35}   // great trees at the back of the glade, in front of the forest wallC.reserve(23,8,25,9);   // nothing grows in front of the oak's door
-  for(const [x,y,k] of [[21,34,'f2_fo_rose'],[27,34,'f2_fo_foxglove'],[21,36,'f2_fo_fern'],[27,36,'f2_fo_flowers']])if(C.free(x,y))C.dec(pspPic(k),x,y,{block:false,sc:.75});   // a frame of flowers round the arrival
+  for(const [x,y,k] of [[15,2,'f2_fo_fir'],[17,2,'f2_fo_beech'],[19,3,'f2_fv_cherry'],[21,2,'f2_fo_fir'],[27,2,'f2_fo_maple'],[29,3,'f2_fv_cherry'],[31,2,'f2_fo_beech'],[33,2,'f2_fo_fir'],[23,2,'f2_fo_birch'],[25,2,'f2_fo_birch']])if(C.free(x,y)){C.used.delete(x+','+y);const d=C.dec(pspPic(k),x,y,{block:true,sc:/birch/.test(k)?.85:1.1});if(d)d.oy=-.35}   // great trees at the back of the glade, in front of the forest wallC.reserve(23,8,25,9);   // nothing grows in front of the oak's door
+  // the glade floor in front of the stones stays clean: no tufts, only flowers and a fern at the foot of each stone; two blossom trees stand at the way in, one the mirror of the other (the forest is a little too perfect)
+  for(const [x,y] of F2_FOREST.STONES)for(const [k,ox,sc] of [['f2_fo_flowers',-.38,.5],['f2_fo_fern',.4,.48]]){const u=C.dec(f2aNs(k),x,y,{block:false,sc});if(u){u.ox=ox;u.oy=.42}}
+  for(const [x,fl] of [[20,0],[28,1]]){C.used.delete(x+',12');if(C.open(x,12)&&!C.nearPath(x,12,0)){const d=C.dec(fl?f2Flip(pspPic('f2_fv_cherry')):pspPic('f2_fv_cherry'),x,12,{block:true,sc:1.0});if(d){d.ox=fl?-.2:.2;d.oy=-.2}}}
+  for(const [x,y,k] of [[21,34,'f2_fo_rose'],[27,34,'f2_fo_foxglove'],[21,36,'f2_fo_fern'],[27,36,'f2_fo_flowers']])if(C.free(x,y))C.dec(f2aNs(k),x,y,{block:false,sc:.75});   // a frame of flowers round the arrival
   // the ground: grass, with drifts of fallen leaves and meadow flowers
-  f2Patches(C,[[FG,.5],[FV,.14],[FM,.36]],{cs:6});
+  f2Patches(C,[[FG,.56],[FV,.18],[FM,.26]],{cs:7,onPath:true,keep:(x,y)=>x>=16&&x<=32&&y>=2&&y<=12});   // no ruled path: the way is open grass with drifts of leaves and flowers
   // the forest: a living tree line at the edges (painted trunks and undergrowth, great trees rising over it), painted trees in the band, ferns, flowers, grass, toadstools and mossy logs
-  const TR=['f2_fo_oak','f2_fo_beech','f2_fo_fir','f2_fo_maple','f2_fo_birch','f2_fo_lime'].map(f2Tree);
-  {const TF=TR.slice(1).concat(['ltree4','ltree12']);TF.push(...TF.map(f2Flip));C.fill(TF,{sc:1,p1:.08,p2:.5,p3:.88})}
-  C.scrub([pspPic('f2_fo_grass'),pspPic('f2_fo_flowers'),pspPic('f2_fo_fern'),pspPic('f2_fo_flowers'),pspPic('f2_fo_flowers')],.22,{sc:.75});
+  const TR=['f2_fo_oak','f2_fo_beech','f2_fo_fir','f2_fo_maple','f2_fo_birch','f2_fo_lime','f2_fv_oak','f2_fv_hornbeam','f2_fv_yew','f2_fv_hawthorn','f2_fv_cherry','f2_fv_hornbeam','f2_fv_oak'].map(f2Tree);   // (the ash is left out: its crown is so high that near the way it reads as a bare pole)
+  {const TF=TR.slice(1);TF.push(...TF.map(f2Flip));C.fill(TF,{sc:1,p1:.08,p2:.5,p3:.88})}
+  // copses: small groves out in the open ground (never within two squares of a way, never in the glade or by the arrival), so there are groves and meadows, not one even ring of trees
+  {for(let y=3;y<37;y++)for(let x=3;x<45;x++){if(!C.free(x,y)||!C.open(x,y)||C.nearPath(x,y,2)||(x>=14&&x<=34&&y<=13)||Math.hypot(x-24,y-35)<6||C.E[y*48+x]>0)continue;const g=C.vn(x,y,5,401);if(g>.62&&C.hs2(x,y,402)<.5+(g-.62)*1.6){const d=C.dec(f2PickVar(C,TR,x,y,C.hs2(x,y,403)),x,y,{block:true,sc:+(.95+C.hs2(x,y,404)*.5).toFixed(2)});if(d){d.ox=(C.hs2(x,y,405)-.5)*.7;d.oy=(C.hs2(x,y,406)-.5)*.6}}}}
+  C.scrub([f2aNs('f2_fo_grass'),f2aNs('f2_fo_flowers'),f2aNs('f2_fo_fern'),f2aNs('f2_fo_flowers'),f2aNs('f2_fo_flowers')],.22,{sc:.75});
   // a landmark in every clearing: a fallen log with a robin on it, a ring of stumps, an old broken pillar
-  for(const [x,y,k] of [[8,17,'f2_fo_log'],[38,18,'f2_fo_ruin'],[9,30,'f2_fo_stump'],[6,6,'f2_fo_ruin'],[10,6,'f2_fo_stump']])if(C.free(x,y)&&!C.nearPath(x,y,0)){C.dec(pspPic(k),x,y,{block:true,sc:k==='f2_fo_ruin'?.75:1.05});if(k==='f2_fo_log'){const r=C.dec(pspPic('f2_fo_robin'),x,y,{block:false,bob:.32,sc:1.2});if(r)r.fly=1}if(k==='f2_fo_ruin'){const q=C.near(x+1,y,1,true);if(q)C.dec(pspPic('f2_fo_toadstools'),q[0],q[1],{block:false,sc:.9})}}
-  C.scrub([pspPic('f2_fo_toadstools')],.02);
+  for(const [x,y,k] of [[8,17,'f2_fo_log'],[38,18,'f2_fo_ruin'],[9,30,'f2_fo_stump'],[6,6,'f2_fo_ruin'],[10,6,'f2_fo_stump']])if(C.free(x,y)&&!C.nearPath(x,y,0)){C.dec(pspPic(k),x,y,{block:true,sc:k==='f2_fo_ruin'?.75:1.05});if(k==='f2_fo_log'){const r=C.dec(pspPic('f2_fo_robin'),x,y,{block:false,bob:.32,sc:1.2});if(r)r.fly=1}if(k==='f2_fo_ruin'){const q=C.near(x+1,y,1,true);if(q)C.dec(f2aNs('f2_fo_toadstools'),q[0],q[1],{block:false,sc:.9})}}
+  C.scrub([f2aNs('f2_fo_toadstools')],.008);
   for(const [x,y] of [[6,15],[10,21],[35,15],[41,21],[7,28],[11,33],[5,4],[9,8],[36,20],[12,30]])if(C.free(x,y)&&!C.nearPath(x,y,0))C.dec(pspPic((x+y)%3?'f2_fo_log':'f2_fo_boulder'),x,y,{block:true,sc:.9});
-  for(const d of C.decor)if(/f2_fo_(oak|beech|fir|maple|birch|lime)|ltree/.test(d.k)&&d.block){d.sc=+((d.sc||1)*(.8+C.hs2(d.x,d.y,171)*.5)).toFixed(2);d.ox=(C.hs2(d.x,d.y,172)-.5)*.85;d.oy=(C.hs2(d.x,d.y,173)-.5)*.7}   // no rows: every tree a little off its square
-  C.capTrees(/ltree|f2_fo_(oak|beech|fir|maple|birch|lime)/,2.4);
+  for(const d of C.decor)if(/f2_f[ov]_(oak|beech|fir|maple|birch|lime|ash|hawthorn|hornbeam|yew|cherry)|ltree/.test(d.k)&&d.block){d.sc=+((d.sc||1)*(.72+C.hs2(d.x,d.y,171)*.62)).toFixed(2);d.ox=(C.hs2(d.x,d.y,172)-.5)*.85;d.oy=(C.hs2(d.x,d.y,173)-.5)*.7}   // no rows: every tree a little off its square
+  f2aGrove(C,/f2_f[ov]_(oak|beech|fir|maple|birch|lime|ash|hawthorn|hornbeam|yew|cherry)/,{keep:(x,y)=>x>=14&&x<=34&&y<=12,under:['f2_fo_fern','f2_fo_grass','f2_fo_fern','f2_fo_foxglove','f2_fo_flowers','f2_fo_grass'].map(f2aNs)});
+  C.capTrees(/ltree|f2_f[ov]_(oak|beech|fir|maple|birch|lime|ash|hawthorn|hornbeam|yew|cherry)/,2.4);
+  C.scrub([f2aNs('f2_fo_grass'),f2aNs('f2_fo_flowers'),f2aNs('f2_fo_grass')],.05,{onPath:true,sc:.5});   // tufts that break the edge of the leaf path
   // shrubs and flowers at the feet of the trees, a few stumps
-  {const S2=['f2_fo_foxglove','f2_fo_stump','f2_fo_fern','f2_fo_rose','f2_fo_toadstools'].map(pspPic);let n=0;
+  {const S2=['f2_fo_foxglove','f2_fo_fern','f2_fo_rose','f2_fo_grass','f2_fo_flowers'].map(f2aNs);let n=0;
    for(let y=3;y<37;y++)for(let x=3;x<45;x++){if(!C.free(x,y)||C.nearPath(x,y,0)||C.core[y*48+x]&&C.hs2(x,y,151)>.08)continue;if(C.hs2(x,y,152)<.075){C.dec(S2[n%S2.length],x,y,{block:false,sc:.62+C.hs2(x,y,153)*.25});n++}}}
   // the glade: soft shafts of sunlight fall on the hollow oak, fireflies hang in them, butterflies cross the glades, small birds fly over
   {const sh0=f2Compose('f2_fo_shaft_c',IMG.ps_f2_fo_shaft?IMG.ps_f2_fo_shaft.width:10,IMG.ps_f2_fo_shaft?Math.round(IMG.ps_f2_fo_shaft.height*.78):10,[['ps_f2_fo_shaft',0,0,0,Math.round((IMG.ps_f2_fo_shaft||{height:10}).height*.78),0,0,(IMG.ps_f2_fo_shaft||{width:10}).width,Math.round((IMG.ps_f2_fo_shaft||{height:10}).height*.78)]],3.2),sh=f2Soft(sh0,{l:.35,r:.35,t:.05,b:.3,a:.3,tag:'g2'});
-   for(const [x,y,w] of [[24.5,6.6,1.3],[21.7,8.4,.9]]){const d=f2Span(C,sh,x,y,0,1,w,0);d.lift=.95;C.f2x[d.kname].lift=.95}
-   for(const [x,y] of [[24,6],[24,8]])C.light(x,y,[1.6,1.4,.9])}
+   for(const [x,y,w] of [[21.7,8.4,.9],[26.4,8.6,.8]]){const d=f2Span(C,sh,x,y,0,1,w,0);d.lift=.95;C.f2x[d.kname].lift=.95}
+   for(const [x,y] of [[24,6],[24,8],[8,18],[38,18],[9,30],[26,25]])C.light(x,y,[1.6,1.4,.9])}
   f2Mover(C,pspPic('f2_fo_butterflies'),[[19,9],[22,4],[29,5],[27,10],[19,9]],.35,{bob:.8}).fly=1;
   f2Mover(C,pspPic('f2_fo_bluefly'),[[6,30],[11,28],[9,33],[6,30]],.3,{bob:.7}).fly=1;
   f2Mover(C,pspPic('f2_fo_butterflies'),[[35,15],[41,18],[37,22],[35,15]],.33,{bob:.9}).fly=1;
   f2Mover(C,pspPic('f2_fo_birds'),[[4,30],[44,8]],1.4,{pingpong:true,bob:3.2}).fly=1;
+  for(const P of [[[21,7],[27,7],[27,10],[21,10],[21,7]],[[6,16],[10,18],[8,21],[6,16]],[[36,16],[41,19],[37,21],[36,16]],[[22,26],[27,28],[24,31],[22,26]]])f2Mover(C,f2Soft(pspPic('f2_fo_fireflies'),{a:.7,tag:'m'}),P,.22,{bob:1.1,sc:.38}).fly=1;   // motes of light drifting in the glades
   for(const [x,y,k] of [[20,27,'f2_fo_robin'],[30,13,'f2_fo_robin2'],[11,25,'f2_fo_robin3']])if(C.free(x,y)&&!C.nearPath(x,y,0))C.dec(pspPic(k),x,y,{block:false});
   // creatures (the perfect forest still bites), chests
   pspSafeZone(C,24,35,6);
@@ -70,13 +95,15 @@ function f2ForestBuild(){
   C.foes(['f2wasps','f2wolf'],[3,2,11,9],4);
   for(const [x,y] of [[5,14],[42,14],[6,33]])C.chestAt(x,y,1);
   C.ret();
-  f2Edge(C,{img:f2Soft('ps_f2_fo_wall2',{filter:'contrast(1.4) brightness(.8) saturate(1.15)',tag:'d'}).replace(/^ps_/,''),wh:1.9,veil:.12,pillar:TR,rgb:[1,1.02,.95],tall:['f2_fo_oak','f2_fo_beech','f2_fo_fir','f2_fo_maple','f2_fo_lime','f2_fo_birch'],tallP:.85,tallSc:[1.1,1.55]});
+  f2Edge(C,{img:f2Soft('ps_f2_fo_wall2',{filter:'contrast(1.35) brightness(.86) saturate(1.25)',tag:'e'}).replace(/^ps_/,''),wh:1.9,veil:.05,pillar:TR,rgb:[1,1.02,.95],tall:['f2_fo_oak','f2_fo_beech','f2_fo_fir','f2_fo_maple','f2_fo_lime','f2_fo_birch','f2_fv_oak','f2_fv_ash','f2_fv_hornbeam','f2_fv_yew'],tallP:.85,tallSc:[1.1,1.55]});
   f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.8) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[.9,.95,1.05]});
   // a row of trees just inside the forest wall (never on a path, never in front of the stones), so the wall is never the last thing in view
   {const T2=TR.slice(1).concat(TR.slice(1).map(f2Flip)),edgeN=(x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>C.rows[y+b]&&C.rows[y+b][x+a]!=='.');
-   for(let y=3;y<37;y++)for(let x=3;x<45;x++){if(!C.free(x,y)||C.nearPath(x,y,1)||!edgeN(x,y)||(x>=15&&x<=33&&y>=3&&y<=11)||Math.hypot(x-24,y-35)<5)continue;if(C.hs2(x,y,161)<.6){const d=C.dec(T2[(C.hs2(x,y,162)*T2.length)|0],x,y,{block:true,sc:.95+C.hs2(x,y,163)*.35});if(d){d.ox=(C.hs2(x,y,164)-.5)*.6;d.oy=(C.hs2(x,y,165)-.5)*.5}}}}
-  for(const [x,k,sc] of [[22,'f2_fo_ruin',.6],[26,'f2_fo_ruin',.6],[21,'f2_fo_foxglove',.8],[27,'f2_fo_fern',.8]]){const d=C.dec(pspPic(k),x,37,{block:!/fox|fern/.test(k),sc});if(d&&/ruin/.test(k)&&x>24)d.k=f2Flip(pspPic(k))}   // old broken stones round the gate
+   for(let y=3;y<37;y++)for(let x=3;x<45;x++){if(!C.free(x,y)||C.nearPath(x,y,1)||!edgeN(x,y)||(x>=15&&x<=33&&y>=3&&y<=11)||Math.hypot(x-24,y-35)<5)continue;if(C.hs2(x,y,161)<.82){const d=C.dec(f2PickVar(C,T2,x,y,C.hs2(x,y,162)),x,y,{block:true,sc:.95+C.hs2(x,y,163)*.35});if(d){d.ox=(C.hs2(x,y,164)-.5)*.6;d.oy=(C.hs2(x,y,165)-.5)*.5}}}}
+  for(const [x,k,sc] of [[22,'f2_fo_ruin',.6],[26,'f2_fo_boulder',.7],[21,'f2_fo_foxglove',.8],[27,'f2_fo_fern',.8]]){const d=C.dec(pspPic(k),x,37,{block:!/fox|fern/.test(k),sc});if(d&&/ruin/.test(k)&&x>24)d.k=f2Flip(pspPic(k))}   // old broken stones round the gate
+  for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(!d.block&&!d.npc&&!d.fly&&!d.mv&&d.x>=19&&d.x<=29&&d.y>=7&&d.y<=12&&d.ox===undefined&&/f2_fo_(grass|fern|toadstools)/.test(String(d.k))){C.decor.splice(i,1)}}
   const lv=C.done({glow:8});
+  f2aDapple(9821,C,{amp:.34,pools:[[24,7,6,.22],[38,18,3.5,.16],[9,30,3,.14],[24,28,3,.12],[8,18,4.5,-.16]]});   // the wolf hollow lies in shadow
   lv.mapNames.push({t:'The Hollow Oak',x:24,y:6,k:'place'});
   return lv}
 pspRegister(9821,f2ForestBuild);
