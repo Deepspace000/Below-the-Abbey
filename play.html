@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.760';
+const VERSION='3.761';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -7299,7 +7299,7 @@ function update(dt){
   if(G.autoNow&&G.state==='play'&&!G.cut&&!G.drag){G.autoNow=false;G.nextAuto=G.time+180;writeSave('auto')}
   if(G.state==='play'&&G.time>=G.nextAuto&&G.timers.length===0&&!G.drag&&!G.cut){G.nextAuto=G.time+180;writeSave('auto')}
 }
-const GFX={dither:2,scan:2,color:0,sharp:0,bright:2};
+const GFX={dither:0,scan:1,color:0,sharp:0,bright:2};   // the default look: light scanlines, no dithering, no sharpening
 const GFX_NAMES={dither:['Off','Low','Normal','Strong'],scan:['Off','Light','Normal'],color:['Washed out','Normal','Vivid'],sharp:['Off','Low','High'],bright:['Darker','Dim','Normal','Bright','Brighter']};
 function gfxApply(){
   const f=[];const b=[.78,.9,1,1.14,1.3][GFX.bright];if(b!==1)f.push(`brightness(${b})`);
@@ -7308,7 +7308,8 @@ function gfxApply(){
   cv.style.filter=f.join(' ');
   try{localStorage.setItem('abbeyGFX',JSON.stringify(GFX))}catch(e){}
 }
-function gfxLoad(){try{const o=JSON.parse(localStorage.getItem('abbeyGFX')||'null');if(o){for(const k in GFX)if(typeof o[k]==='number')GFX[k]=o[k]}else if(localStorage.getItem('abbeyCRT')==='0')GFX.scan=0}catch(e){}gfxApply()}
+function gfxLoad(){try{if(localStorage.getItem('abbeyGFXv')!=='2'){localStorage.setItem('abbeyGFXv','2');localStorage.removeItem('abbeyGFX')}   // the new defaults (light scanlines, no dithering, no sharpening) replace the old saved look once; the player's own changes after that are kept
+    const o=JSON.parse(localStorage.getItem('abbeyGFX')||'null');if(o){for(const k in GFX)if(typeof o[k]==='number')GFX[k]=o[k]}else if(localStorage.getItem('abbeyCRT')==='0')GFX.scan=0}catch(e){}gfxApply()}
 const SND_ROWS=[['combat','Combat sounds'],['amb','Ambient sounds'],['music','Music'],['steps','Footsteps']];
 function drawSnd(){
   BTNS=[];veil(.6);bigPanel(90,12,300,296);
