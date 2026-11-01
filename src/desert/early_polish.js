@@ -173,24 +173,29 @@ function epSecretsApply(n){const list=EP_SECRETS[n],F=epSecF();
 /* the suspicious face: the crypt's own painted wall with one ragged block of stones a little out of line and a hairline gap round it, dust at its foot */
 function epSusTex(s){const key='sus'+s.id;EP.sus=EP.sus||{};if(EP.sus[key]!==undefined)return EP.sus[key];const W=EP.wall;if(!W||!TEX[W.stone])return null;
   const [mx,my]=s.door,[fx,fy]=s.from,face=fx>mx?1:fx<mx?3:fy>my?2:0,vv=W.wv&&W.wv[1];let src=W.stone;if(vv)src=vv[((Math.imul(mx,73856093)^Math.imul(my,19349663)^Math.imul(face,83492791))>>>4)%vv.length]; // the same painted face the engine would draw here
-  const o=TEX[src].d,d=new Uint8ClampedArray(o),N=TS,x0=40,x1=90,y0=46,y1=104;
+  return EP.sus[key]=addTex(epSusData(TEX[src].d,40,90,46,104))}
+/* the odd block, the crack and the dust, made from any wall picture's pixels (o); the same for level 1 and for the secret walls of the mazes (secret_rooms.js) */
+function epSusData(o,x0,x1,y0,y1,HH){HH=HH||TS;const d=new Uint8ClampedArray(o),N=TS;
   const jg=(a,sd)=>Math.round((Math.sin(a*.83+sd)*1.6+Math.sin(a*2.31+sd*3)*1.1+(hash2(a>>1,sd|0,41)-.5)*2.4)),inB=(x,y)=>x>=x0+jg(y,1)&&x<x1+jg(y,7)&&y>=y0+jg(x,3)&&y<y1+jg(x,5);   // a ragged outline that wanders and chips like a real crack
-  for(let y=y0-5;y<y1+5;y++)for(let x=x0-5;x<x1+5;x++){if(x<0||y<0||x>=N||y>=N||!inB(x,y))continue;const sx=Math.min(N-1,x+4),sy=Math.max(0,y-3),i=(y*N+x)*4,j=(sy*N+sx)*4;d[i]=Math.min(255,o[j]*1.05+5);d[i+1]=Math.min(255,o[j+1]*1.04+4);d[i+2]=Math.min(255,o[j+2]*1.01+3)}   // one block of stones a little out of line
-  for(let y=y0-7;y<y1+7;y++)for(let x=x0-7;x<x1+7;x++){if(x<0||y<0||x>=N||y>=N||inB(x,y))continue;let near=0;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1],[2,0],[0,2],[-2,0],[0,-2]])if(inB(x+a,y+b)){near=Math.abs(a)+Math.abs(b);break}if(!near)continue;const i=(y*N+x)*4,top=inB(x+1,y+1)&&!inB(x-1,y+1)&&y<y0+4||inB(x,y+1)&&y<y0+4,k=near===1?(top?1.25:.25+.1*hash2(x,y,9)):(top?1.1:.62);d[i]=Math.min(255,d[i]*k);d[i+1]=Math.min(255,d[i+1]*k);d[i+2]=Math.min(255,d[i+2]*k)}   // a continuous crack round it, lit along its upper lip
-  for(let y=y1+2;y<N;y++)for(let x=x0-8;x<x1+8;x++){if(x<0||x>=N)continue;const t=(y-y1)/(N-y1);if(hash2(x,y,31)<.55*(1-t*.3)){const i=(y*N+x)*4;d[i]=Math.min(255,d[i]*1.35+22);d[i+1]=Math.min(255,d[i+1]*1.32+20);d[i+2]=Math.min(255,d[i+2]*1.25+16)}}   // pale dust where the stones were moved
-  return EP.sus[key]=addTex(d)}
+  for(let y=y0-5;y<y1+5;y++)for(let x=x0-5;x<x1+5;x++){if(x<0||y<0||x>=N||y>=HH||!inB(x,y))continue;const sx=Math.min(N-1,x+4),sy=Math.max(0,y-3),i=(y*N+x)*4,j=(sy*N+sx)*4;d[i]=Math.min(255,o[j]*1.05+5);d[i+1]=Math.min(255,o[j+1]*1.04+4);d[i+2]=Math.min(255,o[j+2]*1.01+3)}   // one block of stones a little out of line
+  for(let y=y0-7;y<y1+7;y++)for(let x=x0-7;x<x1+7;x++){if(x<0||y<0||x>=N||y>=HH||inB(x,y))continue;let near=0;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1],[2,0],[0,2],[-2,0],[0,-2]])if(inB(x+a,y+b)){near=Math.abs(a)+Math.abs(b);break}if(!near)continue;const i=(y*N+x)*4,top=inB(x+1,y+1)&&!inB(x-1,y+1)&&y<y0+4||inB(x,y+1)&&y<y0+4,k=near===1?(top?1.25:.25+.1*hash2(x,y,9)):(top?1.1:.62);d[i]=Math.min(255,d[i]*k);d[i+1]=Math.min(255,d[i+1]*k);d[i+2]=Math.min(255,d[i+2]*k)}   // a continuous crack round it, lit along its upper lip
+  for(let y=y1+2;y<HH;y++)for(let x=x0-8;x<x1+8;x++){if(x<0||x>=N)continue;const t=(y-y1)/(HH-y1);if(hash2(x,y,31)<.55*(1-t*.3)){const i=(y*N+x)*4;d[i]=Math.min(255,d[i]*1.35+22);d[i+1]=Math.min(255,d[i+1]*1.32+20);d[i+2]=Math.min(255,d[i+2]*1.25+16)}}   // pale dust where the stones were moved
+  return d}
+
 /* opening is forgiving: any move into the sealed wall (W, Up, the on-screen arrow, the pad), the attack or use key while facing it, or a click while facing it */
-function epSecretAt(nx,ny){const list=!self.EP_OFF&&EP_SECRETS[LEVEL];if(!list)return null;const s=list.find(q=>q.door[0]===nx&&q.door[1]===ny);return s&&!epSecF()[s.id]?s:null}
-function epSecretOpen(s){const F=epSecF();if(F[s.id])return false;const [nx,ny]=s.door;F[s.id]=1;G.grid[ny][nx]=0;{const li=LIGHTS.findIndex(l=>l.epSecC===s.id);if(li>=0)LIGHTS.splice(li,1)}const L=LEVELS[LEVEL];if(L._epf&&L._epf.ct)L._epf.ct.delete(ny*MW+nx);sfx('door');G.shake=.3;msg('The stones here are loose. A hidden door swings open.','#ffe9a0');EP.cur=-1;return true}
+/* the secret walls of a level: level 1's own four (EP_SECRETS) or the ones secret_rooms.js plans for the mazes and dungeons (SR_ROOMS) */
+const epSecList=n=>EP_SECRETS[n]||(self.SR_ROOMS&&SR_ROOMS[n])||null;
+function epSecretAt(nx,ny){const list=!self.EP_OFF&&epSecList(LEVEL);if(!list)return null;const s=list.find(q=>q.door[0]===nx&&q.door[1]===ny);return s&&!epSecF()[s.id]?s:null}
+function epSecretOpen(s){const F=epSecF();if(F[s.id])return false;const [nx,ny]=s.door;F[s.id]=1;G.grid[ny][nx]=0;{const li=LIGHTS.findIndex(l=>l.epSecC===s.id);if(li>=0)LIGHTS.splice(li,1)}const L=LEVELS[LEVEL];if(L._epf&&L._epf.ct)L._epf.ct.delete(ny*MW+nx);if(self.SR_CT)SR_CT.delete(ny*MW+nx);if(s.sr&&typeof srOpened==='function')srOpened(s);sfx('door');G.shake=.3;msg('The stones here are loose. A hidden door swings open.','#ffe9a0');EP.cur=-1;return true}
 function epFacing(){if(!G.P)return null;const d=DIRS[G.P.f];return epSecretAt(G.P.x+d[0],G.P.y+d[1])}
 {const _dm=doMove;doMove=function(rel){try{if(G.state==='play'&&!G.cut&&!G.talk){const d=DIRS[(G.P.f+rel)%4],s=epSecretAt(G.P.x+d[0],G.P.y+d[1]);if(s&&epSecretOpen(s))return}}catch(e){console.error('ep secret',e)}return _dm.apply(this,arguments)}}
 {const _ac=act;act=function(id){try{if(G.state==='play'&&!G.cut&&!G.talk&&!G.loot&&!G.menu&&(id==='attack'||id==='special'||id==='use'||id==='fwd')){const s=epFacing();if(s&&epSecretOpen(s))return}}catch(e){console.error('ep secret',e)}return _ac.apply(this,arguments)}}
 addEventListener('pointerdown',()=>{try{if(G.state==='play'&&!G.cut&&!G.talk&&!G.loot&&!G.menu&&!(G.inv&&G.inv.open)&&!G.map&&!G.overview){const s=epFacing();if(s)setTimeout(()=>{if(epFacing()===s)epSecretOpen(s)},0)}}catch(e){}},true);
 /* a hint for those who pass by: standing beside a sealed wall for a moment, the party feels a draught (once per wall and visit) */
-function epSecretHint(){const list=!self.EP_OFF&&EP_SECRETS[LEVEL];if(!list||!G.P||G.state!=='play')return;const F=epSecF(),now=G.time||0;EP.hint=EP.hint||{};
+function epSecretHint(){const list=!self.EP_OFF&&epSecList(LEVEL);if(!list||!G.P||G.state!=='play')return;const F=epSecF(),now=G.time||0;EP.hint=EP.hint||{};
   for(const s of list){if(F[s.id]||EP.hint[LEVEL+s.id])continue;const [dx,dy]=s.door,near=Math.abs(G.P.x-dx)+Math.abs(G.P.y-dy)===1;if(!near){if(EP.hintAt&&EP.hintAt.id===s.id)EP.hintAt=null;continue}
     if(!EP.hintAt||EP.hintAt.id!==s.id)EP.hintAt={id:s.id,t:now};else if(now-EP.hintAt.t>1.2){EP.hint[LEVEL+s.id]=1;const d=DIRS[G.P.f],ahead=G.P.x+d[0]===dx&&G.P.y+d[1]===dy;msg(ahead?'A cold draught seeps through a crack in the stones in front of you.':'A cold draught seeps from a crack in the wall beside you.','#c8d4e0')}}}
-{const _sb=secretBump;secretBump=function(nx,ny){try{const list=!self.EP_OFF&&EP_SECRETS[LEVEL];if(list){const s=list.find(q=>q.door[0]===nx&&q.door[1]===ny);const F=epSecF();
+{const _sb=secretBump;secretBump=function(nx,ny){try{const list=!self.EP_OFF&&epSecList(LEVEL);if(list){const s=list.find(q=>q.door[0]===nx&&q.door[1]===ny);const F=epSecF();
     if(s&&!F[s.id]&&epSecretOpen(s))return true}}catch(e){console.error('ep secret',e)}
   return _sb.apply(this,arguments)}}
 /* low clumps of dull damp grass and weeds in the mud: beside the path or a fence, thinning away from it, never on the path itself (the game's own grass pictures, dulled) */
