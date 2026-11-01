@@ -77,7 +77,7 @@ function srPlan(n,L){
     const t=roster.length?roster[(hash2(n,j,905)*Math.min(2,roster.length))|0]:null;
     // one or two props on squares that are not the chest, the creature's square, nor the way in
     const props=[],free=q.cells.filter(c=>!(c[0]===chest[0]&&c[1]===chest[1])&&!(c[0]===monCell[0]&&c[1]===monCell[1])&&!(c[0]===q.D[0]+dx&&c[1]===q.D[1]+dy));
-    out.push({id:'s'+n+'_'+j,sr:1,lv:n,j,door:q.D,from:[fx,fy],cells:q.cells,chest,mon:hasMon?{t,lvl:lv[t]||0,x:monCell[0],y:monCell[1]}:null,lamp:free.length?free[(hash2(n,j,906)*free.length)|0]:chest,free,w:q.w,d:q.d})});
+    out.push({id:'s'+n+'_'+q.D[0]+'_'+q.D[1],sr:1,lv:n,j,door:q.D,from:[fx,fy],cells:q.cells,chest,mon:hasMon?{t,lvl:lv[t]||0,x:monCell[0],y:monCell[1]}:null,lamp:free.length?free[(hash2(n,j,906)*free.length)|0]:chest,free,w:q.w,d:q.d})});
   return {rooms:out,ext,kind,open,W,H,want}}
 /* adds the margin of solid wall (to the right and the bottom only, so no square of the level moves), once */
 function srExtend(L,ext){if(L._srx||(!ext[0]&&!ext[1]))return;L._srx=1;const R=L.rows,H=R.length,W=R[0].length,g=srGrid(L),cnt={};
