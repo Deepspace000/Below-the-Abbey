@@ -39,10 +39,10 @@ function twBuild(){
   // a potion in the second longest dead end
   const items=[];{const e2=ends.find(p=>!taken.has(p[0]+','+p[1])&&d[p[1]*W+p[0]]>=14);if(e2)items.push({k:'potion',x:e2[0],y:e2[1]})}
   const decor=[{k:'chest',x:chest[0],y:chest[1],block:true,goldAmt:35}];
-  // a hungry cat in one dead end, and a salt herring lying in another (The Rat Catcher's Cat)
+  // Tiki, the lost cat, sits in one dead end (picture ep_tw_tiki, assets/ep/tw_tiki.webp), and a salt herring lies in another (Tiki, the Lost Cat)
   {const used=new Set(items.map(q=>q.x+','+q.y));used.add(chest[0]+','+chest[1]);
    const cat=ends.find(p=>!used.has(p[0]+','+p[1])&&!taken.has(p[0]+','+p[1])&&d[p[1]*W+p[0]]>=10);
-   if(cat){used.add(cat[0]+','+cat[1]);decor.push({k:'pet_cat_0',x:cat[0],y:cat[1],block:true,npc:'twcat',sc:.9})}
+   if(cat){used.add(cat[0]+','+cat[1]);decor.push({k:'ep_tw_tiki',x:cat[0],y:cat[1],block:true,npc:'twcat',sc:.9})}
    const fish=ends.find(p=>!used.has(p[0]+','+p[1])&&!taken.has(p[0]+','+p[1])&&d[p[1]*W+p[0]]>=6);
    if(fish)items.push({k:'herring',x:fish[0],y:fish[1]})}
   // a torch light every so often along the passages
@@ -187,15 +187,15 @@ draw(c,x,L,api){
   api.compass(x,436,130,13);
 }});
 
-/* ---- The Rat Catcher's Cat: a hungry cat sits in a dead end under the well, and a salt herring lies in another ---- */
-QUESTS.twq_cat={title:"The Rat Catcher's Cat",who:'A hungry cat',desc:"A thin tabby cat sits in a dead end in the tunnels under the Thornwick well. She is hungry. Find a salt herring, which is lying in another dead end in the tunnels (or buy one), and bring it to her.",need:1,goal:()=>(bagCount('herring')>0||G.flags.twCatFed)?1:0,reward:{gold:1200,xp:4500,items:['potion5']}};
+/* ---- Tiki, the Lost Cat: a skinny white cat sits in a dead end under the well, and a salt herring lies in another ---- */
+QUESTS.twq_cat={title:"Tiki, the Lost Cat",who:'Tiki, the lost cat',desc:"A skinny white cat with one blue eye and one gold eye sits in a dead end in the tunnels under the Thornwick well. Her name is Tiki, and she is hungry. Find a salt herring, which is lying in another dead end in the tunnels (or buy one), and bring it to her.",need:1,goal:()=>(bagCount('herring')>0||G.flags.twCatFed)?1:0,reward:{gold:1200,xp:4500,items:['potion5']}};
 QAREA.twq_cat='Thornwick';
-const TWCAT=khQD("Mrrow. (A thin tabby cat sits in the dead end with her paws together. She has the look of a cat who used to catch the rats down here and has now run out of rats she is brave enough to catch. She looks at your bag, and then at you.)",
+const TWCAT=khQD("Mrrow. (A skinny white cat sits in the dead end with her paws together. Her fur is matted and dirty, one of her eyes is blue and the other is gold. Her name is Tiki. She has the look of a cat who used to catch the rats down here and has now run out of rats she is brave enough to catch. She looks at your bag, and then at you.)",
   "Mrr. (She settles down to wait.)",
   (n,m)=>'She wants a salt herring. One lies in another dead end somewhere in the tunnels, and the shops in Thornwick may sell them too.',
   "Mrrow! (She smells the herring through your bag and stands up at once.)",
   "(She eats the herring in four bites, washes her face, and leaves something for you on the floor.)",
   "(The cat is asleep in the corner with a full stomach and a very small smile.)","Give her the herring.");
-NPCS.twcat={name:'A hungry cat',img:'pet_cat_0',root:d=>qNode('twq_cat',TWCAT)};
+NPCS.twcat={name:'Tiki, the lost cat',img:'ep_tw_tiki',root:d=>qNode('twq_cat',TWCAT)};
 Object.defineProperty(QGIVER,'twcat',{enumerable:true,configurable:true,get(){return qSt('twq_cat')==='done'?null:['twq_cat']}});
 {const _t=qTurnIn;qTurnIn=function(id){const r=_t.apply(this,arguments);try{if(r&&id==='twq_cat'){G.flags.twCatFed=1;if(bagCount('herring')>0)bagRemove('herring',1)}}catch(e){console.error(e)}return r}}
