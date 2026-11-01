@@ -16,14 +16,14 @@ const TKR={ready:false,loading:null,houses:[
   ['n1',12,14,10,14,'S','wl_roof1_1',{sat:.28,dark:.52,tint:[1.04,.98,.9],soot:.5,moss:.3,holes:2,chim:-1}],
   ['n2',16,18,10,15,'S','kh_ohroof1_4',{sat:.8,dark:.58,tint:[1.12,.95,.8],soot:.6,moss:.6,holes:6,chim:1}],
   ['n3',19,21,10,14,'S','kh_ohroof1_0',{sat:.55,dark:.95,tint:[1.02,1,.96],soot:.4,moss:.2,holes:1,chim:-1}],
-  ['n4',23,27,10,15,'S','kh_ohroof1_1',{cap:1.3,sat:1.05,dark:1.1,tint:[.9,.97,1.1],soot:.45,moss:.3,holes:3,chim:1}],
+  ['n4',23,27,10,15,'S','kh_ohroof1_1',{cap:1.0,sat:1.05,dark:1.1,tint:[.9,.97,1.1],soot:.45,moss:.3,holes:3,chim:1}],
   ['n5',29,31,10,14,'S','kh_ohroof1_4',{sat:.6,dark:.85,tint:[1.05,.96,.9],soot:.55,moss:.25,holes:3,chim:-1}],
-  ['ch',33,37,10,14,'S','kh_ohroof1_0',{cap:1.35,steeple:1,chim:-1,sat:.75,dark:1.3,tint:[.95,.98,1.06],soot:.6,moss:.5,holes:5}],
+  ['ch',33,37,10,14,'S','kh_ohroof1_0',{cap:1.3,steeple:1,chim:-1,sat:.75,dark:1.3,tint:[.95,.98,1.06],soot:.6,moss:.5,holes:5}],
   ['s1',12,14,21,23,'N','wl_roof1_4',{sat:.6,dark:.55,tint:[1.1,.95,.8],soot:.5,moss:.2,holes:2,chim:1}],
   ['s2',16,18,21,23,'N','wl_roof1_1',{sat:.3,dark:.6,tint:[.94,1,.94],soot:.4,moss:.25,holes:2,chim:-1}],
   ['s3',19,22,19,22,'N','wl_roof1_5',{sat:.55,dark:.76,tint:[1.04,.94,.88],soot:.75,moss:.3,holes:5,chim:1,flip:1}],
-  ['s4',24,28,19,22,'N','kh_ohroof1_0',{cap:1.3,sat:.8,dark:1.25,tint:[1.04,.99,.94],soot:.45,moss:.3,holes:3,chim:-1,flip:1}],
-  ['s5',30,34,19,22,'N','kh_ohroof1_2',{cap:1.3,sat:.9,dark:.78,tint:[1.05,.82,.72],soot:.45,moss:.5,holes:4,chim:1,flip:1}]
+  ['s4',24,28,19,22,'N','kh_ohroof1_0',{sat:.8,dark:1.25,tint:[1.04,.99,.94],soot:.45,moss:.3,holes:3,chim:-1,flip:1}],
+  ['s5',30,34,19,22,'N','kh_ohroof1_2',{cap:1.0,sat:.9,dark:.78,tint:[1.05,.82,.72],soot:.45,moss:.5,holes:4,chim:1,flip:1}]
 ]};
 function tkrRng(seed){let s=(seed*2654435761)>>>0||1;return()=>{s^=s<<13;s>>>=0;s^=s>>>17;s^=s<<5;s>>>=0;return s/4294967296}}
 function tkrLoadImg(key,src){return new Promise(res=>{if(IMG[key])return res();const i=new Image();i.onload=()=>{IMG[key]=i;res()};i.onerror=()=>res();i.src=src+'?v='+VERSION})}
@@ -81,7 +81,7 @@ function tkrRoofVar(k,id,o,flip,widthSq){
     for(let q=0;q<10;q++){const an=q/10*6.283;ox.drawImage(sil,Math.cos(an)*r,Math.sin(an)*r)}
     ox.drawImage(c,0,0);c.getContext('2d').clearRect(0,0,iw,H);c.getContext('2d').drawImage(o2,0,0)}
   // the gable height: a pitched roof about .42 of its width, never more than about 1.0 square above the wall top; a low roof keeps its own pitch. The chimney scales with the roof.
-  const natural=ih/iw,target=Math.min(natural,.4,(o.cap||1.1)/widthSq),sy=target/natural,FH=Math.max(8,Math.round(H*sy));
+  const natural=ih/iw,target=Math.min(natural,.33,(o.cap||.8)/widthSq),sy=target/natural,FH=Math.max(8,Math.round(H*sy));
   const out=document.createElement('canvas');out.width=iw;out.height=FH;{const ox=out.getContext('2d');if(flip){ox.translate(iw,0);ox.scale(-1,1)}ox.imageSmoothingQuality='high';ox.drawImage(c,0,0,iw,FH)}
   out._tkrR=1;out._pre=c;out._body=target;IMG[key]=out;NPC_H[key]=NPC_H[k];return key;
 }
@@ -132,14 +132,14 @@ function tkrPlace(L){
   TKR.houses.forEach(h=>{const [id,x0,x1,y0,y1,face,k,o]=h,row=face==='S'?y1:y0;
     if(!L.rows[row].slice(x0,x1+1).split('').every(c=>c!=='.')){rep.push(id+' skipped: wall run has a gap');return}
     const W=x1-x0+1,D=y1-y0+1;let touchL=false,touchR=false;for(let y=y0;y<=y1;y++){if(solid(x0-1,y))touchL=true;if(solid(x1+1,y))touchR=true}
-    const ov=Math.max(.1,W*.04),ovL=touchL?0:ov,ovR=touchR?0:ov,xL=x0-ovL,xR=x1+1+ovR,Wr=xR-xL,xc=(xL+xR)/2,flip=o.flip!==undefined?!!o.flip:hash2(x0,y0,202)<.5,key=tkrRoofVar(k,id,o,flip,Wr);if(!key)return;
-    const gab=IMG[key],H=Wr*gab._body,ovF=.08,yF=face==='S'?y1+1+ovF:y0-ovF,yB=face==='S'?y0-ovF:y1+1+ovF,sg=face==='S'?1:-1,nF=[0,sg],nB=[0,-sg],zt=1.53,n=4;
+    const ovL=0,ovR=0,xL=x0-ovL,xR=x1+1+ovR,Wr=xR-xL,xc=(xL+xR)/2,flip=o.flip!==undefined?!!o.flip:hash2(x0,y0,202)<.5,key=tkrRoofVar(k,id,o,flip,Wr);if(!key)return;
+    const gab=IMG[key],H=Wr*gab._body,ovF=.02,yF=face==='S'?y1+1-ovF:y0+ovF,yB=face==='S'?y0+ovF:y1+1-ovF,sg=face==='S'?1:-1,nF=[0,sg],nB=[0,-sg],zt=1.53,n=4;
     planes.push({x:xc,y:yF,k:key,w:Wr,bob:zt,flat:nF,id:id+'F'},{x:xc,y:yB,k:key,w:Wr,bob:zt,flat:nB,id:id+'B'});
     const yMin=Math.min(yF,yB),yMax=Math.max(yF,yB),len=yMax-yMin,band=H/n,pre=gab._pre||gab;
     for(let q=0;q<n;q++){const d=(q+.5)/n*(Wr/2),skL=tkrStep(pre,id,q,n,len,band,flip,0),skR=tkrStep(pre,id,q,n,len,band,flip,1);
       planes.push({x:xL+d,y:(yMin+yMax)/2,k:skL,w:len,bob:zt+q*band,flat:[-1,0],id:id+'L'+q},{x:xR-d,y:(yMin+yMax)/2,k:skR,w:len,bob:zt+q*band,flat:[1,0],id:id+'R'+q})}
     // the chimney: a stack of four faces standing on the upper slope and rising clear of the ridge (a quarter of the roof width wide, at least .3 of the roof height above the ridge)
-    if(o.chim){const s=o.chim>0?1:-1,cw=Math.max(.55,Math.min(.9,Wr*.2)),cd=cw*.8,off=Wr*.22,cx=xc+s*off,cy=yF-sg*Math.max(.7,len*.14),zBase=zt+H*(1-2*off/Wr)-.15,zTop=zt+H+.65,ht=zTop-zBase,
+    if(o.chim){const s=o.chim>0?1:-1,cw=Math.max(.42,Wr*.18),cd=cw*.8,off=Wr*.2,cx=xc+s*off,cy=yF-sg*Math.max(.7,len*.14),zBase=zt+H*(1-2*off/Wr)-.15,zTop=zt+H+.45,ht=zTop-zBase,
         ff=tkrChimFace('tkr_'+id+'_cf',cw,ht,id.charCodeAt(1)),sf=tkrChimFace('tkr_'+id+'_cs',cd,ht,id.charCodeAt(0)+3);
       if(ff&&sf)planes.push({x:cx,y:cy+cd/2,k:ff,w:cw,bob:zBase,flat:[0,1],id:id+'c1'},{x:cx,y:cy-cd/2,k:ff,w:cw,bob:zBase,flat:[0,-1],id:id+'c2'},{x:cx-cw/2,y:cy,k:sf,w:cd,bob:zBase,flat:[-1,0],id:id+'c3'},{x:cx+cw/2,y:cy,k:sf,w:cd,bob:zBase,flat:[1,0],id:id+'c4'})}
     // the church spire: the grey octagonal tower of Oldhaven as four faces, standing on the ridge at the front of the roof
