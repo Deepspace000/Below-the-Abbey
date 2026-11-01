@@ -153,9 +153,9 @@ function mpGwoodDrawCave(x,L,api){
   x.restore();
   const T=(t,cx,cy,sz,col)=>mplText(x,t,X(cx),Y(cy),sz||6.8,col||MPL.INK);
   if(LEVEL===8){
-    T('The Great Cavern',16,5,8,MPL.INK);T("Gandrick's Chamber",28.5,3.2,6.6,MPL.VERM);MPLI.skull(x,X(29),Y(5.4),u*.1);
-    T('Coffin Hall',16.5,19.2,7.2);T('The Dead Passage',16.8,10.5,5.6);T('Entry Cave',4,16.4,6.8);T('Way out to the wood',4.6,19.7,5.2,MPL.VERD);
-    T('Wooden door',9.5,17.3,5);T('Iron gate',24,6.6,5)}
+    T('The Great Cavern',15.5,5,7.2,MPL.INK);T("Gandrick's Hall",53,33,8,MPL.VERM);MPLI.skull(x,X(53.5),Y(37.5),u*.12);
+    T('Coffin Hall',16.5,19.2,7.2);T('The Dead Passage',16.8,10.5,5.6);T('Entry Cave',4,16.4,6.8);T('Way out to the wood',6,20.9,4.8,MPL.VERD);
+    T('Iron gate',53.5,27.6,5);T('Guard Room',28.5,10.6,6);T('Hall of Stolen Goods',21.5,36,7)}
   else{
     T('Bandit Room',3.5,2.5,u*.34);T('Treasure Room',10.5,2.5,u*.3,MPL.VERM);T('The Way In',3.5,6.5,u*.3,MPL.VERD);T('Way out to the wood',3.5,8.55,u*.26,MPL.VERD)}
 }
@@ -178,8 +178,8 @@ function mpGwoodDrawAny(c,x,L,api){
   else if(LEVEL===8){
     mpGwoodDrawCave(x,L,api);
     mpGwoodMargins(x,L,api,'The bandit cave',
-      ['Gandrick lives in the east chamber, behind an iron gate.','Skeletons wake in the coffin hall.'],
-      ['The cave opens to the wood in the west, through a stone entry cave.','Hanging teeth on the roof are stalactites.'],
+      ['Gandrick waits in the great hall at the far south east, behind an iron gate.','Skeletons wake in the coffin hall.'],
+      ['The cave opens to the wood in the west, through a stone entry cave.','Narrow one-square tunnels wind between the big halls. Barrels of stolen goods stand in the corners of the halls.'],
       [[(x,a,b)=>{x.fillStyle='#dccd9e';x.fillRect(a-6,b-3,12,6);x.strokeStyle=MPL.INK;x.lineWidth=.6;x.strokeRect(a-6,b-3,12,6)},'Cave floor'],[(x,a,b)=>{x.fillStyle='#d2c6aa';x.strokeStyle=MPL.INK;x.lineWidth=.5;for(let i=-1;i<2;i++){x.beginPath();x.moveTo(a+i*4-1.6,b-4);x.lineTo(a+i*4,b+3);x.lineTo(a+i*4+1.6,b-4);x.closePath();x.fill();x.stroke()}},'Stalactites'],[(x,a,b)=>mpGwoodCoffin(x,a,b,.7),'Coffins'],[(x,a,b)=>{x.fillStyle='#8a5a2c';x.strokeStyle=MPL.INK;x.lineWidth=.6;x.fillRect(a-4,b-3,8,6);x.strokeRect(a-4,b-3,8,6)},'Wooden door']])}
   else{
     mpGwoodDrawAny.hall(c,x,L,api)}}
