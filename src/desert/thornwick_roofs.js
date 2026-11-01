@@ -129,8 +129,13 @@ function tkrChimFace(key,wSq,hSq,seed){
 function tkrPlace(L){
   if(L._tkr||!TKR.ready)return;L.sky=L.sky||[];const planes=[],rep=[];
   const solid=(x,y)=>L.rows[y]&&L.rows[y][x]!==undefined&&L.rows[y][x]!=='.';
-  TKR.houses.forEach(h=>{const [id,x0,x1,y0,y1,face,k,o]=h,row=face==='S'?y1:y0;
-    if(!L.rows[row].slice(x0,x1+1).split('').every(c=>c!=='.')){rep.push(id+' skipped: wall run has a gap');return}
+  TKR.houses.forEach(h=>{const [id,x0,x1,ty0,ty1,face,k,o]=h,row=face==='S'?ty1:ty0;let y0=ty0,y1=ty1;
+    const allSolid=y=>L.rows[y]&&L.rows[y].slice(x0,x1+1).split('').every(c=>c!=='.');
+    if(!allSolid(row)){rep.push(id+' skipped: wall run has a gap');return}
+    // the depth comes from the map, not the table: walk back from the street wall for as long as the whole width is wall, and make sure the street side does not go on
+    if(face==='S'){while(y0>0&&allSolid(y0-1))y0--;if(allSolid(y1+1)){rep.push(id+' skipped: wall goes on past the street row');return}}
+    else{while(allSolid(y1+1))y1++;if(allSolid(y0-1)){rep.push(id+' skipped: wall goes on past the street row');return}}
+    if(y0!==ty0||y1!==ty1)rep.push(id+' table depth y '+ty0+'-'+ty1+' corrected to the map: y '+y0+'-'+y1);
     const W=x1-x0+1,D=y1-y0+1;let touchL=false,touchR=false;for(let y=y0;y<=y1;y++){if(solid(x0-1,y))touchL=true;if(solid(x1+1,y))touchR=true}
     const ovL=0,ovR=0,xL=x0-ovL,xR=x1+1+ovR,Wr=xR-xL,xc=(xL+xR)/2,flip=o.flip!==undefined?!!o.flip:hash2(x0,y0,202)<.5,key=tkrRoofVar(k,id,o,flip,Wr);if(!key)return;
     const gab=IMG[key],H=Wr*gab._body,ovF=.02,yF=face==='S'?y1+1-ovF:y0+ovF,yB=face==='S'?y0+ovF:y1+1-ovF,sg=face==='S'?1:-1,nF=[0,sg],nB=[0,-sg],zt=1.53,n=4;
@@ -139,7 +144,7 @@ function tkrPlace(L){
     for(let q=0;q<n;q++){const d=(q+.5)/n*(Wr/2),skL=tkrStep(pre,id,q,n,len,band,flip,0),skR=tkrStep(pre,id,q,n,len,band,flip,1);
       planes.push({x:xL+d,y:(yMin+yMax)/2,k:skL,w:len,bob:zt+q*band,flat:[-1,0],id:id+'L'+q},{x:xR-d,y:(yMin+yMax)/2,k:skR,w:len,bob:zt+q*band,flat:[1,0],id:id+'R'+q})}
     // the chimney: a stack of four faces standing on the upper slope and rising clear of the ridge (a quarter of the roof width wide, at least .3 of the roof height above the ridge)
-    if(o.chim){const s=o.chim>0?1:-1,cw=Math.max(.42,Wr*.18),cd=cw*.8,off=Wr*.2,cx=xc+s*off,cy=yF-sg*Math.max(.7,len*.14),zBase=zt+H*(1-2*off/Wr)-.15,zTop=zt+H+.45,ht=zTop-zBase,
+    if(o.chim){const s=o.chim>0?1:-1,cw=Math.max(.42,Wr*.18),cd=cw*.8,off=Wr*.2,cx=xc+s*off,cy=yF-sg*Math.max(.7,len*.14),zBase=zt+H*(1-2*off/Wr)-.28,zTop=zt+H+.45,ht=zTop-zBase,
         ff=tkrChimFace('tkr_'+id+'_cf',cw,ht,id.charCodeAt(1)),sf=tkrChimFace('tkr_'+id+'_cs',cd,ht,id.charCodeAt(0)+3);
       if(ff&&sf)planes.push({x:cx,y:cy+cd/2,k:ff,w:cw,bob:zBase,flat:[0,1],id:id+'c1'},{x:cx,y:cy-cd/2,k:ff,w:cw,bob:zBase,flat:[0,-1],id:id+'c2'},{x:cx-cw/2,y:cy,k:sf,w:cd,bob:zBase,flat:[-1,0],id:id+'c3'},{x:cx+cw/2,y:cy,k:sf,w:cd,bob:zBase,flat:[1,0],id:id+'c4'})}
     // the church spire: the grey octagonal tower of Oldhaven as four faces, standing on the ridge at the front of the roof
@@ -148,6 +153,8 @@ function tkrPlace(L){
     rep.push([id,'wall x '+x0+'-'+(x1+1)+' y '+y0+'-'+(y1+1),'roof x '+xL.toFixed(2)+'-'+xR.toFixed(2),'centre '+xc.toFixed(2)+' vs '+((x0+x1+1)/2),'w '+Wr.toFixed(2)+' (wall '+W+')','ridge +'+H.toFixed(2),'gables y '+yF.toFixed(2)+' / '+yB.toFixed(2)].join(' | '))});
   L._tkr=planes;L._tkrRep=rep;
 }
+/* a plane seen almost edge-on (the camera nearly in the plane of the picture) is stretched by the engine into a huge slab: roof planes are not drawn then */
+function tkrGraze(p,cx,cy){const rx=p.x-cx,ry=p.y-cy,d=Math.hypot(rx,ry)||1e-6,dot=Math.abs(rx*p.flat[0]+ry*p.flat[1]);return dot<.3||dot/d<.3}
 /* at dusk and night the far haze on a sky picture is a pale grey, which made the roofs glow against the dark walls: from the evening on a darker copy of each roof is drawn */
 function tkrDim(img,step){
   if(!step||!img||!img.width)return img;const m=img._tkrM||(img._tkrM={});if(m[step])return m[step];
@@ -157,6 +164,6 @@ function tkrDim(img,step){
   if(LEVEL===3){const L3=LEVELS[3];if(L3&&!L3._tkr){if(!TKR.loading)tkrLoad();else tkrPlace(L3)}}
   const out=_k.apply(this,arguments);
   if(LEVEL===3&&LEVELS[3]&&LEVELS[3]._tkr){const k=(G.day||1)/(G.dayBase||.95),step=k>.95?0:k>.82?1:k>.66?2:3;
-    for(const p of LEVELS[3]._tkr){const dx=p.x-cx,dy=p.y-cy;if(dx*dx+dy*dy>1500)continue;let img=IMG[p.k];if(!img)continue;if(step)img=tkrDim(img,step);
+    for(const p of LEVELS[3]._tkr){const dx=p.x-cx,dy=p.y-cy;if(dx*dx+dy*dy>1500||tkrGraze(p,cx,cy))continue;let img=IMG[p.k];if(!img)continue;if(step)img=tkrDim(img,step);
       out.push({x:p.x,y:p.y,img,w:p.w,bob:p.bob,pic:1,plane3d:1,flat:p.flat,sky:!!window.TKR_SKY,smallSky:true,decor:KH_SKYD})}}
   return out}}
