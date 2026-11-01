@@ -957,5 +957,89 @@
 "h": 384,
 "kind": "sprite",
 "sheet": "tiki_sheet1"
+},
+"hide_0": {
+"file": "hide_0.webp",
+"w": 313,
+"h": 640,
+"kind": "sprite",
+"sheet": "hides_sheet1"
+},
+"hide_1": {
+"file": "hide_1.webp",
+"w": 322,
+"h": 640,
+"kind": "sprite",
+"sheet": "hides_sheet1"
+},
+"hide_2": {
+"file": "hide_2.webp",
+"w": 322,
+"h": 640,
+"kind": "sprite",
+"sheet": "hides_sheet1"
+},
+"hide_3": {
+"file": "hide_3.webp",
+"w": 138,
+"h": 640,
+"kind": "sprite",
+"sheet": "hides_sheet1"
+},
+"hide_5": {
+"file": "hide_5.webp",
+"w": 346,
+"h": 640,
+"kind": "sprite",
+"sheet": "hides_sheet1"
+},
+"hide_7": {
+"file": "hide_7.webp",
+"w": 310,
+"h": 640,
+"kind": "sprite",
+"sheet": "hides_sheet1"
+},
+"hide_8": {
+"file": "hide_8.webp",
+"w": 308,
+"h": 640,
+"kind": "sprite",
+"sheet": "hides_sheet1"
+},
+"hide_9": {
+"file": "hide_9.webp",
+"w": 329,
+"h": 640,
+"kind": "sprite",
+"sheet": "hides_sheet1"
+},
+"hide_10": {
+"file": "hide_10.webp",
+"w": 329,
+"h": 640,
+"kind": "sprite",
+"sheet": "hides_sheet1"
+},
+"web2_0": {
+"file": "web2_0.webp",
+"w": 431,
+"h": 512,
+"kind": "sprite",
+"sheet": "webs_sheet1"
+},
+"web2_1": {
+"file": "web2_1.webp",
+"w": 342,
+"h": 512,
+"kind": "sprite",
+"sheet": "webs_sheet1"
+},
+"web2_2": {
+"file": "web2_2.webp",
+"w": 491,
+"h": 512,
+"kind": "sprite",
+"sheet": "webs_sheet1"
 }
 }

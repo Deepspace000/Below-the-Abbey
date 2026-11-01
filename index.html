@@ -81498,6 +81498,7 @@ function epApply(n,late){const S=self.EP_OFF?null:EP_SPEC[n],L=LEVELS[n];EP._nl=
   if(S.vary)epVary(n,S.vary);
   if(S.jitter)for(const J of S.jitter)epJitter(n,J);
   if(S.pics&&!G.decor.some(d=>d.epPic))epWallPics(n,S.pics);
+  if(S.hides&&!G.decor.some(d=>d.epHide))epHides(n,S.hides);
   if(S.street&&!G.decor.some(d=>d.epSt))epStreet(n,S.street);
   if(S.fixed&&!G.decor.some(d=>d.epFx))for(const [k,x,y,oy] of S.fixed){if(!IMG['ep_'+k]||!G.grid[y]||G.grid[y][x]!==0)continue;G.decor.push({k:'ep_'+k,x,y,block:false,walk:true,deco:true,loot:false,shop:false,epFx:1,oy:oy||0,ox:(hash2(x,y,71)-.5)*.3,sc:.85})}   // a few fixed pieces against the house fronts (never in the middle of the road)
   if(S.tufts&&!G.decor.some(d=>d.epTuft))epTufts(n,S.tufts);
@@ -81526,8 +81527,27 @@ function epWallPics(n,P){if(P.fixed)for(const [x,y,wd,k,h,bob] of P.fixed){if(k=
     if(torchAt.get((wy*MW+wx)*4+face)||taken.has(x+','+y+','+[dx,dy])||(EP_SECRETS[n]&&EP_SECRETS[n].some(q=>q.door[0]===wx&&q.door[1]===wy)))continue;const h=hash2(x*4+face,y,n*17+3);if(h>=(P.p||.3))continue;
     let opts=P.keys.filter(k=>k.k!=='moss'&&IMG['ep_'+k.k]);const side=open(x-dy,y+dx)&&open(x+dy,y-dx)?0:1; // corner pieces want a corner beside them
     opts=opts.filter(k=>!k.corner||side);if(!opts.length)continue;let k=opts[(hash2(x*4+face,y,n*17+4)*opts.length)|0];if(near.some(q=>q[2]===k.k&&Math.abs(q[0]-x)+Math.abs(q[1]-y)<4))k=opts[(opts.indexOf(k)+1)%opts.length];
-    near.push([x,y,k.k]);NPC_H['ep_'+k.k]=k.h;G.decor.push({k:'ep_'+k.k,x,y,wd:[dx,dy],pic:1,bob:k.bob,block:false,deco:true,epPic:1,loot:false,shop:false});cnt++}}
+    near.push([x,y,k.k]);let kk=k.k,kh=k.h;if(kk==='web_hang'&&IMG.ep_web2_0){kk='web2_'+(hash2(x*4+face,y,n*17+5)<.5?0:1);kh=.58}else if(kk==='web_corner'&&IMG.ep_web2_2)kk='web2_2'; // the painted cobwebs: fine silk threads, not grey cloth
+    NPC_H['ep_'+kk]=kh;G.decor.push({k:'ep_'+kk,x,y,wd:[dx,dy],pic:1,bob:k.bob,block:false,deco:true,epPic:1,loot:false,shop:false});cnt++}}
   return cnt}
+/* hanging animal hides and pelts (Gandrick's cave, a bandit den): long flat pieces nailed to the wall of the halls, a few in the tunnels. Same wall-picture mechanism as epWallPics
+   (flush on the wall, true perspective). Deterministic by hash. Never on a door, torch or secret-wall square, never two on neighbouring squares, never the same piece twice in a row. */
+function epHides(n,P){const open=(x,y)=>x>=0&&y>=0&&x<MW&&y<MH&&G.grid[y][x]===0,names=P.names.filter(k=>IMG['ep_'+k]);if(!names.length)return 0;
+  const taken=new Set(G.decor.filter(d=>d.wd).map(d=>d.x+','+d.y+','+d.wd)),F=[[0,-1,2],[1,0,3],[0,1,0],[-1,0,1]],placed=[];let cnt=0;
+  const hallAt=(x,y)=>{for(const k in P.halls){const r=P.halls[k];if(x>=r[0]&&x<=r[2]&&y>=r[1]&&y<=r[3])return k}return null};
+  const doorNear=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const g=G.grid[y+dy]&&G.grid[y+dy][x+dx];if(g===3||g===4||g===5)return true}return false};
+  for(let y=1;y<MH-1;y++)for(let x=1;x<MW-1;x++){if(!open(x,y)||doorNear(x,y))continue;const hall=hallAt(x,y);
+    for(const [dx,dy,face] of F){const wx=x+dx,wy=y+dy,g=G.grid[wy]&&G.grid[wy][wx];if(!(g===1||g===2))continue;
+      if(torchAt.get((wy*MW+wx)*4+face)||taken.has(x+','+y+','+[dx,dy])||(EP_SECRETS[n]&&EP_SECRETS[n].some(q=>q.door[0]===wx&&q.door[1]===wy)))continue;
+      if(G.decor.some(d=>d.x===x&&d.y===y&&d.block))continue;
+      let p;if(hall)p=P.halls[hall][4];else{const tx=-dy,ty=dx;   // a tunnel: only where the wall is long and the tunnel is one square wide
+        p=[-2,-1,1,2].every(k=>{const a=G.grid[wy+ty*k],b=G.grid[y+ty*k];return a&&a[wx+tx*k]!==0&&b&&b[x+tx*k]===0})?P.tunnel:0}
+      if(hash2(x*4+face,y,n*19+7)>=p)continue;
+      if(placed.some(q=>Math.abs(q[0]-x)<=1&&Math.abs(q[1]-y)<=1))continue;   // never on neighbouring squares
+      const last=placed.length?placed[placed.length-1][3]:'';let i=(hash2(x*4+face,y,n*19+8)*names.length)|0;if(names[i]===last)i=(i+1)%names.length;
+      const k=names[i],h=P.h[k]||1,bob=P.bob+(hash2(x,y*3+face,n*19+9)-.5)*.1;
+      placed.push([x,y,face,k]);NPC_H['ep_'+k]=h;G.decor.push({k:'ep_'+k,x,y,wd:[dx,dy],pic:1,bob,block:false,deco:true,epPic:1,epHide:1,loot:false,shop:false});cnt++}}
+  EP.hideCount=cnt;return cnt}
 /* street clutter for a town: on grass or dirt beside a house wall (never on the road, never in a lane between two walls, never by a door), turned to the wall, never blocking */
 function epStreet(n,P){const open=(x,y)=>x>=0&&y>=0&&x<MW&&y<MH&&G.grid[y][x]===0,fm=G.fmap,okF=P.on||'1',used=new Set();
   for(const d of G.decor)used.add(Math.round(d.x)+','+Math.round(d.y));for(const e of G.enemies||[])used.add(e.x+','+e.y);for(const i of G.items||[])used.add(i.x+','+i.y);
@@ -81715,6 +81735,10 @@ const EP_NWIN={tww1:[.35,.27,.65,.55],tww3:[.35,.27,.65,.55],ihw1:[.36,.2,.62,.5
 /* the lit windows in the door pictures of the town (T_DOORS name): the same, one or two panes each */
 const EP_NDOOR={hall:[[.17,.15,.33,.32],[.63,.15,.8,.32]],shop:[[.09,.5,.37,.7],[.4,.5,.67,.7]],inn:[[.22,.18,.34,.37],[.72,.18,.84,.37]]};
 const EP_GRIME=['straw','droppings','puddle','soot','crack','rubble','bones','damp','shards','rag','grain','mud','pebbles','wax'];
+/* Gandrick's cave is a bandit den: hung hides and pelts are its wall dressing; no damp stains, no tangled web pieces (only corner cobwebs). */
+const EP_GANDRICK={pics:{p:.07,keys:[{k:'moss',h:.16,bob:.035},{k:'web_corner',h:.42,bob:.76,corner:1}]},
+  hides:{names:['hide_0','hide_2','hide_7','hide_1','hide_5','hide_0','hide_8','hide_2','hide_10','hide_7','hide_9','hide_3'],h:{hide_0:1.2,hide_1:1.2,hide_2:1.2,hide_3:1.2,hide_5:1.15,hide_6:1.2,hide_7:1.2,hide_8:1.25,hide_9:1.25,hide_10:1.15},bob:.12,tunnel:.1,
+    halls:{entry:[1,15,7,20,.3],coffin:[12,13,21,20,.2],cavern:[10,2,21,8,.4],guard:[26,2,30,9,.5],stolen:[16,31,27,40,.4],gandrick:[47,30,59,41,.5]}}};
 const EP_SPEC={
   /* the crypts below the Abbey: the starting dungeon */
   1:{walls:{name:'crypt1',stone:'cryptwall',so:{k:[.8,.72,.6],sat:.86,foot:[.5,.85],top:[.3,.62]},brick:'cellarbrick',bo:{k:[.5,.46,.44],sat:.22,foot:[.5,.85],top:[.3,.62]},
@@ -81740,7 +81764,7 @@ const EP_SPEC={
      grade:{c:1.06,s:.9,b:1.06,tone:[140,115,80,.08],vig:.26,vc:[12,10,8]},
      tufts:{on:'12',path:'6',tuftF:'sepia(.55) saturate(.9) hue-rotate(28deg) brightness(.6)',p:.9,n:420,far:2,base:.1,big:1,edgeOn:'603',edgeP:.45},street:{keys:['firewood','haybale','dung','wheel','flour','rainbarrel','veg','sacks','crate','bucket'],p:.5,gap:3,on:'12',notNear:'03456',fence:1,fenceRe:/^(fence|ptree|gtree|pjuniper|pbracken|grocks|gboulder|well)/}},
   /* the other early dungeons share the crypts' finish, each with its own stone (see epDungeon) */
-  8:epDungeon('cave',8),23:epDungeon('cave',23),25:epDungeon('cave',25),9:epDungeon('crypt',9),12:epDungeon('crypt',12,{nofloor:1}),501:EP_WELL,11:EP_TUNNEL,18:epDungeon('mine',18),
+  8:Object.assign(epDungeon('cave',8),EP_GANDRICK),23:epDungeon('cave',23),25:epDungeon('cave',25),9:epDungeon('crypt',9),12:epDungeon('crypt',12,{nofloor:1}),501:EP_WELL,11:EP_TUNNEL,18:epDungeon('mine',18),
   /* the deserts: a few painted palms by the oases, broken pieces at the ruins, lone bones far apart; the dunes themselves are not touched */
   41:{desert:{palms:[],ruins:['f2_de_amphora','f2_de_skull','f2_de_cairn'],bones:['f2_dx_oxskull','f2_de_skull','f2_de_cairn','f2_de_amphora'],oasisP:0,oasisN:1,ruinP:.35,ruinN:1,lone:8,loneGap:26}},
   43:{desert:{palms:[],ruins:['f2_de_amphora','f2_de_skull','f2_de_cairn'],bones:['f2_dx_oxskull','f2_de_skull','f2_de_cairn','f2_de_amphora'],oasisP:0,ruinP:.35,ruinN:1,lone:8,loneGap:26}},
