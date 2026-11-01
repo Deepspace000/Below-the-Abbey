@@ -10,14 +10,14 @@
 Object.assign(EP_H,{ep_bn_skull:.2,ep_bn_ribs:.26,ep_bn_longbones:.2,ep_bn_skullpile:.34,ep_bn_jaw:.14,ep_bn_potshards:.24,ep_bn_buried:.26,ep_bn_rat:.1,ep_bn_swordshield:.32,ep_bn_cloak:.3,ep_bn_wolfskull:.15,ep_bn_skelside:.2,ep_bn_wolfskel:.2,ep_bn_moss:.3,ep_bn_crushed:.16,ep_bn_chain:.38,ep_bn_ribdome:.28,ep_bn_skelcurl:.36,ep_bn_twoskulls:.2,ep_bn_skel_sit:.62});
 const BN_DRY=new Set(['skull','ribs','longbones','skullpile','jaw','buried','wolfskull','skelside','wolfskel','crushed','ribdome','skelcurl','twoskulls','skel_sit','potshards']); // bleached in the desert (no moss, no cloak)
 const BN_THEME={
-  crypt:['skel_sit','skelcurl','ribs','ribdome','skull','skullpile','twoskulls','chain','cloak','jaw','longbones','potshards','crushed','moss','buried','swordshield','skelside','skull','longbones','ribs'],
-  cave:['skull','longbones','ribs','buried','moss','crushed','skelside','skelcurl','rat','twoskulls','jaw','wolfskull','potshards','skel_sit','ribdome'],
-  den:['wolfskel','wolfskull','wolfskel','rat','longbones','ribs','crushed','skull','skelside','buried','jaw','wolfskull','moss','skelcurl'],
-  mine:['chain','swordshield','skelcurl','buried','crushed','longbones','skull','rat','ribs','skel_sit','potshards','cloak','twoskulls','skelside'],
-  dry:['skull','ribs','longbones','skullpile','jaw','buried','wolfskull','skelside','crushed','ribdome','skelcurl','twoskulls','skel_sit','potshards','wolfskel']};
-const BN_FIG={crypt:['skel_sit','skelcurl','chain','swordshield','cloak','skelside','buried'],cave:['skel_sit','skelcurl','skelside','buried'],den:['wolfskel','skelside','buried','skelcurl'],mine:['chain','swordshield','skelcurl','skel_sit','buried'],dry:['skel_sit','skelcurl','skelside','buried','wolfskel']}; // whole figures: set against a wall
+  crypt:['skel_sit','skelcurl','ribs','ribdome','skullpile','chain','jaw','longbones','potshards','crushed','buried','swordshield','skelside','longbones','ribs'],
+  cave:['longbones','ribs','buried','crushed','skelside','skelcurl','rat','jaw','wolfskull','potshards','skel_sit','ribdome'],
+  den:['wolfskel','wolfskull','wolfskel','rat','longbones','ribs','crushed','skelside','buried','jaw','wolfskull','skelcurl'],
+  mine:['chain','swordshield','skelcurl','buried','crushed','longbones','rat','ribs','skel_sit','potshards','skelside'],
+  dry:['ribs','longbones','skullpile','jaw','buried','wolfskull','skelside','crushed','ribdome','skelcurl','skel_sit','potshards','wolfskel']};
+const BN_FIG={crypt:['skel_sit','skelcurl','chain','swordshield','skelside','buried'],cave:['skel_sit','skelcurl','skelside','buried'],den:['wolfskel','skelside','buried','skelcurl'],mine:['chain','swordshield','skelcurl','skel_sit','buried'],dry:['skel_sit','skelcurl','skelside','buried','wolfskel']}; // whole figures: set against a wall
 const BN_LV={1:'crypt',9:'crypt',11:'crypt',12:'crypt',31:'crypt',501:'crypt',8:'cave',25:'cave',23:'den',18:'mine',42:'dry',65:'dry'};
-const BN_EXTRA={1:9,8:4,9:3,11:3,12:3,18:4,23:4,25:3,31:3,42:5,65:3,501:4,448:3,456:3};
+const BN_EXTRA={1:4,8:2,9:1,11:1,12:1,18:2,23:2,25:1,31:1,42:2,65:1,501:2,448:1,456:1};   // used sparingly: the old piles are swapped one for one, and only a few extra pieces go on bare floor
 const BN_OLD=new Set(['bones','ep_bonepile','ep_skel_slump']);
 function bnTheme(n,L){if(BN_LV[n])return BN_LV[n];if((L.enemies||[]).some(e=>/wolf|bear/.test(e.t||'')))return 'den';if((L.decor||[]).some(d=>d.k==='dbones'))return 'dry';return 'crypt'}
 /* a variant of a painted piece: ~f mirrored, ~d bleached (made on first use) */
@@ -55,3 +55,6 @@ function bnPost(n){if(self.EP_OFF||self.BN_OFF)return;const L=LEVELS[n];if(!L)re
   if(L._bnOn||(G.decor||[]).some(d=>BN_OLD.has(d.k)||(d.k&&d.k.startsWith('ep_bn_')))){const theme=bnTheme(n,L);bnSwap(n,L,G.decor,theme==='dry',theme); // anything a later hook put in
     try{epLoad().then(()=>{if(LEVEL===n)bnMake(G.decor)})}catch(e){}if(EP.ready)bnMake(G.decor)}}
 {const _ll=loadLevel;loadLevel=function(n){try{bnPre(n)}catch(e){console.error('bn pre',e)}const r=_ll.apply(this,arguments);try{bnPost(n)}catch(e){console.error('bn post',e)}return r}}
+
+/* the old code-drawn pile (IMG.bones) is never shown any more: wherever that picture is still asked for (a level the swap did not reach), a painted heap of bones stands in */
+{const iv=setInterval(()=>{try{if(typeof IMG!=='undefined'&&IMG.ep_bn_longbones&&IMG.ep_bn_longbones.width){IMG.bones=IMG.ep_bn_longbones;if(typeof NPC_H!=='undefined')NPC_H.bones=.2;clearInterval(iv)}}catch(e){}},1500)}
