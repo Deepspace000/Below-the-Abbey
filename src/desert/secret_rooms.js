@@ -103,9 +103,10 @@ function srContents(s,n){const r=srRating(n),ru=k=>hash2(s.chest[0]*7+k,s.chest[
   const gold=ru(10)<.5?Math.round((12+r*3.2)*(.7+.6*ru(11))):0;return {items,gold,sur}}
 /* the face of the sealed wall: this level's own wall picture, one block a little out of line, a crack round it, dust at its foot */
 function srSusFor(ti,s){const key=ti+'_'+s.id;if(SR.tex[key]!==undefined)return SR.tex[key];const T=TEX[ti];if(!T||!T.d||T.e||T.tw||T.d.length%(TS*4)!==0)return SR.tex[key]=ti;
-  const HH=T.d.length/(TS*4),k=HH/TS,h1=hash2(s.door[0],s.door[1],41),h2=hash2(s.door[0],s.door[1],42),x0=36+((h1*10)|0),x1=x0+46+((h2*10)|0),y0=Math.round((HH>TS?.40*TS:42+((h2*8)|0))*(HH>TS?1:1)),y1=y0+Math.round((52+((h1*8)|0))*(HH>TS?1:1));
-  const yy0=HH>TS?Math.round(HH*(.36+h2*.05)):y0,yy1=HH>TS?Math.round(HH*(.74+h1*.05)):Math.min(y1,112);
-  const d=epSusData(T.d,x0,Math.min(x1,118),yy0,yy1,HH),n=addTex(d,null);for(const q of Object.keys(T))if(q!=='d'&&q!=='e')TEX[n][q]=T[q];void k;return SR.tex[key]=n}
+  const HH=T.d.length/(TS*4),tall=HH>TS,h1=hash2(s.door[0],s.door[1],41),h2=hash2(s.door[0],s.door[1],42),x0=40+((h1*8)|0),x1=x0+44+((h2*8)|0);
+  const y0=tall?Math.round(HH*(.42+h2*.04)):48+((h2*6)|0),y1=tall?Math.round(HH*(.64+h1*.04)):y0+40+((h1*6)|0);
+  // a thinner, softer crack than level 1's, a block that is clearly out of line (about half a stone), a small patch of dust
+  const d=epSusData(T.d,x0,x1,y0,y1,HH,{dx:9,dy:-6,soft:.5,dust:.6}),n=addTex(d,null);for(const q of Object.keys(T))if(q!=='d'&&q!=='e')TEX[n][q]=T[q];return SR.tex[key]=n}
 /* the rooms of the level just entered: hollowed out of G.grid, chests filled, lights and props, the creature woken or put back, the sealed walls registered */
 const srSetF=()=>{const F=G.flags;return F.sr_mon=F.sr_mon||{}};
 function srApply(){const list=SR_ROOMS[LEVEL];SR.gd=G.decor;SR.lv=LEVEL;SR.live=[];SR_CT.clear();if(!list||!list.length||!EP.ready)return;
@@ -119,7 +120,7 @@ function srApply(){const list=SR_ROOMS[LEVEL];SR.gd=G.decor;SR.lv=LEVEL;SR.live=
     if(!F[s.id]){
       const [fx,fy]=s.from,ox=dx-fx,oy=dy-fy;
       for(let f=0;f<4;f++){const key=(dy*MW+dx)*4+f;if(torchAt.has(key)){torchAt.delete(key);const l=LIGHTS.find(q=>q.key===key);if(l)l.taken=true}}
-      if(IMG.ep_candles&&!G.decor.some(d=>d.epSecC===s.id))G.decor.push({k:'ep_candles',x:fx,y:fy,ox:ox*.36+(oy?.18:0),oy:oy*.36+(ox?.18:0),sc:.55,block:false,deco:true,loot:false,shop:false,epSecC:s.id});
+      if(IMG.ep_candles&&!G.decor.some(d=>d.epSecC===s.id))G.decor.push({k:'ep_candles',x:fx,y:fy,ox:ox*.36+(oy?.18:0),oy:oy*.36+(ox?.18:0),sc:.85,block:false,deco:true,loot:false,shop:false,epSecC:s.id});
       if(!LIGHTS.some(l=>l.epSecC===s.id))LIGHTS.push({x:fx+.5+ox*.4,y:fy+.5+oy*.4,ph:hash2(fx,fy,7)*6.28,key:-6000-LIGHTS.length,taken:false,red:false,free:true,lamp:true,calm:false,kI:.42,col:[1.25,.9,.55],range2:5,epSecC:s.id});
       SR_CT.set(dy*MW+dx,s)}
     if(!LIGHTS.some(l=>l.epSec===s.id))LIGHTS.push({x:s.lamp[0]+.5,y:s.lamp[1]+.5,ph:hash2(s.lamp[0],s.lamp[1],3)*6.28,key:-5000-LIGHTS.length,taken:false,red:false,free:true,lamp:true,calm:false,kI:.5,col:[1.2,.86,.56],range2:30,epSec:s.id});
