@@ -16,7 +16,8 @@
        level's own roster, woken when the wall opens; whether it was killed is kept in G.flags.sr_mon.
    Which levels: SR_BIG (moderate or larger) and, for about half of the small desert dungeons (the burrows 50 to 59 and the DNG_INFO dungeons), a hash decides.
    ========================================================================== */
-const SR_BIG=[18,21,39,40,42,65,104,107,114,117,124,127,134,137,144,147,260,449,450,471,472,473,474,475,476,477,497,498,499,500,502,532,533,534,535,9673,9674,9675];
+const SR_BIG=[8,18,21,39,40,42,65,104,107,114,117,124,127,134,137,144,147,260,449,450,471,472,473,474,475,476,477,497,498,499,500,502,532,533,534,535,9673,9674,9675];
+const SR_WANT={8:4}; // levels that ask for a set number of rooms (Gandrick's Cave: a maze of tunnels that is under 1000 open squares)
 const SR_ROOMS={},SR={gd:null,lv:0,tex:{},live:[],ok:{}};
 self.SR_ROOMS=SR_ROOMS;self.SR_CT=new Map();
 const srUnique=['boss','gandrick','mayor','overseer','halbrecht','wraith','sut','firelizard','cyclops','pharaohboss'];
@@ -31,7 +32,7 @@ function srPlan(n,L){
   const R=L.rows,H=R.length,W=R[0].length,g=srGrid(L);let open=0;for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(g[y][x]===0)open++;
   const kind=srKindOf(n,L,open);if(!kind)return null;
   const MG=8,at=(x,y)=>x<0||y<0||x>=W+MG||y>=H+MG?-1:(x>=W||y>=H)?1:g[y][x],plain=(x,y)=>srPlain(at(x,y));
-  const want=kind==='big'?Math.max(2,Math.min(6,Math.round(open/600))):(hash2(n,6,903)<.4?2:1);
+  const want=SR_WANT[n]||(kind==='big'?Math.max(2,Math.min(6,Math.round(open/600))):(hash2(n,6,903)<.4?2:1));
   const occ=new Set(),haz=[];
   for(const d of L.decor||[]){occ.add(Math.round(d.x)+','+Math.round(d.y));if(d.npc||d.enter||d.opens||d.lockedBy||d.k==='teleporter'||d.secret||d.shop)haz.push([Math.round(d.x),Math.round(d.y)])}
   for(const e of L.enemies||[]){occ.add(e.x+','+e.y);haz.push([e.x,e.y])}
@@ -42,6 +43,7 @@ function srPlan(n,L){
   const near1=(x,y,r)=>haz.some(h=>Math.abs(h[0]-x)<=r&&Math.abs(h[1]-y)<=r);
   const cand=[];
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(g[y][x]!==0||occ.has(x+','+y)||near1(x,y,1))continue;
+    if(n===8&&typeof GC_HALLS!=='undefined'&&Object.values(GC_HALLS).some(h=>x>=h[0]-1&&x<=h[2]+1&&y>=h[1]-1&&y<=h[3]+1))continue; // Gandrick's Cave: the doors are in the tunnels, not in the big halls
     for(let f=0;f<4;f++){const dx=DIRS[f][0],dy=DIRS[f][1],Dx=x+dx,Dy=y+dy,px=-dy,py=dx;
       if(!plain(Dx,Dy)||at(x-dx,y-dy)!==0||occ.has(Dx+','+Dy)||!plain(Dx+px,Dy+py)||!plain(Dx-px,Dy-py)||special(Dx,Dy))continue;
       const sizes=[[2,2],[3,2],[2,3],[3,3]],so=(hash2(Dx,Dy,n*7+1)*4)|0;let done=null;
@@ -89,7 +91,7 @@ function srExtend(L,ext){if(L._srx||(!ext[0]&&!ext[1]))return;L._srx=1;const R=L
   try{if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();const L=LEVELS[n];
     if(L&&L.rows&&!L._srp){L._srp=1;const P=srPlan(n,L);if(P){L._srPlan=P;srExtend(L,P.ext);SR_ROOMS[n]=P.rooms}}}catch(e){console.error('sr plan',e)}
   const r=_ll.apply(this,arguments);
-  try{const L=LEVELS[n];if(L&&L._srPlan&&!L._srD){L._srD=1;const add=L._srPlan.rooms.map(s=>({k:'chest',x:s.chest[0],y:s.chest[1],block:true,kname:'sr_'+s.id}));for(const d of add)L.decor.push(d);if(DECOR_SPAWNS!==L.decor)for(const d of add)DECOR_SPAWNS.push(d)}
+  try{const L=LEVELS[n];if(L&&L._srPlan&&!L._srD){L._srD=1;const add=L._srPlan.rooms.map(s=>({k:'chest',x:s.chest[0],y:s.chest[1],block:true,kname:'sr_'+s.id}));if(n===8&&typeof gcSecretBarrels==='function')for(const s of L._srPlan.rooms)add.push(...gcSecretBarrels(s));for(const d of add)L.decor.push(d);if(DECOR_SPAWNS!==L.decor)for(const d of add)DECOR_SPAWNS.push(d)}
     if(L&&L._srPlan&&typeof epLoad==='function')epLoad()}catch(e){console.error('sr decor',e)}
   return r}}
 /* the surprise item: one single piece that fits the level's rating, never a quest item (it must have a price and no package or quest mark) */
