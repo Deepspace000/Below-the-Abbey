@@ -9,7 +9,7 @@ HELP = r"""
 window.T={wait:ms=>new Promise(r=>setTimeout(r,ms)),
  go:async(n,x,y,f)=>{for(let t=0;t<6&&LEVEL!==n;t++){goToLevel(n,x===undefined?undefined:{x,y,f});for(let i=0;i<80&&LEVEL!==n;i++)await T.wait(100);await T.wait(900)}
   if(x!==undefined){G.P.x=x;G.P.y=y;G.P.f=f;G.P.angT=(f-1)*Math.PI/2;G.C={x,y,a:G.P.angT}}G.enemies=[];G.lockT=0;G.cut=null;G.talk=null;G.loot=null;await T.wait(1500)},
- bone:d=>/bone|skel|skull|ribs|corpse|^ep_bn_/.test(d.k)};
+ bone:d=>/bone|skel|skull|ribs|corpse|^ep_bn2?_/.test(d.k)};
 """
 AUTOJS = r"""K=>{const ok=(x,y)=>G.grid[y]&&G.grid[y][x]===0&&!G.decor.some(d=>d.block&&d.x===x&&d.y===y);const L=G.decor.filter(d=>T.bone(d)&&!d.hidden&&!/^(gy_|hpa_|art_)/.test(d.k)),out=[],used=[];
  const step=Math.max(1,Math.floor(L.length/K));for(let i=0;i<L.length&&out.length<K;i+=step){const d=L[i];
@@ -18,7 +18,7 @@ def boot(p):
     b = p.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'], executable_path=os.environ.get('BTA_CHROME') or None)
     pg = b.new_page(viewport={'width': 900, 'height': 600})
     pg.on('pageerror', lambda e: print('PAGEERR', e))
-    pg.goto('http://localhost:%s/index.html?town=oldhaven&lvl=10&v=%d' % (PORT, time.time()), wait_until='domcontentloaded', timeout=90000)
+    pg.goto('http://localhost:%s/%s?town=oldhaven&lvl=10&v=%d' % (PORT, os.environ.get('PS_PAGE','index.html'), int(time.time())), wait_until='domcontentloaded', timeout=90000)
     pg.wait_for_function("()=>typeof G!=='undefined'&&G.state==='play'", timeout=150000)
     pg.wait_for_function("()=>LEVEL===305", timeout=120000)
     pg.wait_for_timeout(3000); pg.evaluate(HELP)
