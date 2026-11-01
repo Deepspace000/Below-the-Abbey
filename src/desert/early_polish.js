@@ -31,6 +31,35 @@ function epWallSet(name,stone,brick){if(EP.walls[name])return EP.walls[name];if(
 function epSwapWalls(W){
   if(EP.wall&&EP.wall!==W){[T_STONE,T_TORCH_STONE,T_TORCH_STONE_R,T_BRICK,T_TORCH_BRICK,T_TORCH_BRICK_R,T_DOOR,T_LOCK,T_EXIT]=EP.save;EP.wall=null}
   if(W&&!EP.wall){EP.save=[T_STONE,T_TORCH_STONE,T_TORCH_STONE_R,T_BRICK,T_TORCH_BRICK,T_TORCH_BRICK_R,T_DOOR,T_LOCK,T_EXIT];T_DOOR=W.door;T_LOCK=W.lock;T_EXIT=W.exit;T_STONE=W.stone;T_TORCH_STONE=W.tstone;T_TORCH_STONE_R=W.tstoneR;T_BRICK=W.brick;T_TORCH_BRICK=W.tbrick;T_TORCH_BRICK_R=W.tbrickR;EP.wall=W}}
+
+/* little patches of dungeon flowers GROWN out of the brick joints: a few copies of the early wall tiles with a tiny painted tuft (assets/ep/fl_0..9) set into the bottom mortar line, its colours pulled toward the wall's own tone and light, a soft contact shadow and a short dark crack and roots under it */
+function epFlowerTile(src,im,i,s){const T=TS,r=k=>hash2(i*7+s,k,1303),out=new Uint8ClampedArray(src),asp=im.width/im.height;
+  let hp=T*(.08+.055*r(1)),wp=hp*asp;if(wp>T*.27){wp=T*.27;hp=wp/asp}if(hp<6){hp=6;wp=hp*asp}
+  const w=Math.max(4,Math.round(wp)),h=Math.max(4,Math.round(hp));let xc=(s?.5+.4*r(2):.1+.4*r(2))*T;xc=Math.max(w/2+3,Math.min(T-w/2-3,xc));
+  const xa=Math.max(0,Math.floor(xc-w/2-4)),xb=Math.min(T-1,Math.ceil(xc+w/2+4)),lum=(x,y)=>{const q=(y*T+x)*4;return out[q]*.3+out[q+1]*.59+out[q+2]*.11};
+  const m=[];for(let y=0;y<T;y++){let a=0;for(let x=xa;x<=xb;x++)a+=lum(x,y);m.push(a/(xb-xa+1))}
+  let j=Math.round(T*.78),best=-1e9;for(let y=Math.round(T*.6);y<=Math.round(T*.9);y++){let b=0,c=0;for(let k=-6;k<=6;k++)if(m[y+k]!==undefined){b+=m[y+k];c++}const sc=b/c-m[y];if(sc>best){best=sc;j=y}} // the darkest course joint of the lower wall, against its own surroundings
+  let cv=document.createElement('canvas'),cw=im.width,ch=im.height;cv.width=cw;cv.height=ch;cv.getContext('2d').drawImage(im,0,0);
+  while(cw>w*2){const nw=Math.max(w,cw>>1),nh=Math.max(h,Math.round(ch*nw/cw)),c2=document.createElement('canvas');c2.width=nw;c2.height=nh;const x2=c2.getContext('2d');x2.imageSmoothingQuality='high';x2.drawImage(cv,0,0,nw,nh);cv=c2;cw=nw;ch=nh}
+  const c3=document.createElement('canvas');c3.width=w;c3.height=h;const x3=c3.getContext('2d');x3.imageSmoothingQuality='high';x3.filter='blur(.35px)';x3.drawImage(cv,0,0,w,h);const sp=x3.getImageData(0,0,w,h).data;
+  let wr=0,wg=0,wb=0,n=0;for(let y=Math.max(0,j-12);y<=Math.min(T-1,j+3);y++)for(let x=xa;x<=xb;x++){const q=(y*T+x)*4;wr+=out[q];wg+=out[q+1];wb+=out[q+2];n++}wr/=n;wg/=n;wb/=n;const wl=wr*.3+wg*.59+wb*.11,kL=Math.max(.8,Math.min(1.15,wl/65)),mix=.28+.12*r(3);
+  const x0=Math.round(xc-w/2),y0=j-h+1;
+  for(let y=j-4;y<=j+5;y++)for(let x=Math.floor(xc-w/2-4);x<=Math.ceil(xc+w/2+4);x++){if(x<0||x>=T||y<0||y>=T)continue;const d=((x-xc)/(w/2+4))**2+((y-(j-1))/4.6)**2;if(d<1){const f=1-.3*Math.pow(1-d,1.6),q=(y*T+x)*4;out[q]*=f;out[q+1]*=f;out[q+2]*=f}} // contact shadow
+  let cx=xc+(r(4)-.5)*3;for(let y=j+1;y<=Math.min(T-1,j+4+Math.round(r(5)*5));y++){cx+=(r(10+y)-.5)*1.2;const x=Math.round(cx),q=(y*T+x)*4,f=.5;out[q]*=f;out[q+1]*=f;out[q+2]*=f;const q2=q+4;out[q2]*=.8;out[q2+1]*=.8;out[q2+2]*=.8} // a short dark crack under the roots
+  for(let k=0;k<2;k++){let rx=xc+(k?1:-1)*w*(.12+.1*r(20+k)),ry=j+1;for(let t=0;t<3+Math.round(r(22+k)*3)&&ry<T-1;t++){rx+=(r(30+t+k*5)-.5)*1.4;ry++;const q=(ry*T+Math.round(rx))*4;out[q]=out[q]*.4+30*.6;out[q+1]=out[q+1]*.4+34*.6;out[q+2]=out[q+2]*.4+22*.6}} // dark roots going into it
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const q0=(y*w+x)*4;let a=sp[q0+3]/255;if(a<.03)continue;a=Math.pow(a,1.25)*.94;const X=x0+x,Y=y0+y;if(X<0||X>=T||Y<0||Y>=T)continue;
+    let R=sp[q0],G=sp[q0+1],B=sp[q0+2];const l=R*.3+G*.59+B*.11;R=l+(R-l)*.86;G=l+(G-l)*.86;B=l+(B-l)*.86;R=(R*(1-mix)+wr*mix)*kL;G=(G*(1-mix)+wg*mix)*kL;B=(B*(1-mix)+wb*mix)*kL;const l2=R*.3+G*.59+B*.11,lo=wl*.78+10,hi=wl*1.5+20;if(l2>hi){const q=hi/l2;R*=q;G*=q;B*=q}else if(l2<lo&&l2>1){const q=Math.min(2.2,lo/l2);R*=q;G*=q;B*=q} // keep the tuft in the wall's own range of light: not glowing, not lost
+    const q=(Y*T+X)*4;out[q]=out[q]*(1-a)+R*a;out[q+1]=out[q+1]*(1-a)+G*a;out[q+2]=out[q+2]*(1-a)+B*a}
+  return out}
+function epFlowerPool(W,g){W.fl=W.fl||{};const pl=self.EP_FLPLAIN?'p':'',KY=pl+g;if(W.fl[KY])return W.fl[KY];const bases=(W.wv&&W.wv[g])||[g===1?W.stone:W.brick],out=[];for(let i=0;i<10;i++){const im=IMG['ep_fl_'+i];if(!im||!im.width)continue;for(let s=0;s<2;s++){const b=bases[(i+s)%bases.length];if(!TEX[b]||!TEX[b].d)continue;out.push(addTex(pl?new Uint8ClampedArray(TEX[b].d):epFlowerTile(TEX[b].d,im,i,s)))}}return W.fl[KY]=out}
+function epFlowerPlace(n,L){const W=EP.wall;if(!W||!L._epf||!IMG.ep_fl_0)return;const ct=L._epf.ct=L._epf.ct||new Map(),P={1:epFlowerPool(W,1),2:epFlowerPool(W,2)},put=new Set(),cand=[];let cnt=0;
+  const open=(x,y)=>x>=0&&y>=0&&x<MW&&y<MH&&G.grid[y][x]===0;
+  for(let y=1;y<MH-1;y++)for(let x=1;x<MW-1;x++){const g=G.grid[y][x];if((g!==1&&g!==2)||!P[g].length)continue;if(!(open(x-1,y)||open(x+1,y)||open(x,y-1)||open(x,y+1)))continue;if(ct.has(y*MW+x)||(self.SR_CT&&SR_CT.has(y*MW+x)))continue;let tq=0;for(let f=0;f<4;f++)if(torchAt.has((y*MW+x)*4+f))tq=1;if(tq)continue;cand.push([hash2(x,y,977+n),x,y,g]);
+    if(hash2(x,y,977+n)>1/8)continue;
+    let adj=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if((dx||dy)&&put.has((y+dy)*MW+x+dx))adj=1;if(adj)continue;
+    const v=P[g],k=(hash2(x,y,978)*v.length)|0;ct.set(y*MW+x,v[k]);put.add(y*MW+x);cnt++}
+  if(cnt<2&&cand.length>=4){cand.sort((p,q)=>p[0]-q[0]);for(const [h,x,y,g] of cand){if(cnt>=2)break;let adj=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(put.has((y+dy)*MW+x+dx))adj=1;if(adj)continue;const v=P[g];ct.set(y*MW+x,v[(hash2(x,y,978)*v.length)|0]);put.add(y*MW+x);cnt++}} // a small room still gets a couple
+  L._epFl=cnt}
 /* soft shadows and warm glows, made in code (light, not props) */
 function epBlob(key,col,a0,soft){if(IMG[key])return key;const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,4,64,64,62);g.addColorStop(0,`rgba(${col},${a0})`);g.addColorStop(soft||.55,`rgba(${col},${a0*.45})`);g.addColorStop(1,`rgba(${col},0)`);x.fillStyle=g;x.fillRect(0,0,128,128);IMG[key]=c;return key}
 /* the floor detail of a level: decals in a grimy palette, contact shadows under pieces, warm pools under torches (the f2 decal format, drawn by the floor pass) */
@@ -98,6 +127,7 @@ function epApply(n,late){const S=self.EP_OFF?null:EP_SPEC[n],L=LEVELS[n];EP._nl=
   if(S.decals)L._f2dec=epDecals(n,S);
   L._epf=epFloorFx(n,S);
   if(S.walls&&S.walls.vars&&EP.wall){const W=EP.wall;if(!W.wv){W.wv={};for(const g of [1,2]){const v=S.walls.vars[g];if(!v)continue;const ids=[g===1?W.stone:W.brick];for(const t of v){const d=epTex('ep_tex_'+t.tex,t.o||(g===1?S.walls.so:S.walls.bo));if(d)ids.push(addTex(d))}W.wv[g]=ids}}L._epf.wv=W.wv}
+  if(S.walls&&EP.wall&&!self.EP_NOFL)epFlowerPlace(n,L);
   if(S.retile&&EP.wall&&EP.wall.wv&&EP.wall.wv[1]){if(!L._eptmR){L._eptmR=1;L._eptm=L._eptm||new Map();const vv=EP.wall.wv[1];let k=0;const seen=new Set();for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(g<100||seen.has(g)||(typeof KH_DOOR!=='undefined'&&KH_DOOR[g]))continue;seen.add(g);const ti=T_TILE[g];if(ti!==undefined)L._eptm.set(ti,vv[1+(k++%(vv.length-1))])}}L._epf.tm=L._eptm}
   if(S.grime){if(!L._eptm||!L._eptmG){L._eptmG=1;L._eptm=L._eptm||new Map();const seen=new Set();for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(seen.has(g))continue;seen.add(g);const por=g>=30&&g<100,ti=S.grime.only==='portal'?(por?(T_DOORS[(G.portals[g-30]||{}).tex]||T_DOORS.house):undefined):g>=100?(typeof KH_DOOR!=='undefined'&&KH_DOOR[g]?undefined:T_TILE[g]):(g>=9&&g<=14)||(g>=20&&g<=22)?T_WALL[g]:(g===7&&S.grime.gate)?T_GATE:(por&&S.grime.gate)?(T_DOORS[(G.portals[g-30]||{}).tex]||T_DOORS.house):undefined;if(ti===undefined||L._eptm.has(ti)||!TEX[ti]||!TEX[ti].d)continue;const nt=epGrime(ti,S.grime,g);if(nt!==null)L._eptm.set(ti,nt)}}L._epf.tm=L._eptm}
   if(S.night&&!L._epnD){L._epnD=1;L._eptm=L._eptm||new Map();for(const nm of Object.keys(EP_NDOOR)){const ti=T_DOORS[nm];if(ti===undefined||L._eptm.has(ti)||!TEX[ti]||!TEX[ti].d||!(G.portals||[]).some(q=>q.tex===nm))continue;const T=TEX[ti],nt=addTex(T.d,null);for(const k of Object.keys(T))if(k!=='d'&&k!=='e')TEX[nt][k]=T[k];L._eptm.set(ti,nt);epNightReg(L,nt,null,epNightTv(T.d,EP_NDOOR[nm],0),0)}L._epf.tm=L._eptm} // the lit panes of the shop, inn and hall doors
