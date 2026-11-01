@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.765';
+const VERSION='3.766';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2692,7 +2692,7 @@ function render3D(){
     if(EPTM&&g>=7){const t2=EPTM.get(ti);if(t2!==undefined)ti=t2} // opt-in grimed copies of a level's wall pictures (early_polish.js)
     if(EPTV&&g>=100){const vv=EPTV.get(g);if(vv)ti=vv[((Math.imul(mx,73856093)^Math.imul(my,19349663)^Math.imul(face,83492791))>>>4)%vv.length]} // opt-in painted house walls, a different panel per square (early_polish.js)
     if(EPWV&&(g===1||g===2)&&EPWV[g]){const vv=EPWV[g];ti=vv[((Math.imul(mx,73856093)^Math.imul(my,19349663)^Math.imul(face,83492791))>>>4)%vv.length]} // opt-in painted wall variants (early_polish.js)
-    if(EPCT&&g===1){const t2=EPCT.get(my*MW+mx);if(t2!==undefined)ti=t2} // opt-in single wall squares with their own face (early_polish.js)
+    if(EPCT&&(g===1||g===2)){const t2=EPCT.get(my*MW+mx);if(t2!==undefined)ti=t2} // opt-in single wall squares with their own face (early_polish.js)
     if(SRCT){const c2=SRCT.get(my*MW+mx);if(c2!==undefined)ti=srSusFor(ti,c2)} // a secret wall of a maze or dungeon: this level's own wall picture with the odd block, crack and dust (secret_rooms.js)
     const tv=(g===1||g===2)?torchAt.get((my*MW+mx)*4+face):0;
     if(tv&&LEVEL===31&&T_TORCH_GOLD!==undefined){ti=T_TORCH_GOLD+((fr+((mx*7+my*3)&3)*2)&7)}else if(tv){const ph=((mx*7+my*3)&3);ti=(g===1?(tv===2?T_TORCH_STONE_R:T_TORCH_STONE):(tv===2?T_TORCH_BRICK_R:T_TORCH_BRICK))+((fr+ph*2)&7)}
@@ -4569,7 +4569,7 @@ const WORLD_LOCS=[
   {k:'thornwick',n:'Thornwick',lv:[3,4,5,6,9,12,29],x:156,y:204,ic:'town'},
   {k:'gwood',n:"Gandrick's Wood",lv:[7,25],x:212,y:230,ic:'trees'},
   {k:'gcave',n:'Cave',lv:[8],x:246,y:204,ic:'cave'},
-  {k:'road',n:'Ironhill Road',lv:[10,24],x:176,y:166,ic:'rain'},
+  {k:'road',n:'Ironhill Road',lv:[10,24],x:194,y:146,ic:'rain',sc:.8,pin:1},
   {k:'tunnel',n:'The Tunnel',lv:[11],x:208,y:142,ic:'cave'},
   {k:'ironhill',n:'Ironhill',lv:[13,14,15,16,17,21,30],x:262,y:112,ic:'castle'},
   {k:'graves',n:'Burial Ground',lv:[20],x:206,y:92,ic:'graves'},
@@ -48775,11 +48775,13 @@ function wmnSpec(l){return WMN_SPEC[l.k]||[[WMN_ICSPEC[l.ic]||'i_oaks',0,0,l.ic=
 const WMN_FOOT={i_town:.88,i_seaside:.87,i_castle:.87,i_desertcity:.87,i_cave:.87,i_mine:.85,i_graves:.9,i_crypt:.92,i_oaks:.87,i_pines:.88,i_mountains:.77};   // how far down each picture its solid part goes (the rest is the faded ground): a name may stand over that
 const WM_DH={s:96,ox:-48,oy:-62,a:.62};   // the Deeper Hollow's picture: its size on the map, where it starts from the place's spot, and how see-through it is
 const WMN_BOX={deephollow:[WM_DH.ox-1,WM_DH.oy-1,WM_DH.ox+WM_DH.s+1,WM_DH.oy+WM_DH.s+1]};   // places whose picture is drawn by another file: their box
+const wmnSc=l=>l.sc||1;   // a place may carry sc (0.8 = a fifth smaller): its picture, name and level are all drawn at that fraction
 function wmnShape(l){
   if(WMN_BOX[l.k]){const b=WMN_BOX[l.k];return {parts:[],off:0,ib:[l.x+b[0],l.y+b[1],l.x+b[2],l.y+b[3]]}}
   const s=wmnSpec(l);if(!s.length)return {parts:[],off:0,ib:[l.x,l.y-12,l.x,l.y-4]};let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
-  for(const p of s){const d=wmnDims(p[0],p[3]*WMN_ICO_SCALE,p[4]);x0=Math.min(x0,p[1]*WMN_ICO_SCALE-d[0]/2);x1=Math.max(x1,p[1]*WMN_ICO_SCALE+d[0]/2);y0=Math.min(y0,p[2]*WMN_ICO_SCALE-d[1]);y1=Math.max(y1,p[2]*WMN_ICO_SCALE)}
-  const off=l.y+10-y1;let fi=0;for(const p of s)if(p[2]*WMN_ICO_SCALE===y1&&WMN_FOOT[p[0]]){const d=wmnDims(p[0],p[3]*WMN_ICO_SCALE,p[4]);fi=Math.max(fi,(1-WMN_FOOT[p[0]])*d[1]*.8)}
+  const sc=wmnSc(l),KK=WMN_ICO_SCALE*sc;
+  for(const p of s){const d=wmnDims(p[0],p[3]*KK,p[4]);x0=Math.min(x0,p[1]*KK-d[0]/2);x1=Math.max(x1,p[1]*KK+d[0]/2);y0=Math.min(y0,p[2]*KK-d[1]);y1=Math.max(y1,p[2]*KK)}
+  const off=l.y+10-y1;let fi=0;for(const p of s)if(p[2]*KK===y1&&WMN_FOOT[p[0]]){const d=wmnDims(p[0],p[3]*KK,p[4]);fi=Math.max(fi,(1-WMN_FOOT[p[0]])*d[1]*.8)}
   return {parts:s.slice().sort((a,b)=>a[2]-b[2]),off,fi,ib:[l.x+x0,y0+off,l.x+x1,y1+off]}}
 
 /* ---------- the layout: pictures, then names ---------- */
@@ -48789,16 +48791,17 @@ const wmnHit=(a,b)=>a[0]<b[2]&&a[2]>b[0]&&a[1]<b[3]&&a[3]>b[1];
 function wmnSpread(){
   const c=ctx,B=[],M=3,MAXD=80;
   for(const l of WORLD_LOCS){if(l._x0===undefined){l._x0=l.x;l._y0=l.y}l.x=l._x0;l.y=l._y0}
-  for(const l of WORLD_LOCS){const sh=wmnShape(l),big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle',nsz=big?7.6:6.6;
-    c.save();c.font=`bold ${nsz}px ${FUI}`;const w=c.measureText(l.n).width+(typeof locRating==='function'&&!G.flags.autoScaleOn?24:0);c.restore();
+  for(const l of WORLD_LOCS){const sh=wmnShape(l),big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle',nsz=(big?7.6:6.6)*wmnSc(l);
+    c.save();c.font=`bold ${nsz}px ${FUI}`;const w=c.measureText(l.n).width+(typeof locRating==='function'&&!G.flags.autoScaleOn?24*wmnSc(l):0);c.restore();
     const a=sh.ib[0]-l.x,b=sh.ib[1]-l.y,e=sh.ib[2]-l.x,f=sh.ib[3]-l.y,sub=l.sub?9:0;
     B.push({l,x0:Math.min(a,-w/2-2),y0:b,x1:Math.max(e,w/2+2),y1:f+12+sub+4})}
   for(let it=0;it<400;it++){let moved=false;
     for(let i=0;i<B.length;i++)for(let j=i+1;j<B.length;j++){const p=B[i],q=B[j];
       const ox=Math.min(p.l.x+p.x1,q.l.x+q.x1)-Math.max(p.l.x+p.x0,q.l.x+q.x0)+M,oy=Math.min(p.l.y+p.y1,q.l.y+q.y1)-Math.max(p.l.y+p.y0,q.l.y+q.y0)+M;
       if(ox<=0||oy<=0)continue;moved=true;
-      if(ox<oy){const d=ox/2+.1,s=(p.l.x+(p.x0+p.x1)/2)<=(q.l.x+(q.x0+q.x1)/2)?-1:1;p.l.x+=s*d;q.l.x-=s*d}
-      else{const d=oy/2+.1,s=(p.l.y+(p.y0+p.y1)/2)<=(q.l.y+(q.y0+q.y1)/2)?-1:1;p.l.y+=s*d;q.l.y-=s*d}
+      const kp=p.l.pin?0:q.l.pin?2:1,kq=q.l.pin?0:p.l.pin?2:1;   // a pinned place (pin:1) stays exactly on its spot and the other one gives way
+      if(ox<oy){const d=ox/2+.1,s=(p.l.x+(p.x0+p.x1)/2)<=(q.l.x+(q.x0+q.x1)/2)?-1:1;p.l.x+=s*d*kp;q.l.x-=s*d*kq}
+      else{const d=oy/2+.1,s=(p.l.y+(p.y0+p.y1)/2)<=(q.l.y+(q.y0+q.y1)/2)?-1:1;p.l.y+=s*d*kp;q.l.y-=s*d*kq}
       for(const r of [p,q]){r.l.x=Math.max(r.l._x0-MAXD,Math.min(r.l._x0+MAXD,r.l.x));r.l.y=Math.max(r.l._y0-MAXD,Math.min(r.l._y0+MAXD,r.l.y))}}
     if(!moved)break}
   for(const l of WORLD_LOCS){l.x=Math.round(l.x*2)/2;l.y=Math.round(l.y*2)/2}
@@ -48819,14 +48822,14 @@ function wmnLayout(){
   for(const l of WORLD_LOCS){const sh=wmnShape(l);const lb=[sh.ib[0],sh.ib[1],sh.ib[2],sh.ib[3]-(sh.fi||0)];out[l.k]={sh,ib:sh.ib,lb,parts:sh.parts,off:sh.off};placed.push(lb)}
   const order=WORLD_LOCS.slice().sort((a,b)=>(b.ic==='castle'||b.ic==='town'||b.ic==='abbey'||b.ic==='orangecastle'?1:0)-(a.ic==='castle'||a.ic==='town'||a.ic==='abbey'||a.ic==='orangecastle'?1:0));
   for(const l of order){
-    const L=out[l.k],ib=L.lb,big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle',nsz=big?7.6:6.6;
+    const L=out[l.k],ib=L.lb,big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle',sc=wmnSc(l),nsz=(big?7.6:6.6)*sc;
     const lr=(!G.flags.autoScaleOn&&typeof locRating==='function')?locRating(l):null,t2=lr?'Lv '+lr:'';
-    c.save();c.font=`bold ${nsz}px ${FUI}`;const w1=c.measureText(l.n).width;c.font=`bold 6px ${FUI}`;const w2=lr?c.measureText(t2).width:0;c.font=`bold 6px ${FUI}`;const sw=l.sub?c.measureText(l.sub).width:0;c.restore();
-    const gap=lr?4:0,wt=w1+gap+w2,bw=Math.max(wt,sw),sub=l.sub?9:0,ym=(ib[1]+ib[3])/2;
+    c.save();c.font=`bold ${nsz}px ${FUI}`;const w1=c.measureText(l.n).width;c.font=`bold ${6*sc}px ${FUI}`;const w2=lr?c.measureText(t2).width:0;c.font=`bold ${6*sc}px ${FUI}`;const sw=l.sub?c.measureText(l.sub).width:0;c.restore();
+    const gap=lr?4*sc:0,wt=w1+gap+w2,bw=Math.max(wt,sw),sub=l.sub?9:0,ym=(ib[1]+ib[3])/2;
     // the name always stands straight under its own picture, a little smaller, its top just over the bottom edge of the picture so that it is plainly attached to it
     const ny=ib[3]+nsz/2-1.5,H=12+sub+6,best={cx:l.x,ny,r:[l.x-bw/2-2,ny-6,l.x+bw/2+2,ny-6+H]};let bestA=0;
     for(const p of placed)if(p!==L.lb&&wmnHit(best.r,p))bestA++;
-    placed.push(best.r);Object.assign(L,{cx:best.cx,ny:best.ny,rect:[best.r[0],best.r[1],best.r[2],best.r[1]+12+sub+6],w1,w2,gap,wt,t2,nsz,over:bestA>0});
+    placed.push(best.r);Object.assign(L,{cx:best.cx,ny:best.ny,rect:[best.r[0],best.r[1],best.r[2],best.r[1]+12+sub+6],w1,w2,gap,wt,t2,nsz,over:bestA>0,sc});
   }
   WMN.lay=out;WMN.layKey=key;return out}
 function wmnLay(l){return wmnLayout()[l.k]}
@@ -48839,11 +48842,11 @@ function wmnBlocked(x,y,d){const lay=wmnLayout(),m=d*.5+1.5;
   return false}
 
 /* ---------- drawing ---------- */
-function wmnIco(l){const L=wmnLay(l);if(!L)return;const K=WMN_ICO_SCALE;for(const p of L.parts)wmnDraw(ctx,p[0],l.x+p[1]*K,p[2]*K+L.off,p[3]*K,!!p[4])}
+function wmnIco(l){const L=wmnLay(l);if(!L)return;const K=WMN_ICO_SCALE*wmnSc(l);for(const p of L.parts)wmnDraw(ctx,p[0],l.x+p[1]*K,p[2]*K+L.off,p[3]*K,!!p[4])}
 function wmnLabel(l,v,txtH){
   const L=wmnLay(l);if(!L||L.cx===undefined)return;const col=v?'#1c1208':'#5a4a30',xs=L.cx-L.wt/2;
-  if(L.t2){txtH(l.n,xs+L.w1/2,L.ny,L.nsz,col);txtH(L.t2,xs+L.w1+L.gap+L.w2/2,L.ny,6,'#7a1a10')}else txtH(l.n,L.cx,L.ny,L.nsz,col);
-  if(l.sub)txtH(l.sub,L.cx,L.ny+8,6,'#4a3a22')}
+  if(L.t2){txtH(l.n,xs+L.w1/2,L.ny,L.nsz,col);txtH(L.t2,xs+L.w1+L.gap+L.w2/2,L.ny,6*(L.sc||1),'#7a1a10')}else txtH(l.n,L.cx,L.ny,L.nsz,col);
+  if(l.sub)txtH(l.sub,L.cx,L.ny+8,6*(L.sc||1),'#4a3a22')}
 /* the quest dots stand in the strip left under each name */
 function wmnDots(l,nq,c){const L=wmnLay(l);if(!L||!L.rect)return;
   for(let i=0;i<nq;i++){const row=(i/14)|0,inRow=Math.min(14,nq-row*14),col=i%14;c.beginPath();c.arc(L.cx+(col-(inRow-1)/2)*3.4,L.rect[3]-4+row*3.4,1.15,0,TAU);c.fill();c.stroke()}}
@@ -57305,7 +57308,7 @@ const wmwId=()=>({
 /* ---------- places: positions in map units. The map already has a wide western land (The Western Reaches, The Far West), so nothing is widened; Wenlock moves west to make room ---------- */
 const wmwGyName=(id,i)=>(typeof GY!=='undefined'&&GY.NAMES&&GY.NAMES[id])||LEVEL_NAMES[id]||('Grave Maze '+(i+1));
 const WMW_POS={wenlock:[-300,226],gardens:[-214,200],witchwood:[-282,126],wkgrave:[-356,198],gm1:[-392,166],gm2:[-396,216],gm3:[-362,244],gm4:[-326,152],wellmaze:[-258,260],westgate:[-338,288],
-  underlevel:[-84,98],drowned:[-30,100],thornwell:[186,176],goldenpyramid:[678,178]};
+  underlevel:[-84,98],drowned:[-30,100],thornwell:[132,164],goldenpyramid:[678,178]};
 function wmwHgRooms(hg){if(!hg||typeof hgtAny!=='function')return;for(let n=4850;n<=5499;n++)if(hgtAny(n)&&!hg.lv.includes(n))hg.lv.push(n)}
 // a Hollow room registered later (a town that makes its rooms when it is built) joins the grasslands then
 if(typeof hgtRegister==='function'){const _hr=hgtRegister;hgtRegister=function(id){const r=_hr.apply(this,arguments);try{if(id>=4850&&id<=5499&&typeof WORLD_LOCS!=='undefined'){const hg=WORLD_LOCS.find(l=>l.k==='hollowgrass');if(hg&&hgtAny(id)&&!hg.lv.includes(id))hg.lv.push(id)}}catch(e){}return r}}
@@ -72208,7 +72211,7 @@ function bksRain(R,t,f,rd){
    graveyard 530 (own storm), the Pale Spire and the Never-Ending Tower (own skies), the undersea rooms (uwLv) and every desert level (wxRegionOf is
    'desert', the dunes, Khemetra 41 to 44, 50 to 65, DNG_INFO dungeons, and any name with dune, desert, erg, oasis, pyramid, tomb, burrow, Khemetra).
    Indoors, in caves and in dungeons there is no rain, no mist and no sound: the rain fades out at the door and resumes outside.
-   The Ironhill Road (rain:true) keeps a steady light rain (.4) in the new look.
+   The Ironhill Road (level 10) is not on the dice: it ALWAYS rains there, a steady .55 with showers of .9 (spells of 40 to 120 s, thunder in the showers); its hut (24) is indoors and stays dry.
    Look and light: the three streak layers, wind, gusts, horizon mist, the thin line of splashing puddles, a cool grey wash; weatherNow darkens and greys
    the air in step with the rain (the Wenlock golden light fades as it comes on). Sound: the same loop and hiss (bksSound).
    ========================================================================== */
@@ -72234,12 +72237,19 @@ function bksVisitClock(dt){
   const c=BKS.vc;c.t+=dt;
   if(c.t>=c.end){c.t=0;c.wet=!c.wet;c.str=c.wet?bksStrength():0;c.end=c.wet?50+Math.random()*100:10+Math.random()*30}
   return c.str}
+/* the Ironhill Road (level 10): it ALWAYS rains. A steady rain of .55 with showers of .9 rolled over it, spells of 40 to 120 s; never dry, no dice, no weather turns it off */
+const BKS_ROAD=10,BKS_ROAD_LO=.55,BKS_ROAD_HI=.9;
+const BKS_RC={t:0,hi:false,end:40+Math.random()*80};
+function bksRoadClock(dt){const c=BKS_RC;c.t+=dt;if(c.t>=c.end){c.t=0;c.hi=!c.hi;c.end=40+Math.random()*80}return c.hi?BKS_ROAD_HI:BKS_ROAD_LO}
 function bksEarlyStep(dt){
   if(!bksEarlyOwns()){BKS.eR=0;BKS.early=0;BKS.eth.length=0;return 0}
-  let want=0;if(bksEarlyRoll())want=bksVisitClock(dt);
+  const road=LEVEL===BKS_ROAD;let want=0;
+  if(road){want=bksRoadClock(dt);if(BKS.eR<BKS_ROAD_LO)BKS.eR=BKS_ROAD_LO;weatherNow()}   // it is already raining when the party arrives
+  else{
+  if(bksEarlyRoll())want=bksVisitClock(dt);
   weatherNow();const id=BKS.ebase;   // (the wrapper below records the underlying weather)
   if(id==='snow'||id==='frost')want=0;
-  else{if(id==='rain')want=Math.max(want,.62);else if(id==='storm')want=1;if(LEVEL===10)want=Math.max(want,.4)}
+  else{if(id==='rain')want=Math.max(want,.62);else if(id==='storm')want=1}}
   if(BKS.eforce!==null)want=BKS.eforce;
   BKS.ewant=want;
   BKS.eR+=(want-BKS.eR)*Math.min(1,dt/3.5);if(Math.abs(want-BKS.eR)<.004)BKS.eR=want;
@@ -72247,7 +72257,7 @@ function bksEarlyStep(dt){
   const t=G.time;
   if(want>.7&&BKS.eR>.5){
     if(!BKS.enext)BKS.enext=t+3+Math.random()*6;
-    if(t>BKS.enext){BKS.eflash=t;BKS.eStrikes++;BKS.eth.push(t+1+Math.random()*2.2);BKS.enext=t+8+Math.random()*16}
+    if(t>BKS.enext){BKS.eflash=t;BKS.eStrikes++;BKS.eth.push(t+1+Math.random()*2.2);BKS.enext=t+(road?12+Math.random()*28:8+Math.random()*16)}
   }else BKS.enext=0;
   for(let i=BKS.eth.length-1;i>=0;i--)if(t>=BKS.eth[i]){BKS.eth.splice(i,1);try{gysRumble(.17)}catch(e){}}
   return BKS.early?BKS.eR:0}
@@ -72255,7 +72265,7 @@ function bksEarlyStep(dt){
 {const _w=weatherNow;weatherNow=function(){const w=_w.apply(this,arguments);
   if(BKS.off||BKS.eoff||typeof LEVEL==='undefined'||!bksEarlyOwns())return w;
   const id=w&&w.id;BKS.ebase=id||null;
-  if(id==='snow'||id==='frost'||id==='fog')return w;
+  if(LEVEL!==BKS_ROAD&&(id==='snow'||id==='frost'||id==='fog'))return w;   // (the Ironhill Road is never turned dry by the weather)
   const k=Math.min(1,BKS.eR*1.6),reg=typeof wxRegionOf==='function'&&wxRegionOf(LEVEL);
   if(k<=.02)return(id==='rain'||id==='storm')?Object.assign({id:'clear'},WX_DEF.clear):w;
   const R=WX_DEF[BKS.eR>.8?'storm':'rain'],b=w||{fog:0,haze:0,dark:1,mix:0,col:R.col},lp=(a,c)=>a+(c-a)*k,bc=b.col||R.col;
@@ -81450,6 +81460,37 @@ function epWallSet(name,stone,brick){if(EP.walls[name])return EP.walls[name];if(
 function epSwapWalls(W){
   if(EP.wall&&EP.wall!==W){[T_STONE,T_TORCH_STONE,T_TORCH_STONE_R,T_BRICK,T_TORCH_BRICK,T_TORCH_BRICK_R,T_DOOR,T_LOCK,T_EXIT]=EP.save;EP.wall=null}
   if(W&&!EP.wall){EP.save=[T_STONE,T_TORCH_STONE,T_TORCH_STONE_R,T_BRICK,T_TORCH_BRICK,T_TORCH_BRICK_R,T_DOOR,T_LOCK,T_EXIT];T_DOOR=W.door;T_LOCK=W.lock;T_EXIT=W.exit;T_STONE=W.stone;T_TORCH_STONE=W.tstone;T_TORCH_STONE_R=W.tstoneR;T_BRICK=W.brick;T_TORCH_BRICK=W.tbrick;T_TORCH_BRICK_R=W.tbrickR;EP.wall=W}}
+
+/* little patches of dungeon flowers GROWN out of the brick joints: a few copies of the early wall tiles with a tiny painted tuft (assets/ep/fl_0..9) set into the bottom mortar line, its colours pulled toward the wall's own tone and light, a soft contact shadow and a short dark crack and roots under it */
+function epFlowerTile(src,im,i,s){const T=TS,r=k=>hash2(i*7+s,k,1303),out=new Uint8ClampedArray(src),asp=im.width/im.height;
+  let hp=T*(.08+.055*r(1)),wp=hp*asp;if(wp>T*.27){wp=T*.27;hp=wp/asp}if(hp<6){hp=6;wp=hp*asp}
+  const w=Math.max(4,Math.round(wp)),h=Math.max(4,Math.round(hp));let xc=(s?.5+.4*r(2):.1+.4*r(2))*T;xc=Math.max(w/2+3,Math.min(T-w/2-3,xc));
+  const xa=Math.max(0,Math.floor(xc-w/2-4)),xb=Math.min(T-1,Math.ceil(xc+w/2+4)),lum=(x,y)=>{const q=(y*T+x)*4;return out[q]*.3+out[q+1]*.59+out[q+2]*.11};
+  const m=[];for(let y=0;y<T;y++){let a=0;for(let x=xa;x<=xb;x++)a+=lum(x,y);m.push(a/(xb-xa+1))}
+  let j=Math.round(T*.78),best=-1e9;for(let y=Math.round(T*.6);y<=Math.round(T*.9);y++){let b=0,c=0;for(let k=-6;k<=6;k++)if(m[y+k]!==undefined){b+=m[y+k];c++}const sc=b/c-m[y];if(sc>best){best=sc;j=y}} // the darkest course joint of the lower wall, against its own surroundings
+  let cv=document.createElement('canvas'),cw=im.width,ch=im.height;cv.width=cw;cv.height=ch;cv.getContext('2d').drawImage(im,0,0);
+  while(cw>w*2){const nw=Math.max(w,cw>>1),nh=Math.max(h,Math.round(ch*nw/cw)),c2=document.createElement('canvas');c2.width=nw;c2.height=nh;const x2=c2.getContext('2d');x2.imageSmoothingQuality='high';x2.drawImage(cv,0,0,nw,nh);cv=c2;cw=nw;ch=nh}
+  const c3=document.createElement('canvas');c3.width=w;c3.height=h;const x3=c3.getContext('2d');x3.imageSmoothingQuality='high';x3.filter='blur(.35px)';x3.drawImage(cv,0,0,w,h);const sp=x3.getImageData(0,0,w,h).data;
+  let wr=0,wg=0,wb=0,n=0;for(let y=Math.max(0,j-12);y<=Math.min(T-1,j+3);y++)for(let x=xa;x<=xb;x++){const q=(y*T+x)*4;wr+=out[q];wg+=out[q+1];wb+=out[q+2];n++}wr/=n;wg/=n;wb/=n;const wl=wr*.3+wg*.59+wb*.11,kL=Math.max(.8,Math.min(1.15,wl/65)),mix=.28+.12*r(3);
+  const x0=Math.round(xc-w/2),y0=j-h+2,dk=(X,Y,f)=>{if(X<0||X>=T||Y<0||Y>=T)return;const q=(Y*T+X)*4;out[q]*=f;out[q+1]*=f;out[q+2]*=f}; // the foot dips a pixel into the joint
+  const ph1=r(40)*6.28,ph2=r(41)*6.28;
+  for(let y=j-5;y<=j+5;y++)for(let x=Math.floor(xc-w/2-5);x<=Math.ceil(xc+w/2+5);x++){const ang=Math.atan2((y-(j-1))*2.2,x-xc),rad=1+.28*Math.sin(ang*3+ph1)+.18*Math.sin(ang*7+ph2)+.2*(hash2(x,y,17)-.5),d=(((x-xc)/(w/2+5))**2+((y-(j-1))/5.2)**2)/(rad*rad);if(d<1)dk(x,y,1-.3*Math.pow(1-d,1.6)*(.8+.4*hash2(x,y,18)))} // an uneven soft blob of shade, not a band
+  {const cr=(sx,len,wd0)=>{let cx=sx,cy=j+1,dir=(r(50+len)-.5)*.9;for(let t=0;t<len&&cy<T-1;t++){dir+=(hash2(t,len,19)-.5)*1.1;dir=Math.max(-1.6,Math.min(1.6,dir));cx+=dir*.7+Math.sin(t*.8+sx)*.45;cy+=(t%2===1?0:1);const wd=Math.max(0,wd0-t*.25+(hash2(t,sx|0,20)-.5)*.9),x=Math.round(cx);dk(x,cy,.66-.1*Math.min(1,wd/2));if(wd>1.3)dk(x+1,cy,.84)}};
+    if(self.EP_FLCRACK)cr(xc+(r(4)-.5)*4,5+Math.round(r(5)*8),1.9)} // a cracked, wandering, thinning crack that forks, never a ruled line
+  for(let k=0;k<3;k++){let rx=xc+(k-1)*w*(.12+.12*r(20+k)),ry=j+1;const ln=3+Math.round(r(22+k)*4),dr=(r(26+k)-.5)*1.4;for(let t=0;t<ln&&ry<T-1;t++){rx+=dr*.6+Math.sin(t*1.3+k*2)*.5;ry+=(t%2?1:0)+(t===0?1:0);const q=(ry*T+Math.round(rx))*4,f=Math.max(.1,.45-t*.1);out[q]=out[q]*(1-f)+30*f;out[q+1]=out[q+1]*(1-f)+34*f;out[q+2]=out[q+2]*(1-f)+22*f}} // thin curved roots that fade as they go in
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const q0=(y*w+x)*4;let a=sp[q0+3]/255;if(a<.03)continue;a=Math.pow(a,1.25)*.94;if(a<.95)a*=.45+.9*hash2(x*5+i,y*3+s,21);a=Math.min(1,a*(.86+.2*hash2(x+9,y+i,22)));const X=x0+x,Y=y0+y;if(X<0||X>=T||Y<0||Y>=T)continue;
+    let R=sp[q0],G=sp[q0+1],B=sp[q0+2];const l=R*.3+G*.59+B*.11;R=l+(R-l)*.86;G=l+(G-l)*.86;B=l+(B-l)*.86;R=(R*(1-mix)+wr*mix)*kL;G=(G*(1-mix)+wg*mix)*kL;B=(B*(1-mix)+wb*mix)*kL;const l2=R*.3+G*.59+B*.11,lo=wl*.78+10,hi=wl*1.5+20;if(l2>hi){const q=hi/l2;R*=q;G*=q;B*=q}else if(l2<lo&&l2>1){const q=Math.min(2.2,lo/l2);R*=q;G*=q;B*=q} // keep the tuft in the wall's own range of light: not glowing, not lost
+    const q=(Y*T+X)*4;out[q]=out[q]*(1-a)+R*a;out[q+1]=out[q+1]*(1-a)+G*a;out[q+2]=out[q+2]*(1-a)+B*a}
+  return out}
+function epFlowerPool(W,g){W.fl=W.fl||{};const pl=self.EP_FLPLAIN?'p':'',KY=pl+g;if(W.fl[KY])return W.fl[KY];const bases=(W.wv&&W.wv[g])||[g===1?W.stone:W.brick],out=[];for(let i=0;i<10;i++){const im=IMG['ep_fl_'+i];if(!im||!im.width)continue;for(let s=0;s<2;s++){const b=bases[(i+s)%bases.length];if(!TEX[b]||!TEX[b].d)continue;out.push(addTex(pl?new Uint8ClampedArray(TEX[b].d):epFlowerTile(TEX[b].d,im,i,s)))}}return W.fl[KY]=out}
+function epFlowerPlace(n,L){const W=EP.wall;if(!W||!L._epf||!IMG.ep_fl_0)return;const ct=L._epf.ct=L._epf.ct||new Map(),P={1:epFlowerPool(W,1),2:epFlowerPool(W,2)},put=new Set(),cand=[];let cnt=0;
+  const open=(x,y)=>x>=0&&y>=0&&x<MW&&y<MH&&G.grid[y][x]===0;
+  for(let y=1;y<MH-1;y++)for(let x=1;x<MW-1;x++){const g=G.grid[y][x];if((g!==1&&g!==2)||!P[g].length)continue;if(!(open(x-1,y)||open(x+1,y)||open(x,y-1)||open(x,y+1)))continue;if(ct.has(y*MW+x)||(self.SR_CT&&SR_CT.has(y*MW+x)))continue;let tq=0;for(let f=0;f<4;f++)if(torchAt.has((y*MW+x)*4+f))tq=1;if(tq)continue;cand.push([hash2(x,y,977+n),x,y,g]);
+    if(hash2(x,y,977+n)>1/8)continue;
+    let adj=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if((dx||dy)&&put.has((y+dy)*MW+x+dx))adj=1;if(adj)continue;
+    const v=P[g],k=(hash2(x,y,978)*v.length)|0;ct.set(y*MW+x,v[k]);put.add(y*MW+x);cnt++}
+  if(cnt<2&&cand.length>=4){cand.sort((p,q)=>p[0]-q[0]);for(const [h,x,y,g] of cand){if(cnt>=2)break;let adj=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(put.has((y+dy)*MW+x+dx))adj=1;if(adj)continue;const v=P[g];ct.set(y*MW+x,v[(hash2(x,y,978)*v.length)|0]);put.add(y*MW+x);cnt++}} // a small room still gets a couple
+  L._epFl=cnt}
 /* soft shadows and warm glows, made in code (light, not props) */
 function epBlob(key,col,a0,soft){if(IMG[key])return key;const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,4,64,64,62);g.addColorStop(0,`rgba(${col},${a0})`);g.addColorStop(soft||.55,`rgba(${col},${a0*.45})`);g.addColorStop(1,`rgba(${col},0)`);x.fillStyle=g;x.fillRect(0,0,128,128);IMG[key]=c;return key}
 /* the floor detail of a level: decals in a grimy palette, contact shadows under pieces, warm pools under torches (the f2 decal format, drawn by the floor pass) */
@@ -81509,6 +81550,7 @@ function epApply(n,late){const S=self.EP_OFF?null:EP_SPEC[n],L=LEVELS[n];EP._nl=
   if(S.vary)epVary(n,S.vary);
   if(S.jitter)for(const J of S.jitter)epJitter(n,J);
   if(S.pics&&!G.decor.some(d=>d.epPic))epWallPics(n,S.pics);
+  if(S.hides&&!G.decor.some(d=>d.epHide))epHides(n,S.hides);
   if(S.street&&!G.decor.some(d=>d.epSt))epStreet(n,S.street);
   if(S.fixed&&!G.decor.some(d=>d.epFx))for(const [k,x,y,oy] of S.fixed){if(!IMG['ep_'+k]||!G.grid[y]||G.grid[y][x]!==0)continue;G.decor.push({k:'ep_'+k,x,y,block:false,walk:true,deco:true,loot:false,shop:false,epFx:1,oy:oy||0,ox:(hash2(x,y,71)-.5)*.3,sc:.85})}   // a few fixed pieces against the house fronts (never in the middle of the road)
   if(S.tufts&&!G.decor.some(d=>d.epTuft))epTufts(n,S.tufts);
@@ -81517,6 +81559,7 @@ function epApply(n,late){const S=self.EP_OFF?null:EP_SPEC[n],L=LEVELS[n];EP._nl=
   if(S.decals)L._f2dec=epDecals(n,S);
   L._epf=epFloorFx(n,S);
   if(S.walls&&S.walls.vars&&EP.wall){const W=EP.wall;if(!W.wv){W.wv={};for(const g of [1,2]){const v=S.walls.vars[g];if(!v)continue;const ids=[g===1?W.stone:W.brick];for(const t of v){const d=epTex('ep_tex_'+t.tex,t.o||(g===1?S.walls.so:S.walls.bo));if(d)ids.push(addTex(d))}W.wv[g]=ids}}L._epf.wv=W.wv}
+  if(S.walls&&EP.wall&&!self.EP_NOFL)epFlowerPlace(n,L);
   if(S.retile&&EP.wall&&EP.wall.wv&&EP.wall.wv[1]){if(!L._eptmR){L._eptmR=1;L._eptm=L._eptm||new Map();const vv=EP.wall.wv[1];let k=0;const seen=new Set();for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(g<100||seen.has(g)||(typeof KH_DOOR!=='undefined'&&KH_DOOR[g]))continue;seen.add(g);const ti=T_TILE[g];if(ti!==undefined)L._eptm.set(ti,vv[1+(k++%(vv.length-1))])}}L._epf.tm=L._eptm}
   if(S.grime){if(!L._eptm||!L._eptmG){L._eptmG=1;L._eptm=L._eptm||new Map();const seen=new Set();for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(seen.has(g))continue;seen.add(g);const por=g>=30&&g<100,ti=S.grime.only==='portal'?(por?(T_DOORS[(G.portals[g-30]||{}).tex]||T_DOORS.house):undefined):g>=100?(typeof KH_DOOR!=='undefined'&&KH_DOOR[g]?undefined:T_TILE[g]):(g>=9&&g<=14)||(g>=20&&g<=22)?T_WALL[g]:(g===7&&S.grime.gate)?T_GATE:(por&&S.grime.gate)?(T_DOORS[(G.portals[g-30]||{}).tex]||T_DOORS.house):undefined;if(ti===undefined||L._eptm.has(ti)||!TEX[ti]||!TEX[ti].d)continue;const nt=epGrime(ti,S.grime,g);if(nt!==null)L._eptm.set(ti,nt)}}L._epf.tm=L._eptm}
   if(S.night&&!L._epnD){L._epnD=1;L._eptm=L._eptm||new Map();for(const nm of Object.keys(EP_NDOOR)){const ti=T_DOORS[nm];if(ti===undefined||L._eptm.has(ti)||!TEX[ti]||!TEX[ti].d||!(G.portals||[]).some(q=>q.tex===nm))continue;const T=TEX[ti],nt=addTex(T.d,null);for(const k of Object.keys(T))if(k!=='d'&&k!=='e')TEX[nt][k]=T[k];L._eptm.set(ti,nt);epNightReg(L,nt,null,epNightTv(T.d,EP_NDOOR[nm],0),0)}L._epf.tm=L._eptm} // the lit panes of the shop, inn and hall doors
@@ -81537,8 +81580,27 @@ function epWallPics(n,P){if(P.fixed)for(const [x,y,wd,k,h,bob] of P.fixed){if(k=
     if(torchAt.get((wy*MW+wx)*4+face)||taken.has(x+','+y+','+[dx,dy])||(EP_SECRETS[n]&&EP_SECRETS[n].some(q=>q.door[0]===wx&&q.door[1]===wy)))continue;const h=hash2(x*4+face,y,n*17+3);if(h>=(P.p||.3))continue;
     let opts=P.keys.filter(k=>k.k!=='moss'&&IMG['ep_'+k.k]);const side=open(x-dy,y+dx)&&open(x+dy,y-dx)?0:1; // corner pieces want a corner beside them
     opts=opts.filter(k=>!k.corner||side);if(!opts.length)continue;let k=opts[(hash2(x*4+face,y,n*17+4)*opts.length)|0];if(near.some(q=>q[2]===k.k&&Math.abs(q[0]-x)+Math.abs(q[1]-y)<4))k=opts[(opts.indexOf(k)+1)%opts.length];
-    near.push([x,y,k.k]);NPC_H['ep_'+k.k]=k.h;G.decor.push({k:'ep_'+k.k,x,y,wd:[dx,dy],pic:1,bob:k.bob,block:false,deco:true,epPic:1,loot:false,shop:false});cnt++}}
+    near.push([x,y,k.k]);let kk=k.k,kh=k.h;if(kk==='web_hang'&&IMG.ep_web2_0){kk='web2_'+(hash2(x*4+face,y,n*17+5)<.5?0:1);kh=.58}else if(kk==='web_corner'&&IMG.ep_web2_2)kk='web2_2'; // the painted cobwebs: fine silk threads, not grey cloth
+    NPC_H['ep_'+kk]=kh;G.decor.push({k:'ep_'+kk,x,y,wd:[dx,dy],pic:1,bob:k.bob,block:false,deco:true,epPic:1,loot:false,shop:false});cnt++}}
   return cnt}
+/* hanging animal hides and pelts (Gandrick's cave, a bandit den): long flat pieces nailed to the wall of the halls, a few in the tunnels. Same wall-picture mechanism as epWallPics
+   (flush on the wall, true perspective). Deterministic by hash. Never on a door, torch or secret-wall square, never two on neighbouring squares, never the same piece twice in a row. */
+function epHides(n,P){const open=(x,y)=>x>=0&&y>=0&&x<MW&&y<MH&&G.grid[y][x]===0,names=P.names.filter(k=>IMG['ep_'+k]);if(!names.length)return 0;
+  const taken=new Set(G.decor.filter(d=>d.wd).map(d=>d.x+','+d.y+','+d.wd)),F=[[0,-1,2],[1,0,3],[0,1,0],[-1,0,1]],placed=[];let cnt=0;
+  const hallAt=(x,y)=>{for(const k in P.halls){const r=P.halls[k];if(x>=r[0]&&x<=r[2]&&y>=r[1]&&y<=r[3])return k}return null};
+  const doorNear=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const g=G.grid[y+dy]&&G.grid[y+dy][x+dx];if(g===3||g===4||g===5)return true}return false};
+  for(let y=1;y<MH-1;y++)for(let x=1;x<MW-1;x++){if(!open(x,y)||doorNear(x,y))continue;const hall=hallAt(x,y);
+    for(const [dx,dy,face] of F){const wx=x+dx,wy=y+dy,g=G.grid[wy]&&G.grid[wy][wx];if(!(g===1||g===2))continue;
+      if(torchAt.get((wy*MW+wx)*4+face)||taken.has(x+','+y+','+[dx,dy])||(EP_SECRETS[n]&&EP_SECRETS[n].some(q=>q.door[0]===wx&&q.door[1]===wy)))continue;
+      if(G.decor.some(d=>d.x===x&&d.y===y&&d.block))continue;
+      let p;if(hall)p=P.halls[hall][4];else{const tx=-dy,ty=dx;   // a tunnel: only where the wall is long and the tunnel is one square wide
+        p=[-2,-1,1,2].every(k=>{const a=G.grid[wy+ty*k],b=G.grid[y+ty*k];return a&&a[wx+tx*k]!==0&&b&&b[x+tx*k]===0})?P.tunnel:0}
+      if(hash2(x*4+face,y,n*19+7)>=p)continue;
+      if(placed.some(q=>Math.abs(q[0]-x)<=1&&Math.abs(q[1]-y)<=1))continue;   // never on neighbouring squares
+      const last=placed.length?placed[placed.length-1][3]:'';let i=(hash2(x*4+face,y,n*19+8)*names.length)|0;if(names[i]===last)i=(i+1)%names.length;
+      const k=names[i],h=P.h[k]||1,bob=P.bob+(hash2(x,y*3+face,n*19+9)-.5)*.1;
+      placed.push([x,y,face,k]);NPC_H['ep_'+k]=h;G.decor.push({k:'ep_'+k,x,y,wd:[dx,dy],pic:1,bob,block:false,deco:true,epPic:1,epHide:1,loot:false,shop:false});cnt++}}
+  EP.hideCount=cnt;return cnt}
 /* street clutter for a town: on grass or dirt beside a house wall (never on the road, never in a lane between two walls, never by a door), turned to the wall, never blocking */
 function epStreet(n,P){const open=(x,y)=>x>=0&&y>=0&&x<MW&&y<MH&&G.grid[y][x]===0,fm=G.fmap,okF=P.on||'1',used=new Set();
   for(const d of G.decor)used.add(Math.round(d.x)+','+Math.round(d.y));for(const e of G.enemies||[])used.add(e.x+','+e.y);for(const i of G.items||[])used.add(i.x+','+i.y);
@@ -81726,6 +81788,10 @@ const EP_NWIN={tww1:[.35,.27,.65,.55],tww3:[.35,.27,.65,.55],ihw1:[.36,.2,.62,.5
 /* the lit windows in the door pictures of the town (T_DOORS name): the same, one or two panes each */
 const EP_NDOOR={hall:[[.17,.15,.33,.32],[.63,.15,.8,.32]],shop:[[.09,.5,.37,.7],[.4,.5,.67,.7]],inn:[[.22,.18,.34,.37],[.72,.18,.84,.37]]};
 const EP_GRIME=['straw','droppings','puddle','soot','crack','rubble','bones','damp','shards','rag','grain','mud','pebbles','wax'];
+/* Gandrick's cave is a bandit den: hung hides and pelts are its wall dressing; no damp stains, no tangled web pieces (only corner cobwebs). */
+const EP_GANDRICK={pics:{p:.07,keys:[{k:'moss',h:.16,bob:.035},{k:'web_corner',h:.42,bob:.76,corner:1}]},
+  hides:{names:['hide_0','hide_2','hide_7','hide_1','hide_5','hide_0','hide_8','hide_2','hide_10','hide_7','hide_9','hide_3'],h:{hide_0:1.2,hide_1:1.2,hide_2:1.2,hide_3:1.2,hide_5:1.15,hide_6:1.2,hide_7:1.2,hide_8:1.25,hide_9:1.25,hide_10:1.15},bob:.12,tunnel:.1,
+    halls:{entry:[1,15,7,20,.3],coffin:[12,13,21,20,.2],cavern:[10,2,21,8,.4],guard:[26,2,30,9,.5],stolen:[16,31,27,40,.4],gandrick:[47,30,59,41,.5]}}};
 const EP_SPEC={
   /* the crypts below the Abbey: the starting dungeon */
   1:{walls:{name:'crypt1',stone:'cryptwall',so:{k:[.8,.72,.6],sat:.86,foot:[.5,.85],top:[.3,.62]},brick:'cellarbrick',bo:{k:[.5,.46,.44],sat:.22,foot:[.5,.85],top:[.3,.62]},
@@ -81751,7 +81817,7 @@ const EP_SPEC={
      grade:{c:1.06,s:.9,b:1.06,tone:[140,115,80,.08],vig:.26,vc:[12,10,8]},
      tufts:{on:'12',path:'6',tuftF:'sepia(.55) saturate(.9) hue-rotate(28deg) brightness(.6)',p:.9,n:420,far:2,base:.1,big:1,edgeOn:'603',edgeP:.45},street:{keys:['firewood','haybale','dung','wheel','flour','rainbarrel','veg','sacks','crate','bucket'],p:.5,gap:3,on:'12',notNear:'03456',fence:1,fenceRe:/^(fence|ptree|gtree|pjuniper|pbracken|grocks|gboulder|well)/}},
   /* the other early dungeons share the crypts' finish, each with its own stone (see epDungeon) */
-  8:epDungeon('cave',8),23:epDungeon('cave',23),25:epDungeon('cave',25),9:epDungeon('crypt',9),12:epDungeon('crypt',12,{nofloor:1}),501:EP_WELL,11:EP_TUNNEL,18:epDungeon('mine',18),
+  8:Object.assign(epDungeon('cave',8),EP_GANDRICK),23:epDungeon('cave',23),25:epDungeon('cave',25),9:epDungeon('crypt',9),12:epDungeon('crypt',12,{nofloor:1}),501:EP_WELL,11:EP_TUNNEL,18:epDungeon('mine',18),
   /* the deserts: a few painted palms by the oases, broken pieces at the ruins, lone bones far apart; the dunes themselves are not touched */
   41:{desert:{palms:[],ruins:['f2_de_amphora','f2_de_skull','f2_de_cairn'],bones:['f2_dx_oxskull','f2_de_skull','f2_de_cairn','f2_de_amphora'],oasisP:0,oasisN:1,ruinP:.35,ruinN:1,lone:8,loneGap:26}},
   43:{desert:{palms:[],ruins:['f2_de_amphora','f2_de_skull','f2_de_cairn'],bones:['f2_dx_oxskull','f2_de_skull','f2_de_cairn','f2_de_amphora'],oasisP:0,ruinP:.35,ruinN:1,lone:8,loneGap:26}},
