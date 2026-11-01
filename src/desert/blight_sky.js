@@ -118,7 +118,7 @@ function bksStrike(opt){
 function bksFlash(){const s=BKS.strike;if(!s)return 0;const ms=BKS.hold!==null?BKS.hold:(G.time-s.t0)*1000;if(BKS.hold===null&&ms>300)BKS.strike=null;return gysPulse(ms)*s.amp}
 /* ---- sound ---- */
 function bksSound(dt){
-  const rain=BKS.rain,want=(bksOn()||BKS.in)&&!G.mute&&SNDOPT.amb&&AC&&MASTER&&typeof SMP!=='undefined'&&SMP.rain_loop&&rain>0?1:0;
+  const rain=BKS.rain,want=(bksOn()||BKS.in||BKS.early)&&!G.mute&&SNDOPT.amb&&AC&&MASTER&&typeof SMP!=='undefined'&&SMP.rain_loop&&rain>0?1:0;
   if(!BKS.rainSrc){if(!want)return;
     const s=AC.createBufferSource(),g=AC.createGain(),lp=AC.createBiquadFilter();s.buffer=SMP.rain_loop;s.loop=true;g.gain.value=0;lp.type='lowpass';lp.frequency.value=BKS.in?520:16000;s.connect(lp);lp.connect(g);g.connect(MASTER);s.start();BKS.rainSrc=s;BKS.rainG=g;BKS.rainF=lp;
     if(NB){const h=AC.createBufferSource(),f=AC.createBiquadFilter(),hg=AC.createGain();h.buffer=NB;h.loop=true;f.type='highpass';f.frequency.value=3200;hg.gain.value=0;h.connect(f);f.connect(hg);hg.connect(MASTER);h.start(0,Math.random()*.8);BKS.hissSrc=h;BKS.hissG=hg}}
@@ -143,7 +143,7 @@ function bksSound(dt){
         for(let i=BKS.thunderQ.length-1;i>=0;i--)if(t>=BKS.thunderQ[i].at){const q=BKS.thunderQ.splice(i,1)[0];BKS.thunders++;gysRumble(q.vol)}
         bksWeather(d)}
     }else{
-      if(bksIndoor()){BKS.in=1;bksWeather(Math.min(dt||0,.2))}else{BKS.in=0;BKS.rain=0}
+      if(bksIndoor()){BKS.in=1;bksWeather(Math.min(dt||0,.2))}else{BKS.in=0;BKS.rain=bksEarlyStep(Math.min(dt||0,.2))}
       BKS.strike=null;BKS.thunderQ.length=0;BKS.f=0;if(self.BKSKY_LV)self.BKSKY_LV=0;if(BKS.lv)BKS.lv=0}
     bksSound(Math.min(dt||0,.2));
   }catch(e){console.error('BKS',e)}
@@ -322,3 +322,49 @@ function bksRain(R,t,f,rd){
      const k=(u*8)|0,sc=.7+((P.rt[i]*13+cyc*.37)%1)*.5,x=((P.rx[i]+cyc*.618)%1)*420,y=gy0+8+P.ry[i]*9;
      ctx.globalAlpha=Math.min(1,ra*.55);ctx.drawImage(S.ring,k*26,0,26,14,x-13*sc,y-10*sc,26*sc,14*sc)}}
   ctx.globalAlpha=1}
+
+/* ==========================================================================
+   THE EARLY WOODS AND ROADS (opt-in list BKS_EARLY): the same rain look and sound as the Blighted Road, wired to the ordinary weather schedule.
+   Which levels: the outdoor levels of the northern weather region (Thornwood 2, Thornwick 3, Gandrick's Wood 7, the Ironhill Road 10, Ironhill 13,
+   the moor 19, the Burial Ground 20, Greyfang Pass 22, Greendale Forest 32, Anaea 33). Add a level number to the list to give it the same rain.
+   When: only while weatherNow() says rain (strength .62) or thunderstorm (1.0), faded in and out over a few seconds; never indoors (the level must be
+   outdoor). The Ironhill Road is a rainy pine wood by design (rain:true) and keeps a steady light rain (.4) between showers.
+   Look: the three streak layers with wind and gusts, the horizon mist and spray and the thin line of splashing puddles (bksRain), the same sprites.
+   Sound: the same rain loop with the high hiss (bksSound). A storm also brings a flash of lightning and a rolling thunder (gysRumble).
+   Fog and snow are not touched. The plain streaks of drawWeatherFx (and the dark streaks of drawRain on level 10) are replaced, not added to.
+   ========================================================================== */
+const BKS_EARLY=[2,3,7,10,13,19,20,22,32,33];
+const bksEarlyIs=n=>BKS_EARLY.includes(n);
+const bksEarlyOwns=()=>!BKS.off&&!BKS.eoff&&typeof LEVEL!=='undefined'&&bksEarlyIs(LEVEL)&&G.state==='play'&&!!LEVELS[LEVEL]&&!!LEVELS[LEVEL].outdoor;
+BKS.eR=0;BKS.early=0;BKS.eforce=null;BKS.eflash=-99;BKS.enext=0;BKS.eth=[];BKS.eStrikes=0;
+function bksEarlyWant(){
+  if(!bksEarlyOwns())return 0;
+  if(BKS.eforce!==null)return BKS.eforce;
+  const w=weatherNow();if(w&&w.fx==='rain')return w.id==='storm'?1:.62;
+  return LEVELS[LEVEL].rain?.4:0}
+function bksEarlyStep(dt){
+  if(!bksEarlyOwns()){BKS.eR=0;BKS.early=0;BKS.eth.length=0;return 0}
+  const want=bksEarlyWant(),k=Math.min(1,dt/3.5);BKS.eR+=(want-BKS.eR)*k;if(Math.abs(want-BKS.eR)<.004)BKS.eR=want;
+  BKS.early=BKS.eR>.01?1:0;
+  const t=G.time,w=weatherNow(),storm=BKS.eforce!==null?BKS.eforce>=1:!!(w&&w.id==='storm');
+  if(storm&&BKS.eR>.5){
+    if(!BKS.enext)BKS.enext=t+3+Math.random()*6;
+    if(t>BKS.enext){BKS.eflash=t;BKS.eStrikes++;BKS.eth.push(t+1+Math.random()*2.2);BKS.enext=t+8+Math.random()*16}
+  }else BKS.enext=0;
+  for(let i=BKS.eth.length-1;i>=0;i--)if(t>=BKS.eth[i]){BKS.eth.splice(i,1);try{gysRumble(.17)}catch(e){}}
+  return BKS.early?BKS.eR:0}
+const BKS_ELK={red:0};
+function bksEarlyDraw(){
+  const t=G.time,R=BKS.eR,hh=typeof HH==='number'?HH:105;
+  if(BKS_S.rd!==0||BKS_G.lk!==BKS_ELK||BKS_G.hh!==hh||!BKS_G.mist){bksGround(BKS_ELK,null);BKS_G.hh=hh}
+  ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();
+  const fm=(t-BKS.eflash)*1000;
+  if(fm>=0&&fm<320){const f=gysPulse(fm)*.6;if(f>.01){ctx.globalCompositeOperation='lighter';ctx.fillStyle=`rgba(150,170,225,${.22*f})`;ctx.fillRect(0,0,420,210);ctx.globalCompositeOperation='source-over';ctx.fillStyle=`rgba(235,240,255,${.3*f})`;ctx.fillRect(0,0,420,hh)}}
+  ctx.globalCompositeOperation='source-over';ctx.globalAlpha=Math.min(1,R*.8);ctx.fillStyle=BKS_G.mist;ctx.fillRect(0,hh-46,420,76);ctx.globalAlpha=1;
+  bksRain(R,t,0,0);
+  ctx.restore()}
+{const _w=drawWeatherFx;drawWeatherFx=function(){
+  if(BKS.eR>.02&&bksEarlyOwns()){
+    try{bksEarlyDraw()}catch(e){if(!BKS._ee){BKS._ee=1;console.error('BKS early',e)}}
+    const w=weatherNow();if(w&&w.fx==='rain')return}   // the plain streaks and flash are replaced
+  return _w.apply(this,arguments)}}
