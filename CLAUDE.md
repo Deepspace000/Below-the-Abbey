@@ -3,6 +3,24 @@
 These are standing rules from the owner of the game. They apply to every session and every change. Read them before you
 make or ask for any picture, and before you push.
 
+<!-- TEMP-SAVE-CREDITS:BEGIN (remove this whole block after Wed 4 Nov 2026, 3:30pm Brisbane time) -->
+## Saving credits (temporary)
+
+- **Never read `index.html` or `play.html` whole.** They are 11 MB and `play.html` is an exact copy. Search them with grep and
+  open only a small line range.
+- **Edit `src/desert/*.js`, not `index.html`.** About 9.5 MB of `index.html` is pasted in from those files by
+  `python tools/inject.py`. Find the right small file, edit it, then run the script.
+- Do not read the old notes unless asked: `CHANGES-*`, `UPDATE_LOG_*`, `STATS_*`, `tools/*_NOTES.md`, `tools/*_BRIEF.md`.
+- Do not open the PDFs, `assets/`, `ART-HOLD/`, `manual/`, `desktop/` or `steam/` unless the task is about them.
+- Do one small change per session. Do not start subagents or workflows.
+
+File name prefixes in `src/desert/` (use `ls src/desert | grep <prefix>` to find a file):
+`khemetra_` Khemetra city, `yarrim_` Yarrim, `oldhaven_` Oldhaven, `monastery_` the monastery, `hollowgrass_` Hollow Grasslands,
+`hgt_` and `hgd_` Hollow and Deeper Hollow, `ps_` Pale Spire, `nt_` Never-Ending Tower, `wenlock_` Wenlock, `blight_` the Blight,
+`gy_` graveyard, `ww_` Witchwood, `wellmaze_` well maze, `garden_` gardens, `sale_` Sale, `vault_` vault,
+`fishing_` fishing, `housing_` housing, `maps_` area maps, `spells.js` `gear.js` `armour.js` items and magic.
+<!-- TEMP-SAVE-CREDITS:END -->
+
 ## Art: everything is drawn straight on
 
 1. **All graphics are drawn straight on, in strict front elevation, like a flat architectural drawing.** Never at an angle:
