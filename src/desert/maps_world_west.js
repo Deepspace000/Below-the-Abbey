@@ -19,7 +19,7 @@ const wmwId=()=>({
 /* ---------- places: positions in map units. The map already has a wide western land (The Western Reaches, The Far West), so nothing is widened; Wenlock moves west to make room ---------- */
 const wmwGyName=(id,i)=>(typeof GY!=='undefined'&&GY.NAMES&&GY.NAMES[id])||LEVEL_NAMES[id]||('Grave Maze '+(i+1));
 const WMW_POS={wenlock:[-300,226],gardens:[-214,200],witchwood:[-282,126],wkgrave:[-356,198],gm1:[-392,166],gm2:[-396,216],gm3:[-362,244],gm4:[-326,152],wellmaze:[-258,260],westgate:[-338,288],
-  underlevel:[-84,98],drowned:[-30,100],thornwell:[186,176],goldenpyramid:[678,178]};
+  underlevel:[-84,98],drowned:[-30,100],thornwell:[132,164],goldenpyramid:[678,178]};
 function wmwHgRooms(hg){if(!hg||typeof hgtAny!=='function')return;for(let n=4850;n<=5499;n++)if(hgtAny(n)&&!hg.lv.includes(n))hg.lv.push(n)}
 // a Hollow room registered later (a town that makes its rooms when it is built) joins the grasslands then
 if(typeof hgtRegister==='function'){const _hr=hgtRegister;hgtRegister=function(id){const r=_hr.apply(this,arguments);try{if(id>=4850&&id<=5499&&typeof WORLD_LOCS!=='undefined'){const hg=WORLD_LOCS.find(l=>l.k==='hollowgrass');if(hg&&hgtAny(id)&&!hg.lv.includes(id))hg.lv.push(id)}}catch(e){}return r}}
