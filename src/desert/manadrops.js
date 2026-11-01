@@ -47,7 +47,7 @@ function manaDrop(n){
       for(const c of cand){const sc=hash2(c[0]*131+k*7919,c[1]*17+n,977+k);if(sc>=bs)continue;if(!placed.every(p=>Math.abs(p[0]-c[0])+Math.abs(p[1]-c[1])>=need))continue;bs=sc;best=c}
       if(best)break}
     if(!best)continue;placed.push(best);
-    const id=rating<35?'manadraught':rating<65?(k%2?'greatermana':'manadraught'):(k===0&&cnt>=4&&hash2(n,k,983)<.6?'supermana':'greatermana');
+    const id=rating<35?'manadraught':(typeof manaTierFor==='function'?(k===0&&cnt>=4&&hash2(n,k,983)<.6?'supermana':manaTierFor(rating,hash2(n,k,984))):rating<65?(k%2?'greatermana':'manadraught'):'greatermana'); // from rating 35 the draughts follow the ladder of mana_tiers.js
     L.items.push({k:id,x:best[0],y:best[1]})}
 }
 // every area, whichever way it is entered (a new game, a door, a loaded save), gets its mana potions once, after the herbs
