@@ -1,1101 +1,1171 @@
 {
-"dc_straw": {
-"file": "dc_straw.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grime1"
-},
-"dc_droppings": {
-"file": "dc_droppings.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grime1"
-},
-"dc_puddle": {
-"file": "dc_puddle.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grime1"
-},
-"dc_soot": {
-"file": "dc_soot.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grime1"
-},
-"dc_crack": {
-"file": "dc_crack.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grime1"
-},
-"dc_rubble": {
-"file": "dc_rubble.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grime1"
-},
-"dc_bones": {
-"file": "dc_bones.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grime1"
-},
-"dc_damp": {
-"file": "dc_damp.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grime1"
-},
-"dc_shards": {
-"file": "dc_shards.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grime1"
-},
-"dc_rag": {
-"file": "dc_rag.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grime1"
-},
-"dc_grain": {
-"file": "dc_grain.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grime1"
-},
-"dc_leaves": {
-"file": "dc_leaves.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grime1"
-},
-"dc_wax": {
-"file": "dc_wax.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grime1"
-},
-"dc_mud": {
-"file": "dc_mud.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grime1"
-},
-"dc_blood": {
-"file": "dc_blood.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grime1"
-},
-"dc_pebbles": {
-"file": "dc_pebbles.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grime1"
-},
-"tex_cryptwall": {
-"file": "tex_cryptwall.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_crypt1"
-},
-"tex_cellarbrick": {
-"file": "tex_cellarbrick.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_crypt1"
-},
-"tex_flagfloor": {
-"file": "tex_flagfloor.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_crypt1"
-},
-"tex_earthfloor": {
-"file": "tex_earthfloor.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_crypt1"
-},
-"sacks": {
-"file": "sacks.webp",
-"w": 533,
-"h": 420,
-"kind": "sprite",
-"sheet": "props_dungeon1"
-},
-"crate": {
-"file": "crate.webp",
-"w": 544,
-"h": 389,
-"kind": "sprite",
-"sheet": "props_dungeon1"
-},
-"rubble": {
-"file": "rubble.webp",
-"w": 613,
-"h": 279,
-"kind": "sprite",
-"sheet": "props_dungeon1"
-},
-"ratnest": {
-"file": "ratnest.webp",
-"w": 619,
-"h": 305,
-"kind": "sprite",
-"sheet": "props_dungeon1"
-},
-"bucket": {
-"file": "bucket.webp",
-"w": 321,
-"h": 420,
-"kind": "sprite",
-"sheet": "props_dungeon1"
-},
-"chair": {
-"file": "chair.webp",
-"w": 589,
-"h": 316,
-"kind": "sprite",
-"sheet": "props_dungeon1"
-},
-"bonepile": {
-"file": "bonepile.webp",
-"w": 607,
-"h": 343,
-"kind": "sprite",
-"sheet": "props_dungeon1"
-},
-"planks": {
-"file": "planks.webp",
-"w": 267,
-"h": 420,
-"kind": "sprite",
-"sheet": "props_dungeon1"
-},
-"jar": {
-"file": "jar.webp",
-"w": 324,
-"h": 420,
-"kind": "sprite",
-"sheet": "props_dungeon1"
-},
-"tex_cryptroots": {
-"file": "tex_cryptroots.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_walls2"
-},
-"tex_cryptdamp": {
-"file": "tex_cryptdamp.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_walls2"
-},
-"tex_caverock": {
-"file": "tex_caverock.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_walls2"
-},
-"tex_minewall": {
-"file": "tex_minewall.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_walls2"
-},
-"web_corner": {
-"file": "web_corner.webp",
-"w": 358,
-"h": 360,
-"kind": "sprite",
-"sheet": "wall_details1"
-},
-"web_hang": {
-"file": "web_hang.webp",
-"w": 168,
-"h": 360,
-"kind": "sprite",
-"sheet": "wall_details1"
-},
-"chains": {
-"file": "chains.webp",
-"w": 80,
-"h": 360,
-"kind": "sprite",
-"sheet": "wall_details1"
-},
-"moss": {
-"file": "moss.webp",
-"w": 618,
-"h": 310,
-"kind": "sprite",
-"sheet": "wall_details1"
-},
-"ring": {
-"file": "ring.webp",
-"w": 299,
-"h": 336,
-"kind": "sprite",
-"sheet": "wall_details1"
-},
-"planks_x": {
-"file": "planks_x.webp",
-"w": 457,
-"h": 360,
-"kind": "sprite",
-"sheet": "wall_details1"
-},
-"soot": {
-"file": "soot.webp",
-"w": 280,
-"h": 360,
-"kind": "sprite",
-"sheet": "wall_details1"
-},
-"shelf": {
-"file": "shelf.webp",
-"w": 488,
-"h": 337,
-"kind": "sprite",
-"sheet": "wall_details1"
-},
-"damp": {
-"file": "damp.webp",
-"w": 193,
-"h": 360,
-"kind": "sprite",
-"sheet": "wall_details1"
-},
-"firewood": {
-"file": "firewood.webp",
-"w": 570,
-"h": 355,
-"kind": "sprite",
-"sheet": "props_village1"
-},
-"haybale": {
-"file": "haybale.webp",
-"w": 597,
-"h": 418,
-"kind": "sprite",
-"sheet": "props_village1"
-},
-"trough": {
-"file": "trough.webp",
-"w": 585,
-"h": 211,
-"kind": "sprite",
-"sheet": "props_village1"
-},
-"dung": {
-"file": "dung.webp",
-"w": 454,
-"h": 420,
-"kind": "sprite",
-"sheet": "props_village1"
-},
-"wheel": {
-"file": "wheel.webp",
-"w": 413,
-"h": 413,
-"kind": "sprite",
-"sheet": "props_village1"
-},
-"flour": {
-"file": "flour.webp",
-"w": 522,
-"h": 419,
-"kind": "sprite",
-"sheet": "props_village1"
-},
-"bench": {
-"file": "bench.webp",
-"w": 591,
-"h": 263,
-"kind": "sprite",
-"sheet": "props_village1"
-},
-"rainbarrel": {
-"file": "rainbarrel.webp",
-"w": 319,
-"h": 420,
-"kind": "sprite",
-"sheet": "props_village1"
-},
-"veg": {
-"file": "veg.webp",
-"w": 457,
-"h": 420,
-"kind": "sprite",
-"sheet": "props_village1"
-},
-"tex_mudtrack": {
-"file": "tex_mudtrack.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_grounds1"
-},
-"tex_villgrass": {
-"file": "tex_villgrass.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_grounds1"
-},
-"tex_wetcobble": {
-"file": "tex_wetcobble.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_grounds1"
-},
-"tex_forestfloor": {
-"file": "tex_forestfloor.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_grounds1"
-},
-"tex_cf_plain": {
-"file": "tex_cf_plain.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_cryptfloors"
-},
-"tex_cf_crack": {
-"file": "tex_cf_crack.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_cryptfloors"
-},
-"tex_cf_damp": {
-"file": "tex_cf_damp.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_cryptfloors"
-},
-"tex_cf_drain": {
-"file": "tex_cf_drain.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_cryptfloors"
-},
-"tex_cf_straw": {
-"file": "tex_cf_straw.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_cryptfloors"
-},
-"tex_cf_bones": {
-"file": "tex_cf_bones.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_cryptfloors"
-},
-"tex_cf_soot": {
-"file": "tex_cf_soot.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_cryptfloors"
-},
-"tex_cf_broken": {
-"file": "tex_cf_broken.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_cryptfloors"
-},
-"tex_cf_stain": {
-"file": "tex_cf_stain.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tex_cryptfloors"
-},
-"barrel2": {
-"file": "barrel2.webp",
-"w": 307,
-"h": 420,
-"kind": "sprite",
-"sheet": "props_crypt2"
-},
-"crates2": {
-"file": "crates2.webp",
-"w": 299,
-"h": 420,
-"kind": "sprite",
-"sheet": "props_crypt2"
-},
-"sarc": {
-"file": "sarc.webp",
-"w": 572,
-"h": 273,
-"kind": "sprite",
-"sheet": "props_crypt2"
-},
-"skel_hang": {
-"file": "skel_hang.webp",
-"w": 240,
-"h": 420,
-"kind": "sprite",
-"sheet": "props_crypt2"
-},
-"candles": {
-"file": "candles.webp",
-"w": 332,
-"h": 345,
-"kind": "sprite",
-"sheet": "props_crypt2"
-},
-"lantern": {
-"file": "lantern.webp",
-"w": 192,
-"h": 420,
-"kind": "sprite",
-"sheet": "props_crypt2"
-},
-"skel_slump": {
-"file": "skel_slump.webp",
-"w": 376,
-"h": 420,
-"kind": "sprite",
-"sheet": "props_crypt2"
-},
-"chest_s": {
-"file": "chest_s.webp",
-"w": 403,
-"h": 302,
-"kind": "sprite",
-"sheet": "props_crypt2"
-},
-"potrubble": {
-"file": "potrubble.webp",
-"w": 604,
-"h": 283,
-"kind": "sprite",
-"sheet": "props_crypt2"
-},
-"torch_a": {
-"file": "torch_a.webp",
-"w": 215,
-"h": 360,
-"kind": "sprite",
-"sheet": "torch_bodies"
-},
-"torch_b": {
-"file": "torch_b.webp",
-"w": 243,
-"h": 360,
-"kind": "sprite",
-"sheet": "torch_bodies"
-},
-"torch_c": {
-"file": "torch_c.webp",
-"w": 219,
-"h": 360,
-"kind": "sprite",
-"sheet": "torch_bodies"
-},
-"torch_d": {
-"file": "torch_d.webp",
-"w": 209,
-"h": 360,
-"kind": "sprite",
-"sheet": "torch_bodies"
-},
-"flame_0": {
-"file": "flame_0.webp",
-"w": 137,
-"h": 200,
-"kind": "flame",
-"sheet": "torch_flames"
-},
-"flame_1": {
-"file": "flame_1.webp",
-"w": 137,
-"h": 200,
-"kind": "flame",
-"sheet": "torch_flames"
-},
-"flame_2": {
-"file": "flame_2.webp",
-"w": 137,
-"h": 200,
-"kind": "flame",
-"sheet": "torch_flames"
-},
-"flame_3": {
-"file": "flame_3.webp",
-"w": 137,
-"h": 200,
-"kind": "flame",
-"sheet": "torch_flames"
-},
-"flame_4": {
-"file": "flame_4.webp",
-"w": 137,
-"h": 200,
-"kind": "flame",
-"sheet": "torch_flames"
-},
-"flame_5": {
-"file": "flame_5.webp",
-"w": 137,
-"h": 200,
-"kind": "flame",
-"sheet": "torch_flames"
-},
-"dc_grass1": {
-"file": "dc_grass1.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grass_path_crop"
-},
-"dc_grass2": {
-"file": "dc_grass2.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grass_path_crop"
-},
-"dc_grass3": {
-"file": "dc_grass3.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grass_path_crop"
-},
-"dc_grass4": {
-"file": "dc_grass4.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grass_path_crop"
-},
-"dc_weeds1": {
-"file": "dc_weeds1.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grass_path_crop"
-},
-"dc_weeds2": {
-"file": "dc_weeds2.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grass_path_crop"
-},
-"dc_weeds3": {
-"file": "dc_weeds3.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grass_path_crop"
-},
-"dc_weeds4": {
-"file": "dc_weeds4.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grass_path_crop"
-},
-"dc_ruts": {
-"file": "dc_ruts.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grass_path_crop"
-},
-"dc_hoof": {
-"file": "dc_hoof.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grass_path_crop"
-},
-"dc_rutpuddle": {
-"file": "dc_rutpuddle.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grass_path_crop"
-},
-"dc_stones": {
-"file": "dc_stones.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grass_path_crop"
-},
-"dc_paledirt": {
-"file": "dc_paledirt.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grass_path_crop"
-},
-"dc_strawmud": {
-"file": "dc_strawmud.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grass_path_crop"
-},
-"dc_gravel": {
-"file": "dc_gravel.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grass_path_crop"
-},
-"dc_bracken": {
-"file": "dc_bracken.webp",
-"w": 192,
-"h": 192,
-"kind": "decal",
-"sheet": "dc_grass_path_crop"
-},
-"tex_twh1": {
-"file": "tex_twh1.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_walls_sheet"
-},
-"tex_twh2": {
-"file": "tex_twh2.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_walls_sheet"
-},
-"tex_twh3": {
-"file": "tex_twh3.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_walls_sheet"
-},
-"tex_tww1": {
-"file": "tex_tww1.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_walls_sheet"
-},
-"tex_tww2": {
-"file": "tex_tww2.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_walls_sheet"
-},
-"tex_tww3": {
-"file": "tex_tww3.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_walls_sheet"
-},
-"tex_tws1": {
-"file": "tex_tws1.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_walls_sheet"
-},
-"tex_tws2": {
-"file": "tex_tws2.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_walls_sheet"
-},
-"tex_tws3": {
-"file": "tex_tws3.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_walls_sheet"
-},
-"tex_tst1": {
-"file": "tex_tst1.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_stone_sheet"
-},
-"tex_tst2": {
-"file": "tex_tst2.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_stone_sheet"
-},
-"tex_tst3": {
-"file": "tex_tst3.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_stone_sheet"
-},
-"tex_tst4": {
-"file": "tex_tst4.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_stone_sheet"
-},
-"tex_tst5": {
-"file": "tex_tst5.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_stone_sheet"
-},
-"tex_tst6": {
-"file": "tex_tst6.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_stone_sheet"
-},
-"tex_tst7": {
-"file": "tex_tst7.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_stone_sheet"
-},
-"tex_tst8": {
-"file": "tex_tst8.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_stone_sheet"
-},
-"tex_tst9": {
-"file": "tex_tst9.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_stone_sheet"
-},
-"tex_tst10": {
-"file": "tex_tst10.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_stone_sheet"
-},
-"tex_tst11": {
-"file": "tex_tst11.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_stone_sheet"
-},
-"tex_tst12": {
-"file": "tex_tst12.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "tw_stone_sheet"
-},
-"tex_ihh1": {
-"file": "tex_ihh1.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "ih_walls_sheet"
-},
-"tex_ihh2": {
-"file": "tex_ihh2.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "ih_walls_sheet"
-},
-"tex_ihh3": {
-"file": "tex_ihh3.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "ih_walls_sheet"
-},
-"tex_ihw1": {
-"file": "tex_ihw1.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "ih_walls_sheet"
-},
-"tex_ihw2": {
-"file": "tex_ihw2.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "ih_walls_sheet"
-},
-"tex_ihw3": {
-"file": "tex_ihw3.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "ih_walls_sheet"
-},
-"tex_ihs1": {
-"file": "tex_ihs1.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "ih_walls_sheet"
-},
-"tex_ihs2": {
-"file": "tex_ihs2.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "ih_walls_sheet"
-},
-"tex_ihs3": {
-"file": "tex_ihs3.webp",
-"w": 128,
-"h": 128,
-"kind": "tex",
-"sheet": "ih_walls_sheet"
-},
-"orecart": {
-"file": "orecart.webp",
-"w": 244,
-"h": 209,
-"kind": "sprite",
-"sheet": "ih_props_sheet"
-},
-"coalheap": {
-"file": "coalheap.webp",
-"w": 287,
-"h": 110,
-"kind": "sprite",
-"sheet": "ih_props_sheet"
-},
-"coalsacks": {
-"file": "coalsacks.webp",
-"w": 250,
-"h": 200,
-"kind": "sprite",
-"sheet": "ih_props_sheet"
-},
-"toolrack": {
-"file": "toolrack.webp",
-"w": 280,
-"h": 231,
-"kind": "sprite",
-"sheet": "ih_props_sheet"
-},
-"anvil": {
-"file": "anvil.webp",
-"w": 279,
-"h": 200,
-"kind": "sprite",
-"sheet": "ih_props_sheet"
-},
-"orecrate": {
-"file": "orecrate.webp",
-"w": 242,
-"h": 215,
-"kind": "sprite",
-"sheet": "ih_props_sheet"
-},
-"brazier": {
-"file": "brazier.webp",
-"w": 175,
-"h": 183,
-"kind": "sprite",
-"sheet": "ih_props_sheet"
-},
-"tw_tiki": {
-"file": "tw_tiki.webp",
-"w": 238,
-"h": 384,
-"kind": "sprite",
-"sheet": "tiki_sheet1"
-},
-"bn_skel_sit": {
-"file": "bn_skel_sit.webp",
-"w": 573,
-"h": 734,
-"kind": "sprite",
-"sheet": "bones_a"
-},
-"bn_skull": {
-"file": "bn_skull.webp",
-"w": 527,
-"h": 281,
-"kind": "sprite",
-"sheet": "bones_b"
-},
-"bn_ribs": {
-"file": "bn_ribs.webp",
-"w": 614,
-"h": 240,
-"kind": "sprite",
-"sheet": "bones_b"
-},
-"bn_longbones": {
-"file": "bn_longbones.webp",
-"w": 625,
-"h": 209,
-"kind": "sprite",
-"sheet": "bones_b"
-},
-"bn_skullpile": {
-"file": "bn_skullpile.webp",
-"w": 640,
-"h": 347,
-"kind": "sprite",
-"sheet": "bones_b"
-},
-"bn_jaw": {
-"file": "bn_jaw.webp",
-"w": 558,
-"h": 177,
-"kind": "sprite",
-"sheet": "bones_b"
-},
-"bn_potshards": {
-"file": "bn_potshards.webp",
-"w": 640,
-"h": 245,
-"kind": "sprite",
-"sheet": "bones_b"
-},
-"bn_buried": {
-"file": "bn_buried.webp",
-"w": 640,
-"h": 240,
-"kind": "sprite",
-"sheet": "bones_c"
-},
-"bn_rat": {
-"file": "bn_rat.webp",
-"w": 376,
-"h": 112,
-"kind": "sprite",
-"sheet": "bones_c"
-},
-"bn_swordshield": {
-"file": "bn_swordshield.webp",
-"w": 640,
-"h": 278,
-"kind": "sprite",
-"sheet": "bones_c"
-},
-"bn_cloak": {
-"file": "bn_cloak.webp",
-"w": 640,
-"h": 275,
-"kind": "sprite",
-"sheet": "bones_c"
-},
-"bn_wolfskull": {
-"file": "bn_wolfskull.webp",
-"w": 640,
-"h": 137,
-"kind": "sprite",
-"sheet": "bones_c"
-},
-"bn_skelside": {
-"file": "bn_skelside.webp",
-"w": 640,
-"h": 193,
-"kind": "sprite",
-"sheet": "bones_c"
-},
-"bn_wolfskel": {
-"file": "bn_wolfskel.webp",
-"w": 640,
-"h": 174,
-"kind": "sprite",
-"sheet": "bones_c"
-},
-"bn_moss": {
-"file": "bn_moss.webp",
-"w": 639,
-"h": 304,
-"kind": "sprite",
-"sheet": "bones_d"
-},
-"bn_crushed": {
-"file": "bn_crushed.webp",
-"w": 608,
-"h": 171,
-"kind": "sprite",
-"sheet": "bones_d"
-},
-"bn_chain": {
-"file": "bn_chain.webp",
-"w": 639,
-"h": 369,
-"kind": "sprite",
-"sheet": "bones_d"
-},
-"bn_ribdome": {
-"file": "bn_ribdome.webp",
-"w": 635,
-"h": 268,
-"kind": "sprite",
-"sheet": "bones_d"
-},
-"bn_skelcurl": {
-"file": "bn_skelcurl.webp",
-"w": 633,
-"h": 339,
-"kind": "sprite",
-"sheet": "bones_d"
-},
-"bn_twoskulls": {
-"file": "bn_twoskulls.webp",
-"w": 635,
-"h": 211,
-"kind": "sprite",
-"sheet": "bones_d"
-}
+ "dc_straw": {
+  "file": "dc_straw.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grime1"
+ },
+ "dc_droppings": {
+  "file": "dc_droppings.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grime1"
+ },
+ "dc_puddle": {
+  "file": "dc_puddle.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grime1"
+ },
+ "dc_soot": {
+  "file": "dc_soot.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grime1"
+ },
+ "dc_crack": {
+  "file": "dc_crack.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grime1"
+ },
+ "dc_rubble": {
+  "file": "dc_rubble.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grime1"
+ },
+ "dc_bones": {
+  "file": "dc_bones.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grime1"
+ },
+ "dc_damp": {
+  "file": "dc_damp.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grime1"
+ },
+ "dc_shards": {
+  "file": "dc_shards.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grime1"
+ },
+ "dc_rag": {
+  "file": "dc_rag.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grime1"
+ },
+ "dc_grain": {
+  "file": "dc_grain.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grime1"
+ },
+ "dc_leaves": {
+  "file": "dc_leaves.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grime1"
+ },
+ "dc_wax": {
+  "file": "dc_wax.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grime1"
+ },
+ "dc_mud": {
+  "file": "dc_mud.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grime1"
+ },
+ "dc_blood": {
+  "file": "dc_blood.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grime1"
+ },
+ "dc_pebbles": {
+  "file": "dc_pebbles.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grime1"
+ },
+ "tex_cryptwall": {
+  "file": "tex_cryptwall.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_crypt1"
+ },
+ "tex_cellarbrick": {
+  "file": "tex_cellarbrick.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_crypt1"
+ },
+ "tex_flagfloor": {
+  "file": "tex_flagfloor.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_crypt1"
+ },
+ "tex_earthfloor": {
+  "file": "tex_earthfloor.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_crypt1"
+ },
+ "sacks": {
+  "file": "sacks.webp",
+  "w": 533,
+  "h": 420,
+  "kind": "sprite",
+  "sheet": "props_dungeon1"
+ },
+ "crate": {
+  "file": "crate.webp",
+  "w": 544,
+  "h": 389,
+  "kind": "sprite",
+  "sheet": "props_dungeon1"
+ },
+ "rubble": {
+  "file": "rubble.webp",
+  "w": 613,
+  "h": 279,
+  "kind": "sprite",
+  "sheet": "props_dungeon1"
+ },
+ "ratnest": {
+  "file": "ratnest.webp",
+  "w": 619,
+  "h": 305,
+  "kind": "sprite",
+  "sheet": "props_dungeon1"
+ },
+ "bucket": {
+  "file": "bucket.webp",
+  "w": 321,
+  "h": 420,
+  "kind": "sprite",
+  "sheet": "props_dungeon1"
+ },
+ "chair": {
+  "file": "chair.webp",
+  "w": 589,
+  "h": 316,
+  "kind": "sprite",
+  "sheet": "props_dungeon1"
+ },
+ "bonepile": {
+  "file": "bonepile.webp",
+  "w": 607,
+  "h": 343,
+  "kind": "sprite",
+  "sheet": "props_dungeon1"
+ },
+ "planks": {
+  "file": "planks.webp",
+  "w": 267,
+  "h": 420,
+  "kind": "sprite",
+  "sheet": "props_dungeon1"
+ },
+ "jar": {
+  "file": "jar.webp",
+  "w": 324,
+  "h": 420,
+  "kind": "sprite",
+  "sheet": "props_dungeon1"
+ },
+ "tex_cryptroots": {
+  "file": "tex_cryptroots.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_walls2"
+ },
+ "tex_cryptdamp": {
+  "file": "tex_cryptdamp.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_walls2"
+ },
+ "tex_caverock": {
+  "file": "tex_caverock.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_walls2"
+ },
+ "tex_minewall": {
+  "file": "tex_minewall.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_walls2"
+ },
+ "web_corner": {
+  "file": "web_corner.webp",
+  "w": 358,
+  "h": 360,
+  "kind": "sprite",
+  "sheet": "wall_details1"
+ },
+ "web_hang": {
+  "file": "web_hang.webp",
+  "w": 168,
+  "h": 360,
+  "kind": "sprite",
+  "sheet": "wall_details1"
+ },
+ "chains": {
+  "file": "chains.webp",
+  "w": 80,
+  "h": 360,
+  "kind": "sprite",
+  "sheet": "wall_details1"
+ },
+ "moss": {
+  "file": "moss.webp",
+  "w": 618,
+  "h": 310,
+  "kind": "sprite",
+  "sheet": "wall_details1"
+ },
+ "ring": {
+  "file": "ring.webp",
+  "w": 299,
+  "h": 336,
+  "kind": "sprite",
+  "sheet": "wall_details1"
+ },
+ "planks_x": {
+  "file": "planks_x.webp",
+  "w": 457,
+  "h": 360,
+  "kind": "sprite",
+  "sheet": "wall_details1"
+ },
+ "soot": {
+  "file": "soot.webp",
+  "w": 280,
+  "h": 360,
+  "kind": "sprite",
+  "sheet": "wall_details1"
+ },
+ "shelf": {
+  "file": "shelf.webp",
+  "w": 488,
+  "h": 337,
+  "kind": "sprite",
+  "sheet": "wall_details1"
+ },
+ "damp": {
+  "file": "damp.webp",
+  "w": 193,
+  "h": 360,
+  "kind": "sprite",
+  "sheet": "wall_details1"
+ },
+ "firewood": {
+  "file": "firewood.webp",
+  "w": 570,
+  "h": 355,
+  "kind": "sprite",
+  "sheet": "props_village1"
+ },
+ "haybale": {
+  "file": "haybale.webp",
+  "w": 597,
+  "h": 418,
+  "kind": "sprite",
+  "sheet": "props_village1"
+ },
+ "trough": {
+  "file": "trough.webp",
+  "w": 585,
+  "h": 211,
+  "kind": "sprite",
+  "sheet": "props_village1"
+ },
+ "dung": {
+  "file": "dung.webp",
+  "w": 454,
+  "h": 420,
+  "kind": "sprite",
+  "sheet": "props_village1"
+ },
+ "wheel": {
+  "file": "wheel.webp",
+  "w": 413,
+  "h": 413,
+  "kind": "sprite",
+  "sheet": "props_village1"
+ },
+ "flour": {
+  "file": "flour.webp",
+  "w": 522,
+  "h": 419,
+  "kind": "sprite",
+  "sheet": "props_village1"
+ },
+ "bench": {
+  "file": "bench.webp",
+  "w": 591,
+  "h": 263,
+  "kind": "sprite",
+  "sheet": "props_village1"
+ },
+ "rainbarrel": {
+  "file": "rainbarrel.webp",
+  "w": 319,
+  "h": 420,
+  "kind": "sprite",
+  "sheet": "props_village1"
+ },
+ "veg": {
+  "file": "veg.webp",
+  "w": 457,
+  "h": 420,
+  "kind": "sprite",
+  "sheet": "props_village1"
+ },
+ "tex_mudtrack": {
+  "file": "tex_mudtrack.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_grounds1"
+ },
+ "tex_villgrass": {
+  "file": "tex_villgrass.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_grounds1"
+ },
+ "tex_wetcobble": {
+  "file": "tex_wetcobble.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_grounds1"
+ },
+ "tex_forestfloor": {
+  "file": "tex_forestfloor.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_grounds1"
+ },
+ "tex_cf_plain": {
+  "file": "tex_cf_plain.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_cryptfloors"
+ },
+ "tex_cf_crack": {
+  "file": "tex_cf_crack.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_cryptfloors"
+ },
+ "tex_cf_damp": {
+  "file": "tex_cf_damp.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_cryptfloors"
+ },
+ "tex_cf_drain": {
+  "file": "tex_cf_drain.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_cryptfloors"
+ },
+ "tex_cf_straw": {
+  "file": "tex_cf_straw.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_cryptfloors"
+ },
+ "tex_cf_bones": {
+  "file": "tex_cf_bones.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_cryptfloors"
+ },
+ "tex_cf_soot": {
+  "file": "tex_cf_soot.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_cryptfloors"
+ },
+ "tex_cf_broken": {
+  "file": "tex_cf_broken.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_cryptfloors"
+ },
+ "tex_cf_stain": {
+  "file": "tex_cf_stain.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tex_cryptfloors"
+ },
+ "barrel2": {
+  "file": "barrel2.webp",
+  "w": 307,
+  "h": 420,
+  "kind": "sprite",
+  "sheet": "props_crypt2"
+ },
+ "crates2": {
+  "file": "crates2.webp",
+  "w": 299,
+  "h": 420,
+  "kind": "sprite",
+  "sheet": "props_crypt2"
+ },
+ "sarc": {
+  "file": "sarc.webp",
+  "w": 572,
+  "h": 273,
+  "kind": "sprite",
+  "sheet": "props_crypt2"
+ },
+ "skel_hang": {
+  "file": "skel_hang.webp",
+  "w": 240,
+  "h": 420,
+  "kind": "sprite",
+  "sheet": "props_crypt2"
+ },
+ "candles": {
+  "file": "candles.webp",
+  "w": 332,
+  "h": 345,
+  "kind": "sprite",
+  "sheet": "props_crypt2"
+ },
+ "lantern": {
+  "file": "lantern.webp",
+  "w": 192,
+  "h": 420,
+  "kind": "sprite",
+  "sheet": "props_crypt2"
+ },
+ "skel_slump": {
+  "file": "skel_slump.webp",
+  "w": 376,
+  "h": 420,
+  "kind": "sprite",
+  "sheet": "props_crypt2"
+ },
+ "chest_s": {
+  "file": "chest_s.webp",
+  "w": 403,
+  "h": 302,
+  "kind": "sprite",
+  "sheet": "props_crypt2"
+ },
+ "potrubble": {
+  "file": "potrubble.webp",
+  "w": 604,
+  "h": 283,
+  "kind": "sprite",
+  "sheet": "props_crypt2"
+ },
+ "torch_a": {
+  "file": "torch_a.webp",
+  "w": 215,
+  "h": 360,
+  "kind": "sprite",
+  "sheet": "torch_bodies"
+ },
+ "torch_b": {
+  "file": "torch_b.webp",
+  "w": 243,
+  "h": 360,
+  "kind": "sprite",
+  "sheet": "torch_bodies"
+ },
+ "torch_c": {
+  "file": "torch_c.webp",
+  "w": 219,
+  "h": 360,
+  "kind": "sprite",
+  "sheet": "torch_bodies"
+ },
+ "torch_d": {
+  "file": "torch_d.webp",
+  "w": 209,
+  "h": 360,
+  "kind": "sprite",
+  "sheet": "torch_bodies"
+ },
+ "flame_0": {
+  "file": "flame_0.webp",
+  "w": 137,
+  "h": 200,
+  "kind": "flame",
+  "sheet": "torch_flames"
+ },
+ "flame_1": {
+  "file": "flame_1.webp",
+  "w": 137,
+  "h": 200,
+  "kind": "flame",
+  "sheet": "torch_flames"
+ },
+ "flame_2": {
+  "file": "flame_2.webp",
+  "w": 137,
+  "h": 200,
+  "kind": "flame",
+  "sheet": "torch_flames"
+ },
+ "flame_3": {
+  "file": "flame_3.webp",
+  "w": 137,
+  "h": 200,
+  "kind": "flame",
+  "sheet": "torch_flames"
+ },
+ "flame_4": {
+  "file": "flame_4.webp",
+  "w": 137,
+  "h": 200,
+  "kind": "flame",
+  "sheet": "torch_flames"
+ },
+ "flame_5": {
+  "file": "flame_5.webp",
+  "w": 137,
+  "h": 200,
+  "kind": "flame",
+  "sheet": "torch_flames"
+ },
+ "dc_grass1": {
+  "file": "dc_grass1.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grass_path_crop"
+ },
+ "dc_grass2": {
+  "file": "dc_grass2.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grass_path_crop"
+ },
+ "dc_grass3": {
+  "file": "dc_grass3.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grass_path_crop"
+ },
+ "dc_grass4": {
+  "file": "dc_grass4.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grass_path_crop"
+ },
+ "dc_weeds1": {
+  "file": "dc_weeds1.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grass_path_crop"
+ },
+ "dc_weeds2": {
+  "file": "dc_weeds2.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grass_path_crop"
+ },
+ "dc_weeds3": {
+  "file": "dc_weeds3.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grass_path_crop"
+ },
+ "dc_weeds4": {
+  "file": "dc_weeds4.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grass_path_crop"
+ },
+ "dc_ruts": {
+  "file": "dc_ruts.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grass_path_crop"
+ },
+ "dc_hoof": {
+  "file": "dc_hoof.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grass_path_crop"
+ },
+ "dc_rutpuddle": {
+  "file": "dc_rutpuddle.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grass_path_crop"
+ },
+ "dc_stones": {
+  "file": "dc_stones.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grass_path_crop"
+ },
+ "dc_paledirt": {
+  "file": "dc_paledirt.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grass_path_crop"
+ },
+ "dc_strawmud": {
+  "file": "dc_strawmud.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grass_path_crop"
+ },
+ "dc_gravel": {
+  "file": "dc_gravel.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grass_path_crop"
+ },
+ "dc_bracken": {
+  "file": "dc_bracken.webp",
+  "w": 192,
+  "h": 192,
+  "kind": "decal",
+  "sheet": "dc_grass_path_crop"
+ },
+ "tex_twh1": {
+  "file": "tex_twh1.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_walls_sheet"
+ },
+ "tex_twh2": {
+  "file": "tex_twh2.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_walls_sheet"
+ },
+ "tex_twh3": {
+  "file": "tex_twh3.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_walls_sheet"
+ },
+ "tex_tww1": {
+  "file": "tex_tww1.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_walls_sheet"
+ },
+ "tex_tww2": {
+  "file": "tex_tww2.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_walls_sheet"
+ },
+ "tex_tww3": {
+  "file": "tex_tww3.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_walls_sheet"
+ },
+ "tex_tws1": {
+  "file": "tex_tws1.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_walls_sheet"
+ },
+ "tex_tws2": {
+  "file": "tex_tws2.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_walls_sheet"
+ },
+ "tex_tws3": {
+  "file": "tex_tws3.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_walls_sheet"
+ },
+ "tex_tst1": {
+  "file": "tex_tst1.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_stone_sheet"
+ },
+ "tex_tst2": {
+  "file": "tex_tst2.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_stone_sheet"
+ },
+ "tex_tst3": {
+  "file": "tex_tst3.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_stone_sheet"
+ },
+ "tex_tst4": {
+  "file": "tex_tst4.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_stone_sheet"
+ },
+ "tex_tst5": {
+  "file": "tex_tst5.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_stone_sheet"
+ },
+ "tex_tst6": {
+  "file": "tex_tst6.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_stone_sheet"
+ },
+ "tex_tst7": {
+  "file": "tex_tst7.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_stone_sheet"
+ },
+ "tex_tst8": {
+  "file": "tex_tst8.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_stone_sheet"
+ },
+ "tex_tst9": {
+  "file": "tex_tst9.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_stone_sheet"
+ },
+ "tex_tst10": {
+  "file": "tex_tst10.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_stone_sheet"
+ },
+ "tex_tst11": {
+  "file": "tex_tst11.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_stone_sheet"
+ },
+ "tex_tst12": {
+  "file": "tex_tst12.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "tw_stone_sheet"
+ },
+ "tex_ihh1": {
+  "file": "tex_ihh1.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "ih_walls_sheet"
+ },
+ "tex_ihh2": {
+  "file": "tex_ihh2.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "ih_walls_sheet"
+ },
+ "tex_ihh3": {
+  "file": "tex_ihh3.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "ih_walls_sheet"
+ },
+ "tex_ihw1": {
+  "file": "tex_ihw1.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "ih_walls_sheet"
+ },
+ "tex_ihw2": {
+  "file": "tex_ihw2.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "ih_walls_sheet"
+ },
+ "tex_ihw3": {
+  "file": "tex_ihw3.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "ih_walls_sheet"
+ },
+ "tex_ihs1": {
+  "file": "tex_ihs1.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "ih_walls_sheet"
+ },
+ "tex_ihs2": {
+  "file": "tex_ihs2.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "ih_walls_sheet"
+ },
+ "tex_ihs3": {
+  "file": "tex_ihs3.webp",
+  "w": 128,
+  "h": 128,
+  "kind": "tex",
+  "sheet": "ih_walls_sheet"
+ },
+ "orecart": {
+  "file": "orecart.webp",
+  "w": 244,
+  "h": 209,
+  "kind": "sprite",
+  "sheet": "ih_props_sheet"
+ },
+ "coalheap": {
+  "file": "coalheap.webp",
+  "w": 287,
+  "h": 110,
+  "kind": "sprite",
+  "sheet": "ih_props_sheet"
+ },
+ "coalsacks": {
+  "file": "coalsacks.webp",
+  "w": 250,
+  "h": 200,
+  "kind": "sprite",
+  "sheet": "ih_props_sheet"
+ },
+ "toolrack": {
+  "file": "toolrack.webp",
+  "w": 280,
+  "h": 231,
+  "kind": "sprite",
+  "sheet": "ih_props_sheet"
+ },
+ "anvil": {
+  "file": "anvil.webp",
+  "w": 279,
+  "h": 200,
+  "kind": "sprite",
+  "sheet": "ih_props_sheet"
+ },
+ "orecrate": {
+  "file": "orecrate.webp",
+  "w": 242,
+  "h": 215,
+  "kind": "sprite",
+  "sheet": "ih_props_sheet"
+ },
+ "brazier": {
+  "file": "brazier.webp",
+  "w": 175,
+  "h": 183,
+  "kind": "sprite",
+  "sheet": "ih_props_sheet"
+ },
+ "tw_tiki": {
+  "file": "tw_tiki.webp",
+  "w": 238,
+  "h": 384,
+  "kind": "sprite",
+  "sheet": "tiki_sheet1"
+ },
+ "bn_skel_sit": {
+  "file": "bn_skel_sit.webp",
+  "w": 573,
+  "h": 734,
+  "kind": "sprite",
+  "sheet": "bones_a"
+ },
+ "bn_skull": {
+  "file": "bn_skull.webp",
+  "w": 527,
+  "h": 281,
+  "kind": "sprite",
+  "sheet": "bones_b"
+ },
+ "bn_ribs": {
+  "file": "bn_ribs.webp",
+  "w": 614,
+  "h": 240,
+  "kind": "sprite",
+  "sheet": "bones_b"
+ },
+ "bn_longbones": {
+  "file": "bn_longbones.webp",
+  "w": 625,
+  "h": 209,
+  "kind": "sprite",
+  "sheet": "bones_b"
+ },
+ "bn_skullpile": {
+  "file": "bn_skullpile.webp",
+  "w": 640,
+  "h": 347,
+  "kind": "sprite",
+  "sheet": "bones_b"
+ },
+ "bn_jaw": {
+  "file": "bn_jaw.webp",
+  "w": 558,
+  "h": 177,
+  "kind": "sprite",
+  "sheet": "bones_b"
+ },
+ "bn_potshards": {
+  "file": "bn_potshards.webp",
+  "w": 640,
+  "h": 245,
+  "kind": "sprite",
+  "sheet": "bones_b"
+ },
+ "bn_buried": {
+  "file": "bn_buried.webp",
+  "w": 640,
+  "h": 240,
+  "kind": "sprite",
+  "sheet": "bones_c"
+ },
+ "bn_rat": {
+  "file": "bn_rat.webp",
+  "w": 376,
+  "h": 112,
+  "kind": "sprite",
+  "sheet": "bones_c"
+ },
+ "bn_swordshield": {
+  "file": "bn_swordshield.webp",
+  "w": 640,
+  "h": 278,
+  "kind": "sprite",
+  "sheet": "bones_c"
+ },
+ "bn_cloak": {
+  "file": "bn_cloak.webp",
+  "w": 640,
+  "h": 275,
+  "kind": "sprite",
+  "sheet": "bones_c"
+ },
+ "bn_wolfskull": {
+  "file": "bn_wolfskull.webp",
+  "w": 640,
+  "h": 137,
+  "kind": "sprite",
+  "sheet": "bones_c"
+ },
+ "bn_skelside": {
+  "file": "bn_skelside.webp",
+  "w": 640,
+  "h": 193,
+  "kind": "sprite",
+  "sheet": "bones_c"
+ },
+ "bn_wolfskel": {
+  "file": "bn_wolfskel.webp",
+  "w": 640,
+  "h": 174,
+  "kind": "sprite",
+  "sheet": "bones_c"
+ },
+ "bn_moss": {
+  "file": "bn_moss.webp",
+  "w": 639,
+  "h": 304,
+  "kind": "sprite",
+  "sheet": "bones_d"
+ },
+ "bn_crushed": {
+  "file": "bn_crushed.webp",
+  "w": 608,
+  "h": 171,
+  "kind": "sprite",
+  "sheet": "bones_d"
+ },
+ "bn_chain": {
+  "file": "bn_chain.webp",
+  "w": 639,
+  "h": 369,
+  "kind": "sprite",
+  "sheet": "bones_d"
+ },
+ "bn_ribdome": {
+  "file": "bn_ribdome.webp",
+  "w": 635,
+  "h": 268,
+  "kind": "sprite",
+  "sheet": "bones_d"
+ },
+ "bn_skelcurl": {
+  "file": "bn_skelcurl.webp",
+  "w": 633,
+  "h": 339,
+  "kind": "sprite",
+  "sheet": "bones_d"
+ },
+ "bn_twoskulls": {
+  "file": "bn_twoskulls.webp",
+  "w": 635,
+  "h": 211,
+  "kind": "sprite",
+  "sheet": "bones_d"
+ },
+ "fl_0": {
+  "file": "fl_0.webp",
+  "w": 299,
+  "h": 224,
+  "kind": "sprite",
+  "sheet": "flowers1"
+ },
+ "fl_1": {
+  "file": "fl_1.webp",
+  "w": 284,
+  "h": 244,
+  "kind": "sprite",
+  "sheet": "flowers1"
+ },
+ "fl_2": {
+  "file": "fl_2.webp",
+  "w": 151,
+  "h": 253,
+  "kind": "sprite",
+  "sheet": "flowers1"
+ },
+ "fl_3": {
+  "file": "fl_3.webp",
+  "w": 269,
+  "h": 182,
+  "kind": "sprite",
+  "sheet": "flowers1"
+ },
+ "fl_4": {
+  "file": "fl_4.webp",
+  "w": 351,
+  "h": 216,
+  "kind": "sprite",
+  "sheet": "flowers1"
+ },
+ "fl_5": {
+  "file": "fl_5.webp",
+  "w": 289,
+  "h": 207,
+  "kind": "sprite",
+  "sheet": "flowers1"
+ },
+ "fl_6": {
+  "file": "fl_6.webp",
+  "w": 267,
+  "h": 200,
+  "kind": "sprite",
+  "sheet": "flowers1"
+ },
+ "fl_7": {
+  "file": "fl_7.webp",
+  "w": 302,
+  "h": 176,
+  "kind": "sprite",
+  "sheet": "flowers1"
+ },
+ "fl_8": {
+  "file": "fl_8.webp",
+  "w": 310,
+  "h": 251,
+  "kind": "sprite",
+  "sheet": "flowers1"
+ },
+ "fl_9": {
+  "file": "fl_9.webp",
+  "w": 270,
+  "h": 244,
+  "kind": "sprite",
+  "sheet": "flowers1"
+ }
 }
