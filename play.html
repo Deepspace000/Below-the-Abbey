@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.756';
+const VERSION='3.757';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1547,7 +1547,7 @@ function reset(n){
   G.inv={open:false,tab:'inv',hero:0,sel:null,scroll:0};
   G.enemies=ENEMY_SPAWNS.map((s,i)=>{const st=enemyStat(s.t,s.lvl);return {id:i,t:s.t,lvl:s.lvl||lvlHere(),x:s.x,y:s.y,rx:s.x,ry:s.y,hp:st.hp,maxhp:st.hp,alert:false,chilled:0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100}});
   G.items=ITEM_SPAWNS.map(s=>({k:s.k==='potion'?potionFor(hash2(s.x,s.y,LEVEL+7)):s.k==='hlfood'?hlFoodFor(hash2(s.x,s.y,LEVEL+9)):s.k,x:s.x,y:s.y,taken:false}));
-  G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}if(s.sc)o.sc=s.sc;if(s.walk)o.walk=true;if(s.wd)o.wd=s.wd;if(s.txt)o.txt=s.txt;if(s.bob)o.bob=s.bob;if(s.ox!==undefined){o.ox=s.ox;o.oy=s.oy}if(s.opens){o.opens=s.opens;o.idx=s.idx}if(s.lockedBy)o.lockedBy=s.lockedBy;if(s.secret)o.secret=true;for(const kk of ['solid','ambush','hidden','trap','frame','goldAmt','food','gear','enter','magic','cat','scar','hatch','kname','kl','lk','glow','red','lit','deco','wind','lw','lr','pic','fr','petid','cloudid','thiefid'])if(s[kk]!==undefined)o[kk]=s[kk];return o});
+  G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}if(s.sc)o.sc=s.sc;if(s.walk)o.walk=true;if(s.wd)o.wd=s.wd;if(s.txt)o.txt=s.txt;if(s.bob)o.bob=s.bob;if(s.ox!==undefined){o.ox=s.ox;o.oy=s.oy}if(s.opens){o.opens=s.opens;o.idx=s.idx}if(s.lockedBy)o.lockedBy=s.lockedBy;if(s.secret)o.secret=true;for(const kk of ['solid','ambush','hidden','trap','frame','goldAmt','food','gear','enter','magic','cat','scar','hatch','kname','kl','lk','glow','red','lit','deco','wind','lw','lr','pic','fr','petid','cloudid','thiefid','stolen','lname','srB'])if(s[kk]!==undefined)o[kk]=s[kk];return o});
   applyLevers();clearDoorFronts();
   G.decor.forEach(d=>{if(!d.npc&&(d.k==='grave'||d.k==='grave2'||d.k==='cross')){d.npc='epitaph';d.loot=false}});
   G.decor.forEach(d=>{if(d.npc&&!d.solid&&!/^(lockedgate|gate|fence|lever|hatch)/.test(d.k)){d.block=false;d.walk=true}}); // the party walks through every person and creature; tap them or press attack to speak
@@ -35021,9 +35021,9 @@ function mpGwoodDrawCave(x,L,api){
   x.restore();
   const T=(t,cx,cy,sz,col)=>mplText(x,t,X(cx),Y(cy),sz||6.8,col||MPL.INK);
   if(LEVEL===8){
-    T('The Great Cavern',16,5,8,MPL.INK);T("Gandrick's Chamber",28.5,3.2,6.6,MPL.VERM);MPLI.skull(x,X(29),Y(5.4),u*.1);
-    T('Coffin Hall',16.5,19.2,7.2);T('The Dead Passage',16.8,10.5,5.6);T('Entry Cave',4,16.4,6.8);T('Way out to the wood',4.6,19.7,5.2,MPL.VERD);
-    T('Wooden door',9.5,17.3,5);T('Iron gate',24,6.6,5)}
+    T('The Great Cavern',15.5,5,7.2,MPL.INK);T("Gandrick's Hall",53,33,8,MPL.VERM);MPLI.skull(x,X(53.5),Y(37.5),u*.12);
+    T('Coffin Hall',16.5,19.2,7.2);T('The Dead Passage',16.8,10.5,5.6);T('Entry Cave',4,16.4,6.8);T('Way out to the wood',6,20.9,4.8,MPL.VERD);
+    T('Iron gate',53.5,27.6,5);T('Guard Room',28.5,10.6,6);T('Hall of Stolen Goods',21.5,36,7)}
   else{
     T('Bandit Room',3.5,2.5,u*.34);T('Treasure Room',10.5,2.5,u*.3,MPL.VERM);T('The Way In',3.5,6.5,u*.3,MPL.VERD);T('Way out to the wood',3.5,8.55,u*.26,MPL.VERD)}
 }
@@ -35046,8 +35046,8 @@ function mpGwoodDrawAny(c,x,L,api){
   else if(LEVEL===8){
     mpGwoodDrawCave(x,L,api);
     mpGwoodMargins(x,L,api,'The bandit cave',
-      ['Gandrick lives in the east chamber, behind an iron gate.','Skeletons wake in the coffin hall.'],
-      ['The cave opens to the wood in the west, through a stone entry cave.','Hanging teeth on the roof are stalactites.'],
+      ['Gandrick waits in the great hall at the far south east, behind an iron gate.','Skeletons wake in the coffin hall.'],
+      ['The cave opens to the wood in the west, through a stone entry cave.','Narrow one-square tunnels wind between the big halls. Barrels of stolen goods stand in the corners of the halls.'],
       [[(x,a,b)=>{x.fillStyle='#dccd9e';x.fillRect(a-6,b-3,12,6);x.strokeStyle=MPL.INK;x.lineWidth=.6;x.strokeRect(a-6,b-3,12,6)},'Cave floor'],[(x,a,b)=>{x.fillStyle='#d2c6aa';x.strokeStyle=MPL.INK;x.lineWidth=.5;for(let i=-1;i<2;i++){x.beginPath();x.moveTo(a+i*4-1.6,b-4);x.lineTo(a+i*4,b+3);x.lineTo(a+i*4+1.6,b-4);x.closePath();x.fill();x.stroke()}},'Stalactites'],[(x,a,b)=>mpGwoodCoffin(x,a,b,.7),'Coffins'],[(x,a,b)=>{x.fillStyle='#8a5a2c';x.strokeStyle=MPL.INK;x.lineWidth=.6;x.fillRect(a-4,b-3,8,6);x.strokeRect(a-4,b-3,8,6)},'Wooden door']])}
   else{
     mpGwoodDrawAny.hall(c,x,L,api)}}
@@ -35058,6 +35058,52 @@ mpGwoodDrawAny.hall=function(c,x,L,api){
   api.notes(x,['A small den hidden in the north east of the wood.','Bandits and an archer guard the hall.'],11,100,70,6.2,4);
   api.notes(x,['The only way out is the way you came in, to the south west.'],396,90,72,6.2,4)};
 mplInstall({name:'gwood',levels:[7,25,8],draw:mpGwoodDrawAny,foot:'You are the yellow arrow. Dirt trails are pale brown.'});
+
+/* ---- src/desert/gandrick_cave.js ---- */
+/* ==========================================================================
+   GANDRICK'S CAVE REWORKED (level 8, prefix gc). The bandit boss's hideout is a maze of narrow one-square tunnels joining six big halls: the entry cave (where
+   the party arrives), the coffin hall, the great cavern, the old guard room, the stolen-goods hall in the south and, at the far end of the level (the longest
+   walk from the door), Gandrick's own hall behind the iron gate (the key lies in the great cavern). Gandrick, his stats, the quest flag and the reward are the
+   old ones; only his position and the cave round him changed. Eight more bandits and archers wait at the corners, forks and dead ends of the tunnels.
+   Every big hall has barrels of stolen goods in its corners (decor with stolen:1; lname is the name the loot window shows).
+   The layout was made once with a seeded generator and is stored here as rows. Secret rooms: secret_rooms.js (SR_WANT).
+   ========================================================================== */
+{const L=LEVELS[8];
+ if(L){L.rows=["################################################################","#.#####.################################...................##.##","#.#####.##............####.....############.##############.##.##","#.#####.##............####.....############.##############.##.##","#.#####.##............####.....#########....##.............##.##","#........................................##.#####.#####.#####.##","#.########............####.....#########.##.#####.#####.#####.##","#....#####............####.....###.#####....#####.#####.##....##","#.##.#####............####.....###.##############.#####.#####.##","#.##.###########.#########.....###.##############.#####.#####.##","#.......########.###########.#####....#####.#####.#####.......##","####.###########.###########.########.#####.#####.#####.########","####.###########D###########.########.#####.#####.#####.########","####.#######..........######.########.......##....#####.########","####.#######..........######.###########.#####.#################","#.......####..........######.###########.#####.#################","#.......####..........######.#####.#####.##....#####.###########","#.......####.................#####.#####.##.########.###########","0........D............######.#####.#####.##.########.###########","#.......####..........######.......#####................########","#.......####..........#########.#################.###.#.########","##############.######.#########.#################.###.#.########","##############.######.#########.#####.###########.###.#.########","##############.######.###############.###############.##########","##############.######.###############.###############.##########","#................##.#.############.............######.##########","#.#####.########.##.#.############.########.#########.##########","#.#####.########.##.#.############.########.#########.##########","#.#####.########....#.###..........########.#########.##########","#######.#############.############.########.#########L##########","#######.#############.############.########.###.............####","#######.......##............######.##.##....###.............####","##########.#####............######.##.##.######.............####","##########.#####............######.##.##.######.............####","##########.#####............######.##....######.............####","##########.#####............######.#####.######.............####","#############......................#####.######.............####","####....##....##............######.#####....###.............####","####.########.##............######.########.###.............####","####.########.##............######.########.###.............####","####.##.......##............######.##.......###.............####","####.##.##########################.##.#####.###.............####","####.##.##########################.##.#####.####################","#.......########......................#####.####################","################################################################","################################################################"];
+  L.start={x:1,y:18,f:1};
+  L.enemies=[{"t":"skel","x":14,"y":15},{"t":"skel","x":17,"y":18},{"t":"skel","x":19,"y":14},{"t":"bandit","x":12,"y":4},{"t":"bandit","x":15,"y":6},{"t":"bandit","x":18,"y":3},{"t":"archer","x":20,"y":7},{"t":"bandit","x":27,"y":3},{"t":"archer","x":27,"y":8},{"t":"bandit","x":29,"y":5},{"t":"bandit","x":20,"y":34},{"t":"bandit","x":24,"y":37},{"t":"archer","x":22,"y":32},{"t":"bandit","x":16,"y":28},{"t":"bandit","x":7,"y":5},{"t":"bandit","x":31,"y":22},{"t":"archer","x":43,"y":1},{"t":"bandit","x":37,"y":43},{"t":"bandit","x":61,"y":7},{"t":"archer","x":40,"y":19},{"t":"bandit","x":52,"y":16},{"t":"bandit","x":50,"y":34},{"t":"bandit","x":56,"y":34},{"t":"archer","x":49,"y":38},{"t":"archer","x":57,"y":38},{"t":"gandrick","x":53,"y":37}];
+  L.items=[{"k":"potion","x":3,"y":16},{"k":"potion","x":5,"y":20},{"k":"key","x":20,"y":3},{"k":"bread","x":2,"y":20},{"k":"potion","x":14,"y":19},{"k":"ringW","x":29,"y":9},{"k":"scrollFrost","x":27,"y":9}];
+  L.decor=[{"k":"coffin","x":13,"y":14,"block":true},{"k":"coffin","x":13,"y":17,"block":true},{"k":"coffin","x":20,"y":14,"block":true},{"k":"coffin","x":20,"y":17,"block":true},{"k":"bones","x":3,"y":19,"block":false},{"k":"bones","x":18,"y":15,"block":false},{"k":"bones","x":12,"y":6,"block":false},{"k":"bones","x":17,"y":3,"block":false},{"k":"bones","x":28,"y":8,"block":false},{"k":"bones","x":51,"y":38,"block":false},{"k":"bones","x":23,"y":37,"block":false},{"k":"barrel","x":1,"y":15,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":7,"y":15,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":7,"y":20,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":12,"y":13,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":21,"y":13,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":12,"y":20,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":10,"y":2,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":21,"y":2,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":10,"y":8,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":21,"y":8,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":30,"y":2,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":26,"y":9,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":16,"y":31,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":27,"y":31,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":16,"y":40,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":27,"y":40,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":47,"y":30,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":59,"y":30,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":47,"y":41,"block":true,"stolen":1,"lname":"Barrel of stolen goods"},{"k":"barrel","x":59,"y":41,"block":true,"stolen":1,"lname":"Barrel of stolen goods"}];}}
+const GC_HALLS={entry:[1,15,7,20],coffin:[12,13,21,20],cavern:[10,2,21,8],guard:[26,2,30,9],stolen:[16,31,27,40],gandrick:[47,30,59,41]};
+/* what a barrel of stolen goods holds: 2 to 4 things (cheap gems, food and ale, a ring, now and then a potion) and a little gold, fitted to the level's rating */
+function gcBarrelLoot(d){const r=(typeof srRating==='function'?srRating(8):5),h=k=>hash2(d.x*7+k,d.y*5+8,6100+k),items=[],add=(id,q)=>{if(ITEMDEF[id])items.push({id,n:q||1})};
+  const gems=['gem_garnet','gem_carnelian','gem_amber','gem_citrine','gem_malachite','gem_rosequartz','gem_jet','gem_onyx','gem_tigerseye','gem_peridot'],rings=['ringV','ringW','ringS','ringM'],nb=2+((h(1)*3)|0);
+  for(let k=0;k<nb;k++){const p=h(2+k);
+    if(p<.3)add(gems[(h(30+k)*gems.length)|0],1);else if(p<.5)add(foodFor(h(40+k)),1+((h(50+k)*2)|0));else if(p<.62)add('ale',1);
+    else if(p<.75)add(rings[(h(60+k)*rings.length)|0],1);else if(p<.9&&typeof healTierFor==='function')add(healTierFor(r,h(70+k)),1);else if(typeof manaTierFor==='function')add(manaTierFor(r,h(80+k)),1)}
+  if(!items.length)add('bread',1);
+  return {items,gold:Math.round((14+r*4)*(.7+.6*h(9)))}}
+{const _ol=openLoot;openLoot=function(d){
+  if(d&&d.stolen&&!d.contents){const C=gcBarrelLoot(d);d.contents=C.items;if(d.gold===undefined)d.gold=C.gold}
+  const r=_ol.apply(this,arguments);
+  try{if(d&&d.lname&&G.loot&&G.loot.decor===d)G.loot.name=d.lname}catch(e){}
+  return r}}
+/* the secret rooms of this cave also hold one or two barrels of stolen goods (only on squares that leave the chest and the way in clear) */
+function gcSecretBarrels(s){const k=c=>c[0]+','+c[1],cells=s.cells,ent=cells.find(c=>Math.abs(c[0]-s.door[0])+Math.abs(c[1]-s.door[1])===1),monK=s.mon?s.mon.x+','+s.mon.y:null,out=[],blocked=new Set();
+  const ok=()=>{const open=cells.filter(c=>!blocked.has(k(c))),seen=new Set([k(ent)]),q=[ent];while(q.length){const [x,y]=q.pop();for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const n=[x+a,y+b];if(open.some(o=>o[0]===n[0]&&o[1]===n[1])&&!seen.has(k(n))){seen.add(k(n));q.push(n)}}}
+    if(!open.every(c=>seen.has(k(c))))return false;return [[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>seen.has((s.chest[0]+a)+','+(s.chest[1]+b)))};
+  const cand=cells.filter(c=>k(c)!==k(s.chest)&&k(c)!==k(ent)&&k(c)!==monK).sort((a,b)=>hash2(a[0],a[1],6200)-hash2(b[0],b[1],6200));
+  for(const c of cand){if(out.length>=2)break;blocked.add(k(c));if(ok())out.push({k:'barrel',x:c[0],y:c[1],block:true,stolen:1,lname:'Barrel of stolen goods',srB:s.id});else blocked.delete(k(c))}
+  return out}
+/* braziers: the big halls are too dark for the wall torches alone, and Gandrick has to be seen. A painted brazier (ep_brazier) against a wall of each hall, with a warm light;
+   put in once the early_polish pictures are loaded, the same way the secret rooms get their lamps. Not solid. */
+const GC_BRAZ={coffin:[[16,13],[16,20]],cavern:[[14,2],[19,8]],guard:[[28,2]],stolen:[[19,31],[24,31],[19,40],[24,40]],gandrick:[[50,30],[56,30],[47,35],[59,35],[50,41],[56,41],[51,36],[55,36]]},GC={gd:null};
+function gcBraziers(){if(LEVEL!==8||!G.decor||!G.P||typeof EP==='undefined'||!EP.ready||!IMG.ep_brazier||GC.gd===G.decor)return;GC.gd=G.decor;let i=0;
+  for(const hall of Object.keys(GC_BRAZ))for(const [x,y] of GC_BRAZ[hall]){i++;
+    if(!G.decor.some(d=>d.gcB===i))G.decor.push({k:'ep_brazier',x,y,block:false,deco:true,loot:false,shop:false,sc:.8,oy:.1,gcB:i});
+    if(!LIGHTS.some(l=>l.gcB===i))LIGHTS.push({x:x+.5,y:y+.5,ph:hash2(x,y,11)*6.28,key:-7500-i,taken:false,red:false,free:true,lamp:true,calm:false,kI:hall==='gandrick'?1.35:.95,col:[1.35,.86,.46],range2:40,gcB:i})}
+  [[16,16.5,.8],[15,5,.8],[21.5,35.5,.8],[53.5,34,1.3],[53.5,38,1.7],[53.5,36,1.5],[49.5,37,1.1],[57.5,37,1.1]].forEach(([x,y,k],j)=>{if(!LIGHTS.some(l=>l.gcL===j+1))LIGHTS.push({x,y,ph:j*1.9,key:-7600-j,taken:false,red:false,free:true,lamp:true,calm:false,kI:k,col:[1.3,.9,.55],range2:40,gcL:j+1})})}
+{const _dw=drawWorld;drawWorld=function(){try{if(LEVEL===8)gcBraziers()}catch(e){}return _dw.apply(this,arguments)}}
 
 /* ---- src/desert/maps_ironroad.js ---- */
 /* ==========================================================================
@@ -81914,7 +81960,8 @@ const healTierFor=(rating,roll)=>tierFor(POTION_LADDER,rating,roll),manaTierFor=
        level's own roster, woken when the wall opens; whether it was killed is kept in G.flags.sr_mon.
    Which levels: SR_BIG (moderate or larger) and, for about half of the small desert dungeons (the burrows 50 to 59 and the DNG_INFO dungeons), a hash decides.
    ========================================================================== */
-const SR_BIG=[18,21,39,40,42,65,104,107,114,117,124,127,134,137,144,147,260,449,450,471,472,473,474,475,476,477,497,498,499,500,502,532,533,534,535,9673,9674,9675];
+const SR_BIG=[8,18,21,39,40,42,65,104,107,114,117,124,127,134,137,144,147,260,449,450,471,472,473,474,475,476,477,497,498,499,500,502,532,533,534,535,9673,9674,9675];
+const SR_WANT={8:4}; // levels that ask for a set number of rooms (Gandrick's Cave: a maze of tunnels that is under 1000 open squares)
 const SR_ROOMS={},SR={gd:null,lv:0,tex:{},live:[],ok:{}};
 self.SR_ROOMS=SR_ROOMS;self.SR_CT=new Map();
 const srUnique=['boss','gandrick','mayor','overseer','halbrecht','wraith','sut','firelizard','cyclops','pharaohboss'];
@@ -81929,7 +81976,7 @@ function srPlan(n,L){
   const R=L.rows,H=R.length,W=R[0].length,g=srGrid(L);let open=0;for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(g[y][x]===0)open++;
   const kind=srKindOf(n,L,open);if(!kind)return null;
   const MG=8,at=(x,y)=>x<0||y<0||x>=W+MG||y>=H+MG?-1:(x>=W||y>=H)?1:g[y][x],plain=(x,y)=>srPlain(at(x,y));
-  const want=kind==='big'?Math.max(2,Math.min(6,Math.round(open/600))):(hash2(n,6,903)<.4?2:1);
+  const want=SR_WANT[n]||(kind==='big'?Math.max(2,Math.min(6,Math.round(open/600))):(hash2(n,6,903)<.4?2:1));
   const occ=new Set(),haz=[];
   for(const d of L.decor||[]){occ.add(Math.round(d.x)+','+Math.round(d.y));if(d.npc||d.enter||d.opens||d.lockedBy||d.k==='teleporter'||d.secret||d.shop)haz.push([Math.round(d.x),Math.round(d.y)])}
   for(const e of L.enemies||[]){occ.add(e.x+','+e.y);haz.push([e.x,e.y])}
@@ -81940,6 +81987,7 @@ function srPlan(n,L){
   const near1=(x,y,r)=>haz.some(h=>Math.abs(h[0]-x)<=r&&Math.abs(h[1]-y)<=r);
   const cand=[];
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(g[y][x]!==0||occ.has(x+','+y)||near1(x,y,1))continue;
+    if(n===8&&typeof GC_HALLS!=='undefined'&&Object.values(GC_HALLS).some(h=>x>=h[0]-1&&x<=h[2]+1&&y>=h[1]-1&&y<=h[3]+1))continue; // Gandrick's Cave: the doors are in the tunnels, not in the big halls
     for(let f=0;f<4;f++){const dx=DIRS[f][0],dy=DIRS[f][1],Dx=x+dx,Dy=y+dy,px=-dy,py=dx;
       if(!plain(Dx,Dy)||at(x-dx,y-dy)!==0||occ.has(Dx+','+Dy)||!plain(Dx+px,Dy+py)||!plain(Dx-px,Dy-py)||special(Dx,Dy))continue;
       const sizes=[[2,2],[3,2],[2,3],[3,3]],so=(hash2(Dx,Dy,n*7+1)*4)|0;let done=null;
@@ -81987,7 +82035,7 @@ function srExtend(L,ext){if(L._srx||(!ext[0]&&!ext[1]))return;L._srx=1;const R=L
   try{if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();const L=LEVELS[n];
     if(L&&L.rows&&!L._srp){L._srp=1;const P=srPlan(n,L);if(P){L._srPlan=P;srExtend(L,P.ext);SR_ROOMS[n]=P.rooms}}}catch(e){console.error('sr plan',e)}
   const r=_ll.apply(this,arguments);
-  try{const L=LEVELS[n];if(L&&L._srPlan&&!L._srD){L._srD=1;const add=L._srPlan.rooms.map(s=>({k:'chest',x:s.chest[0],y:s.chest[1],block:true,kname:'sr_'+s.id}));for(const d of add)L.decor.push(d);if(DECOR_SPAWNS!==L.decor)for(const d of add)DECOR_SPAWNS.push(d)}
+  try{const L=LEVELS[n];if(L&&L._srPlan&&!L._srD){L._srD=1;const add=L._srPlan.rooms.map(s=>({k:'chest',x:s.chest[0],y:s.chest[1],block:true,kname:'sr_'+s.id}));if(n===8&&typeof gcSecretBarrels==='function')for(const s of L._srPlan.rooms)add.push(...gcSecretBarrels(s));for(const d of add)L.decor.push(d);if(DECOR_SPAWNS!==L.decor)for(const d of add)DECOR_SPAWNS.push(d)}
     if(L&&L._srPlan&&typeof epLoad==='function')epLoad()}catch(e){console.error('sr decor',e)}
   return r}}
 /* the surprise item: one single piece that fits the level's rating, never a quest item (it must have a price and no package or quest mark) */
