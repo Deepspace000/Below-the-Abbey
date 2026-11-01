@@ -114,7 +114,7 @@ def main():
         with open(os.path.join(os.environ.get('TEMP', '.'), 'sr_whole.json'), 'w') as f:
             json.dump({str(k): v for k, v in built.items()}, f)
         # ---------------- samples ----------------
-        samples = [497, 475, 471, 42, 53, 9674]
+        samples = [497, 475, 471, 42, 53, 9674, 8]
         mon_lv = [n for n, r in built.items() if r['mon'] and r['rooms'] and n not in samples]
         if mon_lv:
             samples.append(mon_lv[0])

@@ -35,10 +35,10 @@ function gcSecretBarrels(s){const k=c=>c[0]+','+c[1],cells=s.cells,ent=cells.fin
   return out}
 /* braziers: the big halls are too dark for the wall torches alone, and Gandrick has to be seen. A painted brazier (ep_brazier) against a wall of each hall, with a warm light;
    put in once the early_polish pictures are loaded, the same way the secret rooms get their lamps. Not solid. */
-const GC_BRAZ={coffin:[[16,13],[16,20]],cavern:[[14,2],[19,8]],guard:[[28,2]],stolen:[[19,31],[24,31],[19,40],[24,40]],gandrick:[[50,30],[56,30],[47,35],[59,35],[50,41],[56,41]]},GC={gd:null};
+const GC_BRAZ={coffin:[[16,13],[16,20]],cavern:[[14,2],[19,8]],guard:[[28,2]],stolen:[[19,31],[24,31],[19,40],[24,40]],gandrick:[[50,30],[56,30],[47,35],[59,35],[50,41],[56,41],[51,36],[55,36]]},GC={gd:null};
 function gcBraziers(){if(LEVEL!==8||!G.decor||!G.P||typeof EP==='undefined'||!EP.ready||!IMG.ep_brazier||GC.gd===G.decor)return;GC.gd=G.decor;let i=0;
   for(const hall of Object.keys(GC_BRAZ))for(const [x,y] of GC_BRAZ[hall]){i++;
     if(!G.decor.some(d=>d.gcB===i))G.decor.push({k:'ep_brazier',x,y,block:false,deco:true,loot:false,shop:false,sc:.8,oy:.1,gcB:i});
     if(!LIGHTS.some(l=>l.gcB===i))LIGHTS.push({x:x+.5,y:y+.5,ph:hash2(x,y,11)*6.28,key:-7500-i,taken:false,red:false,free:true,lamp:true,calm:false,kI:hall==='gandrick'?1.35:.95,col:[1.35,.86,.46],range2:40,gcB:i})}
-  [[16,16.5,.8],[15,5,.8],[21.5,35.5,.8],[53.5,34,1.1],[53.5,38,1.2],[49.5,37,1.0],[57.5,37,1.0]].forEach(([x,y,k],j)=>{if(!LIGHTS.some(l=>l.gcL===j+1))LIGHTS.push({x,y,ph:j*1.9,key:-7600-j,taken:false,red:false,free:true,lamp:true,calm:false,kI:k,col:[1.3,.9,.55],range2:40,gcL:j+1})})}
+  [[16,16.5,.8],[15,5,.8],[21.5,35.5,.8],[53.5,34,1.3],[53.5,38,1.7],[53.5,36,1.5],[49.5,37,1.1],[57.5,37,1.1]].forEach(([x,y,k],j)=>{if(!LIGHTS.some(l=>l.gcL===j+1))LIGHTS.push({x,y,ph:j*1.9,key:-7600-j,taken:false,red:false,free:true,lamp:true,calm:false,kI:k,col:[1.3,.9,.55],range2:40,gcL:j+1})})}
 {const _dw=drawWorld;drawWorld=function(){try{if(LEVEL===8)gcBraziers()}catch(e){}return _dw.apply(this,arguments)}}
