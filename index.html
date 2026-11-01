@@ -81843,9 +81843,9 @@ function tkrBuild(){
   const near=new Int16Array(W*H).fill(-1);TKR.houses.forEach((h,hi)=>{if(!objs.some(o=>o.hid===hi))return;for(let y=h[3];y<=h[4];y++)for(let x=h[1];x<=h[2];x++)near[y*W+x]=hi});
   TKR.objs=objs;TKR.near=near;TKR.W=W;TKR.H=H;LEVELS[3]._tkrRep=rep;
 }
-/* the screen buffer: twice the size of the wall picture, which is the size of the screen canvas */
+/* the screen buffer: as many columns as the wall picture (one ray per wall column, the same rays as the walls) and twice its rows (the height of the screen canvas) */
 const HB={fas:0,bt:0,bo:null,bu:0,bv:0,bT:null,bsh:1,bW:1};
-const TKR3D={y0:0,y1:VH*2-1,cy0:0,cy1:VH*2-1,RW:VW*2,RH:VH*2,buf:null,img:null,can:null,cx:null,top:null,bot:null,has:false,wt0:null,on:true};
+const TKR3D={y0:0,y1:VH*2-1,cy0:0,cy1:VH*2-1,RW:VW,RH:VH*2,buf:null,img:null,can:null,cx:null,top:null,bot:null,has:false,wt0:null,on:true};
 function tkrSample(T,u,v,lod){const L=T.lv[Math.min(T.lv.length-1,lod)],x=Math.min(L.w-1,Math.max(0,(u*L.w)|0)),y=Math.min(L.h-1,Math.max(0,(v*L.h)|0));return (y*L.w+x)*4}
 function tkrLod(T,worldW,t){const tpu=T.w/worldW,f=tpu*t/(F*2)*.7;return f<=1?0:Math.min(6,Math.floor(Math.log2(f)))}
 /* the slab of a ray through an axis-aligned rectangle: [t entry, t exit, axis of the entry face] */
@@ -81863,7 +81863,7 @@ function TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB){
   if(!TKR3D.buf){TKR3D.can=document.createElement('canvas');TKR3D.can.width=RW;TKR3D.can.height=RH;TKR3D.cx=TKR3D.can.getContext('2d');TKR3D.img=TKR3D.cx.createImageData(RW,RH);TKR3D.buf=TKR3D.img.data;
     TKR3D.top=new Float32Array(RW);TKR3D.bot=new Float32Array(RW);TKR3D.wt0=new Float32Array(VW);TKR3D.own=new Int8Array(RW*RH)}
   const B=TKR3D.buf,OWN=TKR3D.own;if(TKR3D.y1>=TKR3D.y0)B.fill(0,TKR3D.y0*RW*4,(TKR3D.y1+1)*RW*4);let Y0=RH,Y1=-1;   // only the rows painted last frame are cleared
-  const objs=TKR.objs,grid=G.grid,MW=TKR.W,MH=TKR.H,near=TKR.near,Fh=F*2,HHh=HH*2,TX=TKR.tex,cand=[],ct=[],cea=[],ct1=[];
+  const cP=TKR3D.cP||(TKR3D.cP=new Float64Array(5*64)),objs=TKR.objs,grid=G.grid,MW=TKR.W,MH=TKR.H,near=TKR.near,Fh=F*2,HHh=HH*2,TX=TKR.tex,cand=[],ct=[],cea=[],ct1=[];
   const day=G.day||0,tb=[tbR,tbG,tbB];let any=false;
   for(let s=0;s<RW;s++){
     TKR3D.top[s]=1e9;TKR3D.bot[s]=-1e9;
@@ -81881,6 +81881,9 @@ function TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB){
     for(let i=0;i<objs.length;i++){const o=objs[i];if(!tkrSlab(cx,cy,rX,rY,o))continue;const t0=TKR_SL[0];if(t0<zs-.02||t0<.06)continue;
       const yo=HHh-(o.zmax-EYE)*Fh/t0;if(yo<ytop)ytop=yo;let k=cand.length;cand.push(o);ct.push(t0);ct1.push(TKR_SL[1]);cea.push(TKR_SL[2]);
       while(k>0&&ct[k-1]>ct[k]){[cand[k-1],cand[k]]=[cand[k],cand[k-1]];[ct[k-1],ct[k]]=[ct[k],ct[k-1]];[ct1[k-1],ct1[k]]=[ct1[k],ct1[k-1]];[cea[k-1],cea[k]]=[cea[k],cea[k-1]];k--}}
+    // per house, what does not change from row to row: the roof height where the ray enters, at the ridge line and where it leaves
+    for(let ci=0;ci<cand.length;ci++){const o=cand[ci];if(o.t!=='house')continue;const t0=ct[ci],t1=ct1[ci],sO=o.ax==='y'?cx:cy,sD=o.ax==='y'?rX:rY,Hs=t=>TKR_WH+TKR_TAU+o.R*(1-Math.abs(sO+sD*t-o.c)/o.half);
+      const tc=Math.abs(sD)>1e-9?(o.c-sO)/sD:-1;cP[ci*5]=Hs(t0);cP[ci*5+1]=tc;cP[ci*5+2]=tc>t0&&tc<t1?Hs(tc):0;cP[ci*5+3]=Hs(t1);cP[ci*5+4]=tc>t0&&tc<t1?1:0}
     if(!cand.length)continue;
     const r0=Math.max(0,Math.floor(ytop)),r1=Math.min(RH-1,Math.ceil(ylim-.5)-1);
     let lastOwn=-1,lastRow=-1,lastGab=false;
@@ -81889,7 +81892,7 @@ function TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB){
       for(let ci=0;ci<cand.length;ci++){const o=cand[ci],t0=ct[ci],t1=ct1[ci];if(t0>=bt)break;const z0=EYE+k*t0;if(k>0&&z0>o.zmax)continue;   // the ray only climbs from here: it passes over this one
         if(o.t==='house'){
           const sO=o.ax==='y'?cx:cy,sD=o.ax==='y'?rX:rY,aO=o.ax==='y'?cy:cx,aD=o.ax==='y'?rY:rX,gab=(o.ax==='y')===(cea[ci]===1);
-          const s0=sO+sD*t0,h0=TKR_WH+TKR_TAU+o.R*(1-Math.abs(s0-o.c)/o.half);
+          const s0=sO+sD*t0,h0=cP[ci*5];
           if(z0<=h0){if(z0<TKR_WH-.002){bt=t0;bo=null;break} // the wall itself: the wall pass has painted it
             if(gab){ // the gable: the wall carried up as a triangle (the picture's triangle over the eave course, its foot beam along the eave course)
               const T=TX[o.gable];if(!T)continue;const u0=(s0-(o.c-o.half))/(2*o.half),u=(o.ax==='y'?rY>0:rX<0)?1-u0:u0;   // left to right as the viewer sees it
@@ -81897,8 +81900,8 @@ function TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB){
             // the eave edge: the thickness of the roof (the lowest course of the slope and its board) seen straight on along the eave wall
             const T=TX[o.slope];if(!T){bt=t0;bo=null;break}const av=aO+aD*t0;let u=av/(o.su*.5);u-=Math.floor(u);bt=t0;bo=o;bT=T;bu=u;bv=.008+.05*(TKR_WH+TKR_TAU-z0)/TKR_TAU;bW=o.su*.5;bsh=1;HB.fas=1;break}   // the eave edge: a course of the same tiles (the clean ridge row of the slope picture) seen end on
           // the slopes: the first point where the ray meets the roof surface
-          let tc=Math.abs(sD)>1e-9?(o.c-sO)/sD:-1;const two=tc>t0&&tc<t1,ns=two?2:1;let th=-1;
-          for(let q=0;q<ns;q++){const ta=q===0?t0:tc,tb2=two&&q===0?tc:t1,fa=TKR_WH+TKR_TAU+o.R*(1-Math.abs(sO+sD*ta-o.c)/o.half)-(EYE+k*ta),fb=TKR_WH+TKR_TAU+o.R*(1-Math.abs(sO+sD*tb2-o.c)/o.half)-(EYE+k*tb2);
+          const tc=cP[ci*5+1],two=cP[ci*5+4]===1,ns=two?2:1;let th=-1;
+          for(let q=0;q<ns;q++){const ta=q===0?t0:tc,tb2=two&&q===0?tc:t1,fa=(q===0?cP[ci*5]:cP[ci*5+2])-(EYE+k*ta),fb=(two&&q===0?cP[ci*5+2]:cP[ci*5+3])-(EYE+k*tb2);
             if(fb>=0){th=fa>=0?ta:ta+(tb2-ta)*(-fa)/(fb-fa);break}}
           if(th<0||th>=bt)continue;
           const T=TX[o.slope];if(!T)continue;const sv=sO+sD*th,av=aO+aD*th,side2=sv>=o.c?0:1;
@@ -81952,13 +81955,13 @@ function TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB){
   if(any){Y1=Math.min(RH-1,Y1+40)}TKR3D.y0=Y0;TKR3D.y1=Y1;   // (the eave line and its shadow reach a little below the last roof row)
   if(any)for(let r=Y0;r<=Y1;r++){const o=r*RW*4;for(let s=1;s<RW-1;s++){const p=o+s*4;if(B[p+3]===255&&(B[p-1]===0||B[p+7]===0))B[p+3]=170}}
   // the skyline pictures (housing roofs, the far abbey) stand behind a house: they show only above its roof
-  for(let x=0;x<VW;x++){TKR3D.wt0[x]=wtop[x];if(!any)continue;const a=TKR3D.top[2*x],b=TKR3D.top[2*x+1],m=Math.min(a,b);if(m<1e8)wtop[x]=Math.min(wtop[x],m/2)}
+  for(let x=0;x<VW;x++){TKR3D.wt0[x]=wtop[x];if(!any)continue;const SX=TKR3D.RW/VW,a=TKR3D.top[x*SX],b=TKR3D.top[x*SX+SX-1],m=Math.min(a,b);if(m<1e8)wtop[x]=Math.min(wtop[x],m/2)}
   if(any){const a0=Math.min(Y0,TKR3D.cy0),a1=Math.max(Y1,TKR3D.cy1);TKR3D.cx.putImageData(TKR3D.img,0,0,0,a0,RW,a1-a0+1);TKR3D.cy0=Y0;TKR3D.cy1=Y1}   // the rows that changed: this frame's roofs and last frame's, now clear
 }
 /* drawWorld: the roof picture onto the screen, after the walls and before the sprites */
 function TKR3D_B(c){if(LEVEL!==3||!TKR3D.has)return;c.save();c.imageSmoothingEnabled=false;c.drawImage(TKR3D.can,0,0,VW,VH);c.restore()}
 /* for the tests: per wall column, the lowest and highest roof pixel drawn (in wall-picture pixels) and the wall top before the roofs lowered it */
-TKR3D.cols=function(){const o=[];for(let x=0;x<VW;x++){const b=TKR3D.bot[2*x],t=TKR3D.top[2*x];   // the even half-column: its ray is exactly the wall pass's ray of column x
+TKR3D.cols=function(){const o=[];for(let x=0;x<VW;x++){const SX=TKR3D.RW/VW,b=TKR3D.bot[x*SX],t=TKR3D.top[x*SX];   // the first column of the pair: its ray is exactly the wall pass's ray of column x
   o.push(TKR3D.has&&b>-1e8?{bot:b/2,top:t/2,wt:TKR3D.wt0[x]}:{bot:null,wt:TKR3D.wt0[x]})}return o};
 
 /* ---- src/desert/mana_tiers.js ---- */
