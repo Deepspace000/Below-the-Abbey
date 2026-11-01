@@ -950,5 +950,12 @@
 "h": 183,
 "kind": "sprite",
 "sheet": "ih_props_sheet"
+},
+"tw_tiki": {
+"file": "tw_tiki.webp",
+"w": 238,
+"h": 384,
+"kind": "sprite",
+"sheet": "tiki_sheet1"
 }
 }
