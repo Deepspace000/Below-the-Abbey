@@ -14,16 +14,16 @@
 const TKR={ready:false,loading:null,houses:[
   // [id, x0, x1 (the wall run, corner to corner), y0, y1, face (the side the street is on), roof piece, look]
   ['n1',12,14,10,14,'S','wl_roof1_1',{sat:.28,dark:.52,tint:[1.04,.98,.9],soot:.5,moss:.3,holes:2,chim:-1}],
-  ['n2',16,18,10,15,'S','kh_ohroof1_4',{sat:.7,dark:.84,tint:[1,.98,.92],soot:.6,moss:.6,holes:6,chim:1}],
+  ['n2',16,18,10,15,'S','kh_ohroof1_4',{sat:.8,dark:.58,tint:[1.12,.95,.8],soot:.6,moss:.6,holes:6,chim:1}],
   ['n3',19,21,10,14,'S','kh_ohroof1_0',{sat:.55,dark:.95,tint:[1.02,1,.96],soot:.4,moss:.2,holes:1,chim:-1}],
-  ['n4',23,27,10,15,'S','kh_ohroof1_1',{cap:1.3,sat:.8,dark:1.15,tint:[1,.98,.94],soot:.45,moss:.3,holes:3,chim:1}],
-  ['n5',29,31,10,14,'S','kh_ohroof1_2',{sat:.46,dark:.86,tint:[1.06,.94,.88],soot:.55,moss:.25,holes:3,chim:-1}],
-  ['ch',33,37,10,14,'S','kh_ohroof1_0',{cap:1.35,steeple:1,chim:-1,sat:.5,dark:.95,tint:[1,.99,.95],soot:.6,moss:.5,holes:5}],
-  ['s1',12,14,21,23,'N','wl_roof1_4',{sat:.45,dark:.62,tint:[1,1,.92],soot:.5,moss:.2,holes:2,chim:1}],
+  ['n4',23,27,10,15,'S','kh_ohroof1_1',{cap:1.3,sat:1.05,dark:1.1,tint:[.9,.97,1.1],soot:.45,moss:.3,holes:3,chim:1}],
+  ['n5',29,31,10,14,'S','kh_ohroof1_4',{sat:.6,dark:.85,tint:[1.05,.96,.9],soot:.55,moss:.25,holes:3,chim:-1}],
+  ['ch',33,37,10,14,'S','kh_ohroof1_0',{cap:1.35,steeple:1,chim:-1,sat:.75,dark:1.3,tint:[.95,.98,1.06],soot:.6,moss:.5,holes:5}],
+  ['s1',12,14,21,23,'N','wl_roof1_4',{sat:.6,dark:.55,tint:[1.1,.95,.8],soot:.5,moss:.2,holes:2,chim:1}],
   ['s2',16,18,21,23,'N','wl_roof1_1',{sat:.3,dark:.6,tint:[.94,1,.94],soot:.4,moss:.25,holes:2,chim:-1}],
   ['s3',19,22,19,22,'N','wl_roof1_5',{sat:.55,dark:.76,tint:[1.04,.94,.88],soot:.75,moss:.3,holes:5,chim:1,flip:1}],
   ['s4',24,28,19,22,'N','kh_ohroof1_0',{cap:1.3,sat:.8,dark:1.25,tint:[1.04,.99,.94],soot:.45,moss:.3,holes:3,chim:-1,flip:1}],
-  ['s5',30,34,19,22,'N','kh_ohroof1_4',{cap:1.3,sat:.75,dark:1.05,tint:[.98,.97,1.02],soot:.45,moss:.5,holes:4,chim:1,flip:1}]
+  ['s5',30,34,19,22,'N','kh_ohroof1_2',{cap:1.3,sat:.9,dark:.78,tint:[1.05,.82,.72],soot:.45,moss:.5,holes:4,chim:1,flip:1}]
 ]};
 function tkrRng(seed){let s=(seed*2654435761)>>>0||1;return()=>{s^=s<<13;s>>>=0;s^=s>>>17;s^=s<<5;s>>>=0;return s/4294967296}}
 function tkrLoadImg(key,src){return new Promise(res=>{if(IMG[key])return res();const i=new Image();i.onload=()=>{IMG[key]=i;res()};i.onerror=()=>res();i.src=src+'?v='+VERSION})}
@@ -93,7 +93,7 @@ function tkrRoofVar(k,id,o,flip,widthSq){
 function tkrSteeple(){
   const key='tkr_steeple',src=IMG.kh_ohtower1_4;if(IMG[key])return key;if(!src)return null;
   const iw=src.width,ih=src.height,c=document.createElement('canvas');c.width=iw;c.height=ih;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(src,0,0);
-  const d=x.getImageData(0,0,iw,ih),a=d.data;for(let i=0;i<a.length;i+=4){if(!a[i+3])continue;const l=a[i]*.3+a[i+1]*.59+a[i+2]*.11;a[i]=(l+(a[i]-l)*.55)*.74;a[i+1]=(l+(a[i+1]-l)*.55)*.76;a[i+2]=(l+(a[i+2]-l)*.55)*.78}
+  const d=x.getImageData(0,0,iw,ih),a=d.data;for(let i=0;i<a.length;i+=4){if(!a[i+3])continue;const l=a[i]*.3+a[i+1]*.59+a[i+2]*.11;a[i]=Math.min(255,(l+(a[i]-l)*.6)*1.05);a[i+1]=Math.min(255,(l+(a[i+1]-l)*.6)*1.05);a[i+2]=Math.min(255,(l+(a[i+2]-l)*.6)*1.08)}
   x.putImageData(d,0,0);x.globalCompositeOperation='source-atop';
   for(let i=0;i<5;i++){const sx=iw*(.22+i*.14),g=x.createLinearGradient(0,ih*.3,0,ih*.95);g.addColorStop(0,'rgba(12,9,7,.3)');g.addColorStop(1,'rgba(12,9,7,0)');x.fillStyle=g;x.fillRect(sx,ih*.3,iw*.04,ih*.65)}
   const g=x.createLinearGradient(0,ih*.7,0,ih);g.addColorStop(0,'rgba(60,72,34,0)');g.addColorStop(1,'rgba(60,72,34,.3)');x.fillStyle=g;x.fillRect(0,ih*.7,iw,ih*.3);
@@ -109,8 +109,8 @@ function tkrStep(src,id,k,n,lenSq,bandSq,alt,side){
   let g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(225,215,185,.20)');g.addColorStop(.45,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(8,6,4,.5)');x.fillStyle=g;x.fillRect(0,0,W,H);
   x.fillStyle='rgba(8,6,4,.55)';x.fillRect(0,H-2,W,2);x.fillStyle='rgba(8,6,4,.3)';x.fillRect(0,Math.round(H*.5),W,1);
   for(let q=0;q<W;q+=Math.round(PPS*.42)){x.fillStyle='rgba(8,6,4,.18)';x.fillRect(q+((k*17)%11),0,1,Math.round(H*.5));x.fillRect(q+Math.round(PPS*.21)+((k*7)%9),Math.round(H*.5),1,H)}
-  if(k===0){g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(4,3,2,.55)');x.fillStyle=g;x.fillRect(0,0,W,H)}   // the eave in shadow
-  if(k===n-1){x.fillStyle='rgba(215,205,175,.65)';x.fillRect(0,0,W,Math.max(2,Math.round(H*.1)))}   // the ridge catches the light
+  if(k===0){g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(2,2,1,.75)');x.fillStyle=g;x.fillRect(0,0,W,H)}   // the eave in shadow
+  if(k===n-1){x.fillStyle='rgba(238,228,198,.85)';x.fillRect(0,0,W,Math.max(3,Math.round(H*.16)))}   // the ridge catches the light
   x.fillStyle=side?"rgba(255,240,205,.16)":"rgba(0,0,0,.42)";x.fillRect(0,0,W,H);   // one slope lit, the other in shade
   c._tkrR=1;IMG[key]=c;return key;
 }
@@ -139,7 +139,7 @@ function tkrPlace(L){
     for(let q=0;q<n;q++){const d=(q+.5)/n*(Wr/2),skL=tkrStep(pre,id,q,n,len,band,flip,0),skR=tkrStep(pre,id,q,n,len,band,flip,1);
       planes.push({x:xL+d,y:(yMin+yMax)/2,k:skL,w:len,bob:zt+q*band,flat:[-1,0],id:id+'L'+q},{x:xR-d,y:(yMin+yMax)/2,k:skR,w:len,bob:zt+q*band,flat:[1,0],id:id+'R'+q})}
     // the chimney: a stack of four faces standing on the upper slope and rising clear of the ridge (a quarter of the roof width wide, at least .3 of the roof height above the ridge)
-    if(o.chim){const s=o.chim>0?1:-1,cw=Math.max(.7,Math.min(1.15,Wr*.32)),cd=cw*.75,off=Wr*.2,cx=xc+s*off,cy=yF-sg*len*.36,zBase=zt+H*(1-2*off/Wr)-.12,zTop=zt+H+Math.max(.5,H*.5),ht=zTop-zBase,
+    if(o.chim){const s=o.chim>0?1:-1,cw=Math.max(.55,Math.min(.9,Wr*.2)),cd=cw*.8,off=Wr*.22,cx=xc+s*off,cy=yF-sg*Math.max(.7,len*.14),zBase=zt+H*(1-2*off/Wr)-.15,zTop=zt+H+.65,ht=zTop-zBase,
         ff=tkrChimFace('tkr_'+id+'_cf',cw,ht,id.charCodeAt(1)),sf=tkrChimFace('tkr_'+id+'_cs',cd,ht,id.charCodeAt(0)+3);
       if(ff&&sf)planes.push({x:cx,y:cy+cd/2,k:ff,w:cw,bob:zBase,flat:[0,1],id:id+'c1'},{x:cx,y:cy-cd/2,k:ff,w:cw,bob:zBase,flat:[0,-1],id:id+'c2'},{x:cx-cw/2,y:cy,k:sf,w:cd,bob:zBase,flat:[-1,0],id:id+'c3'},{x:cx+cw/2,y:cy,k:sf,w:cd,bob:zBase,flat:[1,0],id:id+'c4'})}
     // the church spire: the grey octagonal tower of Oldhaven as four faces, standing on the ridge at the front of the roof
