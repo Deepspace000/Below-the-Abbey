@@ -38,11 +38,11 @@ function csSortList(arr,mode,asc){ // sorts the array in place, stable
 const csState=()=>{const F=G.flags;return F.csort||(F.csort={m:'Value',up:true})};
 /* the acquisition stamp */
 {const _ba=bagAdd;bagAdd=function(it){try{if(it&&!it.a&&G.flags){G.flags.acq=(G.flags.acq|0)+1;it.a=G.flags.acq}}catch(e){}return _ba.apply(this,arguments)}}
-/* the loot window: Take all gets narrower, and the sort buttons stand beside it */
+/* the loot window: the sort buttons stand under the big Take all button */
 function csDraw(L){
   const S=csState();
-  btnText('lsortbox',S.m,385,214,56,26);
-  btnText('lsortdir',S.up?'▲':'▼',444,214,26,26);
+  btnText('lsortbox',S.m,324,216,104,26);
+  btnText('lsortdir',S.up?'▲':'▼',432,216,38,26);
 }
 function csLootBtn(id,L){
   if(id!=='lsortbox'&&id!=='lsortdir')return false;

@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.752';
+const VERSION='3.753';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1354,6 +1354,7 @@ function stepSample(){ // the cobble recordings were 20 dB louder than the rest 
 
 function sfx(n){
   if(!AC||G.mute)return;
+  if(n==='door'||n==='tele'){const nowT=performance.now();if(self.SFX_PASST&&nowT-self.SFX_PASST<1600)return;self.SFX_PASST=nowT} // entering or leaving an area sounds once: two door or portal sounds close together (the door, then the arrival) used to pile up into one loud grind
   if(n==='bump'){if(G.bumpT&&G.time-G.bumpT<1.5)return;G.bumpT=G.time}else if(n==='step')G.bumpT=0; // a wall bumps once, however long the key is held
   if((n==='step'||n==='turn'||n==='bump')&&!SNDOPT.steps)return;
   if(SND_COMBAT.has(n)&&!SNDOPT.combat)return;
@@ -4131,8 +4132,8 @@ function drawLoot(){
   if(L.sel&&L.sel.side==='box'&&it)label=L.shop?`Buy  ${ITEMDEF[it.id].price}`:'Take';
   else if(L.sel&&L.sel.side==='bag'&&it&&L.shop)label=`Sell  ${sellPrice(it.id)}`;
   else if(L.sel&&L.sel.side==='bag'&&it&&L.cap)label='Store in chest';
-  if(label)btnText(id,label,324,198,146,26);
-  if(!L.shop&&box.length){const cs=typeof csDraw==='function';btnText('ltakeall','Take all',324,214,cs?58:146,26);if(cs)csDraw(L)}
+  if(label)btnText(id,label,324,148,146,28);
+  if(!L.shop&&box.length){const cs=typeof csDraw==='function';stoneFace('ltakeall','Take all',324,180,146,32,'#e8d9a6',15);btn('ltakeall',324,180,146,32);if(cs)csDraw(L)} // Take all is a big button of its own; the sort buttons sit under it
   // bottom bar
   drawPortraits(250,hi,'lhero');
   panel(168,252,230,62,false,false);txt(`${HERO_DEF[hi].name}  -  health ${h.hp}/${h.max}`,283,276,10,heroSpeech(hi),'center',true);
@@ -49576,10 +49577,10 @@ function twBuild(){
   // a potion in the second longest dead end
   const items=[];{const e2=ends.find(p=>!taken.has(p[0]+','+p[1])&&d[p[1]*W+p[0]]>=14);if(e2)items.push({k:'potion',x:e2[0],y:e2[1]})}
   const decor=[{k:'chest',x:chest[0],y:chest[1],block:true,goldAmt:35}];
-  // a hungry cat in one dead end, and a salt herring lying in another (The Rat Catcher's Cat)
+  // Tiki, the lost cat, sits in one dead end (picture ep_tw_tiki, assets/ep/tw_tiki.webp), and a salt herring lies in another (Tiki, the Lost Cat)
   {const used=new Set(items.map(q=>q.x+','+q.y));used.add(chest[0]+','+chest[1]);
    const cat=ends.find(p=>!used.has(p[0]+','+p[1])&&!taken.has(p[0]+','+p[1])&&d[p[1]*W+p[0]]>=10);
-   if(cat){used.add(cat[0]+','+cat[1]);decor.push({k:'pet_cat_0',x:cat[0],y:cat[1],block:true,npc:'twcat',sc:.9})}
+   if(cat){used.add(cat[0]+','+cat[1]);decor.push({k:'ep_tw_tiki',x:cat[0],y:cat[1],block:true,npc:'twcat',sc:.9})}
    const fish=ends.find(p=>!used.has(p[0]+','+p[1])&&!taken.has(p[0]+','+p[1])&&d[p[1]*W+p[0]]>=6);
    if(fish)items.push({k:'herring',x:fish[0],y:fish[1]})}
   // a torch light every so often along the passages
@@ -49724,16 +49725,16 @@ draw(c,x,L,api){
   api.compass(x,436,130,13);
 }});
 
-/* ---- The Rat Catcher's Cat: a hungry cat sits in a dead end under the well, and a salt herring lies in another ---- */
-QUESTS.twq_cat={title:"The Rat Catcher's Cat",who:'A hungry cat',desc:"A thin tabby cat sits in a dead end in the tunnels under the Thornwick well. She is hungry. Find a salt herring, which is lying in another dead end in the tunnels (or buy one), and bring it to her.",need:1,goal:()=>(bagCount('herring')>0||G.flags.twCatFed)?1:0,reward:{gold:1200,xp:4500,items:['potion5']}};
+/* ---- Tiki, the Lost Cat: a skinny white cat sits in a dead end under the well, and a salt herring lies in another ---- */
+QUESTS.twq_cat={title:"Tiki, the Lost Cat",who:'Tiki, the lost cat',desc:"A skinny white cat with one blue eye and one gold eye sits in a dead end in the tunnels under the Thornwick well. Her name is Tiki, and she is hungry. Find a salt herring, which is lying in another dead end in the tunnels (or buy one), and bring it to her.",need:1,goal:()=>(bagCount('herring')>0||G.flags.twCatFed)?1:0,reward:{gold:1200,xp:4500,items:['potion5']}};
 QAREA.twq_cat='Thornwick';
-const TWCAT=khQD("Mrrow. (A thin tabby cat sits in the dead end with her paws together. She has the look of a cat who used to catch the rats down here and has now run out of rats she is brave enough to catch. She looks at your bag, and then at you.)",
+const TWCAT=khQD("Mrrow. (A skinny white cat sits in the dead end with her paws together. Her fur is matted and dirty, one of her eyes is blue and the other is gold. Her name is Tiki. She has the look of a cat who used to catch the rats down here and has now run out of rats she is brave enough to catch. She looks at your bag, and then at you.)",
   "Mrr. (She settles down to wait.)",
   (n,m)=>'She wants a salt herring. One lies in another dead end somewhere in the tunnels, and the shops in Thornwick may sell them too.',
   "Mrrow! (She smells the herring through your bag and stands up at once.)",
   "(She eats the herring in four bites, washes her face, and leaves something for you on the floor.)",
   "(The cat is asleep in the corner with a full stomach and a very small smile.)","Give her the herring.");
-NPCS.twcat={name:'A hungry cat',img:'pet_cat_0',root:d=>qNode('twq_cat',TWCAT)};
+NPCS.twcat={name:'Tiki, the lost cat',img:'ep_tw_tiki',root:d=>qNode('twq_cat',TWCAT)};
 Object.defineProperty(QGIVER,'twcat',{enumerable:true,configurable:true,get(){return qSt('twq_cat')==='done'?null:['twq_cat']}});
 {const _t=qTurnIn;qTurnIn=function(id){const r=_t.apply(this,arguments);try{if(r&&id==='twq_cat'){G.flags.twCatFed=1;if(bagCount('herring')>0)bagRemove('herring',1)}}catch(e){console.error(e)}return r}}
 
@@ -59220,11 +59221,11 @@ function csSortList(arr,mode,asc){ // sorts the array in place, stable
 const csState=()=>{const F=G.flags;return F.csort||(F.csort={m:'Value',up:true})};
 /* the acquisition stamp */
 {const _ba=bagAdd;bagAdd=function(it){try{if(it&&!it.a&&G.flags){G.flags.acq=(G.flags.acq|0)+1;it.a=G.flags.acq}}catch(e){}return _ba.apply(this,arguments)}}
-/* the loot window: Take all gets narrower, and the sort buttons stand beside it */
+/* the loot window: the sort buttons stand under the big Take all button */
 function csDraw(L){
   const S=csState();
-  btnText('lsortbox',S.m,385,214,56,26);
-  btnText('lsortdir',S.up?'▲':'▼',444,214,26,26);
+  btnText('lsortbox',S.m,324,216,104,26);
+  btnText('lsortdir',S.up?'▲':'▼',432,216,38,26);
 }
 function csLootBtn(id,L){
   if(id!=='lsortbox'&&id!=='lsortdir')return false;
@@ -71907,12 +71908,12 @@ function bksPanoStep(){
 /* ---- the weather clock: wet and dry spells, about half and half ---- */
 function bksArrive(lv){   // the dice for this visit (the weather of the last 25 seconds is kept: a trip through a door does not change it)
   if(BKS.arrived&&G.time-(BKS.lastT||-99)>=0&&G.time-(BKS.lastT||-99)<25){BKS.strike=null;BKS.thunderQ.length=0;BKS.next=6+Math.random()*10;return}
-  BKS.arrived=1;BKS.t=0;BKS.segWet=Math.random()<.5;BKS.segStr=BKS.segWet?bksStrength():0;BKS.segEnd=BKS.segWet?40+Math.random()*90:30+Math.random()*80;BKS.wet=BKS.segWet?BKS.segStr:0;BKS.wetT=BKS.wet;
+  BKS.arrived=1;BKS.t=0;BKS.segWet=Math.random()<.5;BKS.segStr=BKS.segWet?bksStrength():0;BKS.segEnd=BKS.segWet?50+Math.random()*100:50+Math.random()*110;BKS.wet=BKS.segWet?BKS.segStr:0;BKS.wetT=BKS.wet;
   BKS.strike=null;BKS.thunderQ.length=0;BKS.next=6+Math.random()*10}
 function bksStrength(){return Math.random()<.4?.2+Math.random()*.25:.55+Math.random()*.45}   // drizzle, or rain, or a downpour
 function bksWeather(dt){
   BKS.t+=dt;BKS.lastT=G.time;
-  if(BKS.t>=BKS.segEnd){BKS.t=0;BKS.segWet=!BKS.segWet;BKS.segStr=BKS.segWet?bksStrength():0;BKS.segEnd=BKS.segWet?50+Math.random()*100:50+Math.random()*100}
+  if(BKS.t>=BKS.segEnd){BKS.t=0;BKS.segWet=!BKS.segWet;BKS.segStr=BKS.segWet?bksStrength():0;BKS.segEnd=BKS.segWet?50+Math.random()*100:50+Math.random()*110}   // equal wet and dry spells (dry a hair longer: the fading tail of a spell still counts as rain), so about half of the time is visibly wet
   const k=Math.min(1,dt/BKS.fade*3);BKS.wetT=BKS.segStr;BKS.wet+=(BKS.wetT-BKS.wet)*k;
   let r=BKS.force?BKS.force[0]*BKS.force[1]:BKS.wet;if(r<.02)r=0;BKS.rain=r}
 /* ---- lightning (same shapes as the graveyard's; red places flash red-white) ---- */
@@ -72133,40 +72134,77 @@ function bksRain(R,t,f,rd){
   ctx.globalAlpha=1}
 
 /* ==========================================================================
-   THE EARLY WOODS AND ROADS (opt-in list BKS_EARLY): the same rain look and sound as the Blighted Road, wired to the ordinary weather schedule.
-   Which levels: the outdoor levels of the northern weather region (Thornwood 2, Thornwick 3, Gandrick's Wood 7, the Ironhill Road 10, Ironhill 13,
-   the moor 19, the Burial Ground 20, Greyfang Pass 22, Greendale Forest 32, Anaea 33). Add a level number to the list to give it the same rain.
-   When: only while weatherNow() says rain (strength .62) or thunderstorm (1.0), faded in and out over a few seconds; never indoors (the level must be
-   outdoor). The Ironhill Road is a rainy pine wood by design (rain:true) and keeps a steady light rain (.4) between showers.
-   Look: the three streak layers with wind and gusts, the horizon mist and spray and the thin line of splashing puddles (bksRain), the same sprites.
-   Sound: the same rain loop with the high hiss (bksSound). A storm also brings a flash of lightning and a rolling thunder (gysRumble).
-   Fog and snow are not touched. The plain streaks of drawWeatherFx (and the dark streaks of drawRain on level 10) are replaced, not added to.
+   RAIN ON ANY OUTDOOR AREA (the general rule): the same rain look and sound as the Blighted Road, laid over the area's own sky.
+   When: on ENTERING an outdoor area there is a 15 percent chance (BKS_RAIN_P) that the visit is rainy. The roll is kept in G.flags.rn = {lv, w} so a
+   save and reload does not roll again, and going into a house and out again keeps it; a new roll is made only when the party enters a different
+   rainy-eligible outdoor level and later returns. A rainy visit has wet spells of 50 to 150 s of varied strength (drizzle to downpour, storms above .7 with
+   lightning and thunder) and short dry gaps of 10 to 40 s. Otherwise the area keeps its normal weather; where weatherNow already says rain or storm (the
+   north) the same BKS rain is drawn at .62 or 1.0, so the old plain streaks are never seen. Snow and frost never get rain; fog is left as it is.
+   Which levels (bksRainOK, a test, not a list): outdoor levels (LEVELS[n].outdoor) except the Blighted Road and Sale (bksIs: their own clock), the Wenlock
+   graveyard 530 (own storm), the Pale Spire and the Never-Ending Tower (own skies), the undersea rooms (uwLv) and every desert level (wxRegionOf is
+   'desert', the dunes, Khemetra 41 to 44, 50 to 65, DNG_INFO dungeons, and any name with dune, desert, erg, oasis, pyramid, tomb, burrow, Khemetra).
+   Indoors, in caves and in dungeons there is no rain, no mist and no sound: the rain fades out at the door and resumes outside.
+   The Ironhill Road (rain:true) keeps a steady light rain (.4) in the new look.
+   Look and light: the three streak layers, wind, gusts, horizon mist, the thin line of splashing puddles, a cool grey wash; weatherNow darkens and greys
+   the air in step with the rain (the Wenlock golden light fades as it comes on). Sound: the same loop and hiss (bksSound).
    ========================================================================== */
-const BKS_EARLY=[2,3,7,10,13,19,20,22,32,33];
-const bksEarlyIs=n=>BKS_EARLY.includes(n);
-const bksEarlyOwns=()=>!BKS.off&&!BKS.eoff&&typeof LEVEL!=='undefined'&&bksEarlyIs(LEVEL)&&G.state==='play'&&!!LEVELS[LEVEL]&&!!LEVELS[LEVEL].outdoor;
-BKS.eR=0;BKS.early=0;BKS.eforce=null;BKS.eflash=-99;BKS.enext=0;BKS.eth=[];BKS.eStrikes=0;
-function bksEarlyWant(){
-  if(!bksEarlyOwns())return 0;
-  if(BKS.eforce!==null)return BKS.eforce;
-  const w=weatherNow();if(w&&w.fx==='rain')return w.id==='storm'?1:.62;
-  return LEVELS[LEVEL].rain?.4:0}
+const BKS_RAIN_P=.15;
+function bksIsDesert(n){
+  if(typeof wxRegionOf==='function'&&wxRegionOf(n)==='desert')return true;
+  if((n>=41&&n<=44)||(n>=50&&n<=65))return true;
+  if(typeof DNG_INFO!=='undefined'&&DNG_INFO[n])return true;
+  let nm='';try{nm=String((typeof LEVEL_NAMES!=='undefined'&&LEVEL_NAMES[n])||(LEVELS[n]&&LEVELS[n].name)||'')}catch(e){}
+  return /dune|desert|erg|oasis|pyramid|tomb of|burrow|khemetra/i.test(nm)}
+function bksRainOK(n){
+  if(BKS.off||BKS.eoff||typeof n!=='number'||!LEVELS[n]||!LEVELS[n].outdoor)return false;
+  if(bksIs(n)||n===530||n>=9710)return false;
+  if(typeof uwLv==='function'&&uwLv(n))return false;
+  return !bksIsDesert(n)}
+const bksEarlyOwns=()=>typeof LEVEL!=='undefined'&&G.state==='play'&&bksRainOK(LEVEL);
+BKS.eR=0;BKS.early=0;BKS.eforce=null;BKS.rollForce=null;BKS.eflash=-99;BKS.enext=0;BKS.eth=[];BKS.eStrikes=0;BKS.ebase=null;BKS.vc=null;BKS.vcFor=null;
+function bksEarlyRoll(){   // the dice for this visit, kept in the game flags
+  const F=G.flags||(G.flags={}),r=F.rn;if(r&&r.lv===LEVEL)return r.w;
+  const w=(BKS.rollForce!==null?BKS.rollForce:Math.random()<BKS_RAIN_P)?1:0;F.rn={lv:LEVEL,w};return w}
+function bksVisitClock(dt){
+  const F=G.flags;if(BKS.vcFor!==F.rn){BKS.vcFor=F.rn;BKS.vc={t:0,wet:true,str:bksStrength(),end:50+Math.random()*100}}
+  const c=BKS.vc;c.t+=dt;
+  if(c.t>=c.end){c.t=0;c.wet=!c.wet;c.str=c.wet?bksStrength():0;c.end=c.wet?50+Math.random()*100:10+Math.random()*30}
+  return c.str}
 function bksEarlyStep(dt){
   if(!bksEarlyOwns()){BKS.eR=0;BKS.early=0;BKS.eth.length=0;return 0}
-  const want=bksEarlyWant(),k=Math.min(1,dt/3.5);BKS.eR+=(want-BKS.eR)*k;if(Math.abs(want-BKS.eR)<.004)BKS.eR=want;
+  let want=0;if(bksEarlyRoll())want=bksVisitClock(dt);
+  weatherNow();const id=BKS.ebase;   // (the wrapper below records the underlying weather)
+  if(id==='snow'||id==='frost')want=0;
+  else{if(id==='rain')want=Math.max(want,.62);else if(id==='storm')want=1;if(LEVEL===10)want=Math.max(want,.4)}
+  if(BKS.eforce!==null)want=BKS.eforce;
+  BKS.ewant=want;
+  BKS.eR+=(want-BKS.eR)*Math.min(1,dt/3.5);if(Math.abs(want-BKS.eR)<.004)BKS.eR=want;
   BKS.early=BKS.eR>.01?1:0;
-  const t=G.time,w=weatherNow(),storm=BKS.eforce!==null?BKS.eforce>=1:!!(w&&w.id==='storm');
-  if(storm&&BKS.eR>.5){
+  const t=G.time;
+  if(want>.7&&BKS.eR>.5){
     if(!BKS.enext)BKS.enext=t+3+Math.random()*6;
     if(t>BKS.enext){BKS.eflash=t;BKS.eStrikes++;BKS.eth.push(t+1+Math.random()*2.2);BKS.enext=t+8+Math.random()*16}
   }else BKS.enext=0;
   for(let i=BKS.eth.length-1;i>=0;i--)if(t>=BKS.eth[i]){BKS.eth.splice(i,1);try{gysRumble(.17)}catch(e){}}
   return BKS.early?BKS.eR:0}
+/* the air: grey and dark in step with the rain (the weather's own rain and storm are turned into the same thing) */
+{const _w=weatherNow;weatherNow=function(){const w=_w.apply(this,arguments);
+  if(BKS.off||BKS.eoff||typeof LEVEL==='undefined'||!bksEarlyOwns())return w;
+  const id=w&&w.id;BKS.ebase=id||null;
+  if(id==='snow'||id==='frost'||id==='fog')return w;
+  const k=Math.min(1,BKS.eR*1.6),reg=typeof wxRegionOf==='function'&&wxRegionOf(LEVEL);
+  if(k<=.02)return(id==='rain'||id==='storm')?Object.assign({id:'clear'},WX_DEF.clear):w;
+  const R=WX_DEF[BKS.eR>.8?'storm':'rain'],b=w||{fog:0,haze:0,dark:1,mix:0,col:R.col},lp=(a,c)=>a+(c-a)*k,bc=b.col||R.col;
+  const o={id:BKS.eR>.8?'storm':'rain',n:R.n,text:R.text,fx:'rain',fog:lp(b.fog||0,R.fog),haze:lp(b.haze||0,R.haze),dark:Math.min(b.dark===undefined?1:b.dark,lp(1,R.dark)),mix:lp(b.mix||0,R.mix),
+    col:[lp(bc[0],R.col[0]),lp(bc[1],R.col[1]),lp(bc[2],R.col[2])]};
+  if(reg&&k>.5){o.cold=R.cold;o.wet=R.wet;if(R.stealth)o.stealth=R.stealth}   // the northern wilds keep the chill of rain; towns elsewhere get the look only
+  return o}}
 const BKS_ELK={red:0};
 function bksEarlyDraw(){
   const t=G.time,R=BKS.eR,hh=typeof HH==='number'?HH:105;
   if(BKS_S.rd!==0||BKS_G.lk!==BKS_ELK||BKS_G.hh!==hh||!BKS_G.mist){bksGround(BKS_ELK,null);BKS_G.hh=hh}
   ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();
+  ctx.globalCompositeOperation='multiply';ctx.globalAlpha=Math.min(1,R);ctx.fillStyle='rgb(212,218,228)';ctx.fillRect(0,0,420,210);ctx.globalAlpha=1;
   const fm=(t-BKS.eflash)*1000;
   if(fm>=0&&fm<320){const f=gysPulse(fm)*.6;if(f>.01){ctx.globalCompositeOperation='lighter';ctx.fillStyle=`rgba(150,170,225,${.22*f})`;ctx.fillRect(0,0,420,210);ctx.globalCompositeOperation='source-over';ctx.fillStyle=`rgba(235,240,255,${.3*f})`;ctx.fillRect(0,0,420,hh)}}
   ctx.globalCompositeOperation='source-over';ctx.globalAlpha=Math.min(1,R*.8);ctx.fillStyle=BKS_G.mist;ctx.fillRect(0,hh-46,420,76);ctx.globalAlpha=1;
@@ -81326,7 +81364,7 @@ const EP_EXTRA={tex_beams:'assets/ps/tex_beam_ceiling.jpg',f2_de_palm:'assets/ps
 self.EP_TORCH={1:2,501:2,8:2,9:2,11:2,12:2,18:2,23:2,25:2}; // the painted wall torch (engine hook in render3D), opt-in per level
 const EP={list:null,loading:null,img:{},wall:null,walls:{},on:0,lv:0};
 /* heights in squares of the painted props */
-const EP_H={ep_orecart:.6,ep_coalheap:.32,ep_coalsacks:.5,ep_toolrack:.72,ep_anvil:.5,ep_orecrate:.5,ep_brazier:.5,ep_sarc_dk:.55,ep_barrel2:.62,ep_crates2:.85,ep_sarc:.55,ep_candles:.28,ep_lantern:.42,ep_skel_slump:.62,ep_chest_s:.45,ep_potrubble:.32,ep_f2_de_palm:3.8,ep_f2_dv_doum:3.2,ep_f2_dv_tamarisk:2.8,ep_f2_dv_acacia:2.8,ep_f2_de_column:3.0,ep_f2_de_shard:0.5,ep_f2_de_pillar:3.2,ep_f2_dx_ribs:1.4,ep_f2_dx_stele:1.1,ep_f2_dx_oxskull:0.8,ep_f2_dx_jars:1.3,ep_f2_de_skull:0.5,ep_f2_de_amphora:0.6,ep_f2_de_cairn:0.6,ep_f2_de_shrub:0.8,ep_f2_dv_boulders:1.3,ep_firewood:.4,ep_haybale:.55,ep_trough:.42,ep_dung:.42,ep_wheel:.6,ep_flour:.55,ep_bench:.42,ep_rainbarrel:.62,ep_veg:.34,ep_sacks:.62,ep_crate:.55,ep_rubble:.4,ep_ratnest:.3,ep_bucket:.34,ep_chair:.42,ep_bonepile:.42,ep_planks:.95,ep_jar:.42};
+const EP_H={ep_orecart:.6,ep_coalheap:.32,ep_coalsacks:.5,ep_toolrack:.72,ep_anvil:.5,ep_orecrate:.5,ep_brazier:.5,ep_sarc_dk:.55,ep_barrel2:.62,ep_crates2:.85,ep_sarc:.55,ep_candles:.28,ep_lantern:.42,ep_skel_slump:.62,ep_chest_s:.45,ep_potrubble:.32,ep_f2_de_palm:3.8,ep_f2_dv_doum:3.2,ep_f2_dv_tamarisk:2.8,ep_f2_dv_acacia:2.8,ep_f2_de_column:3.0,ep_f2_de_shard:0.5,ep_f2_de_pillar:3.2,ep_f2_dx_ribs:1.4,ep_f2_dx_stele:1.1,ep_f2_dx_oxskull:0.8,ep_f2_dx_jars:1.3,ep_f2_de_skull:0.5,ep_f2_de_amphora:0.6,ep_f2_de_cairn:0.6,ep_f2_de_shrub:0.8,ep_f2_dv_boulders:1.3,ep_firewood:.4,ep_haybale:.55,ep_trough:.42,ep_dung:.42,ep_wheel:.6,ep_flour:.55,ep_bench:.42,ep_rainbarrel:.62,ep_veg:.34,ep_sacks:.62,ep_crate:.55,ep_rubble:.4,ep_ratnest:.3,ep_bucket:.34,ep_chair:.42,ep_bonepile:.42,ep_planks:.95,ep_jar:.42,ep_tw_tiki:.6};
 function epLoad(){if(EP.loading)return EP.loading;
   EP.loading=fetch('assets/ep/list.json?v='+VERSION).then(r=>r.json()).then(L=>{for(const k in EP_EXTRA)L[k]={file:'../../'+EP_EXTRA[k]};EP.list=L;return Promise.all(Object.keys(L).map(k=>new Promise(res=>{const i=new Image();i.onload=()=>{IMG['ep_'+k]=i;if(EP_H['ep_'+k])NPC_H['ep_'+k]=EP_H['ep_'+k];res()};i.onerror=()=>res();i.src=(L[k].file.startsWith('../../')?L[k].file.slice(6):'assets/ep/'+L[k].file)+'?v='+VERSION})))}).then(()=>{try{const mo=IMG.ep_moss;if(mo&&mo.width&&!mo._ep){const c=document.createElement('canvas');c.width=mo.width;c.height=mo.height;const x=c.getContext('2d');x.filter='saturate(.3) sepia(.45) hue-rotate(35deg) brightness(.78)';x.drawImage(mo,0,0);c._ep=1;IMG.ep_moss=c}}catch(e){} // the moss band: dull damp grey-green, no pink
   try{for(const [src,dst,f] of [['bones','ep_bones_dk','brightness(.5) sepia(.4) saturate(.75)'],['coffin','ep_coffin_dk','brightness(.58) sepia(.6) saturate(.9)'],['ep_sarc','ep_sarc_dk','brightness(.66) sepia(.55) saturate(.9)']]){if(IMG[src]&&!IMG[dst]){const im=IMG[src],c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.filter=f;x.drawImage(im,0,0);IMG[dst]=c;if(NPC_H[src])NPC_H[dst]=NPC_H[src]}}}catch(e){}EP.ready=1;try{if(G.state==='play'&&G.grid)epApply(LEVEL,1)}catch(e){console.error('ep apply',e)}}).catch(e=>{console.error('ep load',e);EP.ready=1});
@@ -81382,7 +81420,7 @@ function epFloorFx(n,S){const W=MW,H=MH,wb=new Uint8Array(W*H),open=(x,y)=>x>=0&
   if(S.glow){const gc=S.glowCol||[1.0,.62,.3];for(const l of LIGHTS){if(l.out)continue;pool(l.x,l.y,S.glowSz||2.6,(i,t)=>{sh[i*3]+=S.glow*gc[0]*t;sh[i*3+1]+=S.glow*gc[1]*t;sh[i*3+2]+=S.glow*gc[2]*t})}}
   return {wb,sf:S.softFine?1:0,ao:S.ao===undefined?.5:S.ao,aoW:S.aoW||.42,soft:S.soft||0,N,sh:any?sh:null}}
 /* the grade: f2Grade's contrast, saturation, tone and vignette, per level */
-function epApply(n,late){const S=self.EP_OFF?null:EP_SPEC[n],L=LEVELS[n];
+function epApply(n,late){const S=self.EP_OFF?null:EP_SPEC[n],L=LEVELS[n];EP._nl=L;
   if(!S){epSwapWalls(null);return}
   if(!EP.ready){epLoad();return}
   if(EP_SECRETS[n])epSecretsApply(n);
@@ -81415,7 +81453,10 @@ function epApply(n,late){const S=self.EP_OFF?null:EP_SPEC[n],L=LEVELS[n];
   if(S.walls&&S.walls.vars&&EP.wall){const W=EP.wall;if(!W.wv){W.wv={};for(const g of [1,2]){const v=S.walls.vars[g];if(!v)continue;const ids=[g===1?W.stone:W.brick];for(const t of v){const d=epTex('ep_tex_'+t.tex,t.o||(g===1?S.walls.so:S.walls.bo));if(d)ids.push(addTex(d))}W.wv[g]=ids}}L._epf.wv=W.wv}
   if(S.retile&&EP.wall&&EP.wall.wv&&EP.wall.wv[1]){if(!L._eptmR){L._eptmR=1;L._eptm=L._eptm||new Map();const vv=EP.wall.wv[1];let k=0;const seen=new Set();for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(g<100||seen.has(g)||(typeof KH_DOOR!=='undefined'&&KH_DOOR[g]))continue;seen.add(g);const ti=T_TILE[g];if(ti!==undefined)L._eptm.set(ti,vv[1+(k++%(vv.length-1))])}}L._epf.tm=L._eptm}
   if(S.grime){if(!L._eptm||!L._eptmG){L._eptmG=1;L._eptm=L._eptm||new Map();const seen=new Set();for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(seen.has(g))continue;seen.add(g);const por=g>=30&&g<100,ti=S.grime.only==='portal'?(por?(T_DOORS[(G.portals[g-30]||{}).tex]||T_DOORS.house):undefined):g>=100?(typeof KH_DOOR!=='undefined'&&KH_DOOR[g]?undefined:T_TILE[g]):(g>=9&&g<=14)||(g>=20&&g<=22)?T_WALL[g]:(g===7&&S.grime.gate)?T_GATE:(por&&S.grime.gate)?(T_DOORS[(G.portals[g-30]||{}).tex]||T_DOORS.house):undefined;if(ti===undefined||L._eptm.has(ti)||!TEX[ti]||!TEX[ti].d)continue;const nt=epGrime(ti,S.grime,g);if(nt!==null)L._eptm.set(ti,nt)}}L._epf.tm=L._eptm}
-  if(S.tv){if(!L._eptv){const D=n===3?LEVEL3_DATA:n===13?LEVEL13_DATA:null,m=new Map();if(D&&D.chars)for(const q of S.tv){const ids=[];q.keys.forEach((k,i)=>{for(const fl of (q.keys.length>1?[0,1]:[0])){const d=epTex('ep_tex_'+k,Object.assign({seed:i*1.7+fl*5,flip:fl,win:q.win&&q.win[k]},q.o||{}));if(d)ids.push(addTex(d))}});if(ids.length)for(const c of q.chars){const g=D.chars[c];if(g!==undefined)m.set(g,ids)}}L._eptv=m}L._epf.tv=L._eptv}   // painted house walls (several panels, one picked per square)
+  if(S.night&&!L._epnD){L._epnD=1;L._eptm=L._eptm||new Map();for(const nm of Object.keys(EP_NDOOR)){const ti=T_DOORS[nm];if(ti===undefined||L._eptm.has(ti)||!TEX[ti]||!TEX[ti].d||!(G.portals||[]).some(q=>q.tex===nm))continue;const T=TEX[ti],nt=addTex(T.d,null);for(const k of Object.keys(T))if(k!=='d'&&k!=='e')TEX[nt][k]=T[k];L._eptm.set(ti,nt);epNightReg(L,nt,null,epNightTv(T.d,EP_NDOOR[nm],0),0)}L._epf.tm=L._eptm} // the lit panes of the shop, inn and hall doors
+  if(S.tv){if(!L._eptv){const D=n===3?LEVEL3_DATA:n===13?LEVEL13_DATA:null,m=new Map();if(D&&D.chars)for(const q of S.tv){const ids=[],nwin=[];q.keys.forEach((k,i)=>{for(const fl of (q.keys.length>1?[0,1]:[0])){const d=epTex('ep_tex_'+k,Object.assign({seed:i*1.7+fl*5,flip:fl,win:q.win&&q.win[k]},q.o||{}));if(d){const id=addTex(d);ids.push(id);if(S.night&&EP_NWIN[k])nwin.push([ids.length-1,id,d,EP_NWIN[k],fl])}}});
+      if(ids.length&&nwin.length){const l0=ids.length,all=ids.concat(ids,ids);for(const [j,id,d,W,fl] of nwin){const ne=epNightTv(d,W.slice(0,4),fl,W[4]);epNightReg(L,id,null,ne,0);const id2=addTex(d);all[2*l0+j]=id2;epNightReg(L,id2,null,ne,1)}ids.length=0;for(const v of all)ids.push(v)} // three runs of the same panels: the first two lit at night, the third dark, so a third of the windows stay unlit and the picture by day is unchanged (the pick is hash % length)
+      if(ids.length)for(const c of q.chars){const g=D.chars[c];if(g!==undefined)m.set(g,ids)}}L._eptv=m}L._epf.tv=L._eptv}   // painted house walls (several panels, one picked per square)
   if(S.grade)F2GRADE[n]=S.grade;
   if(S.amb!==undefined)G.amb=Math.max(G.amb||0,S.amb);
   if(S.xlights)for(let k=0;k<S.xlights.length;k++){const q=S.xlights[k];if(!LIGHTS.some(l=>l.epX===k+1))LIGHTS.push({x:q[0],y:q[1],ph:k*1.7,key:-6000-k,taken:false,red:false,free:true,lamp:true,col:q[2],kI:q[3],range2:40,epX:k+1})}
@@ -81443,6 +81484,30 @@ function epStreet(n,P){const open=(x,y)=>x>=0&&y>=0&&x<MW&&y<MH&&G.grid[y][x]===
     if(placed.some(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)<(P.gap||3)))continue;if(hash2(x,y,n*37+1)>=(P.p||.4))continue;
     const nb=placed.filter(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)<8).map(p=>p[2]);let k=ks[(hash2(x,y,n*37+2)*ks.length)|0];for(let t=0;t<ks.length&&nb.includes(k);t++)k=ks[(ks.indexOf(k)+1)%ks.length];
     placed.push([x,y,k]);G.decor.push({k:'ep_'+k,x,y,block:false,deco:true,epSt:1,loot:false,shop:false,ox:E?.28:Wt?-.28:(hash2(x,y,9)-.5)*.3,oy:S?.28:N?-.28:(hash2(x,y,8)-.5)*.3,sc:+(.85+hash2(x,y,n*37+3)*.3).toFixed(2)})}}
+/* windows that follow the time of day (opt-in: S.night, used by Thornwick and Ironhill). Each lit window picture gets a glow picture (T.e) for every
+   step of the day: dim by day (as the grime pass left it), warm amber with a soft halo from dusk, fully lit 19:00 to 05:00, dimming again 05:00 to 07:00.
+   A step is one eighth of the way; the pictures are made once, the first time a step is needed, and swapped in only when the step changes. */
+function epNightK(){const hr=(((G.clock||0)%1440)+1440)%1440/60;let k=hr>=19||hr<5?1:hr>=7&&hr<17?0:hr>=17?(hr-17)/2:1-(hr-5)/2;return k*k*(3-2*k)}
+function epHalo(a,rad,gain){const W=TS,t=new Float32Array(W*W),u=new Float32Array(W*W);for(let i=0;i<W*W;i++)t[i]=a[i];
+  for(let p=0;p<2;p++){for(let y=0;y<W;y++){for(let x=0;x<W;x++){let q=0,c=0;for(let d=-rad;d<=rad;d++){const xx=x+d;if(xx>=0&&xx<W){q+=t[y*W+xx];c++}}u[y*W+x]=q/c}}
+    for(let x=0;x<W;x++){for(let y=0;y<W;y++){let q=0,c=0;for(let d=-rad;d<=rad;d++){const yy=y+d;if(yy>=0&&yy<W){q+=u[yy*W+x];c++}}t[y*W+x]=q/c}}}
+  for(let i=0;i<W*W;i++)t[i]=Math.min(1,t[i]*gain);return t}
+/* a lit pane in a door or window tile: its own picture, with a soft amber halo spilling onto the wall round it */
+function epNightE(e){const o=new Uint8ClampedArray(e),m=new Float32Array(TS*TS);let any=0;for(let i=0;i<TS*TS;i++){m[i]=e[i*4+3]>40?1:0;any+=m[i]}if(!any)return o;const h=epHalo(m,Math.max(2,TS/24|0),2.6);
+  for(let i=0;i<TS*TS;i++){const j=i*4;if(e[j+3]>40){o[j]=255;o[j+1]=Math.min(255,e[j+1]*1.08);o[j+2]=e[j+2]*.95;o[j+3]=255}else{const a=h[i]*.34;o[j]=255;o[j+1]=172;o[j+2]=70;o[j+3]=a*255}}return o}
+/* a painted house window (dark leaded panes): the pane lights up amber, the lead stays darker, a halo spills onto the plaster */
+function epNightTv(d,W,fl,pre){const o=new Uint8ClampedArray(TS*TS*4),m=new Float32Array(TS*TS),ins=.018,sf=.012;
+  for(const R of Array.isArray(W[0])?W:[W]){const x0=fl?1-R[2]:R[0],x1=fl?1-R[0]:R[2],y0=R[1],y1=R[3];
+    for(let py=0;py<TS;py++)for(let px=0;px<TS;px++){const ux=px/TS,vy=py/TS,i=py*TS+px;const a=Math.min((ux-x0-ins)/sf,(x1-ins-ux)/sf,(vy-y0-ins)/sf,(y1-ins-vy)/sf);m[i]=Math.max(m[i],Math.max(0,Math.min(1,a+.5)))}}
+  const h=epHalo(m,Math.max(2,TS/20|0),1.7);
+  for(let i=0;i<TS*TS;i++){const j=i*4,l=(d[j]*.3+d[j+1]*.59+d[j+2]*.11),pane=pre?m[i]*.5*(.55+.45*Math.min(1,l/120)):m[i]*(.62+.38*(1-Math.min(1,l/150))); // a picture that is already lit by candles gets only a warm lift, so its curtains and panes stay readable
+    const hv=Math.max(0,h[i]-m[i])*.42;const a=Math.max(pane,hv);
+    o[j]=255;o[j+1]=pane>hv?168:150;o[j+2]=pane>hv?66:52;o[j+3]=a*(pane>hv?.92:1)*255}return o}
+function epNightReg(L,ti,day,night,dark){(L._epn=L._epn||[]).push({ti,day,night,dark,c:{}});L._epnStep=-1}
+function epNightTick(L){const st=Math.round(epNightK()*8);if(L._epnStep===st)return;L._epnStep=st;const k=st/8;
+  for(const r of L._epn){const T=TEX[r.ti];if(!T)continue;let e=r.c[st];if(e===undefined){const A=r.day,B=r.night;
+      if(r.dark&&!A)e=null;else{e=new Uint8ClampedArray(B.length);for(let i=0;i<e.length;i++){const a=A?A[i]:0;e[i]=r.dark?a*(1-.6*k):a+(B[i]-a)*k}}r.c[st]=e}
+    T.e=e;for(let j=0;j<8;j++)delete T['he'+j]}}
 /* a grimed copy of a painted wall picture: darker, sootier foot, a dirty top, faint damp streaks and blotches, a little less colour (processing of the painted art, never new drawing) */
 function epGrime(ti,o,seed){const T=TEX[ti],d=T.d;if(!d||d.length!==TS*TS*4)return null;const a=new Uint8ClampedArray(d);const e=T.e;
   for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const i=(y*TS+x)*4;if(e&&e[i+3]>40){if(o.paneK){a[i]*=o.paneK;a[i+1]*=o.paneK*.97;a[i+2]*=o.paneK*.9}continue}let r=a[i],g=a[i+1],b=a[i+2];const l=r*.3+g*.59+b*.11,sa=o.sat||.8;r=l+(r-l)*sa;g=l+(g-l)*sa;b=l+(b-l)*sa;
@@ -81452,7 +81517,7 @@ function epGrime(ti,o,seed){const T=TEX[ti],d=T.d;if(!d||d.length!==TS*TS*4)retu
     if(o.emis!==undefined){const L0=d[i]*.3+d[i+1]*.59+d[i+2]*.11;if(L0>175&&d[i]>=d[i+2]){const q=o.emis+(1-o.emis)*(175/L0);f*=q}} // pale lit window panes, dimmer by day
     a[i]=r*f*(o.tint?o.tint[0]:1);a[i+1]=g*f*(o.tint?o.tint[1]:1);a[i+2]=b*f*(o.tint?o.tint[2]:1)}
   let ee=T.e;if(ee&&o.emis!==undefined){ee=new Uint8ClampedArray(T.e);for(let i=0;i<ee.length;i+=4){ee[i]*=o.emis;ee[i+1]*=o.emis*.92;ee[i+2]*=o.emis*.78}} // lit windows dimmer and warmer by day
-  const n=addTex(a,ee);for(const k of Object.keys(T))if(k!=='d'&&k!=='e')TEX[n][k]=T[k];return n}
+  const n=addTex(a,ee);for(const k of Object.keys(T))if(k!=='d'&&k!=='e')TEX[n][k]=T[k];if(o.night&&T.e&&ee&&EP._nl)epNightReg(EP._nl,n,ee,epNightE(T.e),hash2(n,seed,311)<o.night.dark?1:0);return n}
 /* small per-piece variety for repeated pieces: a mirrored copy on some, a slightly different size (visual only) */
 function epJitter(n,J){for(const d of G.decor){if(d.npc||d.epJ||!J.re.test(String(d.k)))continue;d.epJ=1;const h=hash2(d.x,d.y,n*41+9);if(h<.5&&typeof f2Flip==='function'){const fk=f2Flip(d.k);if(IMG[fk]){if(NPC_H[d.k]&&!NPC_H[fk])NPC_H[fk]=NPC_H[d.k];d.k=fk}}if(J.sc)d.sc=+((d.sc||1)*(1-J.sc+2*J.sc*hash2(d.x,d.y,n*41+10))).toFixed(2)}}
 /* the deserts stay very sparse: a few painted palms beside the oases that are already there, one or two broken pieces at the old ruins,
@@ -81537,7 +81602,7 @@ function epAutoProps(n,A){const L=LEVELS[n],R=L.rows,H=R.length,W=R[0].length,op
     placed.push([x,y,k]);L.decor.push({k:'ep_'+k,x,y,deco:true,block:false,ox:(E?.26:Wt?-.26:0),oy:(S?.26:N?-.26:0),sc:+(.85+hash2(x,y,n*31+7)*.3).toFixed(2)})}}
 {const _ll=loadLevel;loadLevel=function(n){try{epSwapWalls(null);epProps(n,EP_SPEC[n])}catch(e){console.error('ep props',e)}const r=_ll.apply(this,arguments);try{if(EP_SPEC[n])epLoad()}catch(e){console.error(e)}return r}} // our walls are put back before the level's own swaps (the well's, the ruby maze's) run, so theirs keep the true originals
 if(typeof hgdbFloor==='function'){const _hf=hgdbFloor;hgdbFloor=function(){_hf.apply(this,arguments);try{const L=!self.EP_OFF&&LEVELS[LEVEL];if(L&&L._fl7&&!G.fl7)G.fl7=L._fl7}catch(e){}}}   // keep this level's seventh floor (char 6) when the Grasslands' floor hook clears it
-{const _dw=drawWorld;drawWorld=function(){try{epSecretHint()}catch(e){}try{if(typeof LEVEL!=='undefined'&&(EP.cur!==LEVEL||EP.gd!==G.decor||EP.rd!==EP.ready)){EP.cur=LEVEL;EP.gd=G.decor;EP.rd=EP.ready;epApply(LEVEL)}const Lq=!self.EP_OFF&&LEVELS[LEVEL];if(Lq&&Lq._fl7&&G.fl7!==Lq._fl7)G.fl7=Lq._fl7}catch(e){console.error('ep',e)}return _dw.apply(this,arguments)}}   // the seventh floor (char 6) is cleared each tick elsewhere, so it is set again before every frame
+{const _dw=drawWorld;drawWorld=function(){try{epSecretHint()}catch(e){}try{if(typeof LEVEL!=='undefined'&&(EP.cur!==LEVEL||EP.gd!==G.decor||EP.rd!==EP.ready)){EP.cur=LEVEL;EP.gd=G.decor;EP.rd=EP.ready;epApply(LEVEL)}const Lq=!self.EP_OFF&&LEVELS[LEVEL];if(Lq&&Lq._fl7&&G.fl7!==Lq._fl7)G.fl7=Lq._fl7;if(Lq&&Lq._epn)epNightTick(Lq)}catch(e){console.error('ep',e)}return _dw.apply(this,arguments)}}   // the seventh floor (char 6) is cleared each tick elsewhere, so it is set again before every frame
 /* a big painted piece right in front of the party thins out instead of filling the view with a blurred close-up (opt-in: S.nearFade) */
 {const _sl=spriteList;spriteList=function(){const L=_sl.apply(this,arguments);const S=typeof LEVEL!=='undefined'&&!self.EP_OFF&&EP_SPEC[LEVEL];if(!S||!S.nearFade||!G.C)return L;const a=G.C.a||0,cx=G.C.x+.5-Math.cos(a)*.28,cy=G.C.y+.5-Math.sin(a)*.28;
   for(const s of L){const d=s.decor;if(!d||d.npc||s.e||s.pic||s.hang||!s.img||!s.img.width||/chest|sign|lamp|gate|door/.test(String(d.k)))continue;const h=s.w*s.img.height/s.img.width;if(h<1.05&&s.w<1.1)continue;
@@ -81585,6 +81650,10 @@ const EP_WELL={lightK:.66,tintVar:.06,grime:{only:'portal',k:.66,sat:.12,foot:.3
 const EP_TUNNEL=(()=>{const S=epDungeon('crypt',11);S.walls=JSON.parse(JSON.stringify(S.walls));S.walls.name='tunnel';const tan=o=>Object.assign({},o||{},{k:[.98,.88,.72],sat:.85});S.walls.so=tan(S.walls.so);S.walls.bo=tan(S.walls.bo);
   S.walls.vars={1:[{tex:'cryptdamp',o:tan({foot:[.34,.6],top:[.2,.4]})},{tex:'cryptwall',o:tan({foot:[.36,.62],top:[.2,.4],flip:1,blot:.3,seed:1.3})},{tex:'cryptroots',o:tan({foot:[.34,.6],top:[.2,.4],blot:.25,seed:2.1})}]};
   S.floor={name:'tunnelfloor',tex:'earthfloor',o:{k:[.95,.86,.72],sat:.8}};S.amb=.1;S.grade={c:1.08,s:.88,b:1.04,tone:[160,125,85,.12],vig:.36,vc:[10,7,4]};return S})();
+/* where the glass is in each painted house picture that has a lit-able window: x0,y0,x1,y1 as a fraction of the picture (unflipped) */
+const EP_NWIN={tww1:[.35,.27,.65,.55],tww3:[.35,.27,.65,.55],ihw1:[.36,.2,.62,.52],ihw3:[.33,.18,.65,.52],ihw2:[.34,.2,.62,.56],tst1:[.33,.22,.68,.58,1],tst2:[.08,.19,.9,.62,1],tst5:[.33,.14,.67,.48,1],tst8:[.32,.1,.68,.72],tst9:[.34,.12,.68,.58],tst10:[.28,.14,.74,.5,1]};
+/* the lit windows in the door pictures of the town (T_DOORS name): the same, one or two panes each */
+const EP_NDOOR={hall:[[.17,.15,.33,.32],[.63,.15,.8,.32]],shop:[[.09,.5,.37,.7],[.4,.5,.67,.7]],inn:[[.22,.18,.34,.37],[.72,.18,.84,.37]]};
 const EP_GRIME=['straw','droppings','puddle','soot','crack','rubble','bones','damp','shards','rag','grain','mud','pebbles','wax'];
 const EP_SPEC={
   /* the crypts below the Abbey: the starting dungeon */
@@ -81603,11 +81672,11 @@ const EP_SPEC={
      pics:{p:.56,fixed:[[17,7,[1,0],'chains',.55,.55],[3,19,[0,1],'chains',.55,.55],[2,19,[0,1],'web_hang',.5,.7],[4,19,[0,1],'shelf',.3,.5],[13,3,[0,-1],'web_corner',.42,.76]],keys:[{k:'moss',h:.16,bob:.035},{k:'web_corner',h:.42,bob:.76,corner:1},{k:'web_hang',h:.5,bob:.7},{k:'chains',h:.55,bob:.55},{k:'moss',h:.16,bob:.035},{k:'moss',h:.16,bob:.035},{k:'ring',h:.16,bob:.45},{k:'soot',h:.5,bob:.6},{k:'shelf',h:.3,bob:.5}]},
      auto:{keys:['sacks','crate','rubble','ratnest','bucket','bonepile','planks','jar'],p:.75}},
   /* Thornwick: the first town (one main road through a forest clearing) */
-  3:{tv:[{chars:'ABEFHI',keys:['tws1','tws2','tws3','tst12','twh3'],o:{sat:.8,k:[.92,.92,.9],foot:[.3,.45]}},{chars:'JKMNO',win:{tww1:[.34,.36,.66,.6,.9],tww3:[.38,.36,.62,.6,.9]},keys:['twh1','twh2','twh3','tww1','tww2','tww3'],o:{sat:.8,k:[.9,.9,.87],foot:[.3,.45]}},{chars:'k',keys:['tst1'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'l',keys:['tst2'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'m',keys:['tst3'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'n',keys:['tst4'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'o',keys:['tst5'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'q',keys:['tst6'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'r',keys:['tst7'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'s',keys:['tst8'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'u',keys:['tst9'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'v',keys:['tst10'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'ĉ',keys:['tst11'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'Ċ',keys:['tst12'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'ă',keys:['tst2'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'PefwxyzĀāĂĄąĆćĈ',win:{tww1:[.34,.36,.66,.6,.9],tww3:[.38,.36,.62,.6,.9]},keys:['tww1','tww2','tww3','twh2','tww1','tww3'],o:{sat:.8,k:[.9,.9,.87],foot:[.3,.45]}}],
+  3:{night:1,tv:[{chars:'ABEFHI',keys:['tws1','tws2','tws3','tst12','twh3'],o:{sat:.8,k:[.92,.92,.9],foot:[.3,.45]}},{chars:'JKMNO',win:{tww1:[.34,.36,.66,.6,.9],tww3:[.38,.36,.62,.6,.9]},keys:['twh1','twh2','twh3','tww1','tww2','tww3'],o:{sat:.8,k:[.9,.9,.87],foot:[.3,.45]}},{chars:'k',keys:['tst1'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'l',keys:['tst2'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'m',keys:['tst3'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'n',keys:['tst4'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'o',keys:['tst5'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'q',keys:['tst6'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'r',keys:['tst7'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'s',keys:['tst8'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'u',keys:['tst9'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'v',keys:['tst10'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'ĉ',keys:['tst11'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'Ċ',keys:['tst12'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'ă',keys:['tst2'],o:{sat:.85,k:[.9,.9,.88],foot:[.3,.4]}},{chars:'PefwxyzĀāĂĄąĆćĈ',win:{tww1:[.34,.36,.66,.6,.9],tww3:[.38,.36,.62,.6,.9]},keys:['tww1','tww2','tww3','twh2','tww1','tww3'],o:{sat:.8,k:[.9,.9,.87],foot:[.3,.45]}}],
      track:{from:'2',rows:[17],cols:[5,45],base:2,tint:[1.32,1.3,1.38]},
      decals:{path:'6',pathKeys:['ruts','rutpuddle','hoof','ruts','paledirt','ruts'],pathP:.75,verge:['grass1','grass2','grass3','grass4','weeds1','weeds2','weeds3','bracken','grass2'],vergeP:.75,keys:['leaves','pebbles','droppings'],on:{0:['mud','straw','droppings','puddle','pebbles','leaves','soot'],1:['grass1','grass2','grass3','grass4','weeds1','weeds2','weeds4','strawmud','mud','leaves','grass3'],2:['grass1','grass2','weeds1','puddle','mud','strawmud','grass3','weeds2','droppings','grass4'],3:['mud','leaves','straw'],4:['mud','straw','soot','droppings'],5:['mud','puddle','straw']},p:.48,wallBias:.3,sz:[.5,.7],far:16,gain:[1,.95,.88],a:1},
      floorTint:{1:[.8,.84,.74],2:[1.12,1.06,.95]},soft:.75,softFine:1,shadow:.55,shadowSz:1.3,ao:.5,aoW:.5,nearFade:1,glow:.75,glowSz:2.6,glowCol:[1,.7,.42],
-     grime:{k:.8,sat:.7,foot:.36,footK:.7,streak:.45,blot:.55,tint:[1,.96,.9],emis:.3,paneK:.62},jitter:[{re:/^fence$/,sc:0},{re:/^(pjuniper|pheather|pbracken|greeds|gfungus|bush)/,sc:.14},{re:/^(ptree|gtree)/,sc:.1}],
+     grime:{k:.8,sat:.7,foot:.36,footK:.7,streak:.45,blot:.55,tint:[1,.96,.9],emis:.3,paneK:.62,night:{dark:.3}},jitter:[{re:/^fence$/,sc:0},{re:/^(pjuniper|pheather|pbracken|greeds|gfungus|bush)/,sc:.14},{re:/^(ptree|gtree)/,sc:.1}],
      grade:{c:1.06,s:.9,b:1.06,tone:[140,115,80,.08],vig:.26,vc:[12,10,8]},
      tufts:{on:'12',path:'6',tuftF:'sepia(.55) saturate(.9) hue-rotate(28deg) brightness(.6)',p:.9,n:420,far:2,base:.1,big:1,edgeOn:'603',edgeP:.45},street:{keys:['firewood','haybale','dung','wheel','flour','rainbarrel','veg','sacks','crate','bucket'],p:.5,gap:3,on:'12',notNear:'03456',fence:1,fenceRe:/^(fence|ptree|gtree|pjuniper|pbracken|grocks|gboulder|well)/}},
   /* the other early dungeons share the crypts' finish, each with its own stone (see epDungeon) */
@@ -81619,17 +81688,133 @@ const EP_SPEC={
   /* the early woods and roads */
   2:epWood(2,{}),7:epWood(7,{keepFloor:1}),10:epWood(10,{keepFloor:1}),
   /* Ironhill: the second town, a mining town (Thornwick's finish, sootier) */
-  13:{tv:[{chars:'ABEFHI',keys:['ihs1','ihs2','ihs3','ihw3','ihh2'],o:{sat:.8,k:[1.3,1.26,1.2],foot:[.3,.35]}},{chars:'vzĀćĈĉĊďĐđ,;:',win:{ihw1:[.38,.36,.62,.58,1.1],ihw3:[.38,.36,.62,.58,1.1]},keys:['ihh1','ihh2','ihh3','ihw1','ihw3'],o:{sat:.8,k:[1.3,1.26,1.2],foot:[.3,.35]}},{chars:'e',keys:['ihw2'],o:{sat:.8,k:[1.3,1.26,1.2],foot:[.3,.35]}},{chars:'r',keys:['ihw2'],o:{sat:.8,k:[1.3,1.26,1.2],foot:[.3,.35]}},{chars:'y',keys:['ihw2'],o:{sat:.8,k:[1.3,1.26,1.2],foot:[.3,.35]}},{chars:'Ą',keys:['ihw2'],o:{sat:.8,k:[1.3,1.26,1.2],foot:[.3,.35]}},{chars:'f',keys:['tst5'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'q',keys:['tst5'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'u',keys:['tst1'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'ā',keys:['tst5'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'ą',keys:['tst1'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'h',keys:['tst2'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'j',keys:['tst2'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'k',keys:['tst2'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'m',keys:['tst2'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'Ď',keys:['tst2'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'Ē',keys:['tst2'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'g',keys:['tst1'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'i',keys:['tst3'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'l',keys:['tst3'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'n',keys:['tst4'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'o',keys:['tst11'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'Ć',keys:['tst6'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'s',keys:['ihs1'],o:{sat:.8,k:[1.3,1.26,1.2],foot:[.3,.35]}},{chars:'Ă',keys:['ihs2'],o:{sat:.8,k:[1.3,1.26,1.2],foot:[.3,.35]}},{chars:'w',keys:['tst12'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'ă',keys:['tst12'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'ċ',keys:['tst8'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'Č',keys:['tst10'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'č',keys:['tst7'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},],
+  13:{night:1,tv:[{chars:'ABEFHI',keys:['ihs1','ihs2','ihs3','ihw3','ihh2'],o:{sat:.8,k:[1.3,1.26,1.2],foot:[.3,.35]}},{chars:'vzĀćĈĉĊďĐđ,;:',win:{ihw1:[.38,.36,.62,.58,1.1],ihw3:[.38,.36,.62,.58,1.1]},keys:['ihh1','ihh2','ihh3','ihw1','ihw3'],o:{sat:.8,k:[1.3,1.26,1.2],foot:[.3,.35]}},{chars:'e',keys:['ihw2'],o:{sat:.8,k:[1.3,1.26,1.2],foot:[.3,.35]}},{chars:'r',keys:['ihw2'],o:{sat:.8,k:[1.3,1.26,1.2],foot:[.3,.35]}},{chars:'y',keys:['ihw2'],o:{sat:.8,k:[1.3,1.26,1.2],foot:[.3,.35]}},{chars:'Ą',keys:['ihw2'],o:{sat:.8,k:[1.3,1.26,1.2],foot:[.3,.35]}},{chars:'f',keys:['tst5'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'q',keys:['tst5'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'u',keys:['tst1'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'ā',keys:['tst5'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'ą',keys:['tst1'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'h',keys:['tst2'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'j',keys:['tst2'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'k',keys:['tst2'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'m',keys:['tst2'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'Ď',keys:['tst2'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'Ē',keys:['tst2'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'g',keys:['tst1'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'i',keys:['tst3'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'l',keys:['tst3'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'n',keys:['tst4'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'o',keys:['tst11'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'Ć',keys:['tst6'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'s',keys:['ihs1'],o:{sat:.8,k:[1.3,1.26,1.2],foot:[.3,.35]}},{chars:'Ă',keys:['ihs2'],o:{sat:.8,k:[1.3,1.26,1.2],foot:[.3,.35]}},{chars:'w',keys:['tst12'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'ă',keys:['tst12'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'ċ',keys:['tst8'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'Č',keys:['tst10'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},{chars:'č',keys:['tst7'],o:{sat:.8,k:[1.08,1.03,.96],foot:[.35,.45]}},],
      fixed:[['orecart',19,16,-.3],['coalsacks',27,16,-.3],['anvil',31,16,-.3],['coalheap',16,20,.3],['orecrate',22,20,.3],['toolrack',28,20,.32]],
      track:{from:'2',noNear:'0345',rows:[19],cols:[6,45],base:2,tint:[1.62,1.58,1.62]},
      decals:{path:'6',pathKeys:['ruts','rutpuddle','hoof','ruts','paledirt','hoof'],pathP:.7,verge:['grass1','grass2','weeds1','weeds2','grass4','weeds3','grass3'],vergeP:.7,keys:['leaves','pebbles','droppings'],on:{0:['mud','straw','droppings','puddle','soot','soot','pebbles'],1:['grass1','grass2','grass3','weeds1','weeds4','strawmud','mud','soot','grass4'],2:['grass1','grass2','weeds1','puddle','mud','soot','strawmud','droppings'],3:['mud','soot','straw'],4:['mud','straw','soot','droppings'],5:['mud','puddle','straw']},p:.45,wallBias:.3,sz:[.5,.7],far:16,gain:[1,.95,.88],a:1},
      floorTint:{1:[.8,.8,.72],2:[.9,.86,.8]},soft:.75,softFine:1,shadow:.6,shadowSz:1.3,ao:.6,aoW:.55,nearFade:1,glow:.75,glowSz:2.6,glowCol:[1,.7,.42],
-     grime:{k:.82,sat:.62,foot:.4,footK:.75,streak:.55,blot:.6,tint:[.98,.95,.9],emis:.3,paneK:.6},jitter:[{re:/^fence$/,sc:0},{re:/^(pjuniper|pheather|pbracken|greeds|gfungus|bush|flora)/,sc:.14},{re:/^(ptree|gtree|tree)/,sc:.1}],
+     grime:{k:.82,sat:.62,foot:.4,footK:.75,streak:.55,blot:.6,tint:[.98,.95,.9],emis:.3,paneK:.6,night:{dark:.3}},jitter:[{re:/^fence$/,sc:0},{re:/^(pjuniper|pheather|pbracken|greeds|gfungus|bush|flora)/,sc:.14},{re:/^(ptree|gtree|tree)/,sc:.1}],
      grade:{c:1.08,s:.76,b:1.05,tone:[150,115,80,.14],vig:.36,vc:[12,10,8]},
      tufts:{on:'12',path:'6',tuftF:'sepia(.6) saturate(.7) hue-rotate(24deg) brightness(.52)',p:.85,n:520,far:2,base:.12,big:1,edgeOn:'603',edgeP:.4},
      street:{keys:['orecart','coalheap','coalsacks','toolrack','anvil','orecrate','brazier','coalheap','firewood','rubble','planks','sacks','crate','bucket','rainbarrel','wheel'],p:.6,gap:3,on:'12',notNear:'03456',fence:1,fenceRe:/^(fence|ptree|gtree|pjuniper|pbracken|grocks|gboulder|well)/}}
 };
 setTimeout(()=>{try{epLoad()}catch(e){}},4000); // the early polish pictures are small: fetch them soon after the start, so every first visit has them
+
+/* ---- src/desert/thornwick_roofs.js ---- */
+/* ==========================================================================
+   THORNWICK: THE ROOFS (prefix TKR). Level 3, the first town. The houses stand under the high sky with their walls only one storey tall, and until now nothing
+   rose over them. Every house, shop, the inn and the chapel now has its own painted roof, seen from the street looking up (a flat gable or a straight eaves line,
+   never the top of a roof), the same way Wenlock does it: a picture in the level's sky list (L.sky, drawn by khSkyList) standing on the wall top.
+   - the pictures are Wenlock's roof pieces (assets/wl/roof1_*) and the Oldhaven roof pieces (kh_ohroof1_*), weathered into Thornwick's grim, withered palette:
+     greyed and darkened, soot streaks running down from the ridge, moss along the eaves, missing tiles, and a painted chimney (cut from Wenlock's brick roof)
+     on some, set on the ridge; each house gets a mirror, a tone and a slightly different width from a hash, and no two neighbours match;
+   - the chapel has a grey spire beside its roof (the Oldhaven octagonal tower);
+   - visual only: nothing here blocks, moves or hides anything, and the roofs of the houses a party buys (housing.js) are separate entries that are left alone.
+   ========================================================================== */
+const TKR={ready:false,loading:null,houses:[
+  // [id, x0, x1, y0, y1, face (the side the street is on), roof piece, look]
+  ['n1',12,14,10,14,'S','wl_roof1_1',{sat:.62,dark:.86,tint:[1.04,.98,.9],soot:.5,moss:.3,holes:2,chim:2}],
+  ['n2',16,18,10,15,'S','kh_ohroof1_4',{sat:.7,dark:.84,tint:[1,.98,.92],soot:.6,moss:.6,holes:6,chim:1}],
+  ['n3',19,21,10,14,'S','kh_ohroof1_0',{sat:.95,dark:1.02,tint:[.96,1,1.06],soot:.4,moss:.2,holes:1,chim:2}],
+  ['n4',23,27,10,15,'S','kh_ohroof1_1',{sat:.85,dark:.98,tint:[.94,.98,1.08],soot:.45,moss:.3,holes:3,chim:3}],
+  ['n5',29,31,10,14,'S','wl_roof1_0',{sat:.46,dark:.88,tint:[1.06,.94,.88],soot:.55,moss:.25,holes:3,own:1}],
+  ['ch',33,37,10,14,'S','wl_roof1_4',{sat:.75,dark:.88,tint:[.94,.98,1.06],soot:.5,moss:.35,holes:3,steeple:1}],
+  ['s1',12,14,21,23,'N','wl_roof1_2',{sat:.75,dark:.84,tint:[1,1,.92],soot:.5,moss:.2,holes:2,own:1}],
+  ['s2',16,18,21,23,'N','kh_ohroof1_3',{sat:.95,dark:1.0,tint:[.96,1.02,.96],soot:.4,moss:.25,holes:2}],
+  ['s3',19,22,19,22,'N','kh_ohroof1_2',{sat:.5,dark:.74,tint:[1.04,.94,.88],soot:.75,moss:.2,holes:5,chim:2,flip:1}],
+  ['s4',24,28,19,22,'N','kh_ohroof1_5',{sat:.85,dark:1.0,tint:[1,.99,.97],soot:.45,moss:.3,holes:3,chim:2}],
+  ['s5',30,34,19,22,'N','wl_roof1_5',{sat:.8,dark:.92,tint:[.96,1,.92],soot:.4,moss:.55,holes:4,chim:3}]
+]};
+function tkrRng(seed){let s=(seed*2654435761)>>>0||1;return()=>{s^=s<<13;s>>>=0;s^=s>>>17;s^=s<<5;s>>>=0;return s/4294967296}}
+function tkrLoadImg(key,src){return new Promise(res=>{if(IMG[key])return res();const i=new Image();i.onload=()=>{IMG[key]=i;res()};i.onerror=()=>res();i.src=src+'?v='+VERSION})}
+function tkrLoad(){
+  if(TKR.loading)return TKR.loading;
+  const jobs=[];for(let i=0;i<6;i++)jobs.push(tkrLoadImg('wl_roof1_'+i,'assets/wl/roof1_'+i+'.webp'));
+  for(let i=0;i<6;i++)jobs.push(tkrLoadImg('kh_ohroof1_'+i,'assets/kh/ohroof1_'+i+'.webp'));
+  jobs.push(tkrLoadImg('kh_ohtower1_4','assets/kh/ohtower1_4.webp'));
+  return TKR.loading=Promise.all(jobs).then(()=>{TKR.ready=true});
+}
+/* the painted brick chimney of Wenlock's red roof (it stands on the ridge), cut out: used on other roofs, greyed and sooted */
+function tkrChimney(){
+  if(TKR.chim!==undefined)return TKR.chim;const s=IMG.wl_roof1_0;if(!s)return null;
+  const cw=76,ch=150,c=document.createElement('canvas');c.width=cw;c.height=ch;const x=c.getContext('2d');x.drawImage(s,178,0,cw,ch,0,0,cw,ch);
+  // the lowest rows are where the slope starts to widen: fade the bottom edge so it can sit into any roof
+  x.globalCompositeOperation='destination-in';const g=x.createLinearGradient(0,0,0,ch);g.addColorStop(0,'#000');g.addColorStop(.86,'#000');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,cw,ch);
+  return TKR.chim=c;
+}
+/* one weathered roof: a grade (grey, dark, tinted), soot streaks from the ridge, moss along the eaves, missing tiles, and a painted chimney on the ridge */
+function tkrRoofVar(k,id,o,flip){
+  const key='tkr_'+id+(flip?'f':''),src=IMG[k];if(IMG[key])return key;if(!src)return null;
+  const iw=src.width,ih=src.height,rng=tkrRng(id.charCodeAt(0)*131+id.charCodeAt(1)*17+(o.holes|0)*7+3);
+  let hasCh=!!(o.chim||o.own);   // own: the piece already carries its chimney
+  const cim=o.chim?tkrChimney():null,chW=Math.round(iw*(.19+(o.chim||0)*.012)),chH=cim?Math.round(chW*cim.height/cim.width):0,ext=cim?Math.round(chH*.9):0,H=ih+ext;
+  const c=document.createElement('canvas');c.width=iw;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});
+  // the apex of the roof: the first row with some picture in it (a hip roof has a flat top, so the middle of that row)
+  let apexY=0,apexX=iw/2;{const t=document.createElement('canvas');t.width=iw;t.height=ih;const tx=t.getContext('2d',{willReadFrequently:true});tx.drawImage(src,0,0);const d=tx.getImageData(0,0,iw,ih).data;
+    outer:for(let y=0;y<ih;y++){let a=-1,b=-1;for(let xx=0;xx<iw;xx++)if(d[(y*iw+xx)*4+3]>60){if(a<0)a=xx;b=xx}if(a>=0&&b-a>3){apexY=y;apexX=(a+b)/2;break outer}}}
+  if(cim){const cx=apexX+(o.chim===2?-iw*.0:0),by=ext+apexY+chH*.1;x.save();x.drawImage(cim,cx-chW/2,by-chH,chW,chH);x.restore()}
+  x.drawImage(src,0,ext);
+  // grade
+  const d=x.getImageData(0,0,iw,H),a=d.data,t=o.tint,sat=o.sat,dk=o.dark;
+  for(let i=0;i<a.length;i+=4){if(!a[i+3])continue;const l=a[i]*.3+a[i+1]*.59+a[i+2]*.11;
+    const C=v=>Math.max(0,Math.min(255,(v-105)*1.18+105));a[i]=C((l+(a[i]-l)*sat)*dk*t[0]);a[i+1]=C((l+(a[i+1]-l)*sat)*dk*t[1]);a[i+2]=C((l+(a[i+2]-l)*sat)*dk*t[2])}
+  x.putImageData(d,0,0);
+  x.globalCompositeOperation='source-atop';
+  const top=ext+apexY,bot=ext+ih;
+  // soot streaks running down from the ridge and the chimney
+  for(let i=0;i<Math.round(9*o.soot)+2;i++){const sx=iw*(.2+rng()*.6),sw=iw*(.012+rng()*.03),sy=top+(rng()*.1)*ih,len=ih*(.35+rng()*.55);
+    const g=x.createLinearGradient(0,sy,0,sy+len);g.addColorStop(0,'rgba(12,9,7,'+(.32+rng()*.22)*o.soot+')');g.addColorStop(1,'rgba(12,9,7,0)');x.fillStyle=g;
+    x.beginPath();x.moveTo(sx-sw*.4,sy);x.lineTo(sx+sw*.4,sy);x.lineTo(sx+sw*(.9+rng()*.6),sy+len);x.lineTo(sx-sw*(.9+rng()*.6),sy+len);x.closePath();x.fill()}
+  // the eaves darken (wet, sooty) along the bottom
+  {const g=x.createLinearGradient(0,bot-ih*.22,0,bot);g.addColorStop(0,'rgba(18,14,10,0)');g.addColorStop(1,'rgba(18,14,10,.42)');x.fillStyle=g;x.fillRect(0,bot-ih*.22,iw,ih*.22)}
+  // moss along the eaves and in the valleys: soft green-brown blobs
+  for(let i=0;i<Math.round(14*o.moss)+1;i++){const mx=iw*rng(),my=bot-ih*(.02+rng()*.42*(.4+o.moss)),mr=iw*(.025+rng()*.05);
+    const g=x.createRadialGradient(mx,my,0,mx,my,mr);g.addColorStop(0,'rgba(74,88,40,'+(.42+rng()*.2)+')');g.addColorStop(.6,'rgba(62,76,36,.28)');g.addColorStop(1,'rgba(60,72,34,0)');x.fillStyle=g;x.beginPath();x.ellipse(mx,my,mr*1.5,mr*.8,0,0,6.3);x.fill()}
+  // missing tiles and shingles: dark ragged gaps, each with a thin pale edge where the next course shows
+  for(let i=0;i<(o.holes|0);i++){const hy=top+ih*(.3+rng()*.55),spread=(hy-top)/ih*iw*.42,hx=iw/2+(rng()*2-1)*spread*.85,hw=iw*(.02+rng()*.03),hh=hw*(.5+rng()*.5);
+    x.fillStyle='rgba(14,9,6,.78)';x.beginPath();for(let q=0;q<7;q++){const an=q/7*6.283,rr=.7+rng()*.5;x.lineTo(hx+Math.cos(an)*hw*rr,hy+Math.sin(an)*hh*rr)}x.closePath();x.fill();
+    x.strokeStyle='rgba(150,138,118,.22)';x.lineWidth=1;x.beginPath();x.moveTo(hx-hw*.8,hy+hh*.9);x.lineTo(hx+hw*.8,hy+hh*.9);x.stroke()}
+  x.globalCompositeOperation='source-over';
+  {// a dark painted edge round the whole roof (the thick eave and the barge boards), so it reads crisp against the sky
+    const sil=document.createElement('canvas');sil.width=iw;sil.height=H;const sx=sil.getContext('2d');sx.drawImage(c,0,0);sx.globalCompositeOperation='source-in';sx.fillStyle='rgba(12,9,7,.9)';sx.fillRect(0,0,iw,H);
+    const o2=document.createElement('canvas');o2.width=iw;o2.height=H;const ox=o2.getContext('2d'),r=Math.max(2,Math.round(iw/150));
+    for(let q=0;q<10;q++){const an=q/10*6.283;ox.drawImage(sil,Math.cos(an)*r,Math.sin(an)*r+r*.6)}
+    ox.drawImage(c,0,0);c.getContext('2d').clearRect(0,0,iw,H);c.getContext('2d').drawImage(o2,0,0)}
+  let out=c;if(flip){out=document.createElement('canvas');out.width=iw;out.height=H;const x2=out.getContext('2d');x2.translate(iw,0);x2.scale(-1,1);x2.drawImage(c,0,0)}
+  out._tkrR=1;IMG[key]=out;NPC_H[key]=NPC_H[k];return key;
+}
+/* the steeple of the chapel: the grey octagonal tower of Oldhaven, greyed a little more and soot-stained down from the louvres */
+function tkrSteeple(){
+  const key='tkr_steeple',src=IMG.kh_ohtower1_4;if(IMG[key])return key;if(!src)return null;
+  const iw=src.width,ih=src.height,c=document.createElement('canvas');c.width=iw;c.height=ih;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(src,0,0);
+  const d=x.getImageData(0,0,iw,ih),a=d.data;for(let i=0;i<a.length;i+=4){if(!a[i+3])continue;const l=a[i]*.3+a[i+1]*.59+a[i+2]*.11;a[i]=(l+(a[i]-l)*.55)*.74;a[i+1]=(l+(a[i+1]-l)*.55)*.76;a[i+2]=(l+(a[i+2]-l)*.55)*.78}
+  x.putImageData(d,0,0);x.globalCompositeOperation='source-atop';
+  for(let i=0;i<5;i++){const sx=iw*(.22+i*.14),g=x.createLinearGradient(0,ih*.3,0,ih*.95);g.addColorStop(0,'rgba(12,9,7,.3)');g.addColorStop(1,'rgba(12,9,7,0)');x.fillStyle=g;x.fillRect(sx,ih*.3,iw*.04,ih*.65)}
+  const g=x.createLinearGradient(0,ih*.7,0,ih);g.addColorStop(0,'rgba(60,72,34,0)');g.addColorStop(1,'rgba(60,72,34,.3)');x.fillStyle=g;x.fillRect(0,ih*.7,iw,ih*.3);
+  c._tkrR=1;IMG[key]=c;NPC_H[key]=NPC_H.kh_ohtower1_4;return key;
+}
+/* put the roofs into level 3's sky list, once the pictures are in */
+function tkrPlace(L){
+  if(L._tkr||!TKR.ready)return;L.sky=L.sky||[];const out=[];const WH=1.48;
+  TKR.houses.forEach(([id,x0,x1,y0,y1,face,k,o],n)=>{
+    const flip=o.flip!==undefined?!!o.flip:hash2(x0,y0,202)<.5,key=tkrRoofVar(k,id,o,flip);if(!key)return;
+    const span=x1-x0+1,w=span+.1+(o.wide||0)*0+(hash2(x0,y0,205)-.5)*.3+(span>=5?.3:0),yc=face==='S'?y1+1-.55:y0+.55;
+    out.push({x:(x0+x1+1)/2,y:yc,k:key,w,z:WH,tkr:1});
+    if(o.steeple){const sk=tkrSteeple();if(sk)out.push({x:x0+1.05,y:yc-.12,k:sk,w:1.35,z:WH,big:1,tkr:1})}
+  });
+  for(const e of out)L.sky.push(e);L._tkr=out;
+}
+/* at dusk and night the far haze on a sky picture is a pale grey, which made the roofs glow against the dark walls: from the evening on a darker copy of each roof is drawn */
+function tkrDim(img,step){
+  if(!step||!img||!img.width)return img;const m=img._tkrM||(img._tkrM={});if(m[step])return m[step];
+  const f=[1,.74,.58,.45][step],c=document.createElement('canvas');c.width=img.width;c.height=img.height;const x=c.getContext('2d');x.drawImage(img,0,0);
+  x.globalCompositeOperation='source-atop';x.fillStyle='rgba('+((14+8*step)|0)+','+((16+8*step)|0)+','+((26+10*step)|0)+','+(1-f)+')';x.fillRect(0,0,c.width,c.height);return m[step]=c}
+{const _k=khSkyList;khSkyList=function(cx,cy,dX,dY,L,md){
+  if(LEVEL===3){const L3=LEVELS[3];if(L3&&!L3._tkr){if(!TKR.loading)tkrLoad();else tkrPlace(L3)}}
+  const out=_k.apply(this,arguments);
+  if(LEVEL===3&&LEVELS[3]&&LEVELS[3]._tkr){const k=(G.day||1)/(G.dayBase||.95),step=k>.95?0:k>.82?1:k>.66?2:3;
+    if(step)for(const s of out)if(s.img&&s.img._tkrR)s.img=tkrDim(s.img,step)}
+  return out}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

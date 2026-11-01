@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.752';
+const VERSION='3.753';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1354,6 +1354,7 @@ function stepSample(){ // the cobble recordings were 20 dB louder than the rest 
 
 function sfx(n){
   if(!AC||G.mute)return;
+  if(n==='door'||n==='tele'){const nowT=performance.now();if(self.SFX_PASST&&nowT-self.SFX_PASST<1600)return;self.SFX_PASST=nowT} // entering or leaving an area sounds once: two door or portal sounds close together (the door, then the arrival) used to pile up into one loud grind
   if(n==='bump'){if(G.bumpT&&G.time-G.bumpT<1.5)return;G.bumpT=G.time}else if(n==='step')G.bumpT=0; // a wall bumps once, however long the key is held
   if((n==='step'||n==='turn'||n==='bump')&&!SNDOPT.steps)return;
   if(SND_COMBAT.has(n)&&!SNDOPT.combat)return;
@@ -4131,8 +4132,8 @@ function drawLoot(){
   if(L.sel&&L.sel.side==='box'&&it)label=L.shop?`Buy  ${ITEMDEF[it.id].price}`:'Take';
   else if(L.sel&&L.sel.side==='bag'&&it&&L.shop)label=`Sell  ${sellPrice(it.id)}`;
   else if(L.sel&&L.sel.side==='bag'&&it&&L.cap)label='Store in chest';
-  if(label)btnText(id,label,324,198,146,26);
-  if(!L.shop&&box.length){const cs=typeof csDraw==='function';btnText('ltakeall','Take all',324,214,cs?58:146,26);if(cs)csDraw(L)}
+  if(label)btnText(id,label,324,148,146,28);
+  if(!L.shop&&box.length){const cs=typeof csDraw==='function';stoneFace('ltakeall','Take all',324,180,146,32,'#e8d9a6',15);btn('ltakeall',324,180,146,32);if(cs)csDraw(L)} // Take all is a big button of its own; the sort buttons sit under it
   // bottom bar
   drawPortraits(250,hi,'lhero');
   panel(168,252,230,62,false,false);txt(`${HERO_DEF[hi].name}  -  health ${h.hp}/${h.max}`,283,276,10,heroSpeech(hi),'center',true);
@@ -59220,11 +59221,11 @@ function csSortList(arr,mode,asc){ // sorts the array in place, stable
 const csState=()=>{const F=G.flags;return F.csort||(F.csort={m:'Value',up:true})};
 /* the acquisition stamp */
 {const _ba=bagAdd;bagAdd=function(it){try{if(it&&!it.a&&G.flags){G.flags.acq=(G.flags.acq|0)+1;it.a=G.flags.acq}}catch(e){}return _ba.apply(this,arguments)}}
-/* the loot window: Take all gets narrower, and the sort buttons stand beside it */
+/* the loot window: the sort buttons stand under the big Take all button */
 function csDraw(L){
   const S=csState();
-  btnText('lsortbox',S.m,385,214,56,26);
-  btnText('lsortdir',S.up?'▲':'▼',444,214,26,26);
+  btnText('lsortbox',S.m,324,216,104,26);
+  btnText('lsortdir',S.up?'▲':'▼',432,216,38,26);
 }
 function csLootBtn(id,L){
   if(id!=='lsortbox'&&id!=='lsortdir')return false;
