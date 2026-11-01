@@ -334,7 +334,7 @@ function bksRain(R,t,f,rd){
    graveyard 530 (own storm), the Pale Spire and the Never-Ending Tower (own skies), the undersea rooms (uwLv) and every desert level (wxRegionOf is
    'desert', the dunes, Khemetra 41 to 44, 50 to 65, DNG_INFO dungeons, and any name with dune, desert, erg, oasis, pyramid, tomb, burrow, Khemetra).
    Indoors, in caves and in dungeons there is no rain, no mist and no sound: the rain fades out at the door and resumes outside.
-   The Ironhill Road (rain:true) keeps a steady light rain (.4) in the new look.
+   The Ironhill Road (level 10) is not on the dice: it ALWAYS rains there, a steady .55 with showers of .9 (spells of 40 to 120 s, thunder in the showers); its hut (24) is indoors and stays dry.
    Look and light: the three streak layers, wind, gusts, horizon mist, the thin line of splashing puddles, a cool grey wash; weatherNow darkens and greys
    the air in step with the rain (the Wenlock golden light fades as it comes on). Sound: the same loop and hiss (bksSound).
    ========================================================================== */
@@ -360,12 +360,19 @@ function bksVisitClock(dt){
   const c=BKS.vc;c.t+=dt;
   if(c.t>=c.end){c.t=0;c.wet=!c.wet;c.str=c.wet?bksStrength():0;c.end=c.wet?50+Math.random()*100:10+Math.random()*30}
   return c.str}
+/* the Ironhill Road (level 10): it ALWAYS rains. A steady rain of .55 with showers of .9 rolled over it, spells of 40 to 120 s; never dry, no dice, no weather turns it off */
+const BKS_ROAD=10,BKS_ROAD_LO=.55,BKS_ROAD_HI=.9;
+const BKS_RC={t:0,hi:false,end:40+Math.random()*80};
+function bksRoadClock(dt){const c=BKS_RC;c.t+=dt;if(c.t>=c.end){c.t=0;c.hi=!c.hi;c.end=40+Math.random()*80}return c.hi?BKS_ROAD_HI:BKS_ROAD_LO}
 function bksEarlyStep(dt){
   if(!bksEarlyOwns()){BKS.eR=0;BKS.early=0;BKS.eth.length=0;return 0}
-  let want=0;if(bksEarlyRoll())want=bksVisitClock(dt);
+  const road=LEVEL===BKS_ROAD;let want=0;
+  if(road){want=bksRoadClock(dt);if(BKS.eR<BKS_ROAD_LO)BKS.eR=BKS_ROAD_LO;weatherNow()}   // it is already raining when the party arrives
+  else{
+  if(bksEarlyRoll())want=bksVisitClock(dt);
   weatherNow();const id=BKS.ebase;   // (the wrapper below records the underlying weather)
   if(id==='snow'||id==='frost')want=0;
-  else{if(id==='rain')want=Math.max(want,.62);else if(id==='storm')want=1;if(LEVEL===10)want=Math.max(want,.4)}
+  else{if(id==='rain')want=Math.max(want,.62);else if(id==='storm')want=1}}
   if(BKS.eforce!==null)want=BKS.eforce;
   BKS.ewant=want;
   BKS.eR+=(want-BKS.eR)*Math.min(1,dt/3.5);if(Math.abs(want-BKS.eR)<.004)BKS.eR=want;
@@ -373,7 +380,7 @@ function bksEarlyStep(dt){
   const t=G.time;
   if(want>.7&&BKS.eR>.5){
     if(!BKS.enext)BKS.enext=t+3+Math.random()*6;
-    if(t>BKS.enext){BKS.eflash=t;BKS.eStrikes++;BKS.eth.push(t+1+Math.random()*2.2);BKS.enext=t+8+Math.random()*16}
+    if(t>BKS.enext){BKS.eflash=t;BKS.eStrikes++;BKS.eth.push(t+1+Math.random()*2.2);BKS.enext=t+(road?12+Math.random()*28:8+Math.random()*16)}
   }else BKS.enext=0;
   for(let i=BKS.eth.length-1;i>=0;i--)if(t>=BKS.eth[i]){BKS.eth.splice(i,1);try{gysRumble(.17)}catch(e){}}
   return BKS.early?BKS.eR:0}
@@ -381,7 +388,7 @@ function bksEarlyStep(dt){
 {const _w=weatherNow;weatherNow=function(){const w=_w.apply(this,arguments);
   if(BKS.off||BKS.eoff||typeof LEVEL==='undefined'||!bksEarlyOwns())return w;
   const id=w&&w.id;BKS.ebase=id||null;
-  if(id==='snow'||id==='frost'||id==='fog')return w;
+  if(LEVEL!==BKS_ROAD&&(id==='snow'||id==='frost'||id==='fog'))return w;   // (the Ironhill Road is never turned dry by the weather)
   const k=Math.min(1,BKS.eR*1.6),reg=typeof wxRegionOf==='function'&&wxRegionOf(LEVEL);
   if(k<=.02)return(id==='rain'||id==='storm')?Object.assign({id:'clear'},WX_DEF.clear):w;
   const R=WX_DEF[BKS.eR>.8?'storm':'rain'],b=w||{fog:0,haze:0,dark:1,mix:0,col:R.col},lp=(a,c)=>a+(c-a)*k,bc=b.col||R.col;

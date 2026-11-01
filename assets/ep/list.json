@@ -1041,5 +1041,215 @@
 "h": 512,
 "kind": "sprite",
 "sheet": "webs_sheet1"
+},
+"bn_skel_sit": {
+"file": "bn_skel_sit.webp",
+"w": 573,
+"h": 734,
+"kind": "sprite",
+"sheet": "bones_a"
+},
+"bn_skull": {
+"file": "bn_skull.webp",
+"w": 527,
+"h": 281,
+"kind": "sprite",
+"sheet": "bones_b"
+},
+"bn_ribs": {
+"file": "bn_ribs.webp",
+"w": 614,
+"h": 240,
+"kind": "sprite",
+"sheet": "bones_b"
+},
+"bn_longbones": {
+"file": "bn_longbones.webp",
+"w": 625,
+"h": 209,
+"kind": "sprite",
+"sheet": "bones_b"
+},
+"bn_skullpile": {
+"file": "bn_skullpile.webp",
+"w": 640,
+"h": 347,
+"kind": "sprite",
+"sheet": "bones_b"
+},
+"bn_jaw": {
+"file": "bn_jaw.webp",
+"w": 558,
+"h": 177,
+"kind": "sprite",
+"sheet": "bones_b"
+},
+"bn_potshards": {
+"file": "bn_potshards.webp",
+"w": 640,
+"h": 245,
+"kind": "sprite",
+"sheet": "bones_b"
+},
+"bn_buried": {
+"file": "bn_buried.webp",
+"w": 640,
+"h": 240,
+"kind": "sprite",
+"sheet": "bones_c"
+},
+"bn_rat": {
+"file": "bn_rat.webp",
+"w": 376,
+"h": 112,
+"kind": "sprite",
+"sheet": "bones_c"
+},
+"bn_swordshield": {
+"file": "bn_swordshield.webp",
+"w": 640,
+"h": 278,
+"kind": "sprite",
+"sheet": "bones_c"
+},
+"bn_cloak": {
+"file": "bn_cloak.webp",
+"w": 640,
+"h": 275,
+"kind": "sprite",
+"sheet": "bones_c"
+},
+"bn_wolfskull": {
+"file": "bn_wolfskull.webp",
+"w": 640,
+"h": 137,
+"kind": "sprite",
+"sheet": "bones_c"
+},
+"bn_skelside": {
+"file": "bn_skelside.webp",
+"w": 640,
+"h": 193,
+"kind": "sprite",
+"sheet": "bones_c"
+},
+"bn_wolfskel": {
+"file": "bn_wolfskel.webp",
+"w": 640,
+"h": 174,
+"kind": "sprite",
+"sheet": "bones_c"
+},
+"bn_moss": {
+"file": "bn_moss.webp",
+"w": 639,
+"h": 304,
+"kind": "sprite",
+"sheet": "bones_d"
+},
+"bn_crushed": {
+"file": "bn_crushed.webp",
+"w": 608,
+"h": 171,
+"kind": "sprite",
+"sheet": "bones_d"
+},
+"bn_chain": {
+"file": "bn_chain.webp",
+"w": 639,
+"h": 369,
+"kind": "sprite",
+"sheet": "bones_d"
+},
+"bn_ribdome": {
+"file": "bn_ribdome.webp",
+"w": 635,
+"h": 268,
+"kind": "sprite",
+"sheet": "bones_d"
+},
+"bn_skelcurl": {
+"file": "bn_skelcurl.webp",
+"w": 633,
+"h": 339,
+"kind": "sprite",
+"sheet": "bones_d"
+},
+"bn_twoskulls": {
+"file": "bn_twoskulls.webp",
+"w": 635,
+"h": 211,
+"kind": "sprite",
+"sheet": "bones_d"
+},
+"fl_0": {
+"file": "fl_0.webp",
+"w": 299,
+"h": 224,
+"kind": "sprite",
+"sheet": "flowers1"
+},
+"fl_1": {
+"file": "fl_1.webp",
+"w": 284,
+"h": 244,
+"kind": "sprite",
+"sheet": "flowers1"
+},
+"fl_2": {
+"file": "fl_2.webp",
+"w": 151,
+"h": 253,
+"kind": "sprite",
+"sheet": "flowers1"
+},
+"fl_3": {
+"file": "fl_3.webp",
+"w": 269,
+"h": 182,
+"kind": "sprite",
+"sheet": "flowers1"
+},
+"fl_4": {
+"file": "fl_4.webp",
+"w": 351,
+"h": 216,
+"kind": "sprite",
+"sheet": "flowers1"
+},
+"fl_5": {
+"file": "fl_5.webp",
+"w": 289,
+"h": 207,
+"kind": "sprite",
+"sheet": "flowers1"
+},
+"fl_6": {
+"file": "fl_6.webp",
+"w": 267,
+"h": 200,
+"kind": "sprite",
+"sheet": "flowers1"
+},
+"fl_7": {
+"file": "fl_7.webp",
+"w": 302,
+"h": 176,
+"kind": "sprite",
+"sheet": "flowers1"
+},
+"fl_8": {
+"file": "fl_8.webp",
+"w": 310,
+"h": 251,
+"kind": "sprite",
+"sheet": "flowers1"
+},
+"fl_9": {
+"file": "fl_9.webp",
+"w": 270,
+"h": 244,
+"kind": "sprite",
+"sheet": "flowers1"
 }
 }

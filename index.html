@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.764';
+const VERSION='3.765';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2692,7 +2692,7 @@ function render3D(){
     if(EPTM&&g>=7){const t2=EPTM.get(ti);if(t2!==undefined)ti=t2} // opt-in grimed copies of a level's wall pictures (early_polish.js)
     if(EPTV&&g>=100){const vv=EPTV.get(g);if(vv)ti=vv[((Math.imul(mx,73856093)^Math.imul(my,19349663)^Math.imul(face,83492791))>>>4)%vv.length]} // opt-in painted house walls, a different panel per square (early_polish.js)
     if(EPWV&&(g===1||g===2)&&EPWV[g]){const vv=EPWV[g];ti=vv[((Math.imul(mx,73856093)^Math.imul(my,19349663)^Math.imul(face,83492791))>>>4)%vv.length]} // opt-in painted wall variants (early_polish.js)
-    if(EPCT&&g===1){const t2=EPCT.get(my*MW+mx);if(t2!==undefined)ti=t2} // opt-in single wall squares with their own face (early_polish.js)
+    if(EPCT&&(g===1||g===2)){const t2=EPCT.get(my*MW+mx);if(t2!==undefined)ti=t2} // opt-in single wall squares with their own face (early_polish.js)
     if(SRCT){const c2=SRCT.get(my*MW+mx);if(c2!==undefined)ti=srSusFor(ti,c2)} // a secret wall of a maze or dungeon: this level's own wall picture with the odd block, crack and dust (secret_rooms.js)
     const tv=(g===1||g===2)?torchAt.get((my*MW+mx)*4+face):0;
     if(tv&&LEVEL===31&&T_TORCH_GOLD!==undefined){ti=T_TORCH_GOLD+((fr+((mx*7+my*3)&3)*2)&7)}else if(tv){const ph=((mx*7+my*3)&3);ti=(g===1?(tv===2?T_TORCH_STONE_R:T_TORCH_STONE):(tv===2?T_TORCH_BRICK_R:T_TORCH_BRICK))+((fr+ph*2)&7)}
@@ -4569,7 +4569,7 @@ const WORLD_LOCS=[
   {k:'thornwick',n:'Thornwick',lv:[3,4,5,6,9,12,29],x:156,y:204,ic:'town'},
   {k:'gwood',n:"Gandrick's Wood",lv:[7,25],x:212,y:230,ic:'trees'},
   {k:'gcave',n:'Cave',lv:[8],x:246,y:204,ic:'cave'},
-  {k:'road',n:'Ironhill Road',lv:[10,24],x:176,y:166,ic:'rain'},
+  {k:'road',n:'Ironhill Road',lv:[10,24],x:194,y:146,ic:'rain',sc:.8,pin:1},
   {k:'tunnel',n:'The Tunnel',lv:[11],x:208,y:142,ic:'cave'},
   {k:'ironhill',n:'Ironhill',lv:[13,14,15,16,17,21,30],x:262,y:112,ic:'castle'},
   {k:'graves',n:'Burial Ground',lv:[20],x:206,y:92,ic:'graves'},
@@ -9723,6 +9723,17 @@ function terrMarch(x,rX,rY,tmax){
           r=r*(1-m)+(rock.d[rt]*rock.tint[0]*kR0*rs*lc*ivr+hz[0]*skr)*m;g=g*(1-m)+(rock.d[rt+1]*rock.tint[1]*kG0*rs*lc*ivr+hz[1]*skr)*m;b=b*(1-m)+(rock.d[rt+2]*rock.tint[2]*kB0*rs*lc*ivr+hz[2]*skr)*m;
         }
         let o=(ys*VW+x)*4;
+        const dzf=cz-hg;
+        if(T.fp&&!wv&&dzf>.05&&!C.uw){ // flat ground painted row by row (Oldhaven): each row has its own distance and a mip-mapped texel, so the paving does not crawl or shimmer when the party walks
+          for(let y=ys;y<ye;y++,o+=VW*4){
+            const ty=dzf*F/(y+.5-HHv),qx=cx+rX*ty,qy=cy+rY*ty,cq=qx|0,cr=qy|0,fq=(fm&&qx>=0&&qy>=0&&cq<W&&cr<Hh)?fm.charCodeAt(cr*W+cq):48,fdq=fds[fq-48]||fds[0];
+            const mips=floorMips(fdq),vf=ty*ty*rl/(dzf*F),hf=ty*2*PL/VW,lf=Math.min(6.9,Math.max(0,Math.log2(TS*Math.max(vf,hf))-.3)),l0=lf|0,wt=lf-l0,A=mips[l0],B=mips[l0+1],sh0=7-l0,sh1=6-l0;
+            const uu=((qx-cq)*TS)|0,vv=((qy-cr)*TS)|0,ia=(((vv>>l0)<<sh0)+(uu>>l0))<<2,ib=(((vv>>(l0+1))<<sh1)+(uu>>(l0+1)))<<2;
+            const tr=A[ia]+(B[ib]-A[ia])*wt,tg=A[ia+1]+(B[ib+1]-A[ia+1])*wt,tb=A[ia+2]+(B[ib+2]-A[ia+2])*wt;
+            const dq=ty*rl,sm2=Math.min(hzmax,dq*hzrate),iv2=1-sm2,sk2=sm2*(lbm*.55+.05);
+            D[o]=tr*kR0*shade*iv2+hz[0]*sk2;D[o+1]=tg*kG0*shade*iv2+hz[1]*sk2;D[o+2]=tb*kB0*shade*iv2+hz[2]*sk2;
+          }
+        }else
         for(let y=ys;y<ye;y++,o+=VW*4){D[o]=r;D[o+1]=g;D[o+2]=b}
       }
       yb=ytop;
@@ -16306,7 +16317,7 @@ function ohBuild(){
   OH.houses=houses;
   LEVELS[OH.ID]=lv;LEVEL_NAMES[OH.ID]='Oldhaven';
   {for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=chars[rows[y][x]];if(c>=30&&c<100)block[y*W+x]=0} // a gate is not a rock face
-  const hh=new Float32Array(N).fill(.3),rk=new Float32Array(N);TERRS[OH.ID]=yarTerrain(W,H,hh,rk,block)} // flat ground under a real sky
+  const hh=new Float32Array(N).fill(.3),rk=new Float32Array(N);TERRS[OH.ID]=yarTerrain(W,H,hh,rk,block);TERRS[OH.ID].fp=1} // flat ground under a real sky
   const q4=LEVELS[304];if(q4)lv.portals[2].x=q4.start.x,lv.portals[2].y=q4.start.y;
 }
 KH_LAZY[OH.ID]=()=>{seaBuild(304);ohBuild()};LEVEL_NAMES[OH.ID]='Oldhaven';
@@ -16967,7 +16978,7 @@ function oakBuild(){
     portals:[{to:305,x:142,y:73,f:3,tex:'tgate'}],
     mapNames:[{t:'The Gate Glade',x:6,y:32,k:'place'},{t:'Woodwarden Camp',x:22,y:15,k:'place'},{t:'Oakwrights’ Yard',x:22,y:49,k:'place'},{t:'Bramwick’s Glade',x:46,y:31,k:'place'},{t:'The Ashen Glade',x:62,y:7,k:'place'},{t:'The Great Oak',x:68,y:48,k:'place'},{t:'The Woodwardens’ Path',x:14,y:28,k:'lane'},{t:'The Oakwrights’ Road',x:14,y:46,k:'lane'},{t:'The Heart Road',x:34,y:36,k:'lane'},{t:'The Great Oak Road',x:57,y:46,k:'lane'},{t:'To Oldhaven',x:4,y:38,k:'lane'}]};
   LEVELS[OAK.ID]=lv;LEVEL_NAMES[OAK.ID]='The Oakwood';
-  {const N=W*H,hh=new Float32Array(N).fill(.3),rk=new Float32Array(N),bl=new Uint8Array(N);for(let y=0;y<H;y++)for(let x=0;x<W;x++)if((x===0||y===0||x===W-1||y===H-1)&&!(x===0&&y===36))bl[y*W+x]=1;TERRS[OAK.ID]=yarTerrain(W,H,hh,rk,bl)} // a real blue sky above the oaks, as in Oldhaven
+  {const N=W*H,hh=new Float32Array(N).fill(.3),rk=new Float32Array(N),bl=new Uint8Array(N);for(let y=0;y<H;y++)for(let x=0;x<W;x++)if((x===0||y===0||x===W-1||y===H-1)&&!(x===0&&y===36))bl[y*W+x]=1;TERRS[OAK.ID]=yarTerrain(W,H,hh,rk,bl);TERRS[OAK.ID].fp=1}   // flat ground painted row by row, as in Oldhaven, so it does not crawl when the party walks // a real blue sky above the oaks, as in Oldhaven
   lv.ceilH=5.2;
 }
 KH_LAZY[OAK.ID]=oakBuild;LEVEL_NAMES[OAK.ID]='The Oakwood';
@@ -48764,11 +48775,13 @@ function wmnSpec(l){return WMN_SPEC[l.k]||[[WMN_ICSPEC[l.ic]||'i_oaks',0,0,l.ic=
 const WMN_FOOT={i_town:.88,i_seaside:.87,i_castle:.87,i_desertcity:.87,i_cave:.87,i_mine:.85,i_graves:.9,i_crypt:.92,i_oaks:.87,i_pines:.88,i_mountains:.77};   // how far down each picture its solid part goes (the rest is the faded ground): a name may stand over that
 const WM_DH={s:96,ox:-48,oy:-62,a:.62};   // the Deeper Hollow's picture: its size on the map, where it starts from the place's spot, and how see-through it is
 const WMN_BOX={deephollow:[WM_DH.ox-1,WM_DH.oy-1,WM_DH.ox+WM_DH.s+1,WM_DH.oy+WM_DH.s+1]};   // places whose picture is drawn by another file: their box
+const wmnSc=l=>l.sc||1;   // a place may carry sc (0.8 = a fifth smaller): its picture, name and level are all drawn at that fraction
 function wmnShape(l){
   if(WMN_BOX[l.k]){const b=WMN_BOX[l.k];return {parts:[],off:0,ib:[l.x+b[0],l.y+b[1],l.x+b[2],l.y+b[3]]}}
   const s=wmnSpec(l);if(!s.length)return {parts:[],off:0,ib:[l.x,l.y-12,l.x,l.y-4]};let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
-  for(const p of s){const d=wmnDims(p[0],p[3]*WMN_ICO_SCALE,p[4]);x0=Math.min(x0,p[1]*WMN_ICO_SCALE-d[0]/2);x1=Math.max(x1,p[1]*WMN_ICO_SCALE+d[0]/2);y0=Math.min(y0,p[2]*WMN_ICO_SCALE-d[1]);y1=Math.max(y1,p[2]*WMN_ICO_SCALE)}
-  const off=l.y+10-y1;let fi=0;for(const p of s)if(p[2]*WMN_ICO_SCALE===y1&&WMN_FOOT[p[0]]){const d=wmnDims(p[0],p[3]*WMN_ICO_SCALE,p[4]);fi=Math.max(fi,(1-WMN_FOOT[p[0]])*d[1]*.8)}
+  const sc=wmnSc(l),KK=WMN_ICO_SCALE*sc;
+  for(const p of s){const d=wmnDims(p[0],p[3]*KK,p[4]);x0=Math.min(x0,p[1]*KK-d[0]/2);x1=Math.max(x1,p[1]*KK+d[0]/2);y0=Math.min(y0,p[2]*KK-d[1]);y1=Math.max(y1,p[2]*KK)}
+  const off=l.y+10-y1;let fi=0;for(const p of s)if(p[2]*KK===y1&&WMN_FOOT[p[0]]){const d=wmnDims(p[0],p[3]*KK,p[4]);fi=Math.max(fi,(1-WMN_FOOT[p[0]])*d[1]*.8)}
   return {parts:s.slice().sort((a,b)=>a[2]-b[2]),off,fi,ib:[l.x+x0,y0+off,l.x+x1,y1+off]}}
 
 /* ---------- the layout: pictures, then names ---------- */
@@ -48778,16 +48791,17 @@ const wmnHit=(a,b)=>a[0]<b[2]&&a[2]>b[0]&&a[1]<b[3]&&a[3]>b[1];
 function wmnSpread(){
   const c=ctx,B=[],M=3,MAXD=80;
   for(const l of WORLD_LOCS){if(l._x0===undefined){l._x0=l.x;l._y0=l.y}l.x=l._x0;l.y=l._y0}
-  for(const l of WORLD_LOCS){const sh=wmnShape(l),big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle',nsz=big?7.6:6.6;
-    c.save();c.font=`bold ${nsz}px ${FUI}`;const w=c.measureText(l.n).width+(typeof locRating==='function'&&!G.flags.autoScaleOn?24:0);c.restore();
+  for(const l of WORLD_LOCS){const sh=wmnShape(l),big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle',nsz=(big?7.6:6.6)*wmnSc(l);
+    c.save();c.font=`bold ${nsz}px ${FUI}`;const w=c.measureText(l.n).width+(typeof locRating==='function'&&!G.flags.autoScaleOn?24*wmnSc(l):0);c.restore();
     const a=sh.ib[0]-l.x,b=sh.ib[1]-l.y,e=sh.ib[2]-l.x,f=sh.ib[3]-l.y,sub=l.sub?9:0;
     B.push({l,x0:Math.min(a,-w/2-2),y0:b,x1:Math.max(e,w/2+2),y1:f+12+sub+4})}
   for(let it=0;it<400;it++){let moved=false;
     for(let i=0;i<B.length;i++)for(let j=i+1;j<B.length;j++){const p=B[i],q=B[j];
       const ox=Math.min(p.l.x+p.x1,q.l.x+q.x1)-Math.max(p.l.x+p.x0,q.l.x+q.x0)+M,oy=Math.min(p.l.y+p.y1,q.l.y+q.y1)-Math.max(p.l.y+p.y0,q.l.y+q.y0)+M;
       if(ox<=0||oy<=0)continue;moved=true;
-      if(ox<oy){const d=ox/2+.1,s=(p.l.x+(p.x0+p.x1)/2)<=(q.l.x+(q.x0+q.x1)/2)?-1:1;p.l.x+=s*d;q.l.x-=s*d}
-      else{const d=oy/2+.1,s=(p.l.y+(p.y0+p.y1)/2)<=(q.l.y+(q.y0+q.y1)/2)?-1:1;p.l.y+=s*d;q.l.y-=s*d}
+      const kp=p.l.pin?0:q.l.pin?2:1,kq=q.l.pin?0:p.l.pin?2:1;   // a pinned place (pin:1) stays exactly on its spot and the other one gives way
+      if(ox<oy){const d=ox/2+.1,s=(p.l.x+(p.x0+p.x1)/2)<=(q.l.x+(q.x0+q.x1)/2)?-1:1;p.l.x+=s*d*kp;q.l.x-=s*d*kq}
+      else{const d=oy/2+.1,s=(p.l.y+(p.y0+p.y1)/2)<=(q.l.y+(q.y0+q.y1)/2)?-1:1;p.l.y+=s*d*kp;q.l.y-=s*d*kq}
       for(const r of [p,q]){r.l.x=Math.max(r.l._x0-MAXD,Math.min(r.l._x0+MAXD,r.l.x));r.l.y=Math.max(r.l._y0-MAXD,Math.min(r.l._y0+MAXD,r.l.y))}}
     if(!moved)break}
   for(const l of WORLD_LOCS){l.x=Math.round(l.x*2)/2;l.y=Math.round(l.y*2)/2}
@@ -48808,14 +48822,14 @@ function wmnLayout(){
   for(const l of WORLD_LOCS){const sh=wmnShape(l);const lb=[sh.ib[0],sh.ib[1],sh.ib[2],sh.ib[3]-(sh.fi||0)];out[l.k]={sh,ib:sh.ib,lb,parts:sh.parts,off:sh.off};placed.push(lb)}
   const order=WORLD_LOCS.slice().sort((a,b)=>(b.ic==='castle'||b.ic==='town'||b.ic==='abbey'||b.ic==='orangecastle'?1:0)-(a.ic==='castle'||a.ic==='town'||a.ic==='abbey'||a.ic==='orangecastle'?1:0));
   for(const l of order){
-    const L=out[l.k],ib=L.lb,big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle',nsz=big?7.6:6.6;
+    const L=out[l.k],ib=L.lb,big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle',sc=wmnSc(l),nsz=(big?7.6:6.6)*sc;
     const lr=(!G.flags.autoScaleOn&&typeof locRating==='function')?locRating(l):null,t2=lr?'Lv '+lr:'';
-    c.save();c.font=`bold ${nsz}px ${FUI}`;const w1=c.measureText(l.n).width;c.font=`bold 6px ${FUI}`;const w2=lr?c.measureText(t2).width:0;c.font=`bold 6px ${FUI}`;const sw=l.sub?c.measureText(l.sub).width:0;c.restore();
-    const gap=lr?4:0,wt=w1+gap+w2,bw=Math.max(wt,sw),sub=l.sub?9:0,ym=(ib[1]+ib[3])/2;
+    c.save();c.font=`bold ${nsz}px ${FUI}`;const w1=c.measureText(l.n).width;c.font=`bold ${6*sc}px ${FUI}`;const w2=lr?c.measureText(t2).width:0;c.font=`bold ${6*sc}px ${FUI}`;const sw=l.sub?c.measureText(l.sub).width:0;c.restore();
+    const gap=lr?4*sc:0,wt=w1+gap+w2,bw=Math.max(wt,sw),sub=l.sub?9:0,ym=(ib[1]+ib[3])/2;
     // the name always stands straight under its own picture, a little smaller, its top just over the bottom edge of the picture so that it is plainly attached to it
     const ny=ib[3]+nsz/2-1.5,H=12+sub+6,best={cx:l.x,ny,r:[l.x-bw/2-2,ny-6,l.x+bw/2+2,ny-6+H]};let bestA=0;
     for(const p of placed)if(p!==L.lb&&wmnHit(best.r,p))bestA++;
-    placed.push(best.r);Object.assign(L,{cx:best.cx,ny:best.ny,rect:[best.r[0],best.r[1],best.r[2],best.r[1]+12+sub+6],w1,w2,gap,wt,t2,nsz,over:bestA>0});
+    placed.push(best.r);Object.assign(L,{cx:best.cx,ny:best.ny,rect:[best.r[0],best.r[1],best.r[2],best.r[1]+12+sub+6],w1,w2,gap,wt,t2,nsz,over:bestA>0,sc});
   }
   WMN.lay=out;WMN.layKey=key;return out}
 function wmnLay(l){return wmnLayout()[l.k]}
@@ -48828,11 +48842,11 @@ function wmnBlocked(x,y,d){const lay=wmnLayout(),m=d*.5+1.5;
   return false}
 
 /* ---------- drawing ---------- */
-function wmnIco(l){const L=wmnLay(l);if(!L)return;const K=WMN_ICO_SCALE;for(const p of L.parts)wmnDraw(ctx,p[0],l.x+p[1]*K,p[2]*K+L.off,p[3]*K,!!p[4])}
+function wmnIco(l){const L=wmnLay(l);if(!L)return;const K=WMN_ICO_SCALE*wmnSc(l);for(const p of L.parts)wmnDraw(ctx,p[0],l.x+p[1]*K,p[2]*K+L.off,p[3]*K,!!p[4])}
 function wmnLabel(l,v,txtH){
   const L=wmnLay(l);if(!L||L.cx===undefined)return;const col=v?'#1c1208':'#5a4a30',xs=L.cx-L.wt/2;
-  if(L.t2){txtH(l.n,xs+L.w1/2,L.ny,L.nsz,col);txtH(L.t2,xs+L.w1+L.gap+L.w2/2,L.ny,6,'#7a1a10')}else txtH(l.n,L.cx,L.ny,L.nsz,col);
-  if(l.sub)txtH(l.sub,L.cx,L.ny+8,6,'#4a3a22')}
+  if(L.t2){txtH(l.n,xs+L.w1/2,L.ny,L.nsz,col);txtH(L.t2,xs+L.w1+L.gap+L.w2/2,L.ny,6*(L.sc||1),'#7a1a10')}else txtH(l.n,L.cx,L.ny,L.nsz,col);
+  if(l.sub)txtH(l.sub,L.cx,L.ny+8,6*(L.sc||1),'#4a3a22')}
 /* the quest dots stand in the strip left under each name */
 function wmnDots(l,nq,c){const L=wmnLay(l);if(!L||!L.rect)return;
   for(let i=0;i<nq;i++){const row=(i/14)|0,inRow=Math.min(14,nq-row*14),col=i%14;c.beginPath();c.arc(L.cx+(col-(inRow-1)/2)*3.4,L.rect[3]-4+row*3.4,1.15,0,TAU);c.fill();c.stroke()}}
@@ -57294,7 +57308,7 @@ const wmwId=()=>({
 /* ---------- places: positions in map units. The map already has a wide western land (The Western Reaches, The Far West), so nothing is widened; Wenlock moves west to make room ---------- */
 const wmwGyName=(id,i)=>(typeof GY!=='undefined'&&GY.NAMES&&GY.NAMES[id])||LEVEL_NAMES[id]||('Grave Maze '+(i+1));
 const WMW_POS={wenlock:[-300,226],gardens:[-214,200],witchwood:[-282,126],wkgrave:[-356,198],gm1:[-392,166],gm2:[-396,216],gm3:[-362,244],gm4:[-326,152],wellmaze:[-258,260],westgate:[-338,288],
-  underlevel:[-84,98],drowned:[-30,100],thornwell:[186,176],goldenpyramid:[678,178]};
+  underlevel:[-84,98],drowned:[-30,100],thornwell:[132,164],goldenpyramid:[678,178]};
 function wmwHgRooms(hg){if(!hg||typeof hgtAny!=='function')return;for(let n=4850;n<=5499;n++)if(hgtAny(n)&&!hg.lv.includes(n))hg.lv.push(n)}
 // a Hollow room registered later (a town that makes its rooms when it is built) joins the grasslands then
 if(typeof hgtRegister==='function'){const _hr=hgtRegister;hgtRegister=function(id){const r=_hr.apply(this,arguments);try{if(id>=4850&&id<=5499&&typeof WORLD_LOCS!=='undefined'){const hg=WORLD_LOCS.find(l=>l.k==='hollowgrass');if(hg&&hgtAny(id)&&!hg.lv.includes(id))hg.lv.push(id)}}catch(e){}return r}}
@@ -72197,7 +72211,7 @@ function bksRain(R,t,f,rd){
    graveyard 530 (own storm), the Pale Spire and the Never-Ending Tower (own skies), the undersea rooms (uwLv) and every desert level (wxRegionOf is
    'desert', the dunes, Khemetra 41 to 44, 50 to 65, DNG_INFO dungeons, and any name with dune, desert, erg, oasis, pyramid, tomb, burrow, Khemetra).
    Indoors, in caves and in dungeons there is no rain, no mist and no sound: the rain fades out at the door and resumes outside.
-   The Ironhill Road (rain:true) keeps a steady light rain (.4) in the new look.
+   The Ironhill Road (level 10) is not on the dice: it ALWAYS rains there, a steady .55 with showers of .9 (spells of 40 to 120 s, thunder in the showers); its hut (24) is indoors and stays dry.
    Look and light: the three streak layers, wind, gusts, horizon mist, the thin line of splashing puddles, a cool grey wash; weatherNow darkens and greys
    the air in step with the rain (the Wenlock golden light fades as it comes on). Sound: the same loop and hiss (bksSound).
    ========================================================================== */
@@ -72223,12 +72237,19 @@ function bksVisitClock(dt){
   const c=BKS.vc;c.t+=dt;
   if(c.t>=c.end){c.t=0;c.wet=!c.wet;c.str=c.wet?bksStrength():0;c.end=c.wet?50+Math.random()*100:10+Math.random()*30}
   return c.str}
+/* the Ironhill Road (level 10): it ALWAYS rains. A steady rain of .55 with showers of .9 rolled over it, spells of 40 to 120 s; never dry, no dice, no weather turns it off */
+const BKS_ROAD=10,BKS_ROAD_LO=.55,BKS_ROAD_HI=.9;
+const BKS_RC={t:0,hi:false,end:40+Math.random()*80};
+function bksRoadClock(dt){const c=BKS_RC;c.t+=dt;if(c.t>=c.end){c.t=0;c.hi=!c.hi;c.end=40+Math.random()*80}return c.hi?BKS_ROAD_HI:BKS_ROAD_LO}
 function bksEarlyStep(dt){
   if(!bksEarlyOwns()){BKS.eR=0;BKS.early=0;BKS.eth.length=0;return 0}
-  let want=0;if(bksEarlyRoll())want=bksVisitClock(dt);
+  const road=LEVEL===BKS_ROAD;let want=0;
+  if(road){want=bksRoadClock(dt);if(BKS.eR<BKS_ROAD_LO)BKS.eR=BKS_ROAD_LO;weatherNow()}   // it is already raining when the party arrives
+  else{
+  if(bksEarlyRoll())want=bksVisitClock(dt);
   weatherNow();const id=BKS.ebase;   // (the wrapper below records the underlying weather)
   if(id==='snow'||id==='frost')want=0;
-  else{if(id==='rain')want=Math.max(want,.62);else if(id==='storm')want=1;if(LEVEL===10)want=Math.max(want,.4)}
+  else{if(id==='rain')want=Math.max(want,.62);else if(id==='storm')want=1}}
   if(BKS.eforce!==null)want=BKS.eforce;
   BKS.ewant=want;
   BKS.eR+=(want-BKS.eR)*Math.min(1,dt/3.5);if(Math.abs(want-BKS.eR)<.004)BKS.eR=want;
@@ -72236,7 +72257,7 @@ function bksEarlyStep(dt){
   const t=G.time;
   if(want>.7&&BKS.eR>.5){
     if(!BKS.enext)BKS.enext=t+3+Math.random()*6;
-    if(t>BKS.enext){BKS.eflash=t;BKS.eStrikes++;BKS.eth.push(t+1+Math.random()*2.2);BKS.enext=t+8+Math.random()*16}
+    if(t>BKS.enext){BKS.eflash=t;BKS.eStrikes++;BKS.eth.push(t+1+Math.random()*2.2);BKS.enext=t+(road?12+Math.random()*28:8+Math.random()*16)}
   }else BKS.enext=0;
   for(let i=BKS.eth.length-1;i>=0;i--)if(t>=BKS.eth[i]){BKS.eth.splice(i,1);try{gysRumble(.17)}catch(e){}}
   return BKS.early?BKS.eR:0}
@@ -72244,7 +72265,7 @@ function bksEarlyStep(dt){
 {const _w=weatherNow;weatherNow=function(){const w=_w.apply(this,arguments);
   if(BKS.off||BKS.eoff||typeof LEVEL==='undefined'||!bksEarlyOwns())return w;
   const id=w&&w.id;BKS.ebase=id||null;
-  if(id==='snow'||id==='frost'||id==='fog')return w;
+  if(LEVEL!==BKS_ROAD&&(id==='snow'||id==='frost'||id==='fog'))return w;   // (the Ironhill Road is never turned dry by the weather)
   const k=Math.min(1,BKS.eR*1.6),reg=typeof wxRegionOf==='function'&&wxRegionOf(LEVEL);
   if(k<=.02)return(id==='rain'||id==='storm')?Object.assign({id:'clear'},WX_DEF.clear):w;
   const R=WX_DEF[BKS.eR>.8?'storm':'rain'],b=w||{fog:0,haze:0,dark:1,mix:0,col:R.col},lp=(a,c)=>a+(c-a)*k,bc=b.col||R.col;
@@ -81439,6 +81460,37 @@ function epWallSet(name,stone,brick){if(EP.walls[name])return EP.walls[name];if(
 function epSwapWalls(W){
   if(EP.wall&&EP.wall!==W){[T_STONE,T_TORCH_STONE,T_TORCH_STONE_R,T_BRICK,T_TORCH_BRICK,T_TORCH_BRICK_R,T_DOOR,T_LOCK,T_EXIT]=EP.save;EP.wall=null}
   if(W&&!EP.wall){EP.save=[T_STONE,T_TORCH_STONE,T_TORCH_STONE_R,T_BRICK,T_TORCH_BRICK,T_TORCH_BRICK_R,T_DOOR,T_LOCK,T_EXIT];T_DOOR=W.door;T_LOCK=W.lock;T_EXIT=W.exit;T_STONE=W.stone;T_TORCH_STONE=W.tstone;T_TORCH_STONE_R=W.tstoneR;T_BRICK=W.brick;T_TORCH_BRICK=W.tbrick;T_TORCH_BRICK_R=W.tbrickR;EP.wall=W}}
+
+/* little patches of dungeon flowers GROWN out of the brick joints: a few copies of the early wall tiles with a tiny painted tuft (assets/ep/fl_0..9) set into the bottom mortar line, its colours pulled toward the wall's own tone and light, a soft contact shadow and a short dark crack and roots under it */
+function epFlowerTile(src,im,i,s){const T=TS,r=k=>hash2(i*7+s,k,1303),out=new Uint8ClampedArray(src),asp=im.width/im.height;
+  let hp=T*(.08+.055*r(1)),wp=hp*asp;if(wp>T*.27){wp=T*.27;hp=wp/asp}if(hp<6){hp=6;wp=hp*asp}
+  const w=Math.max(4,Math.round(wp)),h=Math.max(4,Math.round(hp));let xc=(s?.5+.4*r(2):.1+.4*r(2))*T;xc=Math.max(w/2+3,Math.min(T-w/2-3,xc));
+  const xa=Math.max(0,Math.floor(xc-w/2-4)),xb=Math.min(T-1,Math.ceil(xc+w/2+4)),lum=(x,y)=>{const q=(y*T+x)*4;return out[q]*.3+out[q+1]*.59+out[q+2]*.11};
+  const m=[];for(let y=0;y<T;y++){let a=0;for(let x=xa;x<=xb;x++)a+=lum(x,y);m.push(a/(xb-xa+1))}
+  let j=Math.round(T*.78),best=-1e9;for(let y=Math.round(T*.6);y<=Math.round(T*.9);y++){let b=0,c=0;for(let k=-6;k<=6;k++)if(m[y+k]!==undefined){b+=m[y+k];c++}const sc=b/c-m[y];if(sc>best){best=sc;j=y}} // the darkest course joint of the lower wall, against its own surroundings
+  let cv=document.createElement('canvas'),cw=im.width,ch=im.height;cv.width=cw;cv.height=ch;cv.getContext('2d').drawImage(im,0,0);
+  while(cw>w*2){const nw=Math.max(w,cw>>1),nh=Math.max(h,Math.round(ch*nw/cw)),c2=document.createElement('canvas');c2.width=nw;c2.height=nh;const x2=c2.getContext('2d');x2.imageSmoothingQuality='high';x2.drawImage(cv,0,0,nw,nh);cv=c2;cw=nw;ch=nh}
+  const c3=document.createElement('canvas');c3.width=w;c3.height=h;const x3=c3.getContext('2d');x3.imageSmoothingQuality='high';x3.filter='blur(.35px)';x3.drawImage(cv,0,0,w,h);const sp=x3.getImageData(0,0,w,h).data;
+  let wr=0,wg=0,wb=0,n=0;for(let y=Math.max(0,j-12);y<=Math.min(T-1,j+3);y++)for(let x=xa;x<=xb;x++){const q=(y*T+x)*4;wr+=out[q];wg+=out[q+1];wb+=out[q+2];n++}wr/=n;wg/=n;wb/=n;const wl=wr*.3+wg*.59+wb*.11,kL=Math.max(.8,Math.min(1.15,wl/65)),mix=.28+.12*r(3);
+  const x0=Math.round(xc-w/2),y0=j-h+2,dk=(X,Y,f)=>{if(X<0||X>=T||Y<0||Y>=T)return;const q=(Y*T+X)*4;out[q]*=f;out[q+1]*=f;out[q+2]*=f}; // the foot dips a pixel into the joint
+  const ph1=r(40)*6.28,ph2=r(41)*6.28;
+  for(let y=j-5;y<=j+5;y++)for(let x=Math.floor(xc-w/2-5);x<=Math.ceil(xc+w/2+5);x++){const ang=Math.atan2((y-(j-1))*2.2,x-xc),rad=1+.28*Math.sin(ang*3+ph1)+.18*Math.sin(ang*7+ph2)+.2*(hash2(x,y,17)-.5),d=(((x-xc)/(w/2+5))**2+((y-(j-1))/5.2)**2)/(rad*rad);if(d<1)dk(x,y,1-.3*Math.pow(1-d,1.6)*(.8+.4*hash2(x,y,18)))} // an uneven soft blob of shade, not a band
+  {const cr=(sx,len,wd0)=>{let cx=sx,cy=j+1,dir=(r(50+len)-.5)*.9;for(let t=0;t<len&&cy<T-1;t++){dir+=(hash2(t,len,19)-.5)*1.1;dir=Math.max(-1.6,Math.min(1.6,dir));cx+=dir*.7+Math.sin(t*.8+sx)*.45;cy+=(t%2===1?0:1);const wd=Math.max(0,wd0-t*.25+(hash2(t,sx|0,20)-.5)*.9),x=Math.round(cx);dk(x,cy,.66-.1*Math.min(1,wd/2));if(wd>1.3)dk(x+1,cy,.84)}};
+    if(self.EP_FLCRACK)cr(xc+(r(4)-.5)*4,5+Math.round(r(5)*8),1.9)} // a cracked, wandering, thinning crack that forks, never a ruled line
+  for(let k=0;k<3;k++){let rx=xc+(k-1)*w*(.12+.12*r(20+k)),ry=j+1;const ln=3+Math.round(r(22+k)*4),dr=(r(26+k)-.5)*1.4;for(let t=0;t<ln&&ry<T-1;t++){rx+=dr*.6+Math.sin(t*1.3+k*2)*.5;ry+=(t%2?1:0)+(t===0?1:0);const q=(ry*T+Math.round(rx))*4,f=Math.max(.1,.45-t*.1);out[q]=out[q]*(1-f)+30*f;out[q+1]=out[q+1]*(1-f)+34*f;out[q+2]=out[q+2]*(1-f)+22*f}} // thin curved roots that fade as they go in
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const q0=(y*w+x)*4;let a=sp[q0+3]/255;if(a<.03)continue;a=Math.pow(a,1.25)*.94;if(a<.95)a*=.45+.9*hash2(x*5+i,y*3+s,21);a=Math.min(1,a*(.86+.2*hash2(x+9,y+i,22)));const X=x0+x,Y=y0+y;if(X<0||X>=T||Y<0||Y>=T)continue;
+    let R=sp[q0],G=sp[q0+1],B=sp[q0+2];const l=R*.3+G*.59+B*.11;R=l+(R-l)*.86;G=l+(G-l)*.86;B=l+(B-l)*.86;R=(R*(1-mix)+wr*mix)*kL;G=(G*(1-mix)+wg*mix)*kL;B=(B*(1-mix)+wb*mix)*kL;const l2=R*.3+G*.59+B*.11,lo=wl*.78+10,hi=wl*1.5+20;if(l2>hi){const q=hi/l2;R*=q;G*=q;B*=q}else if(l2<lo&&l2>1){const q=Math.min(2.2,lo/l2);R*=q;G*=q;B*=q} // keep the tuft in the wall's own range of light: not glowing, not lost
+    const q=(Y*T+X)*4;out[q]=out[q]*(1-a)+R*a;out[q+1]=out[q+1]*(1-a)+G*a;out[q+2]=out[q+2]*(1-a)+B*a}
+  return out}
+function epFlowerPool(W,g){W.fl=W.fl||{};const pl=self.EP_FLPLAIN?'p':'',KY=pl+g;if(W.fl[KY])return W.fl[KY];const bases=(W.wv&&W.wv[g])||[g===1?W.stone:W.brick],out=[];for(let i=0;i<10;i++){const im=IMG['ep_fl_'+i];if(!im||!im.width)continue;for(let s=0;s<2;s++){const b=bases[(i+s)%bases.length];if(!TEX[b]||!TEX[b].d)continue;out.push(addTex(pl?new Uint8ClampedArray(TEX[b].d):epFlowerTile(TEX[b].d,im,i,s)))}}return W.fl[KY]=out}
+function epFlowerPlace(n,L){const W=EP.wall;if(!W||!L._epf||!IMG.ep_fl_0)return;const ct=L._epf.ct=L._epf.ct||new Map(),P={1:epFlowerPool(W,1),2:epFlowerPool(W,2)},put=new Set(),cand=[];let cnt=0;
+  const open=(x,y)=>x>=0&&y>=0&&x<MW&&y<MH&&G.grid[y][x]===0;
+  for(let y=1;y<MH-1;y++)for(let x=1;x<MW-1;x++){const g=G.grid[y][x];if((g!==1&&g!==2)||!P[g].length)continue;if(!(open(x-1,y)||open(x+1,y)||open(x,y-1)||open(x,y+1)))continue;if(ct.has(y*MW+x)||(self.SR_CT&&SR_CT.has(y*MW+x)))continue;let tq=0;for(let f=0;f<4;f++)if(torchAt.has((y*MW+x)*4+f))tq=1;if(tq)continue;cand.push([hash2(x,y,977+n),x,y,g]);
+    if(hash2(x,y,977+n)>1/8)continue;
+    let adj=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if((dx||dy)&&put.has((y+dy)*MW+x+dx))adj=1;if(adj)continue;
+    const v=P[g],k=(hash2(x,y,978)*v.length)|0;ct.set(y*MW+x,v[k]);put.add(y*MW+x);cnt++}
+  if(cnt<2&&cand.length>=4){cand.sort((p,q)=>p[0]-q[0]);for(const [h,x,y,g] of cand){if(cnt>=2)break;let adj=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(put.has((y+dy)*MW+x+dx))adj=1;if(adj)continue;const v=P[g];ct.set(y*MW+x,v[(hash2(x,y,978)*v.length)|0]);put.add(y*MW+x);cnt++}} // a small room still gets a couple
+  L._epFl=cnt}
 /* soft shadows and warm glows, made in code (light, not props) */
 function epBlob(key,col,a0,soft){if(IMG[key])return key;const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,4,64,64,62);g.addColorStop(0,`rgba(${col},${a0})`);g.addColorStop(soft||.55,`rgba(${col},${a0*.45})`);g.addColorStop(1,`rgba(${col},0)`);x.fillStyle=g;x.fillRect(0,0,128,128);IMG[key]=c;return key}
 /* the floor detail of a level: decals in a grimy palette, contact shadows under pieces, warm pools under torches (the f2 decal format, drawn by the floor pass) */
@@ -81507,6 +81559,7 @@ function epApply(n,late){const S=self.EP_OFF?null:EP_SPEC[n],L=LEVELS[n];EP._nl=
   if(S.decals)L._f2dec=epDecals(n,S);
   L._epf=epFloorFx(n,S);
   if(S.walls&&S.walls.vars&&EP.wall){const W=EP.wall;if(!W.wv){W.wv={};for(const g of [1,2]){const v=S.walls.vars[g];if(!v)continue;const ids=[g===1?W.stone:W.brick];for(const t of v){const d=epTex('ep_tex_'+t.tex,t.o||(g===1?S.walls.so:S.walls.bo));if(d)ids.push(addTex(d))}W.wv[g]=ids}}L._epf.wv=W.wv}
+  if(S.walls&&EP.wall&&!self.EP_NOFL)epFlowerPlace(n,L);
   if(S.retile&&EP.wall&&EP.wall.wv&&EP.wall.wv[1]){if(!L._eptmR){L._eptmR=1;L._eptm=L._eptm||new Map();const vv=EP.wall.wv[1];let k=0;const seen=new Set();for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(g<100||seen.has(g)||(typeof KH_DOOR!=='undefined'&&KH_DOOR[g]))continue;seen.add(g);const ti=T_TILE[g];if(ti!==undefined)L._eptm.set(ti,vv[1+(k++%(vv.length-1))])}}L._epf.tm=L._eptm}
   if(S.grime){if(!L._eptm||!L._eptmG){L._eptmG=1;L._eptm=L._eptm||new Map();const seen=new Set();for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(seen.has(g))continue;seen.add(g);const por=g>=30&&g<100,ti=S.grime.only==='portal'?(por?(T_DOORS[(G.portals[g-30]||{}).tex]||T_DOORS.house):undefined):g>=100?(typeof KH_DOOR!=='undefined'&&KH_DOOR[g]?undefined:T_TILE[g]):(g>=9&&g<=14)||(g>=20&&g<=22)?T_WALL[g]:(g===7&&S.grime.gate)?T_GATE:(por&&S.grime.gate)?(T_DOORS[(G.portals[g-30]||{}).tex]||T_DOORS.house):undefined;if(ti===undefined||L._eptm.has(ti)||!TEX[ti]||!TEX[ti].d)continue;const nt=epGrime(ti,S.grime,g);if(nt!==null)L._eptm.set(ti,nt)}}L._epf.tm=L._eptm}
   if(S.night&&!L._epnD){L._epnD=1;L._eptm=L._eptm||new Map();for(const nm of Object.keys(EP_NDOOR)){const ti=T_DOORS[nm];if(ti===undefined||L._eptm.has(ti)||!TEX[ti]||!TEX[ti].d||!(G.portals||[]).some(q=>q.tex===nm))continue;const T=TEX[ti],nt=addTex(T.d,null);for(const k of Object.keys(T))if(k!=='d'&&k!=='e')TEX[nt][k]=T[k];L._eptm.set(ti,nt);epNightReg(L,nt,null,epNightTv(T.d,EP_NDOOR[nm],0),0)}L._epf.tm=L._eptm} // the lit panes of the shop, inn and hall doors
@@ -81783,6 +81836,68 @@ const EP_SPEC={
      street:{keys:['orecart','coalheap','coalsacks','toolrack','anvil','orecrate','brazier','coalheap','firewood','rubble','planks','sacks','crate','bucket','rainbarrel','wheel'],p:.6,gap:3,on:'12',notNear:'03456',fence:1,fenceRe:/^(fence|ptree|gtree|pjuniper|pbracken|grocks|gboulder|well)/}}
 };
 setTimeout(()=>{try{epLoad()}catch(e){}},4000); // the early polish pictures are small: fetch them soon after the start, so every first visit has them
+
+/* ---- src/desert/bones_remake.js ---- */
+/* ==========================================================================
+   BONES REMAKE (prefix bn / BN). The remains that lie on the floor of the dungeons were a pile drawn in code (IMG.bones). They are replaced by painted
+   pieces (Gemini, strict front elevation, cut by tools/bn_ingest.py from ART-HOLD/ep/bones_*.jpg, kept in assets/ep/bn_*.webp and loaded with the
+   other early polish pictures by epLoad): skulls, ribcages, long bones, slumped skeletons, wolf and rat skeletons, and so on.
+   When a level is loaded, each old 'bones' (and the painted ep_bonepile and ep_skel_slump that early_polish scatters) is given one of the new pieces, chosen
+   by a hash of its square and the kind of place (crypt, cave, wolf den, mine, desert), with a mirror image and a little size change. Same square, same
+   block flag. A few dungeons get extra pieces on bare floor (never in a passage, never at a door, stair or secret room).
+   ========================================================================== */
+/* heights in squares (a skull is small, a slumped skeleton is a person) */
+Object.assign(EP_H,{ep_bn_skull:.2,ep_bn_ribs:.26,ep_bn_longbones:.2,ep_bn_skullpile:.34,ep_bn_jaw:.14,ep_bn_potshards:.24,ep_bn_buried:.26,ep_bn_rat:.1,ep_bn_swordshield:.32,ep_bn_cloak:.3,ep_bn_wolfskull:.15,ep_bn_skelside:.2,ep_bn_wolfskel:.2,ep_bn_moss:.3,ep_bn_crushed:.16,ep_bn_chain:.38,ep_bn_ribdome:.28,ep_bn_skelcurl:.36,ep_bn_twoskulls:.2,ep_bn_skel_sit:.62});
+const BN_DRY=new Set(['skull','ribs','longbones','skullpile','jaw','buried','wolfskull','skelside','wolfskel','crushed','ribdome','skelcurl','twoskulls','skel_sit','potshards']); // bleached in the desert (no moss, no cloak)
+const BN_THEME={
+  crypt:['skel_sit','skelcurl','ribs','ribdome','skullpile','chain','jaw','longbones','potshards','crushed','buried','swordshield','skelside','longbones','ribs'],
+  cave:['longbones','ribs','buried','crushed','skelside','skelcurl','rat','jaw','wolfskull','potshards','skel_sit','ribdome'],
+  den:['wolfskel','wolfskull','wolfskel','rat','longbones','ribs','crushed','skelside','buried','jaw','wolfskull','skelcurl'],
+  mine:['chain','swordshield','skelcurl','buried','crushed','longbones','rat','ribs','skel_sit','potshards','skelside'],
+  dry:['ribs','longbones','skullpile','jaw','buried','wolfskull','skelside','crushed','ribdome','skelcurl','skel_sit','potshards','wolfskel']};
+const BN_FIG={crypt:['skel_sit','skelcurl','chain','swordshield','skelside','buried'],cave:['skel_sit','skelcurl','skelside','buried'],den:['wolfskel','skelside','buried','skelcurl'],mine:['chain','swordshield','skelcurl','skel_sit','buried'],dry:['skel_sit','skelcurl','skelside','buried','wolfskel']}; // whole figures: set against a wall
+const BN_LV={1:'crypt',9:'crypt',11:'crypt',12:'crypt',31:'crypt',501:'crypt',8:'cave',25:'cave',23:'den',18:'mine',42:'dry',65:'dry'};
+const BN_EXTRA={1:4,8:2,9:1,11:1,12:1,18:2,23:2,25:1,31:1,42:2,65:1,501:2,448:1,456:1};   // used sparingly: the old piles are swapped one for one, and only a few extra pieces go on bare floor
+const BN_OLD=new Set(['bones','ep_bonepile','ep_skel_slump']);
+function bnTheme(n,L){if(BN_LV[n])return BN_LV[n];if((L.enemies||[]).some(e=>/wolf|bear/.test(e.t||'')))return 'den';if((L.decor||[]).some(d=>d.k==='dbones'))return 'dry';return 'crypt'}
+/* a variant of a painted piece: ~f mirrored, ~d bleached (made on first use) */
+function bnVar(k){if(IMG[k])return IMG[k];const m=/^(ep_bn_\w+)~([fdg]+)$/.exec(k);if(!m)return null;const b=IMG[m[1]];if(!b||!b.width)return null;
+  const c=document.createElement('canvas');c.width=b.width;c.height=b.height;const x=c.getContext('2d');if(m[2].includes('f')){x.translate(b.width,0);x.scale(-1,1)}x.filter=m[2].includes('d')?'sepia(.3) saturate(.62) brightness(1.08) contrast(.94)':'sepia(.38) saturate(.85) brightness(.7) contrast(1.06)';x.drawImage(b,0,0);x.filter='none';
+  const g=x.createLinearGradient(0,b.height*.86,0,b.height);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.6)');x.globalCompositeOperation='destination-out';x.fillStyle=g;x.fillRect(0,b.height*.86,b.width,b.height*.14);x.globalCompositeOperation='source-over';
+  if(m[1]==='ep_bn_skel_sit'){const h=b.height,w=b.width,sg=x.createRadialGradient(w*.5,h*.97,2,w*.5,h*.97,w*.5);sg.addColorStop(0,'rgba(0,0,0,.6)');sg.addColorStop(1,'rgba(0,0,0,0)');x.globalCompositeOperation='destination-over';x.save();x.translate(0,h*.97);x.scale(1,.18);x.translate(0,-h*.97);x.fillStyle=sg;x.fillRect(0,h*.5,w,h);x.restore();x.globalCompositeOperation='source-over'} // a contact shadow under the figure that has no mound
+  IMG[k]=c;if(NPC_H[m[1]])NPC_H[k]=NPC_H[m[1]];return c}
+function bnMake(arr){for(const d of arr||[])if(d.k&&d.k.startsWith('ep_bn_')&&d.k.includes('~'))bnVar(d.k)}
+function bnPick(n,x,y,list,dry,near,salt){let pick=list[(hash2(x,y,n*13+7+(salt||0))*list.length)|0];for(let t=0;t<list.length&&near.includes(pick);t++)pick=list[(list.indexOf(pick)+1)%list.length];
+  const f=hash2(x,y,n*13+9)<.5,d=dry&&BN_DRY.has(pick);return 'ep_bn_'+pick+'~'+(f?'f':'')+(d?'d':'g')}
+function bnSwap(n,L,arr,dry,theme){let c=0;const list=BN_THEME[theme],figs=BN_FIG[theme],prev=[];
+  for(const d of arr){const old=d.k==='dbones'?(dry&&((L.rows||[]).length*((L.rows||[''])[0].length)<=8000)):BN_OLD.has(d.k);if(!old)continue;if(d.epSecP||d.npc||d.hidden||d.wd||d.pic||d.secret||d.sr||d.srB)continue;
+    const near=prev.filter(p=>Math.abs(p[0]-d.x)+Math.abs(p[1]-d.y)<5).map(p=>p[2].replace(/^ep_bn_|~\w*$/g,''));const k=bnPick(n,d.x,d.y,d.k==='ep_skel_slump'?figs:list,dry,near);
+    prev.push([d.x,d.y,k]);d.k=k;delete d.lk;d.sc=+((.92+hash2(d.x,d.y,n*13+11)*.22)*(dry?1.2:1)).toFixed(2);d.deco=true;c++}return c}
+/* extra pieces on bare floor: room squares only (never a passage, never beside a door, stair or secret room) */
+function bnExtras(n,L,count,theme,dry){const R=L.rows,H=R.length,W=R[0].length,op=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&R[y][x]==='.',wall=(x,y)=>x<0||y<0||x>=W||y>=H||R[y][x]==='#'||R[y][x]==='%';
+  const used=new Set();for(const a of [L.enemies||[],L.items||[],L.decor||[]])for(const o of a)used.add(Math.round(o.x)+','+Math.round(o.y));
+  const keep=[[L.start.x,L.start.y]];for(const s of [...(typeof EP_SECRETS!=='undefined'&&EP_SECRETS[n]||[]),...(typeof SR_ROOMS!=='undefined'&&SR_ROOMS[n]||[])]){keep.push(s.door,s.from);for(const c of s.cells||[])keep.push(c);if(s.chest)keep.push(s.chest)}
+  for(const l of L.lights||[])keep.push([Math.floor(l[0]),Math.floor(l[1])]);
+  const cands=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!op(x,y)||used.has(x+','+y))continue;let o=0,odd=false;for(let b=-1;b<=1;b++)for(let a=-1;a<=1;a++){if(op(x+a,y+b))o++;else if(!wall(x+a,y+b))odd=true}
+    if(o<6||odd)continue;if(keep.some(p=>Math.abs(p[0]-x)<=2&&Math.abs(p[1]-y)<=2))continue;
+    const wn=[[0,-1],[0,1],[1,0],[-1,0]].filter(([a,b])=>wall(x+a,y+b));cands.push({x,y,h:hash2(x,y,n*17+5),side:wn.length===1?wn[0]:null})}
+  cands.sort((a,b)=>a.h-b.h);const put=[],far=(c,r)=>put.every(p=>Math.abs(p.x-c.x)+Math.abs(p.y-c.y)>=r),list=BN_THEME[theme],figs=BN_FIG[theme];let made=0;
+  const add=(c,key,o)=>{put.push(c);made++;L.decor.push(Object.assign({k:key,x:c.x,y:c.y,deco:true,block:false,sc:+((.94+hash2(c.x,c.y,n*17+8)*.2)*(dry?1.2:1)).toFixed(2)},o||{}))};
+  if(n===1){let X=null;for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(R[y][x]==='X')X=[x,y]; // a ribcage near the way out
+    if(X){const c=cands.filter(c=>{const d=Math.abs(c.x-X[0])+Math.abs(c.y-X[1]);return d>=3&&d<=6}).sort((a,b)=>a.h-b.h)[0];if(c){add(c,bnPick(n,c.x,c.y,['ribdome','ribs'],false,[],3),{})}}}
+  const nf=Math.round(count*.4);for(const c of cands){if(made>=nf+(n===1?1:0))break;if(!c.side||put.includes(c)||!far(c,5))continue;const k=bnPick(n,c.x,c.y,figs,dry,[],5);add(c,k,{ox:c.side[0]*.2,oy:c.side[1]*.2})}
+  for(const c of cands){if(made>=count+(n===1?1:0))break;if(put.includes(c)||!far(c,3))continue;add(c,bnPick(n,c.x,c.y,list,dry,[],9))}
+  return made}
+function bnPre(n){if(self.EP_OFF||self.BN_OFF)return;if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();const L=LEVELS[n];if(!L||!L.decor||L._bn||!L.rows)return;L._bn=1;
+  if(typeof epProps==='function'&&typeof EP_SPEC!=='undefined'&&EP_SPEC[n])epProps(n,EP_SPEC[n]); // its pieces are in the list before we look
+  const theme=bnTheme(n,L),dry=theme==='dry';let c=bnSwap(n,L,L.decor,dry,theme);if(BN_EXTRA[n])c+=bnExtras(n,L,BN_EXTRA[n],theme,dry);if(c)L._bnOn=1}
+function bnPost(n){if(self.EP_OFF||self.BN_OFF)return;const L=LEVELS[n];if(!L)return;
+  if(L._bnOn||(G.decor||[]).some(d=>BN_OLD.has(d.k)||(d.k&&d.k.startsWith('ep_bn_')))){const theme=bnTheme(n,L);bnSwap(n,L,G.decor,theme==='dry',theme); // anything a later hook put in
+    try{epLoad().then(()=>{if(LEVEL===n)bnMake(G.decor)})}catch(e){}if(EP.ready)bnMake(G.decor)}}
+{const _ll=loadLevel;loadLevel=function(n){try{bnPre(n)}catch(e){console.error('bn pre',e)}const r=_ll.apply(this,arguments);try{bnPost(n)}catch(e){console.error('bn post',e)}return r}}
+
+/* the old code-drawn pile (IMG.bones) is never shown any more: wherever that picture is still asked for (a level the swap did not reach), a painted heap of bones stands in */
+{const iv=setInterval(()=>{try{if(typeof IMG!=='undefined'&&IMG.ep_bn_longbones&&IMG.ep_bn_longbones.width){IMG.bones=IMG.ep_bn_longbones;if(typeof NPC_H!=='undefined')NPC_H.bones=.2;clearInterval(iv)}}catch(e){}},1500)}
 
 /* ---- src/desert/thornwick_roofs.js ---- */
 /* ==========================================================================
