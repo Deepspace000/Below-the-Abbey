@@ -71907,12 +71907,12 @@ function bksPanoStep(){
 /* ---- the weather clock: wet and dry spells, about half and half ---- */
 function bksArrive(lv){   // the dice for this visit (the weather of the last 25 seconds is kept: a trip through a door does not change it)
   if(BKS.arrived&&G.time-(BKS.lastT||-99)>=0&&G.time-(BKS.lastT||-99)<25){BKS.strike=null;BKS.thunderQ.length=0;BKS.next=6+Math.random()*10;return}
-  BKS.arrived=1;BKS.t=0;BKS.segWet=Math.random()<.5;BKS.segStr=BKS.segWet?bksStrength():0;BKS.segEnd=BKS.segWet?40+Math.random()*90:30+Math.random()*80;BKS.wet=BKS.segWet?BKS.segStr:0;BKS.wetT=BKS.wet;
+  BKS.arrived=1;BKS.t=0;BKS.segWet=Math.random()<.5;BKS.segStr=BKS.segWet?bksStrength():0;BKS.segEnd=BKS.segWet?50+Math.random()*100:50+Math.random()*110;BKS.wet=BKS.segWet?BKS.segStr:0;BKS.wetT=BKS.wet;
   BKS.strike=null;BKS.thunderQ.length=0;BKS.next=6+Math.random()*10}
 function bksStrength(){return Math.random()<.4?.2+Math.random()*.25:.55+Math.random()*.45}   // drizzle, or rain, or a downpour
 function bksWeather(dt){
   BKS.t+=dt;BKS.lastT=G.time;
-  if(BKS.t>=BKS.segEnd){BKS.t=0;BKS.segWet=!BKS.segWet;BKS.segStr=BKS.segWet?bksStrength():0;BKS.segEnd=BKS.segWet?50+Math.random()*100:50+Math.random()*100}
+  if(BKS.t>=BKS.segEnd){BKS.t=0;BKS.segWet=!BKS.segWet;BKS.segStr=BKS.segWet?bksStrength():0;BKS.segEnd=BKS.segWet?50+Math.random()*100:50+Math.random()*110}   // equal wet and dry spells (dry a hair longer: the fading tail of a spell still counts as rain), so about half of the time is visibly wet
   const k=Math.min(1,dt/BKS.fade*3);BKS.wetT=BKS.segStr;BKS.wet+=(BKS.wetT-BKS.wet)*k;
   let r=BKS.force?BKS.force[0]*BKS.force[1]:BKS.wet;if(r<.02)r=0;BKS.rain=r}
 /* ---- lightning (same shapes as the graveyard's; red places flash red-white) ---- */
@@ -72133,40 +72133,77 @@ function bksRain(R,t,f,rd){
   ctx.globalAlpha=1}
 
 /* ==========================================================================
-   THE EARLY WOODS AND ROADS (opt-in list BKS_EARLY): the same rain look and sound as the Blighted Road, wired to the ordinary weather schedule.
-   Which levels: the outdoor levels of the northern weather region (Thornwood 2, Thornwick 3, Gandrick's Wood 7, the Ironhill Road 10, Ironhill 13,
-   the moor 19, the Burial Ground 20, Greyfang Pass 22, Greendale Forest 32, Anaea 33). Add a level number to the list to give it the same rain.
-   When: only while weatherNow() says rain (strength .62) or thunderstorm (1.0), faded in and out over a few seconds; never indoors (the level must be
-   outdoor). The Ironhill Road is a rainy pine wood by design (rain:true) and keeps a steady light rain (.4) between showers.
-   Look: the three streak layers with wind and gusts, the horizon mist and spray and the thin line of splashing puddles (bksRain), the same sprites.
-   Sound: the same rain loop with the high hiss (bksSound). A storm also brings a flash of lightning and a rolling thunder (gysRumble).
-   Fog and snow are not touched. The plain streaks of drawWeatherFx (and the dark streaks of drawRain on level 10) are replaced, not added to.
+   RAIN ON ANY OUTDOOR AREA (the general rule): the same rain look and sound as the Blighted Road, laid over the area's own sky.
+   When: on ENTERING an outdoor area there is a 15 percent chance (BKS_RAIN_P) that the visit is rainy. The roll is kept in G.flags.rn = {lv, w} so a
+   save and reload does not roll again, and going into a house and out again keeps it; a new roll is made only when the party enters a different
+   rainy-eligible outdoor level and later returns. A rainy visit has wet spells of 50 to 150 s of varied strength (drizzle to downpour, storms above .7 with
+   lightning and thunder) and short dry gaps of 10 to 40 s. Otherwise the area keeps its normal weather; where weatherNow already says rain or storm (the
+   north) the same BKS rain is drawn at .62 or 1.0, so the old plain streaks are never seen. Snow and frost never get rain; fog is left as it is.
+   Which levels (bksRainOK, a test, not a list): outdoor levels (LEVELS[n].outdoor) except the Blighted Road and Sale (bksIs: their own clock), the Wenlock
+   graveyard 530 (own storm), the Pale Spire and the Never-Ending Tower (own skies), the undersea rooms (uwLv) and every desert level (wxRegionOf is
+   'desert', the dunes, Khemetra 41 to 44, 50 to 65, DNG_INFO dungeons, and any name with dune, desert, erg, oasis, pyramid, tomb, burrow, Khemetra).
+   Indoors, in caves and in dungeons there is no rain, no mist and no sound: the rain fades out at the door and resumes outside.
+   The Ironhill Road (rain:true) keeps a steady light rain (.4) in the new look.
+   Look and light: the three streak layers, wind, gusts, horizon mist, the thin line of splashing puddles, a cool grey wash; weatherNow darkens and greys
+   the air in step with the rain (the Wenlock golden light fades as it comes on). Sound: the same loop and hiss (bksSound).
    ========================================================================== */
-const BKS_EARLY=[2,3,7,10,13,19,20,22,32,33];
-const bksEarlyIs=n=>BKS_EARLY.includes(n);
-const bksEarlyOwns=()=>!BKS.off&&!BKS.eoff&&typeof LEVEL!=='undefined'&&bksEarlyIs(LEVEL)&&G.state==='play'&&!!LEVELS[LEVEL]&&!!LEVELS[LEVEL].outdoor;
-BKS.eR=0;BKS.early=0;BKS.eforce=null;BKS.eflash=-99;BKS.enext=0;BKS.eth=[];BKS.eStrikes=0;
-function bksEarlyWant(){
-  if(!bksEarlyOwns())return 0;
-  if(BKS.eforce!==null)return BKS.eforce;
-  const w=weatherNow();if(w&&w.fx==='rain')return w.id==='storm'?1:.62;
-  return LEVELS[LEVEL].rain?.4:0}
+const BKS_RAIN_P=.15;
+function bksIsDesert(n){
+  if(typeof wxRegionOf==='function'&&wxRegionOf(n)==='desert')return true;
+  if((n>=41&&n<=44)||(n>=50&&n<=65))return true;
+  if(typeof DNG_INFO!=='undefined'&&DNG_INFO[n])return true;
+  let nm='';try{nm=String((typeof LEVEL_NAMES!=='undefined'&&LEVEL_NAMES[n])||(LEVELS[n]&&LEVELS[n].name)||'')}catch(e){}
+  return /dune|desert|erg|oasis|pyramid|tomb of|burrow|khemetra/i.test(nm)}
+function bksRainOK(n){
+  if(BKS.off||BKS.eoff||typeof n!=='number'||!LEVELS[n]||!LEVELS[n].outdoor)return false;
+  if(bksIs(n)||n===530||n>=9710)return false;
+  if(typeof uwLv==='function'&&uwLv(n))return false;
+  return !bksIsDesert(n)}
+const bksEarlyOwns=()=>typeof LEVEL!=='undefined'&&G.state==='play'&&bksRainOK(LEVEL);
+BKS.eR=0;BKS.early=0;BKS.eforce=null;BKS.rollForce=null;BKS.eflash=-99;BKS.enext=0;BKS.eth=[];BKS.eStrikes=0;BKS.ebase=null;BKS.vc=null;BKS.vcFor=null;
+function bksEarlyRoll(){   // the dice for this visit, kept in the game flags
+  const F=G.flags||(G.flags={}),r=F.rn;if(r&&r.lv===LEVEL)return r.w;
+  const w=(BKS.rollForce!==null?BKS.rollForce:Math.random()<BKS_RAIN_P)?1:0;F.rn={lv:LEVEL,w};return w}
+function bksVisitClock(dt){
+  const F=G.flags;if(BKS.vcFor!==F.rn){BKS.vcFor=F.rn;BKS.vc={t:0,wet:true,str:bksStrength(),end:50+Math.random()*100}}
+  const c=BKS.vc;c.t+=dt;
+  if(c.t>=c.end){c.t=0;c.wet=!c.wet;c.str=c.wet?bksStrength():0;c.end=c.wet?50+Math.random()*100:10+Math.random()*30}
+  return c.str}
 function bksEarlyStep(dt){
   if(!bksEarlyOwns()){BKS.eR=0;BKS.early=0;BKS.eth.length=0;return 0}
-  const want=bksEarlyWant(),k=Math.min(1,dt/3.5);BKS.eR+=(want-BKS.eR)*k;if(Math.abs(want-BKS.eR)<.004)BKS.eR=want;
+  let want=0;if(bksEarlyRoll())want=bksVisitClock(dt);
+  weatherNow();const id=BKS.ebase;   // (the wrapper below records the underlying weather)
+  if(id==='snow'||id==='frost')want=0;
+  else{if(id==='rain')want=Math.max(want,.62);else if(id==='storm')want=1;if(LEVEL===10)want=Math.max(want,.4)}
+  if(BKS.eforce!==null)want=BKS.eforce;
+  BKS.ewant=want;
+  BKS.eR+=(want-BKS.eR)*Math.min(1,dt/3.5);if(Math.abs(want-BKS.eR)<.004)BKS.eR=want;
   BKS.early=BKS.eR>.01?1:0;
-  const t=G.time,w=weatherNow(),storm=BKS.eforce!==null?BKS.eforce>=1:!!(w&&w.id==='storm');
-  if(storm&&BKS.eR>.5){
+  const t=G.time;
+  if(want>.7&&BKS.eR>.5){
     if(!BKS.enext)BKS.enext=t+3+Math.random()*6;
     if(t>BKS.enext){BKS.eflash=t;BKS.eStrikes++;BKS.eth.push(t+1+Math.random()*2.2);BKS.enext=t+8+Math.random()*16}
   }else BKS.enext=0;
   for(let i=BKS.eth.length-1;i>=0;i--)if(t>=BKS.eth[i]){BKS.eth.splice(i,1);try{gysRumble(.17)}catch(e){}}
   return BKS.early?BKS.eR:0}
+/* the air: grey and dark in step with the rain (the weather's own rain and storm are turned into the same thing) */
+{const _w=weatherNow;weatherNow=function(){const w=_w.apply(this,arguments);
+  if(BKS.off||BKS.eoff||typeof LEVEL==='undefined'||!bksEarlyOwns())return w;
+  const id=w&&w.id;BKS.ebase=id||null;
+  if(id==='snow'||id==='frost'||id==='fog')return w;
+  const k=Math.min(1,BKS.eR*1.6),reg=typeof wxRegionOf==='function'&&wxRegionOf(LEVEL);
+  if(k<=.02)return(id==='rain'||id==='storm')?Object.assign({id:'clear'},WX_DEF.clear):w;
+  const R=WX_DEF[BKS.eR>.8?'storm':'rain'],b=w||{fog:0,haze:0,dark:1,mix:0,col:R.col},lp=(a,c)=>a+(c-a)*k,bc=b.col||R.col;
+  const o={id:BKS.eR>.8?'storm':'rain',n:R.n,text:R.text,fx:'rain',fog:lp(b.fog||0,R.fog),haze:lp(b.haze||0,R.haze),dark:Math.min(b.dark===undefined?1:b.dark,lp(1,R.dark)),mix:lp(b.mix||0,R.mix),
+    col:[lp(bc[0],R.col[0]),lp(bc[1],R.col[1]),lp(bc[2],R.col[2])]};
+  if(reg&&k>.5){o.cold=R.cold;o.wet=R.wet;if(R.stealth)o.stealth=R.stealth}   // the northern wilds keep the chill of rain; towns elsewhere get the look only
+  return o}}
 const BKS_ELK={red:0};
 function bksEarlyDraw(){
   const t=G.time,R=BKS.eR,hh=typeof HH==='number'?HH:105;
   if(BKS_S.rd!==0||BKS_G.lk!==BKS_ELK||BKS_G.hh!==hh||!BKS_G.mist){bksGround(BKS_ELK,null);BKS_G.hh=hh}
   ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();
+  ctx.globalCompositeOperation='multiply';ctx.globalAlpha=Math.min(1,R);ctx.fillStyle='rgb(212,218,228)';ctx.fillRect(0,0,420,210);ctx.globalAlpha=1;
   const fm=(t-BKS.eflash)*1000;
   if(fm>=0&&fm<320){const f=gysPulse(fm)*.6;if(f>.01){ctx.globalCompositeOperation='lighter';ctx.fillStyle=`rgba(150,170,225,${.22*f})`;ctx.fillRect(0,0,420,210);ctx.globalCompositeOperation='source-over';ctx.fillStyle=`rgba(235,240,255,${.3*f})`;ctx.fillRect(0,0,420,hh)}}
   ctx.globalCompositeOperation='source-over';ctx.globalAlpha=Math.min(1,R*.8);ctx.fillStyle=BKS_G.mist;ctx.fillRect(0,hh-46,420,76);ctx.globalAlpha=1;
