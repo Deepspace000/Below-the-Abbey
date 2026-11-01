@@ -131,6 +131,17 @@ function terrMarch(x,rX,rY,tmax){
           r=r*(1-m)+(rock.d[rt]*rock.tint[0]*kR0*rs*lc*ivr+hz[0]*skr)*m;g=g*(1-m)+(rock.d[rt+1]*rock.tint[1]*kG0*rs*lc*ivr+hz[1]*skr)*m;b=b*(1-m)+(rock.d[rt+2]*rock.tint[2]*kB0*rs*lc*ivr+hz[2]*skr)*m;
         }
         let o=(ys*VW+x)*4;
+        const dzf=cz-hg;
+        if(T.fp&&!wv&&dzf>.05&&!C.uw){ // flat ground painted row by row (Oldhaven): each row has its own distance and a mip-mapped texel, so the paving does not crawl or shimmer when the party walks
+          for(let y=ys;y<ye;y++,o+=VW*4){
+            const ty=dzf*F/(y+.5-HHv),qx=cx+rX*ty,qy=cy+rY*ty,cq=qx|0,cr=qy|0,fq=(fm&&qx>=0&&qy>=0&&cq<W&&cr<Hh)?fm.charCodeAt(cr*W+cq):48,fdq=fds[fq-48]||fds[0];
+            const mips=floorMips(fdq),vf=ty*ty*rl/(dzf*F),hf=ty*2*PL/VW,lf=Math.min(6.9,Math.max(0,Math.log2(TS*Math.max(vf,hf))-.3)),l0=lf|0,wt=lf-l0,A=mips[l0],B=mips[l0+1],sh0=7-l0,sh1=6-l0;
+            const uu=((qx-cq)*TS)|0,vv=((qy-cr)*TS)|0,ia=(((vv>>l0)<<sh0)+(uu>>l0))<<2,ib=(((vv>>(l0+1))<<sh1)+(uu>>(l0+1)))<<2;
+            const tr=A[ia]+(B[ib]-A[ia])*wt,tg=A[ia+1]+(B[ib+1]-A[ia+1])*wt,tb=A[ia+2]+(B[ib+2]-A[ia+2])*wt;
+            const dq=ty*rl,sm2=Math.min(hzmax,dq*hzrate),iv2=1-sm2,sk2=sm2*(lbm*.55+.05);
+            D[o]=tr*kR0*shade*iv2+hz[0]*sk2;D[o+1]=tg*kG0*shade*iv2+hz[1]*sk2;D[o+2]=tb*kB0*shade*iv2+hz[2]*sk2;
+          }
+        }else
         for(let y=ys;y<ye;y++,o+=VW*4){D[o]=r;D[o+1]=g;D[o+2]=b}
       }
       yb=ytop;
