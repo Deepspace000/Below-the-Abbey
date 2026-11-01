@@ -15,15 +15,15 @@ const TKR={ready:false,loading:null,houses:[
   // [id, x0, x1 (the wall run, corner to corner), y0, y1, face (the side the street is on), roof piece, look]
   ['n1',12,14,10,14,'S','wl_roof1_1',{sat:.62,dark:.86,tint:[1.04,.98,.9],soot:.5,moss:.3,holes:2,chim:-1}],
   ['n2',16,18,10,15,'S','kh_ohroof1_4',{sat:.7,dark:.84,tint:[1,.98,.92],soot:.6,moss:.6,holes:6,chim:1}],
-  ['n3',19,21,10,14,'S','kh_ohroof1_0',{sat:.95,dark:1.02,tint:[.96,1,1.06],soot:.4,moss:.2,holes:1,chim:-1}],
-  ['n4',23,27,10,15,'S','kh_ohroof1_1',{sat:.85,dark:.98,tint:[.94,.98,1.08],soot:.45,moss:.3,holes:3,chim:1}],
+  ['n3',19,21,10,14,'S','kh_ohroof1_0',{sat:.55,dark:.95,tint:[1.02,1,.96],soot:.4,moss:.2,holes:1,chim:-1}],
+  ['n4',23,27,10,15,'S','kh_ohroof1_1',{cap:1.3,sat:.5,dark:.9,tint:[1,.98,.94],soot:.45,moss:.3,holes:3,chim:1}],
   ['n5',29,31,10,14,'S','kh_ohroof1_2',{sat:.46,dark:.86,tint:[1.06,.94,.88],soot:.55,moss:.25,holes:3,chim:-1}],
-  ['ch',33,37,10,14,'S','wl_roof1_3',{sat:.75,dark:.88,tint:[.94,.98,1.06],soot:.5,moss:.35,holes:3,steeple:1}],
+  ['ch',33,37,10,14,'S','kh_ohroof1_0',{cap:1.6,chim:1,sat:.5,dark:.95,tint:[1,.99,.95],soot:.6,moss:.5,holes:5}],
   ['s1',12,14,21,23,'N','wl_roof1_4',{sat:.75,dark:.84,tint:[1,1,.92],soot:.5,moss:.2,holes:2,chim:1}],
-  ['s2',16,18,21,23,'N','kh_ohroof1_5',{sat:.95,dark:1.0,tint:[.96,1.02,.96],soot:.4,moss:.25,holes:2,chim:-1}],
+  ['s2',16,18,21,23,'N','wl_roof1_1',{sat:.4,dark:.8,tint:[.94,1,.94],soot:.4,moss:.25,holes:2,chim:-1}],
   ['s3',19,22,19,22,'N','wl_roof1_5',{sat:.55,dark:.76,tint:[1.04,.94,.88],soot:.75,moss:.3,holes:5,chim:1,flip:1}],
-  ['s4',24,28,19,22,'N','kh_ohroof1_0',{sat:.7,dark:.9,tint:[1.04,.99,.94],soot:.45,moss:.3,holes:3,chim:-1,flip:1}],
-  ['s5',30,34,19,22,'N','wl_roof1_1',{sat:.3,dark:.72,tint:[.96,.98,1],soot:.45,moss:.5,holes:4,chim:1,flip:1}]
+  ['s4',24,28,19,22,'N','kh_ohroof1_0',{cap:1.3,sat:.7,dark:.9,tint:[1.04,.99,.94],soot:.45,moss:.3,holes:3,chim:-1,flip:1}],
+  ['s5',30,34,19,22,'N','kh_ohroof1_4',{cap:1.3,sat:.5,dark:.8,tint:[.98,.97,1.02],soot:.45,moss:.5,holes:4,chim:1,flip:1}]
 ]};
 function tkrRng(seed){let s=(seed*2654435761)>>>0||1;return()=>{s^=s<<13;s>>>=0;s^=s>>>17;s^=s<<5;s>>>=0;return s/4294967296}}
 function tkrLoadImg(key,src){return new Promise(res=>{if(IMG[key])return res();const i=new Image();i.onload=()=>{IMG[key]=i;res()};i.onerror=()=>res();i.src=src+'?v='+VERSION})}
@@ -49,20 +49,20 @@ function tkrRoofVar(k,id,o,flip,widthSq){
   const t=document.createElement('canvas');t.width=iw;t.height=ih;const tx=t.getContext('2d',{willReadFrequently:true});tx.drawImage(src,0,0);const sd=tx.getImageData(0,0,iw,ih).data;
   const prof=new Array(iw).fill(ih);let apexY=ih;for(let xx=0;xx<iw;xx++){for(let y=0;y<ih;y++)if(sd[(y*iw+xx)*4+3]>60){prof[xx]=y;break}if(prof[xx]<apexY)apexY=prof[xx]}
   // the chimney: about 13 percent of the roof width, standing about a quarter of the roof height clear of the slope where it stands
-  const cim=o.chim?tkrChimney():null,chW=Math.round(iw*.13),chH=Math.round(ih*.27),side=(o.chim||1)>0?1:-1,
+  const cim=o.chim?tkrChimney():null,chW=Math.round(iw*.17),chH=Math.round(ih*.4),side=(o.chim||1)>0?1:-1,
     ccx=Math.round(iw/2+side*iw*.17),cbase=prof[Math.max(0,Math.min(iw-1,ccx))]+Math.round(ih*.03),ctop=cbase-chH,ext=cim?Math.max(0,-ctop):0,H=ih+ext;
   const c=document.createElement('canvas');c.width=iw;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});
   x.drawImage(src,0,ext);
-  if(cim){ // the stack, drawn over the slope but cut along the slope line (plus a little) so the base sits inside the roof
+  const chimneyDraw=()=>{if(!cim)return; // the stack, drawn over the slope but cut along the slope line (plus a little) so the base sits inside the roof
     const stH=chH+Math.round(ih*.1),st=document.createElement('canvas');st.width=chW;st.height=stH;const sx=st.getContext('2d',{willReadFrequently:true});sx.drawImage(cim,0,10,cim.width,cim.height-30,0,0,chW,stH);
     const dd=sx.getImageData(0,0,chW,stH),da=dd.data,left=ccx-chW/2;
     for(let q=0;q<chW;q++){const colBase=(prof[Math.max(0,Math.min(iw-1,Math.round(left+q)))]+Math.round(ih*.03))-ctop;for(let y=Math.max(0,colBase);y<stH;y++)da[(y*chW+q)*4+3]=0}
-    sx.putImageData(dd,0,0);x.drawImage(st,left,ext+ctop)}
+    sx.putImageData(dd,0,0);for(let i=0;i<da.length;i+=4){const l=da[i]*.3+da[i+1]*.59+da[i+2]*.11;da[i]=(l+(da[i]-l)*.65)*.78;da[i+1]=(l+(da[i+1]-l)*.65)*.74;da[i+2]=(l+(da[i+2]-l)*.65)*.7}sx.putImageData(dd,0,0);x.drawImage(st,left,ext+ctop);x.fillStyle="rgba(8,6,5,.9)";x.fillRect(left-chW*.08,ext+ctop-3,chW*1.16,5)};
   // grade
   const d=x.getImageData(0,0,iw,H),a=d.data,tn=o.tint,sat=o.sat,dk=o.dark;
   for(let i=0;i<a.length;i+=4){if(!a[i+3])continue;const l=a[i]*.3+a[i+1]*.59+a[i+2]*.11;
     const C=v=>Math.max(0,Math.min(255,(v-105)*1.18+105));a[i]=C((l+(a[i]-l)*sat)*dk*tn[0]);a[i+1]=C((l+(a[i+1]-l)*sat)*dk*tn[1]);a[i+2]=C((l+(a[i+2]-l)*sat)*dk*tn[2])}
-  x.putImageData(d,0,0);
+  x.putImageData(d,0,0);chimneyDraw();
   x.globalCompositeOperation='source-atop';
   const top=ext+apexY,bot=ext+ih;
   for(let i=0;i<Math.round(9*o.soot)+2;i++){const sx0=iw*(.2+rng()*.6),sw=iw*(.012+rng()*.03),sy=top+(rng()*.1)*ih,len=ih*(.35+rng()*.55);
@@ -81,33 +81,40 @@ function tkrRoofVar(k,id,o,flip,widthSq){
     for(let q=0;q<10;q++){const an=q/10*6.283;ox.drawImage(sil,Math.cos(an)*r,Math.sin(an)*r)}
     ox.drawImage(c,0,0);c.getContext('2d').clearRect(0,0,iw,H);c.getContext('2d').drawImage(o2,0,0)}
   // the gable height: a pitched roof about .42 of its width, never more than about 1.0 square above the wall top; a low roof keeps its own pitch. The chimney scales with the roof.
-  const natural=ih/iw,target=Math.min(natural,.42,1.0/widthSq),sy=target/natural,FH=Math.max(8,Math.round(H*sy));
+  const natural=ih/iw,target=Math.min(natural,.4,(o.cap||1.1)/widthSq),sy=target/natural,FH=Math.max(8,Math.round(H*sy));
   const out=document.createElement('canvas');out.width=iw;out.height=FH;{const ox=out.getContext('2d');if(flip){ox.translate(iw,0);ox.scale(-1,1)}ox.imageSmoothingQuality='high';ox.drawImage(c,0,0,iw,FH)}
-  out._tkrR=1;IMG[key]=out;NPC_H[key]=NPC_H[k];return key;
+  out._tkrR=1;out._pre=c;out._body=target;IMG[key]=out;NPC_H[key]=NPC_H[k];return key;
 }
-/* the steeple of the chapel: the grey octagonal tower of Oldhaven, greyed a little more and soot-stained down from the louvres */
-function tkrSteeple(){
-  const key='tkr_steeple',src=IMG.kh_ohtower1_4;if(IMG[key])return key;if(!src)return null;
-  const iw=src.width,ih=src.height,c=document.createElement('canvas');c.width=iw;c.height=ih;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(src,0,0);
-  const d=x.getImageData(0,0,iw,ih),a=d.data;for(let i=0;i<a.length;i+=4){if(!a[i+3])continue;const l=a[i]*.3+a[i+1]*.59+a[i+2]*.11;a[i]=(l+(a[i]-l)*.55)*.74;a[i+1]=(l+(a[i+1]-l)*.55)*.76;a[i+2]=(l+(a[i+2]-l)*.55)*.78}
-  x.putImageData(d,0,0);x.globalCompositeOperation='source-atop';
-  for(let i=0;i<5;i++){const sx=iw*(.22+i*.14),g=x.createLinearGradient(0,ih*.3,0,ih*.95);g.addColorStop(0,'rgba(12,9,7,.3)');g.addColorStop(1,'rgba(12,9,7,0)');x.fillStyle=g;x.fillRect(sx,ih*.3,iw*.04,ih*.65)}
-  const g=x.createLinearGradient(0,ih*.7,0,ih);g.addColorStop(0,'rgba(60,72,34,0)');g.addColorStop(1,'rgba(60,72,34,.3)');x.fillStyle=g;x.fillRect(0,ih*.7,iw,ih*.3);
-  c._tkrR=1;IMG[key]=c;NPC_H[key]=NPC_H.kh_ohtower1_4;return key;
+/* ---- the solid roof, from the exact wall squares of the map. Each house gets a pitched roof built of true-perspective planes (the plane3d mechanism of the second floor's bridges):
+   - two gable ends, flat symmetrical triangles seen straight on (the painted roof picture, the chimney painted into it), one over the street wall and one over the back wall;
+   - the two long slopes, each a staircase of narrow vertical bands of painted tile that climb from the eave (the wall top) to the ridge, so the roof is solid from every side;
+   all of it stands on the wall top, is as wide as the wall run plus a small eave (none on a side where the next house touches), and is centred on the house. ---- */
+function tkrStep(src,id,k,n,lenSq,bandSq,alt,side){
+  const key="tkr_"+id+"_s"+k+(alt?"a":"")+(side?"R":"L");if(IMG[key])return key;
+  const PPS=80,W=Math.max(8,Math.round(lenSq*PPS)),H=Math.max(6,Math.round(bandSq*PPS)),c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  const sw=src.width,sh=src.height,cx0=Math.round(sw*.12),cw=Math.round(sw*.76),cy0=Math.round(sh*(.42+.5*(k/n)*.8)),ch=Math.round(sh*.2);
+  const tileW=Math.max(1.4,Math.min(2.4,lenSq/2))*PPS;let px=0,fl=!!alt;
+  while(px<W){x.save();if(fl){x.translate(px+tileW,0);x.scale(-1,1)}else x.translate(px,0);x.drawImage(src,cx0,cy0,cw,ch,0,0,tileW,H);x.restore();px+=tileW;fl=!fl}
+  // each course has a dark lip at its foot and a pale one at its top, so the staircase reads as rows of tiles
+  let g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(210,200,170,.10)');g.addColorStop(.18,'rgba(0,0,0,0)');g.addColorStop(.7,'rgba(0,0,0,0)');g.addColorStop(1,"rgba(10,8,6,.62)");x.fillStyle=g;x.fillRect(0,0,W,H);x.fillStyle=side?"rgba(255,240,205,.07)":"rgba(0,0,0,.2)";x.fillRect(0,0,W,H);
+  c._tkrR=1;IMG[key]=c;return key;
 }
-/* put the roofs into level 3's sky list, once the pictures are in. The wall run of each house is read from the map: the roof is as wide as the wall run (corner to corner)
-   plus a 6 percent eave each side, is centred on it, stands on the wall top (z 1.53; the wall is 1.55) and lies on the plane of the street wall (its face coordinate, less a
-   hand's width). A house whose wall run on the map has a gap gets no roof. */
 function tkrPlace(L){
-  if(L._tkr||!TKR.ready)return;L.sky=L.sky||[];const out=[],rep=[];
+  if(L._tkr||!TKR.ready)return;L.sky=L.sky||[];const planes=[],rep=[];
+  const solid=(x,y)=>L.rows[y]&&L.rows[y][x]!==undefined&&L.rows[y][x]!=='.';
   TKR.houses.forEach(h=>{const [id,x0,x1,y0,y1,face,k,o]=h,row=face==='S'?y1:y0;
-    if(!L.rows[row].slice(x0,x1+1).split('').every(c=>c!=='.')||L.rows[row][x0-1]===undefined){rep.push(id+' skipped: wall run has a gap');return}
-    const span=x1-x0+1,wsq=span*1.12+(hash2(x0,y0,205)-.5)*.06*span/3,flip=o.flip!==undefined?!!o.flip:hash2(x0,y0,202)<.5,key=tkrRoofVar(k,id,o,flip,wsq);if(!key)return;
-    const yc=face==='S'?y1+1-.1:y0+.1;
-    out.push({x:(x0+x1+1)/2,y:yc,k:key,w:wsq,z:1.53,tkr:1});rep.push([id,'wall x '+x0+'-'+(x1+1),'centre '+((x0+x1+1)/2),'w '+wsq.toFixed(2),'y '+yc,'z 1.53'].join(' '));
-    if(o.steeple){const sk=tkrSteeple();if(sk)out.push({x:x0+.55,y:yc-.2,k:sk,w:.85,z:1.5,big:1,tkr:1})}
-  });
-  for(const e of out)L.sky.push(e);L._tkr=out;L._tkrRep=rep;
+    if(!L.rows[row].slice(x0,x1+1).split('').every(c=>c!=='.')){rep.push(id+' skipped: wall run has a gap');return}
+    const W=x1-x0+1,D=y1-y0+1;let touchL=false,touchR=false;for(let y=y0;y<=y1;y++){if(solid(x0-1,y))touchL=true;if(solid(x1+1,y))touchR=true}
+    const ov=Math.max(.1,W*.04),ovL=touchL?0:ov,ovR=touchR?0:ov,xL=x0-ovL,xR=x1+1+ovR,Wr=xR-xL,flip=o.flip!==undefined?!!o.flip:hash2(x0,y0,202)<.5,key=tkrRoofVar(k,id,o,flip,Wr);if(!key)return;
+    const gab=IMG[key],H=Wr*gab._body,ovF=.08,yF=face==='S'?y1+1+ovF:y0-ovF,yB=face==='S'?y0-ovF:y1+1+ovF,nF=face==='S'?[0,1]:[0,-1],nB=[-nF[0],-nF[1]],zt=1.53,n=4;
+    // the two gable ends
+    planes.push({x:(xL+xR)/2,y:yF,k:key,w:Wr,bob:zt,flat:nF,id:id+'F'},{x:(xL+xR)/2,y:yB,k:key,w:Wr,bob:zt,flat:nB,id:id+'B'});
+    // the two slopes: n narrow bands each, the band k at the height of its foot and as far in as the roof is there
+    const yMin=Math.min(yF,yB),yMax=Math.max(yF,yB),len=yMax-yMin,band=H/n,pre=gab._pre||gab;
+    for(let q=0;q<n;q++){const d=(q+.5)/n*(Wr/2),skL=tkrStep(pre,id,q,n,len,band,flip,0),skR=tkrStep(pre,id,q,n,len,band,flip,1);
+      planes.push({x:xL+d,y:(yMin+yMax)/2,k:skL,w:len,bob:zt+q*band,flat:[-1,0],id:id+'L'+q},{x:xR-d,y:(yMin+yMax)/2,k:skR,w:len,bob:zt+q*band,flat:[1,0],id:id+'R'+q})}
+    rep.push([id,'wall x '+x0+'-'+(x1+1)+' y '+y0+'-'+(y1+1),'roof x '+xL.toFixed(2)+'-'+xR.toFixed(2),'centre '+((xL+xR)/2).toFixed(2)+' vs '+((x0+x1+1)/2),'w '+Wr.toFixed(2)+' (wall '+W+')','ridge +'+H.toFixed(2),'gables y '+yF.toFixed(2)+' / '+yB.toFixed(2)].join(' | '))});
+  L._tkr=planes;L._tkrRep=rep;
 }
 /* at dusk and night the far haze on a sky picture is a pale grey, which made the roofs glow against the dark walls: from the evening on a darker copy of each roof is drawn */
 function tkrDim(img,step){
@@ -118,5 +125,6 @@ function tkrDim(img,step){
   if(LEVEL===3){const L3=LEVELS[3];if(L3&&!L3._tkr){if(!TKR.loading)tkrLoad();else tkrPlace(L3)}}
   const out=_k.apply(this,arguments);
   if(LEVEL===3&&LEVELS[3]&&LEVELS[3]._tkr){const k=(G.day||1)/(G.dayBase||.95),step=k>.95?0:k>.82?1:k>.66?2:3;
-    if(step)for(const s of out)if(s.img&&s.img._tkrR)s.img=tkrDim(s.img,step)}
+    for(const p of LEVELS[3]._tkr){const dx=p.x-cx,dy=p.y-cy;if(dx*dx+dy*dy>1500)continue;let img=IMG[p.k];if(!img)continue;if(step)img=tkrDim(img,step);
+      out.push({x:p.x,y:p.y,img,w:p.w,bob:p.bob,pic:1,plane3d:1,flat:p.flat,sky:true,smallSky:true,decor:KH_SKYD})}}
   return out}}
