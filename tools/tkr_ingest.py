@@ -15,7 +15,7 @@ OUT = ROOT / 'assets' / 'tkr'; OUT.mkdir(exist_ok=True)
 def load(n): return np.asarray(Image.open(SRC / n).convert('RGB')).astype(np.float32)
 def magness(a):
     r, g, b = a[..., 0], a[..., 1], a[..., 2]
-    return np.clip(((np.minimum(r, b) - g) - 60) / 60, 0, 1) * (np.abs(r - b) < 120)
+    return np.clip(((np.minimum(r, b) - g) - 40) / 60, 0, 1) * (np.abs(r - b) < 120)
 def save(arr, alpha, name, q=90):
     rgba = np.dstack([np.clip(arr, 0, 255), np.clip(alpha, 0, 255)]).astype(np.uint8)
     Image.fromarray(rgba, 'RGBA').save(OUT / (name + '.webp'), quality=q, method=6)
@@ -23,6 +23,18 @@ def save(arr, alpha, name, q=90):
 def box(mask, x0, y0, x1, y1, thr=.5):
     sub = mask[y0:y1, x0:x1]; ys = np.where(sub.sum(1) >= 3)[0]; xs = np.where(sub.sum(0) >= 3)[0]
     return x0 + xs[0], y0 + ys[0], x0 + xs[-1] + 1, y0 + ys[-1] + 1
+def defringe(rgb, m):
+    """the magenta key leaves a pink cast on the edge pixels: there red and blue are held down to the level of green"""
+    rgb = rgb.copy(); r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+    near = np.asarray(Image.fromarray(((m > .02) * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(7))) > 0
+    cast = near & (r > g + 8) & (b > g + 8)
+    lim = g * 1.12 + 10
+    rgb[..., 0] = np.where(cast, np.minimum(r, lim), r); rgb[..., 2] = np.where(cast, np.minimum(b, lim), b)
+    return rgb
+def cutout(A, m, x0, y0, x1, y1):
+    rgb = defringe(A[y0:y1, x0:x1], m[y0:y1, x0:x1]); mm = m[y0:y1, x0:x1]
+    a = np.where(mm > .12, 0, (1 - mm) * 255)
+    return rgb, a
 def spread(rgb, a):
     """push the painted colour into the transparent pixels (several blurred passes), so that bilinear or edge samples never pick up magenta"""
     rgb = rgb.copy(); w = (a > 127).astype(np.float32)
@@ -53,14 +65,14 @@ for (name, qx, qy, cut) in [('slate', 0, 0, 430), ('shingle', 1, 0, 430), ('that
 A = load('gables.png'); m = magness(A)
 for (name, qx, qy) in [('timber', 0, 0), ('stone', 1, 0), ('boards', 0, 1), ('ochre', 1, 1)]:
     x0, y0, x1, y1 = box(m < .5, qx * 512, qy * 512, qx * 512 + 512, qy * 512 + 512)
-    rgb = A[y0:y1, x0:x1]; a = (1 - m[y0:y1, x0:x1]) * 255
+    rgb, a = cutout(A, m, x0, y0, x1, y1)
     save(spread(rgb, a), a, 'gable_' + name)
 
 # ---- chimneys, tower, spire
 A = load('chimneys.png'); m = magness(A)
 for (name, qx, qy) in [('chim_brick', 0, 0), ('chim_stone', 1, 0), ('tower', 0, 1), ('spire_all', 1, 1)]:
     x0, y0, x1, y1 = box(m < .5, qx * 512, qy * 512, qx * 512 + 512, qy * 512 + 512)
-    rgb = A[y0:y1, x0:x1]; a = (1 - m[y0:y1, x0:x1]) * 255
+    rgb, a = cutout(A, m, x0, y0, x1, y1)
     if name != 'spire_all':
         save(spread(rgb, a), a, name); continue
     # the spire: the cross on its iron rod above the slate, and the slate body from the first row as wide as a fifth of the base
