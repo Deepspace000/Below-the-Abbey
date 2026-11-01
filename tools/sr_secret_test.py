@@ -172,7 +172,7 @@ def main():
             check('497 %s opens with %s' % (s_['id'], label), r['open'] and r['flag'] and r['said'], r)
         # ---------------- the draught hint ----------------
         pg.evaluate("s=>{const F=G.flags.ep_sec=G.flags.ep_sec||{};delete F[s.id];G.grid[s.door[1]][s.door[0]]=1;SR.gd=null;EP.hint={}}", s_)
-        pg.evaluate("async a=>{await T.go(497,a[0],a[1],a[2]);G.msgs=[]}", [fx, fy, f]); pg.wait_for_timeout(2600)
+        pg.evaluate("async a=>{await T.go(497,a[0],a[1],a[2]);G.msgs=[];EP.hint={};EP.hintAt=null}", [fx, fy, f]); pg.wait_for_timeout(2600)
         check('a draught is felt beside a sealed wall', pg.evaluate("()=>(G.msgs||[]).some(m=>/draught/.test(m.text||''))"))
         # ---------------- the map fog ----------------
         pg.evaluate("async()=>{await T.go(497,3,3,0)}")
