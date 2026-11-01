@@ -99,7 +99,7 @@ function worldEventsTick(min){
 }
 function evSpawn(npc,face,text){
   const f=freeNear(G.P.x,G.P.y,5,1);if(!f.length)return;
-  const [x,y]=f[0];G.decor.push({k:face,x,y,block:true,npc,ev:1});buildDecorMap();G.flags.ev.last=G.clock;
+  const [x,y]=f[0];G.decor.push({k:face,x,y,block:false,walk:true,npc,ev:1});buildDecorMap();G.flags.ev.last=G.clock;
   msg(text,'#e8e0a0');sfx('key');
 }
 /* a thief or an ambush while the party sleeps in the open */
@@ -118,7 +118,7 @@ function worldRest(inn){
 }
 khNpc('ev_trader','A passing merchant','peasantM',d=>say('A traveller\'s prices on a traveller\'s road. I carry what the road demands: food, light, cures and the odd bargain.',[['Show me your cart.',()=>{
   openShop(d,[['bread',6],['cheese',4],['water',6],['torch',4],['antidote',3],['salve',3],['healdraught',3],['manadraught',2],['holywater',1],['sleeptea',2]],'The Passing Cart');return null}],['Any news from the road?',()=>say(typeof rumourFor==='function'?rumourFor('road'):'The road is long and the news is stale.',[BYE])],BYE]));
-loadImg('ev_bard','assets/ev_bard.png');NPC_H.ev_bard=1.25;
+loadImg('ev_bard','assets/ev_bard.png');NPC_H.ev_bard=1.0;
 const BARD_SONGS=[ // what Tamsin sings, one for each evening
   ['The Ballad of the Goat and the Tax Roll','A long, rolling ballad about a goat who ate every page of the tax roll, and the three tax men who followed her for a year to get it back, one bite at a time. The square laughs until it cries.'],
   ['The Dragon Who Went on a Diet','A bright song about a dragon who stopped eating knights for the good of her scales. It ends badly for the knights, and very well for the baker.'],
@@ -126,12 +126,14 @@ const BARD_SONGS=[ // what Tamsin sings, one for each evening
   ['The Drowned Bell of Oldhaven','A cold, lovely song about a bell that still rings under the harbour on the nights before a storm. Tamsin plays it very quietly, and the lamps seem to dim.'],
   ['Three Crows at the Crossroads','A quick, wicked drinking song about three crows who sell the same road to three travellers. The chorus is shouted by everyone who knows it, and a few who do not.'],
   ['The Lantern in the Oak','A gentle tune about a lantern someone left in an old oak, and every traveller who has sat beneath it since. It is the one she plays last.']];
+/* the bard slips away once the song is sung, and never stands in the road */
+function evBardLeaves(d){if(!d)return;later(1500,()=>{d.found=true;d.block=false;try{buildDecorMap()}catch(e){}if(G.state==='play')msg('The bard finishes her song and slips away into the evening.','#e8e0a0')})}
 khNpc('ev_bard','Tamsin Larkwhistle, bard','ev_bard',d=>{
   const F=G.flags,day=dayNum(),song=BARD_SONGS[day%BARD_SONGS.length];
   if(F.bardDay===day)return say('I have sung you my best for tonight. Come back tomorrow evening; I know a good many more, and I never sing the same one twice running.',[BYE]);
   return say('Tamsin Larkwhistle, at your service, and at the service of anyone with a coin and a quiet minute! I walk the roads for the songs, and the roads walk me for the dinners. Tonight it is “'+song[0]+'”. Five gold, or whatever you can spare.',[
-    ['Hear the song (5 gold)',()=>{if(G.gold<5)return say('Five gold. Even bards have to eat, I am afraid.',[BYE]);G.gold-=5;F.bardDay=day;afflInflict('wellrested',-1,true);luckAdd(1);return say(song[1]+' The party feels rested, and a little braver.',[BYE])}],
-    ['Tip generously (25 gold)',()=>{if(G.gold<25)return say('That is a kind thought, and I can hear in your purse that you cannot afford it.',[BYE]);G.gold-=25;F.bardDay=day;luckAdd(2,'a generous tip');honourAdd(1);const t=repTownOf(LEVEL);if(t)repAdd(t,2,'you tipped the bard');afflInflict('wellrested',-1,true);return say('Tamsin bows so low her feather brushes the stones, and sings “'+song[0]+'” twice, once for the square and once for you. Then she adds a verse that mentions each of you by name.',[BYE])}],
+    ['Hear the song (5 gold)',()=>{if(G.gold<5)return say('Five gold. Even bards have to eat, I am afraid.',[BYE]);G.gold-=5;F.bardDay=day;afflInflict('wellrested',-1,true);luckAdd(1);evBardLeaves(d);return say(song[1]+' The party feels rested, and a little braver.',[BYE])}],
+    ['Tip generously (25 gold)',()=>{if(G.gold<25)return say('That is a kind thought, and I can hear in your purse that you cannot afford it.',[BYE]);G.gold-=25;F.bardDay=day;luckAdd(2,'a generous tip');honourAdd(1);const t=repTownOf(LEVEL);if(t)repAdd(t,2,'you tipped the bard');afflInflict('wellrested',-1,true);evBardLeaves(d);return say('Tamsin bows so low her feather brushes the stones, and sings “'+song[0]+'” twice, once for the square and once for you. Then she adds a verse that mentions each of you by name.',[BYE])}],
     ['Heard anything on the road?',()=>say(typeof rumourFor==='function'?rumourFor('town'):'Only songs, I am afraid. But songs travel, and so does gossip.',[BYE])],BYE]);
 },{sc:1});
 journalPage({id:'wx',title:'Weather and Seasons',
