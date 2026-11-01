@@ -39,11 +39,13 @@ function wmnSpec(l){return WMN_SPEC[l.k]||[[WMN_ICSPEC[l.ic]||'i_oaks',0,0,l.ic=
 const WMN_FOOT={i_town:.88,i_seaside:.87,i_castle:.87,i_desertcity:.87,i_cave:.87,i_mine:.85,i_graves:.9,i_crypt:.92,i_oaks:.87,i_pines:.88,i_mountains:.77};   // how far down each picture its solid part goes (the rest is the faded ground): a name may stand over that
 const WM_DH={s:96,ox:-48,oy:-62,a:.62};   // the Deeper Hollow's picture: its size on the map, where it starts from the place's spot, and how see-through it is
 const WMN_BOX={deephollow:[WM_DH.ox-1,WM_DH.oy-1,WM_DH.ox+WM_DH.s+1,WM_DH.oy+WM_DH.s+1]};   // places whose picture is drawn by another file: their box
+const wmnSc=l=>l.sc||1;   // a place may carry sc (0.8 = a fifth smaller): its picture, name and level are all drawn at that fraction
 function wmnShape(l){
   if(WMN_BOX[l.k]){const b=WMN_BOX[l.k];return {parts:[],off:0,ib:[l.x+b[0],l.y+b[1],l.x+b[2],l.y+b[3]]}}
   const s=wmnSpec(l);if(!s.length)return {parts:[],off:0,ib:[l.x,l.y-12,l.x,l.y-4]};let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
-  for(const p of s){const d=wmnDims(p[0],p[3]*WMN_ICO_SCALE,p[4]);x0=Math.min(x0,p[1]*WMN_ICO_SCALE-d[0]/2);x1=Math.max(x1,p[1]*WMN_ICO_SCALE+d[0]/2);y0=Math.min(y0,p[2]*WMN_ICO_SCALE-d[1]);y1=Math.max(y1,p[2]*WMN_ICO_SCALE)}
-  const off=l.y+10-y1;let fi=0;for(const p of s)if(p[2]*WMN_ICO_SCALE===y1&&WMN_FOOT[p[0]]){const d=wmnDims(p[0],p[3]*WMN_ICO_SCALE,p[4]);fi=Math.max(fi,(1-WMN_FOOT[p[0]])*d[1]*.8)}
+  const sc=wmnSc(l),KK=WMN_ICO_SCALE*sc;
+  for(const p of s){const d=wmnDims(p[0],p[3]*KK,p[4]);x0=Math.min(x0,p[1]*KK-d[0]/2);x1=Math.max(x1,p[1]*KK+d[0]/2);y0=Math.min(y0,p[2]*KK-d[1]);y1=Math.max(y1,p[2]*KK)}
+  const off=l.y+10-y1;let fi=0;for(const p of s)if(p[2]*KK===y1&&WMN_FOOT[p[0]]){const d=wmnDims(p[0],p[3]*KK,p[4]);fi=Math.max(fi,(1-WMN_FOOT[p[0]])*d[1]*.8)}
   return {parts:s.slice().sort((a,b)=>a[2]-b[2]),off,fi,ib:[l.x+x0,y0+off,l.x+x1,y1+off]}}
 
 /* ---------- the layout: pictures, then names ---------- */
@@ -53,16 +55,17 @@ const wmnHit=(a,b)=>a[0]<b[2]&&a[2]>b[0]&&a[1]<b[3]&&a[3]>b[1];
 function wmnSpread(){
   const c=ctx,B=[],M=3,MAXD=80;
   for(const l of WORLD_LOCS){if(l._x0===undefined){l._x0=l.x;l._y0=l.y}l.x=l._x0;l.y=l._y0}
-  for(const l of WORLD_LOCS){const sh=wmnShape(l),big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle',nsz=big?7.6:6.6;
-    c.save();c.font=`bold ${nsz}px ${FUI}`;const w=c.measureText(l.n).width+(typeof locRating==='function'&&!G.flags.autoScaleOn?24:0);c.restore();
+  for(const l of WORLD_LOCS){const sh=wmnShape(l),big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle',nsz=(big?7.6:6.6)*wmnSc(l);
+    c.save();c.font=`bold ${nsz}px ${FUI}`;const w=c.measureText(l.n).width+(typeof locRating==='function'&&!G.flags.autoScaleOn?24*wmnSc(l):0);c.restore();
     const a=sh.ib[0]-l.x,b=sh.ib[1]-l.y,e=sh.ib[2]-l.x,f=sh.ib[3]-l.y,sub=l.sub?9:0;
     B.push({l,x0:Math.min(a,-w/2-2),y0:b,x1:Math.max(e,w/2+2),y1:f+12+sub+4})}
   for(let it=0;it<400;it++){let moved=false;
     for(let i=0;i<B.length;i++)for(let j=i+1;j<B.length;j++){const p=B[i],q=B[j];
       const ox=Math.min(p.l.x+p.x1,q.l.x+q.x1)-Math.max(p.l.x+p.x0,q.l.x+q.x0)+M,oy=Math.min(p.l.y+p.y1,q.l.y+q.y1)-Math.max(p.l.y+p.y0,q.l.y+q.y0)+M;
       if(ox<=0||oy<=0)continue;moved=true;
-      if(ox<oy){const d=ox/2+.1,s=(p.l.x+(p.x0+p.x1)/2)<=(q.l.x+(q.x0+q.x1)/2)?-1:1;p.l.x+=s*d;q.l.x-=s*d}
-      else{const d=oy/2+.1,s=(p.l.y+(p.y0+p.y1)/2)<=(q.l.y+(q.y0+q.y1)/2)?-1:1;p.l.y+=s*d;q.l.y-=s*d}
+      const kp=p.l.pin?0:q.l.pin?2:1,kq=q.l.pin?0:p.l.pin?2:1;   // a pinned place (pin:1) stays exactly on its spot and the other one gives way
+      if(ox<oy){const d=ox/2+.1,s=(p.l.x+(p.x0+p.x1)/2)<=(q.l.x+(q.x0+q.x1)/2)?-1:1;p.l.x+=s*d*kp;q.l.x-=s*d*kq}
+      else{const d=oy/2+.1,s=(p.l.y+(p.y0+p.y1)/2)<=(q.l.y+(q.y0+q.y1)/2)?-1:1;p.l.y+=s*d*kp;q.l.y-=s*d*kq}
       for(const r of [p,q]){r.l.x=Math.max(r.l._x0-MAXD,Math.min(r.l._x0+MAXD,r.l.x));r.l.y=Math.max(r.l._y0-MAXD,Math.min(r.l._y0+MAXD,r.l.y))}}
     if(!moved)break}
   for(const l of WORLD_LOCS){l.x=Math.round(l.x*2)/2;l.y=Math.round(l.y*2)/2}
@@ -83,14 +86,14 @@ function wmnLayout(){
   for(const l of WORLD_LOCS){const sh=wmnShape(l);const lb=[sh.ib[0],sh.ib[1],sh.ib[2],sh.ib[3]-(sh.fi||0)];out[l.k]={sh,ib:sh.ib,lb,parts:sh.parts,off:sh.off};placed.push(lb)}
   const order=WORLD_LOCS.slice().sort((a,b)=>(b.ic==='castle'||b.ic==='town'||b.ic==='abbey'||b.ic==='orangecastle'?1:0)-(a.ic==='castle'||a.ic==='town'||a.ic==='abbey'||a.ic==='orangecastle'?1:0));
   for(const l of order){
-    const L=out[l.k],ib=L.lb,big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle',nsz=big?7.6:6.6;
+    const L=out[l.k],ib=L.lb,big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle',sc=wmnSc(l),nsz=(big?7.6:6.6)*sc;
     const lr=(!G.flags.autoScaleOn&&typeof locRating==='function')?locRating(l):null,t2=lr?'Lv '+lr:'';
-    c.save();c.font=`bold ${nsz}px ${FUI}`;const w1=c.measureText(l.n).width;c.font=`bold 6px ${FUI}`;const w2=lr?c.measureText(t2).width:0;c.font=`bold 6px ${FUI}`;const sw=l.sub?c.measureText(l.sub).width:0;c.restore();
-    const gap=lr?4:0,wt=w1+gap+w2,bw=Math.max(wt,sw),sub=l.sub?9:0,ym=(ib[1]+ib[3])/2;
+    c.save();c.font=`bold ${nsz}px ${FUI}`;const w1=c.measureText(l.n).width;c.font=`bold ${6*sc}px ${FUI}`;const w2=lr?c.measureText(t2).width:0;c.font=`bold ${6*sc}px ${FUI}`;const sw=l.sub?c.measureText(l.sub).width:0;c.restore();
+    const gap=lr?4*sc:0,wt=w1+gap+w2,bw=Math.max(wt,sw),sub=l.sub?9:0,ym=(ib[1]+ib[3])/2;
     // the name always stands straight under its own picture, a little smaller, its top just over the bottom edge of the picture so that it is plainly attached to it
     const ny=ib[3]+nsz/2-1.5,H=12+sub+6,best={cx:l.x,ny,r:[l.x-bw/2-2,ny-6,l.x+bw/2+2,ny-6+H]};let bestA=0;
     for(const p of placed)if(p!==L.lb&&wmnHit(best.r,p))bestA++;
-    placed.push(best.r);Object.assign(L,{cx:best.cx,ny:best.ny,rect:[best.r[0],best.r[1],best.r[2],best.r[1]+12+sub+6],w1,w2,gap,wt,t2,nsz,over:bestA>0});
+    placed.push(best.r);Object.assign(L,{cx:best.cx,ny:best.ny,rect:[best.r[0],best.r[1],best.r[2],best.r[1]+12+sub+6],w1,w2,gap,wt,t2,nsz,over:bestA>0,sc});
   }
   WMN.lay=out;WMN.layKey=key;return out}
 function wmnLay(l){return wmnLayout()[l.k]}
@@ -103,11 +106,11 @@ function wmnBlocked(x,y,d){const lay=wmnLayout(),m=d*.5+1.5;
   return false}
 
 /* ---------- drawing ---------- */
-function wmnIco(l){const L=wmnLay(l);if(!L)return;const K=WMN_ICO_SCALE;for(const p of L.parts)wmnDraw(ctx,p[0],l.x+p[1]*K,p[2]*K+L.off,p[3]*K,!!p[4])}
+function wmnIco(l){const L=wmnLay(l);if(!L)return;const K=WMN_ICO_SCALE*wmnSc(l);for(const p of L.parts)wmnDraw(ctx,p[0],l.x+p[1]*K,p[2]*K+L.off,p[3]*K,!!p[4])}
 function wmnLabel(l,v,txtH){
   const L=wmnLay(l);if(!L||L.cx===undefined)return;const col=v?'#1c1208':'#5a4a30',xs=L.cx-L.wt/2;
-  if(L.t2){txtH(l.n,xs+L.w1/2,L.ny,L.nsz,col);txtH(L.t2,xs+L.w1+L.gap+L.w2/2,L.ny,6,'#7a1a10')}else txtH(l.n,L.cx,L.ny,L.nsz,col);
-  if(l.sub)txtH(l.sub,L.cx,L.ny+8,6,'#4a3a22')}
+  if(L.t2){txtH(l.n,xs+L.w1/2,L.ny,L.nsz,col);txtH(L.t2,xs+L.w1+L.gap+L.w2/2,L.ny,6*(L.sc||1),'#7a1a10')}else txtH(l.n,L.cx,L.ny,L.nsz,col);
+  if(l.sub)txtH(l.sub,L.cx,L.ny+8,6*(L.sc||1),'#4a3a22')}
 /* the quest dots stand in the strip left under each name */
 function wmnDots(l,nq,c){const L=wmnLay(l);if(!L||!L.rect)return;
   for(let i=0;i<nq;i++){const row=(i/14)|0,inRow=Math.min(14,nq-row*14),col=i%14;c.beginPath();c.arc(L.cx+(col-(inRow-1)/2)*3.4,L.rect[3]-4+row*3.4,1.15,0,TAU);c.fill();c.stroke()}}
