@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.758';
+const VERSION='3.759';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -58700,7 +58700,7 @@ const HS_SIZES={
    rectangle on the ground; 'face' is the side the door is on: S, N, E or W). skin: optional look of the houses in this town (wall style, roof picture). */
 const HS_TOWNS=[
   {key:'thornwick',lvl:3,name:'Thornwick',sizes:['small'],face:'kh_ohfolk5_5',
-    agent:{x:38,y:17,sign:{x:37,y:17}},
+    agent:{x:38,y:16,sign:{x:37,y:16,oy:-.4}},
     plots:{small:{x0:40,y0:14,w:3,d:2,face:'S'}}},
   {key:'ironhill',lvl:13,name:'Ironhill',sizes:['small','medium','large'],face:'kh_ohfolk5_5',
     agent:{x:46,y:18,sign:{x:47,y:18}},
@@ -58937,7 +58937,7 @@ function hsStamp(L,T){
   if(!U.agent){ // the agent, his sign, and the boards of every plot are added once
     const face=IMG[T.face]?T.face:T.alt;if(face&&!NPC_H[face])NPC_H[face]=(typeof KH_NPC_H!=='undefined'&&KH_NPC_H[face])||.98;
     U.agent={k:face,x:T.agent.x,y:T.agent.y,block:true,npc:'hs_agent',sc:1};L.decor.push(U.agent);
-    if(T.agent.sign){const s=T.agent.sign;U.sign={k:'hs_office',x:s.x,y:s.y,block:false,walk:true,deco:true,sc:1};L.decor.push(U.sign)}
+    if(T.agent.sign){const s=T.agent.sign;U.sign={k:'hs_office',x:s.x,y:s.y,ox:s.ox,oy:s.oy,block:false,walk:true,deco:true,sc:1};L.decor.push(U.sign)}
     for(const s of T.sizes){const P=hsPlot(T,s);
       for(const d of L.decor){if(d.block&&!d.npc&&d.x>=P.p.x0&&d.x<P.p.x0+P.p.w&&d.y>=P.p.y0&&d.y<P.p.y0+P.p.d&&d!==U.agent){d._hsTree=true;d.block=false;d.hidden=true}} // trees on a plot are cleared for good
       const board={k:'hs_sale_'+s,x:P.door[0],y:P.door[1],block:true,solid:1,npc:'hs_b_'+s,sc:1};L.decor.push(board);

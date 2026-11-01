@@ -21,7 +21,7 @@ const HS_SIZES={
    rectangle on the ground; 'face' is the side the door is on: S, N, E or W). skin: optional look of the houses in this town (wall style, roof picture). */
 const HS_TOWNS=[
   {key:'thornwick',lvl:3,name:'Thornwick',sizes:['small'],face:'kh_ohfolk5_5',
-    agent:{x:38,y:17,sign:{x:37,y:17}},
+    agent:{x:38,y:16,sign:{x:37,y:16,oy:-.4}},
     plots:{small:{x0:40,y0:14,w:3,d:2,face:'S'}}},
   {key:'ironhill',lvl:13,name:'Ironhill',sizes:['small','medium','large'],face:'kh_ohfolk5_5',
     agent:{x:46,y:18,sign:{x:47,y:18}},

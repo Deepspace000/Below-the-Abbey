@@ -115,7 +115,7 @@ function hsStamp(L,T){
   if(!U.agent){ // the agent, his sign, and the boards of every plot are added once
     const face=IMG[T.face]?T.face:T.alt;if(face&&!NPC_H[face])NPC_H[face]=(typeof KH_NPC_H!=='undefined'&&KH_NPC_H[face])||.98;
     U.agent={k:face,x:T.agent.x,y:T.agent.y,block:true,npc:'hs_agent',sc:1};L.decor.push(U.agent);
-    if(T.agent.sign){const s=T.agent.sign;U.sign={k:'hs_office',x:s.x,y:s.y,block:false,walk:true,deco:true,sc:1};L.decor.push(U.sign)}
+    if(T.agent.sign){const s=T.agent.sign;U.sign={k:'hs_office',x:s.x,y:s.y,ox:s.ox,oy:s.oy,block:false,walk:true,deco:true,sc:1};L.decor.push(U.sign)}
     for(const s of T.sizes){const P=hsPlot(T,s);
       for(const d of L.decor){if(d.block&&!d.npc&&d.x>=P.p.x0&&d.x<P.p.x0+P.p.w&&d.y>=P.p.y0&&d.y<P.p.y0+P.p.d&&d!==U.agent){d._hsTree=true;d.block=false;d.hidden=true}} // trees on a plot are cleared for good
       const board={k:'hs_sale_'+s,x:P.door[0],y:P.door[1],block:true,solid:1,npc:'hs_b_'+s,sc:1};L.decor.push(board);
