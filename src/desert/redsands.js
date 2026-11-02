@@ -29,10 +29,10 @@ function buildRedDunes(){
     const road=Math.abs(x-Math.round(rsCentre(y)))<=3&&y<roadFrom+10,oX=(R(x,y,3)-.5)*.7,oY=(R(x,y,4)-.5)*.7;
     if(road)continue;
     if(DUNE_SPRITES&&R(x,y,20)<.055&&!nearDune(x,y)){dunes.add(x+','+y);put('rdune'+((R(x,y,21)*3)|0),x,y,{block:true,ox:oX*.4,oy:oY*.3,sc:.95+R(x,y,22)*.8})}
-    else if(R(x,y,23)<.016)put('rrock'+((R(x,y,24)*3)|0),x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,25)*.7});
-    else if(R(x,y,26)<.006){const v=(R(x,y,29)*4)|0,s=.9+R(x,y,27)*.4;put('dplant'+v,x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:s,bob:-DPLANT_FOOT[v]*s})} // dplant2 and dplant3 have empty rows under the stem: sink them by that much so they stand on the sand
-    else if(R(x,y,28)<.0025)put('ddead',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,29)*.5});
-    else if(R(x,y,30)<.04)sc('dshrub'+((R(x,y,31)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,32)*.7});
+    else if(R(x,y,23)<.006)put('rrock'+((R(x,y,24)*3)|0),x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,25)*.7});
+    else if(R(x,y,26)<.003){const v=(R(x,y,29)*4)|0,s=.9+R(x,y,27)*.4;put('dplant'+v,x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:s,bob:-DPLANT_FOOT[v]*s})} // dplant2 and dplant3 have empty rows under the stem: sink them by that much so they stand on the sand
+    else if(R(x,y,28)<.0012)put('ddead',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,29)*.5});
+    else if(R(x,y,30)<.012)sc('dshrub'+((R(x,y,31)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,32)*.7});
     else if(R(x,y,33)<.004)sc('dbones',x,y,{ox:oX,oy:oY,sc:.9+R(x,y,34)*.4});
     if(DUNE_SPRITES&&R(x,y,35)<.18)sc('rpeb'+((R(x,y,36)*3)|0),x,y,{ox:(R(x,y,37)-.5)*.9,oy:(R(x,y,38)-.5)*.9,sc:.8+R(x,y,39)*.8});
   }
