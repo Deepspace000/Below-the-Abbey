@@ -53,7 +53,7 @@ function yarWoods(c){
   const chests=[],foes=[];
   for(const [cx,cy,n] of YW_CLEARINGS){const q=spot(cx,cy,2);if(!q)continue;used.add(K(q[0],q[1]));decor.push({k:'chest',x:q[0],y:q[1],block:true,goldAmt:300+Math.floor(hs(cx,cy,89)*400)});chests.push(q)}
   // wolves in the woods, bandits keeping the clearings
-  const WOLVES=[[33,22],[41,17],[28,34],[32,47],[33,57],[34,64],[44,69]],BANDITS=[[49,12,'bandit'],[37,66,'bandit'],[40,68,'bandit'],[28,29,'bandit']];   // slightly fewer than before: 7 wolves and 4 bandits
+  const WOLVES=[[33,22],[41,17],[28,34],[33,57],[44,69]],BANDITS=[[49,12,'bandit'],[40,68,'bandit'],[28,29,'bandit']];   // 5 wolves and 3 bandits (it was 10 and 5)
   for(const [x,y] of WOLVES){const q=spot(x,y,3);if(q){used.add(K(q[0],q[1]));enemies.push({t:'wolf',x:q[0],y:q[1]});foes.push(q)}}
   for(const [x,y,t] of BANDITS){const q=spot(x,y,2);if(q){used.add(K(q[0],q[1]));enemies.push({t,x:q[0],y:q[1]});foes.push(q)}}
   // herbs and a few draughts along the trails

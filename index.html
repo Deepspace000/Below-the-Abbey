@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.785';
+const VERSION='3.786';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -14363,7 +14363,7 @@ function yarBuild(){
     const horizontal=hz.face==='S'||hz.face==='N';
     const sx=horizontal?fx-1:fx,sy=horizontal?fy:fy-1;
     const spot=(P.street[sy*W+sx]||(rows[sy]&&rows[sy][sx]==='.'))?[sx,sy]:[fx,fy];
-    decor.push({k:'sign_'+(q.keeper||'yr'),x:spot[0],y:spot[1],block:false,wd:wall,txt:[q.name.toUpperCase(),KEEP_NAME[q.keeper]||'']});
+    decor.push(Object.assign({k:'sign_'+(q.keeper||'yr'),x:spot[0],y:spot[1],block:false,wd:wall,txt:[q.name.toUpperCase(),KEEP_NAME[q.keeper]||'']},q.keeper==='yr_orsa'?{ox:-wall[0]*.1,oy:-wall[1]*.1}:{}));   // the lighthouse sign hangs a little in front of the wall plane it shares with the low door wall, so no column of it is hidden from any angle
   }
   // ---- the people of the village, who walk through and can be spoken to ----
   YR.people=[];
@@ -82395,7 +82395,7 @@ function yarWoods(c){
   const chests=[],foes=[];
   for(const [cx,cy,n] of YW_CLEARINGS){const q=spot(cx,cy,2);if(!q)continue;used.add(K(q[0],q[1]));decor.push({k:'chest',x:q[0],y:q[1],block:true,goldAmt:300+Math.floor(hs(cx,cy,89)*400)});chests.push(q)}
   // wolves in the woods, bandits keeping the clearings
-  const WOLVES=[[33,22],[41,17],[28,34],[32,47],[33,57],[34,64],[44,69]],BANDITS=[[49,12,'bandit'],[37,66,'bandit'],[40,68,'bandit'],[28,29,'bandit']];   // slightly fewer than before: 7 wolves and 4 bandits
+  const WOLVES=[[33,22],[41,17],[28,34],[33,57],[44,69]],BANDITS=[[49,12,'bandit'],[40,68,'bandit'],[28,29,'bandit']];   // 5 wolves and 3 bandits (it was 10 and 5)
   for(const [x,y] of WOLVES){const q=spot(x,y,3);if(q){used.add(K(q[0],q[1]));enemies.push({t:'wolf',x:q[0],y:q[1]});foes.push(q)}}
   for(const [x,y,t] of BANDITS){const q=spot(x,y,2);if(q){used.add(K(q[0],q[1]));enemies.push({t,x:q[0],y:q[1]});foes.push(q)}}
   // herbs and a few draughts along the trails

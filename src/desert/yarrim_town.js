@@ -291,7 +291,7 @@ function yarBuild(){
     const horizontal=hz.face==='S'||hz.face==='N';
     const sx=horizontal?fx-1:fx,sy=horizontal?fy:fy-1;
     const spot=(P.street[sy*W+sx]||(rows[sy]&&rows[sy][sx]==='.'))?[sx,sy]:[fx,fy];
-    decor.push({k:'sign_'+(q.keeper||'yr'),x:spot[0],y:spot[1],block:false,wd:wall,txt:[q.name.toUpperCase(),KEEP_NAME[q.keeper]||'']});
+    decor.push(Object.assign({k:'sign_'+(q.keeper||'yr'),x:spot[0],y:spot[1],block:false,wd:wall,txt:[q.name.toUpperCase(),KEEP_NAME[q.keeper]||'']},q.keeper==='yr_orsa'?{ox:-wall[0]*.1,oy:-wall[1]*.1}:{}));   // the lighthouse sign hangs a little in front of the wall plane it shares with the low door wall, so no column of it is hidden from any angle
   }
   // ---- the people of the village, who walk through and can be spoken to ----
   YR.people=[];
