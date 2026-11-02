@@ -109,11 +109,12 @@ function tkrBuild(){
         zb=WH+TKR_TAU+R*(1-(Math.abs(us)*half+cw/2)/half)-.05;
       objs.push({t:'box',hid:hi,id:id+'c',X0:bx0,X1:bx1,Y0:by0,Y1:by1,zb,zt:top,tex:'chim_'+kind,ho:objs[objs.length-2],tn:[tn[0]*.95,tn[1]*.95,tn[2]*.95]})}
     if(id==='ch'||(opt&&opt.chapel)){ // the chapel: a square stone bell tower standing through the roof at the street end, with its slate spire and iron cross
-      const o2=opt||{},tc=o2.tx!==undefined?o2.tx:(X0+X1)/2,ty=o2.north?Y0+.95:Y1-.95,hw=.62,zt=WH+TKR_TAU+R+(o2.th||.95),zs=zt+(o2.sh||2.5);
+      const o2=opt||{},tc=o2.tx!==undefined?o2.tx:(X0+X1)/2,ty=o2.ty!==undefined?o2.ty:o2.north?Y0+.95:Y1-.95,hw=.62,   // o2.tx, o2.ty: the tower's own place (Oldhaven); o2.nocross: a tower with a spire and no iron cross
+      zt=WH+TKR_TAU+R+(o2.th||.95),zs=zt+(o2.sh||2.5);
       objs.push({t:'box',hid:hi,id:'cht',X0:tc-hw,X1:tc+hw,Y0:ty-hw,Y1:ty+hw,zb:WH+TKR_TAU+R*.3,zt,tex:'tower',tn:[tn[0]*1.05,tn[1]*1.05,tn[2]*1.05]});
       objs.push({t:'pyr',hid:hi,id:'chs',X0:tc-hw-.03,X1:tc+hw+.03,Y0:ty-hw-.03,Y1:ty+hw+.03,cx:tc,cy:ty,hw:hw+.03,zb:zt,zt:zs,tex:'spire',tn});
       const xw=.36,xh=xw*(TKR.tex.spirex?TKR.tex.spirex.h/TKR.tex.spirex.w:.35);
-      objs.push({t:'card',hid:hi,id:'chx1',ax0:tc-xw/2,ay0:ty,ax1:tc+xw/2,ay1:ty,zb:zs-.04,zt:zs-.04+xh,tex:'spirex',tn},{t:'card',hid:hi,id:'chx2',ax0:tc,ay0:ty-xw/2,ax1:tc,ay1:ty+xw/2,zb:zs-.04,zt:zs-.04+xh,tex:'spirex',tn})}
+      if(!o2.nocross)objs.push({t:'card',hid:hi,id:'chx1',ax0:tc-xw/2,ay0:ty,ax1:tc+xw/2,ay1:ty,zb:zs-.04,zt:zs-.04+xh,tex:'spirex',tn},{t:'card',hid:hi,id:'chx2',ax0:tc,ay0:ty-xw/2,ax1:tc,ay1:ty+xw/2,zb:zs-.04,zt:zs-.04+xh,tex:'spirex',tn})}
     rep.push(id+' | walls x '+X0+'-'+X1+' y '+Y0+'-'+Y1+' | roof x '+X0+'-'+X1+' y '+Y0+'-'+Y1+' (no overhang) | ridge '+ax+' +'+R)});
   if(S.extra)S.extra(objs,(x,y)=>TKR_GROUND?terrH(x,y):0);   // round solids of a level (Yarrim's lighthouse): cylinders and domes, standing free of the wall grid
   TKR.gzOf=TKR.houses.map(h=>TKR_GROUND?terrH((h[1]+h[2]+1)/2,(h[3]+h[4]+1)/2):0);   // the ground the house stands on (uneven ground: Yarrim; flat levels: 0)
@@ -122,6 +123,9 @@ function tkrBuild(){
   const near=new Int16Array(W*H).fill(-1);TKR.houses.forEach((h,hi)=>{if(!objs.some(o=>o.hid===hi))return;for(let y=h[3];y<=h[4];y++)for(let x=h[1];x<=h[2];x++)near[y*W+x]=hi});
   TKR.whOf=TKR.houses.map(h=>(h[12]&&h[12].wh)||TKR_WH);TKR.objs=objs;TKR.near=near;TKR.W=W;TKR.H=H;LEVELS[LEVEL]._tkrRep=rep;
 }
+/* only the roof pieces within a range of the camera are tested by the columns (a big city has hundreds of roofs and most of them are far behind the walls and the haze) */
+const TKR_NB=[];
+function tkrNear(objs,cx,cy,r){if(objs.length<80)return objs;const rr=r*r,B=TKR_NB;B.length=0;for(let i=0;i<objs.length;i++){const o=objs[i],dx=Math.max(o.X0-cx,0,cx-o.X1),dy=Math.max(o.Y0-cy,0,cy-o.Y1);if(dx*dx+dy*dy<=rr)B.push(o)}return B}
 /* the screen buffer: as many columns as the wall picture (one ray per wall column, the same rays as the walls) and twice its rows (the height of the screen canvas) */
 const HB={fas:0,bt:0,bo:null,bu:0,bv:0,bT:null,bsh:1,bW:1};
 const TKR3D={y0:0,y1:VH*2-1,cy0:0,cy1:VH*2-1,RW:VW,RH:VH*2,buf:null,img:null,can:null,cx:null,top:null,bot:null,has:false,wt0:null,on:true};
@@ -142,7 +146,7 @@ function TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB){
   if(!TKR3D.buf){TKR3D.can=document.createElement('canvas');TKR3D.can.width=RW;TKR3D.can.height=RH;TKR3D.cx=TKR3D.can.getContext('2d');TKR3D.img=TKR3D.cx.createImageData(RW,RH);TKR3D.buf=TKR3D.img.data;
     TKR3D.top=new Float32Array(RW);TKR3D.bot=new Float32Array(RW);TKR3D.wt0=new Float32Array(VW);TKR3D.own=new Int8Array(RW*RH)}
   const B=TKR3D.buf,OWN=TKR3D.own;if(TKR3D.y1>=TKR3D.y0)B.fill(0,TKR3D.y0*RW*4,(TKR3D.y1+1)*RW*4);let Y0=RH,Y1=-1;   // only the rows painted last frame are cleared
-  const cP=TKR3D.cP||(TKR3D.cP=new Float64Array(5*64)),objs=TKR.objs,grid=G.grid,MW=TKR.W,MH=TKR.H,near=TKR.near,Fh=F*2,HHh=HH*2,TX=TKR.tex,cand=[],ct=[],cea=[],ct1=[];
+  const cP=TKR3D.cP||(TKR3D.cP=new Float64Array(5*64)),objs=tkrNear(TKR.objs,cx,cy,(TKR.sets[LEVEL]&&TKR.sets[LEVEL].range)||60),grid=G.grid,MW=TKR.W,MH=TKR.H,near=TKR.near,Fh=F*2,HHh=HH*2,TX=TKR.tex,cand=[],ct=[],cea=[],ct1=[];
   const day=G.day||0,tb=[tbR,tbG,tbB],TR=typeof TERR_NOW!=='undefined'&&!!TERR_NOW&&!TERR_NOW.terr,FADE=(TKR.sets[LEVEL]&&TKR.sets[LEVEL].fade)||0;let any=false;
   for(let s=0;s<RW;s++){
     TKR3D.top[s]=1e9;TKR3D.bot[s]=-1e9;

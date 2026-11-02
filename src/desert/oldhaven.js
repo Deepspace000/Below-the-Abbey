@@ -577,10 +577,8 @@ function ohBuild(){
       solid(x,y,c);
     }
     // the roof: a painted gable on top of the walls, and now and then a tower standing over the house
-    const T=OH_TYPES[h.type],rk=pick(T.roofs,h.x0,h.y0,21),rimg=OH_ROOF[rk]||'kh_ohroof1_2';
-    sky.push({x:(h.x0+h.x1+1)/2,y:(h.y0+h.y1+1)/2,k:rimg,w:h.w+.5,z:wh-.03});
-    const tk=hs(h.x0,h.y0,22);
-    if(T.tower||tk<.06)sky.push({x:(h.x0+h.x1+1)/2+(hs(h.x0,h.y0,23)-.5)*2,y:(h.y0+h.y1+1)/2,k:'kh_ohtower1_'+[0,1,4,5][(hs(h.x0,h.y0,24)*4)|0],w:2.8,z:wh-.03});
+    // (no flat roof pictures: the roofs are real ones, ray-cast over the walls like Thornwick's, from this table: oldhaven_roofs.js)
+    const T=OH_TYPES[h.type];h.rk=pick(T.roofs,h.x0,h.y0,21);h.tw=!!(T.tower||hs(h.x0,h.y0,22)<.06);   // the roof kind, and whether a tower stands over the house
     // window boxes and tubs at the door
     if(hs(h.x0,h.y0,95)<.7){const along=(h.face==='N'||h.face==='S')?[[h.front[0]-1,h.front[1]],[h.front[0]+1,h.front[1]]]:[[h.front[0],h.front[1]-1],[h.front[0],h.front[1]+1]];
       for(const [tx,ty] of along){if(!free(tx,ty)||hs(tx,ty,96)>.6)continue;const k=hs(tx,ty,97)<.5?'yar_tub':art('box',tx,ty,98)||'yar_lavender';if(IMG[k]){used.add(tx+','+ty);scenery.push({k,wx:tx+.5,wy:ty+.5,sc:.85+hs(tx,ty,99)*.3,decor:{k,walk:true,x:tx,y:ty}})}}}
@@ -824,10 +822,14 @@ function oldhavenPardon(){
   const F=G.flags;if(F.pardoned)return;F.pardoned=1;F.wanted=0;
   for(const e of G.enemies)if(e.t==='rguard'&&e.hp>0){e.hp=0;e.dying=.55}
   const hb=G.decor.find(d=>d.npc==='oh_halb');if(hb)hb.hidden=true;
-  startCut('oldhavenPardon',()=>{if(qSt('vq6')===null)qAccept('vq6');if(qReady('vq6'))qTurnIn('vq6');msg('The warrant is void. The ransom is lifted.','#ffe36a');sfx('win')});
+  startCut('oldhavenPardon',()=>{if(qSt('vq6')===null)qAccept('vq6');if(qReady('vq6'))qTurnIn('vq6');msg('The warrant is void. The ransom is lifted.','#ffe36a');sfx('win');ohSixQuest()});
 }
+/* the king hands the party the slip with six names, so the quest of the six names (The Six Names, Captain Aldwyn at the gate can tell more) is in the Quests list at once; a party that was
+   pardoned before this (and so has no such quest) gets it when it next enters Oldhaven or its court */
+function ohSixQuest(){const F=G.flags;if(!F.pardoned||typeof QUESTS==='undefined'||!QUESTS.oq0||qSt('oq0')!==null)return;qAccept('oq0');msg('The king\'s slip names six people at the fair green, east of the middle of Oldhaven. Captain Aldwyn at the gate can tell you more.','#ffe36a')}
 function ohEnter(n){
   const F=G.flags;
+  if(n===OH.ID||n===OH.COURT)ohSixQuest();
   if(n===OH.COURT){
     const k=G.decor.find(d=>d.npc==='oh_halb');if(k&&F.pardoned)k.hidden=true;const v=G.decor.find(d=>d.npc==='oh_vance');if(v&&(F.courtFight))v.hidden=true;
     if(!F.courtSeen){F.courtSeen=1;if(qSt('vq6')===null)qAccept('vq6');startCut('oldhavenCourt',ohCourtFight)}

@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.786';
+const VERSION='3.790';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2739,7 +2739,7 @@ function render3D(){
     for(let k=0;k<tcN;k++){const o=((tcY+k)*VW+x)*4,a=(k+1)/(tcN+1);D[o]=TCUTB[k*3]+(D[o]-TCUTB[k*3])*a;D[o+1]=TCUTB[k*3+1]+(D[o+1]-TCUTB[k*3+1])*a;D[o+2]=TCUTB[k*3+2]+(D[o+2]-TCUTB[k*3+2])*a} // the cut top fades into what is behind it
     } // next wall of this column
   }
-  if((LEVEL===3||LEVEL===13||LEVEL===290)&&typeof TKR3D_R==='function')TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB); // opt-in: Thornwick's roofs, ray-cast per column with the walls' own projection (thornwick_roofs.js)
+  if((LEVEL===3||LEVEL===13||LEVEL===290||LEVEL===304||LEVEL===305)&&typeof TKR3D_R==='function')TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB); // opt-in: Thornwick's roofs, ray-cast per column with the walls' own projection (thornwick_roofs.js)
   vctx.putImageData(vimg,0,0);
   for(const L of LIGHTS){const h=L._h;if(!L.taken&&h&&h.col>=0&&h.ty<=zbuf[h.col]+.45)G.hits.push(h)}
   // wall torches: an iron plate on the wall and a wooden stick that runs out to the cloth-wrapped head under the flame
@@ -7083,7 +7083,7 @@ function drawWorld(){ // a slightly softer, lower-res picture; the screen-wide d
   if(LOWC.width!==w){LOWC.width=w;LOWC.height=h}
   LOWX.imageSmoothingEnabled=true;LOWX.drawImage(vc,0,0,w,h);
   ctx.imageSmoothingEnabled=false;ctx.drawImage(LOWC,0,0,420,210);ctx.imageSmoothingEnabled=true;
-  if((LEVEL===3||LEVEL===13||LEVEL===290)&&typeof TKR3D_B==='function')TKR3D_B(ctx); // opt-in: Thornwick's roof picture, under the sprites (thornwick_roofs.js)
+  if((LEVEL===3||LEVEL===13||LEVEL===290||LEVEL===304||LEVEL===305)&&typeof TKR3D_B==='function')TKR3D_B(ctx); // opt-in: Thornwick's roof picture, under the sprites (thornwick_roofs.js)
   if(G._spr){ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';SC=ctx;drawSprites(...G._spr);ctx.restore()}
   if(LEVELS[LEVEL]&&LEVELS[LEVEL].rain)drawRain(); if(STORM.a>.02)drawStorm();else{drawSkyBirds();if(typeof uwLv==='function'&&uwLv(LEVEL))uwSkyFish();else if(yarSea(LEVEL)&&typeof yarGulls==='function')yarGulls()}if(typeof uwHud==='function')uwHud();if(G.pharFlash>0)drawPharFlash();
 }
@@ -15665,7 +15665,7 @@ function seaSpawn(t,r,alert){ // a creature appears a few cells from the party
 }
 function seaEnter(n){
   const F=G.flags;
-  if(n===304&&!F.oldhavenSeen){F.oldhavenSeen=1;startCut('oldhavenArrive',()=>{if(qSt('vq5')===null)qAccept('vq5');if(qReady('vq5'))qTurnIn('vq5');F.act3=1;msg('The gate of Oldhaven stays shut until noon. Speak to the herald.','#ffe36a')})}
+  if(n===304&&!F.oldhavenSeen){F.oldhavenSeen=1;const arrived=()=>{if(qSt('vq5')===null)qAccept('vq5');if(qReady('vq5'))qTurnIn('vq5');F.act3=1;if(qSt('vq6')===null&&!F.pardoned&&QUESTS.vq6)qAccept('vq6');if(!(F.courtSeen||F.pardoned))msg('The gate of Oldhaven stays shut until noon. Speak to the herald.','#ffe36a')};if(F.courtSeen||F.pardoned)arrived();else startCut('oldhavenArrive',arrived)}   // (a party that has already been in the court or pardoned never sees the arrival scene again)
   if(typeof ohEnter==='function')ohEnter(n);
   else if(n>=300&&n<=303&&!(F.seaArr&&F.seaArr[n])){(F.seaArr=F.seaArr||{})[n]=1;msg({300:'Saltbarrow. A pirate haven of sand, wrecks and canvas tents. Gulls cry over the water.',301:'The Isle of Bells. Mist over a drowned abbey. Somewhere in the grey, a bell is moving in the wind.',302:'Cinder Isle. Black rock and red glow. The mountain breathes.',303:'Last Light. A scrap of rock at the end of the chart. A small lamp burns in a hut on the shore.'}[n],'#a8d8ff')}
 }
@@ -16250,10 +16250,8 @@ function ohBuild(){
       solid(x,y,c);
     }
     // the roof: a painted gable on top of the walls, and now and then a tower standing over the house
-    const T=OH_TYPES[h.type],rk=pick(T.roofs,h.x0,h.y0,21),rimg=OH_ROOF[rk]||'kh_ohroof1_2';
-    sky.push({x:(h.x0+h.x1+1)/2,y:(h.y0+h.y1+1)/2,k:rimg,w:h.w+.5,z:wh-.03});
-    const tk=hs(h.x0,h.y0,22);
-    if(T.tower||tk<.06)sky.push({x:(h.x0+h.x1+1)/2+(hs(h.x0,h.y0,23)-.5)*2,y:(h.y0+h.y1+1)/2,k:'kh_ohtower1_'+[0,1,4,5][(hs(h.x0,h.y0,24)*4)|0],w:2.8,z:wh-.03});
+    // (no flat roof pictures: the roofs are real ones, ray-cast over the walls like Thornwick's, from this table: oldhaven_roofs.js)
+    const T=OH_TYPES[h.type];h.rk=pick(T.roofs,h.x0,h.y0,21);h.tw=!!(T.tower||hs(h.x0,h.y0,22)<.06);   // the roof kind, and whether a tower stands over the house
     // window boxes and tubs at the door
     if(hs(h.x0,h.y0,95)<.7){const along=(h.face==='N'||h.face==='S')?[[h.front[0]-1,h.front[1]],[h.front[0]+1,h.front[1]]]:[[h.front[0],h.front[1]-1],[h.front[0],h.front[1]+1]];
       for(const [tx,ty] of along){if(!free(tx,ty)||hs(tx,ty,96)>.6)continue;const k=hs(tx,ty,97)<.5?'yar_tub':art('box',tx,ty,98)||'yar_lavender';if(IMG[k]){used.add(tx+','+ty);scenery.push({k,wx:tx+.5,wy:ty+.5,sc:.85+hs(tx,ty,99)*.3,decor:{k,walk:true,x:tx,y:ty}})}}}
@@ -16497,10 +16495,14 @@ function oldhavenPardon(){
   const F=G.flags;if(F.pardoned)return;F.pardoned=1;F.wanted=0;
   for(const e of G.enemies)if(e.t==='rguard'&&e.hp>0){e.hp=0;e.dying=.55}
   const hb=G.decor.find(d=>d.npc==='oh_halb');if(hb)hb.hidden=true;
-  startCut('oldhavenPardon',()=>{if(qSt('vq6')===null)qAccept('vq6');if(qReady('vq6'))qTurnIn('vq6');msg('The warrant is void. The ransom is lifted.','#ffe36a');sfx('win')});
+  startCut('oldhavenPardon',()=>{if(qSt('vq6')===null)qAccept('vq6');if(qReady('vq6'))qTurnIn('vq6');msg('The warrant is void. The ransom is lifted.','#ffe36a');sfx('win');ohSixQuest()});
 }
+/* the king hands the party the slip with six names, so the quest of the six names (The Six Names, Captain Aldwyn at the gate can tell more) is in the Quests list at once; a party that was
+   pardoned before this (and so has no such quest) gets it when it next enters Oldhaven or its court */
+function ohSixQuest(){const F=G.flags;if(!F.pardoned||typeof QUESTS==='undefined'||!QUESTS.oq0||qSt('oq0')!==null)return;qAccept('oq0');msg('The king\'s slip names six people at the fair green, east of the middle of Oldhaven. Captain Aldwyn at the gate can tell you more.','#ffe36a')}
 function ohEnter(n){
   const F=G.flags;
+  if(n===OH.ID||n===OH.COURT)ohSixQuest();
   if(n===OH.COURT){
     const k=G.decor.find(d=>d.npc==='oh_halb');if(k&&F.pardoned)k.hidden=true;const v=G.decor.find(d=>d.npc==='oh_vance');if(v&&(F.courtFight))v.hidden=true;
     if(!F.courtSeen){F.courtSeen=1;if(qSt('vq6')===null)qAccept('vq6');startCut('oldhavenCourt',ohCourtFight)}
@@ -16646,9 +16648,7 @@ function quayBuild(){
       let c;if(x===b.door[0]&&y===b.door[1])c=ch(dgid);else if(front(x,y))c=win;else c=(x+y)%3===0?side:plain;
       solid(x,y,c);fm[y*W+x]='1';
     }
-    sky.push({x:(b.x0+b.x1+1)/2,y:(b.y0+b.y1+1)/2,k:'kh_ohroof1_'+b.roof,w:d+.6,z:b.wh-.03});
-    if(b.tower)sky.push({x:(b.x0+b.x1+1)/2+2,y:b.y0+2,k:'kh_ohtower1_2',w:3.6,z:b.wh-.03},{x:(b.x0+b.x1+1)/2+2,y:b.y0+2,k:'oq_lflag1',w:1.5,z:b.wh+8.4});
-    else if(k===0||k===2)sky.push({x:b.x0+2.5,y:(b.y0+b.y1)/2,k:'kh_ohtower1_'+(k?4:5),w:2.6,z:b.wh-.03});
+    // (no flat roof pictures: real ray-cast roofs from the table in oldhaven_roofs.js, with a tower on the Customs House and on two of the others)
     LEVEL_NAMES[b.id]=b.name;
   });
   /* ---- the piers: five of them, with the water between full of ships ---- */
@@ -17126,13 +17126,12 @@ const OAKD={
 };
 // the woodwardens: Hale gives the first two quests and the camp one
 khNpc('oa_hale','Hale, captain of the woodwardens','kh_ohfolk7_4',()=>{
-  const F=G.flags,O=OAKF();
-  if(!O.metHale){O.metHale=1;return say('You have come through the east gate? Then you have seen the city under siege and survived. I am Hale, captain of the woodwardens. We keep the Oakwood. Ask me about work, or about the old king’s family.',[BYE])}
+  const F=G.flags,O=OAKF(),first=!O.metHale;O.metHale=1;   // (at the first meeting he offers his work at once: the gold ! over him must not lead to a greeting only)
   const nodes=[];
   if(qSt('oa2')!=='done')nodes.push(['About the wolves',()=>qNode('oa2',OAKD.oa2)]);
   if(qSt('oa2')==='done'&&qSt('oa6')!=='done')nodes.push(['About the Ash Guard camp',()=>qNode('oa6',OAKD.oa6)]);
   nodes.push(['About the old king’s family',()=>say('The king has a granddaughter. She was raised here, with us, because the chancellor was not safe to trust. Her name is Wren. Speak to her, and ask her to show you what she keeps.',[BYE])]);
-  return say('Hale, captain of the woodwardens. The oaks are old and the wolves are hungry. What can I do for you?',[...nodes,BYE]);
+  return say(first?'You have come through the east gate? Then you have seen the city under siege and survived. I am Hale, captain of the woodwardens. We keep the Oakwood. I have work, if you want it, and I can tell you about the old king’s family.':'Hale, captain of the woodwardens. The oaks are old and the wolves are hungry. What can I do for you?',[...nodes,BYE]);
 },{q:['oa2','oa6']});
 khNpc('oa_ward1','A woodwarden','kh_ohfolk7_4',()=>say('Quiet, please. The oaks listen.',[BYE]));
 khNpc('oa_ward2','A woodwarden','kh_ohfolk7_5',()=>say('I walk the same path every day. The oaks have never once told me it was the wrong path.',[BYE]));
@@ -82144,11 +82143,12 @@ function tkrBuild(){
         zb=WH+TKR_TAU+R*(1-(Math.abs(us)*half+cw/2)/half)-.05;
       objs.push({t:'box',hid:hi,id:id+'c',X0:bx0,X1:bx1,Y0:by0,Y1:by1,zb,zt:top,tex:'chim_'+kind,ho:objs[objs.length-2],tn:[tn[0]*.95,tn[1]*.95,tn[2]*.95]})}
     if(id==='ch'||(opt&&opt.chapel)){ // the chapel: a square stone bell tower standing through the roof at the street end, with its slate spire and iron cross
-      const o2=opt||{},tc=o2.tx!==undefined?o2.tx:(X0+X1)/2,ty=o2.north?Y0+.95:Y1-.95,hw=.62,zt=WH+TKR_TAU+R+(o2.th||.95),zs=zt+(o2.sh||2.5);
+      const o2=opt||{},tc=o2.tx!==undefined?o2.tx:(X0+X1)/2,ty=o2.ty!==undefined?o2.ty:o2.north?Y0+.95:Y1-.95,hw=.62,   // o2.tx, o2.ty: the tower's own place (Oldhaven); o2.nocross: a tower with a spire and no iron cross
+      zt=WH+TKR_TAU+R+(o2.th||.95),zs=zt+(o2.sh||2.5);
       objs.push({t:'box',hid:hi,id:'cht',X0:tc-hw,X1:tc+hw,Y0:ty-hw,Y1:ty+hw,zb:WH+TKR_TAU+R*.3,zt,tex:'tower',tn:[tn[0]*1.05,tn[1]*1.05,tn[2]*1.05]});
       objs.push({t:'pyr',hid:hi,id:'chs',X0:tc-hw-.03,X1:tc+hw+.03,Y0:ty-hw-.03,Y1:ty+hw+.03,cx:tc,cy:ty,hw:hw+.03,zb:zt,zt:zs,tex:'spire',tn});
       const xw=.36,xh=xw*(TKR.tex.spirex?TKR.tex.spirex.h/TKR.tex.spirex.w:.35);
-      objs.push({t:'card',hid:hi,id:'chx1',ax0:tc-xw/2,ay0:ty,ax1:tc+xw/2,ay1:ty,zb:zs-.04,zt:zs-.04+xh,tex:'spirex',tn},{t:'card',hid:hi,id:'chx2',ax0:tc,ay0:ty-xw/2,ax1:tc,ay1:ty+xw/2,zb:zs-.04,zt:zs-.04+xh,tex:'spirex',tn})}
+      if(!o2.nocross)objs.push({t:'card',hid:hi,id:'chx1',ax0:tc-xw/2,ay0:ty,ax1:tc+xw/2,ay1:ty,zb:zs-.04,zt:zs-.04+xh,tex:'spirex',tn},{t:'card',hid:hi,id:'chx2',ax0:tc,ay0:ty-xw/2,ax1:tc,ay1:ty+xw/2,zb:zs-.04,zt:zs-.04+xh,tex:'spirex',tn})}
     rep.push(id+' | walls x '+X0+'-'+X1+' y '+Y0+'-'+Y1+' | roof x '+X0+'-'+X1+' y '+Y0+'-'+Y1+' (no overhang) | ridge '+ax+' +'+R)});
   if(S.extra)S.extra(objs,(x,y)=>TKR_GROUND?terrH(x,y):0);   // round solids of a level (Yarrim's lighthouse): cylinders and domes, standing free of the wall grid
   TKR.gzOf=TKR.houses.map(h=>TKR_GROUND?terrH((h[1]+h[2]+1)/2,(h[3]+h[4]+1)/2):0);   // the ground the house stands on (uneven ground: Yarrim; flat levels: 0)
@@ -82157,6 +82157,9 @@ function tkrBuild(){
   const near=new Int16Array(W*H).fill(-1);TKR.houses.forEach((h,hi)=>{if(!objs.some(o=>o.hid===hi))return;for(let y=h[3];y<=h[4];y++)for(let x=h[1];x<=h[2];x++)near[y*W+x]=hi});
   TKR.whOf=TKR.houses.map(h=>(h[12]&&h[12].wh)||TKR_WH);TKR.objs=objs;TKR.near=near;TKR.W=W;TKR.H=H;LEVELS[LEVEL]._tkrRep=rep;
 }
+/* only the roof pieces within a range of the camera are tested by the columns (a big city has hundreds of roofs and most of them are far behind the walls and the haze) */
+const TKR_NB=[];
+function tkrNear(objs,cx,cy,r){if(objs.length<80)return objs;const rr=r*r,B=TKR_NB;B.length=0;for(let i=0;i<objs.length;i++){const o=objs[i],dx=Math.max(o.X0-cx,0,cx-o.X1),dy=Math.max(o.Y0-cy,0,cy-o.Y1);if(dx*dx+dy*dy<=rr)B.push(o)}return B}
 /* the screen buffer: as many columns as the wall picture (one ray per wall column, the same rays as the walls) and twice its rows (the height of the screen canvas) */
 const HB={fas:0,bt:0,bo:null,bu:0,bv:0,bT:null,bsh:1,bW:1};
 const TKR3D={y0:0,y1:VH*2-1,cy0:0,cy1:VH*2-1,RW:VW,RH:VH*2,buf:null,img:null,can:null,cx:null,top:null,bot:null,has:false,wt0:null,on:true};
@@ -82177,7 +82180,7 @@ function TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB){
   if(!TKR3D.buf){TKR3D.can=document.createElement('canvas');TKR3D.can.width=RW;TKR3D.can.height=RH;TKR3D.cx=TKR3D.can.getContext('2d');TKR3D.img=TKR3D.cx.createImageData(RW,RH);TKR3D.buf=TKR3D.img.data;
     TKR3D.top=new Float32Array(RW);TKR3D.bot=new Float32Array(RW);TKR3D.wt0=new Float32Array(VW);TKR3D.own=new Int8Array(RW*RH)}
   const B=TKR3D.buf,OWN=TKR3D.own;if(TKR3D.y1>=TKR3D.y0)B.fill(0,TKR3D.y0*RW*4,(TKR3D.y1+1)*RW*4);let Y0=RH,Y1=-1;   // only the rows painted last frame are cleared
-  const cP=TKR3D.cP||(TKR3D.cP=new Float64Array(5*64)),objs=TKR.objs,grid=G.grid,MW=TKR.W,MH=TKR.H,near=TKR.near,Fh=F*2,HHh=HH*2,TX=TKR.tex,cand=[],ct=[],cea=[],ct1=[];
+  const cP=TKR3D.cP||(TKR3D.cP=new Float64Array(5*64)),objs=tkrNear(TKR.objs,cx,cy,(TKR.sets[LEVEL]&&TKR.sets[LEVEL].range)||60),grid=G.grid,MW=TKR.W,MH=TKR.H,near=TKR.near,Fh=F*2,HHh=HH*2,TX=TKR.tex,cand=[],ct=[],cea=[],ct1=[];
   const day=G.day||0,tb=[tbR,tbG,tbB],TR=typeof TERR_NOW!=='undefined'&&!!TERR_NOW&&!TERR_NOW.terr,FADE=(TKR.sets[LEVEL]&&TKR.sets[LEVEL].fade)||0;let any=false;
   for(let s=0;s<RW;s++){
     TKR3D.top[s]=1e9;TKR3D.bot[s]=-1e9;
@@ -82338,6 +82341,81 @@ function yarLighthouseSolids(objs,gzAt){
   objs.push({t:'dome',front:1,hid:-2,id:'lhd',cx,cy,r:1.2,zb:6.8,zt:7.7,tex:'lh_dome',rep:4,tn:[1,1,1],gz,X0:cx-1.2,X1:cx+1.2,Y0:cy-1.2,Y1:cy+1.2});
 }
 TKR.sets[290]={wh:1.4,houses:[],dyn:yarRoofRows,fade:.3,extra:yarLighthouseSolids};   // fade: the roofs are painted brighter and more contrasted than Yarrim's walls, so they are toned down to sit with them
+
+/* ---- src/desert/oldhaven_roofs.js ---- */
+/* ==========================================================================
+   OLDHAVEN: THE ROOFS. The city (level 305) and the quay (level 304) use the ray-cast roofs of thornwick_roofs.js (TKR), like Thornwick, Ironhill and Yarrim, so every roof stands
+   exactly on its walls and is right from every side: the eaves meet the wall tops, the gable is the wall carried up, the slopes rise behind the eaves in true perspective and
+   a roof behind a nearer house shows only above that house. (The old roofs were flat painted pictures laid over the houses, which could not do that.)
+   The tables are made when the level is built (TKR.sets[n].dyn): every house of OH.houses (the city) and of OQ_HOUSES (the quay) gets a pitched roof exactly over its wall
+   squares (no overhang) at its own wall height (the optional wh of a row: Oldhaven's houses run from 2.0 to 3.7 high). The ridge runs along the longer side of the house, so a
+   long terrace has one long roof with its eaves to the street and a narrow deep house shows its gable. The roof kind the old picture had (terracotta, slate, plum, sage,
+   shingle, brown, thatch, moss) is kept: the painted slope pieces of Thornwick (slate, tile, shingle, thatch) with a tint for plum, sage, brown and moss. The gable end
+   follows the house type (timber, merchant, townhouse, cottage, guild, almshouse). The chapel and the guild halls (and now and then another house) have a stone tower
+   with a spire standing through the roof; the chapel's has an iron cross. The curtain wall, the castle and the far towers are skyline pictures and stay as they were.
+   ========================================================================== */
+const OHR_KIND={   // the old roof kind -> [slope picture, tint]
+  terra:['tile',[1.05,.96,.9]],red:['tile',[1.05,.97,.92]],slate:['slate',[.97,.99,1.04]],plum:['slate',[1.07,.92,1.04]],sage:['slate',[.92,1.05,.97]],
+  shingle:['shingle',[1,1,1]],brown:['shingle',[.96,.9,.84]],thatch:['thatch',[1.04,1,.9]],moss:['thatch',[.9,1.02,.88]]};
+const OHR_GABLE={timber:'timber',merchant:'ochre',townhouse:'stone',cottage:'boards',guild:'stone',almshouse:'ochre'};
+/* one row of the table: the footprint x0..x1, y0..y1 (squares), the wall height, the roof kind, the gable, whether a tower stands over it (and whether it is the chapel's) */
+function ohrRow(id,x0,x1,y0,y1,wh,kind,gable,tower,chapel){
+  const ex=x1-x0+1,ey=y1-y0+1,ax=ex>=ey?'x':'y',across=ax==='x'?ey:ex,half=across/2,K=OHR_KIND[kind]||OHR_KIND.slate,slope=K[0],thatch=slope==='thatch';
+  const r=hash2(x0,y0,191),r2=hash2(x0,y0,192),r3=hash2(x0,y0,193),R=Math.max(.8,Math.min(2.3,half*(thatch?.8:.62)+.12*r));   // the rise: a pitch of about thirty degrees, thatch steeper
+  const withTower=tower&&across>=3&&Math.max(ex,ey)>=4,chim=(chapel||withTower||r2>.62)?null:[.18+.64*r3,(r3<.5?-1:1)*(.3+.2*r),r<.5?'brick':'stone'];
+  const opt={wh};
+  if(withTower){const end=hash2(x0,y0,194)<.5?0:1;opt.chapel=1;opt.nocross=!chapel;opt.th=chapel?1.7:1.1;opt.sh=chapel?3.2:2.1;   // the tower stands at one end of the ridge, inside the footprint
+    if(ax==='x'){opt.tx=end?x1+1-1.05:x0+1.05;opt.ty=(y0+y1+1)/2}else{opt.tx=(x0+x1+1)/2;opt.ty=end?y1+1-1.05:y0+1.05}}
+  return [id,x0,x1,y0,y1,ax,R,chapel?'slate':slope,chapel?'stone':gable,chim,chapel?[.96,.98,1.02]:K[1],.93+.08*r3,opt];
+}
+function ohRoofRows(){
+  const hs=typeof OH!=='undefined'&&OH.houses;if(!hs)return [];
+  return hs.map(h=>ohrRow(h.id,h.x0,h.x1,h.y0,h.y1,h.wh,h.chapel?'slate':(h.rk||'slate'),OHR_GABLE[h.type]||'stone',!!(h.tw||h.chapel),!!h.chapel));
+}
+const OQR_KIND=['plum','slate','terra','moss','shingle'];   // the quay's old roof pictures, kh_ohroof1_0 to 4
+function oqRoofRows(){
+  if(typeof OQ_HOUSES==='undefined')return [];
+  return OQ_HOUSES.map((b,k)=>ohrRow('oq'+k,b.x0,b.x1,b.y0,b.y1,b.wh,OQR_KIND[b.roof%5],k%2?'ochre':'stone',!!(b.tower||k===0||k===2),false));
+}
+TKR.sets[305]={wh:3,houses:[],dyn:ohRoofRows,fade:.15};
+TKR.sets[304]={wh:2.7,houses:[],dyn:oqRoofRows,fade:.15};
+
+/* ---- src/desert/oldhaven_quest_guard.js ---- */
+/* ==========================================================================
+   OLDHAVEN: QUESTS ARE ALWAYS ADDED, AND A GOLD ! ONLY SHOWS WHERE A QUEST CAN BE TAKEN.
+   Found by talking to every person of Oldhaven (the city, the quay, the court, the houses and the Oakwood) at each stage of the story and comparing what the mark said with what the
+   dialogue did: (1) the six people at the fair, the mason and the cats guild, Hale's second quest, Ysolt's, and Aldwyn for the court showed a gold ! at stages when they offered nothing;
+   (2) Captain Aldwyn's later quests (the east gate, the pigeon post, retaking the gate), Sergeant Cade's two and the baker's tunnel were offered with no mark at all;
+   (3) the Court of King Osric was only added when the party walked into the court, and The Six Names only when the party spoke to Aldwyn after the pardon, so after the king's scene the
+   quest list did not say what to do.
+   Here: who gives which quests (QGIVER), when each becomes available (OHQ_GATE: a mark shows for a quest that is not started and is available, a green ? for one that is ready), and the
+   quests the story hands out itself are added by the story: the court on arrival (also for a party that arrived before this, see the check on entering), The Six Names at the pardon
+   (oldhaven.js, ohSixQuest). The tool for this check is tools/qaudit/oh_quest_audit.js.
+   ========================================================================== */
+QGIVER.oh_cap=['vq6','oq0','sg1','sg5','sg8','oa1'];QGIVER.oh_sergeant=['sg2','sg6'];QGIVER.oh_x_baker=['ox3','sg7'];
+const OHQ_GATE={
+  ox1:()=>qSt('oq0')==='active',ox2:()=>qSt('oq0')==='active',ox3:()=>qSt('oq0')==='active',ox4:()=>qSt('oq0')==='active',ox5:()=>qSt('oq0')==='active',ox6:()=>qSt('oq0')==='active',
+  vq6:()=>false,   // the court quest is added by the story (on arrival), nobody hands it out
+  oq0:()=>!!G.flags.pardoned,
+  sg1:()=>qSt('oq0')==='done',sg2:()=>qSt('sg1')==='done',sg5:()=>qSt('sg1')==='done',sg6:()=>qSt('sg1')==='done',
+  sg3:()=>!!G.flags.siege,sg4:()=>!!G.flags.siege,
+  sg7:()=>qSt('sg1')==='done'&&qSt('ox3')==='done',sg8:()=>qSt('sg1')==='done'&&qSt('sg7')==='done',
+  oa1:()=>qSt('sg8')==='done',oa6:()=>qSt('oa2')==='done',oa7:()=>qSt('oa3')==='done',
+  oa9:()=>qSt('oa8')==='done',
+  oa8:()=>{const O=typeof OAKF==='function'?OAKF():{};return !!O.heir&&!O.crowned}
+};
+{const _qm=questMark;questMark=function(d){
+  const qv=QGIVER[d.npc];if(!qv||d.found||d.hidden)return 0;
+  const arr=[].concat(qv).filter(q=>QUESTS[q]);
+  if(!arr.some(q=>OHQ_GATE[q]))return _qm(d);   // a giver outside this list: as before
+  let best=0;
+  for(const q of arr){const st=qSt(q);if(st==='done')continue;if(st==='active'){if(qReady(q))return 2;continue}const g=OHQ_GATE[q];if(!g||g())best=1}
+  return best}}
+/* the court is the next thing to do once the party is in Oldhaven (the quay cutscene adds it; a party that arrived before this gets it here) */
+{const _oe=ohEnter;ohEnter=function(n){
+  const r=_oe.apply(this,arguments),F=G.flags;
+  try{if(n>=304&&n<=311&&F.oldhavenSeen&&!F.pardoned&&!G.cut&&qSt('vq6')===null&&QUESTS.vq6)qAccept('vq6')}catch(e){console.error('ohquestguard',e)}
+  return r}}
 
 /* ---- src/desert/yarrim_woods.js ---- */
 /* ==========================================================================
