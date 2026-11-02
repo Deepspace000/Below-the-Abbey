@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.790';
+const VERSION='3.791';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1294,7 +1294,16 @@ function streamLoad(){
   const pr=el.play();if(pr&&pr.catch)pr.catch(()=>{STREAM.playing=false});STREAM.playing=true;
 }
 const TITLE_MUSIC=false;
+/* THE MUSIC OF THE DUNGEONS. Each time a dungeon is entered one of three recordings is chosen, a third each (they were four players, two of them the same recording; the duplicate is gone).
+   The deserts are left out: their dungeons stream their own tracks (STREAM_LISTS). Levels that have their own music (the Underlevel, the Deeper Hollow, the Hollow Land, Sale, the
+   Pale Spire and so on) keep it. Leaving a dungeon and coming back chooses again. To add a player, add its name to DNG_PLAYERS (assets/audio/<name>.mp3, in the extra list of layer
+   names below, credited in assets/audio/CREDITS.txt). */
+const DNG_PLAYERS=['music_dng_creepy','music_dng_ambiance','music_dng_cave'];
+function dngMusic(T,v){
+  if(G._dngLv!==LEVEL||!G._dngPick){G._dngLv=LEVEL;G._dngPick=DNG_PLAYERS[(Math.random()*DNG_PLAYERS.length)|0]}
+  T[G._dngPick]=v;loadLazy(G._dngPick)}
 function areaAudio(){
+  if(G._dngLv!==undefined&&G._dngLv!==LEVEL)G._dngLv=undefined;   // a new level: the next dungeon chooses its music again
   if(!AC)return;loadSounds();windTick();try{if(typeof seaSoundTick==='function')seaSoundTick()}catch(e){}try{if(typeof yarSoundTick==='function')yarSoundTick()}catch(e){}streamTick();
   const T={};
   if(G.sit&&G.time>G.sit.t)G.sit=null;
@@ -1314,9 +1323,9 @@ function areaAudio(){
     else if(LEVEL===305){T.village_ambience=.5;T.music_embers=.4;loadLazy('music_embers')} // the first dungeon's music plays in the towns (not Khemetra)
     else if(typeof yarSea==='function'&&yarSea(LEVEL)){T.village_ambience=LEVEL===290||LEVEL===304?.22:.06;if(LEVEL===290||LEVEL===304){T.music_embers=.4;loadLazy('music_embers')}}
     else if(STREAM_LISTS[LEVEL]&&LEVEL>=50&&!(LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)){T.dungeon_ambience=.18}
-    else if(EMBERS_LEVELS.includes(LEVEL)){T.dungeon_ambience=.22;T.music_embers=.55;loadLazy('music_embers')}
-    else if(DUNGEON_LEVELS.includes(LEVEL)){T.dungeon_ambience=.3;T.music_dungeon1=.5}
-    else if(LEVEL===39){T.music_dungeon1=.3}
+    else if(EMBERS_LEVELS.includes(LEVEL)){T.dungeon_ambience=.22;dngMusic(T,.5)}
+    else if(DUNGEON_LEVELS.includes(LEVEL)){T.dungeon_ambience=.3;dngMusic(T,.5)}
+    else if(LEVEL===39){dngMusic(T,.3)}
     else if(LEVEL===40){T.music_tavern=.3}
     else if(LEVEL===22){climbNotes()}
     else if(LEVEL===2){T.music_andorios=.55;loadLazy('music_andorios')}
@@ -1328,7 +1337,7 @@ function areaAudio(){
     else if(LEVEL===6||LEVEL===16){T.music_tavern=.55;T.village_ambience=.18}
   }
   for(const n of Object.keys(T)){T[n]*=SNDOPT[SND_CAT(n)];if(!(T[n]>0))delete T[n]}
-  for(const n of SNDLIST.concat(['music_mithral','music_wanderer','music_embers','music_andorios','music_underlevel','music_hollowland','music_deeperhollow'])){if(n in T||LAYERS[n])setLayer(n,T[n]||0)}
+  for(const n of SNDLIST.concat(['music_mithral','music_wanderer','music_embers','music_andorios','music_underlevel','music_hollowland','music_deeperhollow'].concat(DNG_PLAYERS))){if(n in T||LAYERS[n])setLayer(n,T[n]||0)}
   if(G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===3||LEVEL===13||LEVEL===29||LEVEL===30||LEVEL===496)){
     if(!G.bellNext)G.bellNext=G.time+50+Math.random()*60;
     if(G.time>G.bellNext){G.bellNext=G.time+150+Math.random()*100;const v=(LEVEL===29||LEVEL===30||LEVEL===496)?.3:.6;playSmp('church_bell1',v);setTimeout(()=>playSmp('church_bell2',v*.8),2600);if(LEVEL===3||LEVEL===13)msg('The church bell tolls.','#d8c88e')}

@@ -31,3 +31,6 @@ music_sands_*.mp3 | Forgotten Deserts (MoodMode, via Pixabay, Pixabay Content Li
 music_underlevel.mp3 | Dark Cavern Ambient (001) | Paul Wortmann, via OpenGameArt.org (https://opengameart.org/content/dark-cavern-ambient) | CC0 | used for the Underlevel
 music_hollowland.mp3 | Searching | yd, via OpenGameArt.org (https://opengameart.org/content/searching) | CC0 | used for the Hollow Land and the Hollow Grasslands (outdoors)
 music_deeperhollow.mp3 | Paranoid Truth | Tsorthan Grove, via OpenGameArt.org (https://opengameart.org/content/paranoid-truth) | CC0 | used for the Deeper Hollow maze and its boat canals
+music_dng_creepy.mp3 | Creepy Dungeon Ambience | drminky, via freesound.org (https://freesound.org/s/166187/) | converted to mp3 and levelled | used for the dungeons (not the deserts), one of three chosen at each entry
+music_dng_ambiance.mp3 | Dungeon Ambiance | phlair, via freesound.org (https://freesound.org/s/388340/) | converted to mp3 and levelled | used for the dungeons (not the deserts), one of three chosen at each entry
+music_dng_cave.mp3 | Dark Cave Background 2 | solarphasing, via freesound.org (https://freesound.org/s/490585/) | converted to mp3 and levelled | used for the dungeons (not the deserts), one of three chosen at each entry
