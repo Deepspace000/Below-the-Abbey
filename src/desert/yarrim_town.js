@@ -308,7 +308,8 @@ function yarBuild(){
   const mapNames=P.names.concat([ // the names the area map writes over the village, and over the shore
     {t:'The Pier',x:70,y:40,k:'place'},{t:'The Gorge',x:21,y:38.6,k:'lane'},{t:'Yarrim Point',x:61,y:27,k:'place'},{t:'The Beach',x:58,y:50,k:'place'}
   ]);
-  const lv={rows:rows.map(r=>r.join('')),start:{x:G0.x0+1,y:G0.y,f:1},enemies:[],items,decor,scenery,sky:roofs,
+  const woodFoes=[];if(typeof yarWoods==='function')yarWoods({W,H,P,rows,block,fm,h,rk,decor,items,used,hs,enemies:woodFoes});   // the woods round the village (yarrim_woods.js)
+  const lv={rows:rows.map(r=>r.join('')),start:{x:G0.x0+1,y:G0.y,f:1},enemies:woodFoes,items,decor,scenery,sky:roofs,
     fmap:null,floorSet:['isleSand','cobble','wood','bluesand','bluewater','lush','sandpath'],floor:'isleSand',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:'Yarrim',label:'Yarrim',noExtras:true,diff:16,tele:{x:44,y:38},
     chars,lights,portals:[],mapNames};
