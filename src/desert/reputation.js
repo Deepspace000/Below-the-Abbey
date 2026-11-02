@@ -59,8 +59,9 @@ function repQuest(id){
   repAdd(t,big?7:4,'quest done');honourAdd(1);
 }
 /* ---------------------------------------------------------------- the fixers: shady jobs for gold ---------------------------------------------------------------- */
+loadImg('th_dunstan','assets/th_dunstan.png');NPC_H.th_dunstan=.78; // Sly Dunstan has his own painted look (a shifty man with a coin), not the drunk's
 const REP_JOBS={
-  thornwick:{fixer:'th_fixer',name:'Sly Dunstan',face:'drunk',level:3,shake:{npc:'aldous',who:'Aldous, the merchant',gold:120,loss:8},fence:{npc:'bram',who:'Bram, the innkeeper',gold:90,loss:6},pay:[180,260]},
+  thornwick:{fixer:'th_fixer',name:'Sly Dunstan',face:'th_dunstan',level:3,shake:{npc:'aldous',who:'Aldous, the merchant',gold:120,loss:8},fence:{npc:'bram',who:'Bram, the innkeeper',gold:90,loss:6},pay:[180,260]},
   ironhill:{fixer:'ih_fixer',name:'One-Eyed Karl',face:'miner',level:13,shake:{npc:'dorn',who:'Dorn, the merchant',gold:160,loss:8},fence:{npc:'dorn',who:'Dorn, the merchant',gold:110,loss:6},pay:[220,320]},
   anaea:{fixer:'an_fixer',name:'Whisper Mirelle',face:'peasantW',level:33,shake:{npc:'juno',who:'Juno, the baker',gold:130,loss:8},fence:{npc:'odalys',who:'Odalys, the innkeeper',gold:100,loss:6},pay:[200,280]},
   khemetra:{fixer:'kh_fixer',name:'Khafre the Fixer',face:'kh_npc5_5',shake:{npc:'kh_baker',who:'the baker',gold:200,loss:8},fence:{npc:'kh_forge',who:'the smith',gold:160,loss:6},pay:[300,450]}
