@@ -117,7 +117,7 @@ function drawMoreMenu(){
   txt('MORE',240,30,14,'#d8c88e','center',true);
   btnText('ach','Achievements',140,44,200,26);btnText('stats','Stats',140,72,200,26);btnText('collection','Collection',140,100,200,26);btnText('wander','Wandering Monsters',140,128,200,26);
   btnText('newparty','New party',140,156,200,26);btnText('restart','Restart game',140,184,200,26);
-  btnText('menuback','Back',170,256,140,28);
+  btnText('menuback','Back',170,274,140,28);   // (lower, to make room for the Game manual and Credits buttons above it)
   btn('menuclose',0,0,DW,DH);BTNS.unshift(BTNS.pop());
 }
 /* ---- the Controller page: the pad, and what each button does ---- */
