@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.775';
+const VERSION='3.776';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -57994,11 +57994,11 @@ if(ST_ENABLED)try{stClearDoors()}catch(e){console.error(e)}
 
 /* ---- src/desert/boss_plus.js ---- */
 /* ==========================================================================
-   BOSSES ONE LEVEL ABOVE THEIR AREA. Sut, Lord of the Red Desert (the Tomb of Sut, area level 39) stands one level above the area, like the other creatures of the
-   place stand within one level of it. This runs after the game has set every creature's level for the area (rebalanceEnemies), on arrival and whenever it is run again.
+   BOSSES ABOVE THEIR AREA. Sut, Lord of the Red Desert (the Tomb of Sut, area level 39) stands two levels above the area (level 41; he was one above, 40, and was a bit easy),
+   while the other creatures of the place stand within one level of it. This runs after the game has set every creature's level for the area (rebalanceEnemies), on arrival and whenever it is run again.
    Add a creature to BOSS_PLUS (its type and how many levels above) to give another boss the same. Last in the injection order.
    ========================================================================== */
-const BOSS_PLUS={sut:1};
+const BOSS_PLUS={sut:2};
 {const _rb=rebalanceEnemies;rebalanceEnemies=function(){
   const r=_rb.apply(this,arguments);
   try{for(const e of G.enemies){const up=BOSS_PLUS[e.t];if(!up||e.hp<=0||e.dying||e.base===undefined)continue;
