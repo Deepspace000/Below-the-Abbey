@@ -53,7 +53,7 @@ function yarWoods(c){
   const chests=[],foes=[];
   for(const [cx,cy,n] of YW_CLEARINGS){const q=spot(cx,cy,2);if(!q)continue;used.add(K(q[0],q[1]));decor.push({k:'chest',x:q[0],y:q[1],block:true,goldAmt:300+Math.floor(hs(cx,cy,89)*400)});chests.push(q)}
   // wolves in the woods, bandits keeping the clearings
-  const WOLVES=[[33,22],[41,17],[46,16],[38,24],[28,34],[32,47],[33,57],[34,64],[41,63],[44,69]],BANDITS=[[49,12,'bandit'],[52,13,'archer'],[37,66,'bandit'],[40,68,'bandit'],[28,29,'bandit']];
+  const WOLVES=[[33,22],[41,17],[28,34],[32,47],[33,57],[34,64],[44,69]],BANDITS=[[49,12,'bandit'],[37,66,'bandit'],[40,68,'bandit'],[28,29,'bandit']];   // slightly fewer than before: 7 wolves and 4 bandits
   for(const [x,y] of WOLVES){const q=spot(x,y,3);if(q){used.add(K(q[0],q[1]));enemies.push({t:'wolf',x:q[0],y:q[1]});foes.push(q)}}
   for(const [x,y,t] of BANDITS){const q=spot(x,y,2);if(q){used.add(K(q[0],q[1]));enemies.push({t,x:q[0],y:q[1]});foes.push(q)}}
   // herbs and a few draughts along the trails
@@ -61,3 +61,11 @@ function yarWoods(c){
   for(const [x,y,k] of lootAt){const q=spot(x,y,1);if(q){used.add(K(q[0],q[1]));items.push({k,x:q[0],y:q[1]})}}
   YR.woods={trees:trees.length,trail:trail,chests,foes,path};
 }
+
+/* the woods' creatures stay in the woods: they wander only within a few squares of where they stand, and a step that would take one out of the wooded zones is undone, so a wolf never walks into the village */
+const ywInWoods=(x,y)=>YW_ZONES.some(z=>x>=z[0]&&y>=z[1]&&x<=z[2]&&y<=z[3]);
+{const _pat=patrolStep;patrolStep=function(e,def){
+  if(LEVEL!==290||typeof ywInWoods!=='function'||!ywInWoods(e.hx!==undefined?e.hx:e.x,e.hy!==undefined?e.hy:e.y))return _pat.apply(this,arguments);
+  const ox=e.x,oy=e.y,r=_pat.call(this,e,Object.assign({},def,{roam:9}));
+  if(!ywInWoods(e.x,e.y)){e.x=ox;e.y=oy;e.tgt=null}
+  return r}}
