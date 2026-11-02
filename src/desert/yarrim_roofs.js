@@ -17,4 +17,4 @@ function yarRoofRows(){
     const dark=chapel?.92:.95+.1*r3,opt={wh:hz.wh};if(chapel){opt.chapel=1;opt.th=1.2;opt.sh=3}
     return [hz.id,hz.x0,hz.x1,hz.y0,hz.y1,ax,rise,slope,gable,chim,chapel?[.96,.98,1.02]:YRR_TINT[hz.hue%6],dark,opt]});
 }
-TKR.sets[290]={wh:1.4,houses:[],dyn:yarRoofRows};
+TKR.sets[290]={wh:1.4,houses:[],dyn:yarRoofRows,fade:.3};   // fade: the roofs are painted brighter and more contrasted than Yarrim's walls, so they are toned down to sit with them

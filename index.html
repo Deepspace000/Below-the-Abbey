@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.779';
+const VERSION='3.780';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -14090,6 +14090,7 @@ const YR_HOUSES=[
   {p:9,sp:'chandler',name:'Brine and Rope',               room:'shop',  tpl:'chandler',keeper:'yr_chandler', start:[4,5],door:'yardoor3'}
 ];
 const YR_ROOMS=YR_HOUSES.length;
+const YR_WALL_GRADE={sat:1.35,con:1.42,lift:2};   // house wall grade: colour, contrast, brightness
 const YR_GROUND=.53;   // the level ground under the houses (the village land is already about .52 to .56 there)
 const YR_WINTEX=['yarpink','yaryellow','yargreen','yarblue','yarcoral','yarwall'];   // the painted wall with a window, one for each colour of cottage
 const YR_DOORTEX=['yardoor','yardoor2','yardoor3','yardoor4','yardoor5','yardoor6','yardoor7'];
@@ -14169,7 +14170,10 @@ function YR_COT_TPL(c){
 function yarTileMaker(){
   const cache={};
   const gidOf=texId=>{const g=KH_NEXT_GID++;T_TILE[g]=texId;return g};
-  const texCopy=(data,wh)=>{const id=addTex(data);TEX[id].wh=wh;return id};
+  // from 3.780 the house walls get a mild grade (more contrast and colour, a little lighter) so they sit with the brighter, more contrasted ray-cast roofs
+  const grade=d=>{if(!d)return d;const o=new Uint8ClampedArray(d.length);let m=0,n=0;for(let i=0;i<d.length;i+=16)if(d[i+3]>127){m+=d[i]*.3+d[i+1]*.59+d[i+2]*.11;n++}m=n?m/n:128;
+    for(let i=0;i<d.length;i+=4){const l=d[i]*.3+d[i+1]*.59+d[i+2]*.11;for(let c=0;c<3;c++){const v=l+(d[i+c]-l)*YR_WALL_GRADE.sat;o[i+c]=m+(v-m)*YR_WALL_GRADE.con+YR_WALL_GRADE.lift}o[i+3]=d[i+3]}return o};
+  const texCopy=(data,wh)=>{const id=addTex(grade(data));TEX[id].wh=wh;return id};
   const memo=(key,f)=>cache[key]!==undefined?cache[key]:(cache[key]=f());
   const T={};
   const srcWin=hue=>{const id=DS_TEXREG[YR_WINTEX[hue]];return id!==undefined&&TEX[id]?TEX[id].d:null};
@@ -82071,7 +82075,7 @@ function TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB){
     TKR3D.top=new Float32Array(RW);TKR3D.bot=new Float32Array(RW);TKR3D.wt0=new Float32Array(VW);TKR3D.own=new Int8Array(RW*RH)}
   const B=TKR3D.buf,OWN=TKR3D.own;if(TKR3D.y1>=TKR3D.y0)B.fill(0,TKR3D.y0*RW*4,(TKR3D.y1+1)*RW*4);let Y0=RH,Y1=-1;   // only the rows painted last frame are cleared
   const cP=TKR3D.cP||(TKR3D.cP=new Float64Array(5*64)),objs=TKR.objs,grid=G.grid,MW=TKR.W,MH=TKR.H,near=TKR.near,Fh=F*2,HHh=HH*2,TX=TKR.tex,cand=[],ct=[],cea=[],ct1=[];
-  const day=G.day||0,tb=[tbR,tbG,tbB],TR=typeof TERR_NOW!=='undefined'&&!!TERR_NOW&&!TERR_NOW.terr;let any=false;
+  const day=G.day||0,tb=[tbR,tbG,tbB],TR=typeof TERR_NOW!=='undefined'&&!!TERR_NOW&&!TERR_NOW.terr,FADE=(TKR.sets[LEVEL]&&TKR.sets[LEVEL].fade)||0;let any=false;
   for(let s=0;s<RW;s++){
     TKR3D.top[s]=1e9;TKR3D.bot[s]=-1e9;
     const camX=2*s/RW-1,rX=dX+pX*camX,rY=dY+pY*camX,rl=Math.hypot(rX,rY);
@@ -82145,7 +82149,10 @@ function TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB){
       if(bo.ho){const H=bo.ho,sv=(H.ax==='y'?cx+rX*bt:cy+rY*bt),zh=H.wh+TKR_TAU+H.R*(1-Math.abs(sv-H.c)/H.half),zz=(CAMZ-bo.gz)+k*bt;if(zz-zh<.08)ao*=.55+.45*Math.max(0,(zz-zh)/.08)}   // the foot of a chimney is in the shade of the slope it stands on
       const o4=(r*RW+s)*4,g2=bsh*lb*iv*ao*1.17,tn=bo.tn;
       if(TKR3D.dbgP&&TKR3D.dbgP[0]===s&&TKR3D.dbgP[1]===r)TKR3D.dbgR={id:bo.id,t:bo.t,gab:bT===TX[bo.gable],fas,bu,bv,VS,bt,lod,bsh,ao,lb,iv,tex:[L.d[i4],L.d[i4+1],L.d[i4+2]]};   // (tests only)
-      B[o4]=L.d[i4]*g2*tb[0]*tn[0]+hzr[0]*hk;B[o4+1]=L.d[i4+1]*g2*tb[1]*tn[1]+hzr[1]*hk;B[o4+2]=L.d[i4+2]*g2*tb[2]*tn[2]+hzr[2]*hk;B[o4+3]=cov;OWN[r*RW+s]=bo.hid;
+      let q0=L.d[i4],q1=L.d[i4+1],q2=L.d[i4+2];
+      if(FADE>0){const lm=q0*.3+q1*.59+q2*.11,ks=1-.7*FADE,kc=1-.45*FADE,lf=FADE*30;   // a faded set (Yarrim): less colour, less contrast, a touch bleached
+        q0=118+(lm+(q0-lm)*ks-118)*kc+lf;q1=118+(lm+(q1-lm)*ks-118)*kc+lf;q2=118+(lm+(q2-lm)*ks-118)*kc+lf}
+      B[o4]=q0*g2*tb[0]*tn[0]+hzr[0]*hk;B[o4+1]=q1*g2*tb[1]*tn[1]+hzr[1]*hk;B[o4+2]=q2*g2*tb[2]*tn[2]+hzr[2]*hk;B[o4+3]=cov;OWN[r*RW+s]=bo.hid;
       if(r<TKR3D.top[s])TKR3D.top[s]=r;if(r>TKR3D.bot[s])TKR3D.bot[s]=r+1;if(r<Y0)Y0=r;if(r>Y1)Y1=r;lastOwn=bo.hid;lastRow=r;lastGab=bo.t==='house'&&bT===TX[bo.gable]&&!fas;any=true;
     }
     // the eave line and the soft shadow on the wall top under it, where this column's nearest wall carries the roof just painted above it
@@ -82191,7 +82198,7 @@ function yarRoofRows(){
     const dark=chapel?.92:.95+.1*r3,opt={wh:hz.wh};if(chapel){opt.chapel=1;opt.th=1.2;opt.sh=3}
     return [hz.id,hz.x0,hz.x1,hz.y0,hz.y1,ax,rise,slope,gable,chim,chapel?[.96,.98,1.02]:YRR_TINT[hz.hue%6],dark,opt]});
 }
-TKR.sets[290]={wh:1.4,houses:[],dyn:yarRoofRows};
+TKR.sets[290]={wh:1.4,houses:[],dyn:yarRoofRows,fade:.3};   // fade: the roofs are painted brighter and more contrasted than Yarrim's walls, so they are toned down to sit with them
 
 /* ---- src/desert/mana_tiers.js ---- */
 /* ==========================================================================

@@ -18,6 +18,7 @@ const YR_HOUSES=[
   {p:9,sp:'chandler',name:'Brine and Rope',               room:'shop',  tpl:'chandler',keeper:'yr_chandler', start:[4,5],door:'yardoor3'}
 ];
 const YR_ROOMS=YR_HOUSES.length;
+const YR_WALL_GRADE={sat:1.35,con:1.42,lift:2};   // house wall grade: colour, contrast, brightness
 const YR_GROUND=.53;   // the level ground under the houses (the village land is already about .52 to .56 there)
 const YR_WINTEX=['yarpink','yaryellow','yargreen','yarblue','yarcoral','yarwall'];   // the painted wall with a window, one for each colour of cottage
 const YR_DOORTEX=['yardoor','yardoor2','yardoor3','yardoor4','yardoor5','yardoor6','yardoor7'];
@@ -97,7 +98,10 @@ function YR_COT_TPL(c){
 function yarTileMaker(){
   const cache={};
   const gidOf=texId=>{const g=KH_NEXT_GID++;T_TILE[g]=texId;return g};
-  const texCopy=(data,wh)=>{const id=addTex(data);TEX[id].wh=wh;return id};
+  // from 3.780 the house walls get a mild grade (more contrast and colour, a little lighter) so they sit with the brighter, more contrasted ray-cast roofs
+  const grade=d=>{if(!d)return d;const o=new Uint8ClampedArray(d.length);let m=0,n=0;for(let i=0;i<d.length;i+=16)if(d[i+3]>127){m+=d[i]*.3+d[i+1]*.59+d[i+2]*.11;n++}m=n?m/n:128;
+    for(let i=0;i<d.length;i+=4){const l=d[i]*.3+d[i+1]*.59+d[i+2]*.11;for(let c=0;c<3;c++){const v=l+(d[i+c]-l)*YR_WALL_GRADE.sat;o[i+c]=m+(v-m)*YR_WALL_GRADE.con+YR_WALL_GRADE.lift}o[i+3]=d[i+3]}return o};
+  const texCopy=(data,wh)=>{const id=addTex(grade(data));TEX[id].wh=wh;return id};
   const memo=(key,f)=>cache[key]!==undefined?cache[key]:(cache[key]=f());
   const T={};
   const srcWin=hue=>{const id=DS_TEXREG[YR_WINTEX[hue]];return id!==undefined&&TEX[id]?TEX[id].d:null};

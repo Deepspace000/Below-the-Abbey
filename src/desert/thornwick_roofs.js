@@ -142,7 +142,7 @@ function TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB){
     TKR3D.top=new Float32Array(RW);TKR3D.bot=new Float32Array(RW);TKR3D.wt0=new Float32Array(VW);TKR3D.own=new Int8Array(RW*RH)}
   const B=TKR3D.buf,OWN=TKR3D.own;if(TKR3D.y1>=TKR3D.y0)B.fill(0,TKR3D.y0*RW*4,(TKR3D.y1+1)*RW*4);let Y0=RH,Y1=-1;   // only the rows painted last frame are cleared
   const cP=TKR3D.cP||(TKR3D.cP=new Float64Array(5*64)),objs=TKR.objs,grid=G.grid,MW=TKR.W,MH=TKR.H,near=TKR.near,Fh=F*2,HHh=HH*2,TX=TKR.tex,cand=[],ct=[],cea=[],ct1=[];
-  const day=G.day||0,tb=[tbR,tbG,tbB],TR=typeof TERR_NOW!=='undefined'&&!!TERR_NOW&&!TERR_NOW.terr;let any=false;
+  const day=G.day||0,tb=[tbR,tbG,tbB],TR=typeof TERR_NOW!=='undefined'&&!!TERR_NOW&&!TERR_NOW.terr,FADE=(TKR.sets[LEVEL]&&TKR.sets[LEVEL].fade)||0;let any=false;
   for(let s=0;s<RW;s++){
     TKR3D.top[s]=1e9;TKR3D.bot[s]=-1e9;
     const camX=2*s/RW-1,rX=dX+pX*camX,rY=dY+pY*camX,rl=Math.hypot(rX,rY);
@@ -216,7 +216,10 @@ function TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB){
       if(bo.ho){const H=bo.ho,sv=(H.ax==='y'?cx+rX*bt:cy+rY*bt),zh=H.wh+TKR_TAU+H.R*(1-Math.abs(sv-H.c)/H.half),zz=(CAMZ-bo.gz)+k*bt;if(zz-zh<.08)ao*=.55+.45*Math.max(0,(zz-zh)/.08)}   // the foot of a chimney is in the shade of the slope it stands on
       const o4=(r*RW+s)*4,g2=bsh*lb*iv*ao*1.17,tn=bo.tn;
       if(TKR3D.dbgP&&TKR3D.dbgP[0]===s&&TKR3D.dbgP[1]===r)TKR3D.dbgR={id:bo.id,t:bo.t,gab:bT===TX[bo.gable],fas,bu,bv,VS,bt,lod,bsh,ao,lb,iv,tex:[L.d[i4],L.d[i4+1],L.d[i4+2]]};   // (tests only)
-      B[o4]=L.d[i4]*g2*tb[0]*tn[0]+hzr[0]*hk;B[o4+1]=L.d[i4+1]*g2*tb[1]*tn[1]+hzr[1]*hk;B[o4+2]=L.d[i4+2]*g2*tb[2]*tn[2]+hzr[2]*hk;B[o4+3]=cov;OWN[r*RW+s]=bo.hid;
+      let q0=L.d[i4],q1=L.d[i4+1],q2=L.d[i4+2];
+      if(FADE>0){const lm=q0*.3+q1*.59+q2*.11,ks=1-.7*FADE,kc=1-.45*FADE,lf=FADE*30;   // a faded set (Yarrim): less colour, less contrast, a touch bleached
+        q0=118+(lm+(q0-lm)*ks-118)*kc+lf;q1=118+(lm+(q1-lm)*ks-118)*kc+lf;q2=118+(lm+(q2-lm)*ks-118)*kc+lf}
+      B[o4]=q0*g2*tb[0]*tn[0]+hzr[0]*hk;B[o4+1]=q1*g2*tb[1]*tn[1]+hzr[1]*hk;B[o4+2]=q2*g2*tb[2]*tn[2]+hzr[2]*hk;B[o4+3]=cov;OWN[r*RW+s]=bo.hid;
       if(r<TKR3D.top[s])TKR3D.top[s]=r;if(r>TKR3D.bot[s])TKR3D.bot[s]=r+1;if(r<Y0)Y0=r;if(r>Y1)Y1=r;lastOwn=bo.hid;lastRow=r;lastGab=bo.t==='house'&&bT===TX[bo.gable]&&!fas;any=true;
     }
     // the eave line and the soft shadow on the wall top under it, where this column's nearest wall carries the roof just painted above it
