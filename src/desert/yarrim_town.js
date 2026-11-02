@@ -18,6 +18,7 @@ const YR_HOUSES=[
   {p:9,sp:'chandler',name:'Brine and Rope',               room:'shop',  tpl:'chandler',keeper:'yr_chandler', start:[4,5],door:'yardoor3'}
 ];
 const YR_ROOMS=YR_HOUSES.length;
+const YR_GROUND=.53;   // the level ground under the houses (the village land is already about .52 to .56 there)
 const YR_WINTEX=['yarpink','yaryellow','yargreen','yarblue','yarcoral','yarwall'];   // the painted wall with a window, one for each colour of cottage
 const YR_DOORTEX=['yardoor','yardoor2','yardoor3','yardoor4','yardoor5','yardoor6','yardoor7'];
 
@@ -173,9 +174,9 @@ function yarBuild(){
       rows[y][x]=c;block[y*W+x]=isDoor?0:1;fm[y*W+x]='0';
     }
     if(S){hz.p=S.p;specialDoors[S.p]=hz}
-    // the roof: a painted gable, straight on, standing on the walls and about as wide as the cottage
+    // the roof: from 3.779 the ray-cast roofs of yarrim_roofs.js; the old painted gable (below) is only a fallback
     const v=hz.roof%6,flip=hs(hz.x0,hz.y0,66)<.5;
-    roofs.push({x:(hz.x0+hz.x1+1)/2,y:(hz.y0+hz.y1+1)/2,k:'yar_roof'+v+(flip?'f':''),w:hz.w+.5+(sp?.2:0),z:wh-.03});
+    if(!(typeof TKR!=='undefined'&&TKR.sets[YR.ID]))roofs.push({x:(hz.x0+hz.x1+1)/2,y:(hz.y0+hz.y1+1)/2,k:'yar_roof'+v+(flip?'f':''),w:hz.w+.5+(sp?.2:0),z:wh-.03});   // the ray-cast roofs (yarrim_roofs.js) replace these; kept only if they are missing
   }
   // the lighthouse: a squat stone tower on the point, with a brazier burning at its door
   const LH=P.light,lhWh=2.5,lhPlain=ch(TM.plain(5,lhWh));
@@ -325,6 +326,9 @@ function yarBuild(){
     if(hz.x0===46&&hz.y0===41){LEVEL_NAMES[id]='The Steam House';const wall=out===2?[0,-1]:out===0?[0,1]:out===3?[1,0]:[-1,0],hor=out===2||out===0,sx=hor?fx-1:fx,sy=hor?fy:fy-1;decor.push({k:'sign_bath',x:(P.street[sy*W+sx]||(rows[sy]&&rows[sy][sx]==='.'))?sx:fx,y:(P.street[sy*W+sx]||(rows[sy]&&rows[sy][sx]==='.'))?sy:fy,block:false,wd:wall,txt:['THE STEAM HOUSE','Merrin, bath keeper']})}
   }
   LEVELS[YR.ID]=lv;LEVEL_NAMES[YR.ID]='Yarrim';
+  // the ground under every house (and two squares round it) is level, at one height: the walls stand on the ground under them and the ray-cast roofs
+  // (yarrim_roofs.js) are flat-based, so a sloping footprint would make the eaves climb or sink along the wall. The shore beyond keeps its slope.
+  for(const hz of P.houses)for(let y=Math.max(1,hz.y0-2);y<=Math.min(H-2,hz.y1+2);y++)for(let x=Math.max(1,hz.x0-2);x<=Math.min(W-2,hz.x1+2);x++)h[y*W+x]=YR_GROUND;
   TERRS[YR.ID]=yarTerrain(W,H,h,rk,block);
   // the roofs, and the same roofs turned the other way
   for(let k=0;k<6;k++){const im=IMG['kh_yroof3_'+k];if(!im)continue;IMG['yar_roof'+k]=im;IMG['yar_roof'+k+'f']=mkCanvas(im.width,im.height,(x,w,hh)=>{x.translate(w,0);x.scale(-1,1);x.drawImage(im,0,0)})}
