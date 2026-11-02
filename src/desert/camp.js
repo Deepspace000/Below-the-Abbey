@@ -176,12 +176,12 @@ journalPage({id:'camp',title:'Camp and Bonds',
     txt('BONDS',40,197,10,'#d8c88e','left',true);
     let n=0;
     for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){
-      const v=bondVal(i,j),col=v>=2?'#a8d880':v<=-2?'#e08060':'#a89878',x=40+(n%2)*212,y=204+Math.floor(n/2)*20;n++;
-      txt(`${HERO_DEF[i].name} & ${HERO_DEF[j].name}`,x,y+6,8.5,'#e2d8bc','left',true,undefined,140);txt(bondTier(v),x+204,y+6,8,col,'right');
-      jBar(x,y+11,204,5,(v+10)/20,v>=0?'#a8d880':'#d07050');ctx.fillStyle='rgba(255,255,255,.4)';ctx.fillRect(x+102,y+10,1,7);
+      const v=bondVal(i,j),col=v>=2?'#a8d880':v<=-2?'#e08060':'#a89878',x=40+(n%2)*204,y=204+Math.floor(n/2)*20;n++;
+      txt(`${HERO_DEF[i].name} & ${HERO_DEF[j].name}`,x,y+6,8.5,'#e2d8bc','left',true,undefined,140);txt(bondTier(v),x+196,y+6,8,col,'right');
+      jBar(x,y+11,196,5,(v+10)/20,v>=0?'#a8d880':'#d07050');ctx.fillStyle='rgba(255,255,255,.4)';ctx.fillRect(x+98,y+10,1,7);
     }
-    txt('Friends (5+) dodge more and fight in a fury if a friend falls. Rivals (-5 or less) hit harder to prove a point, but lose their aim a little.',40,274,7.2,'#988a70','left',false,undefined,400);
-    txt('Camp activities need a quiet moment with no enemy near.',40,292,7.4,'#a89878','left');
+    txt('Friends (5+) dodge more and fight in a fury if a friend falls. Rivals (-5 or less) hit harder to prove a point, but lose their aim a little.',40,271,7.2,'#988a70','left',false,undefined,400);
+    txt('Camp activities need a quiet moment with no enemy near.',40,281,7.4,'#a89878','left');
   },
   click(id){const m=/^cp_(.+)$/.exec(id);if(m)campRun(m[1])}
 });

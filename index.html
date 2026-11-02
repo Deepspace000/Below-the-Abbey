@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.771';
+const VERSION='3.772';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -12363,13 +12363,16 @@ const jp=id=>JOURNAL.find(p=>p.id===id);
 function drawJournal(){
   BTNS=[];veil(.72);bigPanel(24,8,432,304);
   txt('JOURNAL / ABILITIES',240,25,14,'#d8c88e','center',true);
-  const cw=204,ch=46,gx=14,x0=36,y0=38;
-  JOURNAL.filter(p=>!p.hide||!p.hide()).forEach((p,k)=>{
-    const x=x0+(k%2)*(cw+gx),y=y0+Math.floor(k/2)*(ch+4),note=p.note?p.note():'';
+  // the cards share the room above the Close button: the card height follows the number of pages, so every row fits (and a page added later still fits)
+  const pages=JOURNAL.filter(p=>!p.hide||!p.hide()),cw=204,gx=14,x0=36,y0=36,gy=4,rows=Math.max(1,Math.ceil(pages.length/2));
+  const ch=Math.max(22,Math.min(46,Math.floor((250-(rows-1)*gy)/rows))),nl=Math.max(1,Math.min(3,Math.floor((ch-28)/8.6)+1));   // nl: the lines of summary that fit
+  pages.forEach((p,k)=>{
+    const x=x0+(k%2)*(cw+gx),y=y0+Math.floor(k/2)*(ch+gy),note=p.note?p.note():'';
     ctx.save();rrect(ctx,x,y,cw,ch,5);ctx.fillStyle='rgba(44,20,14,.92)';ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle=note?'#d8b04a':'#7a6440';ctx.stroke();ctx.restore();
     txt(p.title,x+9,y+11,10,note?'#ffe9a0':'#e2d8bc','left',true,undefined,cw-40);
     if(note)txt('!',x+cw-10,y+11,10,'#9ae0a0','center',true);
-    wrapText(p.summary(),cw-16,7.4).slice(0,3).forEach((l,i)=>txt(l,x+9,y+23+i*8.6,7.4,'#b8aa88','left'));
+    let L=wrapText(p.summary(),cw-16,7.4);if(L.length>nl){L=L.slice(0,nl);L[nl-1]=L[nl-1].replace(/[\s.,;:]+$/,'').slice(0,-3)+'...'}   // a longer summary ends in dots
+    L.forEach((l,i)=>txt(l,x+9,y+23+i*8.6,7.4,'#b8aa88','left'));
     btn('jh_'+p.id,x,y,cw,ch);
   });
   btnText('jhexit','Close',190,290,100,18);
@@ -13342,12 +13345,12 @@ journalPage({id:'camp',title:'Camp and Bonds',
     txt('BONDS',40,197,10,'#d8c88e','left',true);
     let n=0;
     for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){
-      const v=bondVal(i,j),col=v>=2?'#a8d880':v<=-2?'#e08060':'#a89878',x=40+(n%2)*212,y=204+Math.floor(n/2)*20;n++;
-      txt(`${HERO_DEF[i].name} & ${HERO_DEF[j].name}`,x,y+6,8.5,'#e2d8bc','left',true,undefined,140);txt(bondTier(v),x+204,y+6,8,col,'right');
-      jBar(x,y+11,204,5,(v+10)/20,v>=0?'#a8d880':'#d07050');ctx.fillStyle='rgba(255,255,255,.4)';ctx.fillRect(x+102,y+10,1,7);
+      const v=bondVal(i,j),col=v>=2?'#a8d880':v<=-2?'#e08060':'#a89878',x=40+(n%2)*204,y=204+Math.floor(n/2)*20;n++;
+      txt(`${HERO_DEF[i].name} & ${HERO_DEF[j].name}`,x,y+6,8.5,'#e2d8bc','left',true,undefined,140);txt(bondTier(v),x+196,y+6,8,col,'right');
+      jBar(x,y+11,196,5,(v+10)/20,v>=0?'#a8d880':'#d07050');ctx.fillStyle='rgba(255,255,255,.4)';ctx.fillRect(x+98,y+10,1,7);
     }
-    txt('Friends (5+) dodge more and fight in a fury if a friend falls. Rivals (-5 or less) hit harder to prove a point, but lose their aim a little.',40,274,7.2,'#988a70','left',false,undefined,400);
-    txt('Camp activities need a quiet moment with no enemy near.',40,292,7.4,'#a89878','left');
+    txt('Friends (5+) dodge more and fight in a fury if a friend falls. Rivals (-5 or less) hit harder to prove a point, but lose their aim a little.',40,271,7.2,'#988a70','left',false,undefined,400);
+    txt('Camp activities need a quiet moment with no enemy near.',40,281,7.4,'#a89878','left');
   },
   click(id){const m=/^cp_(.+)$/.exec(id);if(m)campRun(m[1])}
 });
