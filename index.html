@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.774';
+const VERSION='3.775';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2986,10 +2986,11 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     }
     let x0=Math.max(0,Math.floor(left)),x1=Math.min(VW,Math.ceil(left+sw));
     if(TERR_NOW&&!s.hang&&!s.flat){ // a hill in front hides the foot of whatever stands behind it; columns cut at the same height are painted in one go, so a tree is a few paints, not one per column
-      const kb=clamp(((ty*YBS)|0)-1,0,YBK-1),xb=Math.min(VW-1,Math.ceil(left+sw)),ku=tw/sw;let rn=-1,rc=0;
+      const kb=clamp(((ty*YBS)|0)-1,0,YBK-1),xb=Math.min(VW-1,Math.ceil(left+sw)),ku=tw/sw,gs=s.decor&&!s.e&&!s.sky&&s._tfs>.03,tol=gs?1.4:.6;let rn=-1,rc=0;   // gs: the ground rises across it
       for(let xx=Math.max(0,Math.floor(left));xx<=xb+1;xx++){
-        const vis=xx<=xb&&zbuf[xx]>ty,cut=vis?Math.min(bottom,s.sky?skySmoothCut(xx,kb):YB[xx*YBK+kb]):-1;
-        if(vis&&cut>top){if(rn>=0&&Math.abs(cut-rc)<=.6)continue;if(rn>=0){sprRun2(SRC,left,ku,th,sh,top,bottom,rn,rc,xx);rn=-1;anyVis=true}rn=xx;rc=cut}
+        const vis=xx<=xb&&zbuf[xx]>ty;let cut=vis?Math.min(bottom,s.sky?skySmoothCut(xx,kb):YB[xx*YBK+kb]):-1;
+        if(gs&&vis){const cm=2*(xx+.5)/VW-1,gt=HH+(CAMZ-terrH(cx+(dX+pX*cm)*ty,cy+(dY+pY*cm)*ty))*F/ty+1;if(gt<cut)cut=gt}   // whatever is below the surface of the dune, at the picture's own distance, is hidden: it is planted from every side
+        if(vis&&cut>top){if(rn>=0&&Math.abs(cut-rc)<=tol)continue;if(rn>=0){sprRun2(SRC,left,ku,th,sh,top,bottom,rn,rc,xx);rn=-1;anyVis=true}rn=xx;rc=cut}
         else if(rn>=0){sprRun2(SRC,left,ku,th,sh,top,bottom,rn,rc,xx);rn=-1;anyVis=true}
       }
       x0=x1+2;
@@ -9688,8 +9689,10 @@ function terrRock(){const t=TEX[LEVEL===43?DS_TEXREG.cliffR:DS_TEXREG.cliffY];re
 // where a rock or a tree really meets the ground: the lowest point under its width, so it never hangs over a slope
 function terrFoot(s,cx,cy){
   if(TERR_NOW&&TERR_NOW.terr)return terrH(s.x,s.y);   // on a terrace a thing stands on the step it is in
-  const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1,px=-ry/dl,py=rx/dl,hw=(s.w||1)*.4;
-  return Math.min(terrH(s.x,s.y),terrH(s.x+px*hw,s.y+py*hw),terrH(s.x-px*hw,s.y-py*hw));
+  // the lowest ground under the whole width of the picture (five points across it, seen from where the party stands), so no side of a rock or a tree hangs in the air;
+  // s._tfs is how much the ground rises across it: where that is more than a little, the sprite is also cut at the ground's surface, column by column (the sprite pass in index.html)
+  const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1,px=-ry/dl,py=rx/dl,hw=(s.w||1)*.45,h0=terrH(s.x,s.y),a=terrH(s.x+px*hw,s.y+py*hw),b=terrH(s.x-px*hw,s.y-py*hw),c=terrH(s.x+px*hw*.5,s.y+py*hw*.5),d=terrH(s.x-px*hw*.5,s.y-py*hw*.5),
+    lo=Math.min(h0,a,b,c,d);s._tfs=Math.max(h0,a,b,c,d)-lo;return lo;
 }
 function terrH(x,y){
   const T=TERR_NOW;if(!T)return 0;

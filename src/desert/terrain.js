@@ -94,8 +94,10 @@ function terrRock(){const t=TEX[LEVEL===43?DS_TEXREG.cliffR:DS_TEXREG.cliffY];re
 // where a rock or a tree really meets the ground: the lowest point under its width, so it never hangs over a slope
 function terrFoot(s,cx,cy){
   if(TERR_NOW&&TERR_NOW.terr)return terrH(s.x,s.y);   // on a terrace a thing stands on the step it is in
-  const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1,px=-ry/dl,py=rx/dl,hw=(s.w||1)*.4;
-  return Math.min(terrH(s.x,s.y),terrH(s.x+px*hw,s.y+py*hw),terrH(s.x-px*hw,s.y-py*hw));
+  // the lowest ground under the whole width of the picture (five points across it, seen from where the party stands), so no side of a rock or a tree hangs in the air;
+  // s._tfs is how much the ground rises across it: where that is more than a little, the sprite is also cut at the ground's surface, column by column (the sprite pass in index.html)
+  const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1,px=-ry/dl,py=rx/dl,hw=(s.w||1)*.45,h0=terrH(s.x,s.y),a=terrH(s.x+px*hw,s.y+py*hw),b=terrH(s.x-px*hw,s.y-py*hw),c=terrH(s.x+px*hw*.5,s.y+py*hw*.5),d=terrH(s.x-px*hw*.5,s.y-py*hw*.5),
+    lo=Math.min(h0,a,b,c,d);s._tfs=Math.max(h0,a,b,c,d)-lo;return lo;
 }
 function terrH(x,y){
   const T=TERR_NOW;if(!T)return 0;
