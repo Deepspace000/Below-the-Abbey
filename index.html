@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.791';
+const VERSION='3.792';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1302,6 +1302,14 @@ const DNG_PLAYERS=['music_dng_creepy','music_dng_ambiance','music_dng_cave'];
 function dngMusic(T,v){
   if(G._dngLv!==LEVEL||!G._dngPick){G._dngLv=LEVEL;G._dngPick=DNG_PLAYERS[(Math.random()*DNG_PLAYERS.length)|0]}
   T[G._dngPick]=v;loadLazy(G._dngPick)}
+/* THE SOUNDSCAPE OF THE OPEN COUNTRY (nature_ambience.mp3). A quiet layer under the music (about six decibels below it, on the ambience slider) in the open country that is not a town:
+   the grounds and the Thornwood (2), Gandrick's Wood (7), the Ironhill Road (10) and Moor (19), the Burial Ground (20), the Greyfang Pass (22), Greendale Forest (32), the Oakwood (311),
+   the Pilgrim's Path (400 to 423), the Maze of Gardens (490) and Wenlock (496). Not in towns, deserts, the sea, the Blighted Lands (96xx and Sale), the Hollow Grasslands (470 to 474),
+   Blackbriar Wood (the Witchwood, 520) or the Wenlock graveyard (530, its own storm). It fades out while it rains (the Ironhill Road is always wet, so it is nearly silent there). */
+const NATURE_LEVELS=new Set([2,7,10,19,20,22,32,311,490,496]);
+function natureVol(){
+  const n=LEVEL;if(!(NATURE_LEVELS.has(n)||(n>=400&&n<=423)))return 0;
+  let v=.45;if(typeof BKS!=='undefined'&&BKS.rain>.02)v*=Math.max(0,1-BKS.rain*1.6);return v}
 function areaAudio(){
   if(G._dngLv!==undefined&&G._dngLv!==LEVEL)G._dngLv=undefined;   // a new level: the next dungeon chooses its music again
   if(!AC)return;loadSounds();windTick();try{if(typeof seaSoundTick==='function')seaSoundTick()}catch(e){}try{if(typeof yarSoundTick==='function')yarSoundTick()}catch(e){}streamTick();
@@ -1309,6 +1317,7 @@ function areaAudio(){
   if(G.sit&&G.time>G.sit.t)G.sit=null;
   if(TITLE_MUSIC&&(G.state==='title'||G.state==='create'||G.state==='goto')&&!G.mute)T.music_tavern=.4; // the music of the Prism Cellars plays on the title screen (switched off for now: set TITLE_MUSIC to true)
   if(G.state==='play'&&!G.mute){
+    {const nv=natureVol();if(nv>.01){T.nature_ambience=nv;loadLazy('nature_ambience')}}   // the soundscape of the open country, under whatever music the area has
     if(G.sit){T.music_mithral=.55;loadLazy('music_mithral')}
     if(LEVEL===32){T.music_mithral=.55;loadLazy('music_mithral')}
     else if(LEVEL===33){T.village_ambience=.22;T.wind_loop=.1}
@@ -1337,7 +1346,7 @@ function areaAudio(){
     else if(LEVEL===6||LEVEL===16){T.music_tavern=.55;T.village_ambience=.18}
   }
   for(const n of Object.keys(T)){T[n]*=SNDOPT[SND_CAT(n)];if(!(T[n]>0))delete T[n]}
-  for(const n of SNDLIST.concat(['music_mithral','music_wanderer','music_embers','music_andorios','music_underlevel','music_hollowland','music_deeperhollow'].concat(DNG_PLAYERS))){if(n in T||LAYERS[n])setLayer(n,T[n]||0)}
+  for(const n of SNDLIST.concat(['music_mithral','music_wanderer','music_embers','music_andorios','music_underlevel','music_hollowland','music_deeperhollow'].concat(DNG_PLAYERS,['nature_ambience']))){if(n in T||LAYERS[n])setLayer(n,T[n]||0)}
   if(G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===3||LEVEL===13||LEVEL===29||LEVEL===30||LEVEL===496)){
     if(!G.bellNext)G.bellNext=G.time+50+Math.random()*60;
     if(G.time>G.bellNext){G.bellNext=G.time+150+Math.random()*100;const v=(LEVEL===29||LEVEL===30||LEVEL===496)?.3:.6;playSmp('church_bell1',v);setTimeout(()=>playSmp('church_bell2',v*.8),2600);if(LEVEL===3||LEVEL===13)msg('The church bell tolls.','#d8c88e')}
