@@ -169,6 +169,8 @@ function quayBuild(){
     for(const [dx,dy,k] of [[-2,0,'oq_fcrate'],[-2,1,'oq_fbasket'],[2,1,'oq_fbarrel'],[0,2,'oq_fnet']])tryDc(k,sx+dx,sy+dy);
     for(let q=0;q<3;q++){const a=hs(sx,sy,q+60)*TAU,r=2+hs(sx,sy,q+70)*3,id2=OQ_BUYERS[((hs(sx,sy+q,81)*OQ_BUYERS.length)|0)],kp=KH_KEEPERS[id2];const p=near(Math.round(sx+Math.cos(a)*r),Math.round(sy+3+Math.sin(a)*r*.7),2);if(p&&kp)walk(khFaceKey(kp.face),p[0],p[1],{npc:id2,sc:kp.sc||1})}
   }
+  // the people with work for the party (oldhaven_quayquests.js)
+  if(typeof OQQ_FOLK!=='undefined')for(const f of OQQ_FOLK)person(f.id,f.at[0],f.at[1],4);
   // crates, barrels and sacks are stored against the walls: along the foot of the city wall, and against the sides of the buildings away from their doors
   {const STOR=['oq_fcrate','oq_cargo','oq_fbarrel','oq_sacks','oq_fcrate','oq_cargo','oq_fbarrel'];
     for(let x=21;x<=58;x++){if(Math.abs(x-GX)<=10||hs(x,1,90)<.25)continue;tryDc(STOR[(hs(x,2,90)*STOR.length)|0],x,10)}
