@@ -297,8 +297,7 @@ function bksRain(R,t,f,rd){
   if(!S.far||S.rd!==(rd?1:0))return;
   ctx.globalCompositeOperation='source-over';
   // (no puddles on the road: the rain is only rain)
-  // horizon spray: the rain breaking into the haze
-  for(i=0;i<18;i++){const ph=(t*1.3+P.sw[i%24])%1,a=Math.sin(ph*3.1416),px=((P.sw[(i+5)%24]*7+i*.137)%1)*440-10;if(a<.1)continue;ctx.globalAlpha=Math.min(1,R)*a*.7;const sc=.7+P.sw[(i+9)%24]*.8;ctx.drawImage(S.spray,px,hh-3-P.sw[(i+2)%24]*6,24*sc,10*sc)}
+  // (no horizon spray: nothing splashes on the horizon, the rain only fades into the haze)
   // streaks: one shear per layer, then plain blits
   ctx.save();ctx.transform(1,0,wind,1,0,0);
   n=Math.min(BKS_NF,Math.round(BKS_NF*R*gk));ctx.globalAlpha=Math.min(1,.7*fl);
@@ -313,14 +312,16 @@ function bksRain(R,t,f,rd){
   if(gust>.08){const sx=((t*90)%700)-200;ctx.globalAlpha=Math.min(.5,gust*.28*R);ctx.save();ctx.transform(1,0,wind*.9,1,0,0);ctx.drawImage(S.sheet,sx,0,200,210);ctx.restore()}
   // warm mist round the lamp that lights the party
   if(lamp>.04&&BKS.lbx>-200){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=Math.min(.8,lamp*.55*Math.min(1,.4+R)*fl);const sc=70+60*lamp;ctx.drawImage(S.glow,BKS.lbx-sc,hh-18-sc*.6,sc*2,sc*1.5);ctx.globalCompositeOperation='source-over'}
-  // one thin line of splashing puddles right at the front of the ground (the only wet-ground effect kept): flat puddles with rain rings splashing in them
-  {const gy0=Math.max(hh+30,190);
-   for(i=0;i<11;i++){const px=(i+.5)*38+P.px[i]*14-7,py=gy0+10+P.pd[i]*6,sc=.7+P.px[(i+5)%BKS_NP]*.5;
-     ctx.globalAlpha=Math.min(.7,.55*Math.min(1,R*1.3)*(1+f));ctx.drawImage(S.pud,px-32*sc,py-9*sc,64*sc,18*sc)}
-   const m2=Math.round(18*(.4+.6*R));
+  // no puddles and no line of water: only splashes. Each splash is a small rain ring at a real spot on the ground (a place in the world, near the party), projected every
+  // frame the way the walls are, so when the party walks it comes toward the party and slides down and out of the picture with the ground (a splash fixed to the screen
+  // would stay put while the ground moves). It flashes for under a second and the next one is somewhere else.
+  {const C=G.C,LA=C.a+(typeof LKYAW==='number'?LKYAW:0),TW=Math.PI*2,FE=F*EYE,bx=Math.floor(C.x),by=Math.floor(C.y),m2=Math.round(16*(.4+.6*R));
    for(i=0;i<m2;i++){const per=.5+P.rp[i]*.5,ph=t/per+P.rt[i]*7;cyc=Math.floor(ph);const u=ph-cyc;if(u>.97)continue;
-     const k=(u*8)|0,sc=.7+((P.rt[i]*13+cyc*.37)%1)*.5,x=((P.rx[i]+cyc*.618)%1)*420,y=gy0+8+P.ry[i]*9;
-     ctx.globalAlpha=Math.min(1,ra*.55);ctx.drawImage(S.ring,k*26,0,26,14,x-13*sc,y-10*sc,26*sc,14*sc)}}
+     const wx=bx+.5+(((P.rx[i]+cyc*.618)%1)-.5)*18,wy=by+.5+(((P.ry[i]+cyc*.382)%1)-.5)*18,dx=wx-C.x,dy=wy-C.y,d=((Math.atan2(dy,dx)-LA)%TW+Math.PI*3)%TW-Math.PI;
+     if(Math.abs(d)>1.05)continue;const z=Math.hypot(dx,dy)*Math.cos(d);if(z<.9||z>9)continue;
+     const sx=210*(1+Math.tan(d)/PL),y=hh+FE/z;if(y>208||y<hh+2)continue;
+     const k=(u*8)|0,sc=Math.max(.3,Math.min(1.25,1.5/z))*(.85+((P.rt[i]*13+cyc*.37)%1)*.3);
+     ctx.globalAlpha=Math.min(1,ra*.55);ctx.drawImage(S.ring,k*26,0,26,14,sx-13*sc,y-10*sc,26*sc,14*sc)}}
   ctx.globalAlpha=1}
 
 /* ==========================================================================
@@ -335,7 +336,7 @@ function bksRain(R,t,f,rd){
    'desert', the dunes, Khemetra 41 to 44, 50 to 65, DNG_INFO dungeons, and any name with dune, desert, erg, oasis, pyramid, tomb, burrow, Khemetra).
    Indoors, in caves and in dungeons there is no rain, no mist and no sound: the rain fades out at the door and resumes outside.
    The Ironhill Road (level 10) is not on the dice: it ALWAYS rains there, a steady .55 with showers of .9 (spells of 40 to 120 s, thunder in the showers); its hut (24) is indoors and stays dry.
-   Look and light: the three streak layers, wind, gusts, horizon mist, the thin line of splashing puddles, a cool grey wash; weatherNow darkens and greys
+   Look and light: the three streak layers, wind, gusts, horizon mist, splash rings at real spots on the ground, moving with it (no puddles, no line, no spray at the horizon), a cool grey wash; weatherNow darkens and greys
    the air in step with the rain (the Wenlock golden light fades as it comes on). Sound: the same loop and hiss (bksSound).
    ========================================================================== */
 const BKS_RAIN_P=.15;
