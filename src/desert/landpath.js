@@ -41,8 +41,8 @@ const LP_PRIESTS=[['lp_pr0','Father Elric, of the Long Road','kh_ohfolk2_1','The
  ['lp_pr2','Brother Alder, of the sea church','kh_ohfolk1_4','Saint Aldric watched the sea for sixty years, and nothing happened, and he said it was the best sixty years of his life.']];
 LP_PRIESTS.forEach(([id,n,face,line])=>khPray(id,n,face,line,15));
 khNpc('lp_knight','A knight of the Crown','kh_ohsold1_2',()=>yrLines('lp_knight',["The Crown rides the Pilgrim’s Path twice a day. Nothing ever happens. It is the best post in the kingdom.","I ride from the city gate to the mountains and back. The mountains are far. The horse knows the way.","Do not mind us. We are only here so that you can walk in peace."]));
-khNpc('lp_cliff','The edge of the Pilgrim’s Path','gate',()=>say('The path ends here, at the edge of a high cliff. Far below, beyond the last slope of the mountain, lie the roofs and the harbour of Yarrim, and the sea. A steep goat track leads down. It can be climbed down, but it cannot be climbed up again.',[['Go down the goat track.',()=>{G.flags.lpDone=1;msg('The goat track is steep. The pilgrim’s path falls behind and above.','#a8d8ff');goToLevel(290,{x:LPY.x,y:LPY.y,f:LPY.f});return null}],['Stay a while.',()=>null]]));
-const LPY={x:56,y:8,f:2}; // where the goat track comes out, north of Yarrim
+khNpc('lp_cliff','The edge of the Pilgrim’s Path','gate',()=>say('The path ends here, at the edge of a high cliff. Far below, beyond the last slope of the mountain, lie the roofs and the harbour of Yarrim, and the sea. A steep goat track leads down. It can be climbed down, but it cannot be climbed up again.',[['Go down the goat track.',()=>{G.flags.lpDone=1;msg('The goat track is steep. The pilgrim’s path falls behind and above, and the track comes out among the oaks north of Yarrim.','#a8d8ff');goToLevel(290,{x:LPY.x,y:LPY.y,f:LPY.f});return null}],['Stay a while.',()=>null]]));
+const LPY={x:50,y:8,f:2}; // where the goat track comes out: in the green woods north of Yarrim, at the head of a trail that runs down to the clearing and the village (yarrim_woods.js)
 const LPM={SEG:11,Y:300}; // the gate of the monastery, cut into the rock beside the path, halfway along
 let LP_XC={};
 function lpXcOf(s){ // the middle of the path, row by row: dead straight, with three slow bends in the part of a stretch that no other stretch shares
@@ -369,7 +369,7 @@ function CXOF(L,y){ // the middle of the path on row y, read back from the map
 /* ---- the cliff, Yarrim at the foot of it, and the journal ---- */
 {const _oe=ohEnter;ohEnter=function(n){_oe.apply(this,arguments);const F=G.flags;
   if(n>=LP.BASE&&n<LP.BASE+LP.N&&!F.lpSeen){F.lpSeen=1}
-  if(n===290&&F.lpDone&&!G.decor.some(d=>d.k==='lp_sign_up')){const k=lpBoard('lp_sign_up','THE LAND PATH','one way only');if(k)G.decor.push({k,x:LPY.x-2,y:LPY.y-1,block:false,walk:true,deco:true})}}}
+  if(n===290&&F.lpDone&&!G.decor.some(d=>d.k==='lp_sign_up')){const k=lpBoard('lp_sign_up','THE LAND PATH','one way only');if(k)G.decor.push({k,x:LPY.x-1,y:LPY.y,block:false,walk:true,deco:true})}}}
 
 /* ---- the air: wind off the sea at times, birdsong, birds flying by, bees at the flowers ---- */
 for(let q=0;q<LP.N;q++)WIND_AMT[LP.BASE+q]=LP_LEG(q)==='W'||LP_LEG(q)==='D'?.9:.6; // a breeze from the sea, stronger in the mountains

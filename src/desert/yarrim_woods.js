@@ -9,7 +9,8 @@ const YW_ZONES=[[27,7,53,28,'n'],[26,29,33,52,'w'],[26,53,47,72,'sw']];         
 const YW_TRAILS=[
   [[29,40],[29,26],[36,26],[36,20],[44,20],[44,14],[50,14],[50,11]],                         // north: up from the back track, east through the wood to the clearing at the top
   [[31,41],[31,53],[36,53],[36,61],[30,61],[30,67],[38,67]],                                 // south-west: down from the track to the clearing by the southern shore
-  [[26,40],[26,30]],[[29,28],[27,28]]                                                          // west: a way along the foot of the hills, and a short spur to a small clearing
+  [[26,40],[26,30]],[[29,28],[27,28]],                                                         // west: a way along the foot of the hills, and a short spur to a small clearing
+  [[50,8],[50,11]]                                                                              // the end of the Pilgrim's Path: its goat track comes out here (LPY in landpath.js) and runs down to the north clearing
 ];
 const YW_CLEARINGS=[[51,11,'n'],[39,67,'s'],[27,28,'w']];                                      // each holds a chest
 const YW_OAK=['ltree0','ltree4','ltree8','ltree0','ltree4','ltree8','ltree19'],YW_SPRUCE=['ltree16'];   // (the painted spruces have magenta trunks: slim green cypresses instead)
