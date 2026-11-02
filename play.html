@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.769';
+const VERSION='3.770';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2739,7 +2739,7 @@ function render3D(){
     for(let k=0;k<tcN;k++){const o=((tcY+k)*VW+x)*4,a=(k+1)/(tcN+1);D[o]=TCUTB[k*3]+(D[o]-TCUTB[k*3])*a;D[o+1]=TCUTB[k*3+1]+(D[o+1]-TCUTB[k*3+1])*a;D[o+2]=TCUTB[k*3+2]+(D[o+2]-TCUTB[k*3+2])*a} // the cut top fades into what is behind it
     } // next wall of this column
   }
-  if(LEVEL===3&&typeof TKR3D_R==='function')TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB); // opt-in: Thornwick's roofs, ray-cast per column with the walls' own projection (thornwick_roofs.js)
+  if((LEVEL===3||LEVEL===13)&&typeof TKR3D_R==='function')TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB); // opt-in: Thornwick's roofs, ray-cast per column with the walls' own projection (thornwick_roofs.js)
   vctx.putImageData(vimg,0,0);
   for(const L of LIGHTS){const h=L._h;if(!L.taken&&h&&h.col>=0&&h.ty<=zbuf[h.col]+.45)G.hits.push(h)}
   // wall torches: an iron plate on the wall and a wooden stick that runs out to the cloth-wrapped head under the flame
@@ -7082,7 +7082,7 @@ function drawWorld(){ // a slightly softer, lower-res picture; the screen-wide d
   if(LOWC.width!==w){LOWC.width=w;LOWC.height=h}
   LOWX.imageSmoothingEnabled=true;LOWX.drawImage(vc,0,0,w,h);
   ctx.imageSmoothingEnabled=false;ctx.drawImage(LOWC,0,0,420,210);ctx.imageSmoothingEnabled=true;
-  if(LEVEL===3&&typeof TKR3D_B==='function')TKR3D_B(ctx); // opt-in: Thornwick's roof picture, under the sprites (thornwick_roofs.js)
+  if((LEVEL===3||LEVEL===13)&&typeof TKR3D_B==='function')TKR3D_B(ctx); // opt-in: Thornwick's roof picture, under the sprites (thornwick_roofs.js)
   if(G._spr){ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';SC=ctx;drawSprites(...G._spr);ctx.restore()}
   if(LEVELS[LEVEL]&&LEVELS[LEVEL].rain)drawRain(); if(STORM.a>.02)drawStorm();else{drawSkyBirds();if(typeof uwLv==='function'&&uwLv(LEVEL))uwSkyFish();else if(yarSea(LEVEL)&&typeof yarGulls==='function')yarGulls()}if(typeof uwHud==='function')uwHud();if(G.pharFlash>0)drawPharFlash();
 }
@@ -81929,6 +81929,10 @@ function bnPost(n){if(self.EP_OFF||self.BN_OFF)return;const L=LEVELS[n];if(!L)re
      spire; code only picks the piece and the place in it, and shades it (the slope turned to the light is lighter, the far roofs fade into the haze like the walls);
    - under each roof a dark eave line and a short soft shadow lie on the top of the wall (only where the roof is above it);
    - no roof reaches past its walls (no overhang: the squares beside the houses are all walkable), and the houses a party buys (housing.js) keep their own roofs.
+   IRONHILL (level 13, from 3.770) uses the same machinery: TKR.sets holds one house table per level and the wall height the roofs stand on ('ceil' = the level's own
+   wall height, 3.4 under the open sky: Ironhill's houses are much higher than Thornwick's 1.55). Its church has a tower, spire and cross (an option of its table row),
+   and the mayor's residence has a castle top instead of a pitched roof: a crenellated parapet (the painted tower stone with the gaps between the merlons cut out,
+   tkrMakeCren), a pointed painted spire on each corner turret and a keep with its own crenellated top. No new painting was needed: the pieces are the Thornwick ones.
    TKR3D_B (called from drawWorld) lays the roof picture on the screen before the sprites, so people, lamps and trees in front of a house still stand in front
    of its roof, and lowers wtop (the top of the nearest wall, used by the skyline pictures) to the roof line.
    ========================================================================== */
@@ -81948,8 +81952,22 @@ const TKR={ready:false,loading:null,
     ['s4',24,28,19,22,'x',1.1,'tile','timber',[.75,-.38,'brick'],[.98,.94,.9],.95],
     ['s5',30,34,19,22,'y',1.25,'slate','boards',[.3,.4,'stone'],[.94,.98,1.08],.98]],
   SLOPEU:{slate:2.1,shingle:2.0,thatch:2.4,tile:2.0},   // world width of one painted slope picture along the ridge
-  tex:{},objs:null,nearIdx:null};
-function tkrLoadImg(key,src){return new Promise(res=>{const i=new Image();i.onload=()=>{TKR.tex[key]=tkrTex(i);res()};i.onerror=()=>{console.error('tkr art missing',src);res()};i.src=src+'?v='+VERSION})}
+  tex:{},img:{},objs:null,nearIdx:null};
+/* the roof sets by level. A row is the Thornwick row plus an optional last field: {chapel:1,north:1,tx,th,sh} (tower and spire; north: the street is at the north end;
+   tx: the tower's x; th, sh: how far the tower rises over the ridge and how tall the spire is) or {castle:1} (a castle top, no pitched roof) */
+TKR.sets={3:{wh:1.55,houses:TKR.houses},
+  13:{wh:'ceil',houses:[
+    ['a',12,15,10,12,'x',1.2,'slate','stone',[.7,.38,'stone'],[.95,.97,1.02],.9],
+    ['b',34,37,10,12,'x',1.2,'shingle','boards',[.3,-.36,'stone'],[1,1,1],.92],
+    ['c',12,14,14,16,'y',1.15,'shingle','stone',[.6,.38,'brick'],[1.02,.98,.94],.92],
+    ['d',35,37,14,16,'y',1.15,'slate','timber',[.4,-.38,'stone'],[.96,.98,1.04],.9],
+    ['castle',18,31,10,15,'y',0,'slate','stone',null,[.9,.92,.98],.9,{castle:1}],
+    ['sm',12,16,21,24,'x',1.35,'slate','stone',[.22,.34,'stone'],[.92,.94,1],.88],
+    ['st',18,22,21,24,'x',1.35,'shingle','timber',[.75,-.32,'brick'],[1.02,.98,.92],.92],
+    ['ch',24,27,21,24,'y',1.7,'slate','stone',null,[.96,.98,1.04],.9,{chapel:1,north:1,tx:26.5,th:1.7,sh:3.4}],
+    ['inn',28,33,21,24,'x',1.45,'tile','timber',[.3,.36,'brick'],[1.02,.96,.9],.95],
+    ['h9',35,37,23,26,'y',1.15,'thatch','boards',[.5,.36,'stone'],[1,.98,.9],1]]}};
+function tkrLoadImg(key,src){return new Promise(res=>{const i=new Image();i.onload=()=>{TKR.img[key]=i;TKR.tex[key]=tkrTex(i);res()};i.onerror=()=>{console.error('tkr art missing',src);res()};i.src=src+'?v='+VERSION})}
 /* a picture as RGBA arrays with halved copies (the far roofs read a smaller copy, so they do not shimmer) */
 function tkrTex(img){
   // a gentle grade only: more local contrast (the courses of the painting read better at a distance), the colours themselves untouched
@@ -81966,18 +81984,37 @@ function tkrLoad(){
   for(const n of ['slate','shingle','thatch','tile'])J.push(tkrLoadImg('slope_'+n,'assets/tkr/slope_'+n+'.webp'));
   for(const n of ['timber','stone','boards','ochre'])J.push(tkrLoadImg('gable_'+n,'assets/tkr/gable_'+n+'.webp'));
   for(const n of ['chim_brick','chim_stone','tower','spire','spirex'])J.push(tkrLoadImg(n,'assets/tkr/'+n+'.webp'));
-  return TKR.loading=Promise.all(J).then(()=>{TKR.ready=true});
+  return TKR.loading=Promise.all(J).then(()=>{tkrMakeCren();TKR.ready=true});
 }
-const TKR_WH=1.55,TKR_TAU=.17,TKR_SUN=(()=>{const v=[-.45,.55,.72],n=Math.hypot(...v);return v.map(a=>a/n)})();
+let TKR_WH=1.55;const TKR_TAU=.17,TKR_SUN=(()=>{const v=[-.45,.55,.72],n=Math.hypot(...v);return v.map(a=>a/n)})();
+/* the crenellated parapet picture: the plain stone of the painted tower, with the gaps between the merlons cut out of its top (two merlons across) */
+function tkrMakeCren(){const im=TKR.img.tower;if(!im)return;const W=256,H=160,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});
+  x.drawImage(im,0,Math.round(im.height*.44),im.width,Math.round(im.height*.48),0,0,W,H);
+  const id=x.getImageData(0,0,W,H),a=id.data;for(let y=0;y<64;y++)for(let xx=0;xx<W;xx++){const m=xx%128;if(m<22||m>=106)a[(y*W+xx)*4+3]=0}
+  x.putImageData(id,0,0);TKR.tex.cren=tkrTex(c)}
+/* a castle top over a building: a parapet round the wall top, a turret with a pointed painted spire on each corner and a keep with its own crenellated top.
+   Everything stands inside the footprint (no overhang). */
+function tkrCastle(objs,hi,id,X0,X1,Y0,Y1,tn){
+  const bx=(sid,x0,x1,y0,y1,zb,zt,tex,ex)=>objs.push(Object.assign({t:'box',hid:hi,id:id+sid,X0:x0,X1:x1,Y0:y0,Y1:y1,zb,zt,tex,tn},ex||{}));
+  const zb=TKR_WH-.04,zt=TKR_WH+.72,pt=.3,uw=1.6,ring=(k,x0,x1,y0,y1,b,t,w)=>{bx(k+'s',x0,x1,y1-w,y1,b,t,'cren',{uw});bx(k+'n',x0,x1,y0,y0+w,b,t,'cren',{uw});bx(k+'w',x0,x0+w,y0,y1,b,t,'cren',{uw});bx(k+'e',x1-w,x1,y0,y1,b,t,'cren',{uw})};
+  ring('p',X0,X1,Y0,Y1,zb,zt,pt);
+  const tw=1.1,th=TKR_WH+2.5;   // the four corner turrets
+  [[X0,Y0],[X1-tw,Y0],[X0,Y1-tw],[X1-tw,Y1-tw]].forEach((c,i)=>{bx('t'+i,c[0],c[0]+tw,c[1],c[1]+tw,zb,th,'tower',{tn:[tn[0]*1.04,tn[1]*1.04,tn[2]*1.04]});
+    const hw=tw/2+.03,cx=c[0]+tw/2,cy=c[1]+tw/2;objs.push({t:'pyr',hid:hi,id:id+'u'+i,X0:cx-hw,X1:cx+hw,Y0:cy-hw,Y1:cy+hw,cx,cy,hw,zb:th,zt:th+2.1,tex:'spire',tn})});
+  const kc=[(X0+X1)/2,(Y0+Y1)/2],kh=1.1,kt=TKR_WH+3.6;   // the keep, set back from the front, rising over the parapet
+  bx('k',kc[0]-kh,kc[0]+kh,kc[1]-kh,kc[1]+kh,zb,kt,'tower',{tn:[tn[0]*1.06,tn[1]*1.06,tn[2]*1.06]});
+  ring('q',kc[0]-kh-.06,kc[0]+kh+.06,kc[1]-kh-.06,kc[1]+kh+.06,kt-.04,kt+.7,.24)}
 function tkrShadeV(nx,ny){const d=nx*TKR_SUN[0]+ny*TKR_SUN[1];return clamp(.84+.4*d,.6,1.15)}   // an upright face (gable, chimney, tower): a softer step between light and shade
 function tkrShade(nx,ny,nz){const d=nx*TKR_SUN[0]+ny*TKR_SUN[1]+nz*TKR_SUN[2];return clamp(.8+.75*d,.45,1.35)}
 /* the solids, from the table and the map (a house whose squares are not all wall is left without a roof and reported) */
 function tkrBuild(){
-  const objs=[],rep=[],grid=G.grid,W=grid[0].length,H=grid.length;
-  TKR.houses.forEach((h,hi)=>{const [id,x0,x1,y0,y1,ax,R,slope,gable,chim,tint,dark]=h;
+  const objs=[],rep=[],grid=G.grid,W=grid[0].length,H=grid.length,S=TKR.sets[LEVEL];if(!S)return;
+  TKR.houses=S.houses;TKR_WH=S.wh==='ceil'?(G._cb!==undefined?G._cb:CEILH):S.wh;   // the wall height the roofs stand on
+  TKR.houses.forEach((h,hi)=>{const [id,x0,x1,y0,y1,ax,R,slope,gable,chim,tint,dark,opt]=h;
     for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(!(grid[y]&&grid[y][x]>0)){rep.push(id+' skipped: square '+x+','+y+' is not wall');return}
     const X0=x0,X1=x1+1,Y0=y0,Y1=y1+1,c=ax==='y'?(X0+X1)/2:(Y0+Y1)/2,half=ax==='y'?(X1-X0)/2:(Y1-Y0)/2,len=ax==='y'?Y1-Y0:X1-X0;
     const tn=[tint[0]*dark,tint[1]*dark,tint[2]*dark];
+    if(opt&&opt.castle){tkrCastle(objs,hi,id,X0,X1,Y0,Y1,tn);rep.push(id+' | walls x '+X0+'-'+X1+' y '+Y0+'-'+Y1+' | castle top');return}
     objs.push({t:'house',hid:hi,id,X0,X1,Y0,Y1,ax,c,half,len,R,slope:'slope_'+slope,gable:'gable_'+gable,tn,su:TKR.SLOPEU[slope]||1.3,
       ns:tkrShade(0,0,1),nA:ax==='y'?[tkrShade(R/half,0,1),tkrShade(-R/half,0,1)]:[tkrShade(0,R/half,1),tkrShade(0,-R/half,1)]});
     // the ridge cap: a row of ridge tiles standing a little proud of the ridge, so the top of the roof has a clean edge against the sky
@@ -81986,8 +82023,8 @@ function tkrBuild(){
         bx0=ax==='y'?cs-cw/2:ca-cd/2,bx1=ax==='y'?cs+cw/2:ca+cd/2,by0=ax==='y'?ca-cd/2:cs-cw/2,by1=ax==='y'?ca+cd/2:cs+cw/2,
         zb=TKR_WH+TKR_TAU+R*(1-(Math.abs(us)*half+cw/2)/half)-.05;
       objs.push({t:'box',hid:hi,id:id+'c',X0:bx0,X1:bx1,Y0:by0,Y1:by1,zb,zt:top,tex:'chim_'+kind,ho:objs[objs.length-2],tn:[tn[0]*.95,tn[1]*.95,tn[2]*.95]})}
-    if(id==='ch'){ // the chapel: a square stone bell tower standing through the roof at the street end, with its slate spire and iron cross
-      const tc=(X0+X1)/2,ty=Y1-.95,hw=.62,zt=TKR_WH+TKR_TAU+R+.95,zs=zt+2.5;
+    if(id==='ch'||(opt&&opt.chapel)){ // the chapel: a square stone bell tower standing through the roof at the street end, with its slate spire and iron cross
+      const o2=opt||{},tc=o2.tx!==undefined?o2.tx:(X0+X1)/2,ty=o2.north?Y0+.95:Y1-.95,hw=.62,zt=TKR_WH+TKR_TAU+R+(o2.th||.95),zs=zt+(o2.sh||2.5);
       objs.push({t:'box',hid:hi,id:'cht',X0:tc-hw,X1:tc+hw,Y0:ty-hw,Y1:ty+hw,zb:TKR_WH+TKR_TAU+R*.3,zt,tex:'tower',tn:[tn[0]*1.05,tn[1]*1.05,tn[2]*1.05]});
       objs.push({t:'pyr',hid:hi,id:'chs',X0:tc-hw-.03,X1:tc+hw+.03,Y0:ty-hw-.03,Y1:ty+hw+.03,cx:tc,cy:ty,hw:hw+.03,zb:zt,zt:zs,tex:'spire',tn});
       const xw=.36,xh=xw*(TKR.tex.spirex?TKR.tex.spirex.h/TKR.tex.spirex.w:.35);
@@ -81996,7 +82033,7 @@ function tkrBuild(){
   for(const o of objs){o.zmax=o.t==='house'?TKR_WH+TKR_TAU+o.R:o.zt;if(o.t==='card'){o.X0=Math.min(o.ax0,o.ax1);o.X1=Math.max(o.ax0,o.ax1);o.Y0=Math.min(o.ay0,o.ay1);o.Y1=Math.max(o.ay0,o.ay1)}}
   // which house each wall square belongs to (for the eave line and the shadow on the wall under it)
   const near=new Int16Array(W*H).fill(-1);TKR.houses.forEach((h,hi)=>{if(!objs.some(o=>o.hid===hi))return;for(let y=h[3];y<=h[4];y++)for(let x=h[1];x<=h[2];x++)near[y*W+x]=hi});
-  TKR.objs=objs;TKR.near=near;TKR.W=W;TKR.H=H;LEVELS[3]._tkrRep=rep;
+  TKR.objs=objs;TKR.near=near;TKR.W=W;TKR.H=H;LEVELS[LEVEL]._tkrRep=rep;
 }
 /* the screen buffer: as many columns as the wall picture (one ray per wall column, the same rays as the walls) and twice its rows (the height of the screen canvas) */
 const HB={fas:0,bt:0,bo:null,bu:0,bv:0,bT:null,bsh:1,bW:1};
@@ -82011,7 +82048,7 @@ function tkrSlab(ox,oy,rX,rY,o){let t0=-1e9,t1=1e9,ea=0;
   if(t0>t1||t1<=0)return false;TKR_SL[0]=t0;TKR_SL[1]=t1;TKR_SL[2]=ea;return true}
 /* the render pass (render3D, before the 3D picture is put on screen) */
 function TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB){
-  TKR3D.has=false;if(LEVEL!==3||!TKR3D.on)return;
+  TKR3D.has=false;if(!TKR.sets[LEVEL]||!TKR3D.on)return;
   if(!TKR.ready){tkrLoad();return}
   if(!TKR.objs||TKR.grid!==G.grid){TKR.grid=G.grid;tkrBuild()}
   const RW=TKR3D.RW,RH=TKR3D.RH;
@@ -82114,7 +82151,7 @@ function TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB){
   if(any){const a0=Math.min(Y0,TKR3D.cy0),a1=Math.max(Y1,TKR3D.cy1);TKR3D.cx.putImageData(TKR3D.img,0,0,0,a0,RW,a1-a0+1);TKR3D.cy0=Y0;TKR3D.cy1=Y1}   // the rows that changed: this frame's roofs and last frame's, now clear
 }
 /* drawWorld: the roof picture onto the screen, after the walls and before the sprites */
-function TKR3D_B(c){if(LEVEL!==3||!TKR3D.has)return;c.save();c.imageSmoothingEnabled=false;c.drawImage(TKR3D.can,0,0,VW,VH);c.restore()}
+function TKR3D_B(c){if(!TKR.sets[LEVEL]||!TKR3D.has)return;c.save();c.imageSmoothingEnabled=false;c.drawImage(TKR3D.can,0,0,VW,VH);c.restore()}
 /* for the tests: per wall column, the lowest and highest roof pixel drawn (in wall-picture pixels) and the wall top before the roofs lowered it */
 TKR3D.cols=function(){const o=[];for(let x=0;x<VW;x++){const SX=TKR3D.RW/VW,b=TKR3D.bot[x*SX],t=TKR3D.top[x*SX];   // the first column of the pair: its ray is exactly the wall pass's ray of column x
   o.push(TKR3D.has&&b>-1e8?{bot:b/2,top:t/2,wt:TKR3D.wt0[x]}:{bot:null,wt:TKR3D.wt0[x]})}return o};
