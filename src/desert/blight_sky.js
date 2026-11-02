@@ -315,12 +315,13 @@ function bksRain(R,t,f,rd){
   // no puddles and no line of water: only splashes. Each splash is a small rain ring at a real spot on the ground (a place in the world, near the party), projected every
   // frame the way the walls are, so when the party walks it comes toward the party and slides down and out of the picture with the ground (a splash fixed to the screen
   // would stay put while the ground moves). It flashes for under a second and the next one is somewhere else.
-  {const C=G.C,LA=C.a+(typeof LKYAW==='number'?LKYAW:0),TW=Math.PI*2,FE=F*EYE,bx=Math.floor(C.x),by=Math.floor(C.y),m2=Math.round(16*(.4+.6*R));
+  {const C=G.C,LA=C.a+(typeof LKYAW==='number'?LKYAW:0),TW=Math.PI*2,FE=F*EYE,bx=Math.floor(C.x),by=Math.floor(C.y),QA=Math.round(LA/(Math.PI/2))*Math.PI/2,m2=Math.min(P.rx.length,Math.round(48*(.4+.6*R)));   // QA: the way the party faces (north, south, east or west)
    for(i=0;i<m2;i++){const per=.5+P.rp[i]*.5,ph=t/per+P.rt[i]*7;cyc=Math.floor(ph);const u=ph-cyc;if(u>.97)continue;
-     const wx=bx+.5+(((P.rx[i]+cyc*.618)%1)-.5)*18,wy=by+.5+(((P.ry[i]+cyc*.382)%1)-.5)*18,dx=wx-C.x,dy=wy-C.y,d=((Math.atan2(dy,dx)-LA)%TW+Math.PI*3)%TW-Math.PI;
-     if(Math.abs(d)>1.05)continue;const z=Math.hypot(dx,dy)*Math.cos(d);if(z<.9||z>9)continue;
+     const h1=(P.rx[i]*3.7+cyc*.618)%1,h2=(P.ry[i]*2.3+cyc*.382)%1,rr=1.2+Math.pow(h2,1.5)*7,an=QA+(h1-.5)*1.8,   // in front of the party, most of them close
+       wx=bx+.5+Math.cos(an)*rr,wy=by+.5+Math.sin(an)*rr,dx=wx-C.x,dy=wy-C.y,d=((Math.atan2(dy,dx)-LA)%TW+Math.PI*3)%TW-Math.PI;
+     if(Math.abs(d)>.72)continue;const z=Math.hypot(dx,dy)*Math.cos(d);if(z<1.3||z>9)continue;
      const sx=210*(1+Math.tan(d)/PL),y=hh+FE/z;if(y>208||y<hh+2)continue;
-     const k=(u*8)|0,sc=Math.max(.3,Math.min(1.25,1.5/z))*(.85+((P.rt[i]*13+cyc*.37)%1)*.3);
+     const k=(u*8)|0,sc=Math.max(.3,Math.min(1.8,2.3/z))*(.85+((P.rt[i]*13+cyc*.37)%1)*.3);   // big close to the party, small far away
      ctx.globalAlpha=Math.min(1,ra*.55);ctx.drawImage(S.ring,k*26,0,26,14,sx-13*sc,y-10*sc,26*sc,14*sc)}}
   ctx.globalAlpha=1}
 
