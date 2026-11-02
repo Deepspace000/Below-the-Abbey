@@ -66,7 +66,7 @@ function tkrLoad(){
   if(TKR.loading)return TKR.loading;const J=[];
   for(const n of ['slate','shingle','thatch','tile'])J.push(tkrLoadImg('slope_'+n,'assets/tkr/slope_'+n+'.webp'));
   for(const n of ['timber','stone','boards','ochre'])J.push(tkrLoadImg('gable_'+n,'assets/tkr/gable_'+n+'.webp'));
-  for(const n of ['chim_brick','chim_stone','tower','spire','spirex'])J.push(tkrLoadImg(n,'assets/tkr/'+n+'.webp'));
+  for(const n of ['chim_brick','chim_stone','tower','spire','spirex','lh_wall','lh_lamp','lh_dome'])J.push(tkrLoadImg(n,'assets/tkr/'+n+'.webp'));
   return TKR.loading=Promise.all(J).then(()=>{tkrMakeCren();TKR.ready=true});
 }
 let TKR_WH=1.55,TKR_GROUND=false;const TKR_TAU=.17,TKR_SUN=(()=>{const v=[-.45,.55,.72],n=Math.hypot(...v);return v.map(a=>a/n)})();
@@ -115,8 +115,9 @@ function tkrBuild(){
       const xw=.36,xh=xw*(TKR.tex.spirex?TKR.tex.spirex.h/TKR.tex.spirex.w:.35);
       objs.push({t:'card',hid:hi,id:'chx1',ax0:tc-xw/2,ay0:ty,ax1:tc+xw/2,ay1:ty,zb:zs-.04,zt:zs-.04+xh,tex:'spirex',tn},{t:'card',hid:hi,id:'chx2',ax0:tc,ay0:ty-xw/2,ax1:tc,ay1:ty+xw/2,zb:zs-.04,zt:zs-.04+xh,tex:'spirex',tn})}
     rep.push(id+' | walls x '+X0+'-'+X1+' y '+Y0+'-'+Y1+' | roof x '+X0+'-'+X1+' y '+Y0+'-'+Y1+' (no overhang) | ridge '+ax+' +'+R)});
+  if(S.extra)S.extra(objs,(x,y)=>TKR_GROUND?terrH(x,y):0);   // round solids of a level (Yarrim's lighthouse): cylinders and domes, standing free of the wall grid
   TKR.gzOf=TKR.houses.map(h=>TKR_GROUND?terrH((h[1]+h[2]+1)/2,(h[3]+h[4]+1)/2):0);   // the ground the house stands on (uneven ground: Yarrim; flat levels: 0)
-  for(const o of objs){o.gz=TKR.gzOf[o.hid];o.zmax=o.t==='house'?o.wh+TKR_TAU+o.R:o.zt;if(o.t==='card'){o.X0=Math.min(o.ax0,o.ax1);o.X1=Math.max(o.ax0,o.ax1);o.Y0=Math.min(o.ay0,o.ay1);o.Y1=Math.max(o.ay0,o.ay1)}}
+  for(const o of objs){if(o.gz===undefined)o.gz=TKR.gzOf[o.hid];o.zmax=o.t==='house'?o.wh+TKR_TAU+o.R:o.zt;if(o.t==='card'){o.X0=Math.min(o.ax0,o.ax1);o.X1=Math.max(o.ax0,o.ax1);o.Y0=Math.min(o.ay0,o.ay1);o.Y1=Math.max(o.ay0,o.ay1)}}
   // which house each wall square belongs to (for the eave line and the shadow on the wall under it)
   const near=new Int16Array(W*H).fill(-1);TKR.houses.forEach((h,hi)=>{if(!objs.some(o=>o.hid===hi))return;for(let y=h[3];y<=h[4];y++)for(let x=h[1];x<=h[2];x++)near[y*W+x]=hi});
   TKR.whOf=TKR.houses.map(h=>(h[12]&&h[12].wh)||TKR_WH);TKR.objs=objs;TKR.near=near;TKR.W=W;TKR.H=H;LEVELS[LEVEL]._tkrRep=rep;
@@ -149,23 +150,22 @@ function TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB){
     // the nearest wall in this column (the same grid walk as the wall pass)
     let mx=Math.floor(cx),my=Math.floor(cy);const ddx=Math.abs(1/rX),ddy=Math.abs(1/rY);let stx,sty,sdx,sdy,side=0,g=0,gd=0;
     if(rX<0){stx=-1;sdx=(cx-mx)*ddx}else{stx=1;sdx=(mx+1-cx)*ddx}if(rY<0){sty=-1;sdy=(cy-my)*ddy}else{sty=1;sdy=(my+1-cy)*ddy}
-    while(gd++<90){if(sdx<sdy){sdx+=ddx;mx+=stx;side=0}else{sdy+=ddy;my+=sty;side=1}if(mx<0||my<0||mx>=MW||my>=MH){g=1;break}g=grid[my][mx];if(g>0)break}
+    while(gd++<90){if(sdx<sdy){sdx+=ddx;mx+=stx;side=0}else{sdy+=ddy;my+=sty;side=1}if(mx<0||my<0||mx>=MW||my>=MH){g=1;break}g=grid[my][mx];if(g>0&&!LOWW.has(g))break}
     let zs=side===0?sdx-ddx:sdy-ddy;if(zs<.05)zs=.05;
     const inner=mx>0&&my>0&&mx<MW-1&&my<MH-1,ti=g>=100?T_TILE[g]:-1,nh=inner?near[my*MW+mx]:-1,wh=(ti>=0&&TEX[ti]&&TEX[ti].wh)||(nh>=0?TKR.whOf[nh]:inner?TKR_WH:CEILH);   // (a door square has no tile height of its own: the house's)
     const ylim=HHh-(wh-(TR?CAMZ-terrH(cx+rX*zs,cy+rY*zs):EYE))*Fh/zs;   // (on uneven ground the wall pass stands each wall on the ground under it: Yarrim)
-    if(ylim<=0)continue;
     // the solids this ray passes through, behind the nearest wall or at it
-    cand.length=0;ct.length=0;cea.length=0;ct1.length=0;let ytop=1e9;
-    for(let i=0;i<objs.length;i++){const o=objs[i];if(!tkrSlab(cx,cy,rX,rY,o))continue;const t0=TKR_SL[0];if(t0<zs-.02||t0<.06)continue;
+    cand.length=0;ct.length=0;cea.length=0;ct1.length=0;let ytop=1e9,hasFront=false;
+    for(let i=0;i<objs.length;i++){const o=objs[i];if(!tkrSlab(cx,cy,rX,rY,o))continue;const t0=TKR_SL[0];if((t0<zs-.02&&!o.front)||t0<.06)continue;if(o.front&&t0<zs-.02)hasFront=true;
       const yo=HHh-(o.zmax-(CAMZ-o.gz))*Fh/t0;if(yo<ytop)ytop=yo;let k=cand.length;cand.push(o);ct.push(t0);ct1.push(TKR_SL[1]);cea.push(TKR_SL[2]);
       while(k>0&&ct[k-1]>ct[k]){[cand[k-1],cand[k]]=[cand[k],cand[k-1]];[ct[k-1],ct[k]]=[ct[k],ct[k-1]];[ct1[k-1],ct1[k]]=[ct1[k],ct1[k-1]];[cea[k-1],cea[k]]=[cea[k],cea[k-1]];k--}}
     // per house, what does not change from row to row: the roof height where the ray enters, at the ridge line and where it leaves
     for(let ci=0;ci<cand.length;ci++){const o=cand[ci];if(o.t!=='house')continue;const t0=ct[ci],t1=ct1[ci],sO=o.ax==='y'?cx:cy,sD=o.ax==='y'?rX:rY,Hs=t=>o.wh+TKR_TAU+o.R*(1-Math.abs(sO+sD*t-o.c)/o.half);
       const tc=Math.abs(sD)>1e-9?(o.c-sO)/sD:-1;cP[ci*5]=Hs(t0);cP[ci*5+1]=tc;cP[ci*5+2]=tc>t0&&tc<t1?Hs(tc):0;cP[ci*5+3]=Hs(t1);cP[ci*5+4]=tc>t0&&tc<t1?1:0}
-    if(!cand.length)continue;
-    const r0=Math.max(0,Math.floor(ytop)),r1=Math.min(RH-1,Math.ceil(ylim-.5)-1);
+    if(!cand.length||(ylim<=0&&!hasFront))continue;
+    const r0=Math.max(0,Math.floor(ytop)),r1=hasFront?RH-1:Math.min(RH-1,Math.ceil(ylim-.5)-1);   // a free-standing round solid in front of the nearest wall is painted down to its foot
     let lastOwn=-1,lastRow=-1,lastGab=false;
-    let sky=true,sky0=-9;
+    let sky=true,sky0=-9,fMin=1e9;
     const hit=k=>{HB.fas=0;let bt=1e9,bo=null,bu=0,bv=0,bT=null,bsh=1,bW=1;
       for(let ci=0;ci<cand.length;ci++){const o=cand[ci],t0=ct[ci],t1=ct1[ci];if(t0>=bt)break;const z0=(CAMZ-o.gz)+k*t0;if(k>0&&z0>o.zmax)continue;   // the ray only climbs from here: it passes over this one
         if(o.t==='house'){
@@ -190,6 +190,15 @@ function TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB){
             const nx=ex?(rX>0?-1:1):0,ny=ex?0:(rY>0?-1:1),w=ex?o.Y1-o.Y0:o.X1-o.X0;let u=ex?(py-o.Y0)/w:(px-o.X0)/w;if(ex?rX<0:rY>0)u=1-u;if(o.uw){u=(ex?py:px)/o.uw;u-=Math.floor(u)}   // the picture reads left to right for whoever looks at that face
             let v=(o.zt-z0)/(o.zt-o.zb);if(o.vr)v=o.vr[0]+v*(o.vr[1]-o.vr[0]);const i4=tkrSample(T,u,v,tkrLod(T,w,t0)),L=T.lv[Math.min(T.lv.length-1,tkrLod(T,w,t0))].d;
             if(L[i4+3]<128)continue;bt=t0;bo=o;bT=T;bu=u;bv=v;bW=o.uw||w;bsh=tkrShadeV(nx,ny)*(o.cap?1.15:1)}
+        }else if(o.t==='cyl'||o.t==='dome'){ // round solids: a cylinder (wall picture wrapped round it) and a dome (a half ellipsoid, plates from the apex down)
+          const EZ=(CAMZ-o.gz),ox=cx-o.cx,oy=cy-o.cy,r=o.r;let th=-1,nx=0,ny=0,nz=0,u=0,v=0,wd=1;
+          if(o.t==='cyl'){const a=rX*rX+rY*rY,b=2*(ox*rX+oy*rY),c=ox*ox+oy*oy-r*r,d=b*b-4*a*c;if(d<=0)continue;const tt=(-b-Math.sqrt(d))/(2*a);
+            const z=EZ+k*tt;if(tt<=.06||z<o.zb||z>o.zt)continue;th=tt;const px=ox+rX*tt,py=oy+rY*tt;nx=px/r;ny=py/r;
+            u=(Math.atan2(py,px)/(2*Math.PI)*o.rep+1000)%1;v=1-(((z-(o.vb!==undefined?o.vb:o.zb))/o.vh)%1);wd=2*Math.PI*r/o.rep}
+          else{const h=o.zt-o.zb,sc=r/h,zc=(EZ-o.zb)*sc,ks=k*sc,a=rX*rX+rY*rY+ks*ks,b=2*(ox*rX+oy*rY+zc*ks),c=ox*ox+oy*oy+zc*zc-r*r,d=b*b-4*a*c;if(d<=0)continue;const tt=(-b-Math.sqrt(d))/(2*a);
+            const zz=zc+ks*tt;if(tt<=.06||zz<0)continue;th=tt;const px=ox+rX*tt,py=oy+rY*tt;nx=px/r;ny=py/r;nz=zz/r;
+            u=(Math.atan2(py,px)/(2*Math.PI)*o.rep+1000)%1;v=Math.min(.999,Math.acos(Math.min(1,nz))/(Math.PI/2));wd=2*Math.PI*r/o.rep;nz=nz*.9+.1}
+          if(th>=bt)continue;const T=TX[o.tex];if(!T)continue;bt=th;bo=o;bT=T;bu=u;bv=v;bW=wd;bsh=o.t==='dome'?tkrShade(nx,ny,nz):tkrShadeV(nx,ny);if(o.front&&th<fMin)fMin=th;
         }else if(o.t==='pyr'){
           if(z0<=o.zb)continue;const ox=cx-o.cx,oy=cy-o.cy,bp=[t0,t1];
           const add=t=>{if(t>t0&&t<t1)bp.push(t)};if(Math.abs(rX)>1e-9)add(-ox/rX);if(Math.abs(rY)>1e-9)add(-oy/rY);if(Math.abs(rX-rY)>1e-9)add(-(ox-oy)/(rX-rY));if(Math.abs(rX+rY)>1e-9)add(-(ox+oy)/(rX+rY));bp.sort((a,b)=>a-b);
@@ -222,6 +231,7 @@ function TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB){
       B[o4]=q0*g2*tb[0]*tn[0]+hzr[0]*hk;B[o4+1]=q1*g2*tb[1]*tn[1]+hzr[1]*hk;B[o4+2]=q2*g2*tb[2]*tn[2]+hzr[2]*hk;B[o4+3]=cov;OWN[r*RW+s]=bo.hid;
       if(r<TKR3D.top[s])TKR3D.top[s]=r;if(r>TKR3D.bot[s])TKR3D.bot[s]=r+1;if(r<Y0)Y0=r;if(r>Y1)Y1=r;lastOwn=bo.hid;lastRow=r;lastGab=bo.t==='house'&&bT===TX[bo.gable]&&!fas;any=true;
     }
+    if(fMin<1e8){const xc=s>>1;if(fMin<zbuf[xc])zbuf[xc]=fMin}   // a round solid in front: the sprites behind it stay hidden
     // the eave line and the soft shadow on the wall top under it, where this column's nearest wall carries the roof just painted above it
     // (a gable end is the wall carried up: no line there, only one row of its own colour so no sky shows through at the joint)
     if(nh>=0&&lastOwn===nh&&lastRow>=r1-1){const o4=(lastRow*RW+s)*4;

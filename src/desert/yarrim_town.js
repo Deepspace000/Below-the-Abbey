@@ -184,11 +184,16 @@ function yarBuild(){
   }
   // the lighthouse: a squat stone tower on the point, with a brazier burning at its door
   const LH=P.light,lhWh=2.5,lhPlain=ch(TM.plain(5,lhWh));
-  for(let y=LH.y0;y<=LH.y1;y++)for(let x=LH.x0;x<=LH.x1;x++){rows[y][x]=lhPlain;block[y*W+x]=1;fm[y*W+x]='0'}
-  {const hz={x0:LH.x0,x1:LH.x1,y0:LH.y0,y1:LH.y1,door:LH.door,front:LH.front,face:'W',wh:lhWh,w:3,d:3,sp:{id:'light'}};P.lighthouse=hz;specialDoors[8]=hz;rows[LH.door[1]][LH.door[0]]='8';block[LH.door[1]*W+LH.door[0]]=0;
-    for(let y=LH.y0;y<=LH.y1;y++)for(let x=LH.x0;x<=LH.x1;x++){const i=y*W+x;h[i]=Math.max(h[i],.5)}
+  // from 3.781 the lighthouse is a round painted tower (yarrim_roofs.js): the nine squares are open to the eye and walked round by hidden blocking decor, except the door square,
+  // which stays a low wall with the door on it (a door plate set against the round wall). Without the round solids the old square stone walls are used.
+  const lhRound=!!(typeof TKR!=='undefined'&&TKR.sets[YR.ID]&&TKR.sets[YR.ID].extra),lhCells=[],lowG=lhRound?TM.plain(5,.03):0,lowW=lhRound?ch(lowG):null;if(lowG)LOWW.add(lowG);
+  // (the squares beside the door are low flat walls, nearly invisible: the game keeps the squares next to a door clear of blocking decor)
+  for(let y=LH.y0;y<=LH.y1;y++)for(let x=LH.x0;x<=LH.x1;x++){const nextDoor=Math.abs(x-LH.door[0])+Math.abs(y-LH.door[1])===1;
+    if(lhRound&&!nextDoor){rows[y][x]='.';block[y*W+x]=0;lhCells.push([x,y])}else if(lhRound){rows[y][x]=lowW;block[y*W+x]=1}else{rows[y][x]=lhPlain;block[y*W+x]=1}fm[y*W+x]=lhRound?'5':'0'}
+  {const hz={x0:LH.x0,x1:LH.x1,y0:LH.y0,y1:LH.y1,door:LH.door,front:LH.front,face:'W',wh:lhRound?2.3:lhWh,w:3,d:3,sp:{id:'light'}};/* the door slab is as high as the round base, so it stands flush with it */P.lighthouse=hz;specialDoors[8]=hz;rows[LH.door[1]][LH.door[0]]='8';block[LH.door[1]*W+LH.door[0]]=0;
+    if(!lhRound)for(let y=LH.y0;y<=LH.y1;y++)for(let x=LH.x0;x<=LH.x1;x++){const i=y*W+x;h[i]=Math.max(h[i],.5)}   // (the old square tower stood on a raised square; the round one stands on the land as it is)
     for(let y=LH.y0-2;y<=LH.y1+2;y++)for(let x=LH.x0-3;x<=LH.x1+2;x++){const i=y*W+x;if(!block[i]||(x>=LH.x0&&x<=LH.x1&&y>=LH.y0&&y<=LH.y1))continue;block[i]=0}}
-  roofs.push({x:(LH.x0+LH.x1+1)/2,y:(LH.y0+LH.y1+1)/2,k:'yar_roof4',w:3.9,z:lhWh-.03});
+  if(!lhRound)roofs.push({x:(LH.x0+LH.x1+1)/2,y:(LH.y0+LH.y1+1)/2,k:'yar_roof4',w:3.9,z:lhWh-.03});
   // ---- decor, scenery, items ----
   const decor=[],scenery=[],items=[];
   const used=new Set();
@@ -199,6 +204,7 @@ function yarBuild(){
   const walk=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true},o||{}))};
   const near=(x,y,rad,off)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(free(x+dx,y+dy)&&!(off&&P.street[(y+dy)*W+x+dx]))return [x+dx,y+dy]}return null};   // off: keep clear of the little roads
   YR.near=near;YR.free=free;
+  for(const [x,y] of lhCells){if(x===LH.door[0]&&y===LH.door[1])continue;used.add(x+','+y);decor.push({k:'yar_bucket0',x,y,block:true,walk:false,hidden:true,deco:true})}   // the round tower's footprint: seen through, not walked through
   // moored boats and the boats pulled up for mending
   const boats=[['yar_boat_fish',64,35],['yar_boat_fish',67,46],['yar_boat_fish',73,34],['yar_boat_dhow',71,44],['yar_boat_dhow',78,35],['yar_boat_row',62,37],['yar_boat_row',63,44],['yar_boat_row',75,46],['yar_boat_row',80,43],['yar_boat_row',82,34],['yar_boat_row',91,46],['yar_boat_fish',72,28],['yar_boat_dhow',68,52],['yar_boat_row',70,22],['yar_boat_fish',66,60]];
   YR.boats=boats;
@@ -314,6 +320,7 @@ function yarBuild(){
     const hz=specialDoors[q.p],wh=hz?hz.wh:1.5;
     const name=TM.portalDoor(q.door,wh);
     lv.portals[q.p]={to:YR.FIRST+q.p-1,x:q.start[0],y:q.start[1],f:0,tex:name};
+    if(q.p===8&&typeof yarLhDoorFit==='function'){YR.lhDoorTex=T_DOORS[name];yarLhDoorFit()}   // the lighthouse door is set into the tower's own stone
   }
   // each plain cottage has a door that opens, on a humble room of its own
   for(const c of cots){
