@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.770';
+const VERSION='3.771';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2697,7 +2697,7 @@ function render3D(){
     const tv=(g===1||g===2)?torchAt.get((my*MW+mx)*4+face):0;
     if(tv&&LEVEL===31&&T_TORCH_GOLD!==undefined){ti=T_TORCH_GOLD+((fr+((mx*7+my*3)&3)*2)&7)}else if(tv){const ph=((mx*7+my*3)&3);ti=(g===1?(tv===2?T_TORCH_STONE_R:T_TORCH_STONE):(tv===2?T_TORCH_BRICK_R:T_TORCH_BRICK))+((fr+ph*2)&7)}
     if(LEVEL===22&&g===1&&T_SKY[0]!==undefined)tx=(tx+((t*5)|0))&(TS-1); // the sky drifts past
-    const wh=TEX[ti].wh||(LEVEL===3&&mx>0&&my>0&&mx<MW-1&&my<MH-1?1.55:CEILH); // Thornwick's houses are one storey under the high sky; the forest round it stays tall
+    const wh=TEX[ti].wh||(LEVEL===3&&mx>0&&my>0&&mx<MW-1&&my<MH-1?1.55:LEVEL===13&&mx>0&&my>0&&mx<MW-1&&my<MH-1?2.0:CEILH); // Thornwick's houses are one storey under the high sky (Ironhill's, a little higher, 2.0: TKR.sets[13].wh); the forest round them stays tall
     const skyW=(LEVEL===22&&g===1&&T_SKY[0]!==undefined)||(!!TEX[ti].sky&&!!SKYPAN),tileW=!skyW&&!TEX[ti].h&&wh>2&&(g>=100||g===1||g===2||g===6||(g>=9&&g<=14)||(g>=20&&g<=22)); // tall plain walls repeat their pattern instead of stretching
     const tex=TEX[ti],te=tex.e,wlv=fastW&&perp>4?Math.min(4,Math.floor(Math.log2(TS*perp/F*.7))):0,td=wlv>0&&tex.d&&tex.d.length===TS*TS*4?wallMip(tex,wlv):tex.d; // far facades are read from blurred copies
     const TWt=tex.tw||TS;if(TWt!==TS){tx=(wx*TWt)|0;if((side===0&&rX>0)||(side===1&&rY<0))tx=TWt-1-tx} // opt-in wider pictures (tex.tw, only the painted walls of the Hall of Illusions): more texels across one square
@@ -81929,8 +81929,8 @@ function bnPost(n){if(self.EP_OFF||self.BN_OFF)return;const L=LEVELS[n];if(!L)re
      spire; code only picks the piece and the place in it, and shades it (the slope turned to the light is lighter, the far roofs fade into the haze like the walls);
    - under each roof a dark eave line and a short soft shadow lie on the top of the wall (only where the roof is above it);
    - no roof reaches past its walls (no overhang: the squares beside the houses are all walkable), and the houses a party buys (housing.js) keep their own roofs.
-   IRONHILL (level 13, from 3.770) uses the same machinery: TKR.sets holds one house table per level and the wall height the roofs stand on ('ceil' = the level's own
-   wall height, 3.4 under the open sky: Ironhill's houses are much higher than Thornwick's 1.55). Its church has a tower, spire and cross (an option of its table row),
+   IRONHILL (level 13, from 3.770) uses the same machinery: TKR.sets holds one house table per level and the wall height the roofs stand on (Thornwick's houses are 1.55
+   high, Ironhill's 2.0; the number must match the wall pass in index.html, 'const wh='). Its church has a tower, spire and cross (an option of its table row),
    and the mayor's residence has a castle top instead of a pitched roof: a crenellated parapet (the painted tower stone with the gaps between the merlons cut out,
    tkrMakeCren), a pointed painted spire on each corner turret and a keep with its own crenellated top. No new painting was needed: the pieces are the Thornwick ones.
    TKR3D_B (called from drawWorld) lays the roof picture on the screen before the sprites, so people, lamps and trees in front of a house still stand in front
@@ -81956,7 +81956,7 @@ const TKR={ready:false,loading:null,
 /* the roof sets by level. A row is the Thornwick row plus an optional last field: {chapel:1,north:1,tx,th,sh} (tower and spire; north: the street is at the north end;
    tx: the tower's x; th, sh: how far the tower rises over the ridge and how tall the spire is) or {castle:1} (a castle top, no pitched roof) */
 TKR.sets={3:{wh:1.55,houses:TKR.houses},
-  13:{wh:'ceil',houses:[
+  13:{wh:2.0,houses:[
     ['a',12,15,10,12,'x',1.2,'slate','stone',[.7,.38,'stone'],[.95,.97,1.02],.9],
     ['b',34,37,10,12,'x',1.2,'shingle','boards',[.3,-.36,'stone'],[1,1,1],.92],
     ['c',12,14,14,16,'y',1.15,'shingle','stone',[.6,.38,'brick'],[1.02,.98,.94],.92],

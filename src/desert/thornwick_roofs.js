@@ -12,8 +12,8 @@
      spire; code only picks the piece and the place in it, and shades it (the slope turned to the light is lighter, the far roofs fade into the haze like the walls);
    - under each roof a dark eave line and a short soft shadow lie on the top of the wall (only where the roof is above it);
    - no roof reaches past its walls (no overhang: the squares beside the houses are all walkable), and the houses a party buys (housing.js) keep their own roofs.
-   IRONHILL (level 13, from 3.770) uses the same machinery: TKR.sets holds one house table per level and the wall height the roofs stand on ('ceil' = the level's own
-   wall height, 3.4 under the open sky: Ironhill's houses are much higher than Thornwick's 1.55). Its church has a tower, spire and cross (an option of its table row),
+   IRONHILL (level 13, from 3.770) uses the same machinery: TKR.sets holds one house table per level and the wall height the roofs stand on (Thornwick's houses are 1.55
+   high, Ironhill's 2.0; the number must match the wall pass in index.html, 'const wh='). Its church has a tower, spire and cross (an option of its table row),
    and the mayor's residence has a castle top instead of a pitched roof: a crenellated parapet (the painted tower stone with the gaps between the merlons cut out,
    tkrMakeCren), a pointed painted spire on each corner turret and a keep with its own crenellated top. No new painting was needed: the pieces are the Thornwick ones.
    TKR3D_B (called from drawWorld) lays the roof picture on the screen before the sprites, so people, lamps and trees in front of a house still stand in front
@@ -39,7 +39,7 @@ const TKR={ready:false,loading:null,
 /* the roof sets by level. A row is the Thornwick row plus an optional last field: {chapel:1,north:1,tx,th,sh} (tower and spire; north: the street is at the north end;
    tx: the tower's x; th, sh: how far the tower rises over the ridge and how tall the spire is) or {castle:1} (a castle top, no pitched roof) */
 TKR.sets={3:{wh:1.55,houses:TKR.houses},
-  13:{wh:'ceil',houses:[
+  13:{wh:2.0,houses:[
     ['a',12,15,10,12,'x',1.2,'slate','stone',[.7,.38,'stone'],[.95,.97,1.02],.9],
     ['b',34,37,10,12,'x',1.2,'shingle','boards',[.3,-.36,'stone'],[1,1,1],.92],
     ['c',12,14,14,16,'y',1.15,'shingle','stone',[.6,.38,'brick'],[1.02,.98,.94],.92],
