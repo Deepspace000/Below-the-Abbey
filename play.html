@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.801';
+const VERSION='3.802';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -16854,13 +16854,14 @@ for(const S of OHF_SUSP){
     if(qSt('oq0')===null)return say(`${S.name}. ${S.n===1?'Mind the scales, friend.':S.n===2?'The bells keep time. People do not.':S.n===3?'Fresh rolls, hot from the oven.':S.n===4?'A penny for a song, a joke or a juggle!':S.n===5?'I teach letters and numbers, and some manners.':'Peace be with you.'}`,[BYE]);
     if(st==='done')return say('Thank you again. It is a relief to have it said out loud.',[BYE]);
     if(qReady(S.q))return say(S.ready,[
-      ['Mercy.',()=>{OHF().mercy[S.n]=1;OHF().done[S.n]=1;const rw=rewardText(S.q);qTurnIn(S.q);ohfTake(S);msg('You show mercy.','#9fe0a0');return say(S.mercyR+' Reward: '+rw+'.',[BYE])}],
-      ['Justice.',()=>{OHF().mercy[S.n]=0;OHF().done[S.n]=1;G.gold+=150;const rw=rewardText(S.q);qTurnIn(S.q);ohfTake(S);msg('You choose justice. 150 gold in forfeit.','#e0b080');return say(S.justiceR+' Reward: '+rw+', and 150 gold in forfeit.',[BYE])}],
+      ['Mercy.',()=>{OHF().mercy[S.n]=1;OHF().done[S.n]=1;const rw=rewardText(S.q);qTurnIn(S.q);ohfTake(S);msg('You show mercy.','#9fe0a0');ohfSix();return say(S.mercyR+' Reward: '+rw+'.',[BYE])}],
+      ['Justice.',()=>{OHF().mercy[S.n]=0;OHF().done[S.n]=1;G.gold+=150;const rw=rewardText(S.q);qTurnIn(S.q);ohfTake(S);msg('You choose justice. 150 gold in forfeit.','#e0b080');ohfSix();return say(S.justiceR+' Reward: '+rw+', and 150 gold in forfeit.',[BYE])}],
       ['Let me think.',()=>null]]);
-    if(st==='active')return say(S.remind,[BYE]);
+    if(st==='active')return say(S.remind+` (You have ${qGoal(S.q)} of the ${QUESTS[S.q].need} things asked for.)`,[BYE]);   // the reminder says how far along the party is
     return say(S.meet,[['We will help.',()=>{qAccept(S.q);return say(S.accept,[BYE])}],['Not now.',()=>null]]);
   },{q:S.q});
 }
+const ohfSix=()=>{const n=Object.keys(OHF().done).length;msg(n>=6?'The Six Names: all six are heard. Tell Captain Aldwyn at the gate.':`The Six Names: ${n} of 6 heard.`,'#ffe9a0')};   // after each of the six is settled, the party is told how many are left
 const ohfTake=S=>S.ask.forEach(([id,c])=>{for(let i=0;i<c;i++){const j=G.bag.findIndex(b=>b.id===id);if(j>=0)bagTake(j)}}); // the things asked for are handed over
 const OH_FAIRFOLK=OHF_SUSP.map(S=>[S.npc,S.at[0],S.at[1]]);
 
