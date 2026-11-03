@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.799';
+const VERSION='3.800';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -21399,7 +21399,7 @@ const MANUAL_FILE='Below-the-Abbey-manual.pdf'; // the itch build empties this (
 const CR_PAGES=[   // three pages, one or two sections each ([text,1] a heading, [text,2] the closing line)
   [['MUSIC',1],
    ['Finding Mithral, Geoff Harvey (Pixabay)'],['Wanderer at Night, Zambolino (freetouse.com)'],['Embers on the Flagstone, Kaazoom (Pixabay)'],['RPG Medieval Animated Music, Andorios (Pixabay)'],
-   ['Forgotten Deserts, MoodMode (Pixabay)'],['Vibration of the Sand, Dream of a Holy City, Golden Key'],['   and the tomb music, by deepspace (Mirko Ruckels)'],
+   ['Forgotten Deserts, MoodMode (Pixabay)'],['Vibration of the Sand, Dream of a Holy City and Golden Key,'],['   by deepspace (Mirko Ruckels)'],['The tomb music (title and author not recorded)'],
    ['Dungeon music of the desert dungeons (title and author not recorded)'],['Dark Cavern Ambient (001), Paul Wortmann (OpenGameArt)'],['Searching, yd (OpenGameArt)'],['Paranoid Truth, Tsorthan Grove (OpenGameArt)'],
    ['The Old Tower Inn and Medieval Kings Feast, Snabisch (OpenGameArt)'],['Another August, cynicmusic, The Cynic Project (OpenGameArt)'],['Chant, christislord (OpenGameArt)']],
   [['DUNGEON AND NATURE SOUNDSCAPES',1],
