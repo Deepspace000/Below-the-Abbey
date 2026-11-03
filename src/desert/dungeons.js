@@ -169,7 +169,10 @@ Object.assign(ENEMY_DEF,{
 
 // the small desert dungeons play the Egyptian music, streamed: change this list to change the tracks.
 // options: music_sands_tomb (2:51), music_sands_forgotten (2:33), music_sands_holycity (8:11), music_sands_goldenkey (9:16), music_sands_vibration (13:03)
-const DNG_MUSIC=['music_dungeon1'];   // the old dungeon music (author not recorded) is the music of the small desert dungeons and the burrows, from 3.797 (it was music_sands_vibration, which still plays in the deserts above)
+// Each time one of these dungeons is entered the player starts at a random place in this list (streamTick): the old dungeon music (author not recorded), Vibration of the Sand,
+// and Dream of a Holy City, a third each; the rest follow in order. Only the desert dungeons and the burrows use this list (62 levels): dungeons and caves outside the deserts
+// have the three dungeon soundscapes of dngMusic in index.html and never the desert music.
+const DNG_MUSIC=['music_dungeon1','music_sands_vibration','music_sands_holycity'];
 (function dungeonMusic(){
   const lv=Object.keys(DNG_INFO).map(Number);for(let k=0;k<BURROW_N;k++)lv.push(BURROW_BASE+k);
   for(const n of lv){STREAM_LISTS[n]=DNG_MUSIC;const i=EMBERS_LEVELS.indexOf(n);if(i>=0)EMBERS_LEVELS.splice(i,1)}
