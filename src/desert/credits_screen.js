@@ -5,7 +5,7 @@
 const CR_PAGES=[   // three pages, one or two sections each ([text,1] a heading, [text,2] the closing line)
   [['MUSIC',1],
    ['Finding Mithral, Geoff Harvey (Pixabay)'],['Wanderer at Night, Zambolino (freetouse.com)'],['Embers on the Flagstone, Kaazoom (Pixabay)'],['RPG Medieval Animated Music, Andorios (Pixabay)'],
-   ['Forgotten Deserts, MoodMode (Pixabay)'],['Vibration of the Sand and Dream of a Holy City, Mirko Ruckels'],['Golden Key and the tomb music, from the Sword of the Sands project'],
+   ['Forgotten Deserts, MoodMode (Pixabay)'],['Vibration of the Sand, Dream of a Holy City, Golden Key'],['   and the tomb music, by deepspace (Mirko Ruckels)'],
    ['Dungeon music of the desert dungeons (title and author not recorded)'],['Dark Cavern Ambient (001), Paul Wortmann (OpenGameArt)'],['Searching, yd (OpenGameArt)'],['Paranoid Truth, Tsorthan Grove (OpenGameArt)'],
    ['The Old Tower Inn and Medieval Kings Feast, Snabisch (OpenGameArt)'],['Another August, cynicmusic, The Cynic Project (OpenGameArt)'],['Chant, christislord (OpenGameArt)']],
   [['DUNGEON AND NATURE SOUNDSCAPES',1],
