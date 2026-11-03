@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.796';
+const VERSION='3.797';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1194,7 +1194,7 @@ function nz(dur,vol,type,f0,f1,delay){
 }
 /* recorded sounds (CC0, see assets/audio/CREDITS.txt): area loops, music, footsteps, sword clashes, village noises */
 const SMP={};let SND_LOADING=false;
-const SNDLIST=['music_dungeon1','wind_loop','rain_loop','dungeon_ambience','village_ambience','music_tavern','music_feast','step_stone1','step_stone2','step_stone3','step_stone4','step_wood1','step_wood2','step_wood3','step_wood4','step_dirt1','step_dirt2','step_dirt3','step_dirt4','clash1','clash2','clash3','hit1','hit2','church_bell1','church_bell2','a_goat','a_sheep','a_chicken','a_cow','a_dog','cart_horse','horse_hooves'];
+const SNDLIST=['wind_loop','rain_loop','dungeon_ambience','village_ambience','music_tavern','music_feast','step_stone1','step_stone2','step_stone3','step_stone4','step_wood1','step_wood2','step_wood3','step_wood4','step_dirt1','step_dirt2','step_dirt3','step_dirt4','clash1','clash2','clash3','hit1','hit2','church_bell1','church_bell2','a_goat','a_sheep','a_chicken','a_cow','a_dog','cart_horse','horse_hooves'];
 function loadSounds(){
   if(SND_LOADING||!AC)return;SND_LOADING=true;
   for(const n of SNDLIST)fetch('assets/audio/'+n+'.mp3?v='+VERSION).then(r=>r.arrayBuffer()).then(b=>AC.decodeAudioData(b)).then(buf=>{SMP[n]=buf}).catch(()=>{});
@@ -9436,7 +9436,7 @@ Object.assign(ENEMY_DEF,{
 
 // the small desert dungeons play the Egyptian music, streamed: change this list to change the tracks.
 // options: music_sands_tomb (2:51), music_sands_forgotten (2:33), music_sands_holycity (8:11), music_sands_goldenkey (9:16), music_sands_vibration (13:03)
-const DNG_MUSIC=['music_sands_vibration'];
+const DNG_MUSIC=['music_dungeon1'];   // the old dungeon music (author not recorded) is the music of the small desert dungeons and the burrows, from 3.797 (it was music_sands_vibration, which still plays in the deserts above)
 (function dungeonMusic(){
   const lv=Object.keys(DNG_INFO).map(Number);for(let k=0;k<BURROW_N;k++)lv.push(BURROW_BASE+k);
   for(const n of lv){STREAM_LISTS[n]=DNG_MUSIC;const i=EMBERS_LEVELS.indexOf(n);if(i>=0)EMBERS_LEVELS.splice(i,1)}
@@ -21397,7 +21397,7 @@ const CR_PAGES=[   // three pages, one or two sections each ([text,1] a heading,
   [['MUSIC',1],
    ['Finding Mithral, Geoff Harvey (Pixabay)'],['Wanderer at Night, Zambolino (freetouse.com)'],['Embers on the Flagstone, Kaazoom (Pixabay)'],['RPG Medieval Animated Music, Andorios (Pixabay)'],
    ['Forgotten Deserts, MoodMode (Pixabay)'],['Vibration of the Sand, Dream of a Holy City and Golden Key,'],['   and the tomb music, from the Sword of the Sands project'],
-   ['Dark Cavern Ambient (001), Paul Wortmann (OpenGameArt)'],['Searching, yd (OpenGameArt)'],['Paranoid Truth, Tsorthan Grove (OpenGameArt)'],
+   ['Dungeon music of the desert dungeons (title and author not recorded)'],['Dark Cavern Ambient (001), Paul Wortmann (OpenGameArt)'],['Searching, yd (OpenGameArt)'],['Paranoid Truth, Tsorthan Grove (OpenGameArt)'],
    ['The Old Tower Inn and Medieval Kings Feast, Snabisch (OpenGameArt)'],['Another August, cynicmusic, The Cynic Project (OpenGameArt)'],['Chant, christislord (OpenGameArt)']],
   [['DUNGEON AND NATURE SOUNDSCAPES',1],
    ['Creepy Dungeon Ambience, drminky (Freesound)'],['Dungeon Ambiance, phlair (Freesound)'],['Dark Cave Background 2, solarphasing (Freesound)'],
