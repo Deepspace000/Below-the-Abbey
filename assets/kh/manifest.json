@@ -3571,85 +3571,85 @@
 },
 "ohgard1_0": {
 "file": "ohgard1_0.webp",
-"w": 525,
-"h": 479,
+"w": 562,
+"h": 435,
 "kind": "sprite",
 "sheet": "ohgard1"
 },
 "ohgard1_1": {
 "file": "ohgard1_1.webp",
-"w": 605,
-"h": 271,
+"w": 512,
+"h": 199,
 "kind": "sprite",
 "sheet": "ohgard1"
 },
 "ohgard1_2": {
 "file": "ohgard1_2.webp",
-"w": 452,
-"h": 535,
+"w": 369,
+"h": 462,
 "kind": "sprite",
 "sheet": "ohgard1"
 },
 "ohgard1_3": {
 "file": "ohgard1_3.webp",
-"w": 511,
-"h": 300,
+"w": 543,
+"h": 284,
 "kind": "sprite",
 "sheet": "ohgard1"
 },
 "ohgard2_0": {
 "file": "ohgard2_0.webp",
-"w": 588,
-"h": 456,
+"w": 520,
+"h": 307,
 "kind": "sprite",
 "sheet": "ohgard2"
 },
 "ohgard2_1": {
 "file": "ohgard2_1.webp",
-"w": 294,
-"h": 534,
+"w": 275,
+"h": 469,
 "kind": "sprite",
 "sheet": "ohgard2"
 },
 "ohgard2_2": {
 "file": "ohgard2_2.webp",
-"w": 618,
-"h": 497,
+"w": 513,
+"h": 408,
 "kind": "sprite",
 "sheet": "ohgard2"
 },
 "ohgard2_3": {
 "file": "ohgard2_3.webp",
-"w": 609,
-"h": 343,
+"w": 514,
+"h": 299,
 "kind": "sprite",
 "sheet": "ohgard2"
 },
 "ohgard1_4": {
 "file": "ohgard1_4.webp",
-"w": 212,
-"h": 488,
+"w": 179,
+"h": 477,
 "kind": "sprite",
 "sheet": "ohgard1"
 },
 "ohgard1_5": {
 "file": "ohgard1_5.webp",
-"w": 649,
-"h": 379,
+"w": 487,
+"h": 340,
 "kind": "sprite",
 "sheet": "ohgard1"
 },
 "ohgard2_4": {
 "file": "ohgard2_4.webp",
-"w": 500,
-"h": 421,
+"w": 429,
+"h": 366,
 "kind": "sprite",
 "sheet": "ohgard2"
 },
 "ohgard2_5": {
 "file": "ohgard2_5.webp",
-"w": 359,
-"h": 510,
+"w": 250,
+"h": 471,
 "kind": "sprite",
 "sheet": "ohgard2"
 },

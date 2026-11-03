@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.802';
+const VERSION='3.803';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -15904,7 +15904,7 @@ const OH_ART={
 function ohArt(){
   for(const k in OH_ART)for(const [n,h] of OH_ART[k]){if(IMG[n])NPC_H[n]=NPC_H[n]===undefined||k==='oak'||k==='orchard'||k==='willow'?h:NPC_H[n]}
   NPC_H.ltree0=3.6;NPC_H.ltree4=3.8;NPC_H.ltree8=3.4;NPC_H.ltree12=3.7;NPC_H.ltree19=3.2;NPC_H.ltree17=2.6;NPC_H.ltree18=2.7;
-  NPC_H.kh_city2_1=1.7;Object.assign(NPC_H,{kh_ohgard1_0:1.7,kh_ohgard1_1:.95,kh_ohgard1_2:2.3,kh_ohgard1_3:.62,kh_ohgard1_4:1.0,kh_ohgard1_5:.95,kh_ohgard2_0:1.15,kh_ohgard2_1:.95,kh_ohgard2_2:1.35,kh_ohgard2_3:.7,kh_ohgard2_4:.75});
+  NPC_H.kh_city2_1=1.7;Object.assign(NPC_H,{kh_ohgard1_0:1.44,kh_ohgard1_1:.82,kh_ohgard1_2:2.43,kh_ohgard1_3:.55,kh_ohgard1_4:1.16,kh_ohgard1_5:1.14,kh_ohgard2_0:.92,kh_ohgard2_1:.89,kh_ohgard2_2:1.34,kh_ohgard2_3:.72,kh_ohgard2_4:.76});
   IMG.oh_well=IMG.kh_city1_1;NPC_H.oh_well=1.5;IMG.oh_pergola=IMG.kh_city2_4;NPC_H.oh_pergola=2.4;IMG.oh_topiary=IMG.kh_city2_1;NPC_H.oh_topiary=1.7;NPC_H.kh_city2_4=2.4;NPC_H.kh_city2_5=.55;NPC_H.kh_city1_1=1.5;NPC_H.kh_city2_3=.9;NPC_H.lflora0=.55;NPC_H.lflora0_1=.55;NPC_H.lflora0_2=.55;NPC_H.lbush0=.8;NPC_H.lbush0_1=.8;
   for(let i=0;i<6;i++)NPC_H['kh_stall1_'+i]=1.5;for(const i of [0,1,3])NPC_H['kh_stall2_'+i]=.8;NPC_H.kh_stall2_2=.9;
   // the roofs: painted gables in several colours, some warmed up from the grey ones
