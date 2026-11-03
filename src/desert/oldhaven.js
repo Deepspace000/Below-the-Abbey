@@ -298,6 +298,7 @@ function ohBuild(){
   const walk=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true},o||{}))};
   const near=(x,y,rad)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(free(x+dx,y+dy))return [x+dx,y+dy]}return null};
   OH.near=near;OH.free=free;
+  const G0ok=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&!block[y*W+x];
   const person=(id,x,y,rad)=>{const kp=KH_KEEPERS[id];if(!kp)return null;const q=near(x,y,rad||3);if(!q)return null;walk(khFaceKey(kp.face),q[0],q[1],{npc:id,sc:kp.sc||1});return q};
   const pick=(arr,a,b,c)=>arr[(hs(a,b,c)*arr.length)|0];
   const P=k=>IMG['kh_'+k]?'kh_'+k:null,FOUNT=P('ohgard1_0')||'fountain',BENCH=P('ohgard1_3')||'yar_bench',ARBOUR=P('ohgard1_2'),HEDGE=P('ohgard1_1'),SUNDIAL=P('ohgard1_4'),FCART=P('ohgard1_5'),HIVES=P('ohgard2_0'),RBARREL=P('ohgard2_1'),WASH=P('ohgard2_2'),WBARROW=P('ohgard2_3'),HERBS=P('ohgard2_4');
@@ -632,6 +633,9 @@ function ohBuild(){
   const named=[['oh_cap',GX,22],['oh_guardA',GX-3,20],['oh_guardB',GX+3,20],['oh_m1',66,50],['oh_m2',82,50],['oh_w1',64,52],['oh_w2',72,56],['oh_k1',76,56],['oh_o1',84,56],['oh_s1',68,47],['oh_pr',80,48]];
   for(const [id,x,y] of named)person(id,x,y,5);
   if(typeof OH_SIEGEFOLK!=='undefined')for(const [id,x,y] of OH_SIEGEFOLK)person(id,x,y,5); // the people who help in the siege
+  if(typeof OH_GROUNDFOLK!=='undefined')for(const [id,x,y] of OH_GROUNDFOLK)person(id,x,y,1); // the castle grounds: a page, a chandler, an old guard
+  if(typeof OH_GROUNDITEMS!=='undefined')for(const [k,x,y] of OH_GROUNDITEMS)if(ITEMDEF[k]&&G0ok(x,y))lv.items.push({k,x,y}); // things on the ground round the keep
+  if(typeof OH_GROUNDSECRET!=='undefined')for(const q of OH_GROUNDSECRET)decor.push({k:'chest',x:q.chest[0],y:q.chest[1],block:true,kname:'sr_'+q.id}); // the chests of the three hidden rooms (opened by srApply)
   // the king's road is lined with a few guards, not a regiment
   let sn=0;
   for(let y=70;y<=134;y+=14){for(const sx of [OH_ROAD.x0,OH_ROAD.x1]){const id=OH_SOLDIER[(sn++)%OH_SOLDIER.length],kp=KH_KEEPERS[id];if(free(sx,y)&&kp)walk(khFaceKey(kp.face),sx,y,{npc:id,sc:kp.sc})}}
