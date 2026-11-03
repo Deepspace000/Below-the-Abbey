@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.807';
+const VERSION='3.808';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -7235,7 +7235,7 @@ function drawMenu(){
   btnText('more','More',150,184,180,26);
   ctx.fillStyle='rgba(216,200,142,.35)';ctx.fillRect(120,222,240,1);
   btnText('quittitle','Exit game',160,230,160,26);
-  const L=['W / S: forward, back    A / D: step sideways    Q / E: turn    Space: attack','1-4: choose hero    I: inventory    J: quests    M: map    H: heal    ?: all shortcuts','Controller: Settings, then Controller, shows every button.'];
+  const L=['W / S: forward, back    A / D: step sideways    Q / E: turn    Space: attack (hold it to keep attacking)','1-4: choose hero    I: inventory    J: quests    M: map    H: heal    ?: all shortcuts','Controller: Settings, then Controller, shows every button.'];
   txt('Version '+VERSION,376,24,7.5,'#b8a880','right');
   L.forEach((t,i)=>txt(t,240,272+i*9,7.4,'#d8c9a0','center'));
   btn('menuclose',0,0,DW,DH); BTNS.unshift(BTNS.pop());
@@ -22221,7 +22221,7 @@ const HVT_TIPS={
   qsave:['Quick save','F5'],menu:['Menu','Esc'],map:['Map of this level','M / O'],wait:['Wait a turn','Z'],rest:['Rest and camp','R'],potion:['Drink the frequent use potion','H / P / 5'],
   ipotion:['Drink the frequent use potion','H / P / 5'],ipotb0:['Drink the first backup potion','6'],ipotb1:['Drink the second backup potion','7'],
   hero0:['Choose hero 1','1'],hero1:['Choose hero 2','2'],hero2:['Choose hero 3','3'],hero3:['Choose hero 4','4'],
-  attack:['Attack','Space / Enter'],special:['Special attack or spell','X'],turnL:['Turn left','Q / Left'],turnR:['Turn right','E / Right'],fwd:['Forward','W / Up'],back:['Back','S / Down'],left:['Step left','A'],right:['Step right','D'],
+  attack:['Attack (hold the key to repeat)','Space / Enter'],special:['Special attack or spell','X'],turnL:['Turn left','Q / Left'],turnR:['Turn right','E / Right'],fwd:['Forward','W / Up'],back:['Back','S / Down'],left:['Step left','A'],right:['Step right','D'],
   bfcatch:['Catch the butterfly','N'],bfdig:['Dig with a shovel','G'],
   isort:['Sort the bag','S'],ihero0:['Hero 1','1'],ihero1:['Hero 2','2'],ihero2:['Hero 3','3'],ihero3:['Hero 4','4'],itab_inv:['The bag','I'],itab_char:['Character sheet','C'],itab_spell:['Spell book','B'],itab_powers:['Powers','K'],
   iclose:['Close the bag','I / Esc'],iequip:['Equip the chosen item','E'],iunequip:['Take off the chosen item','U'],iuse:['Use the chosen item','E'],invherbs:['Herbal remedies','Y'],
@@ -22800,7 +22800,7 @@ function sndMiss(){if(!AC||G.mute||!SNDOPT.combat)return;SFXM=SNDOPT.combat;
    ========================================================================== */
 const SHORTCUTS=[ // [group, key shown, what it does]
  ['Moving','W / Up','Forward'],['Moving','S / Down','Back'],['Moving','A','Step left'],['Moving','D','Step right'],['Moving','Q / Left','Turn left'],['Moving','E / Right','Turn right'],['Moving','PgUp / PgDn','Look up, down (V: mouse look)'],
- ['Fighting','Space / Enter','Attack'],['Fighting','X','Special attack or spell'],['Fighting','H / P / 5','Drink the frequent use potion'],['Fighting','6 / 7','Drink the first / second backup potion'],['Fighting','Z','Wait a turn'],['Fighting','R','Rest and camp'],
+ ['Fighting','Space / Enter','Attack (hold it to keep attacking)'],['Fighting','X','Special attack or spell'],['Fighting','H / P / 5','Drink the frequent use potion'],['Fighting','6 / 7','Drink the first / second backup potion'],['Fighting','Z','Wait a turn'],['Fighting','R','Rest and camp'],
  ['Heroes','1 2 3 4','Choose a hero (also in the inventory)'],
  ['Screens','I','Items (the bag)'],['Screens','C','Character sheet'],['Screens','B','Spell book'],['Screens','K','Powers'],['Screens','J','Quests'],['Screens','L','Journal / Abilities'],
  ['Screens','F','Afflictions'],['Screens','U','Collection'],['Screens','M / O','Map of this level'],['Screens','T','Teleport stones'],['Screens','Esc','Menu, or close a screen'],
