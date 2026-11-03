@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.805';
+const VERSION='3.806';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -64211,8 +64211,14 @@ function infTownFor(lvl){
   if(lvl>=40000){const lv=Math.floor((lvl-40000)/10000);return INF.TOWNS.find(t=>t.locked&&t.town===lv)||null}
   return INF.TOWNS.find(t=>t.range&&lvl>=t.range[0]&&lvl<=t.range[1])||null;
 }
+/* Oldhaven: the ordinary homes that may be infested (no shop, no quest keeper, no hoard), the tenth of them with the lowest seeded hash. Worked out once per city build. */
+function infOhPicks(){
+  const hs=OH.houses;if(infOhPicks._h===hs)return infOhPicks._p;
+  const ok=hs.filter(h=>h.room==='home'&&!(h.gold>=500)&&!h.script&&!(h.keeper&&typeof QGIVER!=='undefined'&&QGIVER[h.keeper])).sort((a,c)=>hash2(a.id,3,INF.SEED)-hash2(c.id,3,INF.SEED)||a.id-c.id);
+  infOhPicks._h=hs;return infOhPicks._p=new Set(ok.slice(0,Math.ceil(ok.length/10)).map(h=>h.id))}
 function infPick(lvl){
   if(lvl<1000||lvl>=INF.OFF_LH)return false;
+  if(lvl>=6000&&lvl<=6999&&typeof OH!=='undefined'&&OH.houses&&OH.houses.some(h=>h.id===lvl))return infOhPicks().has(lvl);   // Oldhaven: exactly one ordinary home in ten
   const T=infTownFor(lvl);
   if(T){if(T.locked&&!LEVELS[T.town])return false;return infPicks(T).has(lvl)}
   return lvl<10000&&hash2(lvl,3,INF.SEED)<INF.CHANCE;

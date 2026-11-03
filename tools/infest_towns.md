@@ -7,7 +7,7 @@ Jump links (AREAS in `jumpFromUrl`): `?town=infested`, `infestedwenlock`, `infes
 
 | Town | How its houses are built | Which houses | Result in the test | Creatures |
 |---|---|---|---|---|
-| Oldhaven (305) | `khRoom`, ids 6000-6999, `b.id` `oh<n>` | 1 in 10 by hash | 25 of 311 | rat, bat, skel, bandit |
+| Oldhaven (305) | `khRoom`, ids 6000-6999, `b.id` `oh<n>` | exactly 1 in 10 of the ordinary homes (infOhPicks) | 31 of 301 | rat, bat, skel, bandit |
 | Khemetra (44) | `khRoom`, ids from `khHouseId`, `b.id` `house<n>` | 1 in 10 by hash, kinds house/mansion/low | 27 of 428 | same |
 | Wenlock (496) | `wlinMake` (wenlock_in.js) via `khRoom`, ids 7001-7099, `b.wlin` `home_*` | plain lots only (no special lot), never mill, barn, chapel, shops, inn, school, hall | 6 of 44 (7003, 7006, 7011, 7044, 7054, 7056) | rat, bat, skel, bandit at level 77 (town 80 less 3) |
 | Yarrim (290) | `yarBuild` cottages via `khRoom` with a template, ids 1500-1515 | the 15 fisher cottages (1505 is the Steam House bath, never) | 3 of 15 (1508, 1509, 1510) | same, level 45 |

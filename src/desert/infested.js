@@ -53,8 +53,14 @@ function infTownFor(lvl){
   if(lvl>=40000){const lv=Math.floor((lvl-40000)/10000);return INF.TOWNS.find(t=>t.locked&&t.town===lv)||null}
   return INF.TOWNS.find(t=>t.range&&lvl>=t.range[0]&&lvl<=t.range[1])||null;
 }
+/* Oldhaven: the ordinary homes that may be infested (no shop, no quest keeper, no hoard), the tenth of them with the lowest seeded hash. Worked out once per city build. */
+function infOhPicks(){
+  const hs=OH.houses;if(infOhPicks._h===hs)return infOhPicks._p;
+  const ok=hs.filter(h=>h.room==='home'&&!(h.gold>=500)&&!h.script&&!(h.keeper&&typeof QGIVER!=='undefined'&&QGIVER[h.keeper])).sort((a,c)=>hash2(a.id,3,INF.SEED)-hash2(c.id,3,INF.SEED)||a.id-c.id);
+  infOhPicks._h=hs;return infOhPicks._p=new Set(ok.slice(0,Math.ceil(ok.length/10)).map(h=>h.id))}
 function infPick(lvl){
   if(lvl<1000||lvl>=INF.OFF_LH)return false;
+  if(lvl>=6000&&lvl<=6999&&typeof OH!=='undefined'&&OH.houses&&OH.houses.some(h=>h.id===lvl))return infOhPicks().has(lvl);   // Oldhaven: exactly one ordinary home in ten
   const T=infTownFor(lvl);
   if(T){if(T.locked&&!LEVELS[T.town])return false;return infPicks(T).has(lvl)}
   return lvl<10000&&hash2(lvl,3,INF.SEED)<INF.CHANCE;
