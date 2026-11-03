@@ -48,6 +48,7 @@ function ohTiles(){
     const key=kind+'|'+pat+'|'+wh+'|'+(img||'');if(C[key])return C[key];
     let S=typeof pat==='string'?OH_STY[pat]:{plain:'kh_ohwall1_'+pat,win:'kh_ohwall1_4',door:'kh_ohwall1_5',slit:'kh_ohwall1_3'};
     if(!S)S=OH_STY.gold;const Hp=Math.round(128*wh),pi=IMG[S.plain]||IMG.kh_ohwall1_0,units=Math.ceil(wh);
+    const wins=[];
     const c=mkCanvas(128,Hp,(x,w,h)=>{
       x.fillStyle='#8a8478';x.fillRect(0,0,w,h);
       for(let u=0;u<units;u++){
@@ -63,6 +64,7 @@ function ohTiles(){
         else if(u===1&&kind==='slit')im=IMG[S.slit];
         else if(u===2&&kind==='window'&&wh>=2.9)im=IMG[S.win];
         if(im){
+          for(const nm in OH_PANE)if(IMG[nm]===im){wins.push([u,nm]);break}
           const Z=S.zoom||1;
           if(Z>1&&(im===pi||im===IMG[S.alt])){ // masonry drawn bigger: fewer, chunkier stones, so a wall still reads as stone from a distance
             const sw=im.width/Z,sh=im.height/Z,fx=((u*.41+(typeof pat==='string'?pat.length:0)*.13+(wh*7)%1)%1),fy=((u*.57+.2)%1);
@@ -77,7 +79,7 @@ function ohTiles(){
     if(S.contrast&&kind!=='gate'){ // the painted stone is soft: stretch it round its mean so the courses and joints show from across a street
       let m0=0,m1=0,m2=0,n=0;for(let i=0;i<d.length;i+=4){m0+=d[i];m1+=d[i+1];m2+=d[i+2];n++}m0/=n;m1/=n;m2/=n;const k=S.contrast;
       for(let i=0;i<d.length;i+=4){d[i]=Math.max(0,Math.min(255,(d[i]-m0)*k+m0));d[i+1]=Math.max(0,Math.min(255,(d[i+1]-m1)*k+m1));d[i+2]=Math.max(0,Math.min(255,(d[i+2]-m2)*k+m2))}}
-    const id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;if(wh>=2.5&&(pat==='castle'||pat==='castle2'||pat==='fort')&&kind!=='gate')TEX[id].cren=.3; // castle walls carry battlements
+    const id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;if(wins.length)ohNightReg(id,d,wins,Hp);if(wh>=2.5&&(pat==='castle'||pat==='castle2'||pat==='fort')&&kind!=='gate')TEX[id].cren=.3; // castle walls carry battlements
     const gid=KH_NEXT_GID++;T_TILE[gid]=id;
     return C[key]={gid,tex:id};
   };

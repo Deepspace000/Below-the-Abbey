@@ -3680,5 +3680,12 @@
 "h": 453,
 "kind": "sprite",
 "sheet": "oqgarg"
+},
+"ohlamp_0": {
+"file": "ohlamp_0.webp",
+"w": 91,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohlamp"
 }
 }

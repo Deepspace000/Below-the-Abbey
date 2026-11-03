@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.803';
+const VERSION='3.804';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -15753,6 +15753,7 @@ function ohTiles(){
     const key=kind+'|'+pat+'|'+wh+'|'+(img||'');if(C[key])return C[key];
     let S=typeof pat==='string'?OH_STY[pat]:{plain:'kh_ohwall1_'+pat,win:'kh_ohwall1_4',door:'kh_ohwall1_5',slit:'kh_ohwall1_3'};
     if(!S)S=OH_STY.gold;const Hp=Math.round(128*wh),pi=IMG[S.plain]||IMG.kh_ohwall1_0,units=Math.ceil(wh);
+    const wins=[];
     const c=mkCanvas(128,Hp,(x,w,h)=>{
       x.fillStyle='#8a8478';x.fillRect(0,0,w,h);
       for(let u=0;u<units;u++){
@@ -15768,6 +15769,7 @@ function ohTiles(){
         else if(u===1&&kind==='slit')im=IMG[S.slit];
         else if(u===2&&kind==='window'&&wh>=2.9)im=IMG[S.win];
         if(im){
+          for(const nm in OH_PANE)if(IMG[nm]===im){wins.push([u,nm]);break}
           const Z=S.zoom||1;
           if(Z>1&&(im===pi||im===IMG[S.alt])){ // masonry drawn bigger: fewer, chunkier stones, so a wall still reads as stone from a distance
             const sw=im.width/Z,sh=im.height/Z,fx=((u*.41+(typeof pat==='string'?pat.length:0)*.13+(wh*7)%1)%1),fy=((u*.57+.2)%1);
@@ -15782,7 +15784,7 @@ function ohTiles(){
     if(S.contrast&&kind!=='gate'){ // the painted stone is soft: stretch it round its mean so the courses and joints show from across a street
       let m0=0,m1=0,m2=0,n=0;for(let i=0;i<d.length;i+=4){m0+=d[i];m1+=d[i+1];m2+=d[i+2];n++}m0/=n;m1/=n;m2/=n;const k=S.contrast;
       for(let i=0;i<d.length;i+=4){d[i]=Math.max(0,Math.min(255,(d[i]-m0)*k+m0));d[i+1]=Math.max(0,Math.min(255,(d[i+1]-m1)*k+m1));d[i+2]=Math.max(0,Math.min(255,(d[i+2]-m2)*k+m2))}}
-    const id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;if(wh>=2.5&&(pat==='castle'||pat==='castle2'||pat==='fort')&&kind!=='gate')TEX[id].cren=.3; // castle walls carry battlements
+    const id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;if(wins.length)ohNightReg(id,d,wins,Hp);if(wh>=2.5&&(pat==='castle'||pat==='castle2'||pat==='fort')&&kind!=='gate')TEX[id].cren=.3; // castle walls carry battlements
     const gid=KH_NEXT_GID++;T_TILE[gid]=id;
     return C[key]={gid,tex:id};
   };
@@ -82452,6 +82454,60 @@ function oqRoofRows(){
 }
 TKR.sets[305]={wh:3,houses:[],dyn:ohRoofRows,fade:.15};
 TKR.sets[304]={wh:2.7,houses:[],dyn:oqRoofRows,fade:.15};
+
+/* ---- src/desert/oldhaven_lamp.js ---- */
+/* ==========================================================================
+   OLDHAVEN: THE STREET LAMP. The city (305) and the quay (304) use the painted wrought-iron lamp (assets/kh/ohlamp_0, strict front elevation) in place of the old
+   code-drawn one. Every other place keeps the old lamp: IMG.lamp answers with the painted one only on those two levels, so the lights, the maps and the fade
+   (all keyed on the name 'lamp') need no change.
+   ========================================================================== */
+(function(){
+  let old=IMG.lamp;
+  Object.defineProperty(IMG,'lamp',{configurable:true,enumerable:true,
+    get(){const p=IMG.kh_ohlamp_0;return (LEVEL===304||LEVEL===305)&&p&&p.width?p:old},
+    set(v){old=v}});
+})();
+
+/* ---- src/desert/oldhaven_night.js ---- */
+/* ==========================================================================
+   OLDHAVEN: THE NIGHT. As in Thornwick and Ironhill, the windows light up from dusk to dawn and the street lamps shine at night.
+   - Windows: the painted window pictures of the walls (kh_ohwall*) each have a pane rectangle (OH_PANE: x0,y0,x1,y1 as fractions of the picture, and 1 for an arched top).
+     When a wall tile is made (ohTiles in oldhaven.js) every window unit in it gets an amber glow picture: the pane lit (the leading stays darker, so the panes still read) with a soft
+     halo on the wall round it. The glow is dim by day (none), fades in from 17:00, is full from 19:00 to 05:00 and fades out by 07:00 (epNightK of early_polish.js). The pictures
+     are swapped in only when the eighth-step of the day changes, the same way as Thornwick (epNightTick).
+   - Lamps: the street lamps of the city and the quay shine like those of Khemetra (range and strength); the engine already dims lamps by day.
+   ========================================================================== */
+const OH_PANE={
+  kh_ohwall1_4:[.35,.17,.65,.78,1],
+  kh_ohwall2_2:[.30,.22,.67,.44],kh_ohwall2_3:[.13,.30,.87,.71],kh_ohwall2_5:[.27,.37,.70,.68],
+  kh_ohwall3_2:[.27,.20,.73,.64],kh_ohwall3_3:[.18,.29,.82,.73],kh_ohwall3_5:[.37,.30,.60,.62,1],
+  kh_ohwall4_2:[.30,.11,.72,.70],kh_ohwall4_3:[.10,.25,.88,.70],kh_ohwall4_5:[.39,.26,.63,.53,1],
+  kh_ohwall5_2:[.34,.27,.70,.55],kh_ohwall5_5:[.39,.14,.57,.40],
+  kh_ohwall6_3:[.40,.25,.62,.58,1]};
+const OHN={list:[],step:-1};
+function ohNightReg(ti,d,wins,Hp){
+  const W=128,e=new Uint8ClampedArray(W*Hp*4),HALO=7;
+  for(const [u,nm] of wins){const P=OH_PANE[nm];if(!P)continue;
+    const x0=P[0]*W,x1=P[2]*W,y0=P[1]*128,y1=P[3]*128,top=Hp-(u+1)*128,arch=P[4],rw=(x1-x0)/2,cx=(x0+x1)/2;
+    for(let py=0;py<128;py++){const Y=top+py;if(Y<0||Y>=Hp)continue;
+      for(let px=0;px<W;px++){
+        let dx=Math.max(x0-px,0,px-x1),dy=Math.max(y0-py,0,py-y1);
+        if(arch&&py<y0+rw){const ey=(y0+rw-py)/rw,ex=(px-cx)/rw;const r=Math.sqrt(ex*ex+ey*ey);if(r>1&&py>=y0){dx=(r-1)*rw;dy=0}else if(py<y0){dx=Math.max(dx,0);}}
+        const dist=Math.hypot(dx,dy),j=(Y*W+px)*4;
+        if(dist<=0){const l=d[j]*.3+d[j+1]*.59+d[j+2]*.11,a=Math.min(1,.62+.38*(1-Math.min(1,l/150)));
+          e[j]=255;e[j+1]=172;e[j+2]=66;e[j+3]=a*235}
+        else if(dist<HALO&&e[j+3]<80){const a=(1-dist/HALO);e[j]=255;e[j+1]=165;e[j+2]=62;e[j+3]=a*a*.4*255}}}}
+  OHN.list.push({ti,e});OHN.step=-1}
+function ohNightTick(){
+  const st=Math.round(epNightK()*8);if(OHN.step===st)return;OHN.step=st;const k=st/8;
+  for(const r of OHN.list){const T=TEX[r.ti];if(!T)continue;
+    if(st===0)T.e=null;else{r.c=r.c||{};let e=r.c[st];if(!e){e=new Uint8ClampedArray(r.e.length);for(let i=0;i<e.length;i+=4){e[i]=r.e[i];e[i+1]=r.e[i+1];e[i+2]=r.e[i+2];e[i+3]=r.e[i+3]*k}r.c[st]=e}T.e=e}
+    for(let j=0;j<8;j++)delete T['he'+j]}}
+{const _dw=drawWorld;let lampLv=null;
+  drawWorld=function(){
+    try{if(LEVEL===305||LEVEL===304){ohNightTick();
+      if(lampLv!==G.decor){lampLv=G.decor;for(const l of LIGHTS)if(l.lamp&&!l.fire&&!l.red){l.range2=100;l.kI=2.3}}}}catch(e){console.error('ohnight',e)}
+    return _dw.apply(this,arguments)}}
 
 /* ---- src/desert/oldhaven_quest_guard.js ---- */
 /* ==========================================================================
