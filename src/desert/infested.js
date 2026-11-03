@@ -91,8 +91,8 @@ function infReach(L,from,extraBlock){
 /* change a built house into an infested one */
 // the painted corpses (assets/ds_corpse0..3: on the back, on the front, curled up, in a robe). Usable as a decor name anywhere:
 // {k:'corpse0'..'corpse3'}, or infCorpse(x,y) for one picked by position. Each is about 1.1 squares wide and lies low on the floor.
-Object.assign(NPC_H,{corpse0:.186,corpse1:.205,corpse2:.42,corpse3:.248});
-function infCorpse(x,y){return 'corpse'+((hash2(x*7+3,y*13+1,(typeof INF!=='undefined'&&INF.SEED||1)+21)*4)|0)}
+Object.assign(NPC_H,{corpse0:.308,corpse1:.347,corpse2:.42,corpse3:.393});   // corpse0, 1 and 3 carry a pool of blood under and round them (the heights are the old ones times the picture's new height)
+function infCorpse(x,y){return 'corpse'+[0,1,3][(hash2(x*7+3,y*13+1,(typeof INF!=='undefined'&&INF.SEED||1)+21)*3)|0]}   // flat on the ground, in blood; the curled-up one (corpse2) looked asleep, so it is no longer used
 function infMake(L,b,lvl,back,T){
   T=T||INF.TOWNS[0];const low=T.low||INF.low,cid=infCellarOf(lvl),town=back.to,rating=Math.max(1,((typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[town])||16)-3),H=L.rows.length,W=L.rows[0].length;
   L.infest=1;L.infestCellar=cid;L.infestRating=rating;L.infestTown=T.k;L.diff=rating;LEVEL_RATING[lvl]=rating;L.amb=Math.min(L.amb||.66,.4);delete L.scene;

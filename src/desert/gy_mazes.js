@@ -104,7 +104,7 @@ function gyMazeBuild(k){
   const far=(a,b,d)=>Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])>=d;
   // rooms: furnish by kind
   const FURN={
-    start:r=>{light((r.x0+r.x1)>>1,(r.y0+r.y1)>>1,spec.lcol);dec('candles',r.x0+2,r.y1,{block:true,sc:.7});
+    start:r=>{light((r.x0+r.x1)>>1,(r.y0+r.y1)>>1,spec.lcol);{const cc=cellsOf(r).filter(([x,y])=>free(x,y)&&!doorCell.has(x+','+y)&&!mouths.has(x+','+y)&&!(x===r.x0&&y===((r.y0+r.y1)>>1))).sort((p,q)=>(q[1]-p[1])||(q[0]-p[0]))[0];if(cc)dec('candles',cc[0],cc[1],{block:true,sc:.7})} // the candle stand stands in a corner, never on a square the party must cross (it used to close the room's only way out)
       // the name of the place, on a hanging plaque on the north wall, two squares ahead and a little to the left of the arrival square, so that it is in view when the party comes down
       decor.push({k:'sign_gy',x:r.x0+2,y:r.y0,block:false,wd:[0,-1],txt:[spec.name.toUpperCase(),'Level '+(84+k)]})},
     boss:r=>{const cx=(r.x0+r.x1)>>1,cy=(r.y0+r.y1)>>1;light(cx,cy,spec.lcol);light(r.x0,r.y0,spec.lcol);light(r.x1,r.y1,spec.lcol);
