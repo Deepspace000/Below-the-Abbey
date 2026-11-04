@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.813';
+const VERSION='3.814';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -82539,6 +82539,20 @@ function ohNightTick(){
   drawWorld=function(){
     try{if(LEVEL===305||LEVEL===304){ohNightTick();
       if(lampLv!==G.decor){lampLv=G.decor;for(const l of LIGHTS)if(l.lamp&&!l.fire&&!l.red){l.range2=100;l.kI=2.3}}}}catch(e){console.error('ohnight',e)}
+    return _dw.apply(this,arguments)}}
+
+/* ---- src/desert/oldhaven_bells.js ---- */
+/* Oldhaven strikes the hour: the church bell rings once for each hour on the 12 hour clock, twelve times at noon and midnight.
+   Only on the quay and in the city (levels 304 and 305). Waiting for noon at the herald jumps the clock to 12, so it rings twelve then. */
+const OHB={hour:-1,lv:0,run:0};
+{const _dw=drawWorld;
+  drawWorld=function(){
+    try{if(LEVEL===304||LEVEL===305){
+      const h=Math.floor(G.clock/60)%24;
+      if(OHB.lv!==LEVEL){OHB.lv=LEVEL;OHB.hour=h}
+      else if(h!==OHB.hour){OHB.hour=h;const k=h%12||12,run=++OHB.run;
+        for(let i=0;i<k;i++)setTimeout(()=>{if(run===OHB.run&&(LEVEL===304||LEVEL===305))try{playSmp(i%2?'church_bell2':'church_bell1',.7,.9)}catch(e){}},i*2400)}
+    }else OHB.lv=0}catch(e){console.error('ohbells',e)}
     return _dw.apply(this,arguments)}}
 
 /* ---- src/desert/oldhaven_quest_guard.js ---- */
