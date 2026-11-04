@@ -9,7 +9,7 @@
    (intelligence bonus + staff magic + 8) with the spell bonuses for a mage or a sorcerer. So the power grows with the weapon, the stat and the gear, as
    the creatures' health grows with the level of the place. g = (1 + 0.002 x (hero level - the power's unlock level)) x (1 + 0.001 x hero level): the first part rewards each level of
    mastery beyond the unlock, the second makes every power a little stronger as the hero grows, beyond what the weapon and the stats give (the best weapons stop at level 70).
-   GE (0.75) and TAPER (0.15) were set from simulated fights so that the party kills about as fast as before (tools/powers_audit, POWERS_AFTER.md).
+   GE (0.72) and TAPER (0.30) were set from simulated fights so that the party kills about as fast as before (tools/powers_audit, POWERS_AFTER.md).
    An area power does 0.4 x that for each foe it reaches (so about 1.2 times a single power when three are close).
    Damage over time (bleed, poison, burn) is part of the same total, and is spread over its rounds. Costs are fixed numbers that rise with the
    unlock level; they never change with the caster's level, so an early power stays cheap and simply stops mattering as the heroes grow.
@@ -38,7 +38,7 @@ const rng=(M,u)=>{const a=[1,2];a._M=M;a._u=u;return a}; // a damage range for t
 
 /* [kind, key, cost, role, options]  kind c: a class power by name, x: a spell by id, n: a new power.   role s: single target, g: area.
    options: dot: share of the total that is damage over time. p: the plain words of the card (the number is added by the game). */
-const GE=.75,TAPER=.15; // GE: one factor for all classes, TAPER: the damage for each point of cost falls by this much between level 1 and level 80, both set so that fights do not get much shorter than before (see POWERS_AFTER.md)
+const GE=.72,TAPER=.30; // (was .75 and .15: the late powers hit too hard, now about 20 percent less at level 80, 14 percent at 50, 4 percent at 1) // GE: one factor for all classes, TAPER: the damage for each point of cost falls by this much between level 1 and level 80, both set so that fights do not get much shorter than before (see POWERS_AFTER.md)
 const E_CLS={Warrior:.31,Barbarian:.30,Paladin:.25,Ranger:.35,Archer:.36,Thief:.38,Assassin:.33,Mage:.20,Sorcerer:.20,Priest:.20,Monk:.40,Goat:.36};
 const CM={Warrior:1.10,Barbarian:1.18,Paladin:.9,Ranger:1.13,Archer:1.10,Thief:1.18,Assassin:1.12,Mage:1.25,Sorcerer:1.25,Priest:1,Monk:1.22,Goat:1.22}; // a small correction for each class, from the fight simulations: the old ladders were not equally generous (the Monk's Flurry of Blows was a bargain, the Paladin's powers were traps)
 const eff=(cls,u)=>E_CLS[cls]*CM[cls]*GE*(1-TAPER*Math.max(0,Math.min(80,u)-1)/79);
