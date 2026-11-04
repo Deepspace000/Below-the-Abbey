@@ -169,6 +169,8 @@ function quayBuild(){
   }
   // the people with work for the party (oldhaven_quayquests.js)
   if(typeof OQQ_FOLK!=='undefined')for(const f of OQQ_FOLK)person(f.id,f.at[0],f.at[1],4);
+  if(typeof OHT_QFOLK!=='undefined')for(const f of OHT_QFOLK)person(f.id,f.at[0],f.at[1],4);
+  if(typeof OHT_HATCHES!=='undefined')for(const h of OHT_HATCHES)if(h.lv===OQ.ID){const q=near(h.at[0],h.at[1],8);if(q){dc('dhatch',q[0],q[1],{block:true,walk:false,enter:h.enter});const b=near(q[0],q[1]+1,3);if(b){used.add(b[0]+','+b[1]);OHT_SPOTS[h.id]={hatch:q,back:b}}}}
   // crates, barrels and sacks are stored against the walls: along the foot of the city wall, and against the sides of the buildings away from their doors
   {const STOR=['oq_fcrate','oq_cargo','oq_fbarrel','oq_sacks','oq_fcrate','oq_cargo','oq_fbarrel'];
     for(let x=21;x<=58;x++){if(Math.abs(x-GX)<=10||hs(x,1,90)<.25)continue;tryDc(STOR[(hs(x,2,90)*STOR.length)|0],x,10)}

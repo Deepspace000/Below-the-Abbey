@@ -7,6 +7,7 @@ const OHB={hour:-1,lv:0,run:0};
       const h=Math.floor(G.clock/60)%24;
       if(OHB.lv!==LEVEL){OHB.lv=LEVEL;OHB.hour=h}
       else if(h!==OHB.hour){OHB.hour=h;const k=h%12||12,run=++OHB.run;
-        for(let i=0;i<k;i++)setTimeout(()=>{if(run===OHB.run&&(LEVEL===304||LEVEL===305))try{playSmp(i%2?'church_bell2':'church_bell1',.7,.9)}catch(e){}},i*2400)}
+        let note='',flat=false;try{flat=k===12&&typeof ohtFlat==='function'&&ohtFlat();note=(typeof ohtStruck==='function'&&ohtStruck(h,k))||''}catch(e){console.error(e)}
+        for(let i=0;i<k;i++)setTimeout(()=>{if(run===OHB.run&&(LEVEL===304||LEVEL===305)){const bad=flat&&i===k-1;try{playSmp(i%2?'church_bell2':'church_bell1',bad?.5:.7,bad?.6:.9)}catch(e){}if(note&&i===k-1)try{msg(note,'#e8d070')}catch(e){}}},i*2400)}
     }else OHB.lv=0}catch(e){console.error('ohbells',e)}
     return _dw.apply(this,arguments)}}

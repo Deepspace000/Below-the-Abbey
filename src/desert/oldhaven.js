@@ -632,6 +632,8 @@ function ohBuild(){
   /* ---- the named people: the gate, the square and the doors of the palace ---- */
   const named=[['oh_cap',GX,22],['oh_guardA',GX-3,20],['oh_guardB',GX+3,20],['oh_m1',66,50],['oh_m2',82,50],['oh_w1',64,52],['oh_w2',72,56],['oh_k1',76,56],['oh_o1',84,56],['oh_s1',68,47],['oh_pr',80,48]];
   for(const [id,x,y] of named)person(id,x,y,5);
+  if(typeof OHT_FOLK!=='undefined')for(const [id,x,y,r] of OHT_FOLK)person(id,x,y,r||5); // the tales of Oldhaven (oldhaven_tales.js)
+  if(typeof OHT_HATCHES!=='undefined')for(const h of OHT_HATCHES)if(h.lv===OH.ID){const q=near(h.at[0],h.at[1],8);if(q){dc('dhatch',q[0],q[1],{block:true,walk:false,enter:h.enter});const b=near(q[0],q[1]+1,3);if(b){used.add(b[0]+','+b[1]);OHT_SPOTS[h.id]={hatch:q,back:b}}}} // manhole and crypt hatch (oldhaven_under.js)
   if(typeof OH_SIEGEFOLK!=='undefined')for(const [id,x,y] of OH_SIEGEFOLK)person(id,x,y,5); // the people who help in the siege
   if(typeof OH_GROUNDFOLK!=='undefined')for(const [id,x,y] of OH_GROUNDFOLK)person(id,x,y,1); // the castle grounds: a page, a chandler, an old guard
   if(typeof OH_GROUNDITEMS!=='undefined')for(const [k,x,y] of OH_GROUNDITEMS)if(ITEMDEF[k]&&G0ok(x,y))lv.items.push({k,x,y}); // things on the ground round the keep
