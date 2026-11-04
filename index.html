@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.822';
+const VERSION='3.823';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -79733,7 +79733,7 @@ f2OnArrive(9826,()=>f2SwampApply());
 /* ---------- 7. THE NIGHTMARE (9827): the brain ---------- */
 const F2_NIGHT={JAR:[24,7],LAMP:[[21,5,'north-west'],[27,5,'north-east'],[27,9,'south-east'],[21,9,'south-west']]};
 function f2NightBuild(){
-  const NC=f2TexFloor(f2Soft('ps_f2_tex_r3night',{filter:'brightness(1.75) contrast(1.35)',tag:'r3'}),'f2t_r3night3',1.0)||f2TexFloor('ps_f2_tex_nmcrack','f2t_nmcrack',1.1)||'tombdark',NQ=f2TexFloor('ps_f2_tex_nmchequer','f2t_nmchequer',.8)||'wl2f5',NB=f2TexFloor('ps_f2_tex_nmbones','f2t_nmbones',1.0)||'ash',NF=f2TexFloor('ps_f2_tex_nmflesh','f2t_nmflesh',.95)||'blood';
+  const NC=f2TexFloor(f2Soft('ps_f2_tex_r3night',{filter:'brightness(1.75) contrast(1.35)',tag:'r3'}),'f2t_r3night3',.55,[.85,.7,.8])||f2TexFloor('ps_f2_tex_nmcrack','f2t_nmcrack',1.1)||'tombdark',NQ=f2TexFloor('ps_f2_tex_nmchequer','f2t_nmchequer',1.35,[1.1,1.0,.95])||'wl2f5',NB=f2TexFloor('ps_f2_tex_nmbones','f2t_nmbones',1.0)||'ash',NF=f2TexFloor('ps_f2_tex_nmflesh','f2t_nmflesh',.95)||'blood';
   const C=f2Room({id:9827,ground:NC,path:NQ,band:[1,4],guard:1,guardKeep:(x,y)=>x>=16&&x<=32&&y<=12,wh:3.4,softRet:1,rw:0,mistH:.02,shade:{edge:.35,pool:.55},
     routes:[[[24,35],[24,27],[31,23],[31,15],[24,13],[24,11]],[[24,27],[14,25],[9,20]],[[31,19],[40,19]],[[22,31],[11,31]]],
     clear:[[17,2,31,12,NF,'The Ring of Lanterns',1],[4,15,13,24,NB,'The Doll Room',1],[35,14,44,24,NB,'The Hall of Eyes',1],[5,27,15,34,NF,'The Broken Clocks',1]],

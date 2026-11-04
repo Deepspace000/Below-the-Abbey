@@ -78,7 +78,7 @@ f2OnArrive(9826,()=>f2SwampApply());
 /* ---------- 7. THE NIGHTMARE (9827): the brain ---------- */
 const F2_NIGHT={JAR:[24,7],LAMP:[[21,5,'north-west'],[27,5,'north-east'],[27,9,'south-east'],[21,9,'south-west']]};
 function f2NightBuild(){
-  const NC=f2TexFloor(f2Soft('ps_f2_tex_r3night',{filter:'brightness(1.75) contrast(1.35)',tag:'r3'}),'f2t_r3night3',1.0)||f2TexFloor('ps_f2_tex_nmcrack','f2t_nmcrack',1.1)||'tombdark',NQ=f2TexFloor('ps_f2_tex_nmchequer','f2t_nmchequer',.8)||'wl2f5',NB=f2TexFloor('ps_f2_tex_nmbones','f2t_nmbones',1.0)||'ash',NF=f2TexFloor('ps_f2_tex_nmflesh','f2t_nmflesh',.95)||'blood';
+  const NC=f2TexFloor(f2Soft('ps_f2_tex_r3night',{filter:'brightness(1.75) contrast(1.35)',tag:'r3'}),'f2t_r3night3',.55,[.85,.7,.8])||f2TexFloor('ps_f2_tex_nmcrack','f2t_nmcrack',1.1)||'tombdark',NQ=f2TexFloor('ps_f2_tex_nmchequer','f2t_nmchequer',1.35,[1.1,1.0,.95])||'wl2f5',NB=f2TexFloor('ps_f2_tex_nmbones','f2t_nmbones',1.0)||'ash',NF=f2TexFloor('ps_f2_tex_nmflesh','f2t_nmflesh',.95)||'blood';
   const C=f2Room({id:9827,ground:NC,path:NQ,band:[1,4],guard:1,guardKeep:(x,y)=>x>=16&&x<=32&&y<=12,wh:3.4,softRet:1,rw:0,mistH:.02,shade:{edge:.35,pool:.55},
     routes:[[[24,35],[24,27],[31,23],[31,15],[24,13],[24,11]],[[24,27],[14,25],[9,20]],[[31,19],[40,19]],[[22,31],[11,31]]],
     clear:[[17,2,31,12,NF,'The Ring of Lanterns',1],[4,15,13,24,NB,'The Doll Room',1],[35,14,44,24,NB,'The Hall of Eyes',1],[5,27,15,34,NF,'The Broken Clocks',1]],
