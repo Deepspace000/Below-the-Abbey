@@ -32,7 +32,7 @@ const OHU_SPEC={
          [13,3,23,10,'The Washing Cistern'],[2,2,10,9,'The Grate King’s Hall'],[2,12,8,18,'The Dry Ledge'],[26,2,32,5,'The Bricked Landing']],
   links:[[0,2,'v'],[0,1,'h'],[2,3,'h'],[3,4,'v'],[2,5,'v'],[5,6,'h'],[6,7,'v'],[1,7,'v'],[5,8,'h']],
   portals:[{ch:'0',x:18,y:31,to:'sewerCity',f:2},{ch:'1',x:36,y:11,to:'sewerQuay',f:2}],
-  foes:[[0,'rat',1],[1,'rat',3],[1,'bat',2],[2,'rat',3],[2,'bat',2],[3,'rat',6],[3,'bat',1],[4,'bat',2],[4,'rat',2],[5,'rat',3],[5,'bat',2],[6,'rat',3],[7,'rat',1]],
+  foes:[[0,'oslime',1],[1,'rat',1],[1,'oslime',2],[1,'bat',1],[2,'rat',1],[2,'oslime',2],[2,'bat',1],[3,'rat',2],[3,'oslime',3],[3,'bat',1],[4,'bat',2],[4,'oslime',2],[5,'rat',1],[5,'oslime',2],[5,'bat',1],[6,'rat',1],[6,'oslime',2],[7,'oslime',1]],
   boss:[6,'ohgratekin'],
   items:[['bronzescrap',5,26],['bronzescrap',33,25],['bronzescrap',15,9],['potion',20,18],['potion',9,6]],
   decor:[['chest',9,3,{magic:1,goldAmt:700}],['chest',34,26],['chest',22,4],['barrel',34,9,{}],['barrel',16,28],['crate',4,26],

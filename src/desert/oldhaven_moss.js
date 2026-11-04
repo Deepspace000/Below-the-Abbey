@@ -20,3 +20,11 @@
   dress(6712,'hideaway',[.62,.58,.54],.9,{decals:['soot','droppings','rubble','straw','pebbles','shards','rag','crack'],gain:[.95,.9,.84],amb:.05,lightK:1.5,shadow:.78,
     grade:{c:1.14,s:.82,b:.84,tone:[90,60,35,.12],vig:.62,vc:[3,2,1]},grimeTint:[.94,.9,.84],glowCol:[1,.62,.3]});
   EP_TORCH[6712]=2}
+
+/* the sewer slime: the painted Maw Slime (fangs, red eyes) washed green, so it is a foul sewer horror and not a cute blob */
+ENEMY_DEF.oslime={name:'Sewer Slime',hp:75,dmg:[5,9],hit:.72,w:1.5,img:'osl_slime',xp:70,gold:[0,6],speed:1,aboveParty:0,verb:'engulfs'};
+{const art=()=>{if(IMG.osl_slime)return;const s=IMG.art_hgslime5;if(!s||!s.width)return;
+    const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.drawImage(s,0,0);
+    x.globalCompositeOperation='screen';x.fillStyle='rgb(20,66,16)';x.fillRect(0,0,c.width,c.height);   // black body -> deep slime green, red eyes -> sickly yellow
+    x.globalCompositeOperation='destination-in';x.drawImage(s,0,0);IMG.osl_slime=c;try{wlTrimFoot('osl_slime')}catch(e){}};
+  const _dw=drawWorld;drawWorld=function(){art();return _dw.apply(this,arguments)}}
