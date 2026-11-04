@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.825';
+const VERSION='3.826';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1776,7 +1776,7 @@ function healScaled(hi,tg,old,rank,group){return Math.max(old,Math.round(tg.max*
 function healCrit(t,amt){if(Math.random()<.12){const x=Math.round(amt*.75);t.hp=Math.min(t.max,t.hp+x);G._healCrit=1;return x}return 0} // a heal spell crits one time in eight, for three quarters more
 function rollDmg(h,mult){
   const r=heroDmgRange(h),w=heroWeapon(h);let d=rnd(r[0],r[1]),crit=false;
-  if(Math.random()<weaponCrit(w)+(w&&w.dbl||0)+ringSum(h,'dbl')+pasH(h,'crit')){d*=1.3;crit=true}G._critFlag=crit;
+  if(Math.random()<weaponCrit(w)+(w&&w.dbl||0)+ringSum(h,'dbl')+pasH(h,'crit')){d*=1.3+pasH(h,'critDmg');crit=true}G._critFlag=crit;
   return {d:Math.max(1,Math.round(d*(mult||1)*(1+pasH(h,'dmgPct')))),crit};
 }
 function specialInfo(i){
@@ -1864,7 +1864,7 @@ function heroAttack(i){
     const d0=DIRS[G.P.f];for(const k of [1,0,2]){const x=G.P.x+d0[0]*k,y=G.P.y+d0[1]*k,nd=G.decor.find(d=>d.npc&&d.walk&&!d.found&&d.x===x&&d.y===y);if(nd){startTalk(nd);return false}}
     msg(range>1?'No target in range.':'There is nothing within reach.');return false}
   const en=ENEMY_DEF[f.e.t].name,verb=range>1?'shoots':'hits';
-  if(Math.random()<heroHitPct(i,ENEMY_DEF[f.e.t].fly)){const r=rollDmg(h);msg(`${def.name} ${verb} the ${en} for ${r.d}${r.crit?' (critical! x1.3)':''}.`,r.crit?'#ffd76a':undefined);hurtEnemy(f.e,r.d);try{if(typeof armourLeech==='function')armourLeech(i,r.d)}catch(x){}try{if(w&&w.eff)weaponProc(i,f.e,r.d,w,f.k)}catch(x){console.error(x)}}
+  if(Math.random()<heroHitPct(i,ENEMY_DEF[f.e.t].fly)){const r=rollDmg(h);msg(`${def.name} ${verb} the ${en} for ${r.d}${r.crit?' (critical!)':''}.`,r.crit?'#ffd76a':undefined);hurtEnemy(f.e,r.d);try{if(typeof armourLeech==='function')armourLeech(i,r.d)}catch(x){}try{if(w&&w.eff)weaponProc(i,f.e,r.d,w,f.k)}catch(x){console.error(x)}}
   else{msg(`${def.name} misses.`,'#a09880');sfx('miss');f.e.alert=true}
   return true;
 }
@@ -20954,20 +20954,20 @@ function weaponProc(i,E,dmg,w,k){
    ========================================================================== */
 const ARM_SETS=[ // [key, name, level, colour, flavour, effects of helm / chest / arms / legs, set bonus, set title]
  ['boar','Boarhide',10,'#8a6a44','Hardened boiled leather with bone studs and the tusks of a great boar.',['dodge','regen','crit','hungerSlow'],{ward:2,thorns:3},'Boarhide Hunter'],
- ['iron','Ironscale',20,'#8a929c','Overlapping dark iron scales, riveted and plain.',['ward','thorns','dmgPct','dodge'],{ward:4,regen:.25},'Ironscale Warden'],
- ['rime','Rimeforged',30,'#8ac8e8','Pale blue steel rimed with frost, trimmed with white fur.',['dodge','ward','mpRegen','lifesteal'],{secondWind:.3,mpRegen:.2},'Rimeforged Sentinel'],
- ['ember','Emberplate',40,'#d8602a','Black iron plate with cracks of glowing red, like cooling lava.',['dmgPct','thorns','crit','regen'],{thorns:8,dmgPct:.08},'Emberplate Champion'],
- ['sun','Sunsteel',50,'#e8c860','Polished gold and white steel, engraved with the sun.',['regen','dodge','lifesteal','mpRegen'],{secondWind:.4,regen:.5},'Sunsteel Paladin'],
- ['void','Voidglass',60,'#7a4ac8','Black obsidian glass plate with veins of violet light.',['crit','lifesteal','dodge','dmgPct'],{lifesteal:.08,crit:.06,mpRegen:.2},'Voidglass Reaver'],
- ['storm','Stormwrought',70,'#58d0f0','Bright blue steel engraved with lightning, and it crackles.',['dodge','mpRegen','crit','dmgPct'],{dodge:.08,mpRegen:.5},'Stormwrought Tempest'],
- ['wyrm','Wyrmbone',80,'#e8e0c8','Ivory plates of dragon bone, ridged and toothed.',['ward','thorns','regen','lifesteal'],{ward:8,thorns:12},'Wyrmbone Slayer'],
- ['star','Starforged',90,'#3a58b8','Midnight plate scattered with silver stars.',['mpRegen','dodge','secondWind','regen'],{mpRegen:.6,secondWind:.4},'Starforged Seer'],
- ['god','Godforged',100,'#f0e0a0','Radiant white and gold plate with a halo and feathered wings.',['ward','lifesteal','dmgPct','regen'],{secondWind:.5,dmgPct:.1,ward:8,mpRegen:.3},'Godforged Exemplar']];
+ ['iron','Ironscale',20,'#8a929c','Overlapping dark iron scales, riveted and plain.',['ward','thorns','crit','dodge'],{ward:4,regen:.25},'Ironscale Warden'],
+ ['rime','Rimeforged',30,'#8ac8e8','Pale blue steel rimed with frost, trimmed with white fur.',['dodge','ward','mpRegen','crit'],{secondWind:.3,mpRegen:.2},'Rimeforged Sentinel'],
+ ['ember','Emberplate',40,'#d8602a','Black iron plate with cracks of glowing red, like cooling lava.',['critDmg','thorns','crit','regen'],{thorns:8,dmgPct:.08},'Emberplate Champion'],
+ ['sun','Sunsteel',50,'#e8c860','Polished gold and white steel, engraved with the sun.',['regen','dodge','crit','mpRegen'],{secondWind:.4,regen:.5},'Sunsteel Paladin'],
+ ['void','Voidglass',60,'#7a4ac8','Black obsidian glass plate with veins of violet light.',['crit','lifesteal','critDmg','dmgPct'],{lifesteal:.08,crit:.06,mpRegen:.2},'Voidglass Reaver'],
+ ['storm','Stormwrought',70,'#58d0f0','Bright blue steel engraved with lightning, and it crackles.',['crit','mpRegen','critDmg','dmgPct'],{dodge:.08,mpRegen:.5},'Stormwrought Tempest'],
+ ['wyrm','Wyrmbone',80,'#e8e0c8','Ivory plates of dragon bone, ridged and toothed.',['ward','thorns','regen','critDmg'],{ward:8,thorns:12},'Wyrmbone Slayer'],
+ ['star','Starforged',90,'#3a58b8','Midnight plate scattered with silver stars.',['mpRegen','dodge','critDmg','crit'],{mpRegen:.6,secondWind:.4},'Starforged Seer'],
+ ['god','Godforged',100,'#f0e0a0','Radiant white and gold plate with a halo and feathered wings.',['ward','lifesteal','critDmg','regen'],{secondWind:.5,dmgPct:.1,ward:8,mpRegen:.3},'Godforged Exemplar']];
 const ARM_SLOTS=[['h','head','Helm','head',.55],['c','chest','Chest','chest',1],['a','arms','Arms','arms',.35],['l','legs','Legs','legs',.45]];
 const ARM_NAMES={boar:['Tusked Boarhide Helm','Boarhide Cuirass','Boarhide Vambraces','Boarhide Greaves'],iron:['Ironscale Coif','Ironscale Hauberk','Ironscale Vambraces','Ironscale Greaves'],rime:['Rimeforged Helm','Rimeforged Breastplate','Rimeforged Bracers','Rimeforged Greaves'],ember:['Emberplate Helm','Emberplate Cuirass','Emberplate Vambraces','Emberplate Greaves'],sun:['Sunsteel Helm','Sunsteel Cuirass','Sunsteel Vambraces','Sunsteel Greaves'],void:['Voidglass Crown','Voidglass Cuirass','Voidglass Vambraces','Voidglass Greaves'],storm:['Stormwrought Helm','Stormwrought Breastplate','Stormwrought Vambraces','Stormwrought Greaves'],wyrm:['Wyrmbone Skull Helm','Wyrmbone Cuirass','Wyrmbone Vambraces','Wyrmbone Greaves'],star:['Starforged Helm','Starforged Breastplate','Starforged Vambraces','Starforged Greaves'],god:['Godforged Helm','Godforged Cuirass','Godforged Vambraces','Godforged Greaves']};
-const ARM_VAL={dodge:t=>+(.012*t+.01).toFixed(3),regen:t=>+(.08*t+.08).toFixed(2),thorns:t=>Math.round(2*t),dmgPct:t=>+(.012*t+.01).toFixed(3),crit:t=>+(.01*t+.01).toFixed(3),mpRegen:t=>+(.06*t+.04).toFixed(2),ward:t=>Math.round(1.2*t+.5),lifesteal:t=>+(.008*t+.02).toFixed(3),secondWind:t=>+(.2+.02*t).toFixed(2),hungerSlow:t=>+(.04*t+.06).toFixed(2)};
+const ARM_VAL={dodge:t=>+(.012*t+.01).toFixed(3),regen:t=>+(.08*t+.08).toFixed(2),thorns:t=>Math.round(2*t),dmgPct:t=>+(.012*t+.01).toFixed(3),crit:t=>+(.01*t+.01).toFixed(3),critDmg:t=>+(.02*t+.04).toFixed(3),mpRegen:t=>+(.06*t+.04).toFixed(2),ward:t=>Math.round(1.2*t+.5),lifesteal:t=>+(.008*t+.02).toFixed(3),secondWind:t=>+(.2+.02*t).toFixed(2),hungerSlow:t=>+(.04*t+.06).toFixed(2)};
 const armPct=v=>Math.round(v*100);
-const ARM_TXT={dodge:v=>`Enemies miss ${armPct(v)}% more.`,regen:()=>'Wounds close steadily.',thorns:v=>`Every enemy that strikes you takes ${v} damage.`,dmgPct:v=>`All damage +${armPct(v)}%.`,crit:v=>`+${armPct(v)}% double hits.`,mpRegen:()=>'Mana comes back faster.',ward:v=>`Every blow on you is ${v} lighter.`,lifesteal:v=>`Heals ${armPct(v)}% of melee damage dealt.`,secondWind:v=>`Once per 30 rounds, below a quarter health, heals ${armPct(v)}%.`,hungerSlow:v=>`Hunger falls ${armPct(v)}% slower.`};
+const ARM_TXT={dodge:v=>`Enemies miss ${armPct(v)}% more.`,regen:()=>'Wounds close steadily.',thorns:v=>`Every enemy that strikes you takes ${v} damage.`,dmgPct:v=>`All damage +${armPct(v)}%.`,crit:v=>`+${armPct(v)}% chance of a critical hit.`,critDmg:v=>`Critical hits do ${armPct(v)}% more damage.`,mpRegen:()=>'Mana comes back faster.',ward:v=>`Every blow on you is ${v} lighter.`,lifesteal:v=>`Heals ${armPct(v)}% of melee damage dealt.`,secondWind:v=>`Once per 30 rounds, below a quarter health, heals ${armPct(v)}%.`,hungerSlow:v=>`Hunger falls ${armPct(v)}% slower.`};
 const ARM_IDS=[],ARM_SET_OF={};
 for(const [key,name,lv,col,fl,keys,bonus,title] of ARM_SETS){
   const t=lv/10,A=Math.round(5+lv*.38),pr=Math.round(400*Math.pow(t,1.7));
@@ -22762,7 +22762,7 @@ const GOLD_TINT=['#fff070','#c88a10'];
   return _af.apply(this,arguments)}}
 {const _df=drawFloats;drawFloats=function(dt){
   for(let i=G.floats.length-1;i>=0;i--){const f=G.floats[i];if(!f.splat)continue;f.t+=dt;if(f.t>(f.crit?1:.75)){G.floats.splice(i,1);continue}
-    drawSplat(f.x+(f.seed%7-3)*3,f.y+24+f.t*8,f.R*(1+(f.t<.1?.2:0)),f.text,f.crit?GOLD_TINT:['#e83a2a','#8a1410'],f.seed,clamp(1.2-f.t*1.6,0,1),f.crit?'CRITICAL  1.3x damage':null)} // low on the body, drifting down, gone before it could reach the face
+    drawSplat(f.x+(f.seed%7-3)*3,f.y+24+f.t*8,f.R*(1+(f.t<.1?.2:0)),f.text,f.crit?GOLD_TINT:['#e83a2a','#8a1410'],f.seed,clamp(1.2-f.t*1.6,0,1),f.crit?'CRITICAL':null)} // low on the body, drifting down, gone before it could reach the face
   const keep=G.floats.filter(f=>f.splat);G.floats=G.floats.filter(f=>!f.splat);_df.apply(this,arguments);G.floats=G.floats.concat(keep)}}
 {const _ui=ui;ui=function(dt){_ui.apply(this,arguments);try{if(G.state!=='play'||G.menu||G.overview||G.map)return; // the portraits are on screen in the main view and in the inventory (a little lower there)
   const PY=G.inv.open?238:232;
@@ -82953,17 +82953,17 @@ const GH2_IDS=[];
     ['Constellation Blade',{chain:[.5,3]},0,'A midnight-blue blade scattered with stars.'],
     ['Starfall Axe',{chain:[.4,3],cleave:1},0,'An axe whose edge leaves a trail of falling stars.'],
     ['Comet Maul',{stun:.25,nova:[.2,.6]},0,'A maul like a fallen star, heavy and cold.'],
-    ['Starseeker Bow',{double:.3,bossdmg:.3,pierce:1},0,'A bow that finds its target in any darkness.']]],
+    ['Starseeker Bow',{double:.3,bossdmg:.3,pierce:1},{crit:.08},'A bow that finds its target in any darkness. +8% chance of a critical hit.']]],
   [94,'Bloodmoon',[
     ['Bloodmoon Edge',{bleed:[.45,18,6]},{lifesteal:.06},'A crimson blade that drinks what it cuts. The wielder heals 6% of the damage dealt.'],
-    ['Crimson Reaver',{exec:[.3,3.5]},{lifesteal:.06},'A red axe with a crescent edge. The wielder heals 6% of the damage dealt.'],
+    ['Crimson Reaver',{exec:[.3,3.5]},{lifesteal:.06,critDmg:.2},'A red axe with a crescent edge. The wielder heals 6% of the damage dealt, and critical hits do 20% more damage.'],
     ['Vampire Maul',{vuln:[.35,5],bleed:[.3,16,5]},{lifesteal:.07},'A dark red maul that never dries. The wielder heals 7% of the damage dealt.'],
     ['Bow of Red Tides',{bleed:[.4,16,5],double:.2},{lifesteal:.05},'A blood-red bow. The wielder heals 5% of the damage dealt.']]],
   [98,'Voidglass',[
-    ['Voidreaver',{curse:[.4,6],exec:[.3,3.5]},0,'A sword of black obsidian with violet light in its veins.'],
+    ['Voidreaver',{curse:[.4,6],exec:[.3,3.5]},{crit:.07,critDmg:.15},'A sword of black obsidian with violet light in its veins. +7% chance of a critical hit, and critical hits do 15% more damage.'],
     ['Riftcleaver',{cleave:1,fear:[.3,3]},0,'An obsidian axe that seems to cut the air itself.'],
     ['Null Maul',{blind:[.3,4],stun:.2},0,'A black glass maul that swallows the light around it.'],
-    ['Wraith Bow',{slow:[.4,4],pierce:1,curse:[.25,5]},0,'A bow of black glass. Its arrows pass through the foe like smoke.']]],
+    ['Wraith Bow',{slow:[.4,4],pierce:1,curse:[.25,5]},{critDmg:.25},'A bow of black glass. Its arrows pass through the foe like smoke. Critical hits do 25% more damage.']]],
   [102,'Sunsteel',[
     ['Dawnbringer',{bossdmg:.55,blind:[.25,3]},{regen:.2},'A golden blade that shines like noon. Wounds close steadily.'],
     ['Sunreaver',{shock:.3,burn:[.3,16,4]},{regen:.2},'A gold and white axe engraved with sun rays. Wounds close steadily.'],
@@ -82975,10 +82975,10 @@ const GH2_IDS=[];
     ['Leviathan Maul',{stun:.25,slow:[.4,4]},0,'A heavy bronze maul with a coral head.'],
     ['Tidecaller Bow',{poison:[.4,14,5],pierce:1,double:.2},0,'A bow of green bronze and pearl, strung with something that hums like the sea.']]],
   [110,'Godforged',[
-    ['Heavenfall',{exec:[.35,4],bossdmg:.5},{lifesteal:.08},'A radiant sword with feathered wings at the guard. The wielder heals 8% of the damage dealt.'],
+    ['Heavenfall',{exec:[.35,4],bossdmg:.5},{lifesteal:.08,critDmg:.3},'A radiant sword with feathered wings at the guard. The wielder heals 8% of the damage dealt, and critical hits do 30% more damage.'],
     ['Halo Axe',{cleave:1,chain:[.5,4],shock:.2},0,'A golden axe crowned with a halo ring.'],
     ['Seraph\'s Mace',{stun:.3,vuln:[.4,5]},{regen:.3},'A white and gold mace with a halo. Wounds close quickly.'],
-    ['Bow of Ascension',{double:.35,pierce:1,bossdmg:.4},0,'A golden bow wrapped in wings, that shoots light itself.']]]];
+    ['Bow of Ascension',{double:.35,pierce:1,bossdmg:.4},{crit:.1},'A golden bow wrapped in wings, that shoots light itself. +10% chance of a critical hit.']]]];
   const T=['Sword','Axe','Mace','Bow'],K=['sw','ax','mc','bw'],pc=x=>Math.round(x*100)+'%';
   const TX={bleed:v=>`${pc(v[0])} of hits leave the foe bleeding.`,burn:v=>`${pc(v[0])} of hits set the foe on fire.`,poison:v=>`${pc(v[0])} of hits poison the foe.`,curse:v=>`${pc(v[0])} of hits curse the foe.`,fear:v=>`${pc(v[0])} of hits make the foe flee.`,blind:v=>`${pc(v[0])} of hits blind the foe.`,slow:v=>`${pc(v[0])} of hits slow the foe.`,
     cleave:()=>'Every hit also cuts the foe behind the first.',pierce:()=>'Its arrows pass through to the foe behind.',stun:v=>`One hit in ${Math.round(1/v)} knocks the foe senseless.`,vuln:v=>`${pc(v[0])} of hits crack the foe's guard.`,exec:v=>`Against a foe under ${pc(v[0])} health it deals ${v[1]} times damage.`,bossdmg:v=>`Bosses and great beasts take ${pc(v)} more.`,shock:v=>`${pc(v)} of hits shake the ground and knock down foes within two squares.`,double:v=>`${pc(v)} of shots send a second arrow.`,

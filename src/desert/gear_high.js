@@ -57,17 +57,17 @@ const GH2_IDS=[];
     ['Constellation Blade',{chain:[.5,3]},0,'A midnight-blue blade scattered with stars.'],
     ['Starfall Axe',{chain:[.4,3],cleave:1},0,'An axe whose edge leaves a trail of falling stars.'],
     ['Comet Maul',{stun:.25,nova:[.2,.6]},0,'A maul like a fallen star, heavy and cold.'],
-    ['Starseeker Bow',{double:.3,bossdmg:.3,pierce:1},0,'A bow that finds its target in any darkness.']]],
+    ['Starseeker Bow',{double:.3,bossdmg:.3,pierce:1},{crit:.08},'A bow that finds its target in any darkness. +8% chance of a critical hit.']]],
   [94,'Bloodmoon',[
     ['Bloodmoon Edge',{bleed:[.45,18,6]},{lifesteal:.06},'A crimson blade that drinks what it cuts. The wielder heals 6% of the damage dealt.'],
-    ['Crimson Reaver',{exec:[.3,3.5]},{lifesteal:.06},'A red axe with a crescent edge. The wielder heals 6% of the damage dealt.'],
+    ['Crimson Reaver',{exec:[.3,3.5]},{lifesteal:.06,critDmg:.2},'A red axe with a crescent edge. The wielder heals 6% of the damage dealt, and critical hits do 20% more damage.'],
     ['Vampire Maul',{vuln:[.35,5],bleed:[.3,16,5]},{lifesteal:.07},'A dark red maul that never dries. The wielder heals 7% of the damage dealt.'],
     ['Bow of Red Tides',{bleed:[.4,16,5],double:.2},{lifesteal:.05},'A blood-red bow. The wielder heals 5% of the damage dealt.']]],
   [98,'Voidglass',[
-    ['Voidreaver',{curse:[.4,6],exec:[.3,3.5]},0,'A sword of black obsidian with violet light in its veins.'],
+    ['Voidreaver',{curse:[.4,6],exec:[.3,3.5]},{crit:.07,critDmg:.15},'A sword of black obsidian with violet light in its veins. +7% chance of a critical hit, and critical hits do 15% more damage.'],
     ['Riftcleaver',{cleave:1,fear:[.3,3]},0,'An obsidian axe that seems to cut the air itself.'],
     ['Null Maul',{blind:[.3,4],stun:.2},0,'A black glass maul that swallows the light around it.'],
-    ['Wraith Bow',{slow:[.4,4],pierce:1,curse:[.25,5]},0,'A bow of black glass. Its arrows pass through the foe like smoke.']]],
+    ['Wraith Bow',{slow:[.4,4],pierce:1,curse:[.25,5]},{critDmg:.25},'A bow of black glass. Its arrows pass through the foe like smoke. Critical hits do 25% more damage.']]],
   [102,'Sunsteel',[
     ['Dawnbringer',{bossdmg:.55,blind:[.25,3]},{regen:.2},'A golden blade that shines like noon. Wounds close steadily.'],
     ['Sunreaver',{shock:.3,burn:[.3,16,4]},{regen:.2},'A gold and white axe engraved with sun rays. Wounds close steadily.'],
@@ -79,10 +79,10 @@ const GH2_IDS=[];
     ['Leviathan Maul',{stun:.25,slow:[.4,4]},0,'A heavy bronze maul with a coral head.'],
     ['Tidecaller Bow',{poison:[.4,14,5],pierce:1,double:.2},0,'A bow of green bronze and pearl, strung with something that hums like the sea.']]],
   [110,'Godforged',[
-    ['Heavenfall',{exec:[.35,4],bossdmg:.5},{lifesteal:.08},'A radiant sword with feathered wings at the guard. The wielder heals 8% of the damage dealt.'],
+    ['Heavenfall',{exec:[.35,4],bossdmg:.5},{lifesteal:.08,critDmg:.3},'A radiant sword with feathered wings at the guard. The wielder heals 8% of the damage dealt, and critical hits do 30% more damage.'],
     ['Halo Axe',{cleave:1,chain:[.5,4],shock:.2},0,'A golden axe crowned with a halo ring.'],
     ['Seraph\'s Mace',{stun:.3,vuln:[.4,5]},{regen:.3},'A white and gold mace with a halo. Wounds close quickly.'],
-    ['Bow of Ascension',{double:.35,pierce:1,bossdmg:.4},0,'A golden bow wrapped in wings, that shoots light itself.']]]];
+    ['Bow of Ascension',{double:.35,pierce:1,bossdmg:.4},{crit:.1},'A golden bow wrapped in wings, that shoots light itself. +10% chance of a critical hit.']]]];
   const T=['Sword','Axe','Mace','Bow'],K=['sw','ax','mc','bw'],pc=x=>Math.round(x*100)+'%';
   const TX={bleed:v=>`${pc(v[0])} of hits leave the foe bleeding.`,burn:v=>`${pc(v[0])} of hits set the foe on fire.`,poison:v=>`${pc(v[0])} of hits poison the foe.`,curse:v=>`${pc(v[0])} of hits curse the foe.`,fear:v=>`${pc(v[0])} of hits make the foe flee.`,blind:v=>`${pc(v[0])} of hits blind the foe.`,slow:v=>`${pc(v[0])} of hits slow the foe.`,
     cleave:()=>'Every hit also cuts the foe behind the first.',pierce:()=>'Its arrows pass through to the foe behind.',stun:v=>`One hit in ${Math.round(1/v)} knocks the foe senseless.`,vuln:v=>`${pc(v[0])} of hits crack the foe's guard.`,exec:v=>`Against a foe under ${pc(v[0])} health it deals ${v[1]} times damage.`,bossdmg:v=>`Bosses and great beasts take ${pc(v)} more.`,shock:v=>`${pc(v)} of hits shake the ground and knock down foes within two squares.`,double:v=>`${pc(v)} of shots send a second arrow.`,

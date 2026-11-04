@@ -36,7 +36,7 @@ const GOLD_TINT=['#fff070','#c88a10'];
   return _af.apply(this,arguments)}}
 {const _df=drawFloats;drawFloats=function(dt){
   for(let i=G.floats.length-1;i>=0;i--){const f=G.floats[i];if(!f.splat)continue;f.t+=dt;if(f.t>(f.crit?1:.75)){G.floats.splice(i,1);continue}
-    drawSplat(f.x+(f.seed%7-3)*3,f.y+24+f.t*8,f.R*(1+(f.t<.1?.2:0)),f.text,f.crit?GOLD_TINT:['#e83a2a','#8a1410'],f.seed,clamp(1.2-f.t*1.6,0,1),f.crit?'CRITICAL  1.3x damage':null)} // low on the body, drifting down, gone before it could reach the face
+    drawSplat(f.x+(f.seed%7-3)*3,f.y+24+f.t*8,f.R*(1+(f.t<.1?.2:0)),f.text,f.crit?GOLD_TINT:['#e83a2a','#8a1410'],f.seed,clamp(1.2-f.t*1.6,0,1),f.crit?'CRITICAL':null)} // low on the body, drifting down, gone before it could reach the face
   const keep=G.floats.filter(f=>f.splat);G.floats=G.floats.filter(f=>!f.splat);_df.apply(this,arguments);G.floats=G.floats.concat(keep)}}
 {const _ui=ui;ui=function(dt){_ui.apply(this,arguments);try{if(G.state!=='play'||G.menu||G.overview||G.map)return; // the portraits are on screen in the main view and in the inventory (a little lower there)
   const PY=G.inv.open?238:232;
