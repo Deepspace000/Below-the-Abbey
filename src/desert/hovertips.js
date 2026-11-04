@@ -6,7 +6,7 @@ const HVT_TIPS={
   qsave:['Quick save','F5'],menu:['Menu','Esc'],map:['Map of this level','M / O'],wait:['Wait a turn','Z'],rest:['Rest and camp','R'],potion:['Drink the frequent use potion','H / P / 5'],
   ipotion:['Drink the frequent use potion','H / P / 5'],ipotb0:['Drink the first backup potion','6'],ipotb1:['Drink the second backup potion','7'],
   hero0:['Choose hero 1','1'],hero1:['Choose hero 2','2'],hero2:['Choose hero 3','3'],hero3:['Choose hero 4','4'],
-  attack:['Attack (hold the key to repeat)','Space / Enter'],special:['Special attack or spell','X'],turnL:['Turn left','Q / Left'],turnR:['Turn right','E / Right'],fwd:['Forward','W / Up'],back:['Back','S / Down'],left:['Step left','A'],right:['Step right','D'],
+  attack:['Attack (hold the key or the button to repeat)','Space / Enter'],special:['Special attack or spell','X'],turnL:['Turn left','Q / Left'],turnR:['Turn right','E / Right'],fwd:['Forward','W / Up'],back:['Back','S / Down'],left:['Step left','A'],right:['Step right','D'],
   bfcatch:['Catch the butterfly','N'],bfdig:['Dig with a shovel','G'],
   isort:['Sort the bag','S'],ihero0:['Hero 1','1'],ihero1:['Hero 2','2'],ihero2:['Hero 3','3'],ihero3:['Hero 4','4'],itab_inv:['The bag','I'],itab_char:['Character sheet','C'],itab_spell:['Spell book','B'],itab_powers:['Powers','K'],
   iclose:['Close the bag','I / Esc'],iequip:['Equip the chosen item','E'],iunequip:['Take off the chosen item','U'],iuse:['Use the chosen item','E'],invherbs:['Herbal remedies','Y'],
