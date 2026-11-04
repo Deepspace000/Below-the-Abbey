@@ -271,12 +271,30 @@ function yarBuild(){
     sc2(hs(n,13,41)<.5?'yar_lavender':'yar_tub',x,y,.8+hs(n,14,41)*.4)}
   // the beach: gulls, shells, driftwood and crabs
   const scB=(k,x,y,s)=>scenery.push({k,wx:x,wy:y,sc:s||1,decor:{k,walk:true,x:x|0,y:y|0}});
+  // shells and sticks are now many different small pieces, few of them, never the same picture twice close together
+  const BP={sh:['sh_conch','sh_scallop','sh_cockle','sh_whelk','sh_snail','sh_razor','sh_mussel','sh_dollar','sh_star','sh_peri'],pair:['sh_p1','sh_p2','sh_p3','sh_p4'],tri:['sh_t1','sh_t2','sh_t3','sh_t4'],big:['sh_b1','sh_b2','sh_b3','sh_b4'],peb:['peb1','peb2','peb3','peb4','weed1','weed2'],
+    one:['st_single','st_plank','st_fork','st_cross'],pile:['st_three','st_bundle','st_twigs','st_root']};
+  const placed=[],mir=k=>{const m=k+'_m';if(!IMG[m]&&IMG[k]&&IMG[k].width){const im=IMG[k],c=document.createElement('canvas');c.width=im.width;c.height=im.height;const g=c.getContext('2d');g.translate(im.width,0);g.scale(-1,1);g.drawImage(im,0,0);IMG[m]=c;NPC_H[m]=NPC_H[k]}return IMG[m]?m:k};
+  const piece=(list,h,x,y,n,tag)=>{let k;for(let i=0;i<list.length;i++){k='yar_'+list[(((h*list.length)|0)+i)%list.length];if(!placed.some(q=>q.k===k&&Math.hypot(q.x-x,q.y-y)<7))break}
+    placed.push({k,x,y});const sx=x+(hs(n,15,tag)-.5)*.3,sy=y+(hs(n,16,tag)-.5)*.2;scB(hs(n,17,tag)<.5?mir(k):k,sx,sy,.85+hs(n,18,tag)*.35)};
+  const crabs=[];
   for(let n=0;n<420;n++){
     const y=2+((hs(n,1,31)*(H-4))|0),sx=yarCoast(y),x=sx-1-hs(n,2,32)*13;
     if(x<G0.x1+2||y<9||y>H-10)continue;const cx=x|0,cy=y|0;if(!free(cx,cy)||fm[cy*W+cx]==='1')continue;
-    const r=hs(n,3,33),k=r<.34?'yar_gull_stand':r<.5?'yar_shells':r<.66?'yar_driftwood':r<.74?'yar_crab':null;if(!k)continue;
-    scB(k,x,y+hs(n,4,34)*.4-.2,.8+hs(n,5,35)*.5);
+    const r=hs(n,3,33),yy=y+hs(n,4,34)*.4-.2;
+    if(r<.34){scB('yar_gull_stand',x,yy,.8+hs(n,5,35)*.5);continue}
+    if(r<.5){if(hs(n,9,39)>.3)continue;const c=hs(n,10,40);
+      if(hs(n,11,41)<.18)piece(BP.peb,hs(n,12,42),x,yy,n,43);
+      else if(c<.45)piece(BP.sh,hs(n,12,42),x,yy,n,44);else if(c<.7)piece(BP.pair,hs(n,12,42),x,yy,n,45);else if(c<.85)piece(BP.tri,hs(n,12,42),x,yy,n,46);else if(c<.95)piece(BP.big,hs(n,12,42),x,yy,n,47);
+      else scB('yar_shells',x,yy,.8+hs(n,5,35)*.5);continue}
+    if(r<.66){if(hs(n,9,48)>.25)continue;const c=hs(n,10,49);
+      if(c<.55)piece(BP.one,hs(n,12,50),x,yy,n,51);else if(c<.95)piece(BP.pile,hs(n,12,52),x,yy,n,53);else scB('yar_driftwood',x,yy,.8+hs(n,5,35)*.5);continue}
+    if(r<.74){scB('yar_crab',x,yy,.8+hs(n,5,35)*.5);crabs.push([n,x,yy])}
   }
+  // a few loose singles by the crabs and by the water line
+  for(const [n,x,y] of crabs)if(hs(n,19,54)<.14)piece(BP.sh,hs(n,20,54),x+.45,y+.05,n,55);
+  for(let n=0;n<40;n++){const y=2+((hs(n,21,56)*(H-4))|0),x=yarCoast(y)-.6-hs(n,22,56)*.8,cx=x|0,cy=y|0;
+    if(hs(n,23,56)>.1||x<G0.x1+2||y<9||y>H-10||!free(cx,cy)||fm[cy*W+cx]==='1')continue;piece(BP.one,hs(n,24,56),x,y,n,57)}
   for(let n=0;n<40;n++){const x=58+hs(n,6,36)*28,y=40.2+hs(n,7,37)*1.6;scB('yar_gull_stand',x,y,.9+hs(n,8,38)*.3)}
   for(const [cx,cy,r] of YR_ISLANDS)for(let n=0;n<4;n++){const a=hs(cx,n,41)*TAU,x=cx+Math.cos(a)*r*.55,y=cy+Math.sin(a)*r*.55,i=(y|0)*W+(x|0);if(h[i]>.05&&h[i]<1)scB('yar_gull_stand',x,y,.9)}
   for(const [x,y] of [[44,38],[31,41]])items.push({k:'potion',x,y});
