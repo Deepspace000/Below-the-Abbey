@@ -30,7 +30,7 @@ function f2WaterPlan(){
   return T}
 function f2WaterBuild(){
   const WH=4.0,W=48,H=40;
-  const FL={o:f2TexFloor('ps_f2_tex_masegni','f2t_masegni',1.0)||'pale',h:f2TexFloor('ps_f2_tex_herring','f2t_herring',.95)||'wl2f1',q:f2TexFloor('ps_f2_tex_trachyte','f2t_trachyteq',1.0,[1.02,1.0,.97])||'wl2f2',c:f2TexFloor('ps_f2_tex_cobdark','f2t_cobdark',1.05)||'wetcobble',k:f2TexFloor('ps_f2_tex_curb','f2t_curb',.9)||'pale',t:f2TexFloor('ps_f2_tex_trachyte','f2t_trachyte',.92)||'pale',w:f2TexFloor('ps_f2_tex_water_a','f2t_watera',1.0,[.95,1.0,1.03]),wd:f2TexFloor('ps_f2_tex_water_b','f2t_waterb',1.0,[1,1,1])};
+  const FL={o:f2TexFloor('ps_f2_tex_masegni','f2t_masegni',1.12,[1.06,1.03,.94])||'pale',h:f2TexFloor('ps_f2_tex_herring','f2t_herring',1.08,[1.06,1.03,.94])||'wl2f1',q:f2TexFloor('ps_f2_tex_trachyte','f2t_trachyteq',1.1,[1.06,1.03,.95])||'wl2f2',c:f2TexFloor('ps_f2_tex_cobdark','f2t_cobdark',1.05)||'wetcobble',k:f2TexFloor('ps_f2_tex_curb','f2t_curb',.9)||'pale',t:f2TexFloor('ps_f2_tex_trachyte','f2t_trachyte',.92)||'pale',w:f2TexFloor('ps_f2_tex_water_a','f2t_watera',.5,[.45,.9,1.45]),wd:f2TexFloor('ps_f2_tex_water_b','f2t_waterb',.46,[.42,.85,1.35])};
   const C=f2Room({id:9824,ground:FL.o,path:FL.o,noBand:true,wh:WH,rw:0,
     routes:[{p:[[24,35],[24,32],[15,31],[15,25],[21,25],[21,10],[24,9],[24,3]],rw:0},{p:[[24,32],[24,30]],rw:0}],
     clear:[[19,33,29,37,null,null]],edge:()=>false});

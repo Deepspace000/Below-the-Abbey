@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.821';
+const VERSION='3.822';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -79427,7 +79427,7 @@ function f2WaterPlan(){
   return T}
 function f2WaterBuild(){
   const WH=4.0,W=48,H=40;
-  const FL={o:f2TexFloor('ps_f2_tex_masegni','f2t_masegni',1.0)||'pale',h:f2TexFloor('ps_f2_tex_herring','f2t_herring',.95)||'wl2f1',q:f2TexFloor('ps_f2_tex_trachyte','f2t_trachyteq',1.0,[1.02,1.0,.97])||'wl2f2',c:f2TexFloor('ps_f2_tex_cobdark','f2t_cobdark',1.05)||'wetcobble',k:f2TexFloor('ps_f2_tex_curb','f2t_curb',.9)||'pale',t:f2TexFloor('ps_f2_tex_trachyte','f2t_trachyte',.92)||'pale',w:f2TexFloor('ps_f2_tex_water_a','f2t_watera',1.0,[.95,1.0,1.03]),wd:f2TexFloor('ps_f2_tex_water_b','f2t_waterb',1.0,[1,1,1])};
+  const FL={o:f2TexFloor('ps_f2_tex_masegni','f2t_masegni',1.12,[1.06,1.03,.94])||'pale',h:f2TexFloor('ps_f2_tex_herring','f2t_herring',1.08,[1.06,1.03,.94])||'wl2f1',q:f2TexFloor('ps_f2_tex_trachyte','f2t_trachyteq',1.1,[1.06,1.03,.95])||'wl2f2',c:f2TexFloor('ps_f2_tex_cobdark','f2t_cobdark',1.05)||'wetcobble',k:f2TexFloor('ps_f2_tex_curb','f2t_curb',.9)||'pale',t:f2TexFloor('ps_f2_tex_trachyte','f2t_trachyte',.92)||'pale',w:f2TexFloor('ps_f2_tex_water_a','f2t_watera',.5,[.45,.9,1.45]),wd:f2TexFloor('ps_f2_tex_water_b','f2t_waterb',.46,[.42,.85,1.35])};
   const C=f2Room({id:9824,ground:FL.o,path:FL.o,noBand:true,wh:WH,rw:0,
     routes:[{p:[[24,35],[24,32],[15,31],[15,25],[21,25],[21,10],[24,9],[24,3]],rw:0},{p:[[24,32],[24,30]],rw:0}],
     clear:[[19,33,29,37,null,null]],edge:()=>false});
