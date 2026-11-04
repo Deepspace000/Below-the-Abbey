@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.810';
+const VERSION='3.811';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -82607,6 +82607,18 @@ function yarWoods(c){
     tree.add(I(x,y));used.add(K(x,y));trees.push([x,y,k]);
     decor.push({k,x,y,block:true,ox:(hs(x,y,86)-.5)*.5,oy:(hs(x,y,87)-.5)*.5,sc:.85+hs(x,y,88)*.35});
   }
+  // bushes between the forest and the beach: a loose strip just outside the east edge of the woods, and a thinner one behind the sand; walk-through, never near a house, a road, the park, the lighthouse or a trail
+  {const BUSH=['lbush0','lbush0_1','lbush0_2'];let nb=0;
+   for(let y=8;y<H-9;y++){const sh=typeof YP!=='undefined'?YP.shore(y):62;
+     for(let x=30;x<sh-3;x++){
+       if(!land(x,y)||keep(x,y)||used.has(K(x,y))||path.has(I(x,y))||tree.has(I(x,y))||inZone(x,y))continue;
+       const z=YW_ZONES.find(q=>y>=q[1]-1&&y<=q[3]+1&&x>q[2]&&x<=q[2]+7);          // just outside a zone's east edge
+       const nearSand=x>=sh-10&&x<=sh-4;                                           // behind the beach
+       const p=z?.07:nearSand?.045:0;if(!p||hs(x,y,95)>p)continue;
+       const key=BUSH[(hs(x,y,96)*BUSH.length)|0];used.add(K(x,y));nb++;
+       decor.push({k:key,x,y,block:false,walk:true,deco:true,ox:(hs(x,y,97)-.5)*.7,oy:(hs(x,y,98)-.5)*.5,sc:.85+hs(x,y,99)*.45})}}
+   if(typeof NPC_H!=='undefined')for(const k of BUSH)if(NPC_H[k]===undefined)NPC_H[k]=.8;
+   c.yarBushes=nb}
   // the squares that can be walked to from the back track (a creature or a chest is never put in a pocket the trees have closed off)
   const reach=new Set(),pass=(x,y)=>P.street[I(x,y)]||(land(x,y)&&!tree.has(I(x,y))),q0=[I(...YW_TRAILS[0][0])];reach.add(q0[0]);
   for(let a=0;a<q0.length;a++){const i=q0[a],x=i%W,y=(i/W)|0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const X=x+dx,Y=y+dy;if(X<2||Y<2||X>=W-2||Y>=H-2)continue;const j=I(X,Y);if(reach.has(j)||!pass(X,Y))continue;reach.add(j);q0.push(j)}}
