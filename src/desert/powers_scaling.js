@@ -40,7 +40,7 @@ const rng=(M,u)=>{const a=[1,2];a._M=M;a._u=u;return a}; // a damage range for t
    options: dot: share of the total that is damage over time. p: the plain words of the card (the number is added by the game). */
 const GE=.72,TAPER=.30; // (was .75 and .15: the late powers hit too hard, now about 20 percent less at level 80, 14 percent at 50, 4 percent at 1) // GE: one factor for all classes, TAPER: the damage for each point of cost falls by this much between level 1 and level 80, both set so that fights do not get much shorter than before (see POWERS_AFTER.md)
 const E_CLS={Warrior:.31,Barbarian:.30,Paladin:.25,Ranger:.35,Archer:.36,Thief:.38,Assassin:.33,Mage:.20,Sorcerer:.20,Priest:.20,Monk:.40,Goat:.36};
-const CM={Warrior:1.10,Barbarian:1.18,Paladin:.9,Ranger:1.13,Archer:1.10,Thief:1.18,Assassin:1.12,Mage:1.25,Sorcerer:1.25,Priest:1,Monk:1.22,Goat:1.22}; // a small correction for each class, from the fight simulations: the old ladders were not equally generous (the Monk's Flurry of Blows was a bargain, the Paladin's powers were traps)
+const CM={Warrior:.98,Barbarian:1.04,Paladin:.9,Ranger:.92,Archer:.90,Thief:1.18,Assassin:1.25,Mage:2.0,Sorcerer:2.0,Priest:1.8,Monk:.88,Goat:.92}; // a small correction for each class, from the fight simulations: the old ladders were not equally generous (the Monk's Flurry of Blows was a bargain, the Paladin's powers were traps)
 const eff=(cls,u)=>E_CLS[cls]*CM[cls]*GE*(1-TAPER*Math.max(0,Math.min(80,u)-1)/79);
 const SPEC={
 Warrior:[
