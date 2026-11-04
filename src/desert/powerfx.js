@@ -59,24 +59,29 @@ function pfxCrescent(cx,cy,R,a0,a1,th,col,alpha){
   const N=18;ctx.beginPath();for(let n=0;n<=N;n++){const a=a0+(a1-a0)*n/N,w=Math.sin(n/N*Math.PI);ctx.lineTo(cx+Math.cos(a)*(R+th*w),cy+Math.sin(a)*(R+th*w)*.8)}
   for(let n=N;n>=0;n--){const a=a0+(a1-a0)*n/N;ctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R*.8)}ctx.closePath();ctx.fillStyle=col;ctx.globalAlpha=alpha;ctx.fill();ctx.globalAlpha=1}
 /* painted, ragged effect pictures (assets/fx_*.png, light on black, so they are added over the view) */
-const PFX_IMG={slash:'slash',spin:'slash',claw:'claw',fire:'fire',bolt:'bolt',holy:'holy',ice:'ice',gas:'gas',shadow:'shadow',heal:'heal',rise:'heal',aura:'heal'};
+const PFX_IMG={slash:'slash',spin:'slash',claw:'claw',fire:'fire',bolt:'bolt',holy:'holy',ice:'ice',gas:'gas',shadow:'shadow',heal:'heal',rise:'heal',aura:'dome',shock:'shockring',fists:'impact',arrow:'arrowfly',rain:'arrowfly'};
 for(const n of new Set(Object.values(PFX_IMG)))loadImg('fx_'+n,'assets/fx_'+n+'.png');
+const sE2=u=>1-(1-u)*(1-u);
 function pfxPicture(f,p,rnd){
   const im=IMG['fx_'+PFX_IMG[f.k]];if(!im||!im.width)return false;const k=f.k,x=f.x,y=f.y;
   const inn=Math.min(1,p*5),out=Math.max(0,1-Math.max(0,p-.45)/.55),al=inn*out;
-  let sz=(k==='heal'||k==='aura'||k==='rise')?46:k==='holy'?86:k==='bolt'?80:k==='ice'||k==='fire'?(f.tw?54:76):k==='gas'||k==='shadow'?64:60;
+  let sz=(k==='heal'||k==='aura'||k==='rise')?46:k==='holy'?86:k==='shock'?96:k==='fists'?72:k==='arrow'?62:k==='rain'?46:k==='bolt'?80:k==='ice'||k==='fire'?(f.tw?54:76):k==='gas'||k==='shadow'?64:60;
   const grow=.55+p*.65,jx=(rnd()-.5)*(k==='slash'||k==='claw'?3:1.4),jy=(rnd()-.5)*2;
   const draw=(rot,mul,al2)=>{ctx.save();ctx.translate(x+jx,y+jy);ctx.rotate(rot);ctx.globalAlpha=Math.max(0,Math.min(1,al2));const w=sz*grow*mul;ctx.drawImage(im,-w/2,-w/2,w,w);ctx.restore()};
   const sd=f.seed||1,rot0=(sd%7-3)*.08;
-  if(k==='spin'){for(let n=0;n<3;n++)draw(p*5+n*2.1,1-n*.12,al*.9)}
+  if(k==='shock'){ctx.save();ctx.globalAlpha=al;const w=sz*(.5+p*1.0)*1.5;ctx.translate(x,y+12);ctx.drawImage(im,-w/2,-w*.62,w,w);ctx.restore()}
+  else if(k==='arrow'){for(let m=0;m<3;m++){const q=Math.min(1,Math.max(0,p*2.6-m*.12));if(q<=0)continue;ctx.save();ctx.globalAlpha=Math.min(1,q*4)*(q<.85?1:(1-q)/.15)*inn;ctx.translate(x-70*(1-sE2(q))+0,y+(m-1)*8);const w=62;ctx.drawImage(im,-w*.96,-w/2,w,w);ctx.restore()}}
+  else if(k==='rain'){for(let m=0;m<7;m++){const q=Math.min(1,Math.max(0,p*2.2-m*.07));if(q<=0)continue;ctx.save();ctx.globalAlpha=Math.min(1,q*4)*(q<.85?1:(1-q)/.15);ctx.translate(x+(m-3)*11+((f.seed*(m+3))%7-3),y-70*(1-q)+4);ctx.rotate(Math.PI/2+.08*(m%3-1));const w=46;ctx.drawImage(im,-w*.96,-w/2,w,w);ctx.restore()}}
+  else if(k==='aura'){ctx.save();ctx.globalAlpha=al*.85;const w=sz*1.7*(.8+.2*Math.sin(p*9));ctx.drawImage(im,x-w/2,y-w*.62,w,w);ctx.restore()}
+  else if(k==='spin'){for(let n=0;n<3;n++)draw(p*5+n*2.1,1-n*.12,al*.9)}
   else if(k==='claw'){draw(rot0-.1,1,al);draw(rot0-.1,.8,al*.5)}
   else if(k==='slash'){draw(rot0,1.15,al);draw(rot0+.12,.7,al*.7)}
   else if(k==='holy'){draw(0,1.1,al);draw(0,.6,al*.6)}
   else if(k==='aura'){draw(0,1.4,al*.7);draw(p*2,1,al*.5)}
   else draw(rot0*2+p*(k==='gas'||k==='shadow'?1.2:.3),1,al);
   /* ragged extras: torn sparks and little shards so it never looks clean */
-  const col=PFX_TINT[k]||'#fff',n=k==='slash'||k==='claw'?9:6;ctx.lineCap='butt';
-  for(let m=0;m<n;m++){const an=rnd()*TAU,d1=(8+rnd()*20)*(.4+p),d2=d1+3+rnd()*9;ctx.strokeStyle=hexA(col,out*(.5+rnd()*.5));ctx.lineWidth=.8+rnd()*1.6;const mx=x+Math.cos(an)*d1,my=y+Math.sin(an)*d1*.8;ctx.beginPath();ctx.moveTo(mx,my);ctx.lineTo((mx+x+Math.cos(an)*d2)/2+(rnd()-.5)*4,(my+y+Math.sin(an)*d2*.8)/2+(rnd()-.5)*4);ctx.lineTo(x+Math.cos(an)*d2,y+Math.sin(an)*d2*.8);ctx.stroke()}
+  const col=PFX_TINT[k]||'#fff',n=k==='slash'||k==='claw'?9:6;
+  for(let m=0;m<n;m++){const an=rnd()*TAU,d1=(8+rnd()*22)*(.4+p);ctx.fillStyle=hexA(col,out*(.5+rnd()*.5));ctx.beginPath();ctx.arc(x+Math.cos(an)*d1,y+Math.sin(an)*d1*.8,.7+rnd()*1.3,0,TAU);ctx.fill()}
   return true}
 function pfxDraw(f,p,rnd){
   if(pfxPicture(f,p,rnd))return;
