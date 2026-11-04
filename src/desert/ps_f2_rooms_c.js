@@ -109,7 +109,10 @@ function f2NightBuild(){
   for(const [x,y] of [[5,16],[43,15],[14,33]])C.chestAt(x,y,1);
   C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[.9,.95,1.05]});
   C.f2.decals={keys:['stain','fbones','fissure','gears','page','petals','claws','stain','fissure','petals','doll','glass'].map(k=>'f2_dc_nh_'+k),p:.5,sz:[.4,.75],far:13,keep:(x,y)=>x>=20&&x<=28&&y>=4&&y<=10};
+  const DKF=f2TexFloor(f2Soft('ps_f2_tex_r3night',{filter:'brightness(1.75) contrast(1.35)',tag:'r3'}),'f2t_r3dark',.2,[.8,.5,.65]),dkc=DKF?C.fl(DKF):null;   // the dark ground a blocking tree stands on
   const lv=C.done({glow:9});
+  // every tree, column or other blocking piece stands on a patch of black, so what cannot be walked through shows against the lighter ground
+  if(dkc!=null)for(const d of lv.decor)if(d.block&&!d.npc&&!d.span&&!d.roof&&!d.fly&&typeof d.k==='string'&&/(eyetree|nm_tree|nv_thorn|nv_spire|nv_handtree|nightthorn|nightoak|nv_cage|nv_books)/.test(d.k)&&d.x>=0&&d.y>=0&&d.x<48&&d.y<48)C.fm[d.y*48+d.x]=dkc;
   // staring doors: a few black wall squares that face a square the party can stand on become doors covered in eyes (they never open)
   {const f=f2FacGid('ps_f2_eyedoor',0,1,3.4,{tex:'texBlack_1',fit:false,rgb:[.95,.9,.9]}),TB=TERRS[9827]&&TERRS[9827].block,bs=new Set(lv.decor.filter(d=>d.block).map(d=>d.x+','+d.y));
    const stand=(x,y)=>lv.rows[y]&&lv.rows[y][x]==='.'&&!bs.has(x+','+y)&&!(TB&&TB[y*48+x]);

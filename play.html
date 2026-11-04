@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.823';
+const VERSION='3.824';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1776,7 +1776,7 @@ function healScaled(hi,tg,old,rank,group){return Math.max(old,Math.round(tg.max*
 function healCrit(t,amt){if(Math.random()<.12){const x=Math.round(amt*.75);t.hp=Math.min(t.max,t.hp+x);G._healCrit=1;return x}return 0} // a heal spell crits one time in eight, for three quarters more
 function rollDmg(h,mult){
   const r=heroDmgRange(h),w=heroWeapon(h);let d=rnd(r[0],r[1]),crit=false;
-  if(Math.random()<weaponCrit(w)+(w&&w.dbl||0)+ringSum(h,'dbl')+pasH(h,'crit')){d*=1.5;crit=true}G._critFlag=crit;
+  if(Math.random()<weaponCrit(w)+(w&&w.dbl||0)+ringSum(h,'dbl')+pasH(h,'crit')){d*=1.3;crit=true}G._critFlag=crit;
   return {d:Math.max(1,Math.round(d*(mult||1)*(1+pasH(h,'dmgPct')))),crit};
 }
 function specialInfo(i){
@@ -1864,7 +1864,7 @@ function heroAttack(i){
     const d0=DIRS[G.P.f];for(const k of [1,0,2]){const x=G.P.x+d0[0]*k,y=G.P.y+d0[1]*k,nd=G.decor.find(d=>d.npc&&d.walk&&!d.found&&d.x===x&&d.y===y);if(nd){startTalk(nd);return false}}
     msg(range>1?'No target in range.':'There is nothing within reach.');return false}
   const en=ENEMY_DEF[f.e.t].name,verb=range>1?'shoots':'hits';
-  if(Math.random()<heroHitPct(i,ENEMY_DEF[f.e.t].fly)){const r=rollDmg(h);msg(`${def.name} ${verb} the ${en} for ${r.d}${r.crit?' (critical! x1.5)':''}.`,r.crit?'#ffd76a':undefined);hurtEnemy(f.e,r.d);try{if(typeof armourLeech==='function')armourLeech(i,r.d)}catch(x){}try{if(w&&w.eff)weaponProc(i,f.e,r.d,w,f.k)}catch(x){console.error(x)}}
+  if(Math.random()<heroHitPct(i,ENEMY_DEF[f.e.t].fly)){const r=rollDmg(h);msg(`${def.name} ${verb} the ${en} for ${r.d}${r.crit?' (critical! x1.3)':''}.`,r.crit?'#ffd76a':undefined);hurtEnemy(f.e,r.d);try{if(typeof armourLeech==='function')armourLeech(i,r.d)}catch(x){}try{if(w&&w.eff)weaponProc(i,f.e,r.d,w,f.k)}catch(x){console.error(x)}}
   else{msg(`${def.name} misses.`,'#a09880');sfx('miss');f.e.alert=true}
   return true;
 }
@@ -22762,7 +22762,7 @@ const GOLD_TINT=['#fff070','#c88a10'];
   return _af.apply(this,arguments)}}
 {const _df=drawFloats;drawFloats=function(dt){
   for(let i=G.floats.length-1;i>=0;i--){const f=G.floats[i];if(!f.splat)continue;f.t+=dt;if(f.t>(f.crit?1:.75)){G.floats.splice(i,1);continue}
-    drawSplat(f.x+(f.seed%7-3)*3,f.y+24+f.t*8,f.R*(1+(f.t<.1?.2:0)),f.text,f.crit?GOLD_TINT:['#e83a2a','#8a1410'],f.seed,clamp(1.2-f.t*1.6,0,1),f.crit?'CRITICAL  1.5x damage':null)} // low on the body, drifting down, gone before it could reach the face
+    drawSplat(f.x+(f.seed%7-3)*3,f.y+24+f.t*8,f.R*(1+(f.t<.1?.2:0)),f.text,f.crit?GOLD_TINT:['#e83a2a','#8a1410'],f.seed,clamp(1.2-f.t*1.6,0,1),f.crit?'CRITICAL  1.3x damage':null)} // low on the body, drifting down, gone before it could reach the face
   const keep=G.floats.filter(f=>f.splat);G.floats=G.floats.filter(f=>!f.splat);_df.apply(this,arguments);G.floats=G.floats.concat(keep)}}
 {const _ui=ui;ui=function(dt){_ui.apply(this,arguments);try{if(G.state!=='play'||G.menu||G.overview||G.map)return; // the portraits are on screen in the main view and in the inventory (a little lower there)
   const PY=G.inv.open?238:232;
@@ -79764,7 +79764,10 @@ function f2NightBuild(){
   for(const [x,y] of [[5,16],[43,15],[14,33]])C.chestAt(x,y,1);
   C.ret();f2RetGate(C,f2Soft('ps_f2_illgate',{filter:'brightness(.85) contrast(1.15)',tag:'d'}),{one:true,wh:3.0,tex:'texBlack_2',rgb:[.9,.95,1.05]});
   C.f2.decals={keys:['stain','fbones','fissure','gears','page','petals','claws','stain','fissure','petals','doll','glass'].map(k=>'f2_dc_nh_'+k),p:.5,sz:[.4,.75],far:13,keep:(x,y)=>x>=20&&x<=28&&y>=4&&y<=10};
+  const DKF=f2TexFloor(f2Soft('ps_f2_tex_r3night',{filter:'brightness(1.75) contrast(1.35)',tag:'r3'}),'f2t_r3dark',.2,[.8,.5,.65]),dkc=DKF?C.fl(DKF):null;   // the dark ground a blocking tree stands on
   const lv=C.done({glow:9});
+  // every tree, column or other blocking piece stands on a patch of black, so what cannot be walked through shows against the lighter ground
+  if(dkc!=null)for(const d of lv.decor)if(d.block&&!d.npc&&!d.span&&!d.roof&&!d.fly&&typeof d.k==='string'&&/(eyetree|nm_tree|nv_thorn|nv_spire|nv_handtree|nightthorn|nightoak|nv_cage|nv_books)/.test(d.k)&&d.x>=0&&d.y>=0&&d.x<48&&d.y<48)C.fm[d.y*48+d.x]=dkc;
   // staring doors: a few black wall squares that face a square the party can stand on become doors covered in eyes (they never open)
   {const f=f2FacGid('ps_f2_eyedoor',0,1,3.4,{tex:'texBlack_1',fit:false,rgb:[.95,.9,.9]}),TB=TERRS[9827]&&TERRS[9827].block,bs=new Set(lv.decor.filter(d=>d.block).map(d=>d.x+','+d.y));
    const stand=(x,y)=>lv.rows[y]&&lv.rows[y][x]==='.'&&!bs.has(x+','+y)&&!(TB&&TB[y*48+x]);
