@@ -150,7 +150,7 @@ function f2Tree(name){return pspPic(name)}
 const F2_TREE_RX=new RegExp('^ps_('+F2_TREES.join('|')+')(_fl)?$');
 function f2Art(){
   if(F2.art)return;F2.art=1;
-  for(const t of F2_TINT)try{f2Tint(t[0],t[1],t[2],t[3])}catch(e){console.error('f2 tint',t[0],e)}
+  for(const t of F2_TINT)try{if(!f2Tint(t[0],t[1],t[2],t[3]))F2.art=0}catch(e){console.error('f2 tint',t[0],e)}   // a source picture still loading: try again next time, so a re-toned piece is never left as its plain green original
   // painted wall textures of other areas, aliased for gyTile (it reads IMG['gyp_'+name])
   for(const [a,b] of [['f2_rock','pf_rock'],['f2_ruin','pf_ruinwall']])if(IMG[b]&&IMG[b].width)IMG['gyp_'+a]=IMG[b];
   for(const t in ENEMY_DEF){const d=ENEMY_DEF[t];if(d&&d.f2&&d.f2h&&IMG[d.img]&&IMG[d.img].width){const im=IMG[d.img];d.w=+(d.f2h*im.width/im.height).toFixed(2)}}}
