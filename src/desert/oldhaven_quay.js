@@ -129,9 +129,7 @@ function quayBuild(){
       let c;if(x===b.door[0]&&y===b.door[1])c=ch(dgid);else if(front(x,y))c=win;else c=(x+y)%3===0?side:plain;
       solid(x,y,c);fm[y*W+x]='1';
     }
-    sky.push({x:(b.x0+b.x1+1)/2,y:(b.y0+b.y1+1)/2,k:'kh_ohroof1_'+b.roof,w:d+.6,z:b.wh-.03});
-    if(b.tower)sky.push({x:(b.x0+b.x1+1)/2+2,y:b.y0+2,k:'kh_ohtower1_2',w:3.6,z:b.wh-.03},{x:(b.x0+b.x1+1)/2+2,y:b.y0+2,k:'oq_lflag1',w:1.5,z:b.wh+8.4});
-    else if(k===0||k===2)sky.push({x:b.x0+2.5,y:(b.y0+b.y1)/2,k:'kh_ohtower1_'+(k?4:5),w:2.6,z:b.wh-.03});
+    // (no flat roof pictures: real ray-cast roofs from the table in oldhaven_roofs.js, with a tower on the Customs House and on two of the others)
     LEVEL_NAMES[b.id]=b.name;
   });
   /* ---- the piers: five of them, with the water between full of ships ---- */

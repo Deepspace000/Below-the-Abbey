@@ -25,7 +25,7 @@ function gyAvenueBuild(){
   const light=(x,y,col)=>{lights.push([x,y]);if(col)lcol[x+','+y]=col};
   // the hall: candles and a warm glow, and bones
   for(let x=5;x<=27;x+=4)light(x,9,[1.4,1.0,.55]);
-  for(const x of [4,12,20,27]){dec('candles',x,8,{block:true,sc:.7});dec('candles',x,10,{block:true,sc:.7})}
+  for(const x of [6,13,20,27]){dec('candles',x,8,{block:true,sc:.7});dec('candles',x,10,{block:true,sc:.7})}   // beside the vault doorways (x 4, 11, 18 and 25 in rows 7 and 11), never in front of them: the candles used to close every doorway
   for(const [x,y] of [[8,9],[16,9],[24,9]])dec('bones',x,y,{sc:.9});
   for(const [x,y] of [[3,8],[28,8],[3,10],[28,10],[14,8],[22,10]])dec('web',x,y,{sc:.5});
   // the eight vaults

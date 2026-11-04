@@ -4,7 +4,7 @@
    ========================================================================== */
 const SHORTCUTS=[ // [group, key shown, what it does]
  ['Moving','W / Up','Forward'],['Moving','S / Down','Back'],['Moving','A','Step left'],['Moving','D','Step right'],['Moving','Q / Left','Turn left'],['Moving','E / Right','Turn right'],['Moving','PgUp / PgDn','Look up, down (V: mouse look)'],
- ['Fighting','Space / Enter','Attack'],['Fighting','X','Special attack or spell'],['Fighting','H / P / 5','Drink the frequent use potion'],['Fighting','6 / 7','Drink the first / second backup potion'],['Fighting','Z','Wait a turn'],['Fighting','R','Rest and camp'],
+ ['Fighting','Space / Enter','Attack (hold it to keep attacking)'],['Fighting','X','Special attack or spell'],['Fighting','H / P / 5','Drink the frequent use potion'],['Fighting','6 / 7','Drink the first / second backup potion'],['Fighting','Z','Wait a turn'],['Fighting','R','Rest and camp'],
  ['Heroes','1 2 3 4','Choose a hero (also in the inventory)'],
  ['Screens','I','Items (the bag)'],['Screens','C','Character sheet'],['Screens','B','Spell book'],['Screens','K','Powers'],['Screens','J','Quests'],['Screens','L','Journal / Abilities'],
  ['Screens','F','Afflictions'],['Screens','U','Collection'],['Screens','M / O','Map of this level'],['Screens','T','Teleport stones'],['Screens','Esc','Menu, or close a screen'],
@@ -44,13 +44,12 @@ addEventListener('keydown',e=>{
 function drawKeysPage(){
   BTNS=[];veil(.86);bigPanel(8,6,464,308);
   txt('KEYBOARD SHORTCUTS',240,22,14,'#d8c88e','center',true);
-  const cols=[['Moving','Fighting','Heroes','In the bag'],['Screens','Exploring']];
+  const cols=[['Moving','Fighting','In the bag'],['Screens','Exploring','Heroes']];   // (Heroes sits on the right so that the left column fits the page)
   cols.forEach((col,ci)=>{let y=38;const x=22+ci*232;
     for(const g of col){txt(g.toUpperCase(),x,y+4,8.5,'#e8c870','left',true);ctx.fillStyle='rgba(216,200,142,.35)';ctx.fillRect(x,y+10,216,1);y+=17;
       for(const [,key,what] of SHORTCUTS.filter(s=>s[0]===g)){ctx.save();rrect(ctx,x,y-6,72,12,3);ctx.fillStyle='rgba(60,46,24,.95)';ctx.fill();ctx.lineWidth=1;ctx.strokeStyle='#8a7448';ctx.stroke();ctx.restore();
         txt(key,x+36,y,7.8,'#f0e4b4','center',true,undefined,68);txt(what,x+78,y,7.6,'#d8cba4','left',false,undefined,138);y+=11.5}
       y+=5}});
-  txt('Esc closes the screen you are in.',360,274,7.6,'#a89878','center');
   btnText('menuback','Back',310,284,100,22);
   btn('menuclose',0,0,DW,DH);BTNS.unshift(BTNS.pop());
 }

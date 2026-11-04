@@ -48,6 +48,7 @@ function ohTiles(){
     const key=kind+'|'+pat+'|'+wh+'|'+(img||'');if(C[key])return C[key];
     let S=typeof pat==='string'?OH_STY[pat]:{plain:'kh_ohwall1_'+pat,win:'kh_ohwall1_4',door:'kh_ohwall1_5',slit:'kh_ohwall1_3'};
     if(!S)S=OH_STY.gold;const Hp=Math.round(128*wh),pi=IMG[S.plain]||IMG.kh_ohwall1_0,units=Math.ceil(wh);
+    const wins=[];
     const c=mkCanvas(128,Hp,(x,w,h)=>{
       x.fillStyle='#8a8478';x.fillRect(0,0,w,h);
       for(let u=0;u<units;u++){
@@ -63,6 +64,7 @@ function ohTiles(){
         else if(u===1&&kind==='slit')im=IMG[S.slit];
         else if(u===2&&kind==='window'&&wh>=2.9)im=IMG[S.win];
         if(im){
+          for(const nm in OH_PANE)if(IMG[nm]===im){wins.push([u,nm]);break}
           const Z=S.zoom||1;
           if(Z>1&&(im===pi||im===IMG[S.alt])){ // masonry drawn bigger: fewer, chunkier stones, so a wall still reads as stone from a distance
             const sw=im.width/Z,sh=im.height/Z,fx=((u*.41+(typeof pat==='string'?pat.length:0)*.13+(wh*7)%1)%1),fy=((u*.57+.2)%1);
@@ -77,7 +79,7 @@ function ohTiles(){
     if(S.contrast&&kind!=='gate'){ // the painted stone is soft: stretch it round its mean so the courses and joints show from across a street
       let m0=0,m1=0,m2=0,n=0;for(let i=0;i<d.length;i+=4){m0+=d[i];m1+=d[i+1];m2+=d[i+2];n++}m0/=n;m1/=n;m2/=n;const k=S.contrast;
       for(let i=0;i<d.length;i+=4){d[i]=Math.max(0,Math.min(255,(d[i]-m0)*k+m0));d[i+1]=Math.max(0,Math.min(255,(d[i+1]-m1)*k+m1));d[i+2]=Math.max(0,Math.min(255,(d[i+2]-m2)*k+m2))}}
-    const id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;if(wh>=2.5&&(pat==='castle'||pat==='castle2'||pat==='fort')&&kind!=='gate')TEX[id].cren=.3; // castle walls carry battlements
+    const id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;if(wins.length)ohNightReg(id,d,wins,Hp);if(wh>=2.5&&(pat==='castle'||pat==='castle2'||pat==='fort')&&kind!=='gate')TEX[id].cren=.3; // castle walls carry battlements
     const gid=KH_NEXT_GID++;T_TILE[gid]=id;
     return C[key]={gid,tex:id};
   };
@@ -199,7 +201,7 @@ const OH_ART={
 function ohArt(){
   for(const k in OH_ART)for(const [n,h] of OH_ART[k]){if(IMG[n])NPC_H[n]=NPC_H[n]===undefined||k==='oak'||k==='orchard'||k==='willow'?h:NPC_H[n]}
   NPC_H.ltree0=3.6;NPC_H.ltree4=3.8;NPC_H.ltree8=3.4;NPC_H.ltree12=3.7;NPC_H.ltree19=3.2;NPC_H.ltree17=2.6;NPC_H.ltree18=2.7;
-  NPC_H.kh_city2_1=1.7;Object.assign(NPC_H,{kh_ohgard1_0:1.7,kh_ohgard1_1:.95,kh_ohgard1_2:2.3,kh_ohgard1_3:.62,kh_ohgard1_4:1.0,kh_ohgard1_5:.95,kh_ohgard2_0:1.15,kh_ohgard2_1:.95,kh_ohgard2_2:1.35,kh_ohgard2_3:.7,kh_ohgard2_4:.75});
+  NPC_H.kh_city2_1=1.7;Object.assign(NPC_H,{kh_ohgard1_0:1.44,kh_ohgard1_1:.82,kh_ohgard1_2:2.43,kh_ohgard1_3:.55,kh_ohgard1_4:1.16,kh_ohgard1_5:1.14,kh_ohgard2_0:.92,kh_ohgard2_1:.89,kh_ohgard2_2:1.34,kh_ohgard2_3:.72,kh_ohgard2_4:.76});
   IMG.oh_well=IMG.kh_city1_1;NPC_H.oh_well=1.5;IMG.oh_pergola=IMG.kh_city2_4;NPC_H.oh_pergola=2.4;IMG.oh_topiary=IMG.kh_city2_1;NPC_H.oh_topiary=1.7;NPC_H.kh_city2_4=2.4;NPC_H.kh_city2_5=.55;NPC_H.kh_city1_1=1.5;NPC_H.kh_city2_3=.9;NPC_H.lflora0=.55;NPC_H.lflora0_1=.55;NPC_H.lflora0_2=.55;NPC_H.lbush0=.8;NPC_H.lbush0_1=.8;
   for(let i=0;i<6;i++)NPC_H['kh_stall1_'+i]=1.5;for(const i of [0,1,3])NPC_H['kh_stall2_'+i]=.8;NPC_H.kh_stall2_2=.9;
   // the roofs: painted gables in several colours, some warmed up from the grey ones
@@ -296,6 +298,7 @@ function ohBuild(){
   const walk=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true},o||{}))};
   const near=(x,y,rad)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(free(x+dx,y+dy))return [x+dx,y+dy]}return null};
   OH.near=near;OH.free=free;
+  const G0ok=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&!block[y*W+x];
   const person=(id,x,y,rad)=>{const kp=KH_KEEPERS[id];if(!kp)return null;const q=near(x,y,rad||3);if(!q)return null;walk(khFaceKey(kp.face),q[0],q[1],{npc:id,sc:kp.sc||1});return q};
   const pick=(arr,a,b,c)=>arr[(hs(a,b,c)*arr.length)|0];
   const P=k=>IMG['kh_'+k]?'kh_'+k:null,FOUNT=P('ohgard1_0')||'fountain',BENCH=P('ohgard1_3')||'yar_bench',ARBOUR=P('ohgard1_2'),HEDGE=P('ohgard1_1'),SUNDIAL=P('ohgard1_4'),FCART=P('ohgard1_5'),HIVES=P('ohgard2_0'),RBARREL=P('ohgard2_1'),WASH=P('ohgard2_2'),WBARROW=P('ohgard2_3'),HERBS=P('ohgard2_4');
@@ -577,10 +580,8 @@ function ohBuild(){
       solid(x,y,c);
     }
     // the roof: a painted gable on top of the walls, and now and then a tower standing over the house
-    const T=OH_TYPES[h.type],rk=pick(T.roofs,h.x0,h.y0,21),rimg=OH_ROOF[rk]||'kh_ohroof1_2';
-    sky.push({x:(h.x0+h.x1+1)/2,y:(h.y0+h.y1+1)/2,k:rimg,w:h.w+.5,z:wh-.03});
-    const tk=hs(h.x0,h.y0,22);
-    if(T.tower||tk<.06)sky.push({x:(h.x0+h.x1+1)/2+(hs(h.x0,h.y0,23)-.5)*2,y:(h.y0+h.y1+1)/2,k:'kh_ohtower1_'+[0,1,4,5][(hs(h.x0,h.y0,24)*4)|0],w:2.8,z:wh-.03});
+    // (no flat roof pictures: the roofs are real ones, ray-cast over the walls like Thornwick's, from this table: oldhaven_roofs.js)
+    const T=OH_TYPES[h.type];h.rk=pick(T.roofs,h.x0,h.y0,21);h.tw=!!(T.tower||hs(h.x0,h.y0,22)<.06);   // the roof kind, and whether a tower stands over the house
     // window boxes and tubs at the door
     if(hs(h.x0,h.y0,95)<.7){const along=(h.face==='N'||h.face==='S')?[[h.front[0]-1,h.front[1]],[h.front[0]+1,h.front[1]]]:[[h.front[0],h.front[1]-1],[h.front[0],h.front[1]+1]];
       for(const [tx,ty] of along){if(!free(tx,ty)||hs(tx,ty,96)>.6)continue;const k=hs(tx,ty,97)<.5?'yar_tub':art('box',tx,ty,98)||'yar_lavender';if(IMG[k]){used.add(tx+','+ty);scenery.push({k,wx:tx+.5,wy:ty+.5,sc:.85+hs(tx,ty,99)*.3,decor:{k,walk:true,x:tx,y:ty}})}}}
@@ -632,6 +633,9 @@ function ohBuild(){
   const named=[['oh_cap',GX,22],['oh_guardA',GX-3,20],['oh_guardB',GX+3,20],['oh_m1',66,50],['oh_m2',82,50],['oh_w1',64,52],['oh_w2',72,56],['oh_k1',76,56],['oh_o1',84,56],['oh_s1',68,47],['oh_pr',80,48]];
   for(const [id,x,y] of named)person(id,x,y,5);
   if(typeof OH_SIEGEFOLK!=='undefined')for(const [id,x,y] of OH_SIEGEFOLK)person(id,x,y,5); // the people who help in the siege
+  if(typeof OH_GROUNDFOLK!=='undefined')for(const [id,x,y] of OH_GROUNDFOLK)person(id,x,y,1); // the castle grounds: a page, a chandler, an old guard
+  if(typeof OH_GROUNDITEMS!=='undefined')for(const [k,x,y] of OH_GROUNDITEMS)if(ITEMDEF[k]&&G0ok(x,y))lv.items.push({k,x,y}); // things on the ground round the keep
+  if(typeof OH_GROUNDSECRET!=='undefined')for(const q of OH_GROUNDSECRET)decor.push({k:'chest',x:q.chest[0],y:q.chest[1],block:true,kname:'sr_'+q.id}); // the chests of the three hidden rooms (opened by srApply)
   // the king's road is lined with a few guards, not a regiment
   let sn=0;
   for(let y=70;y<=134;y+=14){for(const sx of [OH_ROAD.x0,OH_ROAD.x1]){const id=OH_SOLDIER[(sn++)%OH_SOLDIER.length],kp=KH_KEEPERS[id];if(free(sx,y)&&kp)walk(khFaceKey(kp.face),sx,y,{npc:id,sc:kp.sc})}}
@@ -824,10 +828,14 @@ function oldhavenPardon(){
   const F=G.flags;if(F.pardoned)return;F.pardoned=1;F.wanted=0;
   for(const e of G.enemies)if(e.t==='rguard'&&e.hp>0){e.hp=0;e.dying=.55}
   const hb=G.decor.find(d=>d.npc==='oh_halb');if(hb)hb.hidden=true;
-  startCut('oldhavenPardon',()=>{if(qSt('vq6')===null)qAccept('vq6');if(qReady('vq6'))qTurnIn('vq6');msg('The warrant is void. The ransom is lifted.','#ffe36a');sfx('win')});
+  startCut('oldhavenPardon',()=>{if(qSt('vq6')===null)qAccept('vq6');if(qReady('vq6'))qTurnIn('vq6');msg('The warrant is void. The ransom is lifted.','#ffe36a');sfx('win');ohSixQuest()});
 }
+/* the king hands the party the slip with six names, so the quest of the six names (The Six Names, Captain Aldwyn at the gate can tell more) is in the Quests list at once; a party that was
+   pardoned before this (and so has no such quest) gets it when it next enters Oldhaven or its court */
+function ohSixQuest(){const F=G.flags;if(!F.pardoned||typeof QUESTS==='undefined'||!QUESTS.oq0||qSt('oq0')!==null)return;qAccept('oq0');msg('The king\'s slip names six people at the fair green, east of the middle of Oldhaven. Captain Aldwyn at the gate can tell you more.','#ffe36a')}
 function ohEnter(n){
   const F=G.flags;
+  if(n===OH.ID||n===OH.COURT)ohSixQuest();
   if(n===OH.COURT){
     const k=G.decor.find(d=>d.npc==='oh_halb');if(k&&F.pardoned)k.hidden=true;const v=G.decor.find(d=>d.npc==='oh_vance');if(v&&(F.courtFight))v.hidden=true;
     if(!F.courtSeen){F.courtSeen=1;if(qSt('vq6')===null)qAccept('vq6');startCut('oldhavenCourt',ohCourtFight)}

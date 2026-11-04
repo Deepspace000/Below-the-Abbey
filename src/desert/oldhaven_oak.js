@@ -97,13 +97,12 @@ const OAKD={
 };
 // the woodwardens: Hale gives the first two quests and the camp one
 khNpc('oa_hale','Hale, captain of the woodwardens','kh_ohfolk7_4',()=>{
-  const F=G.flags,O=OAKF();
-  if(!O.metHale){O.metHale=1;return say('You have come through the east gate? Then you have seen the city under siege and survived. I am Hale, captain of the woodwardens. We keep the Oakwood. Ask me about work, or about the old king’s family.',[BYE])}
+  const F=G.flags,O=OAKF(),first=!O.metHale;O.metHale=1;   // (at the first meeting he offers his work at once: the gold ! over him must not lead to a greeting only)
   const nodes=[];
   if(qSt('oa2')!=='done')nodes.push(['About the wolves',()=>qNode('oa2',OAKD.oa2)]);
   if(qSt('oa2')==='done'&&qSt('oa6')!=='done')nodes.push(['About the Ash Guard camp',()=>qNode('oa6',OAKD.oa6)]);
   nodes.push(['About the old king’s family',()=>say('The king has a granddaughter. She was raised here, with us, because the chancellor was not safe to trust. Her name is Wren. Speak to her, and ask her to show you what she keeps.',[BYE])]);
-  return say('Hale, captain of the woodwardens. The oaks are old and the wolves are hungry. What can I do for you?',[...nodes,BYE]);
+  return say(first?'You have come through the east gate? Then you have seen the city under siege and survived. I am Hale, captain of the woodwardens. We keep the Oakwood. I have work, if you want it, and I can tell you about the old king’s family.':'Hale, captain of the woodwardens. The oaks are old and the wolves are hungry. What can I do for you?',[...nodes,BYE]);
 },{q:['oa2','oa6']});
 khNpc('oa_ward1','A woodwarden','kh_ohfolk7_4',()=>say('Quiet, please. The oaks listen.',[BYE]));
 khNpc('oa_ward2','A woodwarden','kh_ohfolk7_5',()=>say('I walk the same path every day. The oaks have never once told me it was the wrong path.',[BYE]));

@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.787';
+const VERSION='3.810';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1194,7 +1194,7 @@ function nz(dur,vol,type,f0,f1,delay){
 }
 /* recorded sounds (CC0, see assets/audio/CREDITS.txt): area loops, music, footsteps, sword clashes, village noises */
 const SMP={};let SND_LOADING=false;
-const SNDLIST=['music_dungeon1','wind_loop','rain_loop','dungeon_ambience','village_ambience','music_tavern','music_feast','step_stone1','step_stone2','step_stone3','step_stone4','step_wood1','step_wood2','step_wood3','step_wood4','step_dirt1','step_dirt2','step_dirt3','step_dirt4','clash1','clash2','clash3','hit1','hit2','church_bell1','church_bell2','a_goat','a_sheep','a_chicken','a_cow','a_dog','cart_horse','horse_hooves'];
+const SNDLIST=['wind_loop','rain_loop','dungeon_ambience','village_ambience','music_tavern','music_feast','step_stone1','step_stone2','step_stone3','step_stone4','step_wood1','step_wood2','step_wood3','step_wood4','step_dirt1','step_dirt2','step_dirt3','step_dirt4','clash1','clash2','clash3','hit1','hit2','church_bell1','church_bell2','a_goat','a_sheep','a_chicken','a_cow','a_dog','cart_horse','horse_hooves'];
 function loadSounds(){
   if(SND_LOADING||!AC)return;SND_LOADING=true;
   for(const n of SNDLIST)fetch('assets/audio/'+n+'.mp3?v='+VERSION).then(r=>r.arrayBuffer()).then(b=>AC.decodeAudioData(b)).then(buf=>{SMP[n]=buf}).catch(()=>{});
@@ -1221,6 +1221,8 @@ function setLayer(n,target){
 }
 const EMBERS_LEVELS=[1,9,12,23,25,26,27,28]; // the first crypt and the tiny dungeons get their own track
 const DUNGEON_LEVELS=[1,8,9,11,12,18,20,21,23,25,26,27,28,31];
+const CEMETERY_LEVELS=[20,431,433,434,530,531,532,533,534,535,536,537,538,539,540,541,542]; // every cemetery and the crypts under them (Ironhill Burial Ground, the monastery's Quiet Cemetery, Wenlock Graveyard): Alone in a Cemetery plays in all of them
+const CEMETERY_OUTDOOR=[431,530];
 function huntTick(){
   const F=G.flags;
   if(!F.wanted||(LEVEL!==19&&LEVEL!==22)||G.state!=='play'||G.cut||G.talk||G.menu||G.inv.open||G.loot||G.timers.length)return;
@@ -1294,14 +1296,44 @@ function streamLoad(){
   const pr=el.play();if(pr&&pr.catch)pr.catch(()=>{STREAM.playing=false});STREAM.playing=true;
 }
 const TITLE_MUSIC=false;
+/* THE MUSIC OF THE DUNGEONS. Each time a dungeon is entered one of three recordings is chosen, a third each (they were four players, two of them the same recording; the duplicate is gone).
+   The deserts are left out: their dungeons stream their own tracks (STREAM_LISTS). Levels that have their own music (the Underlevel, the Deeper Hollow, the Hollow Land, Sale, the
+   Pale Spire and so on) keep it. Leaving a dungeon and coming back chooses again. To add a player, add its name to DNG_PLAYERS (assets/audio/<name>.mp3, in the extra list of layer
+   names below, credited in assets/audio/CREDITS.txt). */
+const DNG_PLAYERS=['music_dng_creepy','music_dng_ambiance','music_dng_cave'];
+function dngMusic(T,v){
+  if(G._dngLv!==LEVEL||!G._dngPick){G._dngLv=LEVEL;G._dngPick=DNG_PLAYERS[(Math.random()*DNG_PLAYERS.length)|0]}
+  T[G._dngPick]=v;loadLazy(G._dngPick)}
+/* THE SOUNDSCAPE OF THE OPEN COUNTRY (nature_ambience.mp3). A quiet layer under the music (about six decibels below it, on the ambience slider) in the open country that is not a town:
+   the grounds and the Thornwood (2), Gandrick's Wood (7), the Ironhill Road (10) and Moor (19), the Burial Ground (20), the Greyfang Pass (22), Greendale Forest (32), the Oakwood (311),
+   the Pilgrim's Path (400 to 423), the Maze of Gardens (490) and Wenlock (496). Not in towns, deserts, the sea, the Blighted Lands (96xx and Sale), the Hollow Grasslands (470 to 474),
+   Blackbriar Wood (the Witchwood, 520) or the Wenlock graveyard (530, its own storm). It fades out while it rains (the Ironhill Road is always wet, so it is nearly silent there). */
+const NATURE_LEVELS=new Set([2,7,10,19,20,22,32,311,490,496]);
+function natureVol(){
+  const n=LEVEL;if(!(NATURE_LEVELS.has(n)||(n>=400&&n<=423)))return 0;
+  let v=.45;if(typeof BKS!=='undefined'&&BKS.rain>.02)v*=Math.max(0,1-BKS.rain*1.6);return v}
+/* THE FOREST RAIN SOUNDSCAPE (forest_rain_ambience.mp3): a quiet layer under the music in the two places the nature soundscape leaves out, the Hollow Grasslands (470, outdoors; not the
+   beehive dungeons) and Blackbriar Wood (the Witchwood, 520; not its cottage rooms). It is lowered while real rain is falling so the two rains do not stack. */
+const FORESTRAIN_LEVELS=new Set([470,520]);
+function forestRainVol(){
+  if(!FORESTRAIN_LEVELS.has(LEVEL))return 0;
+  let v=.45;if(typeof BKS!=='undefined'&&BKS.rain>.02)v*=Math.max(.25,1-BKS.rain*.8);return v}
+/* RAIN ON THE LAKE (rain_lake_ambience.mp3): on the Ironhill Road (10) a second rain recording swells with the rain and fades away when the rain stops. Its volume follows how hard it is
+   raining (BKS.rain, the weather of blight_sky.js: a steady drizzle of about .55 on the road, showers of .9), and the game eases every layer up and down over a few seconds, so there
+   is no jump. It is fetched on arrival so that it is ready when the rain comes. */
+function rainLakeVol(){
+  if(LEVEL!==10)return 0;const r=(typeof BKS!=='undefined'&&BKS.rain)||0;return r>.02?Math.min(.6,r*.75):0}
 function areaAudio(){
+  if(G._dngLv!==undefined&&G._dngLv!==LEVEL)G._dngLv=undefined;   // a new level: the next dungeon chooses its music again
   if(!AC)return;loadSounds();windTick();try{if(typeof seaSoundTick==='function')seaSoundTick()}catch(e){}try{if(typeof yarSoundTick==='function')yarSoundTick()}catch(e){}streamTick();
   const T={};
   if(G.sit&&G.time>G.sit.t)G.sit=null;
   if(TITLE_MUSIC&&(G.state==='title'||G.state==='create'||G.state==='goto')&&!G.mute)T.music_tavern=.4; // the music of the Prism Cellars plays on the title screen (switched off for now: set TITLE_MUSIC to true)
   if(G.state==='play'&&!G.mute){
+    {const nv=natureVol();if(nv>.01){T.nature_ambience=nv;loadLazy('nature_ambience')}const fv=forestRainVol();if(fv>.01){T.forest_rain_ambience=fv;loadLazy('forest_rain_ambience')}if(LEVEL===10)loadLazy('rain_lake_ambience');const lv=rainLakeVol();if(lv>.01)T.rain_lake_ambience=lv}   // the soundscape of the open country, under whatever music the area has
     if(G.sit){T.music_mithral=.55;loadLazy('music_mithral')}
     if(LEVEL===32){T.music_mithral=.55;loadLazy('music_mithral')}
+    else if(CEMETERY_LEVELS.includes(LEVEL)){T.music_cemetery=.55;loadLazy('music_cemetery');if(!CEMETERY_OUTDOOR.includes(LEVEL))T.dungeon_ambience=.14}
     else if(LEVEL===33){T.village_ambience=.22;T.wind_loop=.1}
     else if(LEVEL===475){T.music_deeperhollow=.55;loadLazy('music_deeperhollow')} // the Deeper Hollow maze and its boat lakes: Paranoid Truth
     else if(LEVEL===364||LEVEL===470){T.music_hollowland=.55;loadLazy('music_hollowland')} // the Hollow Land and the Hollow Grasslands, outdoors: Searching
@@ -1314,9 +1346,9 @@ function areaAudio(){
     else if(LEVEL===305){T.village_ambience=.5;T.music_embers=.4;loadLazy('music_embers')} // the first dungeon's music plays in the towns (not Khemetra)
     else if(typeof yarSea==='function'&&yarSea(LEVEL)){T.village_ambience=LEVEL===290||LEVEL===304?.22:.06;if(LEVEL===290||LEVEL===304){T.music_embers=.4;loadLazy('music_embers')}}
     else if(STREAM_LISTS[LEVEL]&&LEVEL>=50&&!(LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)){T.dungeon_ambience=.18}
-    else if(EMBERS_LEVELS.includes(LEVEL)){T.dungeon_ambience=.22;T.music_embers=.55;loadLazy('music_embers')}
-    else if(DUNGEON_LEVELS.includes(LEVEL)){T.dungeon_ambience=.3;T.music_dungeon1=.5}
-    else if(LEVEL===39){T.music_dungeon1=.3}
+    else if(EMBERS_LEVELS.includes(LEVEL)){T.dungeon_ambience=.22;dngMusic(T,.5)}
+    else if(DUNGEON_LEVELS.includes(LEVEL)){T.dungeon_ambience=.3;dngMusic(T,.5)}
+    else if(LEVEL===39){dngMusic(T,.3)}
     else if(LEVEL===40){T.music_tavern=.3}
     else if(LEVEL===22){climbNotes()}
     else if(LEVEL===2){T.music_andorios=.55;loadLazy('music_andorios')}
@@ -1328,7 +1360,7 @@ function areaAudio(){
     else if(LEVEL===6||LEVEL===16){T.music_tavern=.55;T.village_ambience=.18}
   }
   for(const n of Object.keys(T)){T[n]*=SNDOPT[SND_CAT(n)];if(!(T[n]>0))delete T[n]}
-  for(const n of SNDLIST.concat(['music_mithral','music_wanderer','music_embers','music_andorios','music_underlevel','music_hollowland','music_deeperhollow'])){if(n in T||LAYERS[n])setLayer(n,T[n]||0)}
+  for(const n of SNDLIST.concat(['music_mithral','music_cemetery','music_wanderer','music_embers','music_andorios','music_underlevel','music_hollowland','music_deeperhollow'].concat(DNG_PLAYERS,['nature_ambience','forest_rain_ambience','rain_lake_ambience']))){if(n in T||LAYERS[n])setLayer(n,T[n]||0)}
   if(G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===3||LEVEL===13||LEVEL===29||LEVEL===30||LEVEL===496)){
     if(!G.bellNext)G.bellNext=G.time+50+Math.random()*60;
     if(G.time>G.bellNext){G.bellNext=G.time+150+Math.random()*100;const v=(LEVEL===29||LEVEL===30||LEVEL===496)?.3:.6;playSmp('church_bell1',v);setTimeout(()=>playSmp('church_bell2',v*.8),2600);if(LEVEL===3||LEVEL===13)msg('The church bell tolls.','#d8c88e')}
@@ -2739,7 +2771,7 @@ function render3D(){
     for(let k=0;k<tcN;k++){const o=((tcY+k)*VW+x)*4,a=(k+1)/(tcN+1);D[o]=TCUTB[k*3]+(D[o]-TCUTB[k*3])*a;D[o+1]=TCUTB[k*3+1]+(D[o+1]-TCUTB[k*3+1])*a;D[o+2]=TCUTB[k*3+2]+(D[o+2]-TCUTB[k*3+2])*a} // the cut top fades into what is behind it
     } // next wall of this column
   }
-  if((LEVEL===3||LEVEL===13||LEVEL===290)&&typeof TKR3D_R==='function')TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB); // opt-in: Thornwick's roofs, ray-cast per column with the walls' own projection (thornwick_roofs.js)
+  if((LEVEL===3||LEVEL===13||LEVEL===290||LEVEL===304||LEVEL===305)&&typeof TKR3D_R==='function')TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB); // opt-in: Thornwick's roofs, ray-cast per column with the walls' own projection (thornwick_roofs.js)
   vctx.putImageData(vimg,0,0);
   for(const L of LIGHTS){const h=L._h;if(!L.taken&&h&&h.col>=0&&h.ty<=zbuf[h.col]+.45)G.hits.push(h)}
   // wall torches: an iron plate on the wall and a wooden stick that runs out to the cloth-wrapped head under the flame
@@ -7083,7 +7115,7 @@ function drawWorld(){ // a slightly softer, lower-res picture; the screen-wide d
   if(LOWC.width!==w){LOWC.width=w;LOWC.height=h}
   LOWX.imageSmoothingEnabled=true;LOWX.drawImage(vc,0,0,w,h);
   ctx.imageSmoothingEnabled=false;ctx.drawImage(LOWC,0,0,420,210);ctx.imageSmoothingEnabled=true;
-  if((LEVEL===3||LEVEL===13||LEVEL===290)&&typeof TKR3D_B==='function')TKR3D_B(ctx); // opt-in: Thornwick's roof picture, under the sprites (thornwick_roofs.js)
+  if((LEVEL===3||LEVEL===13||LEVEL===290||LEVEL===304||LEVEL===305)&&typeof TKR3D_B==='function')TKR3D_B(ctx); // opt-in: Thornwick's roof picture, under the sprites (thornwick_roofs.js)
   if(G._spr){ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';SC=ctx;drawSprites(...G._spr);ctx.restore()}
   if(LEVELS[LEVEL]&&LEVELS[LEVEL].rain)drawRain(); if(STORM.a>.02)drawStorm();else{drawSkyBirds();if(typeof uwLv==='function'&&uwLv(LEVEL))uwSkyFish();else if(yarSea(LEVEL)&&typeof yarGulls==='function')yarGulls()}if(typeof uwHud==='function')uwHud();if(G.pharFlash>0)drawPharFlash();
 }
@@ -7203,7 +7235,7 @@ function drawMenu(){
   btnText('more','More',150,184,180,26);
   ctx.fillStyle='rgba(216,200,142,.35)';ctx.fillRect(120,222,240,1);
   btnText('quittitle','Exit game',160,230,160,26);
-  const L=['W / S: forward, back    A / D: step sideways    Q / E: turn    Space: attack','1-4: choose hero    I: inventory    J: quests    M: map    H: heal    ?: all shortcuts','Controller: Settings, then Controller, shows every button.'];
+  const L=['W / S: forward, back    A / D: step sideways    Q / E: turn    Space: attack (hold it to keep attacking)','1-4: choose hero    I: inventory    J: quests    M: map    H: heal    ?: all shortcuts','Controller: Settings, then Controller, shows every button.'];
   txt('Version '+VERSION,376,24,7.5,'#b8a880','right');
   L.forEach((t,i)=>txt(t,240,272+i*9,7.4,'#d8c9a0','center'));
   btn('menuclose',0,0,DW,DH); BTNS.unshift(BTNS.pop());
@@ -7496,6 +7528,7 @@ function handleBtn(id){
   if(id.startsWith('hero')){openInv(+id.slice(4));return} // (no longer a line about the hero's afflictions each time the inventory is opened)
   act(id);
   if(['fwd','back','left','right','turnL','turnR'].includes(id))G.hold={id,t:G.time+.42};
+  else if(id==='attack')G.hold={id,t:G.time+.42}; // a finger (or the mouse button) kept down on the Attack button keeps attacking, like a held Space bar; lifting it stops (ptrEnd clears G.hold)
 }
 function toDesign(e){const r=cv.getBoundingClientRect();return [(e.clientX-r.left)/r.width*DW,(e.clientY-r.top)/r.height*DH]}
 let PTR=null;
@@ -9407,7 +9440,10 @@ Object.assign(ENEMY_DEF,{
 
 // the small desert dungeons play the Egyptian music, streamed: change this list to change the tracks.
 // options: music_sands_tomb (2:51), music_sands_forgotten (2:33), music_sands_holycity (8:11), music_sands_goldenkey (9:16), music_sands_vibration (13:03)
-const DNG_MUSIC=['music_sands_vibration'];
+// Each time one of these dungeons is entered the player starts at a random place in this list (streamTick): the old dungeon music (author not recorded), Vibration of the Sand,
+// Dream of a Holy City and Golden Key, a quarter each; the rest follow in order. Only the desert dungeons and the burrows use this list (62 levels): dungeons and caves outside the deserts
+// have the three dungeon soundscapes of dngMusic in index.html and never the desert music.
+const DNG_MUSIC=['music_dungeon1','music_sands_vibration','music_sands_holycity','music_sands_goldenkey'];
 (function dungeonMusic(){
   const lv=Object.keys(DNG_INFO).map(Number);for(let k=0;k<BURROW_N;k++)lv.push(BURROW_BASE+k);
   for(const n of lv){STREAM_LISTS[n]=DNG_MUSIC;const i=EMBERS_LEVELS.indexOf(n);if(i>=0)EMBERS_LEVELS.splice(i,1)}
@@ -15665,7 +15701,7 @@ function seaSpawn(t,r,alert){ // a creature appears a few cells from the party
 }
 function seaEnter(n){
   const F=G.flags;
-  if(n===304&&!F.oldhavenSeen){F.oldhavenSeen=1;startCut('oldhavenArrive',()=>{if(qSt('vq5')===null)qAccept('vq5');if(qReady('vq5'))qTurnIn('vq5');F.act3=1;msg('The gate of Oldhaven stays shut until noon. Speak to the herald.','#ffe36a')})}
+  if(n===304&&!F.oldhavenSeen){F.oldhavenSeen=1;const arrived=()=>{if(qSt('vq5')===null)qAccept('vq5');if(qReady('vq5'))qTurnIn('vq5');F.act3=1;if(qSt('vq6')===null&&!F.pardoned&&QUESTS.vq6)qAccept('vq6');if(!(F.courtSeen||F.pardoned))msg('The gate of Oldhaven stays shut until noon. Speak to the herald.','#ffe36a')};if(F.courtSeen||F.pardoned)arrived();else startCut('oldhavenArrive',arrived)}   // (a party that has already been in the court or pardoned never sees the arrival scene again)
   if(typeof ohEnter==='function')ohEnter(n);
   else if(n>=300&&n<=303&&!(F.seaArr&&F.seaArr[n])){(F.seaArr=F.seaArr||{})[n]=1;msg({300:'Saltbarrow. A pirate haven of sand, wrecks and canvas tents. Gulls cry over the water.',301:'The Isle of Bells. Mist over a drowned abbey. Somewhere in the grey, a bell is moving in the wind.',302:'Cinder Isle. Black rock and red glow. The mountain breathes.',303:'Last Light. A scrap of rock at the end of the chart. A small lamp burns in a hut on the shore.'}[n],'#a8d8ff')}
 }
@@ -15721,6 +15757,7 @@ function ohTiles(){
     const key=kind+'|'+pat+'|'+wh+'|'+(img||'');if(C[key])return C[key];
     let S=typeof pat==='string'?OH_STY[pat]:{plain:'kh_ohwall1_'+pat,win:'kh_ohwall1_4',door:'kh_ohwall1_5',slit:'kh_ohwall1_3'};
     if(!S)S=OH_STY.gold;const Hp=Math.round(128*wh),pi=IMG[S.plain]||IMG.kh_ohwall1_0,units=Math.ceil(wh);
+    const wins=[];
     const c=mkCanvas(128,Hp,(x,w,h)=>{
       x.fillStyle='#8a8478';x.fillRect(0,0,w,h);
       for(let u=0;u<units;u++){
@@ -15736,6 +15773,7 @@ function ohTiles(){
         else if(u===1&&kind==='slit')im=IMG[S.slit];
         else if(u===2&&kind==='window'&&wh>=2.9)im=IMG[S.win];
         if(im){
+          for(const nm in OH_PANE)if(IMG[nm]===im){wins.push([u,nm]);break}
           const Z=S.zoom||1;
           if(Z>1&&(im===pi||im===IMG[S.alt])){ // masonry drawn bigger: fewer, chunkier stones, so a wall still reads as stone from a distance
             const sw=im.width/Z,sh=im.height/Z,fx=((u*.41+(typeof pat==='string'?pat.length:0)*.13+(wh*7)%1)%1),fy=((u*.57+.2)%1);
@@ -15750,7 +15788,7 @@ function ohTiles(){
     if(S.contrast&&kind!=='gate'){ // the painted stone is soft: stretch it round its mean so the courses and joints show from across a street
       let m0=0,m1=0,m2=0,n=0;for(let i=0;i<d.length;i+=4){m0+=d[i];m1+=d[i+1];m2+=d[i+2];n++}m0/=n;m1/=n;m2/=n;const k=S.contrast;
       for(let i=0;i<d.length;i+=4){d[i]=Math.max(0,Math.min(255,(d[i]-m0)*k+m0));d[i+1]=Math.max(0,Math.min(255,(d[i+1]-m1)*k+m1));d[i+2]=Math.max(0,Math.min(255,(d[i+2]-m2)*k+m2))}}
-    const id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;if(wh>=2.5&&(pat==='castle'||pat==='castle2'||pat==='fort')&&kind!=='gate')TEX[id].cren=.3; // castle walls carry battlements
+    const id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;if(wins.length)ohNightReg(id,d,wins,Hp);if(wh>=2.5&&(pat==='castle'||pat==='castle2'||pat==='fort')&&kind!=='gate')TEX[id].cren=.3; // castle walls carry battlements
     const gid=KH_NEXT_GID++;T_TILE[gid]=id;
     return C[key]={gid,tex:id};
   };
@@ -15872,7 +15910,7 @@ const OH_ART={
 function ohArt(){
   for(const k in OH_ART)for(const [n,h] of OH_ART[k]){if(IMG[n])NPC_H[n]=NPC_H[n]===undefined||k==='oak'||k==='orchard'||k==='willow'?h:NPC_H[n]}
   NPC_H.ltree0=3.6;NPC_H.ltree4=3.8;NPC_H.ltree8=3.4;NPC_H.ltree12=3.7;NPC_H.ltree19=3.2;NPC_H.ltree17=2.6;NPC_H.ltree18=2.7;
-  NPC_H.kh_city2_1=1.7;Object.assign(NPC_H,{kh_ohgard1_0:1.7,kh_ohgard1_1:.95,kh_ohgard1_2:2.3,kh_ohgard1_3:.62,kh_ohgard1_4:1.0,kh_ohgard1_5:.95,kh_ohgard2_0:1.15,kh_ohgard2_1:.95,kh_ohgard2_2:1.35,kh_ohgard2_3:.7,kh_ohgard2_4:.75});
+  NPC_H.kh_city2_1=1.7;Object.assign(NPC_H,{kh_ohgard1_0:1.44,kh_ohgard1_1:.82,kh_ohgard1_2:2.43,kh_ohgard1_3:.55,kh_ohgard1_4:1.16,kh_ohgard1_5:1.14,kh_ohgard2_0:.92,kh_ohgard2_1:.89,kh_ohgard2_2:1.34,kh_ohgard2_3:.72,kh_ohgard2_4:.76});
   IMG.oh_well=IMG.kh_city1_1;NPC_H.oh_well=1.5;IMG.oh_pergola=IMG.kh_city2_4;NPC_H.oh_pergola=2.4;IMG.oh_topiary=IMG.kh_city2_1;NPC_H.oh_topiary=1.7;NPC_H.kh_city2_4=2.4;NPC_H.kh_city2_5=.55;NPC_H.kh_city1_1=1.5;NPC_H.kh_city2_3=.9;NPC_H.lflora0=.55;NPC_H.lflora0_1=.55;NPC_H.lflora0_2=.55;NPC_H.lbush0=.8;NPC_H.lbush0_1=.8;
   for(let i=0;i<6;i++)NPC_H['kh_stall1_'+i]=1.5;for(const i of [0,1,3])NPC_H['kh_stall2_'+i]=.8;NPC_H.kh_stall2_2=.9;
   // the roofs: painted gables in several colours, some warmed up from the grey ones
@@ -15969,6 +16007,7 @@ function ohBuild(){
   const walk=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true},o||{}))};
   const near=(x,y,rad)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(free(x+dx,y+dy))return [x+dx,y+dy]}return null};
   OH.near=near;OH.free=free;
+  const G0ok=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&!block[y*W+x];
   const person=(id,x,y,rad)=>{const kp=KH_KEEPERS[id];if(!kp)return null;const q=near(x,y,rad||3);if(!q)return null;walk(khFaceKey(kp.face),q[0],q[1],{npc:id,sc:kp.sc||1});return q};
   const pick=(arr,a,b,c)=>arr[(hs(a,b,c)*arr.length)|0];
   const P=k=>IMG['kh_'+k]?'kh_'+k:null,FOUNT=P('ohgard1_0')||'fountain',BENCH=P('ohgard1_3')||'yar_bench',ARBOUR=P('ohgard1_2'),HEDGE=P('ohgard1_1'),SUNDIAL=P('ohgard1_4'),FCART=P('ohgard1_5'),HIVES=P('ohgard2_0'),RBARREL=P('ohgard2_1'),WASH=P('ohgard2_2'),WBARROW=P('ohgard2_3'),HERBS=P('ohgard2_4');
@@ -16250,10 +16289,8 @@ function ohBuild(){
       solid(x,y,c);
     }
     // the roof: a painted gable on top of the walls, and now and then a tower standing over the house
-    const T=OH_TYPES[h.type],rk=pick(T.roofs,h.x0,h.y0,21),rimg=OH_ROOF[rk]||'kh_ohroof1_2';
-    sky.push({x:(h.x0+h.x1+1)/2,y:(h.y0+h.y1+1)/2,k:rimg,w:h.w+.5,z:wh-.03});
-    const tk=hs(h.x0,h.y0,22);
-    if(T.tower||tk<.06)sky.push({x:(h.x0+h.x1+1)/2+(hs(h.x0,h.y0,23)-.5)*2,y:(h.y0+h.y1+1)/2,k:'kh_ohtower1_'+[0,1,4,5][(hs(h.x0,h.y0,24)*4)|0],w:2.8,z:wh-.03});
+    // (no flat roof pictures: the roofs are real ones, ray-cast over the walls like Thornwick's, from this table: oldhaven_roofs.js)
+    const T=OH_TYPES[h.type];h.rk=pick(T.roofs,h.x0,h.y0,21);h.tw=!!(T.tower||hs(h.x0,h.y0,22)<.06);   // the roof kind, and whether a tower stands over the house
     // window boxes and tubs at the door
     if(hs(h.x0,h.y0,95)<.7){const along=(h.face==='N'||h.face==='S')?[[h.front[0]-1,h.front[1]],[h.front[0]+1,h.front[1]]]:[[h.front[0],h.front[1]-1],[h.front[0],h.front[1]+1]];
       for(const [tx,ty] of along){if(!free(tx,ty)||hs(tx,ty,96)>.6)continue;const k=hs(tx,ty,97)<.5?'yar_tub':art('box',tx,ty,98)||'yar_lavender';if(IMG[k]){used.add(tx+','+ty);scenery.push({k,wx:tx+.5,wy:ty+.5,sc:.85+hs(tx,ty,99)*.3,decor:{k,walk:true,x:tx,y:ty}})}}}
@@ -16305,6 +16342,9 @@ function ohBuild(){
   const named=[['oh_cap',GX,22],['oh_guardA',GX-3,20],['oh_guardB',GX+3,20],['oh_m1',66,50],['oh_m2',82,50],['oh_w1',64,52],['oh_w2',72,56],['oh_k1',76,56],['oh_o1',84,56],['oh_s1',68,47],['oh_pr',80,48]];
   for(const [id,x,y] of named)person(id,x,y,5);
   if(typeof OH_SIEGEFOLK!=='undefined')for(const [id,x,y] of OH_SIEGEFOLK)person(id,x,y,5); // the people who help in the siege
+  if(typeof OH_GROUNDFOLK!=='undefined')for(const [id,x,y] of OH_GROUNDFOLK)person(id,x,y,1); // the castle grounds: a page, a chandler, an old guard
+  if(typeof OH_GROUNDITEMS!=='undefined')for(const [k,x,y] of OH_GROUNDITEMS)if(ITEMDEF[k]&&G0ok(x,y))lv.items.push({k,x,y}); // things on the ground round the keep
+  if(typeof OH_GROUNDSECRET!=='undefined')for(const q of OH_GROUNDSECRET)decor.push({k:'chest',x:q.chest[0],y:q.chest[1],block:true,kname:'sr_'+q.id}); // the chests of the three hidden rooms (opened by srApply)
   // the king's road is lined with a few guards, not a regiment
   let sn=0;
   for(let y=70;y<=134;y+=14){for(const sx of [OH_ROAD.x0,OH_ROAD.x1]){const id=OH_SOLDIER[(sn++)%OH_SOLDIER.length],kp=KH_KEEPERS[id];if(free(sx,y)&&kp)walk(khFaceKey(kp.face),sx,y,{npc:id,sc:kp.sc})}}
@@ -16497,10 +16537,14 @@ function oldhavenPardon(){
   const F=G.flags;if(F.pardoned)return;F.pardoned=1;F.wanted=0;
   for(const e of G.enemies)if(e.t==='rguard'&&e.hp>0){e.hp=0;e.dying=.55}
   const hb=G.decor.find(d=>d.npc==='oh_halb');if(hb)hb.hidden=true;
-  startCut('oldhavenPardon',()=>{if(qSt('vq6')===null)qAccept('vq6');if(qReady('vq6'))qTurnIn('vq6');msg('The warrant is void. The ransom is lifted.','#ffe36a');sfx('win')});
+  startCut('oldhavenPardon',()=>{if(qSt('vq6')===null)qAccept('vq6');if(qReady('vq6'))qTurnIn('vq6');msg('The warrant is void. The ransom is lifted.','#ffe36a');sfx('win');ohSixQuest()});
 }
+/* the king hands the party the slip with six names, so the quest of the six names (The Six Names, Captain Aldwyn at the gate can tell more) is in the Quests list at once; a party that was
+   pardoned before this (and so has no such quest) gets it when it next enters Oldhaven or its court */
+function ohSixQuest(){const F=G.flags;if(!F.pardoned||typeof QUESTS==='undefined'||!QUESTS.oq0||qSt('oq0')!==null)return;qAccept('oq0');msg('The king\'s slip names six people at the fair green, east of the middle of Oldhaven. Captain Aldwyn at the gate can tell you more.','#ffe36a')}
 function ohEnter(n){
   const F=G.flags;
+  if(n===OH.ID||n===OH.COURT)ohSixQuest();
   if(n===OH.COURT){
     const k=G.decor.find(d=>d.npc==='oh_halb');if(k&&F.pardoned)k.hidden=true;const v=G.decor.find(d=>d.npc==='oh_vance');if(v&&(F.courtFight))v.hidden=true;
     if(!F.courtSeen){F.courtSeen=1;if(qSt('vq6')===null)qAccept('vq6');startCut('oldhavenCourt',ohCourtFight)}
@@ -16646,9 +16690,7 @@ function quayBuild(){
       let c;if(x===b.door[0]&&y===b.door[1])c=ch(dgid);else if(front(x,y))c=win;else c=(x+y)%3===0?side:plain;
       solid(x,y,c);fm[y*W+x]='1';
     }
-    sky.push({x:(b.x0+b.x1+1)/2,y:(b.y0+b.y1+1)/2,k:'kh_ohroof1_'+b.roof,w:d+.6,z:b.wh-.03});
-    if(b.tower)sky.push({x:(b.x0+b.x1+1)/2+2,y:b.y0+2,k:'kh_ohtower1_2',w:3.6,z:b.wh-.03},{x:(b.x0+b.x1+1)/2+2,y:b.y0+2,k:'oq_lflag1',w:1.5,z:b.wh+8.4});
-    else if(k===0||k===2)sky.push({x:b.x0+2.5,y:(b.y0+b.y1)/2,k:'kh_ohtower1_'+(k?4:5),w:2.6,z:b.wh-.03});
+    // (no flat roof pictures: real ray-cast roofs from the table in oldhaven_roofs.js, with a tower on the Customs House and on two of the others)
     LEVEL_NAMES[b.id]=b.name;
   });
   /* ---- the piers: five of them, with the water between full of ships ---- */
@@ -16822,13 +16864,14 @@ for(const S of OHF_SUSP){
     if(qSt('oq0')===null)return say(`${S.name}. ${S.n===1?'Mind the scales, friend.':S.n===2?'The bells keep time. People do not.':S.n===3?'Fresh rolls, hot from the oven.':S.n===4?'A penny for a song, a joke or a juggle!':S.n===5?'I teach letters and numbers, and some manners.':'Peace be with you.'}`,[BYE]);
     if(st==='done')return say('Thank you again. It is a relief to have it said out loud.',[BYE]);
     if(qReady(S.q))return say(S.ready,[
-      ['Mercy.',()=>{OHF().mercy[S.n]=1;OHF().done[S.n]=1;const rw=rewardText(S.q);qTurnIn(S.q);ohfTake(S);msg('You show mercy.','#9fe0a0');return say(S.mercyR+' Reward: '+rw+'.',[BYE])}],
-      ['Justice.',()=>{OHF().mercy[S.n]=0;OHF().done[S.n]=1;G.gold+=150;const rw=rewardText(S.q);qTurnIn(S.q);ohfTake(S);msg('You choose justice. 150 gold in forfeit.','#e0b080');return say(S.justiceR+' Reward: '+rw+', and 150 gold in forfeit.',[BYE])}],
+      ['Mercy.',()=>{OHF().mercy[S.n]=1;OHF().done[S.n]=1;const rw=rewardText(S.q);qTurnIn(S.q);ohfTake(S);msg('You show mercy.','#9fe0a0');ohfSix();return say(S.mercyR+' Reward: '+rw+'.',[BYE])}],
+      ['Justice.',()=>{OHF().mercy[S.n]=0;OHF().done[S.n]=1;G.gold+=150;const rw=rewardText(S.q);qTurnIn(S.q);ohfTake(S);msg('You choose justice. 150 gold in forfeit.','#e0b080');ohfSix();return say(S.justiceR+' Reward: '+rw+', and 150 gold in forfeit.',[BYE])}],
       ['Let me think.',()=>null]]);
-    if(st==='active')return say(S.remind,[BYE]);
+    if(st==='active')return say(S.remind+` (You have ${qGoal(S.q)} of the ${QUESTS[S.q].need} things asked for.)`,[BYE]);   // the reminder says how far along the party is
     return say(S.meet,[['We will help.',()=>{qAccept(S.q);return say(S.accept,[BYE])}],['Not now.',()=>null]]);
   },{q:S.q});
 }
+const ohfSix=()=>{const n=Object.keys(OHF().done).length;msg(n>=6?'The Six Names: all six are heard. Tell Captain Aldwyn at the gate.':`The Six Names: ${n} of 6 heard.`,'#ffe9a0')};   // after each of the six is settled, the party is told how many are left
 const ohfTake=S=>S.ask.forEach(([id,c])=>{for(let i=0;i<c;i++){const j=G.bag.findIndex(b=>b.id===id);if(j>=0)bagTake(j)}}); // the things asked for are handed over
 const OH_FAIRFOLK=OHF_SUSP.map(S=>[S.npc,S.at[0],S.at[1]]);
 
@@ -17126,13 +17169,12 @@ const OAKD={
 };
 // the woodwardens: Hale gives the first two quests and the camp one
 khNpc('oa_hale','Hale, captain of the woodwardens','kh_ohfolk7_4',()=>{
-  const F=G.flags,O=OAKF();
-  if(!O.metHale){O.metHale=1;return say('You have come through the east gate? Then you have seen the city under siege and survived. I am Hale, captain of the woodwardens. We keep the Oakwood. Ask me about work, or about the old king’s family.',[BYE])}
+  const F=G.flags,O=OAKF(),first=!O.metHale;O.metHale=1;   // (at the first meeting he offers his work at once: the gold ! over him must not lead to a greeting only)
   const nodes=[];
   if(qSt('oa2')!=='done')nodes.push(['About the wolves',()=>qNode('oa2',OAKD.oa2)]);
   if(qSt('oa2')==='done'&&qSt('oa6')!=='done')nodes.push(['About the Ash Guard camp',()=>qNode('oa6',OAKD.oa6)]);
   nodes.push(['About the old king’s family',()=>say('The king has a granddaughter. She was raised here, with us, because the chancellor was not safe to trust. Her name is Wren. Speak to her, and ask her to show you what she keeps.',[BYE])]);
-  return say('Hale, captain of the woodwardens. The oaks are old and the wolves are hungry. What can I do for you?',[...nodes,BYE]);
+  return say(first?'You have come through the east gate? Then you have seen the city under siege and survived. I am Hale, captain of the woodwardens. We keep the Oakwood. I have work, if you want it, and I can tell you about the old king’s family.':'Hale, captain of the woodwardens. The oaks are old and the wolves are hungry. What can I do for you?',[...nodes,BYE]);
 },{q:['oa2','oa6']});
 khNpc('oa_ward1','A woodwarden','kh_ohfolk7_4',()=>say('Quiet, please. The oaks listen.',[BYE]));
 khNpc('oa_ward2','A woodwarden','kh_ohfolk7_5',()=>say('I walk the same path every day. The oaks have never once told me it was the wrong path.',[BYE]));
@@ -21360,6 +21402,46 @@ const MANUAL_FILE='Below-the-Abbey-manual.pdf'; // the itch build empties this (
   if(id==='manualpdf'&&G.menu==='more'){try{window.open(MANUAL_FILE,'_blank')}catch(e){}msg('The manual opens in a new tab.','#a8d8ff');return}
   _b(id)}})();
 
+/* ---- src/desert/credits_screen.js ---- */
+/* ==========================================================================
+   THE CREDITS PAGE. A Credits button on the More page opens a paged list (three pages, by section) of every piece of music and sound in the game: its title and who made it (the full list with
+   links and licences is assets/audio/CREDITS.txt; keep the two in step when a sound is added). Prev, Next and Back like the Achievements page.
+   ========================================================================== */
+const CR_PAGES=[   // three pages, one or two sections each ([text,1] a heading, [text,2] the closing line)
+  [['MUSIC',1],
+   ['Finding Mithral, Geoff Harvey (Pixabay)'],['Wanderer at Night, Zambolino (freetouse.com)'],['Embers on the Flagstone, Kaazoom (Pixabay)'],['RPG Medieval Animated Music, Andorios (Pixabay)'],
+   ['Forgotten Deserts, MoodMode (Pixabay)'],['Vibration of the Sand, Dream of a Holy City and Golden Key,'],['   by deepspace (Mirko Ruckels)'],
+   ['Dungeon and tomb music, from the Sword of the Sands project (author not recorded)'],['Dark Cavern Ambient (001), Paul Wortmann (OpenGameArt)'],['Searching, yd (OpenGameArt)'],['Paranoid Truth, Tsorthan Grove (OpenGameArt)'],
+   ['The Old Tower Inn and Medieval Kings Feast, Snabisch (OpenGameArt)'],['Another August, cynicmusic, The Cynic Project (OpenGameArt)'],['Chant, christislord (OpenGameArt)'],['Alone in a Cemetary, Tim Kulig (Pixabay)']],
+  [['DUNGEON AND NATURE SOUNDSCAPES',1],
+   ['Creepy Dungeon Ambience, drminky (Freesound)'],['Dungeon Ambiance, phlair (Freesound)'],['Dark Cave Background 2, solarphasing (Freesound)'],
+   ['Forest Rain Atmo (Fantasy), szegvari (Freesound)'],['Rain at the small forest lake in summer, garuda1982 (Freesound)'],['Nature sounds (supplied for the game)'],
+   ['AMBIENCE',1],
+   ['Dungeon Ambience, Creomoto (OpenGameArt)'],['Village ambience, ramonmineiro (Freesound)'],['Mild Wind Background Noise (OpenGameArt)'],['Amb Rain Loop 1 (OpenGameArt)']],
+  [['SOUND EFFECTS',1],
+   ['Impact Sounds, Kenney (kenney.nl)'],['20 Sword Sound Effects, StarNinjas (OpenGameArt)'],['Footsteps on wood, stone, leaves, gravel and mud, qubodup (OpenGameArt)'],
+   ['Fantozzi\'s Footsteps, Raassh (OpenGameArt)'],['Church bells, Audeption and _CAZAPROD_ (Freesound)'],['Horse trotting, KobatoGames (OpenGameArt)'],['Cart horse, bruno.auzet (Freesound)'],
+   ['Goat, TheKingOfGeeks360 (Freesound)'],['Sheep baa (OpenGameArt)'],['Chicken, evsecrets (Freesound)'],['Cow, spurioustransients (Freesound)'],['Dog barking, HaelDB (OpenGameArt)'],
+   ['Thank you to everyone who shares their sounds.',2]]
+];
+function drawCredits(){
+  BTNS=[];veil(.7);bigPanel(24,8,432,304);
+  const pages=CR_PAGES.length;G.crPage=clamp(G.crPage||0,0,pages-1);
+  txt('CREDITS: MUSIC AND SOUND',240,24,13,'#d8c88e','center',true);
+  CR_PAGES[G.crPage].forEach((r,i)=>{const y=50+i*14.5;
+    if(r[1]===1)txt(r[0],44,y,8.5,'#c8a860','left',true);
+    else if(r[1]===2)txt(r[0],240,y+4,8,'#b8aa88','center');
+    else txt(r[0],52,y,8,'#e2d8bc','left',false,undefined,380)});
+  txt(`Page ${G.crPage+1} of ${pages}`,240,296,8,'#9a8a68','center');
+  btnText('cr_prev','Prev',44,284,90,22);btnText('cr_back','Back',195,284,90,22);btnText('cr_next','Next',346,284,90,22);
+}
+(function(){const _d=drawMoreMenu;drawMoreMenu=function(){_d();btnText('credits','Credits',140,240,200,26)}})();
+(function(){const _m=drawMenu;drawMenu=function(){if(G.menu==='credits'){drawCredits();return}_m.apply(this,arguments)}})();
+(function(){const _b=handleBtn;handleBtn=function(id){
+  if(G.menu==='more'&&id==='credits'){G.menuBack='more';G.menu='credits';G.crPage=0;return}
+  if(G.menu==='credits'){if(id==='cr_prev')G.crPage=Math.max(0,(G.crPage||0)-1);else if(id==='cr_next')G.crPage=(G.crPage||0)+1;else if(id==='cr_back'||id==='menuback'||id==='menuclose'||id==='menu')G.menu=menuBack();return}
+  _b.apply(this,arguments)}})();
+
 /* ---- src/desert/uilist.js ---- */
 /* written by tools/inject.py from the manifest.json in each folder of assets/ui */
 const UI_LIST={"order":["gold","ruby","green","brown","turquoise","tapered","sandstone","stone","round","winged","filigree","filigreegold","winged_ruby","filigree_ruby","winged_green","filigree_green","winged_brown","filigree_brown","winged_turquoise","filigree_turquoise","filigree_gold","filigree_sandstone","winged_gold","winged_sandstone"],"styles":{"gold":{"label":"Gold sandstone","files":{"std_n":{"file":"stone_std_n.webp","w":991,"h":262},"std_l":{"file":"stone_std_l.webp","w":991,"h":262},"std_p":{"file":"stone_std_p.webp","w":991,"h":262},"small_n":{"file":"stone_small_n.webp","w":991,"h":262},"small_l":{"file":"stone_small_l.webp","w":991,"h":262},"small_p":{"file":"stone_small_p.webp","w":991,"h":262}},"fam":{"std":{"cap":0.573,"pad":0.534,"ar":3.782,"wl":0,"wt":0,"bh":262},"small":{"cap":0.573,"pad":0.515,"ar":3.782,"wl":0,"wt":0,"bh":262}}},"ruby":{"label":"Ruby","files":{"std_n":{"file":"stone_std_n.webp","w":991,"h":262},"std_l":{"file":"stone_std_l.webp","w":991,"h":262},"std_p":{"file":"stone_std_p.webp","w":991,"h":262},"small_n":{"file":"stone_small_n.webp","w":991,"h":262},"small_l":{"file":"stone_small_l.webp","w":991,"h":262},"small_p":{"file":"stone_small_p.webp","w":991,"h":262}},"fam":{"std":{"cap":0.76,"pad":0.534,"ar":3.782,"wl":0,"wt":0,"bh":262},"small":{"cap":0.76,"pad":0.515,"ar":3.782,"wl":0,"wt":0,"bh":262}},"ink":"light"},"green":{"label":"Dark green","files":{"std_n":{"file":"stone_std_n.webp","w":991,"h":262},"std_l":{"file":"stone_std_l.webp","w":991,"h":262},"std_p":{"file":"stone_std_p.webp","w":991,"h":262},"small_n":{"file":"stone_small_n.webp","w":991,"h":262},"small_l":{"file":"stone_small_l.webp","w":991,"h":262},"small_p":{"file":"stone_small_p.webp","w":991,"h":262}},"fam":{"std":{"cap":0.573,"pad":0.534,"ar":3.782,"wl":0,"wt":0,"bh":262},"small":{"cap":0.573,"pad":0.515,"ar":3.782,"wl":0,"wt":0,"bh":262}},"ink":"light"},"brown":{"label":"Dark brown","files":{"std_n":{"file":"stone_std_n.webp","w":991,"h":262},"std_l":{"file":"stone_std_l.webp","w":991,"h":262},"std_p":{"file":"stone_std_p.webp","w":991,"h":262},"small_n":{"file":"stone_small_n.webp","w":991,"h":262},"small_l":{"file":"stone_small_l.webp","w":991,"h":262},"small_p":{"file":"stone_small_p.webp","w":991,"h":262}},"fam":{"std":{"cap":0.573,"pad":0.534,"ar":3.782,"wl":0,"wt":0,"bh":262},"small":{"cap":0.573,"pad":0.515,"ar":3.782,"wl":0,"wt":0,"bh":262}},"ink":"light"},"turquoise":{"label":"Turquoise","files":{"std_n":{"file":"stone_std_n.webp","w":991,"h":262},"std_l":{"file":"stone_std_l.webp","w":991,"h":262},"std_p":{"file":"stone_std_p.webp","w":991,"h":262},"small_n":{"file":"stone_small_n.webp","w":991,"h":262},"small_l":{"file":"stone_small_l.webp","w":991,"h":262},"small_p":{"file":"stone_small_p.webp","w":991,"h":262}},"fam":{"std":{"cap":0.573,"pad":0.534,"ar":3.782,"wl":0,"wt":0,"bh":262},"small":{"cap":0.573,"pad":0.515,"ar":3.782,"wl":0,"wt":0,"bh":262}}},"tapered":{"label":"Polished sandstone","files":{"std_n":{"file":"stone_std_n.webp","w":990,"h":260},"std_l":{"file":"stone_std_l.webp","w":990,"h":260},"std_p":{"file":"stone_std_p.webp","w":990,"h":260},"small_n":{"file":"stone_small_n.webp","w":990,"h":260},"small_l":{"file":"stone_small_l.webp","w":990,"h":260},"small_p":{"file":"stone_small_p.webp","w":990,"h":260}},"fam":{"std":{"cap":0.577,"pad":0.538,"ar":3.808,"wl":0,"wt":0,"bh":260},"small":{"cap":0.577,"pad":0.519,"ar":3.808,"wl":0,"wt":0,"bh":260}}},"sandstone":{"label":"Sandstone","files":{"std_n":{"file":"stone_std_n.webp","w":989,"h":261},"std_l":{"file":"stone_std_l.webp","w":989,"h":261},"std_p":{"file":"stone_std_p.webp","w":989,"h":261},"slim_n":{"file":"stone_slim_n.webp","w":989,"h":261},"slim_l":{"file":"stone_slim_l.webp","w":989,"h":261},"slim_p":{"file":"stone_slim_p.webp","w":989,"h":261}},"fam":{"std":{"cap":0.766,"pad":0.728,"ar":3.789,"wl":0,"wt":0,"bh":261},"slim":{"cap":0.517,"pad":0.498,"ar":3.789,"wl":0,"wt":0,"bh":261}}},"stone":{"label":"Rough stone","files":{"std_n":{"file":"stone_std_n.webp","w":994,"h":264},"std_l":{"file":"stone_std_l.webp","w":994,"h":264},"std_p":{"file":"stone_std_p.webp","w":994,"h":264},"slim_n":{"file":"stone_slim_n.webp","w":994,"h":264},"slim_l":{"file":"stone_slim_l.webp","w":994,"h":264},"slim_p":{"file":"stone_slim_p.webp","w":994,"h":264}},"fam":{"std":{"cap":1.098,"pad":0.663,"ar":3.765,"wl":0,"wt":0,"bh":264},"slim":{"cap":0.511,"pad":0.492,"ar":3.765,"wl":0,"wt":0,"bh":264}}},"round":{"label":"Round iron","files":{"round_n":{"file":"stone_round_n.webp","w":276,"h":277},"round_l":{"file":"stone_round_l.webp","w":276,"h":277},"round_p":{"file":"stone_round_p.webp","w":276,"h":277}},"fam":{"round":{"cap":0.495,"pad":0.343,"ar":0.996,"wl":0,"wt":0,"bh":277}},"fallback":"tapered"},"winged":{"label":"Winged gold","files":{"std_n":{"file":"stone_std_n.webp","w":1009,"h":286},"std_l":{"file":"stone_std_l.webp","w":1009,"h":286},"std_p":{"file":"stone_std_p.webp","w":1009,"h":286}},"fam":{"std":{"cap":0.596,"pad":0.404,"ar":3.187,"wl":130,"wt":51,"bh":235}},"fallback":"gold"},"filigree":{"label":"Filigree sandstone","files":{"std_n":{"file":"stone_std_n.webp","w":996,"h":275},"std_l":{"file":"stone_std_l.webp","w":996,"h":275},"std_p":{"file":"stone_std_p.webp","w":996,"h":275}},"fam":{"std":{"cap":0.636,"pad":0.545,"ar":3.622,"wl":0,"wt":0,"bh":275}},"fallback":"tapered"},"filigreegold":{"label":"Filigree gold","files":{"std_n":{"file":"stone_std_n.webp","w":996,"h":274},"std_l":{"file":"stone_std_l.webp","w":996,"h":274},"std_p":{"file":"stone_std_p.webp","w":996,"h":274}},"fam":{"std":{"cap":0.639,"pad":0.547,"ar":3.635,"wl":0,"wt":0,"bh":274}},"fallback":"gold"},"winged_ruby":{"label":"Winged ruby","files":{"std_n":{"file":"stone_std_n.webp","w":980,"h":306},"std_l":{"file":"stone_std_l.webp","w":980,"h":306},"std_p":{"file":"stone_std_p.webp","w":980,"h":306},"small_n":{"file":"stone_small_n.webp","w":312,"h":272},"small_l":{"file":"stone_small_l.webp","w":312,"h":272},"small_p":{"file":"stone_small_p.webp","w":312,"h":272}},"fam":{"std":{"cap":0.364,"pad":0.298,"ar":2.378,"wl":163,"wt":31,"bh":275},"small":{"cap":0.368,"pad":0.265,"ar":1.147,"wl":0,"wt":0,"bh":272}},"fallback":"ruby","ink":"light"},"filigree_ruby":{"label":"Filigree ruby","files":{"std_n":{"file":"stone_std_n.webp","w":1000,"h":200},"std_l":{"file":"stone_std_l.webp","w":1000,"h":200},"std_p":{"file":"stone_std_p.webp","w":1000,"h":200},"small_n":{"file":"stone_small_n.webp","w":365,"h":200},"small_l":{"file":"stone_small_l.webp","w":365,"h":200},"small_p":{"file":"stone_small_p.webp","w":365,"h":200}},"fam":{"std":{"cap":1.028,"pad":1.0,"ar":5.0,"wl":0,"wt":0,"bh":200},"small":{"cap":0.514,"pad":0.437,"ar":1.825,"wl":0,"wt":0,"bh":200}},"ink":"light"},"winged_green":{"label":"Winged green","files":{"std_n":{"file":"stone_std_n.webp","w":980,"h":306},"std_l":{"file":"stone_std_l.webp","w":980,"h":306},"std_p":{"file":"stone_std_p.webp","w":980,"h":306},"small_n":{"file":"stone_small_n.webp","w":312,"h":272},"small_l":{"file":"stone_small_l.webp","w":312,"h":272},"small_p":{"file":"stone_small_p.webp","w":312,"h":272}},"fam":{"std":{"cap":0.364,"pad":0.298,"ar":2.378,"wl":163,"wt":31,"bh":275},"small":{"cap":0.368,"pad":0.265,"ar":1.147,"wl":0,"wt":0,"bh":272}},"fallback":"green","ink":"light"},"filigree_green":{"label":"Filigree green","files":{"std_n":{"file":"stone_std_n.webp","w":1000,"h":200},"std_l":{"file":"stone_std_l.webp","w":1000,"h":200},"std_p":{"file":"stone_std_p.webp","w":1000,"h":200},"small_n":{"file":"stone_small_n.webp","w":365,"h":200},"small_l":{"file":"stone_small_l.webp","w":365,"h":200},"small_p":{"file":"stone_small_p.webp","w":365,"h":200}},"fam":{"std":{"cap":1.028,"pad":1.0,"ar":5.0,"wl":0,"wt":0,"bh":200},"small":{"cap":0.514,"pad":0.437,"ar":1.825,"wl":0,"wt":0,"bh":200}},"ink":"light"},"winged_brown":{"label":"Winged brown","files":{"std_n":{"file":"stone_std_n.webp","w":980,"h":306},"std_l":{"file":"stone_std_l.webp","w":980,"h":306},"std_p":{"file":"stone_std_p.webp","w":980,"h":306},"small_n":{"file":"stone_small_n.webp","w":312,"h":272},"small_l":{"file":"stone_small_l.webp","w":312,"h":272},"small_p":{"file":"stone_small_p.webp","w":312,"h":272}},"fam":{"std":{"cap":0.364,"pad":0.298,"ar":2.378,"wl":163,"wt":31,"bh":275},"small":{"cap":0.368,"pad":0.265,"ar":1.147,"wl":0,"wt":0,"bh":272}},"fallback":"brown","ink":"light"},"filigree_brown":{"label":"Filigree brown","files":{"std_n":{"file":"stone_std_n.webp","w":1000,"h":200},"std_l":{"file":"stone_std_l.webp","w":1000,"h":200},"std_p":{"file":"stone_std_p.webp","w":1000,"h":200},"small_n":{"file":"stone_small_n.webp","w":365,"h":200},"small_l":{"file":"stone_small_l.webp","w":365,"h":200},"small_p":{"file":"stone_small_p.webp","w":365,"h":200}},"fam":{"std":{"cap":1.028,"pad":1.0,"ar":5.0,"wl":0,"wt":0,"bh":200},"small":{"cap":0.514,"pad":0.437,"ar":1.825,"wl":0,"wt":0,"bh":200}},"ink":"light"},"winged_turquoise":{"label":"Winged turquoise","files":{"std_n":{"file":"stone_std_n.webp","w":980,"h":306},"std_l":{"file":"stone_std_l.webp","w":980,"h":306},"std_p":{"file":"stone_std_p.webp","w":980,"h":306},"small_n":{"file":"stone_small_n.webp","w":312,"h":272},"small_l":{"file":"stone_small_l.webp","w":312,"h":272},"small_p":{"file":"stone_small_p.webp","w":312,"h":272}},"fam":{"std":{"cap":0.364,"pad":0.298,"ar":2.378,"wl":163,"wt":31,"bh":275},"small":{"cap":0.368,"pad":0.265,"ar":1.147,"wl":0,"wt":0,"bh":272}},"fallback":"turquoise"},"filigree_turquoise":{"label":"Filigree turquoise","files":{"std_n":{"file":"stone_std_n.webp","w":1000,"h":200},"std_l":{"file":"stone_std_l.webp","w":1000,"h":200},"std_p":{"file":"stone_std_p.webp","w":1000,"h":200},"small_n":{"file":"stone_small_n.webp","w":365,"h":200},"small_l":{"file":"stone_small_l.webp","w":365,"h":200},"small_p":{"file":"stone_small_p.webp","w":365,"h":200}},"fam":{"std":{"cap":1.028,"pad":1.0,"ar":5.0,"wl":0,"wt":0,"bh":200},"small":{"cap":0.514,"pad":0.437,"ar":1.825,"wl":0,"wt":0,"bh":200}}},"filigree_gold":{"label":"Filigree gold","files":{"std_n":{"file":"stone_std_n.webp","w":1000,"h":200},"std_l":{"file":"stone_std_l.webp","w":1000,"h":200},"std_p":{"file":"stone_std_p.webp","w":1000,"h":200},"small_n":{"file":"stone_small_n.webp","w":365,"h":200},"small_l":{"file":"stone_small_l.webp","w":365,"h":200},"small_p":{"file":"stone_small_p.webp","w":365,"h":200}},"fam":{"std":{"cap":1.028,"pad":1.0,"ar":5.0,"wl":0,"wt":0,"bh":200},"small":{"cap":0.514,"pad":0.437,"ar":1.825,"wl":0,"wt":0,"bh":200}}},"filigree_sandstone":{"label":"Filigree sandstone","files":{"std_n":{"file":"stone_std_n.webp","w":1000,"h":200},"std_l":{"file":"stone_std_l.webp","w":1000,"h":200},"std_p":{"file":"stone_std_p.webp","w":1000,"h":200},"small_n":{"file":"stone_small_n.webp","w":365,"h":200},"small_l":{"file":"stone_small_l.webp","w":365,"h":200},"small_p":{"file":"stone_small_p.webp","w":365,"h":200}},"fam":{"std":{"cap":1.028,"pad":1.0,"ar":5.0,"wl":0,"wt":0,"bh":200},"small":{"cap":0.514,"pad":0.437,"ar":1.825,"wl":0,"wt":0,"bh":200}}},"winged_gold":{"label":"Winged gold","files":{"std_n":{"file":"stone_std_n.webp","w":980,"h":306},"std_l":{"file":"stone_std_l.webp","w":980,"h":306},"std_p":{"file":"stone_std_p.webp","w":980,"h":306},"small_n":{"file":"stone_small_n.webp","w":312,"h":272},"small_l":{"file":"stone_small_l.webp","w":312,"h":272},"small_p":{"file":"stone_small_p.webp","w":312,"h":272}},"fam":{"std":{"cap":0.364,"pad":0.298,"ar":2.378,"wl":163,"wt":31,"bh":275},"small":{"cap":0.368,"pad":0.265,"ar":1.147,"wl":0,"wt":0,"bh":272}},"fallback":"gold"},"winged_sandstone":{"label":"Winged sandstone","files":{"std_n":{"file":"stone_std_n.webp","w":980,"h":305},"std_l":{"file":"stone_std_l.webp","w":980,"h":305},"std_p":{"file":"stone_std_p.webp","w":980,"h":305},"small_n":{"file":"stone_small_n.webp","w":312,"h":271},"small_l":{"file":"stone_small_l.webp","w":312,"h":271},"small_p":{"file":"stone_small_p.webp","w":312,"h":271}},"fam":{"std":{"cap":0.365,"pad":0.299,"ar":2.387,"wl":163,"wt":31,"bh":274},"small":{"cap":0.369,"pad":0.266,"ar":1.151,"wl":0,"wt":0,"bh":271}},"fallback":"gold"}}};
@@ -22071,7 +22153,7 @@ function drawMoreMenu(){
   txt('MORE',240,30,14,'#d8c88e','center',true);
   btnText('ach','Achievements',140,44,200,26);btnText('stats','Stats',140,72,200,26);btnText('collection','Collection',140,100,200,26);btnText('wander','Wandering Monsters',140,128,200,26);
   btnText('newparty','New party',140,156,200,26);btnText('restart','Restart game',140,184,200,26);
-  btnText('menuback','Back',170,256,140,28);
+  btnText('menuback','Back',170,274,140,28);   // (lower, to make room for the Game manual and Credits buttons above it)
   btn('menuclose',0,0,DW,DH);BTNS.unshift(BTNS.pop());
 }
 /* ---- the Controller page: the pad, and what each button does ---- */
@@ -22140,7 +22222,7 @@ const HVT_TIPS={
   qsave:['Quick save','F5'],menu:['Menu','Esc'],map:['Map of this level','M / O'],wait:['Wait a turn','Z'],rest:['Rest and camp','R'],potion:['Drink the frequent use potion','H / P / 5'],
   ipotion:['Drink the frequent use potion','H / P / 5'],ipotb0:['Drink the first backup potion','6'],ipotb1:['Drink the second backup potion','7'],
   hero0:['Choose hero 1','1'],hero1:['Choose hero 2','2'],hero2:['Choose hero 3','3'],hero3:['Choose hero 4','4'],
-  attack:['Attack','Space / Enter'],special:['Special attack or spell','X'],turnL:['Turn left','Q / Left'],turnR:['Turn right','E / Right'],fwd:['Forward','W / Up'],back:['Back','S / Down'],left:['Step left','A'],right:['Step right','D'],
+  attack:['Attack (hold the key or the button to repeat)','Space / Enter'],special:['Special attack or spell','X'],turnL:['Turn left','Q / Left'],turnR:['Turn right','E / Right'],fwd:['Forward','W / Up'],back:['Back','S / Down'],left:['Step left','A'],right:['Step right','D'],
   bfcatch:['Catch the butterfly','N'],bfdig:['Dig with a shovel','G'],
   isort:['Sort the bag','S'],ihero0:['Hero 1','1'],ihero1:['Hero 2','2'],ihero2:['Hero 3','3'],ihero3:['Hero 4','4'],itab_inv:['The bag','I'],itab_char:['Character sheet','C'],itab_spell:['Spell book','B'],itab_powers:['Powers','K'],
   iclose:['Close the bag','I / Esc'],iequip:['Equip the chosen item','E'],iunequip:['Take off the chosen item','U'],iuse:['Use the chosen item','E'],invherbs:['Herbal remedies','Y'],
@@ -22719,7 +22801,7 @@ function sndMiss(){if(!AC||G.mute||!SNDOPT.combat)return;SFXM=SNDOPT.combat;
    ========================================================================== */
 const SHORTCUTS=[ // [group, key shown, what it does]
  ['Moving','W / Up','Forward'],['Moving','S / Down','Back'],['Moving','A','Step left'],['Moving','D','Step right'],['Moving','Q / Left','Turn left'],['Moving','E / Right','Turn right'],['Moving','PgUp / PgDn','Look up, down (V: mouse look)'],
- ['Fighting','Space / Enter','Attack'],['Fighting','X','Special attack or spell'],['Fighting','H / P / 5','Drink the frequent use potion'],['Fighting','6 / 7','Drink the first / second backup potion'],['Fighting','Z','Wait a turn'],['Fighting','R','Rest and camp'],
+ ['Fighting','Space / Enter','Attack (hold it to keep attacking)'],['Fighting','X','Special attack or spell'],['Fighting','H / P / 5','Drink the frequent use potion'],['Fighting','6 / 7','Drink the first / second backup potion'],['Fighting','Z','Wait a turn'],['Fighting','R','Rest and camp'],
  ['Heroes','1 2 3 4','Choose a hero (also in the inventory)'],
  ['Screens','I','Items (the bag)'],['Screens','C','Character sheet'],['Screens','B','Spell book'],['Screens','K','Powers'],['Screens','J','Quests'],['Screens','L','Journal / Abilities'],
  ['Screens','F','Afflictions'],['Screens','U','Collection'],['Screens','M / O','Map of this level'],['Screens','T','Teleport stones'],['Screens','Esc','Menu, or close a screen'],
@@ -22759,13 +22841,12 @@ addEventListener('keydown',e=>{
 function drawKeysPage(){
   BTNS=[];veil(.86);bigPanel(8,6,464,308);
   txt('KEYBOARD SHORTCUTS',240,22,14,'#d8c88e','center',true);
-  const cols=[['Moving','Fighting','Heroes','In the bag'],['Screens','Exploring']];
+  const cols=[['Moving','Fighting','In the bag'],['Screens','Exploring','Heroes']];   // (Heroes sits on the right so that the left column fits the page)
   cols.forEach((col,ci)=>{let y=38;const x=22+ci*232;
     for(const g of col){txt(g.toUpperCase(),x,y+4,8.5,'#e8c870','left',true);ctx.fillStyle='rgba(216,200,142,.35)';ctx.fillRect(x,y+10,216,1);y+=17;
       for(const [,key,what] of SHORTCUTS.filter(s=>s[0]===g)){ctx.save();rrect(ctx,x,y-6,72,12,3);ctx.fillStyle='rgba(60,46,24,.95)';ctx.fill();ctx.lineWidth=1;ctx.strokeStyle='#8a7448';ctx.stroke();ctx.restore();
         txt(key,x+36,y,7.8,'#f0e4b4','center',true,undefined,68);txt(what,x+78,y,7.6,'#d8cba4','left',false,undefined,138);y+=11.5}
       y+=5}});
-  txt('Esc closes the screen you are in.',360,274,7.6,'#a89878','center');
   btnText('menuback','Back',310,284,100,22);
   btn('menuclose',0,0,DW,DH);BTNS.unshift(BTNS.pop());
 }
@@ -56793,7 +56874,7 @@ function gyAvenueBuild(){
   const light=(x,y,col)=>{lights.push([x,y]);if(col)lcol[x+','+y]=col};
   // the hall: candles and a warm glow, and bones
   for(let x=5;x<=27;x+=4)light(x,9,[1.4,1.0,.55]);
-  for(const x of [4,12,20,27]){dec('candles',x,8,{block:true,sc:.7});dec('candles',x,10,{block:true,sc:.7})}
+  for(const x of [6,13,20,27]){dec('candles',x,8,{block:true,sc:.7});dec('candles',x,10,{block:true,sc:.7})}   // beside the vault doorways (x 4, 11, 18 and 25 in rows 7 and 11), never in front of them: the candles used to close every doorway
   for(const [x,y] of [[8,9],[16,9],[24,9]])dec('bones',x,y,{sc:.9});
   for(const [x,y] of [[3,8],[28,8],[3,10],[28,10],[14,8],[22,10]])dec('web',x,y,{sc:.5});
   // the eight vaults
@@ -56930,7 +57011,7 @@ function gyMazeBuild(k){
   const far=(a,b,d)=>Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])>=d;
   // rooms: furnish by kind
   const FURN={
-    start:r=>{light((r.x0+r.x1)>>1,(r.y0+r.y1)>>1,spec.lcol);dec('candles',r.x0+2,r.y1,{block:true,sc:.7});
+    start:r=>{light((r.x0+r.x1)>>1,(r.y0+r.y1)>>1,spec.lcol);{const cc=cellsOf(r).filter(([x,y])=>free(x,y)&&!doorCell.has(x+','+y)&&!mouths.has(x+','+y)&&!(x===r.x0&&y===((r.y0+r.y1)>>1))).sort((p,q)=>(q[1]-p[1])||(q[0]-p[0]))[0];if(cc)dec('candles',cc[0],cc[1],{block:true,sc:.7})} // the candle stand stands in a corner, never on a square the party must cross (it used to close the room's only way out)
       // the name of the place, on a hanging plaque on the north wall, two squares ahead and a little to the left of the arrival square, so that it is in view when the party comes down
       decor.push({k:'sign_gy',x:r.x0+2,y:r.y0,block:false,wd:[0,-1],txt:[spec.name.toUpperCase(),'Level '+(84+k)]})},
     boss:r=>{const cx=(r.x0+r.x1)>>1,cy=(r.y0+r.y1)>>1;light(cx,cy,spec.lcol);light(r.x0,r.y0,spec.lcol);light(r.x1,r.y1,spec.lcol);
@@ -64133,8 +64214,14 @@ function infTownFor(lvl){
   if(lvl>=40000){const lv=Math.floor((lvl-40000)/10000);return INF.TOWNS.find(t=>t.locked&&t.town===lv)||null}
   return INF.TOWNS.find(t=>t.range&&lvl>=t.range[0]&&lvl<=t.range[1])||null;
 }
+/* Oldhaven: the ordinary homes that may be infested (no shop, no quest keeper, no hoard), the tenth of them with the lowest seeded hash. Worked out once per city build. */
+function infOhPicks(){
+  const hs=OH.houses;if(infOhPicks._h===hs)return infOhPicks._p;
+  const ok=hs.filter(h=>h.room==='home'&&!(h.gold>=500)&&!h.script&&!(h.keeper&&typeof QGIVER!=='undefined'&&QGIVER[h.keeper])).sort((a,c)=>hash2(a.id,3,INF.SEED)-hash2(c.id,3,INF.SEED)||a.id-c.id);
+  infOhPicks._h=hs;return infOhPicks._p=new Set(ok.slice(0,Math.ceil(ok.length/10)).map(h=>h.id))}
 function infPick(lvl){
   if(lvl<1000||lvl>=INF.OFF_LH)return false;
+  if(lvl>=6000&&lvl<=6999&&typeof OH!=='undefined'&&OH.houses&&OH.houses.some(h=>h.id===lvl))return infOhPicks().has(lvl);   // Oldhaven: exactly one ordinary home in ten
   const T=infTownFor(lvl);
   if(T){if(T.locked&&!LEVELS[T.town])return false;return infPicks(T).has(lvl)}
   return lvl<10000&&hash2(lvl,3,INF.SEED)<INF.CHANCE;
@@ -64165,8 +64252,8 @@ function infReach(L,from,extraBlock){
 /* change a built house into an infested one */
 // the painted corpses (assets/ds_corpse0..3: on the back, on the front, curled up, in a robe). Usable as a decor name anywhere:
 // {k:'corpse0'..'corpse3'}, or infCorpse(x,y) for one picked by position. Each is about 1.1 squares wide and lies low on the floor.
-Object.assign(NPC_H,{corpse0:.186,corpse1:.205,corpse2:.42,corpse3:.248});
-function infCorpse(x,y){return 'corpse'+((hash2(x*7+3,y*13+1,(typeof INF!=='undefined'&&INF.SEED||1)+21)*4)|0)}
+Object.assign(NPC_H,{corpse0:.308,corpse1:.347,corpse2:.42,corpse3:.393});   // corpse0, 1 and 3 carry a pool of blood under and round them (the heights are the old ones times the picture's new height)
+function infCorpse(x,y){return 'corpse'+[0,1,3][(hash2(x*7+3,y*13+1,(typeof INF!=='undefined'&&INF.SEED||1)+21)*3)|0]}   // flat on the ground, in blood; the curled-up one (corpse2) looked asleep, so it is no longer used
 function infMake(L,b,lvl,back,T){
   T=T||INF.TOWNS[0];const low=T.low||INF.low,cid=infCellarOf(lvl),town=back.to,rating=Math.max(1,((typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[town])||16)-3),H=L.rows.length,W=L.rows[0].length;
   L.infest=1;L.infestCellar=cid;L.infestRating=rating;L.infestTown=T.k;L.diff=rating;LEVEL_RATING[lvl]=rating;L.amb=Math.min(L.amb||.66,.4);delete L.scene;
@@ -82144,11 +82231,12 @@ function tkrBuild(){
         zb=WH+TKR_TAU+R*(1-(Math.abs(us)*half+cw/2)/half)-.05;
       objs.push({t:'box',hid:hi,id:id+'c',X0:bx0,X1:bx1,Y0:by0,Y1:by1,zb,zt:top,tex:'chim_'+kind,ho:objs[objs.length-2],tn:[tn[0]*.95,tn[1]*.95,tn[2]*.95]})}
     if(id==='ch'||(opt&&opt.chapel)){ // the chapel: a square stone bell tower standing through the roof at the street end, with its slate spire and iron cross
-      const o2=opt||{},tc=o2.tx!==undefined?o2.tx:(X0+X1)/2,ty=o2.north?Y0+.95:Y1-.95,hw=.62,zt=WH+TKR_TAU+R+(o2.th||.95),zs=zt+(o2.sh||2.5);
+      const o2=opt||{},tc=o2.tx!==undefined?o2.tx:(X0+X1)/2,ty=o2.ty!==undefined?o2.ty:o2.north?Y0+.95:Y1-.95,hw=.62,   // o2.tx, o2.ty: the tower's own place (Oldhaven); o2.nocross: a tower with a spire and no iron cross
+      zt=WH+TKR_TAU+R+(o2.th||.95),zs=zt+(o2.sh||2.5);
       objs.push({t:'box',hid:hi,id:'cht',X0:tc-hw,X1:tc+hw,Y0:ty-hw,Y1:ty+hw,zb:WH+TKR_TAU+R*.3,zt,tex:'tower',tn:[tn[0]*1.05,tn[1]*1.05,tn[2]*1.05]});
       objs.push({t:'pyr',hid:hi,id:'chs',X0:tc-hw-.03,X1:tc+hw+.03,Y0:ty-hw-.03,Y1:ty+hw+.03,cx:tc,cy:ty,hw:hw+.03,zb:zt,zt:zs,tex:'spire',tn});
       const xw=.36,xh=xw*(TKR.tex.spirex?TKR.tex.spirex.h/TKR.tex.spirex.w:.35);
-      objs.push({t:'card',hid:hi,id:'chx1',ax0:tc-xw/2,ay0:ty,ax1:tc+xw/2,ay1:ty,zb:zs-.04,zt:zs-.04+xh,tex:'spirex',tn},{t:'card',hid:hi,id:'chx2',ax0:tc,ay0:ty-xw/2,ax1:tc,ay1:ty+xw/2,zb:zs-.04,zt:zs-.04+xh,tex:'spirex',tn})}
+      if(!o2.nocross)objs.push({t:'card',hid:hi,id:'chx1',ax0:tc-xw/2,ay0:ty,ax1:tc+xw/2,ay1:ty,zb:zs-.04,zt:zs-.04+xh,tex:'spirex',tn},{t:'card',hid:hi,id:'chx2',ax0:tc,ay0:ty-xw/2,ax1:tc,ay1:ty+xw/2,zb:zs-.04,zt:zs-.04+xh,tex:'spirex',tn})}
     rep.push(id+' | walls x '+X0+'-'+X1+' y '+Y0+'-'+Y1+' | roof x '+X0+'-'+X1+' y '+Y0+'-'+Y1+' (no overhang) | ridge '+ax+' +'+R)});
   if(S.extra)S.extra(objs,(x,y)=>TKR_GROUND?terrH(x,y):0);   // round solids of a level (Yarrim's lighthouse): cylinders and domes, standing free of the wall grid
   TKR.gzOf=TKR.houses.map(h=>TKR_GROUND?terrH((h[1]+h[2]+1)/2,(h[3]+h[4]+1)/2):0);   // the ground the house stands on (uneven ground: Yarrim; flat levels: 0)
@@ -82157,6 +82245,9 @@ function tkrBuild(){
   const near=new Int16Array(W*H).fill(-1);TKR.houses.forEach((h,hi)=>{if(!objs.some(o=>o.hid===hi))return;for(let y=h[3];y<=h[4];y++)for(let x=h[1];x<=h[2];x++)near[y*W+x]=hi});
   TKR.whOf=TKR.houses.map(h=>(h[12]&&h[12].wh)||TKR_WH);TKR.objs=objs;TKR.near=near;TKR.W=W;TKR.H=H;LEVELS[LEVEL]._tkrRep=rep;
 }
+/* only the roof pieces within a range of the camera are tested by the columns (a big city has hundreds of roofs and most of them are far behind the walls and the haze) */
+const TKR_NB=[];
+function tkrNear(objs,cx,cy,r){if(objs.length<80)return objs;const rr=r*r,B=TKR_NB;B.length=0;for(let i=0;i<objs.length;i++){const o=objs[i],dx=Math.max(o.X0-cx,0,cx-o.X1),dy=Math.max(o.Y0-cy,0,cy-o.Y1);if(dx*dx+dy*dy<=rr)B.push(o)}return B}
 /* the screen buffer: as many columns as the wall picture (one ray per wall column, the same rays as the walls) and twice its rows (the height of the screen canvas) */
 const HB={fas:0,bt:0,bo:null,bu:0,bv:0,bT:null,bsh:1,bW:1};
 const TKR3D={y0:0,y1:VH*2-1,cy0:0,cy1:VH*2-1,RW:VW,RH:VH*2,buf:null,img:null,can:null,cx:null,top:null,bot:null,has:false,wt0:null,on:true};
@@ -82177,7 +82268,7 @@ function TKR3D_R(cx,cy,dX,dY,pX,pY,hzr,hzmax,hzrate,lbm,tbR,tbG,tbB){
   if(!TKR3D.buf){TKR3D.can=document.createElement('canvas');TKR3D.can.width=RW;TKR3D.can.height=RH;TKR3D.cx=TKR3D.can.getContext('2d');TKR3D.img=TKR3D.cx.createImageData(RW,RH);TKR3D.buf=TKR3D.img.data;
     TKR3D.top=new Float32Array(RW);TKR3D.bot=new Float32Array(RW);TKR3D.wt0=new Float32Array(VW);TKR3D.own=new Int8Array(RW*RH)}
   const B=TKR3D.buf,OWN=TKR3D.own;if(TKR3D.y1>=TKR3D.y0)B.fill(0,TKR3D.y0*RW*4,(TKR3D.y1+1)*RW*4);let Y0=RH,Y1=-1;   // only the rows painted last frame are cleared
-  const cP=TKR3D.cP||(TKR3D.cP=new Float64Array(5*64)),objs=TKR.objs,grid=G.grid,MW=TKR.W,MH=TKR.H,near=TKR.near,Fh=F*2,HHh=HH*2,TX=TKR.tex,cand=[],ct=[],cea=[],ct1=[];
+  const cP=TKR3D.cP||(TKR3D.cP=new Float64Array(5*64)),objs=tkrNear(TKR.objs,cx,cy,(TKR.sets[LEVEL]&&TKR.sets[LEVEL].range)||60),grid=G.grid,MW=TKR.W,MH=TKR.H,near=TKR.near,Fh=F*2,HHh=HH*2,TX=TKR.tex,cand=[],ct=[],cea=[],ct1=[];
   const day=G.day||0,tb=[tbR,tbG,tbB],TR=typeof TERR_NOW!=='undefined'&&!!TERR_NOW&&!TERR_NOW.terr,FADE=(TKR.sets[LEVEL]&&TKR.sets[LEVEL].fade)||0;let any=false;
   for(let s=0;s<RW;s++){
     TKR3D.top[s]=1e9;TKR3D.bot[s]=-1e9;
@@ -82339,6 +82430,135 @@ function yarLighthouseSolids(objs,gzAt){
 }
 TKR.sets[290]={wh:1.4,houses:[],dyn:yarRoofRows,fade:.3,extra:yarLighthouseSolids};   // fade: the roofs are painted brighter and more contrasted than Yarrim's walls, so they are toned down to sit with them
 
+/* ---- src/desert/oldhaven_roofs.js ---- */
+/* ==========================================================================
+   OLDHAVEN: THE ROOFS. The city (level 305) and the quay (level 304) use the ray-cast roofs of thornwick_roofs.js (TKR), like Thornwick, Ironhill and Yarrim, so every roof stands
+   exactly on its walls and is right from every side: the eaves meet the wall tops, the gable is the wall carried up, the slopes rise behind the eaves in true perspective and
+   a roof behind a nearer house shows only above that house. (The old roofs were flat painted pictures laid over the houses, which could not do that.)
+   The tables are made when the level is built (TKR.sets[n].dyn): every house of OH.houses (the city) and of OQ_HOUSES (the quay) gets a pitched roof exactly over its wall
+   squares (no overhang) at its own wall height (the optional wh of a row: Oldhaven's houses run from 2.0 to 3.7 high). The ridge runs along the longer side of the house, so a
+   long terrace has one long roof with its eaves to the street and a narrow deep house shows its gable. The roof kind the old picture had (terracotta, slate, plum, sage,
+   shingle, brown, thatch, moss) is kept: the painted slope pieces of Thornwick (slate, tile, shingle, thatch) with a tint for plum, sage, brown and moss. The gable end
+   follows the house type (timber, merchant, townhouse, cottage, guild, almshouse). The chapel and the guild halls (and now and then another house) have a stone tower
+   with a spire standing through the roof; the chapel's has an iron cross. The curtain wall, the castle and the far towers are skyline pictures and stay as they were.
+   ========================================================================== */
+const OHR_KIND={   // the old roof kind -> [slope picture, tint]
+  terra:['tile',[1.05,.96,.9]],red:['tile',[1.05,.97,.92]],slate:['slate',[.97,.99,1.04]],plum:['slate',[1.07,.92,1.04]],sage:['slate',[.92,1.05,.97]],
+  shingle:['shingle',[1,1,1]],brown:['shingle',[.96,.9,.84]],thatch:['thatch',[1.04,1,.9]],moss:['thatch',[.9,1.02,.88]]};
+const OHR_GABLE={timber:'timber',merchant:'ochre',townhouse:'stone',cottage:'boards',guild:'stone',almshouse:'ochre'};
+/* one row of the table: the footprint x0..x1, y0..y1 (squares), the wall height, the roof kind, the gable, whether a tower stands over it (and whether it is the chapel's) */
+function ohrRow(id,x0,x1,y0,y1,wh,kind,gable,tower,chapel){
+  const ex=x1-x0+1,ey=y1-y0+1,ax=ex>=ey?'x':'y',across=ax==='x'?ey:ex,half=across/2,K=OHR_KIND[kind]||OHR_KIND.slate,slope=K[0],thatch=slope==='thatch';
+  const r=hash2(x0,y0,191),r2=hash2(x0,y0,192),r3=hash2(x0,y0,193),R=Math.max(.8,Math.min(2.3,half*(thatch?.8:.62)+.12*r));   // the rise: a pitch of about thirty degrees, thatch steeper
+  const withTower=tower&&across>=3&&Math.max(ex,ey)>=4,chim=(chapel||withTower||r2>.62)?null:[.18+.64*r3,(r3<.5?-1:1)*(.3+.2*r),r<.5?'brick':'stone'];
+  const opt={wh};
+  if(withTower){const end=hash2(x0,y0,194)<.5?0:1;opt.chapel=1;opt.nocross=!chapel;opt.th=chapel?1.7:1.1;opt.sh=chapel?3.2:2.1;   // the tower stands at one end of the ridge, inside the footprint
+    if(ax==='x'){opt.tx=end?x1+1-1.05:x0+1.05;opt.ty=(y0+y1+1)/2}else{opt.tx=(x0+x1+1)/2;opt.ty=end?y1+1-1.05:y0+1.05}}
+  return [id,x0,x1,y0,y1,ax,R,chapel?'slate':slope,chapel?'stone':gable,chim,chapel?[.96,.98,1.02]:K[1],.93+.08*r3,opt];
+}
+function ohRoofRows(){
+  const hs=typeof OH!=='undefined'&&OH.houses;if(!hs)return [];
+  return hs.map(h=>ohrRow(h.id,h.x0,h.x1,h.y0,h.y1,h.wh,h.chapel?'slate':(h.rk||'slate'),OHR_GABLE[h.type]||'stone',!!(h.tw||h.chapel),!!h.chapel));
+}
+const OQR_KIND=['plum','slate','terra','moss','shingle'];   // the quay's old roof pictures, kh_ohroof1_0 to 4
+function oqRoofRows(){
+  if(typeof OQ_HOUSES==='undefined')return [];
+  return OQ_HOUSES.map((b,k)=>ohrRow('oq'+k,b.x0,b.x1,b.y0,b.y1,b.wh,OQR_KIND[b.roof%5],k%2?'ochre':'stone',!!(b.tower||k===0||k===2),false));
+}
+TKR.sets[305]={wh:3,houses:[],dyn:ohRoofRows,fade:.15};
+TKR.sets[304]={wh:2.7,houses:[],dyn:oqRoofRows,fade:.15};
+
+/* ---- src/desert/oldhaven_lamp.js ---- */
+/* ==========================================================================
+   OLDHAVEN: THE STREET LAMP. The city (305) and the quay (304) use the painted wrought-iron lamp (assets/kh/ohlamp_0, strict front elevation) in place of the old
+   code-drawn one. Every other place keeps the old lamp: IMG.lamp answers with the painted one only on those two levels, so the lights, the maps and the fade
+   (all keyed on the name 'lamp') need no change.
+   ========================================================================== */
+(function(){
+  let old=IMG.lamp;
+  Object.defineProperty(IMG,'lamp',{configurable:true,enumerable:true,
+    get(){const p=IMG.kh_ohlamp_0;return (LEVEL===304||LEVEL===305)&&p&&p.width?p:old},
+    set(v){old=v}});
+})();
+
+/* ---- src/desert/oldhaven_night.js ---- */
+/* ==========================================================================
+   OLDHAVEN: THE NIGHT. As in Thornwick and Ironhill, the windows light up from dusk to dawn and the street lamps shine at night.
+   - Windows: the painted window pictures of the walls (kh_ohwall*) each have a pane rectangle (OH_PANE: x0,y0,x1,y1 as fractions of the picture, and 1 for an arched top).
+     When a wall tile is made (ohTiles in oldhaven.js) every window unit in it gets an amber glow picture: the pane lit (the leading stays darker, so the panes still read) with a soft
+     halo on the wall round it. The glow is dim by day (none), fades in from 17:00, is full from 19:00 to 05:00 and fades out by 07:00 (epNightK of early_polish.js). The pictures
+     are swapped in only when the eighth-step of the day changes, the same way as Thornwick (epNightTick).
+   - Lamps: the street lamps of the city and the quay shine like those of Khemetra (range and strength); the engine already dims lamps by day.
+   ========================================================================== */
+const OH_PANE={
+  kh_ohwall1_4:[.35,.17,.65,.78,1],
+  kh_ohwall2_2:[.30,.22,.67,.44],kh_ohwall2_3:[.13,.30,.87,.71],kh_ohwall2_5:[.27,.37,.70,.68],
+  kh_ohwall3_2:[.27,.20,.73,.64],kh_ohwall3_3:[.18,.29,.82,.73],kh_ohwall3_5:[.37,.30,.60,.62,1],
+  kh_ohwall4_2:[.30,.11,.72,.70],kh_ohwall4_3:[.10,.25,.88,.70],kh_ohwall4_5:[.39,.26,.63,.53,1],
+  kh_ohwall5_2:[.34,.27,.70,.55],kh_ohwall5_5:[.39,.14,.57,.40],
+  kh_ohwall6_3:[.40,.25,.62,.58,1]};
+const OHN={list:[],step:-1};
+function ohNightReg(ti,d,wins,Hp){
+  const W=128,e=new Uint8ClampedArray(W*Hp*4),HALO=7;
+  for(const [u,nm] of wins){const P=OH_PANE[nm];if(!P)continue;
+    const x0=P[0]*W,x1=P[2]*W,y0=P[1]*128,y1=P[3]*128,top=Hp-(u+1)*128,arch=P[4],rw=(x1-x0)/2,cx=(x0+x1)/2;
+    for(let py=0;py<128;py++){const Y=top+py;if(Y<0||Y>=Hp)continue;
+      for(let px=0;px<W;px++){
+        let dx=Math.max(x0-px,0,px-x1),dy=Math.max(y0-py,0,py-y1);
+        if(arch&&py<y0+rw){const ey=(y0+rw-py)/rw,ex=(px-cx)/rw;const r=Math.sqrt(ex*ex+ey*ey);if(r>1&&py>=y0){dx=(r-1)*rw;dy=0}else if(py<y0){dx=Math.max(dx,0);}}
+        const dist=Math.hypot(dx,dy),j=(Y*W+px)*4;
+        if(dist<=0){const l=d[j]*.3+d[j+1]*.59+d[j+2]*.11,a=Math.min(1,.62+.38*(1-Math.min(1,l/150)));
+          e[j]=255;e[j+1]=172;e[j+2]=66;e[j+3]=a*235}
+        else if(dist<HALO&&e[j+3]<80){const a=(1-dist/HALO);e[j]=255;e[j+1]=165;e[j+2]=62;e[j+3]=a*a*.4*255}}}}
+  OHN.list.push({ti,e});OHN.step=-1}
+function ohNightTick(){
+  const st=Math.round(epNightK()*8);if(OHN.step===st)return;OHN.step=st;const k=st/8;
+  for(const r of OHN.list){const T=TEX[r.ti];if(!T)continue;
+    if(st===0)T.e=null;else{r.c=r.c||{};let e=r.c[st];if(!e){e=new Uint8ClampedArray(r.e.length);for(let i=0;i<e.length;i+=4){e[i]=r.e[i];e[i+1]=r.e[i+1];e[i+2]=r.e[i+2];e[i+3]=r.e[i+3]*k}r.c[st]=e}T.e=e}
+    for(let j=0;j<8;j++)delete T['he'+j]}}
+{const _dw=drawWorld;let lampLv=null;
+  drawWorld=function(){
+    try{if(LEVEL===305||LEVEL===304){ohNightTick();
+      if(lampLv!==G.decor){lampLv=G.decor;for(const l of LIGHTS)if(l.lamp&&!l.fire&&!l.red){l.range2=100;l.kI=2.3}}}}catch(e){console.error('ohnight',e)}
+    return _dw.apply(this,arguments)}}
+
+/* ---- src/desert/oldhaven_quest_guard.js ---- */
+/* ==========================================================================
+   OLDHAVEN: QUESTS ARE ALWAYS ADDED, AND A GOLD ! ONLY SHOWS WHERE A QUEST CAN BE TAKEN.
+   Found by talking to every person of Oldhaven (the city, the quay, the court, the houses and the Oakwood) at each stage of the story and comparing what the mark said with what the
+   dialogue did: (1) the six people at the fair, the mason and the cats guild, Hale's second quest, Ysolt's, and Aldwyn for the court showed a gold ! at stages when they offered nothing;
+   (2) Captain Aldwyn's later quests (the east gate, the pigeon post, retaking the gate), Sergeant Cade's two and the baker's tunnel were offered with no mark at all;
+   (3) the Court of King Osric was only added when the party walked into the court, and The Six Names only when the party spoke to Aldwyn after the pardon, so after the king's scene the
+   quest list did not say what to do.
+   Here: who gives which quests (QGIVER), when each becomes available (OHQ_GATE: a mark shows for a quest that is not started and is available, a green ? for one that is ready), and the
+   quests the story hands out itself are added by the story: the court on arrival (also for a party that arrived before this, see the check on entering), The Six Names at the pardon
+   (oldhaven.js, ohSixQuest). The tool for this check is tools/qaudit/oh_quest_audit.js.
+   ========================================================================== */
+QGIVER.oh_cap=['vq6','oq0','sg1','sg5','sg8','oa1'];QGIVER.oh_sergeant=['sg2','sg6'];QGIVER.oh_x_baker=['ox3','sg7'];
+const OHQ_GATE={
+  ox1:()=>qSt('oq0')==='active',ox2:()=>qSt('oq0')==='active',ox3:()=>qSt('oq0')==='active',ox4:()=>qSt('oq0')==='active',ox5:()=>qSt('oq0')==='active',ox6:()=>qSt('oq0')==='active',
+  vq6:()=>false,   // the court quest is added by the story (on arrival), nobody hands it out
+  oq0:()=>!!G.flags.pardoned,
+  sg1:()=>qSt('oq0')==='done',sg2:()=>qSt('sg1')==='done',sg5:()=>qSt('sg1')==='done',sg6:()=>qSt('sg1')==='done',
+  sg3:()=>!!G.flags.siege,sg4:()=>!!G.flags.siege,
+  sg7:()=>qSt('sg1')==='done'&&qSt('ox3')==='done',sg8:()=>qSt('sg1')==='done'&&qSt('sg7')==='done',
+  oa1:()=>qSt('sg8')==='done',oa6:()=>qSt('oa2')==='done',oa7:()=>qSt('oa3')==='done',
+  oa9:()=>qSt('oa8')==='done',
+  oa8:()=>{const O=typeof OAKF==='function'?OAKF():{};return !!O.heir&&!O.crowned}
+};
+{const _qm=questMark;questMark=function(d){
+  const qv=QGIVER[d.npc];if(!qv||d.found||d.hidden)return 0;
+  const arr=[].concat(qv).filter(q=>QUESTS[q]);
+  if(!arr.some(q=>OHQ_GATE[q]))return _qm(d);   // a giver outside this list: as before
+  let best=0;
+  for(const q of arr){const st=qSt(q);if(st==='done')continue;if(st==='active'){if(qReady(q))return 2;continue}const g=OHQ_GATE[q];if(!g||g())best=1}
+  return best}}
+/* the court is the next thing to do once the party is in Oldhaven (the quay cutscene adds it; a party that arrived before this gets it here) */
+{const _oe=ohEnter;ohEnter=function(n){
+  const r=_oe.apply(this,arguments),F=G.flags;
+  try{if(n>=304&&n<=311&&F.oldhavenSeen&&!F.pardoned&&!G.cut&&qSt('vq6')===null&&QUESTS.vq6)qAccept('vq6')}catch(e){console.error('ohquestguard',e)}
+  return r}}
+
 /* ---- src/desert/yarrim_woods.js ---- */
 /* ==========================================================================
    YARRIM: THE WOODS. Green woods round the village to the north and north-west, the west (along the back track) and the south-west. Called by yarBuild (yarrim_town.js)
@@ -82387,18 +82607,6 @@ function yarWoods(c){
     tree.add(I(x,y));used.add(K(x,y));trees.push([x,y,k]);
     decor.push({k,x,y,block:true,ox:(hs(x,y,86)-.5)*.5,oy:(hs(x,y,87)-.5)*.5,sc:.85+hs(x,y,88)*.35});
   }
-  // bushes between the forest and the beach: a loose strip just outside the east edge of the woods, and a thinner one behind the sand; walk-through, never near a house, a road, the park, the lighthouse or a trail
-  {const BUSH=['lbush0','lbush0_1','lbush0_2'];let nb=0;
-   for(let y=8;y<H-9;y++){const sh=typeof YP!=='undefined'?YP.shore(y):62;
-     for(let x=30;x<sh-3;x++){
-       if(!land(x,y)||keep(x,y)||used.has(K(x,y))||path.has(I(x,y))||tree.has(I(x,y))||inZone(x,y))continue;
-       const z=YW_ZONES.find(q=>y>=q[1]-1&&y<=q[3]+1&&x>q[2]&&x<=q[2]+7);          // just outside a zone's east edge
-       const nearSand=x>=sh-10&&x<=sh-4;                                           // behind the beach
-       const p=z?.07:nearSand?.045:0;if(!p||hs(x,y,95)>p)continue;
-       const key=BUSH[(hs(x,y,96)*BUSH.length)|0];used.add(K(x,y));nb++;
-       decor.push({k:key,x,y,block:false,walk:true,deco:true,ox:(hs(x,y,97)-.5)*.7,oy:(hs(x,y,98)-.5)*.5,sc:.85+hs(x,y,99)*.45})}}
-   if(typeof NPC_H!=='undefined')for(const k of BUSH)if(NPC_H[k]===undefined)NPC_H[k]=.8;
-   c.yarBushes=nb}
   // the squares that can be walked to from the back track (a creature or a chest is never put in a pocket the trees have closed off)
   const reach=new Set(),pass=(x,y)=>P.street[I(x,y)]||(land(x,y)&&!tree.has(I(x,y))),q0=[I(...YW_TRAILS[0][0])];reach.add(q0[0]);
   for(let a=0;a<q0.length;a++){const i=q0[a],x=i%W,y=(i/W)|0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const X=x+dx,Y=y+dy;if(X<2||Y<2||X>=W-2||Y>=H-2)continue;const j=I(X,Y);if(reach.has(j)||!pass(X,Y))continue;reach.add(j);q0.push(j)}}
@@ -82591,6 +82799,71 @@ function srTick(){if(typeof LEVEL==='undefined'||!G.decor||!G.P)return;
 {const _dw=drawWorld;drawWorld=function(){try{if(SR_ROOMS[LEVEL]||SR.gd)srTick()}catch(e){}return _dw.apply(this,arguments)}}
 /* "Something glints at the bottom of the chest." when the chest of a secret wall is opened (once) */
 {const _ol=openLoot;openLoot=function(d){const r=_ol.apply(this,arguments);try{if(d&&d.srSur&&!d.srSurMsg&&G.loot&&G.loot.decor===d){d.srSurMsg=1;msg('Something glints at the bottom of the chest.','#ffe9a0')}}catch(e){}return r}}
+
+/* ---- src/desert/oldhaven_grounds.js ---- */
+/* ==========================================================================
+   OLDHAVEN: THE CASTLE GROUNDS. The ward of the castle has a winding path round the keep and its two long halls (the lanes at the north, west and east that nothing used
+   to stand in). Now:
+   - two small quests: Pip the page lost the steward's signet ring on the north path, and Hob the chandler needs four candle-ends from the ground round the keep;
+   - Tam, an old gate-guard, who talks about the loose stones in the halls (a hint, no quest);
+   - a few things to pick up lying on the path: two healing potions, two herbs;
+   - three secret doors (the same loose-stone door as the mazes, secret_rooms.js, planned by hand here because the city is an open level): one in the west hall, one in
+     the east hall, one in the west face of the keep. Each hides a small chamber with a chest (potions, a little gold and one surprise item).
+   The people and things are put in by ohBuild (OH_GROUNDFOLK, OH_GROUNDITEMS, OH_GROUNDSECRET); the doors are SR_ROOMS[305], which srApply already handles.
+   ========================================================================== */
+ITEMDEF.ohsignet={n:"Steward's Signet",k:'quest',t:'Quest item',ic:'ring',c:'#d8b040',stack:1,price:1,d:'A heavy silver signet ring, cut with the castle tower. The steward seals the king\'s letters with it.',sw:.1};
+ITEMDEF.ohcandle={n:'Candle-end',k:'quest',t:'Quest item',ic:'herb',c:'#e8d8a0',stack:1,price:1,d:'A fat stub of beeswax candle, dropped on the castle paths by a page in a hurry.',sw:.1};
+const OG_FOLK=[
+ {id:'og_pip',n:'Pip, a page of the castle',face:'kh_ohfolk1_5',at:[52,16]},
+ {id:'og_hob',n:'Hob, the castle chandler',face:'kh_ohfolk3_3',at:[96,16]},
+ {id:'og_tam',n:'Tam, an old gate-guard',face:'kh_ohfolk7_4',at:[62,9]}
+];
+const OH_GROUNDFOLK=OG_FOLK.map(f=>[f.id,f.at[0],f.at[1]]);
+/* the north path is the lane at y 8 (west of the keep from x 51 to 62, east of it from 86 to 98); the side lanes are x 51-52 and 96-97, and x 62 and 86 run beside the keep */
+const OH_GROUNDITEMS=[
+  ['ohsignet',60,8],
+  ['ohcandle',55,17],['ohcandle',62,15],['ohcandle',86,15],['ohcandle',93,8],
+  ['potion',51,10],['potion',97,10],['herb',57,8],['herb',90,17]];
+/* hidden chambers: door (a wall square of a hall or the keep), from (the lane square in front of it), cells (inside the solid block), chest (the far corner), lamp */
+const OH_GROUNDSECRET=[
+  {id:'oh_w',door:[53,12],from:[52,12],cells:[[54,11],[55,11],[56,11],[54,12],[55,12],[56,12]],chest:[56,12],lamp:[55,11],w:2,d:3},
+  {id:'oh_e',door:[95,12],from:[96,12],cells:[[94,11],[93,11],[92,11],[94,12],[93,12],[92,12]],chest:[92,12],lamp:[93,11],w:2,d:3},
+  {id:'oh_k',door:[63,13],from:[62,13],cells:[[64,12],[65,12],[66,12],[64,13],[65,13],[66,13]],chest:[66,12],lamp:[65,13],w:2,d:3}];
+SR_ROOMS[305]=OH_GROUNDSECRET.map((s,j)=>Object.assign({sr:1,lv:305,j,mon:null,free:s.cells.filter(c=>!(c[0]===s.chest[0]&&c[1]===s.chest[1])&&!(c[0]===s.door[0]+(s.door[0]-s.from[0])&&c[1]===s.door[1]+(s.door[1]-s.from[1])))},s));
+const ogq=(id,t,who,desc,need,goal,reward,extra)=>{QUESTS[id]=Object.assign({title:t,who,desc,need,goal,reward},extra||{});QAREA[id]='Oldhaven'};
+ogq('og1',"The Steward's Signet",'Pip, a page of the castle','Pip lost the steward\'s silver signet ring while running a letter along the north path round the keep. Find it on the ground and bring it back to Pip, before the steward finds out.',1,()=>Math.min(1,bagCount('ohsignet')),{gold:700,xp:6000,items:['potion4']},{take:{ohsignet:1}});
+ogq('og2','Candle-ends for the Keep','Hob, the castle chandler','Hob makes the candles for the castle, and a page has been dropping them along the paths round the keep. Pick up 4 candle-ends from the ground and bring them to Hob.',4,()=>Math.min(4,bagCount('ohcandle')),{gold:600,xp:5500},{take:{ohcandle:4}});
+const OGD={
+ og1:khQD('Oh, please! The steward\'s signet ring. I had it in my hand on the north path, the one round the keep, and then a goose came and now it is gone. If he finds out, I am cleaning the moat. Will you look for it? It is silver, with a little tower on it.','Thank you, thank you. Try the lane along the north wall.',(g,n)=>`The ring is somewhere on the paths round the keep. You have ${g} of ${n}.`,'My ring! My neck! I mean, the steward\'s ring! Thank you.','The goose is in the moat now. Here, this is all I have, from the steward\'s own purse. He will not miss it.','The steward has not noticed. Thank you.','Here is the ring.'),
+ og2:khQD('The candles for the keep are mine, and every dawn I find them on the paths, dropped by the pages who carry them. A candle-end is a candle I cannot count. Four of them, if you would. They lie on the ground along the lanes round the keep.','Four candle-ends. Look along the lanes, and in the corners.',(g,n)=>`Four candle-ends, and you have ${g}.`,'Four ends. I will melt them into one proper candle. Thank you.','Four candle-ends. Take this for the trouble.','The keep has light again.','Here are four candle-ends.')};
+const ogNpc=(id,fn,q)=>{const f=OG_FOLK.find(x=>x.id===id);khNpc(f.id,f.n,f.face,fn,q?{q}:undefined)};
+ogNpc('og_pip',()=>qSt('og1')==='done'?say('The steward has not noticed. I am going to be very good from now on, for at least a week.',[BYE]):qNode('og1',OGD.og1),'og1');
+ogNpc('og_hob',()=>qSt('og2')==='done'?say('The paths are clear and the candles are counted. I could sing.',[BYE]):qNode('og2',OGD.og2),'og2');
+ogNpc('og_tam',()=>say(qSt('og1')==='active'?'A ring? Pip has lost a ring? Try the north lane, lad. And mind the geese.':'Thirty years on the gate, and I will tell you a thing the young ones do not know. The two long halls and the keep have loose stones in them, on the lane side. Walk up to one and push. Some old guards put their savings behind them.',[BYE]));
+/* the open city keeps a blocked-square map for its terrain (TERR_BLOCK): the hidden chambers and their opened doors must be free squares in it as well as in the grid */
+{const _dw=drawWorld;drawWorld=function(){
+  try{if(LEVEL===305&&typeof TERR_BLOCK!=='undefined'&&TERR_BLOCK&&G.grid){const F=(G.flags.ep_sec||{});
+    for(const s of OH_GROUNDSECRET){if(s.bad)continue;for(const [x,y] of s.cells)if(G.grid[y]&&G.grid[y][x]===0)TERR_BLOCK[y*MW+x]=0;if(F[s.id]&&G.grid[s.door[1]][s.door[0]]===0)TERR_BLOCK[s.door[1]*MW+s.door[0]]=0}}}catch(e){console.error('oggr',e)}
+  return _dw.apply(this,arguments)}}
+
+/* ---- src/desert/level_edge.js ---- */
+/* ==========================================================================
+   THE EDGE OF A HIGHER LEVEL. A creature above the party's average level is harder than its stats alone say:
+   - it hits more often: +0.6 percent to its chance to hit for every level it stands above the party, at most +18 percent (so +14 percent against a level 84 creature and a level 60 party);
+   - it takes slightly less damage: 0.5 percent less for every level above, at most 20 percent less (12 percent less at 24 levels up).
+   A creature at or below the party's level is not changed. The party level is the average of the living heroes (adaAvgLvl, adapt.js).
+   ========================================================================== */
+const LE={hitPer:.006,hitMax:.18,dmgPer:.005,dmgMax:.20};
+function leGap(e){
+  if(!e||!(e.lvl>0)||typeof adaAvgLvl!=='function')return 0;
+  const a=adaAvgLvl();return a>0?Math.max(0,e.lvl-a):0}
+{const _hc=enemyHitC;enemyHitC=function(def,hi,lvl,e){
+  const base=_hc.apply(this,arguments),g=leGap(e);
+  return g>0?Math.min(.97,base+Math.min(LE.hitMax,g*LE.hitPer)):base}}
+{const _he=hurtEnemy;hurtEnemy=function(e,dmg){
+  const g=leGap(e);
+  if(g>0&&typeof dmg==='number'&&dmg>1){const a=Array.prototype.slice.call(arguments);a[1]=Math.max(1,Math.round(dmg*(1-Math.min(LE.dmgMax,g*LE.dmgPer))));return _he.apply(this,a)}
+  return _he.apply(this,arguments)}}
 
 /* ---- src/desert/npc_unblock.js ---- */
 /* Safeguard: a person never stands in the road. Level setup already makes every NPC walk-through; this catches

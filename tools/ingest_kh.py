@@ -3,7 +3,8 @@
     python tools/ingest_kh.py <sheet.jpg> <name> <fac|sprite|tex> [cols=<n> rows=<n>] [maxh=<px>]
 
 fac     each house front is cropped out and saved as assets/kh/<name>_<k>.jpg (opaque, a flat wall)
-sprite  each picture is keyed out of the magenta and saved as assets/kh/<name>_<k>.webp (with transparency); soft=1 keeps thin dark parts and takes the purple fringe off flames
+sprite  each picture is keyed out of the magenta and saved as assets/kh/<name>_<k>.webp (with transparency); soft=1 keeps thin dark parts and takes the purple fringe off flames;
+        grid=1 cols=<n> rows=<n> [join=<px>] cuts a sheet laid out in a grid: every picture is found whole and numbered in the grid's reading order, whatever its height or width
 tex     the sheet is cut into a cols x rows grid of seamless squares, saved as assets/kh/<name>_<k>.jpg
 
 Pieces are numbered in reading order. assets/kh/manifest.json lists every piece with its size.
@@ -67,6 +68,18 @@ if kind == 'tex':
         for ci in range(cols):
             pieces.append((ci * W // cols, rj * H // rows, (ci + 1) * W // cols, (rj + 1) * H // rows))
 else:
+    if opts.get('grid'):   # a sheet laid out in a grid: every picture is found whole (its loose parts, a rope, a chain, water, are joined by a growth of join=<px> pixels), then numbered in the grid's reading order by where its centre lies, so a wide picture that spills over its cell is not cut
+        from scipy import ndimage as ndi
+        gc, gr = int(opts.get('cols', 3)), int(opts.get('rows', 2)); W_, H_ = im.size
+        lab, nl = ndi.label(ndi.binary_dilation(fg, iterations=int(opts.get('join', 14))))
+        comps = []
+        for i in range(1, nl + 1):
+            ys, xs = np.where((lab == i) & fg)
+            if len(ys) < 800: continue   # specks of the background are not pictures
+            comps.append((int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1))
+        comps.sort(key=lambda q: (min(gr - 1, int((q[1] + q[3]) / 2 * gr / H_)), q[0] + q[2]))
+        if len(comps) != gc * gr: print('WARNING: found %d pictures, the grid has %d cells' % (len(comps), gc * gr))
+        pieces.extend(comps)
     if opts.get('order') == 'rows':
         for (y0, y1) in runs(fg.sum(axis=1) > 6, 4):
             if y1 - y0 < 40: continue
@@ -80,7 +93,7 @@ else:
     forced_rows = int(opts.get('rows', 0))
     gapx = 3 if kind == 'sprite' else 6
     thin = bool(opts.get('soft'))   # soft: a one or two pixel rope or chain still counts as part of the picture
-    for (x0, x1) in (runs(fg.sum(axis=0) > (2 if thin else 6), gapx) if opts.get('order') != 'rows' else []):
+    for (x0, x1) in (runs(fg.sum(axis=0) > (2 if thin else 6), gapx) if opts.get('order') != 'rows' and not opts.get('grid') else []):
         if x1 - x0 < 40: continue
         col = fg[:, x0:x1 + 1]
         spans = runs(col.sum(axis=1) > (0 if thin else 3), 2)
@@ -95,8 +108,8 @@ else:
             if len(xs) == 0: continue
             pieces.append((x0 + xs[0], y0, x0 + xs[-1] + 1, y1 + 1))
     # reading order: rows of similar height first, then left to right
-    pieces.sort(key=lambda p: (round(p[1] / 120), p[0]))
-if kind == 'sprite' and len(pieces) > 2:   # slivers (a staff, a stray fringe) are not pictures
+    if not opts.get('grid'): pieces.sort(key=lambda p: (round(p[1] / 120), p[0]))
+if kind == 'sprite' and len(pieces) > 2 and not opts.get('grid'):   # slivers (a staff, a stray fringe) are not pictures
     ar = sorted((x1 - x0) * (y1 - y0) for (x0, y0, x1, y1) in pieces); med = ar[len(ar) // 2]
     pieces = [q for q in pieces if (q[2] - q[0]) * (q[3] - q[1]) >= .3 * med]
 maxh = int(opts.get('maxh', 512))

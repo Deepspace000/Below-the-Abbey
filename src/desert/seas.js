@@ -211,7 +211,7 @@ function seaSpawn(t,r,alert){ // a creature appears a few cells from the party
 }
 function seaEnter(n){
   const F=G.flags;
-  if(n===304&&!F.oldhavenSeen){F.oldhavenSeen=1;startCut('oldhavenArrive',()=>{if(qSt('vq5')===null)qAccept('vq5');if(qReady('vq5'))qTurnIn('vq5');F.act3=1;msg('The gate of Oldhaven stays shut until noon. Speak to the herald.','#ffe36a')})}
+  if(n===304&&!F.oldhavenSeen){F.oldhavenSeen=1;const arrived=()=>{if(qSt('vq5')===null)qAccept('vq5');if(qReady('vq5'))qTurnIn('vq5');F.act3=1;if(qSt('vq6')===null&&!F.pardoned&&QUESTS.vq6)qAccept('vq6');if(!(F.courtSeen||F.pardoned))msg('The gate of Oldhaven stays shut until noon. Speak to the herald.','#ffe36a')};if(F.courtSeen||F.pardoned)arrived();else startCut('oldhavenArrive',arrived)}   // (a party that has already been in the court or pardoned never sees the arrival scene again)
   if(typeof ohEnter==='function')ohEnter(n);
   else if(n>=300&&n<=303&&!(F.seaArr&&F.seaArr[n])){(F.seaArr=F.seaArr||{})[n]=1;msg({300:'Saltbarrow. A pirate haven of sand, wrecks and canvas tents. Gulls cry over the water.',301:'The Isle of Bells. Mist over a drowned abbey. Somewhere in the grey, a bell is moving in the wind.',302:'Cinder Isle. Black rock and red glow. The mountain breathes.',303:'Last Light. A scrap of rock at the end of the chart. A small lamp burns in a hut on the shore.'}[n],'#a8d8ff')}
 }
