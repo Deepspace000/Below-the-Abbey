@@ -20,12 +20,11 @@ khNpc('yr1_p2','Moll, a laundry woman','kh_yfolk3_3',()=>say('Bessa waters the a
 /* ---- the travelling donkey ---- */
 const YR_FARE_ORIGIN=[692,66];   // Yarrim on the map of the far lands
 function yrFare(wx,wy,extra){const d=Math.hypot(wx-YR_FARE_ORIGIN[0],wy-YR_FARE_ORIGIN[1]),half=typeof qSt==='function'&&qSt('yq_donk')==='done'?.5:1;return Math.max(20,Math.round((d*.28+(extra||0))*half/10)*10)}   // Biscuit's friends ride at half fare
-const YR_RIDES=[ // where the donkey goes: the name, the level, where you step down, and what has to have happened
+const YR_RIDES=[ // where the donkey goes: the name, the level, where you step down, and what has to have happened (the donkey does not go to Oldhaven: that way is by ship)
   {n:'Khemetra, by the Sea Gate',lv:44,at:{x:394,y:200,f:3},fare:()=>yrFare(486,56),need:()=>true,line:'The donkey takes the cliff road, round the back of the dunes, and the whole of Khemetra comes slowly up out of the sand: white walls, gold roofs, the long wall.'},
   {n:'Anaea, the white town',lv:33,fare:()=>yrFare(402,238),need:()=>G.flags.lvSeen&&G.flags.lvSeen[33],line:'The donkey knows this road. It goes west, and the dunes become scrub, and the scrub becomes a green valley with a white town in it.'},
   {n:'Greendale',lv:32,fare:()=>yrFare(418,186),need:()=>G.flags.lvSeen&&G.flags.lvSeen[32],line:'Past the pass, the land goes green, and the road runs down between hedges to a small, quiet valley.'},
   {n:'Ironhill',lv:13,fare:()=>yrFare(262,112),need:()=>G.flags.lvSeen&&G.flags.lvSeen[13],line:'A long road, a longer afternoon, and then smoke over a castle on a hill.'},
-  {n:'Oldhaven, the long way round by the north',lv:304,days:6,fare:()=>yrFare(1950,66,60),need:()=>G.flags.oldhavenSeen,line:'Hamid takes the coast road north, and then north again, past the last farm and the last well, until the two coasts of the Narrow Sea close together under a grey sky. Biscuit crosses the neck of land at a plod. The cart turns east and then south, six days of cold wind, and at the end of it the sea comes back on the other side, and a long grey wall runs along the shore. Hamid says he much prefers boats.'},
   {n:'Thornwick',lv:3,fare:()=>yrFare(156,204),need:()=>G.flags.lvSeen&&G.flags.lvSeen[3],line:'Over the moor and through the forest, where the road remembers the party. At the end of it, the little town with the goat on its sign.'}
 ];
 let YR_RIDE=null;
@@ -64,9 +63,10 @@ function yrKhShopMenu(page){
 }
 function yrDonkeyMenu(){
   const F=G.flags,here=YR.ID;
-  const opts=YR_RIDES.filter(r=>r.lv!==LEVEL&&r.need()).map(r=>{const fare=r.fare();return [r.n+'  ('+fare+' gold)',()=>yrRide(r,fare)]});
-  if(LEVEL!==44)opts.push(['Khemetra: take me to a shop...',()=>yrKhShopMenu(0)]);
-  const hidden=YR_RIDES.filter(r=>!r.need()).length;
+  const lower=r=>(LEVEL_RATING[r.lv]||0)<(LEVEL_RATING[LEVEL]||0);   // the donkey only goes to places of a lower level than the village, so it cannot be used to skip ahead
+  const opts=YR_RIDES.filter(r=>r.lv!==LEVEL&&lower(r)&&r.need()).map(r=>{const fare=r.fare();return [r.n+'  ('+fare+' gold)',()=>yrRide(r,fare)]});
+  if(LEVEL!==44&&(LEVEL_RATING[44]||0)<(LEVEL_RATING[LEVEL]||0))opts.push(['Khemetra: take me to a shop...',()=>yrKhShopMenu(0)]);
+  const hidden=YR_RIDES.filter(r=>lower(r)&&!r.need()).length;
   const o=opts.slice(0,3);
   if(opts.length>3)o.push(['More places...',()=>{const rest=opts.slice(3);rest.push(['Back',()=>yrDonkeyMenu()]);return say('Where else?',rest)}]);
   o.push(['Never mind.',()=>null]);
