@@ -1,4 +1,4 @@
-# Below the Abbey: update notes, 3.779 to 3.837
+# Below the Abbey: update notes, 3.779 to 3.838
 
 The last update notes covered 3.769 to 3.778. These are the versions since (3.788 and 3.789 were never released). All of them are on GitHub Pages, and every release has also gone to itch.io (browser) and the Windows app.
 
@@ -45,6 +45,7 @@ The last update notes covered 3.769 to 3.778. These are the versions since (3.78
 - 3.818: shop weapons for levels 62 to 78 (swords, axes, maces and bows, five tiers). The shops in Wenlock, Sale, the Deeper Hollow and Oldhaven sell every tier.
 - 3.819: 32 painted shop weapons for levels 82 to 110, in eight sets, each with its own effects: burning, poison, curse, fear, blind, slow, chain lightning, a burst of force, and mana leech.
 - 3.826: some armour sets and the top weapons carry extra critical chance and extra critical damage.
+- 3.838: every piece of gear shows its level on its card, and its name and bag slot are coloured by level: grey for levels 0 to 4, green 5 to 9, blue 10 to 19, yellow 20 to 29, orange 30 to 39, red 40 to 59, purple 60 to 79, orange 80 to 99 and turquoise from 100 up. A piece with no level of its own gets one worked out from its price. The special named pieces keep a pink border on the bag slot. The pick-up message uses the same colour.
 - 3.837: the weapons of levels 82 to 110 grow more gently from one level to the next. The Starseeker Bow (level 90) now does 351 to 505, where it did up to 590. The level 110 weapons top out around 615 to 660, where they reached about 950.
 
 ## Powers
