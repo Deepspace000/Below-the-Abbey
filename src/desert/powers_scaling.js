@@ -26,6 +26,7 @@ function uW(h){const r=heroDmgRange(h),w=heroWeapon(h);const crit=weaponCrit(w)+
 function uM(h){return (intB(h)+magicBonus(h)+8)*(1+pasH(h,'spellPct'))}
 function psU(h){return isCaster(clsOf(h))?uM(h):uW(h)}
 const LATE=L=>1-.45*Math.max(0,Math.min(1,(L-30)/70)); // powers hit softer as the hero levels: nothing before level 30, then falling to 55 percent by level 100 (late gear made single powers do 6000 and more)
+const bowPen=h=>{try{const w=h&&heroWeapon(h);return w&&w.ranged?.5:1}catch(e){return 1}}; // a melee power swung with a bow in hand (a thief with an archer's bow) hits half as hard: the bow's damage is for shooting
 const gF=(L,u)=>(1+K*Math.max(0,L-u))*(1+KL*L)*LATE(L);
 function useHero(){ // the hero who is using a power now
   try{const h=G.heroes[G.curHero===undefined?G.sel:G.curHero];if(h)return h}catch(e){}
@@ -41,7 +42,7 @@ const rng=(M,u)=>{const a=[1,2];a._M=M;a._u=u;return a}; // a damage range for t
    options: dot: share of the total that is damage over time. p: the plain words of the card (the number is added by the game). */
 const GE=.72,TAPER=.30; // (was .75 and .15: the late powers hit too hard, now about 20 percent less at level 80, 14 percent at 50, 4 percent at 1) // GE: one factor for all classes, TAPER: the damage for each point of cost falls by this much between level 1 and level 80, both set so that fights do not get much shorter than before (see POWERS_AFTER.md)
 const E_CLS={Warrior:.31,Barbarian:.30,Paladin:.25,Ranger:.35,Archer:.36,Thief:.38,Assassin:.33,Mage:.20,Sorcerer:.20,Priest:.20,Monk:.40,Goat:.36};
-const CM={Warrior:.98,Barbarian:1.04,Paladin:1.35,Ranger:.88,Archer:.85,Thief:.75,Assassin:.85,Mage:2.0,Sorcerer:2.0,Priest:1.8,Monk:.78,Goat:.92}; // the high damage classes (Thief, Assassin, Archer, Ranger, Monk) have the softest powers, so that E x CM is about .30 for all the fighters: their blows already do the damage (a small correction for each class, from the fight simulations: the old ladders were not equally generous (the Monk's Flurry of Blows was a bargain, the Paladin's powers were traps)
+const CM={Warrior:.98,Barbarian:1.04,Paladin:1.35,Ranger:.80,Archer:.78,Thief:.52,Assassin:.65,Mage:2.0,Sorcerer:2.0,Priest:1.8,Monk:.72,Goat:.92}; // the high damage classes (Thief, Assassin, Archer, Ranger, Monk) have the softest powers, so that E x CM is about .30 for all the fighters: their blows already do the damage (a small correction for each class, from the fight simulations: the old ladders were not equally generous (the Monk's Flurry of Blows was a bargain, the Paladin's powers were traps)
 const CASTER={Mage:1,Sorcerer:1,Priest:1};
 const eff=(cls,u)=>E_CLS[cls]*CM[cls]*GE*(1-TAPER*Math.max(0,Math.min(80,u)-1)/79)*(u>=80&&!CASTER[cls]?.88:1); // the level 80 powers of the fighters, archers and rogues hit another 12 percent softer
 const SPEC={
@@ -159,7 +160,7 @@ const NUM_FIX=[
 /* ---- the numbers of one power ---- */
 const fmt=n=>String(Math.max(1,Math.round(n)));
 function dmgText(info,h){
-  if(!h)return '';const U=psU(h),g=gF(h.lvl,info.u),tot=info.M*U*g,dir=tot*(1-info.dot);
+  if(!h)return '';const U=psU(h),g=gF(h.lvl,info.u)*(info.mel?bowPen(h):1),tot=info.M*U*g,dir=tot*(1-info.dot);
   let s='';
   if(dir>=1)s+=` About ${fmt(dir)} damage${info.role==='g'?' to each foe in reach':''} for ${HERO_DEF[heroIdx(h)]?HERO_DEF[heroIdx(h)].name:'the hero'} at level ${h.lvl}.`;
   if(info.dot>0)s+=` ${dir>=1?'Plus about':'About'} ${fmt(tot*info.dot)} more over the following rounds.`;
@@ -180,7 +181,7 @@ function newClassPower(cls,def,cost){
 }
 function setWeaponM(P,info,n){
   const base=info.M/(n||1);
-  Object.defineProperty(P,'m',{get(){const h=useHero();return base*gF(h?h.lvl:1,info.u)*(P._bsk?psBackstab():1)},set(v){},configurable:true,enumerable:true});
+  Object.defineProperty(P,'m',{get(){const h=useHero();return base*gF(h?h.lvl:1,info.u)*(P._bsk?psBackstab():1)*(P._mel?bowPen(h):1)},set(v){},configurable:true,enumerable:true});
 }
 function psBackstab(){try{const f=frontEnemy(1);return f&&!f.e.alert?1.5:1}catch(e){return 1}}
 function setCasterDmg(P,info){
@@ -205,8 +206,8 @@ function applyClassPower(cls,P,cost,role,o,info){
   if(t==='backstab'){P.type='melee';P._bsk=1;P.a=0}
   if(t==='butt'){P.type='melee';P.daze=1;P.a=0}
   const ty=P.type;
-  if(ty==='melee'){P.a=0;setWeaponM(P,info,1)}
-  else if(ty==='multi'||ty==='ranged'){setWeaponM(P,info,P.n||1)}
+  if(ty==='melee'){P.a=0;P._mel=1;info.mel=1;setWeaponM(P,info,1)}
+  else if(ty==='multi'||ty==='ranged'){if(ty==='multi'){P._mel=1;info.mel=1}setWeaponM(P,info,P.n||1)}
   else if(ty==='shot'){setWeaponM(P,info,1)}
   else if(ty==='volley'){setWeaponM(P,info,2)}
   else if(ty==='aoe'||ty==='daze'){

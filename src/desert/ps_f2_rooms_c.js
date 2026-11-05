@@ -87,7 +87,7 @@ function f2NightBuild(){
   {const [jx,jy]=F2_NIGHT.JAR;C.used.delete(jx+','+jy);C.dec(pspPic('f2_brainjar'),jx,jy,{block:true,npc:'f2n_jar',sc:1.2});C.light(jx,jy,[1.4,2.6,1.2])}
   F2_NIGHT.LAMP.forEach(([x,y],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_lantern_off'),x,y,{block:true,npc:'f2n_lamp'+i});C.light(x,y,[.9,.4,.3])});
   // the dark: dead trees full of eyes, warped clocks, dolls
-  const NT=[pspPic('f2_eyetree'),pspPic('f2_nm_tree'),pspPic('f2_nv_thorn'),pspPic('f2_nv_spire'),pspPic('f2_nm_tree'),pspPic('f2_nv_handtree')];NT.push(...NT.map(f2Flip));NT.push('f2i_nightthorn');   // the leaf-covered column (a re-toned witchwood thorn) is now one in thirteen, not two in twelve
+  const NT=[pspPic('f2_eyetree'),pspPic('f2_nm_tree'),pspPic('f2_nv_thorn'),pspPic('f2_nv_spire'),pspPic('f2_nm_tree'),pspPic('f2_nv_handtree')];NT.push(...NT.map(f2Flip));   // (the leaf-covered column, a re-toned witchwood thorn, is gone from the nightmare altogether)
   C.fill(NT.concat(['f2i_nightoak',pspPic('f2_nv_cage'),pspPic('f2_nv_books')]),{p1:.08,p2:.3,p3:.5});
   // the wrong stairs: stairs that climb to doors that stand alone, split three ways, end in eyes; floating islands of rock, melting clocks, piles of dolls; red lamps along the way
   for(const [x,y,k] of [[20,30,'f2_nm_stairdoor'],[28,30,'f2_nm_stairsplit'],[14,10,'f2_nm_stairseye'],[34,9,'f2_nm_stairsplit'],[40,28,'f2_nm_stairseye'],[8,9,'f2_nm_stairdoor'],[19,22,'f2_nm_spiral']]){let q=null;for(let r=0;r<5&&!q;r++)for(let dy=-r;dy<=r&&!q;dy++)for(let dx=-r;dx<=r&&!q;dx++){const a=x+dx,b=y+dy;if(C.free(a,b)&&!C.nearPath(a,b,1))q=[a,b]}if(q)C.dec(f2Soft(pspPic(k),{filter:'brightness(.62) contrast(1.15) sepia(.3)',tag:'nm'}),q[0],q[1],{block:true,sc:.75})}   // the wrong stairs

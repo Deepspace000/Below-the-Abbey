@@ -33,7 +33,11 @@ for(let id=PSP.LO;id<=PSP.HI;id++){if(!KH_LAZY[id]){LEVEL_RATING[id]=LEVEL_RATIN
 /* ---------- arrival: the pictures first (Wenlock's loader brings the graveyard, the witch wood and the Oldhaven folk; then our own manifest), then the level ---------- */
 async function pspLoadOwn(){
   try{PSP.man=await (await fetch('assets/ps/manifest.json?v='+VERSION)).json()}catch(e){PSP.man={}}
-  await Promise.all(Object.keys(PSP.man||{}).map(k=>{const m=PSP.man[k];return loadImg('ps_'+k,'assets/ps/'+m.file).then(()=>{if(m.h&&m.kind!=='tex')NPC_H['ps_'+k]=m.h;if(/^(arch_|alcove_|door_|gate_|bridge_arch|castle_|iron_|bridge_rail|lantern_bracket)/.test(k))pspDePlum('ps_'+k)}).catch(()=>0)}))}
+  // a picture that fails to load (a dropped request among nearly 800) is asked for again, twice, after a pause; one left missing would show as the grey stand-in column until the page is reloaded
+  const get=async(k,m)=>{for(let n=0;n<3;n++){await loadImg('ps_'+k,'assets/ps/'+m.file);if(IMG['ps_'+k]&&IMG['ps_'+k].width)return;if(n<2)await new Promise(r=>setTimeout(r,n?1200:400))}throw 0};   // (loadImg never rejects: it just leaves the picture out)
+  PSP.failed=[];
+  await Promise.all(Object.keys(PSP.man||{}).map(k=>{const m=PSP.man[k];return get(k,m).then(()=>{if(m.h&&m.kind!=='tex')NPC_H['ps_'+k]=m.h;if(/^(arch_|alcove_|door_|gate_|bridge_arch|castle_|iron_|bridge_rail|lantern_bracket)/.test(k))pspDePlum('ps_'+k)}).catch(()=>{PSP.failed.push(k)})}));
+  if(PSP.failed.length)console.warn('Pale Spire pictures that did not load:',PSP.failed.join(' '))}
 /* the painted arches and alcoves came with a dark plum fill in their openings (reads as a violet haze in the lane): turn dark purple pixels neutral blue-black */
 function pspDePlum(key){try{const im=IMG[key];if(!im||!im.width||im._ps2)return;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);const d=x.getImageData(0,0,c.width,c.height),a=d.data;
   const iron=/^ps_(iron_|arch_iron|bridge_rail|lantern_bracket)/.test(key);

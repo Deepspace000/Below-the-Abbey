@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.835';
+const VERSION='3.836';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -63433,6 +63433,7 @@ function uW(h){const r=heroDmgRange(h),w=heroWeapon(h);const crit=weaponCrit(w)+
 function uM(h){return (intB(h)+magicBonus(h)+8)*(1+pasH(h,'spellPct'))}
 function psU(h){return isCaster(clsOf(h))?uM(h):uW(h)}
 const LATE=L=>1-.45*Math.max(0,Math.min(1,(L-30)/70)); // powers hit softer as the hero levels: nothing before level 30, then falling to 55 percent by level 100 (late gear made single powers do 6000 and more)
+const bowPen=h=>{try{const w=h&&heroWeapon(h);return w&&w.ranged?.5:1}catch(e){return 1}}; // a melee power swung with a bow in hand (a thief with an archer's bow) hits half as hard: the bow's damage is for shooting
 const gF=(L,u)=>(1+K*Math.max(0,L-u))*(1+KL*L)*LATE(L);
 function useHero(){ // the hero who is using a power now
   try{const h=G.heroes[G.curHero===undefined?G.sel:G.curHero];if(h)return h}catch(e){}
@@ -63448,7 +63449,7 @@ const rng=(M,u)=>{const a=[1,2];a._M=M;a._u=u;return a}; // a damage range for t
    options: dot: share of the total that is damage over time. p: the plain words of the card (the number is added by the game). */
 const GE=.72,TAPER=.30; // (was .75 and .15: the late powers hit too hard, now about 20 percent less at level 80, 14 percent at 50, 4 percent at 1) // GE: one factor for all classes, TAPER: the damage for each point of cost falls by this much between level 1 and level 80, both set so that fights do not get much shorter than before (see POWERS_AFTER.md)
 const E_CLS={Warrior:.31,Barbarian:.30,Paladin:.25,Ranger:.35,Archer:.36,Thief:.38,Assassin:.33,Mage:.20,Sorcerer:.20,Priest:.20,Monk:.40,Goat:.36};
-const CM={Warrior:.98,Barbarian:1.04,Paladin:1.35,Ranger:.88,Archer:.85,Thief:.75,Assassin:.85,Mage:2.0,Sorcerer:2.0,Priest:1.8,Monk:.78,Goat:.92}; // the high damage classes (Thief, Assassin, Archer, Ranger, Monk) have the softest powers, so that E x CM is about .30 for all the fighters: their blows already do the damage (a small correction for each class, from the fight simulations: the old ladders were not equally generous (the Monk's Flurry of Blows was a bargain, the Paladin's powers were traps)
+const CM={Warrior:.98,Barbarian:1.04,Paladin:1.35,Ranger:.80,Archer:.78,Thief:.52,Assassin:.65,Mage:2.0,Sorcerer:2.0,Priest:1.8,Monk:.72,Goat:.92}; // the high damage classes (Thief, Assassin, Archer, Ranger, Monk) have the softest powers, so that E x CM is about .30 for all the fighters: their blows already do the damage (a small correction for each class, from the fight simulations: the old ladders were not equally generous (the Monk's Flurry of Blows was a bargain, the Paladin's powers were traps)
 const CASTER={Mage:1,Sorcerer:1,Priest:1};
 const eff=(cls,u)=>E_CLS[cls]*CM[cls]*GE*(1-TAPER*Math.max(0,Math.min(80,u)-1)/79)*(u>=80&&!CASTER[cls]?.88:1); // the level 80 powers of the fighters, archers and rogues hit another 12 percent softer
 const SPEC={
@@ -63566,7 +63567,7 @@ const NUM_FIX=[
 /* ---- the numbers of one power ---- */
 const fmt=n=>String(Math.max(1,Math.round(n)));
 function dmgText(info,h){
-  if(!h)return '';const U=psU(h),g=gF(h.lvl,info.u),tot=info.M*U*g,dir=tot*(1-info.dot);
+  if(!h)return '';const U=psU(h),g=gF(h.lvl,info.u)*(info.mel?bowPen(h):1),tot=info.M*U*g,dir=tot*(1-info.dot);
   let s='';
   if(dir>=1)s+=` About ${fmt(dir)} damage${info.role==='g'?' to each foe in reach':''} for ${HERO_DEF[heroIdx(h)]?HERO_DEF[heroIdx(h)].name:'the hero'} at level ${h.lvl}.`;
   if(info.dot>0)s+=` ${dir>=1?'Plus about':'About'} ${fmt(tot*info.dot)} more over the following rounds.`;
@@ -63587,7 +63588,7 @@ function newClassPower(cls,def,cost){
 }
 function setWeaponM(P,info,n){
   const base=info.M/(n||1);
-  Object.defineProperty(P,'m',{get(){const h=useHero();return base*gF(h?h.lvl:1,info.u)*(P._bsk?psBackstab():1)},set(v){},configurable:true,enumerable:true});
+  Object.defineProperty(P,'m',{get(){const h=useHero();return base*gF(h?h.lvl:1,info.u)*(P._bsk?psBackstab():1)*(P._mel?bowPen(h):1)},set(v){},configurable:true,enumerable:true});
 }
 function psBackstab(){try{const f=frontEnemy(1);return f&&!f.e.alert?1.5:1}catch(e){return 1}}
 function setCasterDmg(P,info){
@@ -63612,8 +63613,8 @@ function applyClassPower(cls,P,cost,role,o,info){
   if(t==='backstab'){P.type='melee';P._bsk=1;P.a=0}
   if(t==='butt'){P.type='melee';P.daze=1;P.a=0}
   const ty=P.type;
-  if(ty==='melee'){P.a=0;setWeaponM(P,info,1)}
-  else if(ty==='multi'||ty==='ranged'){setWeaponM(P,info,P.n||1)}
+  if(ty==='melee'){P.a=0;P._mel=1;info.mel=1;setWeaponM(P,info,1)}
+  else if(ty==='multi'||ty==='ranged'){if(ty==='multi'){P._mel=1;info.mel=1}setWeaponM(P,info,P.n||1)}
   else if(ty==='shot'){setWeaponM(P,info,1)}
   else if(ty==='volley'){setWeaponM(P,info,2)}
   else if(ty==='aoe'||ty==='daze'){
@@ -76974,7 +76975,11 @@ for(let id=PSP.LO;id<=PSP.HI;id++){if(!KH_LAZY[id]){LEVEL_RATING[id]=LEVEL_RATIN
 /* ---------- arrival: the pictures first (Wenlock's loader brings the graveyard, the witch wood and the Oldhaven folk; then our own manifest), then the level ---------- */
 async function pspLoadOwn(){
   try{PSP.man=await (await fetch('assets/ps/manifest.json?v='+VERSION)).json()}catch(e){PSP.man={}}
-  await Promise.all(Object.keys(PSP.man||{}).map(k=>{const m=PSP.man[k];return loadImg('ps_'+k,'assets/ps/'+m.file).then(()=>{if(m.h&&m.kind!=='tex')NPC_H['ps_'+k]=m.h;if(/^(arch_|alcove_|door_|gate_|bridge_arch|castle_|iron_|bridge_rail|lantern_bracket)/.test(k))pspDePlum('ps_'+k)}).catch(()=>0)}))}
+  // a picture that fails to load (a dropped request among nearly 800) is asked for again, twice, after a pause; one left missing would show as the grey stand-in column until the page is reloaded
+  const get=async(k,m)=>{for(let n=0;n<3;n++){await loadImg('ps_'+k,'assets/ps/'+m.file);if(IMG['ps_'+k]&&IMG['ps_'+k].width)return;if(n<2)await new Promise(r=>setTimeout(r,n?1200:400))}throw 0};   // (loadImg never rejects: it just leaves the picture out)
+  PSP.failed=[];
+  await Promise.all(Object.keys(PSP.man||{}).map(k=>{const m=PSP.man[k];return get(k,m).then(()=>{if(m.h&&m.kind!=='tex')NPC_H['ps_'+k]=m.h;if(/^(arch_|alcove_|door_|gate_|bridge_arch|castle_|iron_|bridge_rail|lantern_bracket)/.test(k))pspDePlum('ps_'+k)}).catch(()=>{PSP.failed.push(k)})}));
+  if(PSP.failed.length)console.warn('Pale Spire pictures that did not load:',PSP.failed.join(' '))}
 /* the painted arches and alcoves came with a dark plum fill in their openings (reads as a violet haze in the lane): turn dark purple pixels neutral blue-black */
 function pspDePlum(key){try{const im=IMG[key];if(!im||!im.width||im._ps2)return;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);const d=x.getImageData(0,0,c.width,c.height),a=d.data;
   const iron=/^ps_(iron_|arch_iron|bridge_rail|lantern_bracket)/.test(key);
@@ -79754,7 +79759,7 @@ function f2NightBuild(){
   {const [jx,jy]=F2_NIGHT.JAR;C.used.delete(jx+','+jy);C.dec(pspPic('f2_brainjar'),jx,jy,{block:true,npc:'f2n_jar',sc:1.2});C.light(jx,jy,[1.4,2.6,1.2])}
   F2_NIGHT.LAMP.forEach(([x,y],i)=>{C.used.delete(x+','+y);C.dec(pspPic('f2_lantern_off'),x,y,{block:true,npc:'f2n_lamp'+i});C.light(x,y,[.9,.4,.3])});
   // the dark: dead trees full of eyes, warped clocks, dolls
-  const NT=[pspPic('f2_eyetree'),pspPic('f2_nm_tree'),pspPic('f2_nv_thorn'),pspPic('f2_nv_spire'),pspPic('f2_nm_tree'),pspPic('f2_nv_handtree')];NT.push(...NT.map(f2Flip));NT.push('f2i_nightthorn');   // the leaf-covered column (a re-toned witchwood thorn) is now one in thirteen, not two in twelve
+  const NT=[pspPic('f2_eyetree'),pspPic('f2_nm_tree'),pspPic('f2_nv_thorn'),pspPic('f2_nv_spire'),pspPic('f2_nm_tree'),pspPic('f2_nv_handtree')];NT.push(...NT.map(f2Flip));   // (the leaf-covered column, a re-toned witchwood thorn, is gone from the nightmare altogether)
   C.fill(NT.concat(['f2i_nightoak',pspPic('f2_nv_cage'),pspPic('f2_nv_books')]),{p1:.08,p2:.3,p3:.5});
   // the wrong stairs: stairs that climb to doors that stand alone, split three ways, end in eyes; floating islands of rock, melting clocks, piles of dolls; red lamps along the way
   for(const [x,y,k] of [[20,30,'f2_nm_stairdoor'],[28,30,'f2_nm_stairsplit'],[14,10,'f2_nm_stairseye'],[34,9,'f2_nm_stairsplit'],[40,28,'f2_nm_stairseye'],[8,9,'f2_nm_stairdoor'],[19,22,'f2_nm_spiral']]){let q=null;for(let r=0;r<5&&!q;r++)for(let dy=-r;dy<=r&&!q;dy++)for(let dx=-r;dx<=r&&!q;dx++){const a=x+dx,b=y+dy;if(C.free(a,b)&&!C.nearPath(a,b,1))q=[a,b]}if(q)C.dec(f2Soft(pspPic(k),{filter:'brightness(.62) contrast(1.15) sepia(.3)',tag:'nm'}),q[0],q[1],{block:true,sc:.75})}   // the wrong stairs
