@@ -68,3 +68,6 @@ The class powers were rebalanced several times. Where they stand now:
 
 ## 3.839
 - Pale Spire, third floor: the Observatory Gallery and the Sovereign's Reflection boss are open. The stair at the north end of the Hall of Mirrors opens once the crystal in the Beam Room is lit.
+
+## 3.840
+- Hall of Mirrors: the beam of light is now drawn, the four mirror posts look like mirrors, and the hidden closet has mirrors on its walls.
