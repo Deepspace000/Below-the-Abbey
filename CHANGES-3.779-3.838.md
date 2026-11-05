@@ -81,3 +81,5 @@ The class powers were rebalanced several times. Where they stand now:
 
 ## 3.843
 - Attack pictures for the Sovereign's Reflection, Mirror Shade, Star Wraith and Brass Clockwork Guardian.
+
+3.844: Observatory chart room pedestals redrawn small and straight on (empty pedestal plus one with each constellation disc); the pedestal menu now lists the constellations in a scrambled order.

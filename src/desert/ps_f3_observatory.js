@@ -10,6 +10,7 @@
 const PSF3O={ID:9881,W:56,H:44,WH:3.2,
   SOLVE:['lamp','hound','crown','ladder','mirror'],
   NAMES:{lamp:'The Lamp',hound:'The Hound',crown:'The Crown',ladder:'The Ladder',mirror:'The Mirror'},
+  MENU:['ladder','lamp','mirror','hound','crown'],
   SLOTS:[[7,23],[9,23],[11,23],[13,23],[15,23]],
   GATE:[28,14],MIRRORDOOR:[38,23],SCOPE:[28,6],GLASS:[47,17],UP:[47,29],SPAWN:[47,23]};
 PSP.LEVELS.push(PSP_LV(9881,'The Observatory Gallery',56,44,107,0,'in'));
@@ -19,7 +20,7 @@ function psf3oCheck(slots){let right=0;for(let i=0;i<PSF3O.SOLVE.length;i++)if(s
 function psf3oApply(){
   if(LEVEL!==PSF3O.ID||!G.decor)return;const F=psf3oF();
   for(const d of G.decor){
-    if(d.npc&&d.npc.startsWith('psf3o_slot_')){const c=F.slots[+d.npc.slice(-1)];d.k=pspPic(c?'obs_chart_'+c:'statue_plinth')}
+    if(d.npc&&d.npc.startsWith('psf3o_slot_')){const c=F.slots[+d.npc.slice(-1)];d.k=pspPic(c?'obs_ped_'+c:'obs_ped_empty')}
     if(d.npc==='psf3o_gate'){d.hidden=!!F.chart;d.found=!!F.chart;d.block=!F.chart}
     if(d.npc==='psf3o_mirrordoor'){d.hidden=!!F.scope;d.found=!!F.scope;d.block=!F.scope}
     if(d.npc==='psf3o_up'){const on=F.reflect===2;d.hidden=!on;d.found=!on;d.block=on}}}
@@ -59,7 +60,7 @@ function psf3oBuild(info){
   put('col_silver',PSF3O.GATE[0],PSF3O.GATE[1],{npc:'psf3o_gate',sc:1.15});
   put('mirror_haunted_b',PSF3O.MIRRORDOOR[0],PSF3O.MIRRORDOOR[1],{npc:'psf3o_mirrordoor',sc:1.1});
   // ---- the Chart Room ----
-  PSF3O.SLOTS.forEach(([x,y],i)=>put('statue_plinth',x,y,{npc:'psf3o_slot_'+i,sc:.9}));
+  PSF3O.SLOTS.forEach(([x,y],i)=>put('obs_ped_empty',x,y,{npc:'psf3o_slot_'+i,sc:1}));
   for(const x of [7,9,11,13,15])pic(WALLP[x%WALLP.length],x,20,[0,-1]);
   pic('window_stained_tall',6,27,[-1,0]);pic('window_stained_tall',16,27,[1,0]);
   put('globe',11,28,{sc:.9});C.light(11,25,[1.1,1.1,1.4]);cand(7,29);cand(15,29);
@@ -144,10 +145,10 @@ CUTS.psReflect=()=>[
 const PSF3O_LAB={lamp:'the Lamp',hound:'the Hound',crown:'the Crown',ladder:'the Ladder',mirror:'the Mirror'};
 khNpc('psf3o_chartrow','The Chart of the Rising','ps_obs_chartrow',()=>say("A great star chart hangs in a black and brass frame. It shows five constellations in a row. Reading from left to right, they are the Lamp, the Hound, the Crown, the Ladder and the Mirror. A line cut into the frame says: SET THE STANDS IN THIS ORDER. The five stands and their pedestals are in the Chart Room, the west room off this Gallery.",[BYE]));
 function psf3oSlot(i){
-  khNpc('psf3o_slot_'+i,'Pedestal '+(i+1),'ps_statue_plinth',()=>{const F=psf3oF(),cur=F.slots[i],n=i+1;
+  khNpc('psf3o_slot_'+i,'Pedestal '+(i+1),'ps_obs_ped_empty',()=>{const F=psf3oF(),cur=F.slots[i],n=i+1;
     if(F.chart)return say("The stands are set in the right order, and the five charts glow faintly. The pedestals will not move now.",[BYE]);
     const ord=['first','second','third','fourth','fifth'][i];
-    const opts=Object.keys(PSF3O.NAMES).map(c=>[(cur===c?'(here now) ':'')+'Put '+PSF3O_LAB[c]+' stand here.',()=>{G.talk=null;const F=psf3oF();
+    const opts=PSF3O.MENU.map(c=>[(cur===c?'(here now) ':'')+'Put '+PSF3O_LAB[c]+' stand here.',()=>{G.talk=null;const F=psf3oF();
       F.slots=F.slots.map(v=>v===c?null:v);F.slots[i]=c;sfx('door');psf3oApply();const r=psf3oCheck(F.slots),full=F.slots.every(Boolean);
       if(r.done){F.chart=1;try{f2Chime('open')}catch(e){}psf3oApply();msg('The last stand settles into place. All five charts light up together, and a deep note rings through the Gallery. Far to the north, the silver gate to the Telescope Room lets go.','#e0f0ff')}
       else if(full)msg('All five stands are in place, but they hum out of tune. '+r.right+' of 5 are in the right place.','#ffd0a0');

@@ -6204,5 +6204,53 @@
 "h": 2.1,
 "kind": "sprite",
 "sheet": "obsa"
+},
+"obs_ped_empty": {
+"file": "obs_ped_empty.webp",
+"w": 704,
+"px_h": 342,
+"h": 0.5,
+"kind": "sprite",
+"sheet": "pedset"
+},
+"obs_ped_lamp": {
+"file": "obs_ped_lamp.webp",
+"w": 506,
+"px_h": 512,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "pedset"
+},
+"obs_ped_hound": {
+"file": "obs_ped_hound.webp",
+"w": 506,
+"px_h": 512,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "pedset"
+},
+"obs_ped_crown": {
+"file": "obs_ped_crown.webp",
+"w": 499,
+"px_h": 512,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "pedset"
+},
+"obs_ped_ladder": {
+"file": "obs_ped_ladder.webp",
+"w": 500,
+"px_h": 512,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "pedset"
+},
+"obs_ped_mirror": {
+"file": "obs_ped_mirror.webp",
+"w": 500,
+"px_h": 512,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "pedset"
 }
 }
