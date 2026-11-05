@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.850';
+const VERSION='3.851';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -80574,8 +80574,9 @@ const PSF4M={ID:9890,W:46,H:46,
   SEAL:[30,8],GATE:[36,3],MOON:[36,4],DOWN:[23,28]};
 PSF4.BACK={9891:[23,10,0],9892:[36,23,1],9893:[23,36,2],9894:[10,23,3]};
 const psf4Done=()=>PSF4.IDS.filter(i=>psf4F().done[i]).length;
+const psf4Have=()=>PSF4.IDS.filter(i=>bagCount(PSF4_CHARM[i].id)>0).length;   // the little planets carried in the bag: these open the gate
 function psf4mApply(){
-  if(LEVEL!==PSF4M.ID||!G.decor)return;const all=psf4Done()===4;
+  if(LEVEL!==PSF4M.ID||!G.decor)return;const all=psf4Have()===4;
   for(const d of G.decor)if(d.npc==='psf4_seal'){d.hidden=all;d.found=all;d.block=!all}}
 function psf4mBuild(info){
   const W=PSF4M.W,H=PSF4M.H,id=PSF4M.ID;
@@ -80620,14 +80621,14 @@ for(const [pid,key,x,y,name] of PSF4M.PLANETS){
   khNpc('psf4_pl_'+pid,name,'ps_planet_'+key,()=>{const F=psf4F(),done=!!F.done[pid];
     return say("A great painted planet turns slowly in the air, as big as a house. "+({stone:'Grey stone, with walls and towers of old castles drawn on it.',ice:'White and blue ice, cracked and ridged.',grow:'Dense green forest, with huge mushrooms and vines.',fire:'Black rock with rivers of lava and small volcanoes.'}[key])+(done?" You have been through its maze and reached its exit.":" Its surface is a maze. If you step onto it, you will walk through it seen from above.")+" "+psf4Done()+" of 4 planets are done.",[
       [done?'Step onto the planet again.':'Step onto the planet.',()=>{G.talk=null;sfx('door');goToLevel(pid,{x:2,y:2,f:2});return null}],BYE])})}
-khNpc('psf4_seal','The Iron Gate','ps_iron_gate_big',()=>say("A tall iron gate shuts off the way east, to the Moon Gate. Cut into the bars is a line: WHEN YOU HAVE THE FOUR PLANETS, YOU MAY PASS. "+psf4Done()+" of 4 planets are done.",[BYE]));
+khNpc('psf4_seal','The Iron Gate','ps_iron_gate_big',()=>say("A tall iron gate shuts off the way east, to the Moon Gate. Cut into the bars is a line: WHEN YOU HAVE THE FOUR PLANETS, YOU MAY PASS. You carry "+psf4Have()+" of the 4 little planets.",[BYE]));
 khNpc('psf4_down','The spiral stair','ps_stair_spiral_iron',()=>say("The iron stair winds down to the Observatory Gallery.",[['Go down.',()=>{G.talk=null;sfx('door');goToLevel(9881,{x:47,y:28,f:0});return null}],BYE]));
 /* ---------- coming off a planet, arriving, the gate ---------- */
 pspOnArrive(n=>{if(n!==PSF4M.ID)return;try{psf4mApply();const F=psf4F();
   if(F.moon===2)for(let i=G.enemies.length-1;i>=0;i--)if(G.enemies[i].t==='psmoon')G.enemies.splice(i,1);
   psf4MoonFix();
   if(!F.seen){F.seen=1;msg('The stair ends in a round hall of pale stone. Four doors lead off it, and in every room beyond a whole world hangs in the air.','#d8e4ff')}
-  if(psf4Done()===4&&!F.gateMsg){F.gateMsg=1;msg('All four planets are walked. Far to the north-east, the iron gate lets go.','#bfe8ff')}}catch(e){console.error('psf4m arrive',e)}});
+  if(psf4Have()===4&&!F.gateMsg){F.gateMsg=1;msg('You carry all four little planets. Far to the north-east, the iron gate lets go.','#bfe8ff')}}catch(e){console.error('psf4m arrive',e)}});
 /* ---------- the Moon (the boss) ---------- */
 {
   ENEMY_DEF.psmoon=pscE('psmoon',{img:'ps_moon_boss',ph:3.4,w:2.4,name:'The Pale Moon',hp:940,dmg:[18,26],hit:.92,verb:'crushes',xp:2100,boss:true,aboveParty:0,gold:[0,0],fly:true,floatH:.2});
