@@ -1,6 +1,6 @@
 # Pale Spire, third floor: plan for the Observatory Gallery and the boss
 
-Status at 3.833: the Hall of Mirrors (level 9880) is built and playable. The Observatory Gallery and the boss are NOT built. This file is the brief for the next session. Read it, then `src/desert/ps_f3_mirrors.js` and `src/desert/ps_f2_dream.js` (the floor 2 boss, the model to copy).
+Status at 3.839: the Hall of Mirrors (9880), the Observatory Gallery (9881) and the boss, The Sovereign's Reflection, are BUILT in `src/desert/ps_f3_observatory.js` (star-chart pin puzzle, telescope, Astronomer quest psq41, Shield of the Last Reflection, stub stair to the Moon Tower 9890). The text below was the original brief. Still wanted: painted art (see the last section; stand-in pictures are used now). Read it, then `src/desert/ps_f3_mirrors.js` and `src/desert/ps_f2_dream.js` (the floor 2 boss, the model to copy).
 
 ## What exists
 

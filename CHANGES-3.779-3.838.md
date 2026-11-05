@@ -65,3 +65,6 @@ The class powers were rebalanced several times. Where they stand now:
 
 ## Camp
 - 3.831: "Cook a hearty meal" has eleven scenes instead of three, five different closing lines, and never shows the same scene twice in a row. The other camp activities no longer repeat the same scene twice in a row either.
+
+## 3.839
+- Pale Spire, third floor: the Observatory Gallery and the Sovereign's Reflection boss are open. The stair at the north end of the Hall of Mirrors opens once the crystal in the Beam Room is lit.

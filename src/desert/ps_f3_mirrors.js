@@ -4,7 +4,7 @@
    East: the Beam Room. A lamp throws a beam east; three mirror posts (touch one to turn it between / and \) must carry it east, south, east, south to the crystal at (49,23).
    When the crystal is lit the Silver Seal at (45,26) lets go and the Reliquary behind it (a chest) can be reached.
    West: the Court of Glass, with a maiden whose hand mirror shows a room that is not there; the way through it leads to a hidden closet and a chest.
-   South-east: a quiet room to rest. North (28,7): the stair to the Observatory Gallery, still shut (the next part of the floor is not built yet).
+   South-east: a quiet room to rest. North (28,7): the stair to the Observatory Gallery, opened by the crystal (see ps_f3_observatory.js).
    ========================================================================== */
 const PSF3={ID:9880,W:56,H:40,WH:3.2,
   LAMP:[41,14],TARGET:[49,23],SEAL:[45,26],SEAL_DIR:[0,0],
@@ -78,7 +78,10 @@ function psf3Build(info){
   return lv}
 pspRegister(PSF3.ID,psf3Build);
 /* ---------- the things to touch ---------- */
-khNpc('psf3_stair','The stair to the Observatory','gy_urn',()=>say("A stair of black glass goes up behind a carved door. The door is shut fast with a silver seal that has no lock. A note is scratched on the lintel in a careful hand: THE OBSERVATORY GALLERY IS NOT OPEN YET.",[BYE]));
+khNpc('psf3_stair','The stair to the Observatory','gy_urn',()=>{const F=psf3F(),l=PSP.LINKS.find(k=>k.from===PSF3.ID&&k.to===9881);
+  if(!F.beam)return say("A stair of black glass goes up behind a carved door. The door is shut fast with a ring of silver light. Writing on the lintel reads: THE LIGHT THAT OPENS THE SEAL OPENS THIS. The door will open when the crystal in the Beam Room, east of the hall, is lit.",[BYE]);
+  return say("The ring of silver light on the door has gone out. A stair of black glass goes up into the dark, toward the Observatory Gallery.",[
+    ['Climb the stair.',()=>{G.talk=null;const q=l?pspLandOf(l):[28,40,0];sfx('door');goToLevel(9881,{x:q[0],y:q[1],f:q[2]});return null}],BYE])});
 khNpc('psf3_riddle','A lectern in the nave','ps_lectern',()=>say("A heavy page lies open on the lectern, written in a mirror hand. It reads: THE LAMP IN THE EAST ROOM SPEAKS EAST. THE FIRST MIRROR TURNS IT SOUTH. THE SECOND TURNS IT EAST. THE THIRD TURNS IT SOUTH, AND IT RESTS ON THE CRYSTAL. A MIRROR LEANS EITHER \\ OR /. THE FOURTH MIRROR IS A LIAR.",[BYE]));
 khNpc('psf3_lamp','The lamp','gy_urn',()=>{const t=psf3Trace();return say("A tall silver lamp burns with a thin white flame. It throws a beam of light east along the middle of the room, straight as a ruled line. "+(t.end==='crystal'?"The beam arrives at the crystal.":(t.hits?"The beam strikes "+t.hits+" mirror"+(t.hits>1?'s':'')+" and then dies against a wall.":"It dies against the first wall it meets.")),[BYE])});
 function psf3Post(k){const nm={a:'The first mirror',b:'The second mirror',c:'The third mirror',d:'The fourth mirror'}[k];
