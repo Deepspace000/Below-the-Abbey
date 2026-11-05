@@ -56,7 +56,7 @@ for(const [pid,key,x,y,name] of PSF4M.PLANETS){
   khNpc('psf4_pl_'+pid,name,'ps_planet_'+key,()=>{const F=psf4F(),done=!!F.done[pid];
     return say("A great painted planet turns slowly in the air, as big as a house. "+({stone:'Grey stone, with walls and towers of old castles drawn on it.',ice:'White and blue ice, cracked and ridged.',grow:'Dense green forest, with huge mushrooms and vines.',fire:'Black rock with rivers of lava and small volcanoes.'}[key])+(done?" You have been through its maze and reached its exit.":" Its surface is a maze. If you step onto it, you will walk through it seen from above.")+" "+psf4Done()+" of 4 planets are done.",[
       [done?'Step onto the planet again.':'Step onto the planet.',()=>{G.talk=null;sfx('door');goToLevel(pid,{x:2,y:2,f:2});return null}],BYE])})}
-khNpc('psf4_seal','The Iron Gate','ps_iron_gate_big',()=>say("A tall iron gate shuts off the way east, to the Moon Gate. Cut into the bars is a line: WHEN THE FOUR WORLDS ARE WALKED, THE GATE LETS GO. "+psf4Done()+" of 4 planets are done.",[BYE]));
+khNpc('psf4_seal','The Iron Gate','ps_iron_gate_big',()=>say("A tall iron gate shuts off the way east, to the Moon Gate. Cut into the bars is a line: WHEN YOU HAVE THE FOUR PLANETS, YOU MAY PASS. "+psf4Done()+" of 4 planets are done.",[BYE]));
 khNpc('psf4_down','The spiral stair','ps_stair_spiral_iron',()=>say("The iron stair winds down to the Observatory Gallery.",[['Go down.',()=>{G.talk=null;sfx('door');goToLevel(9881,{x:47,y:28,f:0});return null}],BYE]));
 /* ---------- coming off a planet, arriving, the gate ---------- */
 pspOnArrive(n=>{if(n!==PSF4M.ID)return;try{psf4mApply();const F=psf4F();
