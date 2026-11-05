@@ -66,7 +66,7 @@ function psf3Build(info){
   if(C.free(26,22)){C.used.delete('26,22');C.dec(pspPic('lectern'),26,22,{block:true,npc:'psf3_riddle'})}
   // ---- the beam room ----
   {const [lx,ly]=PSF3.LAMP;C.used.delete(lx+','+ly);C.dec(pspPic('candelabra_tall'),lx,ly,{block:true,npc:'psf3_lamp'});C.light(lx,ly,[1.6,1.5,1.2])}
-  for(const k in PSF3.POSTS){const [x,y]=PSF3.POSTS[k];C.used.delete(x+','+y);C.dec(pspPic('furn_mirror_gothic'),x,y,{block:true,npc:'psf3_post_'+k,sc:.95});C.light(x,y,[.9,1.0,1.3])}
+  for(const k in PSF3.POSTS){const [x,y]=PSF3.POSTS[k];C.used.delete(x+','+y);C.dec(pspPic('obs_mirrorpost'),x,y,{block:true,npc:'psf3_post_'+k,sc:1});C.light(x,y,[.9,1.0,1.3])}
   {const [x,y]=PSF3.TARGET;C.used.delete(x+','+y);C.dec('gy_urn',x,y,{block:true,npc:'psf3_crystal',sc:1.1});C.light(x,y,[1.1,.9,1.5])}
   {const [x,y]=PSF3.SEAL;C.used.delete(x+','+y);const d=C.dec(pspPic('col_silver'),x,y,{block:true,npc:'psf3_seal',sc:1.15});if(d)d.sc=1.15}
   pic('mirror_haunted_a',40,15,[-1,0]);pic('mirror_haunted_c',50,16,[1,0]);pic('banner_long_a',44,12,[0,-1]);

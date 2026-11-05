@@ -6060,5 +6060,117 @@
 "h": 0.76,
 "kind": "sprite",
 "sheet": "f2be"
+},
+"obs_scope": {
+"file": "obs_scope.webp",
+"w": 305,
+"px_h": 512,
+"h": 2.4,
+"kind": "sprite",
+"sheet": "obs"
+},
+"obs_chart_lamp": {
+"file": "obs_chart_lamp.webp",
+"w": 310,
+"px_h": 512,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "obs"
+},
+"obs_chart_hound": {
+"file": "obs_chart_hound.webp",
+"w": 309,
+"px_h": 512,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "obs"
+},
+"obs_chart_crown": {
+"file": "obs_chart_crown.webp",
+"w": 309,
+"px_h": 512,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "obs"
+},
+"obs_chart_ladder": {
+"file": "obs_chart_ladder.webp",
+"w": 310,
+"px_h": 512,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "obs"
+},
+"obs_chart_mirror": {
+"file": "obs_chart_mirror.webp",
+"w": 308,
+"px_h": 512,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "obs"
+},
+"obs_mirrorpost": {
+"file": "obs_mirrorpost.webp",
+"w": 226,
+"px_h": 512,
+"h": 2.1,
+"kind": "sprite",
+"sheet": "obs"
+},
+"obs_orrery": {
+"file": "obs_orrery.webp",
+"w": 271,
+"px_h": 512,
+"h": 1.6,
+"kind": "sprite",
+"sheet": "obs"
+},
+"obs_starpanel": {
+"file": "obs_starpanel.webp",
+"w": 284,
+"px_h": 512,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "obs"
+},
+"obs_chartrow": {
+"file": "obs_chartrow.webp",
+"w": 1521,
+"px_h": 512,
+"h": 1.3,
+"kind": "sprite",
+"sheet": "obsrow"
+},
+"obs_reflect": {
+"file": "obs_reflect.webp",
+"w": 203,
+"px_h": 512,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "obsc"
+},
+"obs_shade": {
+"file": "obs_shade.webp",
+"w": 170,
+"px_h": 512,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "obsc"
+},
+"obs_wraith": {
+"file": "obs_wraith.webp",
+"w": 371,
+"px_h": 512,
+"h": 2.1,
+"kind": "sprite",
+"sheet": "obsc"
+},
+"obs_clockwork": {
+"file": "obs_clockwork.webp",
+"w": 282,
+"px_h": 512,
+"h": 2.1,
+"kind": "sprite",
+"sheet": "obsc"
 }
 }
