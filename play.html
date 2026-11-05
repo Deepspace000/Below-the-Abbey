@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.844';
+const VERSION='3.845';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2451,6 +2451,7 @@ function act(id){
   G.queued=null;
   if(['attack','special','wait','rest','potion','fwd','back','left','right','turnL','turnR'].includes(id)&&!(G.hold&&G.hold.id===id))pressFx(id);
   if(['attack','special','fwd','back','left','right','turnL','turnR','wait','rest','potion'].includes(id))for(const b of G.lvlBanners)if(b.out===undefined)b.out=G.time; // level notices fade once the party acts
+  if(typeof tdAct==='function'&&tdAct(id))return; // top-down levels: the arrows walk north, east, south and west
   const i=G.sel;
   switch(id){
     case 'fwd':doMove(0);break;case 'right':doMove(1);break;case 'back':doMove(2);break;case 'left':doMove(3);break;
@@ -2577,6 +2578,7 @@ function drawStorm(){
 const HGW_FACE=[1.06,.9,.72,.96]; // brightness of a wall by the side it faces (N,E,S,W) on terraced city levels, so building volumes read
 function hgwW(x,y,g){return x>=0&&y>=0&&x<MW&&y<MH&&g[y][x]>0}
 function render3D(){
+  if(typeof tdOn==='function'&&tdOn())return; // top-down levels draw their own view (topdown.js)
   const t=G.time,C=G.C,LA=C.a+(typeof LKYAW==='number'?LKYAW:0),dX=Math.cos(LA),dY=Math.sin(LA),pX=-dY*PL,pY=dX*PL; // LKYAW: the look-around swing of the view (lookaround.js)
   const cx=C.x+.5-dX*.28,cy=C.y+.5-dY*.28;
   HH=105+climbView(cx,cy,dX,dY);
@@ -7118,7 +7120,7 @@ function ui(dt){
 }
 const LOWC=document.createElement('canvas'),LOWX=LOWC.getContext('2d',{willReadFrequently:true});
 const BAYER=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
-function drawWorld(){ // a slightly softer, lower-res picture; the screen-wide dither overlay gives it the same grain as the menus
+function drawWorld(){ if(typeof tdOn==='function'&&tdOn()){tdDraw();return} // a slightly softer, lower-res picture; the screen-wide dither overlay gives it the same grain as the menus
   const w=GFX.sharp?420:(G.day>0?360:384),h=w/2;
   if(LOWC.width!==w){LOWC.width=w;LOWC.height=h}
   LOWX.imageSmoothingEnabled=true;LOWX.drawImage(vc,0,0,w,h);
@@ -80267,6 +80269,251 @@ pspOnArrive(n=>{if(n!==PSF3O.ID)return;try{psf3oApply();const F=psf3oF();if(!F.s
 PSP_L(9880,null,9881,[28,40,0],{name:'the stair up to the Observatory Gallery'});
 PSP_L(9881,[28,42],9880,[28,10,2],{name:'the stair back down to the Hall of Mirrors'});
 PSP_L(9881,null,9890,[20,20,0],{name:'the spiral stair to the Moon Tower',prov:1});
+
+/* ---- src/desert/topdown.js ---- */
+/* ==========================================================================
+   TOP-DOWN LEVELS (the planets of the Floor of the Moon, level ids 9891 to 9894).
+   A level listed in TD.levels is played on the same grid, with the same turn rounds and the same fights as every other level, but it is SEEN
+   from above: render3D() draws nothing there and drawWorld() draws tdDraw() instead, a map that follows the party. The party is one token.
+   Moving:  the four arrows (or W A S D, or the pad) walk north, south, west and east on the map, whatever way the party faced before.
+   Fighting: walking into a creature turns to it and the selected hero strikes it (a bump attack). The Attack button and the powers strike the
+             creature next to the party, turning to it first. Creatures walk up and strike back in the usual rounds.
+   Seeing:  only the squares in line of sight, within TD.sight squares, are lit. Squares seen once stay on the map, dimmed. Nothing is drawn in
+             the dark, so a maze must be explored. The remembered squares are G.seen, so the O map and the minimap work too.
+   Hooks in index.html (all one line each): render3D() returns at once on a top-down level, drawWorld() calls tdDraw(), act() calls tdAct().
+   ========================================================================== */
+const TD={levels:new Set(),sight:7,cs:21,look:{},vis:null,visKey:'',visLv:-1};
+TD.look.def={floor:['#ecdcae','#e6d5a5','#efe0b6'],wall:['#7d6a4f','#74634a','#85735a'],wallTop:'#b59e76',mortar:'rgba(40,28,14,.5)',ink:'#241a0e',lip:'#8a7048',vign:'#120d08',door:'#9a6a32',exit:'#c42a20',grass:'#b9c58a',keep:'#d2cbb4',grave:'#c4b694',gold:'#c9993a',shade:'4,3,2'};
+TD.zones=null;TD.zLv=-1;
+function tdOn(){return TD.levels.has(LEVEL)}
+function tdLook(){return TD.look[LEVEL]||TD.look.def}
+/* ---------- what can be seen now: line of sight from the party, kept in TD.vis and added to G.seen ---------- */
+function tdBuildZones(){
+  TD.zLv=LEVEL;TD.zones=new Uint8Array(MW*MH);TD.zlist=[];const lv=LEVELS[LEVEL],zs=lv&&lv._td&&lv._td.zones||[];
+  zs.forEach(z=>{TD.zlist.push(z);for(let y=z.y0;y<=z.y1;y++)for(let x=z.x0;x<=z.x1;x++)TD.zones[y*MW+x]=TD.zlist.length})}
+function tdZone(x,y){return TD.zones&&TD.zones[y*MW+x]?TD.zlist[TD.zones[y*MW+x]-1]:null}
+function tdUpdateVis(){
+  if(TD.zLv!==LEVEL||!TD.zones||TD.zones.length!==MW*MH)tdBuildZones();
+  const P=G.P,key=LEVEL+':'+P.x+','+P.y;
+  if(TD.visKey===key&&TD.vis&&TD.vis.length===MW*MH)return;
+  TD.visKey=key;TD.vis=new Uint8Array(MW*MH);const R=TD.sight;
+  for(let y=P.y-R;y<=P.y+R;y++)for(let x=P.x-R;x<=P.x+R;x++){
+    if(x<0||y<0||x>=MW||y>=MH)continue;
+    if(Math.hypot(x-P.x,y-P.y)>R+.5)continue;
+    if(x===P.x&&y===P.y||hasLOS(P.x,P.y,x,y)){TD.vis[y*MW+x]=1;if(G.seen&&G.seen[y])G.seen[y][x]=1}
+  }
+}
+function tdVisible(x,y){return !!(TD.vis&&x>=0&&y>=0&&x<MW&&y<MH&&TD.vis[y*MW+x])}
+/* ---------- moving and striking ---------- */
+const TD_DIR={fwd:0,right:1,back:2,left:3,turnR:1,turnL:3};   // index into DIRS: north, east, south, west
+function tdFace(f){
+  const P=G.P,C=G.C;let d=((f-P.f)%4+4)%4;if(d===3)d=-1;
+  P.f=f;P.angT+=d*Math.PI/2;C.a=P.angT}                       // the turn is instant: the top-down view has nothing to swing round
+function tdPassable(g){return g===3||g===4||g===5||g===7||(g>=15&&g<=19)||(g>=30&&g<100)||(g>=200&&g<1000)||(g>=1000&&typeof KH_DOOR!=='undefined'&&!!KH_DOOR[g])}
+function tdAct(id){
+  if(!tdOn())return false;
+  if(id in TD_DIR){
+    const f=TD_DIR[id],d=DIRS[f];tdFace(f);
+    const e=enemyAt(G.P.x+d[0],G.P.y+d[1]);
+    if(e&&e.hp>0){const i=G.sel;if(G.heroes[i].alive&&heroAttack(i))heroDone(i);return true}   // a bump attack
+    const nx=G.P.x+d[0],ny=G.P.y+d[1],g=G.grid[ny]&&G.grid[ny][nx];
+    if(g>0&&!tdPassable(g)){sfx('bump');G.shake=.1;return true}   // a plain wall: a bump, and no words
+    doMove(0);return true}
+  if(id==='attack'||id==='special'){                           // strike the creature next to the party, turning to it first
+    const P=G.P,here=DIRS[P.f];
+    if(!enemyAt(P.x+here[0],P.y+here[1])){
+      for(let f=0;f<4;f++){const d=DIRS[f],e=enemyAt(P.x+d[0],P.y+d[1]);if(e&&e.hp>0){tdFace(f);break}}}}
+  return false}
+/* ---------- drawing ---------- */
+function tdCell(ox,oy,x,y,g,cs,L,vis){
+  const sx=Math.round(ox+x*cs),sy=Math.round(oy+y*cs),n=Math.ceil(cs),h=hash2(x,y,LEVEL);
+  if(g>0){
+    const open=(xx,yy)=>xx>=0&&yy>=0&&xx<MW&&yy<MH&&G.grid[yy][xx]===0;
+    if(g===3||g===4||(g>=15&&g<=19)||(g>=200&&g<1000)){ // a door of oak with iron bands
+      ctx.fillStyle=L.door;ctx.fillRect(sx,sy,n,n);ctx.strokeStyle=L.ink;ctx.lineWidth=1.5;ctx.strokeRect(sx+1,sy+1,n-2,n-2);
+      ctx.fillStyle='#3a2410';for(const k of [.3,.66])ctx.fillRect(sx+2,sy+n*k,n-4,2);ctx.fillStyle=L.gold;ctx.fillRect(sx+n*.5-1.5,sy+n*.45,3,3);return}
+    if(g===5||g===7||(g>=30&&g<100)||(g>=1000&&typeof KH_DOOR!=='undefined'&&KH_DOOR[g])){ // the way out: a red wax seal on the parchment
+      ctx.fillStyle=L.floor[0];ctx.fillRect(sx,sy,n,n);const p=.5+.5*Math.sin(G.time*3),cx=sx+n/2,cy=sy+n/2;
+      ctx.fillStyle=L.exit;ctx.beginPath();for(let i=0;i<10;i++){const a=i/10*TAU,r=n*(.42+(i%2?.06:0));ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r)}ctx.closePath();ctx.fill();
+      ctx.strokeStyle='rgba(255,220,170,'+(.4+.4*p)+')';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,n*.24,0,TAU);ctx.stroke();
+      ctx.fillStyle='rgba(255,230,190,'+(.5+.4*p)+')';ctx.fillRect(cx-1,cy-n*.16,2,n*.32);ctx.fillRect(cx-n*.16,cy-1,n*.32,2);return}
+    // a wall: dark inked stone in courses, with a lit edge where it faces the floor
+    ctx.fillStyle=L.wall[(h*3)|0];ctx.fillRect(sx,sy,n,n);
+    ctx.strokeStyle=L.mortar;ctx.lineWidth=1;ctx.beginPath();const row=((x+y)&1)?n/2:0;
+    ctx.moveTo(sx,sy+n/2);ctx.lineTo(sx+n,sy+n/2);ctx.moveTo(sx+row+n/4,sy);ctx.lineTo(sx+row+n/4,sy+n/2);ctx.moveTo(sx+(n/2-row)+n/4,sy+n/2);ctx.lineTo(sx+(n/2-row)+n/4,sy+n);ctx.stroke();
+    if(open(x,y-1)){ctx.fillStyle=L.wallTop;ctx.fillRect(sx,sy,n,2)}
+    if(open(x,y+1)){ctx.fillStyle=L.ink;ctx.fillRect(sx,sy+n-2,n,2);ctx.fillStyle=L.lip;ctx.fillRect(sx,sy+n,n,0)}
+    if(open(x-1,y)){ctx.fillStyle=L.wallTop;ctx.fillRect(sx,sy,1,n)}
+    if(open(x+1,y)){ctx.fillStyle=L.ink;ctx.fillRect(sx+n-1,sy,1,n)}
+    return}
+  const z=tdZone(x,y),t=z&&z.type;
+  ctx.fillStyle=t==='grass'?L.grass:t==='keep'||t==='chapel'?L.keep:t==='grave'?L.grave:L.floor[(h*3)|0];ctx.fillRect(sx,sy,n,n);
+  if(t==='keep'||t==='chapel'){ctx.strokeStyle='rgba(60,44,26,.38)';ctx.lineWidth=1;ctx.strokeRect(sx+.5,sy+.5,n-1,n-1)}   // flagstones
+  else if(t==='grass'){ctx.strokeStyle='rgba(60,86,34,.55)';ctx.lineWidth=1;for(let i=0;i<2;i++){const tx=sx+3+((h*(11+i*5))%1)*(n-7),ty=sy+4+((h*(17+i*3))%1)*(n-8);ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx-1,ty-3);ctx.moveTo(tx,ty);ctx.lineTo(tx+1,ty-3);ctx.stroke()}}
+  else{ctx.fillStyle='rgba(110,80,40,.16)';if(h>.7)ctx.fillRect(sx+((h*9)%1)*(n-3),sy+((h*21)%1)*(n-3),2,2);if(h<.12){ctx.fillRect(sx+((h*53)%1)*(n-4),sy+((h*31)%1)*(n-4),3,1)}}   // a dirt road, with a few specks
+}
+function tdToken(im,sx,sy,w,h,o){ // a creature or prop picture stood on its square: feet on the square's lower edge, a shadow under it
+  if(!im)return;o=o||{};
+  ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(sx,sy+2,w*.42,w*.14,0,0,TAU);ctx.fill();
+  ctx.save();if(o.alpha!==undefined)ctx.globalAlpha=o.alpha;ctx.drawImage(im,sx-w/2+(o.dx||0),sy-h+(o.dy||0),w,h);
+  if(o.flash>0){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=Math.min(.9,o.flash);ctx.drawImage(im,sx-w/2+(o.dx||0),sy-h+(o.dy||0),w,h)}
+  ctx.restore()}
+function tdDraw(){
+  const L=tdLook(),C=G.C,cs=TD.cs,VWd=420,VHd=210;
+  G.hits=[];G._spr=null;G.arrows.length=0;
+  ctx.fillStyle=L.vign;ctx.fillRect(0,0,VWd,VHd);
+  if(!G.grid||!G.seen||!G.P)return;
+  tdUpdateVis();
+  const ox=VWd/2-(C.x+.5)*cs,oy=VHd/2-(C.y+.5)*cs;
+  const x0=Math.max(0,Math.floor(-ox/cs)),x1=Math.min(MW-1,Math.ceil((VWd-ox)/cs)),y0=Math.max(0,Math.floor(-oy/cs)),y1=Math.min(MH-1,Math.ceil((VHd-oy)/cs));
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
+    const seen=G.seen[y][x],vis=TD.vis[y*MW+x];if(!seen&&!vis)continue;
+    tdCell(ox,oy,x,y,G.grid[y][x],cs,L,vis);
+    if(!vis){ctx.fillStyle='rgba(26,18,10,.42)';ctx.fillRect(Math.round(ox+x*cs),Math.round(oy+y*cs),Math.ceil(cs),Math.ceil(cs))}
+  }
+  const cell=(x,y)=>[ox+(x+.5)*cs,oy+(y+1)*cs-3];
+  // things lying on the ground
+  for(const it of G.items){if(it.taken||!tdVisible(it.x,it.y))continue;
+    const sx=ox+(it.x+.5)*cs,sy=oy+(it.y+.5)*cs,p=.5+.5*Math.sin(G.time*4+it.x);
+    const gr=ctx.createRadialGradient(sx,sy,1,sx,sy,cs*.8);gr.addColorStop(0,`rgba(255,226,120,${.45+.25*p})`);gr.addColorStop(1,'rgba(255,226,120,0)');ctx.fillStyle=gr;ctx.fillRect(sx-cs,sy-cs,cs*2,cs*2);
+    try{const d=ITEMDEF[it.k];if(d)itemIcon(Object.assign({id:it.k},d),sx,sy,cs/44);else throw 0}catch(e){ctx.fillStyle='#ffd76a';ctx.beginPath();ctx.arc(sx,sy,cs*.22,0,TAU);ctx.fill()}}
+  // chests, people and props
+  const order=[];
+  for(const d of G.decor){if(d.hidden||d.found||d.wd||d.deco||!tdVisible(d.x,d.y))continue;if(!(d.loot||d.npc||d.block))continue;order.push(d)}
+  order.sort((a,b)=>a.y-b.y);
+  for(const d of order){
+    const [sx,sy]=cell(d.x,d.y),im=IMG[d.k];
+    if(d.loot&&(d.k==='gy_chest'||!im)){ // a chest: a little box with a gold band
+      ctx.fillStyle='#5a3a1c';ctx.fillRect(sx-cs*.36,sy-cs*.55,cs*.72,cs*.5);ctx.fillStyle='#caa24e';ctx.fillRect(sx-cs*.36,sy-cs*.36,cs*.72,2.5);ctx.fillRect(sx-2,sy-cs*.42,4,cs*.2);continue}
+    if(im){const hh=Math.min(cs*1.3,(NPC_H[d.k]||1)*cs*.75*(d.sc||1)),ww=hh*im.width/im.height;tdToken(im,sx,sy,Math.min(ww,cs*1.1),hh*Math.min(1,cs*1.1/ww))}}
+  // creatures
+  const foes=G.enemies.filter(e=>(e.hp>0||e.dying>0)&&tdVisible(Math.round(e.rx),Math.round(e.ry))).sort((a,b)=>a.ry-b.ry);
+  for(const e of foes){
+    const def=ENEMY_DEF[e.t]||{},im=(e.lunge>.2&&e.hp>0&&IMG[def.img+'A'])||IMG[def.img]||IMG._fbRat;
+    const big=Math.max(1,Math.min(3,def.ph||1.2));
+    const [sx,sy]=cell(e.rx,e.ry),hh=cs*Math.min(1.5,.72*big),ww=im?hh*im.width/im.height:hh;
+    const dx=e.x-G.P.x,dy=e.y-G.P.y,lu=e.lunge>0&&e.hp>0?-Math.sign(dx)*e.lunge*cs*.4:0,lv=e.lunge>0&&e.hp>0?-Math.sign(dy)*e.lunge*cs*.4:0;
+    e.sx=sx;e.sy=sy-hh*.7;
+    const fall=e.hp<=0?Math.max(0,e.dying/.55):1;
+    if(im)tdToken(im,sx+lu,sy+lv,Math.min(ww,cs*2.2),hh,{alpha:fall,flash:e.flash});
+    if(e.hp>0){const bw=cs*.9,bx=sx-bw/2,by=sy-hh-4,fr=Math.max(0,e.hp/e.maxhp);
+      ctx.fillStyle='rgba(10,4,4,.8)';ctx.fillRect(bx,by,bw,3);ctx.fillStyle=e.alert?'#e84a38':'#c8a050';ctx.fillRect(bx,by,bw*fr,3)}
+  }
+  // the party: the hero whose turn it is, in a ring, with an arrow for the way it faces
+  {const px=ox+(C.x+.5)*cs,py=oy+(C.y+.5)*cs,f=G.P.f,d=DIRS[f],r=cs*.46;
+    ctx.fillStyle='rgba(0,0,0,.4)';ctx.beginPath();ctx.ellipse(px,py+r*.7,r*.95,r*.4,0,0,TAU);ctx.fill();
+    ctx.save();ctx.beginPath();ctx.arc(px,py,r,0,TAU);ctx.clip();ctx.fillStyle='#120e0a';ctx.fillRect(px-r,py-r,r*2,r*2);
+    const img=portraitImg(G.sel);if(img){const sw=Math.min(img.width,img.height),sx=(img.width-sw)/2;ctx.drawImage(img,sx,0,sw,sw*.9,px-r,py-r,r*2,r*2)}
+    ctx.restore();
+    ctx.lineWidth=2;ctx.strokeStyle='#ffe36a';ctx.beginPath();ctx.arc(px,py,r,0,TAU);ctx.stroke();
+    const ax=px+d[0]*(r+5),ay=py+d[1]*(r+5),nx=-d[1],ny=d[0];
+    ctx.fillStyle='#ffe36a';ctx.beginPath();ctx.moveTo(ax+d[0]*5,ay+d[1]*5);ctx.lineTo(ax-d[0]*2+nx*5,ay-d[1]*2+ny*5);ctx.lineTo(ax-d[0]*2-nx*5,ay-d[1]*2-ny*5);ctx.closePath();ctx.fill();
+  }
+  // darkness closing in at the edge of sight
+  {const px=ox+(C.x+.5)*cs,py=oy+(C.y+.5)*cs,gr=ctx.createRadialGradient(px,py,cs*4.2,px,py,cs*(TD.sight+1.5));gr.addColorStop(0,'rgba(11,8,5,0)');gr.addColorStop(1,'rgba(11,8,5,.72)');ctx.fillStyle=gr;ctx.fillRect(0,0,VWd,VHd)}
+  tdFrame(L);
+}
+
+/* a border like the edge of an old map: a double ink line, gold corners, a compass rose, the name of the place, and the name of the room the party stands in */
+function tdFrame(L){
+  const w=420,h=210;ctx.save();ctx.strokeStyle=L.ink;ctx.lineWidth=3;ctx.strokeRect(2,2,w-4,h-4);ctx.strokeStyle=L.gold;ctx.lineWidth=1;ctx.strokeRect(5,5,w-10,h-10);
+  ctx.fillStyle=L.gold;for(const [cx,cy] of [[5,5],[w-5,5],[5,h-5],[w-5,h-5]]){ctx.beginPath();ctx.moveTo(cx,cy-5);ctx.lineTo(cx+5,cy);ctx.lineTo(cx,cy+5);ctx.lineTo(cx-5,cy);ctx.closePath();ctx.fill()}
+  // the compass rose, top right
+  const cx=w-26,cy=28,r=15;ctx.globalAlpha=.9;ctx.fillStyle='rgba(26,18,10,.42)';ctx.beginPath();ctx.arc(cx,cy,r+3,0,TAU);ctx.fill();ctx.globalAlpha=1;
+  ctx.fillStyle='#e6d6a6';for(let i=0;i<4;i++){const a=i*Math.PI/2-Math.PI/2,k=i===0?r:r*.8;ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*k,cy+Math.sin(a)*k);ctx.lineTo(cx+Math.cos(a+.45)*r*.28,cy+Math.sin(a+.45)*r*.28);ctx.lineTo(cx+Math.cos(a-.45)*r*.28,cy+Math.sin(a-.45)*r*.28);ctx.closePath();ctx.fill()}
+  ctx.fillStyle=L.exit;ctx.beginPath();ctx.moveTo(cx,cy-r);ctx.lineTo(cx+3,cy-r*.3);ctx.lineTo(cx-3,cy-r*.3);ctx.closePath();ctx.fill();
+  txt('N',cx,cy-r-4,7,'#e6d6a6','center',true);ctx.restore();
+  const z=tdZone(G.P.x,G.P.y);
+  txt(String(LEVEL_NAMES[LEVEL]||'').toUpperCase(),210,16,9,'#e6d6a6','center',true);
+  if(z&&z.name)txt(z.name,210,198,8,'#f0e0b0','center',true);
+}
+
+/* ---- src/desert/ps_f4_planets.js ---- */
+/* ==========================================================================
+   THE PALE SPIRE, FOURTH FLOOR: THE FLOOR OF THE MOON. Four rooms, each with a planet floating in it; each planet is a maze played from ABOVE
+   (see topdown.js). Planet levels: 9891 stone, 9892 ice, 9893 growth, 9894 fire. The hub is 9890. All four done opens the way up, past the Moon.
+   This file holds the maze maker (psf4Maze) and the planets. Prefix psf4 / PSF4.
+   State: G.flags.psp.f4 = {done:{9891:1,...}} (a planet is done when the party steps onto its way out).
+   ========================================================================== */
+const PSF4={HUB:9890,IDS:[9891,9892,9893,9894]};
+function psf4F(){const P=(G.flags.psp=G.flags.psp||{});return P.f4||(P.f4={done:{}})}
+/* a small seeded random generator, so a planet is the same maze every time */
+function psf4Rng(seed){let a=(seed>>>0)||1;return ()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
+/* a maze on a W x H grid (both odd): open[y][x] true where the party can walk. Passages are one square wide; `rooms` rooms are cut out of it so fights have space,
+   and `braid` is the share of dead ends that are opened into loops. Returns {open, start, exit, dead} (dead = dead ends, far ones first). */
+function psf4Maze(W,H,seed,o){
+  o=o||{};const R=psf4Rng(seed),open=[];for(let y=0;y<H;y++)open.push(new Array(W).fill(false));
+  const cw=(W-1)/2,ch=(H-1)/2,seen=new Uint8Array(cw*ch),st=[[0,0]];seen[0]=1;open[1][1]=true;
+  while(st.length){
+    const [cx,cy]=st[st.length-1],nb=[];
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=cx+dx,ny=cy+dy;if(nx>=0&&ny>=0&&nx<cw&&ny<ch&&!seen[ny*cw+nx])nb.push([nx,ny,dx,dy])}
+    if(!nb.length){st.pop();continue}
+    const [nx,ny,dx,dy]=nb[(R()*nb.length)|0];seen[ny*cw+nx]=1;
+    open[cy*2+1+dy][cx*2+1+dx]=true;open[ny*2+1][nx*2+1]=true;st.push([nx,ny]);
+  }
+  const rooms=[];
+  for(let i=0,tries=0;i<(o.rooms||6)&&tries<200;tries++){
+    const rw=3+2*((R()*2)|0),rh=3+2*((R()*2)|0),rx=1+2*((R()*((W-rw-1)/2))|0),ry=1+2*((R()*((H-rh-1)/2))|0);
+    if(rx+rw>=W-1||ry+rh>=H-1)continue;
+    if(Math.hypot(rx-1,ry-1)<9)continue;
+    if(rooms.some(r=>rx<r.x1+3&&rx+rw>r.x0-3&&ry<r.y1+3&&ry+rh>r.y0-3))continue;
+    for(let y=ry;y<ry+rh;y++)for(let x=rx;x<rx+rw;x++)open[y][x]=true;
+    rooms.push({x0:rx,y0:ry,x1:rx+rw-1,y1:ry+rh-1});i++}
+  const nbr=(x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].filter(([dx,dy])=>open[y+dy]&&open[y+dy][x+dx]);
+  const deadEnds=()=>{const d=[];for(let y=1;y<H-1;y+=2)for(let x=1;x<W-1;x+=2)if(open[y][x]&&nbr(x,y).length===1)d.push([x,y]);return d};
+  for(const [x,y] of deadEnds()){if(R()>=(o.braid===undefined?.25:o.braid))continue;
+    const ws=[[1,0],[-1,0],[0,1],[0,-1]].filter(([dx,dy])=>{const wx=x+dx,wy=y+dy,bx=x+2*dx,by=y+2*dy;return !open[wy][wx]&&bx>0&&by>0&&bx<W-1&&by<H-1&&open[by][bx]});
+    if(ws.length){const [dx,dy]=ws[(R()*ws.length)|0];open[y+dy][x+dx]=true}}
+  // the distance from the start: the way out is the farthest dead end
+  const dist=new Int32Array(W*H).fill(-1),q=[[1,1]];dist[W+1]=0;
+  for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(open[ny]&&open[ny][nx]&&dist[ny*W+nx]<0){dist[ny*W+nx]=dist[y*W+x]+1;q.push([nx,ny])}}}
+  const dead=deadEnds().filter(([x,y])=>!(x===1&&y===1)&&dist[y*W+x]>0).sort((a,b)=>dist[b[1]*W+b[0]]-dist[a[1]*W+a[0]]);
+  return {open,rooms,dist,dead,start:[1,1],exit:dead[0]||[W-2,H-2]}}
+/* builds one planet: a top-down maze level. spec = {id,name,W,H,seed,foes:[types],nFoes,nChests,nItems,floor,wall} */
+function psf4Planet(info,spec){
+  // the level kit only treats squares 2 to size-3 as floor, so the maze (which starts at 1) is set one square in: maze (x,y) is level (x+1,y+1)
+  const id=spec.id,MW0=spec.W,MH0=spec.H,W=MW0+2,H=MH0+2,O=1;
+  const C=pspMake({id,W,H,start:{x:1+O,y:1+O,f:2},floor:'flag',wh:2.2,amb:.5,lcol:PSH_COL.cold,kind:'in'});
+  const M=psf4Maze(MW0,MH0,spec.seed,spec),open=M.open,R=psf4Rng(spec.seed*7+3);
+  for(let y=0;y<MH0;y++)for(let x=0;x<MW0;x++)if(open[y][x])C.carve(x+O,y+O,x+O,y+O);
+  const [mex,mey]=M.exit,ex=mex+O,ey=mey+O;
+  // the landmark rooms: each is named on the map, drawn in its own ground, and furnished
+  const KINDS=[['keep','The Keep'],['chapel','The Chapel'],['grass','The Herb Garden'],['grave','The Graveyard'],['grass','The Well Court'],['keep','The Guardroom']];
+  const zones=M.rooms.map((r,i)=>({type:KINDS[i%6][0],name:KINDS[i%6][1],n:i,x0:r.x0+O,y0:r.y0+O,x1:r.x1+O,y1:r.y1+O}));
+  const pp=(name,x,y)=>{if(C.free(x,y))C.prop(name,x,y,{block:true,sc:.9})};
+  // props stand only on the inside of a room (never on its border ring, where the passages come in), so they can never shut a way
+  const PROPS={The_Keep:['brazier','brazier','st_headless'],The_Chapel:['altar','font','pews','pews'],The_Herb_Garden:['well_pale','urn_big','urn_big'],The_Graveyard:['st_saint2','st_headless','skull_pillar','st_headless'],The_Well_Court:['well_pale','barrels','cart_old'],The_Guardroom:['hearth_cold','barrels','cage']};
+  for(const z of zones){
+    const cx=(z.x0+z.x1)>>1,cy=(z.y0+z.y1)>>1;C.mapNames.push({t:z.name,x:cx,y:cy,k:'place'});
+    const ins=[];for(let y=z.y0+1;y<=z.y1-1;y++)for(let x=z.x0+1;x<=z.x1-1;x++)ins.push([x,y]);
+    ins.sort((a,b)=>Math.hypot(a[0]-cx,a[1]-cy)-Math.hypot(b[0]-cx,b[1]-cy));
+    (PROPS[z.name.replace(/ /g,'_')]||[]).forEach((n,i)=>{if(ins[i])pp(n,ins[i][0],ins[i][1])})}
+  // the way out is a door in the wall beside the far dead end
+  let at=null;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const wx=mex+dx,wy=mey+dy;if(wx>0&&wy>0&&wx<MW0-1&&wy<MH0-1&&!open[wy][wx]){at=[wx+O,wy+O];break}}
+  at=at||[ex+1,ey];
+  PSP_L(id,at,PSF4.HUB,[20,20,0],{name:'the way off the planet',prov:1});
+  C.links({});
+  C.light(1+O,1+O,[1.2,1.2,1.6]);C.light(ex,ey,[.9,1.4,1.8]);
+  const spots=[];for(let y=1;y<MH0-1;y++)for(let x=1;x<MW0-1;x++)if(open[y][x]&&M.dist[y*MW0+x]>=10&&!(x===mex&&y===mey))spots.push([x+O,y+O]);
+  const take=()=>{if(!spots.length)return null;const i=(R()*spots.length)|0;return spots.splice(i,1)[0]};
+  // chests and things lying about go in the dead ends, the far ones first
+  const dead=M.dead.slice(1).map(([x,y])=>[x+O,y+O]);let nc=spec.nChests||3;
+  for(const [x,y] of dead){if(nc<=0)break;if(!C.free(x,y))continue;if(C.chest(x,y,{gold:2200+((R()*1200)|0),tier:1}))nc--}
+  let ni=spec.nItems||5;for(const [x,y] of dead.slice().reverse()){if(ni<=0)break;if(C.items.some(i=>i.x===x&&i.y===y)||C.decor.some(d=>d.x===x&&d.y===y))continue;C.items.push({k:'potion6',x,y,taken:false});ni--}
+  const L=info.lvl||108,types=spec.foes;
+  let nf=spec.nFoes||12;while(nf-->0){const s=take();if(!s)break;pspFoe(C,types[(R()*types.length)|0],s[0],s[1],{lvl:L})}
+  const lv=C.finish({start:{x:1+O,y:1+O,f:2}});
+  lv._td={exit:at,seed:spec.seed,look:spec.look,zones};
+  return lv}
+/* ---------- planet 1: the stone planet ---------- */
+PSP.LEVELS.push(PSP_LV(9891,'The Stone Planet',39,39,108,0,'in'));
+TD.levels.add(9891);
+pspRegister(9891,info=>psf4Planet(info,{id:9891,W:37,H:37,seed:9891,rooms:6,braid:.22,nFoes:14,nChests:3,nItems:5,foes:['psclockwork','psmirrorshade','psstarwraith','psstarmoth']}));
+/* stepping onto the way out finishes the planet */
+{const _m=doMove;doMove=function(rel){
+  try{if(tdOn()){const lv=LEVELS[LEVEL],t=lv&&lv._td;if(t){const d=DIRS[(G.P.f+rel)%4],nx=G.P.x+d[0],ny=G.P.y+d[1];
+    if(nx===t.exit[0]&&ny===t.exit[1]&&PSF4.IDS.includes(LEVEL)){const F=psf4F();if(!F.done[LEVEL]){F.done[LEVEL]=1;msg('The planet is complete. A way opens off its edge.','#bfe8ff');sfx('level')}}}}}catch(e){console.error('psf4 exit',e)}
+  return _m.apply(this,arguments)}}
 
 /* ---- src/desert/nt_look.js ---- */
 /* ==========================================================================
