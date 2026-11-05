@@ -78,3 +78,6 @@ The class powers were rebalanced several times. Where they stand now:
 ## 3.842
 - Observatory Gallery redone as an arranging puzzle: a painted Chart of the Rising in the Gallery shows the five constellations in order; in the Chart Room you set the five star chart stands on five pedestals in that order. No more pins or clues to work out.
 - Painted art for the Observatory: telescope, star chart stands, chart of the rising, orrery, star panel, mirror post (also used in the Beam Room), the Sovereign's Reflection, Mirror Shade, Star Wraith and Brass Clockwork Guardian.
+
+## 3.843
+- Attack pictures for the Sovereign's Reflection, Mirror Shade, Star Wraith and Brass Clockwork Guardian.

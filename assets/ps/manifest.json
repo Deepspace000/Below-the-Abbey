@@ -6172,5 +6172,37 @@
 "h": 2.1,
 "kind": "sprite",
 "sheet": "obsc"
+},
+"obs_reflectA": {
+"file": "obs_reflectA.webp",
+"w": 422,
+"px_h": 512,
+"h": 2.6,
+"kind": "sprite",
+"sheet": "obsa"
+},
+"obs_shadeA": {
+"file": "obs_shadeA.webp",
+"w": 493,
+"px_h": 512,
+"h": 1.9,
+"kind": "sprite",
+"sheet": "obsa"
+},
+"obs_wraithA": {
+"file": "obs_wraithA.webp",
+"w": 520,
+"px_h": 512,
+"h": 2.1,
+"kind": "sprite",
+"sheet": "obsa"
+},
+"obs_clockworkA": {
+"file": "obs_clockworkA.webp",
+"w": 392,
+"px_h": 512,
+"h": 2.1,
+"kind": "sprite",
+"sheet": "obsa"
 }
 }
