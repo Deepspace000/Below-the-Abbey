@@ -9,8 +9,9 @@ const PSF4M={ID:9890,W:46,H:46,
   PLANETS:[[9891,'stone',23,8,'The Stone Planet'],[9892,'ice',38,23,'The Ice Planet'],[9893,'grow',23,38,'The Growing Planet'],[9894,'fire',8,23,'The Fire Planet']],
   SEAL:[30,8],GATE:[36,3],MOON:[36,4],DOWN:[23,28]};
 PSF4.BACK={9891:[23,10,0],9892:[36,23,1],9893:[23,36,2],9894:[10,23,3]};
-const psf4Done=()=>PSF4.IDS.filter(i=>psf4F().done[i]).length;
-const psf4Have=()=>PSF4.IDS.filter(i=>bagCount(PSF4_CHARM[i].id)>0).length;   // the little planets carried in the bag: these open the gate
+const psf4Has=i=>bagCount(PSF4_CHARM[i].id)>0;   // a planet counts as done only while its little planet is carried in the bag
+const psf4Have=()=>PSF4.IDS.filter(psf4Has).length;
+const psf4Done=psf4Have;   // the little planets carried in the bag: these open the gate
 function psf4mApply(){
   if(LEVEL!==PSF4M.ID||!G.decor)return;const all=psf4Have()===4;
   for(const d of G.decor)if(d.npc==='psf4_seal'){d.hidden=all;d.found=all;d.block=!all}}
@@ -54,8 +55,8 @@ function psf4mBuild(info){
 pspRegister(PSF4M.ID,psf4mBuild);
 /* ---------- the things to touch ---------- */
 for(const [pid,key,x,y,name] of PSF4M.PLANETS){
-  khNpc('psf4_pl_'+pid,name,'ps_planet_'+key,()=>{const F=psf4F(),done=!!F.done[pid];
-    return say("A great painted planet turns slowly in the air, as big as a house. "+({stone:'Grey stone, with walls and towers of old castles drawn on it.',ice:'White and blue ice, cracked and ridged.',grow:'Dense green forest, with huge mushrooms and vines.',fire:'Black rock with rivers of lava and small volcanoes.'}[key])+(done?" You have been through its maze and reached its exit.":" Its surface is a maze. If you step onto it, you will walk through it seen from above.")+" "+psf4Done()+" of 4 planets are done.",[
+  khNpc('psf4_pl_'+pid,name,'ps_planet_'+key,()=>{const F=psf4F(),done=psf4Has(pid);
+    return say("A great painted planet turns slowly in the air, as big as a house. "+({stone:'Grey stone, with walls and towers of old castles drawn on it.',ice:'White and blue ice, cracked and ridged.',grow:'Dense green forest, with huge mushrooms and vines.',fire:'Black rock with rivers of lava and small volcanoes.'}[key])+(done?" You carry its little planet.":" Its surface is a maze. Somewhere far across it lies a little planet, and next to that is the way back. If you step onto it, you will walk through it seen from above.")+" "+psf4Done()+" of 4 little planets are carried.",[
       [done?'Step onto the planet again.':'Step onto the planet.',()=>{G.talk=null;sfx('door');goToLevel(pid,{x:2,y:2,f:2});return null}],BYE])})}
 khNpc('psf4_seal','The Iron Gate','ps_iron_gate_big',()=>say("A tall iron gate shuts off the way east, to the Moon Gate. Cut into the bars is a line: WHEN YOU HAVE THE FOUR PLANETS, YOU MAY PASS. You carry "+psf4Have()+" of the 4 little planets.",[BYE]));
 khNpc('psf4_down','The spiral stair','ps_stair_spiral_iron',()=>say("The iron stair winds down to the Observatory Gallery.",[['Go down.',()=>{G.talk=null;sfx('door');goToLevel(9881,{x:47,y:28,f:0});return null}],BYE]));

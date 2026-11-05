@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.851';
+const VERSION='3.853';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -80481,6 +80481,8 @@ function psf4Maze(W,H,seed,o){
   const dist=new Int32Array(W*H).fill(-1),q=[[1,1]];dist[W+1]=0;
   for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(open[ny]&&open[ny][nx]&&dist[ny*W+nx]<0){dist[ny*W+nx]=dist[y*W+x]+1;q.push([nx,ny])}}}
   const dead=deadEnds().filter(([x,y])=>!(x===1&&y===1)&&dist[y*W+x]>0).sort((a,b)=>dist[b[1]*W+b[0]]-dist[a[1]*W+a[0]]);
+  // the way out must also be far across the map, not just far along the winding corridors: among the dead ends at least 60% as far as the farthest, take the one farthest in a straight line from the start
+  if(dead.length>1){const mx=dist[dead[0][1]*W+dead[0][0]],far=dead.filter(([x,y])=>dist[y*W+x]>=mx*.6).sort((a,b)=>Math.hypot(b[0]-1,b[1]-1)-Math.hypot(a[0]-1,a[1]-1))[0];if(far){dead.splice(dead.indexOf(far),1);dead.unshift(far)}}
   return {open,rooms,dist,dead,start:[1,1],exit:dead[0]||[W-2,H-2]}}
 /* builds one planet: a top-down maze level. spec = {id,name,W,H,seed,foes:[types],nFoes,nChests,nItems,floor,wall} */
 /* ---------- the four little planets: one lies at the end of each maze; each gives a bonus to the whole party for as long as it is carried in the bag ---------- */
@@ -80545,7 +80547,7 @@ pspRegister(9894,info=>psf4Planet(info,{id:9894,W:43,H:43,seed:9894,rooms:8,brai
 /* stepping onto the way out finishes the planet */
 {const _m=doMove;doMove=function(rel){
   try{if(tdOn()){const lv=LEVELS[LEVEL],t=lv&&lv._td;if(t){const d=DIRS[(G.P.f+rel)%4],nx=G.P.x+d[0],ny=G.P.y+d[1];
-    if(nx===t.exit[0]&&ny===t.exit[1]&&PSF4.IDS.includes(LEVEL)){const F=psf4F();if(!F.done[LEVEL]){F.done[LEVEL]=1;msg('The planet is complete. A way opens off its edge.','#bfe8ff');sfx('level')}}}}}catch(e){console.error('psf4 exit',e)}
+    if(nx===t.exit[0]&&ny===t.exit[1]&&PSF4.IDS.includes(LEVEL)){const F=psf4F();if(!F.done[LEVEL]&&bagCount(PSF4_CHARM[LEVEL].id)>0){F.done[LEVEL]=1;msg('You carry the little planet. The way back opens at the edge of the map.','#bfe8ff');sfx('level')}}}}}catch(e){console.error('psf4 exit',e)}
   return _m.apply(this,arguments)}}
 /* ---------- the party meets the top-down view: told once, before the first maze ---------- */
 CUTS.psPlanet=()=>[
@@ -80573,8 +80575,9 @@ const PSF4M={ID:9890,W:46,H:46,
   PLANETS:[[9891,'stone',23,8,'The Stone Planet'],[9892,'ice',38,23,'The Ice Planet'],[9893,'grow',23,38,'The Growing Planet'],[9894,'fire',8,23,'The Fire Planet']],
   SEAL:[30,8],GATE:[36,3],MOON:[36,4],DOWN:[23,28]};
 PSF4.BACK={9891:[23,10,0],9892:[36,23,1],9893:[23,36,2],9894:[10,23,3]};
-const psf4Done=()=>PSF4.IDS.filter(i=>psf4F().done[i]).length;
-const psf4Have=()=>PSF4.IDS.filter(i=>bagCount(PSF4_CHARM[i].id)>0).length;   // the little planets carried in the bag: these open the gate
+const psf4Has=i=>bagCount(PSF4_CHARM[i].id)>0;   // a planet counts as done only while its little planet is carried in the bag
+const psf4Have=()=>PSF4.IDS.filter(psf4Has).length;
+const psf4Done=psf4Have;   // the little planets carried in the bag: these open the gate
 function psf4mApply(){
   if(LEVEL!==PSF4M.ID||!G.decor)return;const all=psf4Have()===4;
   for(const d of G.decor)if(d.npc==='psf4_seal'){d.hidden=all;d.found=all;d.block=!all}}
@@ -80618,8 +80621,8 @@ function psf4mBuild(info){
 pspRegister(PSF4M.ID,psf4mBuild);
 /* ---------- the things to touch ---------- */
 for(const [pid,key,x,y,name] of PSF4M.PLANETS){
-  khNpc('psf4_pl_'+pid,name,'ps_planet_'+key,()=>{const F=psf4F(),done=!!F.done[pid];
-    return say("A great painted planet turns slowly in the air, as big as a house. "+({stone:'Grey stone, with walls and towers of old castles drawn on it.',ice:'White and blue ice, cracked and ridged.',grow:'Dense green forest, with huge mushrooms and vines.',fire:'Black rock with rivers of lava and small volcanoes.'}[key])+(done?" You have been through its maze and reached its exit.":" Its surface is a maze. If you step onto it, you will walk through it seen from above.")+" "+psf4Done()+" of 4 planets are done.",[
+  khNpc('psf4_pl_'+pid,name,'ps_planet_'+key,()=>{const F=psf4F(),done=psf4Has(pid);
+    return say("A great painted planet turns slowly in the air, as big as a house. "+({stone:'Grey stone, with walls and towers of old castles drawn on it.',ice:'White and blue ice, cracked and ridged.',grow:'Dense green forest, with huge mushrooms and vines.',fire:'Black rock with rivers of lava and small volcanoes.'}[key])+(done?" You carry its little planet.":" Its surface is a maze. Somewhere far across it lies a little planet, and next to that is the way back. If you step onto it, you will walk through it seen from above.")+" "+psf4Done()+" of 4 little planets are carried.",[
       [done?'Step onto the planet again.':'Step onto the planet.',()=>{G.talk=null;sfx('door');goToLevel(pid,{x:2,y:2,f:2});return null}],BYE])})}
 khNpc('psf4_seal','The Iron Gate','ps_iron_gate_big',()=>say("A tall iron gate shuts off the way east, to the Moon Gate. Cut into the bars is a line: WHEN YOU HAVE THE FOUR PLANETS, YOU MAY PASS. You carry "+psf4Have()+" of the 4 little planets.",[BYE]));
 khNpc('psf4_down','The spiral stair','ps_stair_spiral_iron',()=>say("The iron stair winds down to the Observatory Gallery.",[['Go down.',()=>{G.talk=null;sfx('door');goToLevel(9881,{x:47,y:28,f:0});return null}],BYE]));

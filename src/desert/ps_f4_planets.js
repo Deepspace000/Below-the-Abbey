@@ -37,6 +37,8 @@ function psf4Maze(W,H,seed,o){
   const dist=new Int32Array(W*H).fill(-1),q=[[1,1]];dist[W+1]=0;
   for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(open[ny]&&open[ny][nx]&&dist[ny*W+nx]<0){dist[ny*W+nx]=dist[y*W+x]+1;q.push([nx,ny])}}}
   const dead=deadEnds().filter(([x,y])=>!(x===1&&y===1)&&dist[y*W+x]>0).sort((a,b)=>dist[b[1]*W+b[0]]-dist[a[1]*W+a[0]]);
+  // the way out must also be far across the map, not just far along the winding corridors: among the dead ends at least 60% as far as the farthest, take the one farthest in a straight line from the start
+  if(dead.length>1){const mx=dist[dead[0][1]*W+dead[0][0]],far=dead.filter(([x,y])=>dist[y*W+x]>=mx*.6).sort((a,b)=>Math.hypot(b[0]-1,b[1]-1)-Math.hypot(a[0]-1,a[1]-1))[0];if(far){dead.splice(dead.indexOf(far),1);dead.unshift(far)}}
   return {open,rooms,dist,dead,start:[1,1],exit:dead[0]||[W-2,H-2]}}
 /* builds one planet: a top-down maze level. spec = {id,name,W,H,seed,foes:[types],nFoes,nChests,nItems,floor,wall} */
 /* ---------- the four little planets: one lies at the end of each maze; each gives a bonus to the whole party for as long as it is carried in the bag ---------- */
@@ -101,7 +103,7 @@ pspRegister(9894,info=>psf4Planet(info,{id:9894,W:43,H:43,seed:9894,rooms:8,brai
 /* stepping onto the way out finishes the planet */
 {const _m=doMove;doMove=function(rel){
   try{if(tdOn()){const lv=LEVELS[LEVEL],t=lv&&lv._td;if(t){const d=DIRS[(G.P.f+rel)%4],nx=G.P.x+d[0],ny=G.P.y+d[1];
-    if(nx===t.exit[0]&&ny===t.exit[1]&&PSF4.IDS.includes(LEVEL)){const F=psf4F();if(!F.done[LEVEL]){F.done[LEVEL]=1;msg('The planet is complete. A way opens off its edge.','#bfe8ff');sfx('level')}}}}}catch(e){console.error('psf4 exit',e)}
+    if(nx===t.exit[0]&&ny===t.exit[1]&&PSF4.IDS.includes(LEVEL)){const F=psf4F();if(!F.done[LEVEL]&&bagCount(PSF4_CHARM[LEVEL].id)>0){F.done[LEVEL]=1;msg('You carry the little planet. The way back opens at the edge of the map.','#bfe8ff');sfx('level')}}}}}catch(e){console.error('psf4 exit',e)}
   return _m.apply(this,arguments)}}
 /* ---------- the party meets the top-down view: told once, before the first maze ---------- */
 CUTS.psPlanet=()=>[
