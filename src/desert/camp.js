@@ -80,7 +80,7 @@ const CAMP_ACTS=[
   {id:'cook',n:'Cook a hearty meal',d:'Two food items make a stew for the party: Well Fed (+2 strength) for a day and hunger filled. A cook makes it better.',cost:'1 hour, 2 food',ok:()=>foodUnits()>=2,run:hi=>{
     takeFood(2);advanceTime(60);const r=profPerk('cook');
     G.heroes.forEach(h=>{if(h.alive)h.food=Math.min(100,h.food+40+r*8)});afflInflict('wellfed',-1,true);if(r>=3)G.buffs.push({name:'A Master\'s Stew',b:'regen',amt:.4,left:200,hi:-1});
-    profXP('cook',2);msg('The stew is hot and hearty. The party eats in good spirits.','#e8c070');bondRandom(1)}},
+    profXP('cook',2);msg(['The stew is hot and hearty. The party eats in good spirits.','The meal is plain and filling. Bowls are scraped clean.','Warm food, a warm fire and nobody in a hurry. The party feels the better for it.','It is not a feast, but it is hot, and that is nearly the same thing.','The party eats well tonight, and sleeps better for it.'][(Math.random()*5)|0],'#e8c070');bondRandom(1)}},
   {id:'sharpen',n:'Sharpen and mend the gear',d:'Blades keen, straps mended: the party deals more damage for the next day of fighting. A smith does it better.',cost:'30 minutes',ok:()=>true,run:hi=>{
     advanceTime(30);const r=profPerk('smith');G.buffs=G.buffs.filter(b=>b.name!=='Sharpened Blades');G.buffs.push({name:'Sharpened Blades',b:'dmgPct',amt:.06+.025*r,left:400,hi:-1});
     profXP('smith',2);msg(`Whetstones ring. The party deals ${Math.round((.06+.025*r)*100)}% more damage for a long while.`,'#e0a070')}},
@@ -123,7 +123,15 @@ const CAMP_SCENES={
   cook:[
     "{n} hangs the pot over the fire and counts out what food is left. Onion, a little salt, whatever the road has given. The smell rises, and one by one the others drift closer.|{o} claims the first bowl, burns a tongue, and swears it is the best stew in the world.",
     "{n} stirs with a wooden spoon and tastes, frowns, tastes again. A pinch of something from a pocket goes in. Nobody asks what.|The party eats in the firelight, mostly in silence, and silence is the kind of compliment a cook understands.",
-    "It takes an hour, and {n} will not be hurried. The pot bubbles. The steam smells of home, though not any home the party has had lately.|{o} wipes the bowl clean with a crust of bread. “Same again tomorrow,” {o} says, and means it."
+    "It takes an hour, and {n} will not be hurried. The pot bubbles. The steam smells of home, though not any home the party has had lately.|{o} wipes the bowl clean with a crust of bread. “Same again tomorrow,” {o} says, and means it.",
+    "{n} unwraps the last of the cheese, cuts the bread thick and sets a flat stone in the coals to warm it. The first slice is toasted brown at the edges.|Nobody talks while they eat. The fire ticks, and a cup is passed round with nothing in it but hot water and a good deal of gratitude.",
+    "“Whatever you do, do not look in the pot,” says {n}. {o} looks in the pot.|“It is food,” {o} says carefully. “I think it is food.” It is, and it is better than it has any right to be, and the pot is scraped clean before anyone can ask what went in it.",
+    "{n} roasts the meat on a stick over the embers until the fat spits and hisses, then carves it into four with a travelling knife.|{o} eats with both hands. For a quarter of an hour the only sounds are the fire and somebody trying not to groan with pleasure.",
+    "There is not much left, so {n} makes it go further: a broth, thin but hot, with the bread torn into it.|It warms the hands first and the belly after. {o} holds the bowl up under the chin for the steam and says nothing at all, which from {o} is a speech.",
+    "{n} does the sums on the fingers of one hand and decides that tonight is a night for a proper meal. The good salt comes out. The dried herbs come out. {o} is made to peel something.|The meal is served on upturned shields. It is eaten very slowly, as if the evening might notice and end.",
+    "A stew, again, because it is always a stew. But {n} has found wild garlic at the edge of the camp, and it makes all the difference.|“I could eat this every night,” {o} says. “You will,” says {n}, and goes back to the pot.",
+    "{n} sets the food out on a cloth and divides it into four with great fairness and a look that dares anyone to argue over the larger piece.|Nobody argues. {o} offers half a biscuit to the quietest of the party, who takes it as if it were a medal.",
+    "The pot is dented and the spoon is bent, and {n} cooks with both as if they were the finest kitchen in the land. The smoke drifts up into the trees.|Afterwards {o} lies back with hands on stomach and looks at the stars. “Worth the walk,” {o} says. Nobody asks which walk."
   ],
   sharpen:[
     "{n} sits on a stone with the whetstone and a rag and goes down the line of blades one by one. The ring of steel carries a long way in the dark.|The edges come up bright. Straps are mended, buckles are tightened, and the party's gear looks a little less like it has been dragged across a continent.",
@@ -150,7 +158,8 @@ function campMoment(id,hi){
   const pool=CAMP_SCENES[id];if(!pool)return;
   const n=HERO_DEF[hi].name,others=[0,1,2,3].filter(j=>j!==hi&&G.heroes[j].alive),o=others.length?HERO_DEF[others[(Math.random()*others.length)|0]].name:n,info=G._campInfo||{};
   const p=info.b!==undefined?HERO_DEF[info.b].name:o;
-  let parts=pool[(Math.random()*pool.length)|0].split('|');
+  let k=(Math.random()*pool.length)|0;const lastK=(G._campLast=G._campLast||{});if(pool.length>1&&k===lastK[id])k=(k+1+((Math.random()*(pool.length-1))|0))%pool.length;lastK[id]=k;   // never the same scene twice running
+  let parts=pool[k].split('|');
   const f=info.found&&info.found.length?'Back at the fire with '+info.found.join(', ')+'.':'Back at the fire with empty hands, and a good story about a thorn.';
   const lines=parts.map(t=>({text:t.replace(/\{f\}/g,f).replace(/\{n\}/g,n).replace(/\{o\}/g,o).replace(/\{p\}/g,p)}));
   if(id==='tend'&&info.n!==undefined)lines.push({text:info.n?`${info.n===1?'One':'Some'} of the sick feel better. The fever breaks, or the cough eases.`:'Nothing is cured yet, but rest and care will do more tomorrow.'});

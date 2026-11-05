@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.830';
+const VERSION='3.831';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -13288,7 +13288,7 @@ const CAMP_ACTS=[
   {id:'cook',n:'Cook a hearty meal',d:'Two food items make a stew for the party: Well Fed (+2 strength) for a day and hunger filled. A cook makes it better.',cost:'1 hour, 2 food',ok:()=>foodUnits()>=2,run:hi=>{
     takeFood(2);advanceTime(60);const r=profPerk('cook');
     G.heroes.forEach(h=>{if(h.alive)h.food=Math.min(100,h.food+40+r*8)});afflInflict('wellfed',-1,true);if(r>=3)G.buffs.push({name:'A Master\'s Stew',b:'regen',amt:.4,left:200,hi:-1});
-    profXP('cook',2);msg('The stew is hot and hearty. The party eats in good spirits.','#e8c070');bondRandom(1)}},
+    profXP('cook',2);msg(['The stew is hot and hearty. The party eats in good spirits.','The meal is plain and filling. Bowls are scraped clean.','Warm food, a warm fire and nobody in a hurry. The party feels the better for it.','It is not a feast, but it is hot, and that is nearly the same thing.','The party eats well tonight, and sleeps better for it.'][(Math.random()*5)|0],'#e8c070');bondRandom(1)}},
   {id:'sharpen',n:'Sharpen and mend the gear',d:'Blades keen, straps mended: the party deals more damage for the next day of fighting. A smith does it better.',cost:'30 minutes',ok:()=>true,run:hi=>{
     advanceTime(30);const r=profPerk('smith');G.buffs=G.buffs.filter(b=>b.name!=='Sharpened Blades');G.buffs.push({name:'Sharpened Blades',b:'dmgPct',amt:.06+.025*r,left:400,hi:-1});
     profXP('smith',2);msg(`Whetstones ring. The party deals ${Math.round((.06+.025*r)*100)}% more damage for a long while.`,'#e0a070')}},
@@ -13331,7 +13331,15 @@ const CAMP_SCENES={
   cook:[
     "{n} hangs the pot over the fire and counts out what food is left. Onion, a little salt, whatever the road has given. The smell rises, and one by one the others drift closer.|{o} claims the first bowl, burns a tongue, and swears it is the best stew in the world.",
     "{n} stirs with a wooden spoon and tastes, frowns, tastes again. A pinch of something from a pocket goes in. Nobody asks what.|The party eats in the firelight, mostly in silence, and silence is the kind of compliment a cook understands.",
-    "It takes an hour, and {n} will not be hurried. The pot bubbles. The steam smells of home, though not any home the party has had lately.|{o} wipes the bowl clean with a crust of bread. “Same again tomorrow,” {o} says, and means it."
+    "It takes an hour, and {n} will not be hurried. The pot bubbles. The steam smells of home, though not any home the party has had lately.|{o} wipes the bowl clean with a crust of bread. “Same again tomorrow,” {o} says, and means it.",
+    "{n} unwraps the last of the cheese, cuts the bread thick and sets a flat stone in the coals to warm it. The first slice is toasted brown at the edges.|Nobody talks while they eat. The fire ticks, and a cup is passed round with nothing in it but hot water and a good deal of gratitude.",
+    "“Whatever you do, do not look in the pot,” says {n}. {o} looks in the pot.|“It is food,” {o} says carefully. “I think it is food.” It is, and it is better than it has any right to be, and the pot is scraped clean before anyone can ask what went in it.",
+    "{n} roasts the meat on a stick over the embers until the fat spits and hisses, then carves it into four with a travelling knife.|{o} eats with both hands. For a quarter of an hour the only sounds are the fire and somebody trying not to groan with pleasure.",
+    "There is not much left, so {n} makes it go further: a broth, thin but hot, with the bread torn into it.|It warms the hands first and the belly after. {o} holds the bowl up under the chin for the steam and says nothing at all, which from {o} is a speech.",
+    "{n} does the sums on the fingers of one hand and decides that tonight is a night for a proper meal. The good salt comes out. The dried herbs come out. {o} is made to peel something.|The meal is served on upturned shields. It is eaten very slowly, as if the evening might notice and end.",
+    "A stew, again, because it is always a stew. But {n} has found wild garlic at the edge of the camp, and it makes all the difference.|“I could eat this every night,” {o} says. “You will,” says {n}, and goes back to the pot.",
+    "{n} sets the food out on a cloth and divides it into four with great fairness and a look that dares anyone to argue over the larger piece.|Nobody argues. {o} offers half a biscuit to the quietest of the party, who takes it as if it were a medal.",
+    "The pot is dented and the spoon is bent, and {n} cooks with both as if they were the finest kitchen in the land. The smoke drifts up into the trees.|Afterwards {o} lies back with hands on stomach and looks at the stars. “Worth the walk,” {o} says. Nobody asks which walk."
   ],
   sharpen:[
     "{n} sits on a stone with the whetstone and a rag and goes down the line of blades one by one. The ring of steel carries a long way in the dark.|The edges come up bright. Straps are mended, buckles are tightened, and the party's gear looks a little less like it has been dragged across a continent.",
@@ -13358,7 +13366,8 @@ function campMoment(id,hi){
   const pool=CAMP_SCENES[id];if(!pool)return;
   const n=HERO_DEF[hi].name,others=[0,1,2,3].filter(j=>j!==hi&&G.heroes[j].alive),o=others.length?HERO_DEF[others[(Math.random()*others.length)|0]].name:n,info=G._campInfo||{};
   const p=info.b!==undefined?HERO_DEF[info.b].name:o;
-  let parts=pool[(Math.random()*pool.length)|0].split('|');
+  let k=(Math.random()*pool.length)|0;const lastK=(G._campLast=G._campLast||{});if(pool.length>1&&k===lastK[id])k=(k+1+((Math.random()*(pool.length-1))|0))%pool.length;lastK[id]=k;   // never the same scene twice running
+  let parts=pool[k].split('|');
   const f=info.found&&info.found.length?'Back at the fire with '+info.found.join(', ')+'.':'Back at the fire with empty hands, and a good story about a thorn.';
   const lines=parts.map(t=>({text:t.replace(/\{f\}/g,f).replace(/\{n\}/g,n).replace(/\{o\}/g,o).replace(/\{p\}/g,p)}));
   if(id==='tend'&&info.n!==undefined)lines.push({text:info.n?`${info.n===1?'One':'Some'} of the sick feel better. The fever breaks, or the cough eases.`:'Nothing is cured yet, but rest and care will do more tomorrow.'});
@@ -78971,6 +78980,7 @@ function psf2HubBuild(info){
   {const sh=f2Soft(pspPic('f2_fo_shaft'),{filter:'saturate(0) brightness(1.25)',l:.3,r:.3,t:.05,b:.25,a:.32,tag:'hub'});const d=f2Span(C,sh,28.5,21.55,0,1,2.6,0);d.lift=.2;C.f2x[d.kname].lift=.2}   // a pale shaft of light falls on the bier from the vault
   C.light(28,22,[1.2,1.15,1.4]);C.light(28,21,[1.0,.85,1.2]);
   {C.used.delete('28,24');const d=C.dec(pspPic('f2_sleeper_up'),28,24,{block:false,npc:'psf2_sleeper'});if(d)d.hidden=true}
+  {C.used.delete('51,5');const d=C.dec('psf2_swirl',51,5,{block:false,npc:'psf2_portal',sc:.8});if(d){d.hidden=true;d.found=true}}   // the swirling door (ps_f2_dream.js): hidden until the Sovereign's Dream is dead
   // the arms: columns in rows (aisles), alcoves with statues, candles
   for(const x of [8,11,14,17,20]){prop('col_fluted',x,20);prop('col_fluted',x,24)}
   for(const x of [36,39,42,45,48]){prop('col_twist',x,20);prop('col_twist',x,24)}
@@ -79802,6 +79812,119 @@ function f2NightTouch(i){const R=f2S(9827);if(R.solved)return;if(R.showing){msg(
 f2OnArrive(9827,()=>{const R=f2S(9827);R.showing=0;R.pos=0;if(!R.solved)R.seq=null;for(let i=0;i<4;i++)f2NightLamp(i,false)});
 /* any illusion room not built by its file yet is a plain stretch of its world with the way back (so the hub doors always lead somewhere) */
 for(const id of F2.ROOMS)if(!pspLevel(id).built)pspRegister(id,()=>{const C=f2Room({id,ground:'lush',route:[[24,35],[24,8]],clear:[[18,4,30,12,null,null,1]]});C.ret();return C.done()});
+
+/* ---- src/desert/ps_f2_dream.js ---- */
+/* ==========================================================================
+   THE PALE SPIRE, SECOND FLOOR: THE SLEEPER WAKES, AND THE SOVEREIGN'S DREAM (prefix psf2 / psdream).
+   When the seventh piece is laid on the table the Sleeper wakes (cutscene psWake). The part of her that kept dreaming for the Sovereign tears loose and rises as a boss, the Sovereign's Dream
+   (cutscene psDream, then the fight). Killing it drops the Dreamweave Mantle, brings the Sleeper back, and opens a swirling door where the iron door stood: the way to the third floor (9880, still a stub room).
+   State: psf2F().dream  undefined/0 = not woken, 1 = the Dream is loose, 2 = the Dream is dead and the door is open;  psf2F().dreamGot = the mantle was given.
+   ========================================================================== */
+/* ---------- the two cutscenes ---------- */
+CUTS.psWake=()=>[
+  {text:'The last piece settles into its hollow. For a moment nothing moves. Then the pale cloth on the black stone rises and falls, once, like a sleeper drawing breath.'},
+  {text:'The Sleeper opens her eyes. She sits up slowly, as if every limb had to be introduced to the others, and steps down from the table with one hand on the cold stone.'},
+  {who:'The Sleeper',text:'Seven rooms. I heard you in every one of them. The forest, the snow, the water, the sand, the swamp. I heard you in the nightmare, and I was so frightened that you would stop.'},
+  {who:hn(0),text:'You are the Sleeper?'},
+  {who:'The Sleeper',text:'I was. I dreamed this whole floor for the Sovereign, until the night I would not dream any more. She took me apart and hid me in my own dreams, so that I could never wake and say what I knew. You put me back together. I have no gold to give you. I only have my thanks.'},
+  {who:hn(1),text:'Then you can open the way up?'},
+  {who:'The Sleeper',text:'The stair is shut by a dream, and every dream has a dreamer. For a very long time the dreamer was me.'},
+  {text:'The Sleeper stops. The shadow she throws on the floor has not moved with her. It lies where she was lying, long and black, and the cloth on the table is still moving.'},
+  {who:'The Sleeper',text:'Oh. Oh, no. She left a piece of me behind. The part that always did what it was told. Stand back, all of you. Stand back now.'}];
+CUTS.psDream=()=>[
+  {text:'The shadow on the floor comes away from the stone like a sheet from a line. It rises, and it takes the Sleeper\'s shape, and her face. The eyes are lit from the inside. The hair moves in a wind that is not there.'},
+  {who:'The Sovereign\'s Dream',text:'You are in my dream. You have been in it since the stair.'},
+  {who:'The Sleeper',text:'She is the part of me that never woke. She holds the way up, and she has held it for me for a hundred years.'},
+  {who:'The Sovereign\'s Dream',text:'I built you seven rooms, and you walked through them like guests. Do you know what a guest owes the house?'},
+  {who:hn(2),text:'Whatever it is, we are not paying it.'},
+  {who:'The Sovereign\'s Dream',text:'Then you will wake nowhere. I was given one task: keep the dreamer asleep, and keep the door shut. I will do both. I am very good at it.'},
+  {who:hn(0),text:'She will not let us up.'},
+  {who:'The Sleeper',text:'She cannot. She is only a dream, and a dream has to wake if it is hurt enough. Go on. I will not look away.'},
+  {text:'The Sleeper steps back into the shadow of a pillar. Seven pale lights, one for each of the rooms, flare in a ring round the bier. The Dream lifts both hands.'}];
+
+/* ---------- the creature ---------- */
+{
+  const src=()=>pspPic('f2_sleeper_up');
+  // the Sleeper's own picture, darkened and turned violet: her shadow
+  psf2DreamArt=function(){const s=src();return f2Tint('ps_psdream',s,'brightness(.34) contrast(1.5) saturate(1.8) hue-rotate(250deg)','rgba(70,20,110,.45)')};
+  ENEMY_DEF.psdream=pscE('psdream',{img:'ps_psdream',ph:2.5,w:1.15,name:"The Sovereign's Dream",hp:650,dmg:[12,18],hit:.9,verb:'drowns',xp:1250,boss:true,aboveParty:0,gold:[0,0]});
+  if(typeof NO_VARY!=='undefined')NO_VARY.push('psdream');
+  if(typeof BOSS_GOLD!=='undefined')BOSS_GOLD.psdream=[5000,6500];
+  if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^psdream/,'cursed',.2]);
+}
+var psf2DreamArt;
+function psf2DreamFix(){const k=psf2DreamArt(),im=k&&IMG[k];if(im&&im.width){ENEMY_DEF.psdream.w=+(ENEMY_DEF.psdream.ph*im.width/im.height).toFixed(2);if(NPC_H.ps_f2_sleeper_up!==undefined)NPC_H[k]=NPC_H.ps_f2_sleeper_up}return !!k}
+const psf2DreamLive=()=>(G.enemies||[]).some(e=>e.t==='psdream'&&e.hp>0);
+function psf2DreamSpawn(){psf2DreamFix();return bl3Add('psdream',28,26,104)}
+
+/* the Dream is loose: spawn her, hide the Sleeper, then show the second scene */
+function psf2Rise(cut){
+  if(LEVEL!==PSF2H.ID)return;const F=psf2F();F.dream=1;
+  if(!psf2DreamLive())psf2DreamSpawn();
+  psf2Apply();
+  if(cut){F.dreamCut=1;startCut('psDream')}}
+/* waking the Sleeper plays the first scene, and the Dream rises when it ends */
+{const _w=psf2Wake;psf2Wake=function(){const F=psf2F(),was=F.woke,r=_w.apply(this,arguments);
+  if(r&&!was){F.dream=1;G.talk=null;startCut('psWake',()=>psf2Rise(true))}
+  return r}}
+/* she keeps her phases: every quarter of her health lost lets something out of the rooms she dreamed */
+bl3Hit('psdream',e=>{
+  const r=e.hp/e.maxhp,ph=r<.25?3:r<.5?2:r<.75?1:0;if(ph<=(e._ph|0))return;e._ph=ph;
+  const T=[null,['f2shadow','f2shadow'],['f2hands','f2horror'],['f2hound','f2hound','f2doll']][ph],M=[null,'The Dream shrieks, and two shadows peel off the walls.','The floor opens in clawing hands, and a many-faced thing climbs out of the cracks.','The Dream falls to her knees and screams, and the hounds of the nightmare come bounding out of the dark.'][ph];
+  let n=0;for(const t of T){if(G.enemies.filter(m=>m._kid&&m.hp>0).length>=4)break;const m=bl3Add(t,e.x,e.y,104);if(m){m._kid=1;n++}}
+  msg(M,'#c8a8ff')});
+/* her death */
+bl3Kill('psdream',e=>{
+  const F=psf2F();F.dream=2;
+  try{f2Chime('open')}catch(x){}
+  msg("The Dream comes apart in seven voices, one for each room, and the last one is the Sleeper's own. Where she fell, the dark on the floor is only a floor.",'#d8c8ff');
+  if(!F.dreamGot){F.dreamGot=1;bl3Give('pg_dreamweave');msg("A folded robe of silver thread lies where she stood: the Dreamweave Mantle.",'#ffe36a')}
+  later(900,()=>{psf2Apply();msg('The iron door at the end of the gallery shudders and swings away. Where it stood, a doorway of swirling light turns slowly in the air.','#e0c8ff')})});
+
+/* ---------- the loot: a piece of the Pale Spire's own gear ---------- */
+pgrItem('pg_dreamweave',{n:'Dreamweave Mantle',k:'chest',t:'Chest',ic:'chest',c:PGR_C.vio,armor:88,pas:{ward:32,dodge:.1,regen:1,mpRegen:1,spellPct:.1,dmgPct:.05},sw:.3,
+  d:"A robe of silver thread so fine it weighs nothing, woven by the Sleeper in her dreams and left behind when the Sovereign's Dream was undone. Armour 88, every blow on the wearer is 32 lighter, enemies miss 10% more, spells strike 10% harder, all damage +5%, and wounds and tiredness fade steadily."});
+
+/* ---------- the Sleeper afterwards, and the swirling door ---------- */
+khNpc('psf2_sleeper','The Sleeper','ps_f2_sleeper_up',()=>{const F=psf2F();
+  if(F.dream===2)return say("The Dream is gone, and I am only one person again. It is a very strange thing to be. The way up is open: the Hall of Mirrors, on the third floor. Be careful there. Nothing in it is what it looks like, and the Sovereign knows every trick I ever dreamed. Thank you. Go well.",[BYE]);
+  return say("Hurt her! She is only a dream, and she will wake if you hurt her enough!",[BYE])});
+khNpc('psf2_portal','The swirling door','psf2_swirl',()=>{const l=PSP.LINKS.find(k=>k.from===PSF2H.ID&&k.to===9880);
+  return say("A doorway of swirling violet light stands where the iron door was. It turns slowly, and it hums very quietly, like a bell that has just been struck. The stair to the third floor is behind it. Cold air breathes out of it, and it smells of polished glass.",[
+    ['Step through.',()=>{G.talk=null;const q=l?pspLandOf(l):[12,13,0];sfx('door');goToLevel(9880,{x:q[0],y:q[1],f:q[2]});return null}],BYE])});
+PSP_L(9820,null,9880,[56,80,0],{name:'the swirling door to the Third Floor',prov:1});
+PSP_L(9880,null,9820,[50,5,3],{name:'back through the swirling door',prov:1});
+
+/* the door's picture: a stone arch round a slow vortex, drawn from the painted rune circles and bursts of the spell art (fx_paint.js), redrawn while it is on screen */
+function psf2SwirlDraw(t){
+  const c=IMG.psf2_swirl;if(!c)return;const g=c.getContext('2d'),W=c.width,H=c.height,cx=W/2,cy=H*.56;
+  g.clearRect(0,0,W,H);
+  const arch=()=>{g.beginPath();g.moveTo(22,H-4);g.lineTo(22,H*.4);g.arc(cx,H*.4,cx-22,Math.PI,0);g.lineTo(W-22,H-4);g.closePath()};
+  g.save();arch();g.clip();
+  const gr=g.createRadialGradient(cx,cy,4,cx,cy,H*.55);gr.addColorStop(0,'#b894ff');gr.addColorStop(.2,'#7a50d8');gr.addColorStop(.55,'#331870');gr.addColorStop(1,'#0e0620');g.fillStyle=gr;g.fillRect(0,0,W,H);
+  g.globalCompositeOperation='lighter';
+  for(let i=0;i<3;i++){const im=IMG[i===1?'fx_burst':'fx_runecircle'];if(!im||!im.width)continue;
+    g.save();g.translate(cx,cy);g.rotate(t*(i%2?-1:1)*(.5+.25*i));const s=W*(1.25-.22*i);g.globalAlpha=.3+.08*Math.sin(t*2+i);g.drawImage(im,-s/2,-s/2,s,s);g.restore()}
+  for(let a=0;a<5;a++){g.beginPath();for(let k=0;k<=40;k++){const u=k/40,r=4+u*H*.5,an=a*Math.PI*2/5+u*3.4+t*1.1;const x=cx+Math.cos(an)*r*.8,y=cy+Math.sin(an)*r;k?g.lineTo(x,y):g.moveTo(x,y)}
+    g.strokeStyle='rgba(200,170,255,.4)';g.lineWidth=2.2;g.stroke()}
+  g.restore();
+  arch();g.strokeStyle='#bdb4d8';g.lineWidth=7;g.stroke();g.strokeStyle='#6c6388';g.lineWidth=2;g.stroke()}
+{const c=document.createElement('canvas');c.width=192;c.height=288;IMG.psf2_swirl=c;NPC_H.psf2_swirl=2.5;psf2SwirlDraw(0)}
+{const _u=update;update=function(dt){const r=_u.apply(this,arguments);
+  try{if(typeof LEVEL!=='undefined'&&LEVEL===PSF2H.ID){const F=psf2F();
+    if(F.dream===2)psf2SwirlDraw(G.time);
+    // the Dream is loose but not on the floor (a level left mid-fight, or a Sleeper woken before this existed): she rises again once the party is free to see it
+    if(F.woke&&F.dream===1&&!psf2DreamLive()&&G.state==='play'&&!G.cut&&!G.talk&&G.enemies){PSF2H.riseAt=PSF2H.riseAt||G.time+.8;if(G.time>=PSF2H.riseAt){PSF2H.riseAt=0;psf2Rise(!F.dreamCut)}}}}catch(e){console.error('psf2 dream',e)}
+  return r}}
+
+/* ---------- the level follows the flags ---------- */
+{const _a=psf2Apply;psf2Apply=function(){_a.apply(this,arguments);
+  if(LEVEL!==PSF2H.ID||!G.decor)return;const F=psf2F();
+  for(const d of G.decor){
+    if(d.npc==='psf2_sleeper'&&F.dream===1){d.hidden=true;d.found=true;d.block=false}
+    if(d.npc==='psf2_portal'){const on=F.dream===2;d.hidden=!on;d.found=!on;d.block=on}}}}
+/* a Sleeper woken before this update (or a level left mid-fight): the Dream is loose again when the party comes back */
+pspOnArrive(n=>{if(n!==PSF2H.ID)return;const F=psf2F();PSF2H.riseAt=0;if(F.woke&&F.dream!==2&&F.dream===undefined)F.dream=1;psf2Apply()});
 
 /* ---- src/desert/nt_look.js ---- */
 /* ==========================================================================

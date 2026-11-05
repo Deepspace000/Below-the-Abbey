@@ -136,6 +136,7 @@ function psf2HubBuild(info){
   {const sh=f2Soft(pspPic('f2_fo_shaft'),{filter:'saturate(0) brightness(1.25)',l:.3,r:.3,t:.05,b:.25,a:.32,tag:'hub'});const d=f2Span(C,sh,28.5,21.55,0,1,2.6,0);d.lift=.2;C.f2x[d.kname].lift=.2}   // a pale shaft of light falls on the bier from the vault
   C.light(28,22,[1.2,1.15,1.4]);C.light(28,21,[1.0,.85,1.2]);
   {C.used.delete('28,24');const d=C.dec(pspPic('f2_sleeper_up'),28,24,{block:false,npc:'psf2_sleeper'});if(d)d.hidden=true}
+  {C.used.delete('51,5');const d=C.dec('psf2_swirl',51,5,{block:false,npc:'psf2_portal',sc:.8});if(d){d.hidden=true;d.found=true}}   // the swirling door (ps_f2_dream.js): hidden until the Sovereign's Dream is dead
   // the arms: columns in rows (aisles), alcoves with statues, candles
   for(const x of [8,11,14,17,20]){prop('col_fluted',x,20);prop('col_fluted',x,24)}
   for(const x of [36,39,42,45,48]){prop('col_twist',x,20);prop('col_twist',x,24)}
