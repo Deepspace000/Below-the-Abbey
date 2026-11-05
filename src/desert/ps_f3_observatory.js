@@ -170,11 +170,11 @@ khNpc('psf3o_glass','The great mirror','ps_furn_mirror_gothic',()=>{const F=psf3
   return say("A mirror taller than a door fills the north wall of the Court. It shows the party, but a moment late, as if the reflections had to be told what to do.",[
     ['Touch the glass.',()=>{G.talk=null;const F=psf3oF();F.reflect=1;startCut('psReflect',()=>psf3oRise());return null}],BYE])});
 khNpc('psf3o_up','The spiral stair','ps_stair_spiral_iron',()=>{const l=PSP.LINKS.find(k=>k.from===PSF3O.ID&&k.to===9890);
-  return say("A spiral stair of black iron winds up into the dark. It goes to the Moon Tower, on the fourth floor. Cold air comes down it, and it smells of dust and old stars.",[
-    ['Climb the stair.',()=>{G.talk=null;const q=l?pspLandOf(l):[20,20,0];sfx('door');goToLevel(9890,{x:q[0],y:q[1],f:q[2]});return null}],BYE])});
+  return say("A spiral stair of black iron winds up into the dark. It goes up to the Floor of the Moon, on the fourth floor. Cold air comes down it, and it smells of dust and old stars.",[
+    ['Climb the stair.',()=>{G.talk=null;const q=l?pspLandOf(l):[23,26,0];sfx('door');goToLevel(9890,{x:q[0],y:q[1],f:q[2]});return null}],BYE])});
 /* ---------- the Astronomer and his quest ---------- */
 khNpc('psf3o_astro','The Astronomer','ps_ghost_scholar',()=>{const F=psf3oF();
-  if(F.reflect===2)return say("The Court is quiet. For the first time in a hundred years nothing looks back at me from the glass. Go up, if you want to. The Moon Tower is the next thing the Sovereign watched.",[BYE]);
+  if(F.reflect===2)return say("The Court is quiet. For the first time in a hundred years nothing looks back at me from the glass. Go up, if you want to. The Floor of the Moon is the next thing the Sovereign watched.",[BYE]);
   if(F.scope)return say("You have seen the Court through my telescope, then. Go in and break the Reflection. I would come with you, but I do not like mirrors.",[BYE]);
   if(F.chart)return say("The gate is open. The telescope is in the room to the north. Look through it.",[BYE]);
   return say("I am the Astronomer, or I was. I watched the stars from this room for the Sovereign, and then I watched the Sovereign, and then I could not stop. The Chart of the Rising in the Gallery shows the order the five constellations come up. Set the five star chart stands in the Chart Room in that order, and the gate to my telescope will open.",[BYE])});
@@ -192,7 +192,7 @@ blGiveOpt('psf3o_astro','psq41',()=>true,{
   remind:()=>{const F=psf3oF();return F.reflect===2?"It is done. Come back to me.":F.scope?"Go through the mirror door in the east wall of the Gallery, and break the Reflection.":F.chart?"The gate is open. Look through the telescope, in the room to the north.":"Set the five stands in the Chart Room in the order on the Chart of the Rising, in the Gallery."},
   ready:"The glass is broken. I felt it from here, like a tooth coming out.",
   thanks:"Take this, and the stores of the Gallery with it. I have nothing else to give.",
-  after:"The Court is quiet, and the stair at the back of it goes up to the Moon Tower, on the fourth floor. It is not open yet."});
+  after:"The Court is quiet, and the stair at the back of it goes up to the Floor of the Moon, on the fourth floor."});
 /* ---------- arriving, and the boss that is loose but not on the floor ---------- */
 pspOnArrive(n=>{if(n!==PSF3O.ID)return;try{psf3oApply();const F=psf3oF();if(!F.seen){F.seen=1;msg('The stair ends in a long gallery under a dome. Brass rings and star charts hang from the ceiling, and the stars in the glass overhead are not the ones outside.','#d8d4f0')}
   if(F.reflect===1&&!psf3oLive())PSF3O.riseAt=0}catch(e){console.error('psf3o arrive',e)}});
@@ -203,4 +203,3 @@ pspOnArrive(n=>{if(n!==PSF3O.ID)return;try{psf3oApply();const F=psf3oF();if(!F.s
 /* ---------- the links ---------- */
 PSP_L(9880,null,9881,[28,40,0],{name:'the stair up to the Observatory Gallery'});
 PSP_L(9881,[28,42],9880,[28,10,2],{name:'the stair back down to the Hall of Mirrors'});
-PSP_L(9881,null,9890,[20,20,0],{name:'the spiral stair to the Moon Tower',prov:1});

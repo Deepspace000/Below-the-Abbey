@@ -4,7 +4,7 @@
    This file holds the maze maker (psf4Maze) and the planets. Prefix psf4 / PSF4.
    State: G.flags.psp.f4 = {done:{9891:1,...}} (a planet is done when the party steps onto its way out).
    ========================================================================== */
-const PSF4={HUB:9890,IDS:[9891,9892,9893,9894]};
+const PSF4={HUB:9890,IDS:[9891,9892,9893,9894],BACK:{9891:[14,16,3],9892:[26,16,1],9893:[14,26,3],9894:[26,26,1]}};   // where the hub receives the party coming off each planet (see the hub)
 function psf4F(){const P=(G.flags.psp=G.flags.psp||{});return P.f4||(P.f4={done:{}})}
 /* a small seeded random generator, so a planet is the same maze every time */
 function psf4Rng(seed){let a=(seed>>>0)||1;return ()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
@@ -47,20 +47,19 @@ function psf4Planet(info,spec){
   for(let y=0;y<MH0;y++)for(let x=0;x<MW0;x++)if(open[y][x])C.carve(x+O,y+O,x+O,y+O);
   const [mex,mey]=M.exit,ex=mex+O,ey=mey+O;
   // the landmark rooms: each is named on the map, drawn in its own ground, and furnished
-  const KINDS=[['keep','The Keep'],['chapel','The Chapel'],['grass','The Herb Garden'],['grave','The Graveyard'],['grass','The Well Court'],['keep','The Guardroom']];
-  const zones=M.rooms.map((r,i)=>({type:KINDS[i%6][0],name:KINDS[i%6][1],n:i,x0:r.x0+O,y0:r.y0+O,x1:r.x1+O,y1:r.y1+O}));
+  const KINDS=spec.kinds;   // [name, ground colour, ground pattern, props...]
+  const zones=M.rooms.map((r,i)=>{const k=KINDS[i%KINDS.length];return {name:k[0],col:k[1],pat:k[2],props:k.slice(3),n:i,x0:r.x0+O,y0:r.y0+O,x1:r.x1+O,y1:r.y1+O}});
   const pp=(name,x,y)=>{if(C.free(x,y))C.prop(name,x,y,{block:true,sc:.9})};
   // props stand only on the inside of a room (never on its border ring, where the passages come in), so they can never shut a way
-  const PROPS={The_Keep:['brazier','brazier','st_headless'],The_Chapel:['altar','font','pews','pews'],The_Herb_Garden:['well_pale','urn_big','urn_big'],The_Graveyard:['st_saint2','st_headless','skull_pillar','st_headless'],The_Well_Court:['well_pale','barrels','cart_old'],The_Guardroom:['hearth_cold','barrels','cage']};
   for(const z of zones){
     const cx=(z.x0+z.x1)>>1,cy=(z.y0+z.y1)>>1;C.mapNames.push({t:z.name,x:cx,y:cy,k:'place'});
     const ins=[];for(let y=z.y0+1;y<=z.y1-1;y++)for(let x=z.x0+1;x<=z.x1-1;x++)ins.push([x,y]);
     ins.sort((a,b)=>Math.hypot(a[0]-cx,a[1]-cy)-Math.hypot(b[0]-cx,b[1]-cy));
-    (PROPS[z.name.replace(/ /g,'_')]||[]).forEach((n,i)=>{if(ins[i])pp(n,ins[i][0],ins[i][1])})}
+    z.props.forEach((n,i)=>{if(ins[i])pp(n,ins[i][0],ins[i][1])})}
   // the way out is a door in the wall beside the far dead end
   let at=null;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const wx=mex+dx,wy=mey+dy;if(wx>0&&wy>0&&wx<MW0-1&&wy<MH0-1&&!open[wy][wx]){at=[wx+O,wy+O];break}}
   at=at||[ex+1,ey];
-  PSP_L(id,at,PSF4.HUB,[20,20,0],{name:'the way off the planet',prov:1});
+  PSP_L(id,at,PSF4.HUB,PSF4.BACK[id],{name:'the way off the planet'});
   C.links({});
   C.light(1+O,1+O,[1.2,1.2,1.6]);C.light(ex,ey,[.9,1.4,1.8]);
   const spots=[];for(let y=1;y<MH0-1;y++)for(let x=1;x<MW0-1;x++)if(open[y][x]&&M.dist[y*MW0+x]>=10&&!(x===mex&&y===mey))spots.push([x+O,y+O]);
@@ -77,7 +76,20 @@ function psf4Planet(info,spec){
 /* ---------- planet 1: the stone planet ---------- */
 PSP.LEVELS.push(PSP_LV(9891,'The Stone Planet',39,39,108,0,'in'));
 TD.levels.add(9891);
-pspRegister(9891,info=>psf4Planet(info,{id:9891,W:37,H:37,seed:9891,rooms:6,braid:.22,nFoes:14,nChests:3,nItems:5,foes:['psclockwork','psmirrorshade','psstarwraith','psstarmoth']}));
+const PSF4_STONE=[['The Keep','#d2cbb4','flag','brazier','brazier','st_headless'],['The Chapel','#d2cbb4','flag','altar','font','pews','pews'],['The Herb Garden','#b9c58a','tuft','well_pale','urn_big','urn_big'],['The Graveyard','#c4b694','plain','st_saint2','st_headless','skull_pillar','st_headless'],['The Well Court','#b9c58a','tuft','well_pale','barrels','cart_old'],['The Guardroom','#d2cbb4','flag','hearth_cold','barrels','cage']];
+pspRegister(9891,info=>psf4Planet(info,{id:9891,W:37,H:37,seed:9891,rooms:6,braid:.22,nFoes:14,nChests:3,nItems:5,kinds:PSF4_STONE,foes:['psclockwork','psmirrorshade','psstarwraith','psstarmoth']}));
+/* ---------- planets 2 to 4: each a different map of a different land ---------- */
+PSP.LEVELS.push(PSP_LV(9892,'The Ice Planet',43,43,109,0,'in'),PSP_LV(9893,'The Growing Planet',43,43,109,0,'in'),PSP_LV(9894,'The Fire Planet',45,45,110,0,'in'));
+for(const id of [9892,9893,9894])TD.levels.add(id);
+TD.look[9892]=Object.assign({},TD.look.def,{floor:['#e4ecf0','#dde7ee','#e9f0f3'],wall:['#6b7f90','#62768a','#738799'],wallTop:'#b6cddd',mortar:'rgba(20,40,60,.5)',ink:'#12202e',lip:'#6a8298',vign:'#080c12',gold:'#9fc4dc',exit:'#2a8fd0',speck:'rgba(80,130,170,.2)',tuft:'rgba(90,140,180,.6)',crack:'rgba(60,110,150,.55)'});
+TD.look[9893]=Object.assign({},TD.look.def,{floor:['#c9d49a','#c2cf92','#d0daa2'],wall:['#4a5a34','#425230','#52623a'],wallTop:'#8aa05c',mortar:'rgba(20,40,10,.5)',ink:'#16200c',lip:'#5c7038',vign:'#080d05',gold:'#c8b050',exit:'#b8321e',speck:'rgba(60,90,30,.22)'});
+TD.look[9894]=Object.assign({},TD.look.def,{floor:['#d8b890','#d2b088','#dcbf98'],wall:['#3a2622','#33211e','#412a25'],wallTop:'#8a4a30',mortar:'rgba(0,0,0,.5)',ink:'#120806',lip:'#4a2418',vign:'#0d0504',gold:'#e07a30',exit:'#e8a020',speck:'rgba(160,60,20,.2)',tuft:'rgba(200,80,20,.55)',crack:'rgba(150,40,10,.6)'});
+const PSF4_ICE=[['The Frozen Hall','#cfe0ea','flag','brazier','st_saint2','col_twist'],['The Rimed Chapel','#cfe0ea','flag','altar','font','pews'],['The Snowfield','#f2f6f8','tuft','urn_big','well_pale'],['The Drowned Rink','#b8d4e4','crack','st_headless','skull_pillar'],['The Winter Court','#f2f6f8','tuft','well_pale','barrels','cart_old'],['The Ice Guardroom','#cfe0ea','flag','hearth_cold','barrels','cage']];
+const PSF4_GROW=[['The Overgrown Keep','#b7c88a','tuft','brazier','st_headless','col_twist'],['The Mossy Chapel','#a9c07c','flag','altar','font','pews'],['The Orchard','#c4d68e','tuft','urn_big','well_pale','urn_big'],['The Mushroom Ring','#a8b878','tuft','skull_pillar','st_saint2'],['The Root Court','#b9cc88','tuft','well_pale','barrels','cart_old'],['The Hive Hall','#a9c07c','flag','hearth_cold','barrels','cage']];
+const PSF4_FIRE=[['The Burnt Keep','#c9a47c','crack','brazier','brazier','st_headless'],['The Ember Chapel','#c9a47c','crack','altar','font','pews'],['The Ash Garden','#b89270','tuft','urn_big','well_pale','urn_big'],['The Charnel Field','#a88468','crack','st_saint2','skull_pillar','st_headless','st_headless'],['The Forge Court','#c9a47c','crack','well_pale','barrels','cart_old'],['The Slag Hall','#b89270','flag','hearth_cold','barrels','cage']];
+pspRegister(9892,info=>psf4Planet(info,{id:9892,W:41,H:41,seed:9892,rooms:7,braid:.2,nFoes:16,nChests:3,nItems:5,kinds:PSF4_ICE,foes:['psdrowned','pswraith','psbonecrawl','pshhound','psmarblehound']}));
+pspRegister(9893,info=>psf4Planet(info,{id:9893,W:41,H:41,seed:9893,rooms:7,braid:.3,nFoes:16,nChests:3,nItems:5,kinds:PSF4_GROW,foes:['psthornsprite','pshydra','psleech','pschimera','psmoth']}));
+pspRegister(9894,info=>psf4Planet(info,{id:9894,W:43,H:43,seed:9894,rooms:8,braid:.15,nFoes:18,nChests:4,nItems:6,kinds:PSF4_FIRE,foes:['psfiend','psgargoyle','psflayed','pswraith','pssentinel']}));
 /* stepping onto the way out finishes the planet */
 {const _m=doMove;doMove=function(rel){
   try{if(tdOn()){const lv=LEVELS[LEVEL],t=lv&&lv._td;if(t){const d=DIRS[(G.P.f+rel)%4],nx=G.P.x+d[0],ny=G.P.y+d[1];

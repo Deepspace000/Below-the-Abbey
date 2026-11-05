@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.846';
+const VERSION='3.847';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -72608,7 +72608,7 @@ PSP.LEVELS=[
  PSP_LV(9860,'The Wintergarden',80,64,105,0,'atrium'),
  PSP_LV(9870,'The Moonlit Terrace Maze',72,64,105,0,'maze'),
  PSP_LV(9880,'The Third Floor: the Hall of Mirrors and the Observatory Gallery',112,84,106,0,'in'),
- PSP_LV(9890,'The Moon Tower',40,40,107,0,'in',{floors:5}),
+ PSP_LV(9890,'The Floor of the Moon',46,46,110,0,'in'),
  PSP_LV(9900,'The Bell Tower',40,40,108,0,'in',{floors:5}),
  PSP_LV(9910,'The Raven Tower and the Great Mews',48,48,108,0,'in',{floors:4}),
  PSP_LV(9920,"The Alchemist's Tower",40,40,109,0,'in',{floors:5}),
@@ -80235,11 +80235,11 @@ khNpc('psf3o_glass','The great mirror','ps_furn_mirror_gothic',()=>{const F=psf3
   return say("A mirror taller than a door fills the north wall of the Court. It shows the party, but a moment late, as if the reflections had to be told what to do.",[
     ['Touch the glass.',()=>{G.talk=null;const F=psf3oF();F.reflect=1;startCut('psReflect',()=>psf3oRise());return null}],BYE])});
 khNpc('psf3o_up','The spiral stair','ps_stair_spiral_iron',()=>{const l=PSP.LINKS.find(k=>k.from===PSF3O.ID&&k.to===9890);
-  return say("A spiral stair of black iron winds up into the dark. It goes to the Moon Tower, on the fourth floor. Cold air comes down it, and it smells of dust and old stars.",[
-    ['Climb the stair.',()=>{G.talk=null;const q=l?pspLandOf(l):[20,20,0];sfx('door');goToLevel(9890,{x:q[0],y:q[1],f:q[2]});return null}],BYE])});
+  return say("A spiral stair of black iron winds up into the dark. It goes up to the Floor of the Moon, on the fourth floor. Cold air comes down it, and it smells of dust and old stars.",[
+    ['Climb the stair.',()=>{G.talk=null;const q=l?pspLandOf(l):[23,26,0];sfx('door');goToLevel(9890,{x:q[0],y:q[1],f:q[2]});return null}],BYE])});
 /* ---------- the Astronomer and his quest ---------- */
 khNpc('psf3o_astro','The Astronomer','ps_ghost_scholar',()=>{const F=psf3oF();
-  if(F.reflect===2)return say("The Court is quiet. For the first time in a hundred years nothing looks back at me from the glass. Go up, if you want to. The Moon Tower is the next thing the Sovereign watched.",[BYE]);
+  if(F.reflect===2)return say("The Court is quiet. For the first time in a hundred years nothing looks back at me from the glass. Go up, if you want to. The Floor of the Moon is the next thing the Sovereign watched.",[BYE]);
   if(F.scope)return say("You have seen the Court through my telescope, then. Go in and break the Reflection. I would come with you, but I do not like mirrors.",[BYE]);
   if(F.chart)return say("The gate is open. The telescope is in the room to the north. Look through it.",[BYE]);
   return say("I am the Astronomer, or I was. I watched the stars from this room for the Sovereign, and then I watched the Sovereign, and then I could not stop. The Chart of the Rising in the Gallery shows the order the five constellations come up. Set the five star chart stands in the Chart Room in that order, and the gate to my telescope will open.",[BYE])});
@@ -80257,7 +80257,7 @@ blGiveOpt('psf3o_astro','psq41',()=>true,{
   remind:()=>{const F=psf3oF();return F.reflect===2?"It is done. Come back to me.":F.scope?"Go through the mirror door in the east wall of the Gallery, and break the Reflection.":F.chart?"The gate is open. Look through the telescope, in the room to the north.":"Set the five stands in the Chart Room in the order on the Chart of the Rising, in the Gallery."},
   ready:"The glass is broken. I felt it from here, like a tooth coming out.",
   thanks:"Take this, and the stores of the Gallery with it. I have nothing else to give.",
-  after:"The Court is quiet, and the stair at the back of it goes up to the Moon Tower, on the fourth floor. It is not open yet."});
+  after:"The Court is quiet, and the stair at the back of it goes up to the Floor of the Moon, on the fourth floor."});
 /* ---------- arriving, and the boss that is loose but not on the floor ---------- */
 pspOnArrive(n=>{if(n!==PSF3O.ID)return;try{psf3oApply();const F=psf3oF();if(!F.seen){F.seen=1;msg('The stair ends in a long gallery under a dome. Brass rings and star charts hang from the ceiling, and the stars in the glass overhead are not the ones outside.','#d8d4f0')}
   if(F.reflect===1&&!psf3oLive())PSF3O.riseAt=0}catch(e){console.error('psf3o arrive',e)}});
@@ -80268,7 +80268,6 @@ pspOnArrive(n=>{if(n!==PSF3O.ID)return;try{psf3oApply();const F=psf3oF();if(!F.s
 /* ---------- the links ---------- */
 PSP_L(9880,null,9881,[28,40,0],{name:'the stair up to the Observatory Gallery'});
 PSP_L(9881,[28,42],9880,[28,10,2],{name:'the stair back down to the Hall of Mirrors'});
-PSP_L(9881,null,9890,[20,20,0],{name:'the spiral stair to the Moon Tower',prov:1});
 
 /* ---- src/desert/topdown.js ---- */
 /* ==========================================================================
@@ -80346,11 +80345,12 @@ function tdCell(ox,oy,x,y,g,cs,L,vis){
     if(open(x-1,y)){ctx.fillStyle=L.wallTop;ctx.fillRect(sx,sy,1,n)}
     if(open(x+1,y)){ctx.fillStyle=L.ink;ctx.fillRect(sx+n-1,sy,1,n)}
     return}
-  const z=tdZone(x,y),t=z&&z.type;
-  ctx.fillStyle=t==='grass'?L.grass:t==='keep'||t==='chapel'?L.keep:t==='grave'?L.grave:L.floor[(h*3)|0];ctx.fillRect(sx,sy,n,n);
-  if(t==='keep'||t==='chapel'){ctx.strokeStyle='rgba(60,44,26,.38)';ctx.lineWidth=1;ctx.strokeRect(sx+.5,sy+.5,n-1,n-1)}   // flagstones
-  else if(t==='grass'){ctx.strokeStyle='rgba(60,86,34,.55)';ctx.lineWidth=1;for(let i=0;i<2;i++){const tx=sx+3+((h*(11+i*5))%1)*(n-7),ty=sy+4+((h*(17+i*3))%1)*(n-8);ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx-1,ty-3);ctx.moveTo(tx,ty);ctx.lineTo(tx+1,ty-3);ctx.stroke()}}
-  else{ctx.fillStyle='rgba(110,80,40,.16)';if(h>.7)ctx.fillRect(sx+((h*9)%1)*(n-3),sy+((h*21)%1)*(n-3),2,2);if(h<.12){ctx.fillRect(sx+((h*53)%1)*(n-4),sy+((h*31)%1)*(n-4),3,1)}}   // a dirt road, with a few specks
+  const z=tdZone(x,y),pat=z&&z.pat;
+  ctx.fillStyle=z&&z.col?z.col:L.floor[(h*3)|0];ctx.fillRect(sx,sy,n,n);
+  if(pat==='flag'){ctx.strokeStyle='rgba(60,44,26,.38)';ctx.lineWidth=1;ctx.strokeRect(sx+.5,sy+.5,n-1,n-1)}   // flagstones
+  else if(pat==='tuft'){ctx.strokeStyle=L.tuft||'rgba(60,86,34,.55)';ctx.lineWidth=1;for(let i=0;i<2;i++){const tx=sx+3+((h*(11+i*5))%1)*(n-7),ty=sy+4+((h*(17+i*3))%1)*(n-8);ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx-1,ty-3);ctx.moveTo(tx,ty);ctx.lineTo(tx+1,ty-3);ctx.stroke()}}   // tufts, frost marks, embers
+  else if(pat==='crack'){ctx.strokeStyle=L.crack||'rgba(60,30,20,.5)';ctx.lineWidth=1;if(h>.45){ctx.beginPath();ctx.moveTo(sx+2,sy+((h*9)%1)*n);ctx.lineTo(sx+n/2,sy+n/2+((h*5)%1)*4);ctx.lineTo(sx+n-2,sy+((h*7)%1)*n);ctx.stroke()}}
+  else{ctx.fillStyle=L.speck||'rgba(110,80,40,.16)';if(h>.7)ctx.fillRect(sx+((h*9)%1)*(n-3),sy+((h*21)%1)*(n-3),2,2);if(h<.12){ctx.fillRect(sx+((h*53)%1)*(n-4),sy+((h*31)%1)*(n-4),3,1)}}   // a dirt road, with a few specks
 }
 function tdToken(im,sx,sy,w,h,o){ // a creature or prop picture stood on its square: feet on the square's lower edge, a shadow under it
   if(!im)return;o=o||{};
@@ -80435,7 +80435,7 @@ function tdFrame(L){
    This file holds the maze maker (psf4Maze) and the planets. Prefix psf4 / PSF4.
    State: G.flags.psp.f4 = {done:{9891:1,...}} (a planet is done when the party steps onto its way out).
    ========================================================================== */
-const PSF4={HUB:9890,IDS:[9891,9892,9893,9894]};
+const PSF4={HUB:9890,IDS:[9891,9892,9893,9894],BACK:{9891:[14,16,3],9892:[26,16,1],9893:[14,26,3],9894:[26,26,1]}};   // where the hub receives the party coming off each planet (see the hub)
 function psf4F(){const P=(G.flags.psp=G.flags.psp||{});return P.f4||(P.f4={done:{}})}
 /* a small seeded random generator, so a planet is the same maze every time */
 function psf4Rng(seed){let a=(seed>>>0)||1;return ()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
@@ -80478,20 +80478,19 @@ function psf4Planet(info,spec){
   for(let y=0;y<MH0;y++)for(let x=0;x<MW0;x++)if(open[y][x])C.carve(x+O,y+O,x+O,y+O);
   const [mex,mey]=M.exit,ex=mex+O,ey=mey+O;
   // the landmark rooms: each is named on the map, drawn in its own ground, and furnished
-  const KINDS=[['keep','The Keep'],['chapel','The Chapel'],['grass','The Herb Garden'],['grave','The Graveyard'],['grass','The Well Court'],['keep','The Guardroom']];
-  const zones=M.rooms.map((r,i)=>({type:KINDS[i%6][0],name:KINDS[i%6][1],n:i,x0:r.x0+O,y0:r.y0+O,x1:r.x1+O,y1:r.y1+O}));
+  const KINDS=spec.kinds;   // [name, ground colour, ground pattern, props...]
+  const zones=M.rooms.map((r,i)=>{const k=KINDS[i%KINDS.length];return {name:k[0],col:k[1],pat:k[2],props:k.slice(3),n:i,x0:r.x0+O,y0:r.y0+O,x1:r.x1+O,y1:r.y1+O}});
   const pp=(name,x,y)=>{if(C.free(x,y))C.prop(name,x,y,{block:true,sc:.9})};
   // props stand only on the inside of a room (never on its border ring, where the passages come in), so they can never shut a way
-  const PROPS={The_Keep:['brazier','brazier','st_headless'],The_Chapel:['altar','font','pews','pews'],The_Herb_Garden:['well_pale','urn_big','urn_big'],The_Graveyard:['st_saint2','st_headless','skull_pillar','st_headless'],The_Well_Court:['well_pale','barrels','cart_old'],The_Guardroom:['hearth_cold','barrels','cage']};
   for(const z of zones){
     const cx=(z.x0+z.x1)>>1,cy=(z.y0+z.y1)>>1;C.mapNames.push({t:z.name,x:cx,y:cy,k:'place'});
     const ins=[];for(let y=z.y0+1;y<=z.y1-1;y++)for(let x=z.x0+1;x<=z.x1-1;x++)ins.push([x,y]);
     ins.sort((a,b)=>Math.hypot(a[0]-cx,a[1]-cy)-Math.hypot(b[0]-cx,b[1]-cy));
-    (PROPS[z.name.replace(/ /g,'_')]||[]).forEach((n,i)=>{if(ins[i])pp(n,ins[i][0],ins[i][1])})}
+    z.props.forEach((n,i)=>{if(ins[i])pp(n,ins[i][0],ins[i][1])})}
   // the way out is a door in the wall beside the far dead end
   let at=null;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const wx=mex+dx,wy=mey+dy;if(wx>0&&wy>0&&wx<MW0-1&&wy<MH0-1&&!open[wy][wx]){at=[wx+O,wy+O];break}}
   at=at||[ex+1,ey];
-  PSP_L(id,at,PSF4.HUB,[20,20,0],{name:'the way off the planet',prov:1});
+  PSP_L(id,at,PSF4.HUB,PSF4.BACK[id],{name:'the way off the planet'});
   C.links({});
   C.light(1+O,1+O,[1.2,1.2,1.6]);C.light(ex,ey,[.9,1.4,1.8]);
   const spots=[];for(let y=1;y<MH0-1;y++)for(let x=1;x<MW0-1;x++)if(open[y][x]&&M.dist[y*MW0+x]>=10&&!(x===mex&&y===mey))spots.push([x+O,y+O]);
@@ -80508,7 +80507,20 @@ function psf4Planet(info,spec){
 /* ---------- planet 1: the stone planet ---------- */
 PSP.LEVELS.push(PSP_LV(9891,'The Stone Planet',39,39,108,0,'in'));
 TD.levels.add(9891);
-pspRegister(9891,info=>psf4Planet(info,{id:9891,W:37,H:37,seed:9891,rooms:6,braid:.22,nFoes:14,nChests:3,nItems:5,foes:['psclockwork','psmirrorshade','psstarwraith','psstarmoth']}));
+const PSF4_STONE=[['The Keep','#d2cbb4','flag','brazier','brazier','st_headless'],['The Chapel','#d2cbb4','flag','altar','font','pews','pews'],['The Herb Garden','#b9c58a','tuft','well_pale','urn_big','urn_big'],['The Graveyard','#c4b694','plain','st_saint2','st_headless','skull_pillar','st_headless'],['The Well Court','#b9c58a','tuft','well_pale','barrels','cart_old'],['The Guardroom','#d2cbb4','flag','hearth_cold','barrels','cage']];
+pspRegister(9891,info=>psf4Planet(info,{id:9891,W:37,H:37,seed:9891,rooms:6,braid:.22,nFoes:14,nChests:3,nItems:5,kinds:PSF4_STONE,foes:['psclockwork','psmirrorshade','psstarwraith','psstarmoth']}));
+/* ---------- planets 2 to 4: each a different map of a different land ---------- */
+PSP.LEVELS.push(PSP_LV(9892,'The Ice Planet',43,43,109,0,'in'),PSP_LV(9893,'The Growing Planet',43,43,109,0,'in'),PSP_LV(9894,'The Fire Planet',45,45,110,0,'in'));
+for(const id of [9892,9893,9894])TD.levels.add(id);
+TD.look[9892]=Object.assign({},TD.look.def,{floor:['#e4ecf0','#dde7ee','#e9f0f3'],wall:['#6b7f90','#62768a','#738799'],wallTop:'#b6cddd',mortar:'rgba(20,40,60,.5)',ink:'#12202e',lip:'#6a8298',vign:'#080c12',gold:'#9fc4dc',exit:'#2a8fd0',speck:'rgba(80,130,170,.2)',tuft:'rgba(90,140,180,.6)',crack:'rgba(60,110,150,.55)'});
+TD.look[9893]=Object.assign({},TD.look.def,{floor:['#c9d49a','#c2cf92','#d0daa2'],wall:['#4a5a34','#425230','#52623a'],wallTop:'#8aa05c',mortar:'rgba(20,40,10,.5)',ink:'#16200c',lip:'#5c7038',vign:'#080d05',gold:'#c8b050',exit:'#b8321e',speck:'rgba(60,90,30,.22)'});
+TD.look[9894]=Object.assign({},TD.look.def,{floor:['#d8b890','#d2b088','#dcbf98'],wall:['#3a2622','#33211e','#412a25'],wallTop:'#8a4a30',mortar:'rgba(0,0,0,.5)',ink:'#120806',lip:'#4a2418',vign:'#0d0504',gold:'#e07a30',exit:'#e8a020',speck:'rgba(160,60,20,.2)',tuft:'rgba(200,80,20,.55)',crack:'rgba(150,40,10,.6)'});
+const PSF4_ICE=[['The Frozen Hall','#cfe0ea','flag','brazier','st_saint2','col_twist'],['The Rimed Chapel','#cfe0ea','flag','altar','font','pews'],['The Snowfield','#f2f6f8','tuft','urn_big','well_pale'],['The Drowned Rink','#b8d4e4','crack','st_headless','skull_pillar'],['The Winter Court','#f2f6f8','tuft','well_pale','barrels','cart_old'],['The Ice Guardroom','#cfe0ea','flag','hearth_cold','barrels','cage']];
+const PSF4_GROW=[['The Overgrown Keep','#b7c88a','tuft','brazier','st_headless','col_twist'],['The Mossy Chapel','#a9c07c','flag','altar','font','pews'],['The Orchard','#c4d68e','tuft','urn_big','well_pale','urn_big'],['The Mushroom Ring','#a8b878','tuft','skull_pillar','st_saint2'],['The Root Court','#b9cc88','tuft','well_pale','barrels','cart_old'],['The Hive Hall','#a9c07c','flag','hearth_cold','barrels','cage']];
+const PSF4_FIRE=[['The Burnt Keep','#c9a47c','crack','brazier','brazier','st_headless'],['The Ember Chapel','#c9a47c','crack','altar','font','pews'],['The Ash Garden','#b89270','tuft','urn_big','well_pale','urn_big'],['The Charnel Field','#a88468','crack','st_saint2','skull_pillar','st_headless','st_headless'],['The Forge Court','#c9a47c','crack','well_pale','barrels','cart_old'],['The Slag Hall','#b89270','flag','hearth_cold','barrels','cage']];
+pspRegister(9892,info=>psf4Planet(info,{id:9892,W:41,H:41,seed:9892,rooms:7,braid:.2,nFoes:16,nChests:3,nItems:5,kinds:PSF4_ICE,foes:['psdrowned','pswraith','psbonecrawl','pshhound','psmarblehound']}));
+pspRegister(9893,info=>psf4Planet(info,{id:9893,W:41,H:41,seed:9893,rooms:7,braid:.3,nFoes:16,nChests:3,nItems:5,kinds:PSF4_GROW,foes:['psthornsprite','pshydra','psleech','pschimera','psmoth']}));
+pspRegister(9894,info=>psf4Planet(info,{id:9894,W:43,H:43,seed:9894,rooms:8,braid:.15,nFoes:18,nChests:4,nItems:6,kinds:PSF4_FIRE,foes:['psfiend','psgargoyle','psflayed','pswraith','pssentinel']}));
 /* stepping onto the way out finishes the planet */
 {const _m=doMove;doMove=function(rel){
   try{if(tdOn()){const lv=LEVELS[LEVEL],t=lv&&lv._td;if(t){const d=DIRS[(G.P.f+rel)%4],nx=G.P.x+d[0],ny=G.P.y+d[1];
@@ -80527,6 +80539,97 @@ CUTS.psPlanet=()=>[
   {who:hn(3),text:'That is why I prefer them.'},
   {text:'Somewhere past the first wall, something heavy turns over. The map shows it as a small dark shape.'}];
 pspOnArrive(n=>{if(n!==9891)return;try{const F=psf4F();if(F.intro)return;F.intro=1;later(700,()=>startCut('psPlanet'))}catch(e){console.error('psf4 intro',e)}});
+
+/* ---- src/desert/ps_f4_moon.js ---- */
+/* ==========================================================================
+   THE PALE SPIRE, FOURTH FLOOR: THE FLOOR OF THE MOON (hub, level 9890, 46 x 46, indoor, rating 110; prefix psf4m).
+   The stair from the Observatory lands in the Moon Hall (centre). Four rooms lead off it, each with a great painted planet floating in it; touching a planet
+   puts the party into that planet's maze, seen from above (ps_f4_planets.js, topdown.js). When all four are done the iron gate to the Moon Gate room opens.
+   There the floating Moon, the boss (level 110), hangs in front of the stair to the fifth floor. Killing it gives the Orrery Staff of the Pale Moon.
+   State: G.flags.psp.f4 = {done:{9891:1,..}, intro, moon (0 / 2 dead), got}.
+   ========================================================================== */
+const PSF4M={ID:9890,W:46,H:46,
+  PLANETS:[[9891,'stone',23,8,'The Stone Planet'],[9892,'ice',38,23,'The Ice Planet'],[9893,'grow',23,38,'The Growing Planet'],[9894,'fire',8,23,'The Fire Planet']],
+  SEAL:[30,8],GATE:[36,3],MOON:[36,4],DOWN:[23,28]};
+PSF4.BACK={9891:[23,10,0],9892:[36,23,1],9893:[23,36,2],9894:[10,23,3]};
+const psf4Done=()=>PSF4.IDS.filter(i=>psf4F().done[i]).length;
+function psf4mApply(){
+  if(LEVEL!==PSF4M.ID||!G.decor)return;const all=psf4Done()===4;
+  for(const d of G.decor)if(d.npc==='psf4_seal'){d.hidden=all;d.found=all;d.block=!all}}
+function psf4mBuild(info){
+  const W=PSF4M.W,H=PSF4M.H,id=PSF4M.ID;
+  try{gyAlias();if(typeof pshPics==='function')pshPics()}catch(e){}
+  const C=pspMake({id,W,H,start:{x:23,y:26,f:0},floor:'flag',wh:3.2,amb:.4,lcol:PSH_COL.cold,kind:'in'});
+  const {rows}=C;
+  C.room(18,18,28,28,{floor:'flag',name:'The Moon Hall',at:[23,21]});
+  C.room(18,4,28,12,{floor:'flag',name:'The Stone Room',at:[23,6]});
+  C.room(34,18,42,28,{floor:'flag',name:'The Ice Room',at:[38,21]});
+  C.room(18,34,28,42,{floor:'flag',name:'The Growing Room',at:[23,36]});
+  C.room(4,18,12,28,{floor:'flag',name:'The Fire Room',at:[8,21]});
+  C.room(31,4,41,12,{floor:'flag',name:'The Moon Gate',at:[36,7]});
+  C.room(31,33,39,39,{floor:'flag',name:'The Quiet Loft',at:[35,35]});
+  C.carve(22,13,24,17);C.carve(29,22,33,24);C.carve(22,29,24,33);C.carve(13,22,17,24);C.carve(29,8,30,8);C.carve(29,36,30,36);
+  C.links({});
+  const put=(name,x,y,o)=>{C.used.delete(x+','+y);return C.dec(pspPic(name),x,y,Object.assign({block:true},o||{}))};
+  // the Moon Hall
+  for(const [x,y] of [[19,19],[27,19],[19,27],[27,27]])C.column(x,y,'fluted');
+  put('obs_orrery',23,23,{sc:1});C.light(23,23,[1.2,1.2,1.5]);
+  put('stair_spiral_iron',PSF4M.DOWN[0],PSF4M.DOWN[1],{npc:'psf4_down',sc:1});
+  for(const x of [20,26])C.picture('banner_long_a',x,18,[0,-1]);
+  // the four planets, each floating in its room with a light of its own colour
+  const COL={stone:[1.3,1.15,.95],ice:[.9,1.2,1.6],grow:[.9,1.4,.8],fire:[1.6,.9,.6]};
+  for(const [pid,key,x,y,name] of PSF4M.PLANETS){
+    put('planet_'+key,x,y,{npc:'psf4_pl_'+pid,sc:1.15});C.light(x,y,COL[key]);C.light(x+(x<23?2:x>23?-2:0),y+(y<23?2:y>23?-2:0),COL[key]);
+    const rx=x<23?[4,12]:x>23?[34,42]:[18,28],ry=y<23?[4,12]:y>23?[34,42]:[18,28];
+    for(const [cx,cy] of [[rx[0]+1,ry[0]+1],[rx[1]-1,ry[0]+1],[rx[0]+1,ry[1]-1],[rx[1]-1,ry[1]-1]])if(C.free(cx,cy))C.cand(cx,cy,COL[key])}
+  // the iron gate to the Moon Gate room, shut until all four planets are done
+  put('iron_gate_big',PSF4M.SEAL[0],PSF4M.SEAL[1],{npc:'psf4_seal',sc:1});
+  // the Moon Gate room
+  for(const x of [32,40])for(const y of [5,11])C.column(x,y,'twist');
+  C.light(36,6,[1.2,1.25,1.6]);C.light(36,10,[1.0,1.05,1.4]);
+  pspRest(C,{x0:31,y0:33,x1:39,y1:39,bed:[33,35],chest:[38,38],name:'The Quiet Loft',line:'A small loft off the Growing Room, with a narrow bed and a brass lamp. Warm candles burn here, and nothing from the floor can come in.'});
+  pspSafeRect(C,31,33,39,39);pspSafeRect(C,18,18,28,28);
+  C.glow(7,PSH_COL.cold);
+  // the Moon hangs in front of the stair to the fifth floor, unless it is already dead
+  if(psf4F().moon!==2)pspFoe(C,'psmoon',PSF4M.MOON[0],PSF4M.MOON[1],{lvl:110});
+  return C.finish({start:{x:23,y:26,f:0}})}
+pspRegister(PSF4M.ID,psf4mBuild);
+/* ---------- the things to touch ---------- */
+for(const [pid,key,x,y,name] of PSF4M.PLANETS){
+  khNpc('psf4_pl_'+pid,name,'ps_planet_'+key,()=>{const F=psf4F(),done=!!F.done[pid];
+    return say("A great painted planet turns slowly in the air, as big as a house. "+({stone:'Grey stone, with walls and towers of old castles drawn on it.',ice:'White and blue ice, cracked and ridged.',grow:'Dense green forest, with huge mushrooms and vines.',fire:'Black rock with rivers of lava and small volcanoes.'}[key])+(done?" You have been through its maze and reached its exit.":" Its surface is a maze. If you step onto it, you will walk through it seen from above.")+" "+psf4Done()+" of 4 planets are done.",[
+      [done?'Step onto the planet again.':'Step onto the planet.',()=>{G.talk=null;sfx('door');goToLevel(pid,{x:2,y:2,f:2});return null}],BYE])})}
+khNpc('psf4_seal','The Iron Gate','ps_iron_gate_big',()=>say("A tall iron gate shuts off the way east, to the Moon Gate. Cut into the bars is a line: WHEN THE FOUR WORLDS ARE WALKED, THE GATE LETS GO. "+psf4Done()+" of 4 planets are done.",[BYE]));
+khNpc('psf4_down','The spiral stair','ps_stair_spiral_iron',()=>say("The iron stair winds down to the Observatory Gallery.",[['Go down.',()=>{G.talk=null;sfx('door');goToLevel(9881,{x:47,y:28,f:0});return null}],BYE]));
+/* ---------- coming off a planet, arriving, the gate ---------- */
+pspOnArrive(n=>{if(n!==PSF4M.ID)return;try{psf4mApply();const F=psf4F();
+  if(F.moon===2)for(let i=G.enemies.length-1;i>=0;i--)if(G.enemies[i].t==='psmoon')G.enemies.splice(i,1);
+  psf4MoonFix();
+  if(!F.seen){F.seen=1;msg('The stair ends in a round hall of pale stone. Four doors lead off it, and in every room beyond a whole world hangs in the air.','#d8e4ff')}
+  if(psf4Done()===4&&!F.gateMsg){F.gateMsg=1;msg('All four planets are walked. Far to the north-east, the iron gate lets go.','#bfe8ff')}}catch(e){console.error('psf4m arrive',e)}});
+/* ---------- the Moon (the boss) ---------- */
+{
+  ENEMY_DEF.psmoon=pscE('psmoon',{img:'ps_moon_boss',ph:3.4,w:2.4,name:'The Pale Moon',hp:940,dmg:[18,26],hit:.92,verb:'crushes',xp:2100,boss:true,aboveParty:0,gold:[0,0],fly:true,floatH:.2});
+  if(typeof NO_VARY!=='undefined')NO_VARY.push('psmoon');
+  if(typeof BOSS_GOLD!=='undefined')BOSS_GOLD.psmoon=[7000,9000];
+  if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^psmoon/,'cursed',.2]);
+}
+function psf4MoonFix(){const im=IMG.ps_moon_boss;if(im&&im.width)ENEMY_DEF.psmoon.w=+(ENEMY_DEF.psmoon.ph*im.width/im.height).toFixed(2)}
+bl3Hit('psmoon',e=>{
+  const r=e.hp/e.maxhp,ph=r<.25?3:r<.5?2:r<.75?1:0;if(ph<=(e._ph|0))return;e._ph=ph;
+  const T=[null,['psstarmoth','psstarmoth'],['psstarwraith','psmirrorshade'],['psclockwork','psstarwraith']][ph],M=[null,'The Moon cracks along its crown. Two swarms of star moths pour out of the cracks.','The Moon turns its dark side to you, and two shapes fall off it into the room.','The Moon opens its mouth wide. A brass guardian and a star wraith drop out of it.'][ph];
+  for(const t of T){if(G.enemies.filter(m=>m._kid&&m.hp>0).length>=4)break;const m=bl3Add(t,e.x,Math.min(e.y+2,10),110);if(m)m._kid=1}
+  msg(M,'#d8e4ff')});
+bl3Kill('psmoon',e=>{
+  const F=psf4F();F.moon=2;
+  try{f2Chime('open')}catch(x){}
+  msg("The Moon goes dim, and then dark, and the eyes in its craters close one by one. The chains of its crown drop and ring on the floor. The way to the stair is clear.",'#d8e4ff');
+  if(!F.got){F.got=1;bl3Give('pg_moonstaff');msg("A staff of pale stone lies among the chains, with a small brass orrery turning at its tip: the Orrery Staff of the Pale Moon.",'#ffe36a')}});
+pgrItem('pg_moonstaff',{n:'Orrery Staff of the Pale Moon',t:'Staff',ic:'staff',c:PGR_C.vio,dmg:[300,350],magic:200,req:{int:78},eff:{bossdmg:.6,daze:.3},pas:{spellPct:.18,mpRegen:1.2},sw:.44,
+  d:"A tall staff of pale moonstone, topped with a small brass orrery that turns by itself. It came from the floating Moon. Adds 200 to the power of spells, spell damage +18%, tiredness fades faster, bosses take 60% more, and foes are sometimes dazed."});
+/* ---------- the links ---------- */
+PSP_L(9881,null,9890,[23,26,0],{name:'the spiral stair up to the Floor of the Moon'});
+PSP_L(9890,[PSF4M.GATE[0],PSF4M.GATE[1]],9900,[20,20,0],{name:'the stair to the fifth floor',prov:1});
 
 /* ---- src/desert/nt_look.js ---- */
 /* ==========================================================================

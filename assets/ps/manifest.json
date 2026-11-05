@@ -6252,5 +6252,53 @@
 "h": 1.0,
 "kind": "sprite",
 "sheet": "pedset"
+},
+"planet_stone": {
+"file": "planet_stone.webp",
+"w": 494,
+"px_h": 512,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "planets"
+},
+"planet_ice": {
+"file": "planet_ice.webp",
+"w": 512,
+"px_h": 512,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "planets"
+},
+"planet_grow": {
+"file": "planet_grow.webp",
+"w": 498,
+"px_h": 512,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "planets"
+},
+"planet_fire": {
+"file": "planet_fire.webp",
+"w": 504,
+"px_h": 512,
+"h": 2.0,
+"kind": "sprite",
+"sheet": "planets"
+},
+"moon_boss": {
+"file": "moon_boss.webp",
+"w": 498,
+"px_h": 512,
+"h": 3.4,
+"kind": "sprite",
+"sheet": "moonboss"
+},
+"moon_bossA": {
+"file": "moon_bossA.webp",
+"w": 470,
+"px_h": 512,
+"h": 3.4,
+"kind": "sprite",
+"sheet": "moonboss"
 }
 }

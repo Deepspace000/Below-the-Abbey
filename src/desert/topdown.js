@@ -73,11 +73,12 @@ function tdCell(ox,oy,x,y,g,cs,L,vis){
     if(open(x-1,y)){ctx.fillStyle=L.wallTop;ctx.fillRect(sx,sy,1,n)}
     if(open(x+1,y)){ctx.fillStyle=L.ink;ctx.fillRect(sx+n-1,sy,1,n)}
     return}
-  const z=tdZone(x,y),t=z&&z.type;
-  ctx.fillStyle=t==='grass'?L.grass:t==='keep'||t==='chapel'?L.keep:t==='grave'?L.grave:L.floor[(h*3)|0];ctx.fillRect(sx,sy,n,n);
-  if(t==='keep'||t==='chapel'){ctx.strokeStyle='rgba(60,44,26,.38)';ctx.lineWidth=1;ctx.strokeRect(sx+.5,sy+.5,n-1,n-1)}   // flagstones
-  else if(t==='grass'){ctx.strokeStyle='rgba(60,86,34,.55)';ctx.lineWidth=1;for(let i=0;i<2;i++){const tx=sx+3+((h*(11+i*5))%1)*(n-7),ty=sy+4+((h*(17+i*3))%1)*(n-8);ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx-1,ty-3);ctx.moveTo(tx,ty);ctx.lineTo(tx+1,ty-3);ctx.stroke()}}
-  else{ctx.fillStyle='rgba(110,80,40,.16)';if(h>.7)ctx.fillRect(sx+((h*9)%1)*(n-3),sy+((h*21)%1)*(n-3),2,2);if(h<.12){ctx.fillRect(sx+((h*53)%1)*(n-4),sy+((h*31)%1)*(n-4),3,1)}}   // a dirt road, with a few specks
+  const z=tdZone(x,y),pat=z&&z.pat;
+  ctx.fillStyle=z&&z.col?z.col:L.floor[(h*3)|0];ctx.fillRect(sx,sy,n,n);
+  if(pat==='flag'){ctx.strokeStyle='rgba(60,44,26,.38)';ctx.lineWidth=1;ctx.strokeRect(sx+.5,sy+.5,n-1,n-1)}   // flagstones
+  else if(pat==='tuft'){ctx.strokeStyle=L.tuft||'rgba(60,86,34,.55)';ctx.lineWidth=1;for(let i=0;i<2;i++){const tx=sx+3+((h*(11+i*5))%1)*(n-7),ty=sy+4+((h*(17+i*3))%1)*(n-8);ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx-1,ty-3);ctx.moveTo(tx,ty);ctx.lineTo(tx+1,ty-3);ctx.stroke()}}   // tufts, frost marks, embers
+  else if(pat==='crack'){ctx.strokeStyle=L.crack||'rgba(60,30,20,.5)';ctx.lineWidth=1;if(h>.45){ctx.beginPath();ctx.moveTo(sx+2,sy+((h*9)%1)*n);ctx.lineTo(sx+n/2,sy+n/2+((h*5)%1)*4);ctx.lineTo(sx+n-2,sy+((h*7)%1)*n);ctx.stroke()}}
+  else{ctx.fillStyle=L.speck||'rgba(110,80,40,.16)';if(h>.7)ctx.fillRect(sx+((h*9)%1)*(n-3),sy+((h*21)%1)*(n-3),2,2);if(h<.12){ctx.fillRect(sx+((h*53)%1)*(n-4),sy+((h*31)%1)*(n-4),3,1)}}   // a dirt road, with a few specks
 }
 function tdToken(im,sx,sy,w,h,o){ // a creature or prop picture stood on its square: feet on the square's lower edge, a shadow under it
   if(!im)return;o=o||{};

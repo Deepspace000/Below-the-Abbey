@@ -56,7 +56,7 @@ PSP.LEVELS=[
  PSP_LV(9860,'The Wintergarden',80,64,105,0,'atrium'),
  PSP_LV(9870,'The Moonlit Terrace Maze',72,64,105,0,'maze'),
  PSP_LV(9880,'The Third Floor: the Hall of Mirrors and the Observatory Gallery',112,84,106,0,'in'),
- PSP_LV(9890,'The Moon Tower',40,40,107,0,'in',{floors:5}),
+ PSP_LV(9890,'The Floor of the Moon',46,46,110,0,'in'),
  PSP_LV(9900,'The Bell Tower',40,40,108,0,'in',{floors:5}),
  PSP_LV(9910,'The Raven Tower and the Great Mews',48,48,108,0,'in',{floors:4}),
  PSP_LV(9920,"The Alchemist's Tower",40,40,109,0,'in',{floors:5}),
