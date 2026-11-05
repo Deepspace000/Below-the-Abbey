@@ -10,6 +10,7 @@
 const PSF3O={ID:9881,W:56,H:44,WH:3.2,
   SOLVE:['lamp','hound','crown','ladder','mirror'],
   NAMES:{lamp:'The Lamp',hound:'The Hound',crown:'The Crown',ladder:'The Ladder',mirror:'The Mirror'},
+  PIC:{lamp:'candelabra_tall',hound:'st_hound',crown:'furn_throne_black',ladder:'stairs_curved',mirror:'furn_mirror_gothic'},
   STANDS:{crown:[7,23],mirror:[9,23],lamp:[11,23],ladder:[13,23],hound:[15,23]},
   GATE:[28,14],MIRRORDOOR:[38,23],SCOPE:[28,6],GLASS:[47,17],UP:[47,29],SPAWN:[47,23]};
 PSP.LEVELS.push(PSP_LV(9881,'The Observatory Gallery',56,44,107,0,'in'));
@@ -58,7 +59,7 @@ function psf3oBuild(info){
   put('col_silver',PSF3O.GATE[0],PSF3O.GATE[1],{npc:'psf3o_gate',sc:1.15});
   put('mirror_haunted_b',PSF3O.MIRRORDOOR[0],PSF3O.MIRRORDOOR[1],{npc:'psf3o_mirrordoor',sc:1.1});
   // ---- the Chart Room ----
-  for(const k in PSF3O.STANDS){const [x,y]=PSF3O.STANDS[k];put('scroll_rack',x,y,{npc:'psf3o_s_'+k})}
+  for(const k in PSF3O.STANDS){const [x,y]=PSF3O.STANDS[k];put(PSF3O.PIC[k],x,y,{npc:'psf3o_s_'+k,sc:.9})}
   for(const x of [7,9,11,13,15])pic(WALLP[x%WALLP.length],x,20,[0,-1]);
   pic('window_stained_tall',6,27,[-1,0]);pic('window_stained_tall',16,27,[1,0]);
   put('globe',11,28,{sc:.9});C.light(11,25,[1.1,1.1,1.4]);cand(7,29);cand(15,29);
@@ -140,14 +141,19 @@ CUTS.psReflect=()=>[
   {who:hn(2),text:'We have broken worse things than glass.'},
   {text:'The mirror bulges like a held breath, and she steps out of it.'}];
 /* ---------- the things to touch ---------- */
-function psf3oNote(id,name,txt){khNpc(id,name,'ps_lectern',()=>say(txt,[BYE]))}
-psf3oNote('psf3o_lecternA','A lectern in the Gallery',"A page in a neat hand lies open on the lectern. It reads: THE ASTRONOMER'S NOTE, PAGE ONE. THE FIVE CHARTS ARE IN THE WEST ROOM. EACH HAS A BRASS PIN. PRESS THE PINS IN THE ORDER THE STARS RISE. THE LAMP RISES FIRST. THE MIRROR RISES LAST. PAGE TWO IS IN MY STUDY. PAGE THREE IS IN THE ARCHIVE.");
-psf3oNote('psf3o_lecternB','A lectern in the Study',"A page in the same hand reads: THE ASTRONOMER'S NOTE, PAGE TWO. THE HOUND RISES BEFORE THE CROWN.");
-psf3oNote('psf3o_lecternC','A lectern in the Archive',"A page in the same hand reads: THE ASTRONOMER'S NOTE, PAGE THREE. THE LADDER RISES AFTER THE CROWN.");
+const PSF3O_CLUE={A:'The Lamp rises first. The Mirror rises last.',B:'The Hound rises before the Crown.',C:'The Ladder rises after the Crown.'};
+function psf3oNote(id,key,name,txt){khNpc(id,name,'ps_lectern',()=>{const F=psf3oF();(F.notes=F.notes||{})[key]=1;return say(txt+" (Written into your notes: "+PSF3O_CLUE[key]+")",[BYE])})}
+psf3oNote('psf3o_lecternA','A','A lectern in the Gallery',"A page in a neat hand lies open on the lectern. It reads: THE ASTRONOMER'S NOTE, PAGE ONE. THE FIVE STAR CHARTS ARE IN THE CHART ROOM, THE WEST ROOM OFF THIS GALLERY. EACH CHART HAS A BRASS PIN UNDER IT. PRESS THE FIVE PINS IN THE ORDER THE CONSTELLATIONS RISE. THE LAMP RISES FIRST. THE MIRROR RISES LAST. PAGE TWO IS IN MY STUDY, NORTH OF THE CHART ROOM. PAGE THREE IS IN THE ARCHIVE, SOUTH-EAST.");
+psf3oNote('psf3o_lecternB','B','A lectern in the Study',"A page in the same hand reads: THE ASTRONOMER'S NOTE, PAGE TWO. THE HOUND RISES BEFORE THE CROWN.");
+psf3oNote('psf3o_lecternC','C','A lectern in the Archive',"A page in the same hand reads: THE ASTRONOMER'S NOTE, PAGE THREE. THE LADDER RISES AFTER THE CROWN.");
+function psf3oNotesText(){const N=psf3oF().notes||{},got=['A','B','C'].filter(k=>N[k]);
+  if(!got.length)return "You have no notes yet. The Astronomer's three pages are on lecterns in the Gallery, the Study and the Archive.";
+  return "Your notes: "+got.map(k=>PSF3O_CLUE[k]).join(' ')+(got.length<3?" ("+got.length+" of 3 pages found.)":" That is all three pages. Together they fix the whole order: put the first constellation to rise first, and work along to the last.")}
 function psf3oStand(k){const nm=PSF3O.NAMES[k];
   khNpc('psf3o_s_'+k,'The chart of '+nm,'ps_scroll_rack',()=>{const F=psf3oF();
     if(F.chart)return say("The chart of "+nm+" glows faintly. Its brass pin is pressed down, and all five pins are held down together.",[BYE]);
-    return say("A star chart on a brass stand shows "+nm+": a small knot of bright stars joined by thin lines. A brass pin sits under the chart. "+F.seq.length+" of 5 pins are pressed down.",[
+    return say("This is one of five star charts. This one shows "+nm+", a knot of bright stars joined by thin lines. Under it is a brass pin. The five pins must be pressed in the order the constellations rise. "+F.seq.length+" of 5 pins are pressed down so far.",[
+      ['Read my notes.',()=>say(psf3oNotesText(),[BYE])],
       [F.seq.includes(k)?'The pin is already down.':'Press the pin.',()=>{G.talk=null;const F=psf3oF();if(F.seq.includes(k))return null;
         F.seq.push(k);sfx('door');const r=psf3oCheck(F.seq);
         if(r==='done'){F.chart=1;try{f2Chime('open')}catch(e){}psf3oApply();msg('The fifth pin clicks down. All five charts light up together, and a deep note rings through the Gallery. Far to the north, the silver gate to the Telescope Room lets go.','#e0f0ff')}

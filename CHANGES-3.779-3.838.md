@@ -71,3 +71,6 @@ The class powers were rebalanced several times. Where they stand now:
 
 ## 3.840
 - Hall of Mirrors: the beam of light is now drawn, the four mirror posts look like mirrors, and the hidden closet has mirrors on its walls.
+
+## 3.841
+- Observatory Gallery: the five star charts are now five different objects (lamp, hound, throne, stair, mirror) and say plainly what the pins are for. Each chart has a "Read my notes" option that lists the clues you have found.
