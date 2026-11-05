@@ -87,7 +87,7 @@ const GH2_IDS=[];
   const TX={bleed:v=>`${pc(v[0])} of hits leave the foe bleeding.`,burn:v=>`${pc(v[0])} of hits set the foe on fire.`,poison:v=>`${pc(v[0])} of hits poison the foe.`,curse:v=>`${pc(v[0])} of hits curse the foe.`,fear:v=>`${pc(v[0])} of hits make the foe flee.`,blind:v=>`${pc(v[0])} of hits blind the foe.`,slow:v=>`${pc(v[0])} of hits slow the foe.`,
     cleave:()=>'Every hit also cuts the foe behind the first.',pierce:()=>'Its arrows pass through to the foe behind.',stun:v=>`One hit in ${Math.round(1/v)} knocks the foe senseless.`,vuln:v=>`${pc(v[0])} of hits crack the foe's guard.`,exec:v=>`Against a foe under ${pc(v[0])} health it deals ${v[1]} times damage.`,bossdmg:v=>`Bosses and great beasts take ${pc(v)} more.`,shock:v=>`${pc(v)} of hits shake the ground and knock down foes within two squares.`,double:v=>`${pc(v)} of shots send a second arrow.`,
     chain:v=>`Each hit arcs on to up to ${v[1]} other nearby foes for ${pc(v[0])} of the damage.`,nova:v=>`${pc(v[0])} of hits blast every foe within two squares for ${pc(v[1])} of the damage.`,manaleech:v=>`Every hit restores ${v} mana to the wielder.`};
-  const AVG=L=>430+(L-82)*13.5;
+  const AVG=L=>420+(L-82)*5;   // was 430 + 13.5 a level: the Starseeker Bow (level 90) hit up to 590 and the level 110 weapons up to 950. Now 460 at level 90, 560 at level 110
   for(const [L,set,W] of SETS)W.forEach(([n,eff,pas,fl],k)=>{
     const t=T[k],id='gh_'+K[k]+L,a=AVG(L)*(t==='Bow'?.93:1),req=Math.round(40+(L-82)/4),price=Math.round(20000*Math.pow(L/80,1.7)/100)*100;
     const ex=Object.keys(eff).map(q=>TX[q](eff[q])).join(' ');
