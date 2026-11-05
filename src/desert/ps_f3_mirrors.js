@@ -93,7 +93,7 @@ khNpc('psf3_seal','The Silver Seal','ps_col_silver',()=>say("A pillar of silver 
 khNpc('psf3_court','The lectern in the Court of Glass','ps_lectern',()=>say("A plaque reads: THE COURT OF GLASS. THE SOVEREIGN COMES HERE TO SEE HERSELF. NOTHING ELSE IN THE ROOM IS EVER WHAT IT LOOKS LIKE. LOOK AT THE MAIDEN'S MIRROR IF YOU DARE.",[BYE]));
 khNpc('psf3_hidden',"The maiden's mirror",'ps_alcove_maiden',()=>{const F=psf3F();
   return say("A statue of a maiden holds up a hand mirror. In the glass you see a small room with a chest in it, a room that is not behind this wall. The glass is cold, and it is slightly open, like a door.",[
-    [F.hidden?'Step through again.':'Step through the glass.',()=>{G.talk=null;F.hidden=1;sfx('door');f2MoveTo([5,31,0]);msg('The glass gives like cold water. You step out into a small closet of silver mirrors.','#e0f0ff');return null}],BYE])});
+    [F.hidden?'Step through again.':'Step through the glass.',()=>{G.talk=null;F.hidden=1;sfx('door');f2MoveTo([5,31,0]);msg('You step through the mirror into a small closet of silver mirrors.','#e0f0ff');return null}],BYE])});
 /* a way out of the closet: the mirror on the closet wall */
 khNpc('psf3_back','The closet mirror','ps_alcove_maiden',()=>say("The mirror on the wall of the closet shows the Court of Glass. It is cold, and slightly open.",[['Step back through.',()=>{G.talk=null;sfx('door');f2MoveTo([12,17,1]);return null}],BYE]));
 pspOnArrive(n=>{if(n===PSF3.ID)try{psf3Apply();const F=psf3F();if(!F.seen){F.seen=1;msg('The swirling door closes behind you. The air smells of polished glass, and every wall shows you a hall that is a little longer than this one.','#d8d4f0')}}catch(e){console.error('psf3 arrive',e)}});
