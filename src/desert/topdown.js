@@ -52,6 +52,11 @@ function tdAct(id){
       for(let f=0;f<4;f++){const d=DIRS[f],e=enemyAt(P.x+d[0],P.y+d[1]);if(e&&e.hp>0){tdFace(f);break}}}}
   return false}
 /* ---------- drawing ---------- */
+function tdSeal(sx,sy,n,L){
+  ctx.fillStyle=L.floor[0];ctx.fillRect(sx,sy,n,n);const p=.5+.5*Math.sin(G.time*3),cx=sx+n/2,cy=sy+n/2;
+  ctx.fillStyle=L.exit;ctx.beginPath();for(let i=0;i<10;i++){const a=i/10*TAU,r=n*(.5+(i%2?.08:0));ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r)}ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(255,220,170,'+(.4+.4*p)+')';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,n*.24,0,TAU);ctx.stroke();
+  ctx.fillStyle='rgba(255,230,190,'+(.5+.4*p)+')';ctx.fillRect(cx-1,cy-n*.16,2,n*.32);ctx.fillRect(cx-n*.16,cy-1,n*.32,2)}
 function tdCell(ox,oy,x,y,g,cs,L,vis){
   const sx=Math.round(ox+x*cs),sy=Math.round(oy+y*cs),n=Math.ceil(cs),h=hash2(x,y,LEVEL);
   if(g>0){
@@ -60,10 +65,7 @@ function tdCell(ox,oy,x,y,g,cs,L,vis){
       ctx.fillStyle=L.door;ctx.fillRect(sx,sy,n,n);ctx.strokeStyle=L.ink;ctx.lineWidth=1.5;ctx.strokeRect(sx+1,sy+1,n-2,n-2);
       ctx.fillStyle='#3a2410';for(const k of [.3,.66])ctx.fillRect(sx+2,sy+n*k,n-4,2);ctx.fillStyle=L.gold;ctx.fillRect(sx+n*.5-1.5,sy+n*.45,3,3);return}
     if(g===5||g===7||(g>=30&&g<100)||(g>=1000&&typeof KH_DOOR!=='undefined'&&KH_DOOR[g])){ // the way out: a red wax seal on the parchment
-      ctx.fillStyle=L.floor[0];ctx.fillRect(sx,sy,n,n);const p=.5+.5*Math.sin(G.time*3),cx=sx+n/2,cy=sy+n/2;
-      ctx.fillStyle=L.exit;ctx.beginPath();for(let i=0;i<10;i++){const a=i/10*TAU,r=n*(.42+(i%2?.06:0));ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r)}ctx.closePath();ctx.fill();
-      ctx.strokeStyle='rgba(255,220,170,'+(.4+.4*p)+')';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,n*.24,0,TAU);ctx.stroke();
-      ctx.fillStyle='rgba(255,230,190,'+(.5+.4*p)+')';ctx.fillRect(cx-1,cy-n*.16,2,n*.32);ctx.fillRect(cx-n*.16,cy-1,n*.32,2);return}
+      tdSeal(sx,sy,n,L);return}
     // a wall: dark inked stone in courses, with a lit edge where it faces the floor
     ctx.fillStyle=L.wall[(h*3)|0];ctx.fillRect(sx,sy,n,n);
     ctx.strokeStyle=L.mortar;ctx.lineWidth=1;ctx.beginPath();const row=((x+y)&1)?n/2:0;
@@ -100,6 +102,16 @@ function tdDraw(){
     if(!vis){ctx.fillStyle='rgba(26,18,10,.42)';ctx.fillRect(Math.round(ox+x*cs),Math.round(oy+y*cs),Math.ceil(cs),Math.ceil(cs))}
   }
   const cell=(x,y)=>[ox+(x+.5)*cs,oy+(y+1)*cs-3];
+  // the way out: a pulsing golden glow around the seal, once its square has been seen, and an arrow at the edge of the map pointing to it when it is off screen
+  {const lv=LEVELS[LEVEL],t=lv&&lv._td,ex=t&&t.exit;
+    if(ex&&(G.seen[ex[1]][ex[0]]||TD.vis[ex[1]*MW+ex[0]])){
+      tdSeal(Math.round(ox+ex[0]*cs),Math.round(oy+ex[1]*cs),Math.ceil(cs),L);
+      const p=.5+.5*Math.sin(G.time*3),ex_=ox+(ex[0]+.5)*cs,ey=oy+(ex[1]+.5)*cs,R=cs*(1.6+.5*p);
+      ctx.save();const gr=ctx.createRadialGradient(ex_,ey,cs*.3,ex_,ey,R);gr.addColorStop(0,'rgba(255,214,110,.75)');gr.addColorStop(1,'rgba(255,214,110,0)');ctx.fillStyle=gr;ctx.fillRect(ex_-R,ey-R,R*2,R*2);ctx.restore();
+      const inside=ex_>8&&ex_<VWd-8&&ey>8&&ey<VHd-8;
+      if(!inside){const px=ox+(C.x+.5)*cs,py=oy+(C.y+.5)*cs,a=Math.atan2(ey-py,ex_-px),r=Math.min(VWd/2-18,VHd/2-18)*(.55+.05*p),ax=VWd/2+Math.cos(a)*Math.min(r*1.8,VWd/2-18),ay=VHd/2+Math.sin(a)*r;
+        ctx.save();ctx.translate(ax,ay);ctx.rotate(a);ctx.fillStyle='#ffd66e';ctx.strokeStyle='#241a0e';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(10,0);ctx.lineTo(-5,-7);ctx.lineTo(-2,0);ctx.lineTo(-5,7);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
+        txt('EXIT',ax,ay+(Math.sin(a)>0?-12:16),7,'#ffd66e','center',true)}}}
   // things lying on the ground
   for(const it of G.items){if(it.taken||!tdVisible(it.x,it.y))continue;
     const sx=ox+(it.x+.5)*cs,sy=oy+(it.y+.5)*cs,p=.5+.5*Math.sin(G.time*4+it.x);

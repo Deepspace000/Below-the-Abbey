@@ -39,6 +39,13 @@ function psf4Maze(W,H,seed,o){
   const dead=deadEnds().filter(([x,y])=>!(x===1&&y===1)&&dist[y*W+x]>0).sort((a,b)=>dist[b[1]*W+b[0]]-dist[a[1]*W+a[0]]);
   return {open,rooms,dist,dead,start:[1,1],exit:dead[0]||[W-2,H-2]}}
 /* builds one planet: a top-down maze level. spec = {id,name,W,H,seed,foes:[types],nFoes,nChests,nItems,floor,wall} */
+/* ---------- the four little planets: one lies at the end of each maze; each gives a bonus to the whole party for as long as it is carried in the bag ---------- */
+const PSF4_CHARM={9891:{id:'pl_stone',n:'Little Stone Planet',c:'#9a9484',pas:{maxhp:60},d:"A grey ball of stone no bigger than a plum, with tiny walls and towers drawn on it. It hangs in the air just above the palm. While it is in the bag, every hero has 60 more health."},
+  9892:{id:'pl_ice',n:'Little Ice Planet',c:'#9fd0ec',pas:{spellPct:.1},d:"A small ball of pale blue ice, cold to the touch and cracked all over. While it is in the bag, every spell does 10% more damage."},
+  9893:{id:'pl_grow',n:'Little Growing Planet',c:'#6fb04a',pas:{regen:2},d:"A small green ball with a tuft of moss and a tiny mushroom growing on it. While it is in the bag, every hero heals a little each turn."},
+  9894:{id:'pl_fire',n:'Little Fire Planet',c:'#e0702a',pas:{hitPct:.08},d:"A small black ball of rock with thin lines of lava running over it. It is warm. While it is in the bag, every hero hits 8% more often."}};
+for(const k in PSF4_CHARM){const c=PSF4_CHARM[k];ITEMDEF[c.id]={k:'key',n:c.n,t:'Charm',ic:'ringS',c:c.c,price:0,d:c.d+' Only one of each can be carried.',sw:.1,stack:0,planet:1,pas:c.pas}}
+function psf4Pas(key){let s=0;try{for(const k in PSF4_CHARM){const c=PSF4_CHARM[k];if(c.pas[key]&&bagCount(c.id)>0)s+=c.pas[key]}}catch(e){}return s}
 function psf4Planet(info,spec){
   // the level kit only treats squares 2 to size-3 as floor, so the maze (which starts at 1) is set one square in: maze (x,y) is level (x+1,y+1)
   const id=spec.id,MW0=spec.W,MH0=spec.H,W=MW0+2,H=MH0+2,O=1;
@@ -67,6 +74,7 @@ function psf4Planet(info,spec){
   // chests and things lying about go in the dead ends, the far ones first
   const dead=M.dead.slice(1).map(([x,y])=>[x+O,y+O]);let nc=spec.nChests||3;
   for(const [x,y] of dead){if(nc<=0)break;if(!C.free(x,y))continue;if(C.chest(x,y,{gold:2200+((R()*1200)|0),tier:1}))nc--}
+  if(PSF4_CHARM[id]&&!bagCount(PSF4_CHARM[id].id))C.items.push({k:PSF4_CHARM[id].id,x:ex,y:ey,taken:false});   // the little planet lies at the very end, in front of the way out
   let ni=spec.nItems||5;for(const [x,y] of dead.slice().reverse()){if(ni<=0)break;if(C.items.some(i=>i.x===x&&i.y===y)||C.decor.some(d=>d.x===x&&d.y===y))continue;C.items.push({k:'potion6',x,y,taken:false});ni--}
   const L=info.lvl||108,types=spec.foes;
   let nf=spec.nFoes||12;while(nf-->0){const s=take();if(!s)break;pspFoe(C,types[(R()*types.length)|0],s[0],s[1],{lvl:L})}

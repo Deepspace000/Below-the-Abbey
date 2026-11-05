@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.848';
+const VERSION='3.849';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2040,6 +2040,7 @@ function pas(hi,key){
   for(const p of CLASSES[HERO_DEF[hi].clsId].powers)if(!p.act&&h.lvl>=p.lv)s+=p.pas[key]||0;
   for(const b of G.buffs)if(b.left>0&&b.b===key&&(b.hi===-1||b.hi===hi))s+=b.amt;
   if(typeof gearPas==='function')s+=gearPas(hi,key);
+  if(typeof psf4Pas==='function')s+=psf4Pas(key);
   if(typeof luckPas==='function')s+=luckPas(key);
   if(typeof petPas==='function')s+=petPas(key);
   if(typeof profPas==='function')s+=profPas(hi,key)+bondPas(hi,key);
@@ -80324,6 +80325,11 @@ function tdAct(id){
       for(let f=0;f<4;f++){const d=DIRS[f],e=enemyAt(P.x+d[0],P.y+d[1]);if(e&&e.hp>0){tdFace(f);break}}}}
   return false}
 /* ---------- drawing ---------- */
+function tdSeal(sx,sy,n,L){
+  ctx.fillStyle=L.floor[0];ctx.fillRect(sx,sy,n,n);const p=.5+.5*Math.sin(G.time*3),cx=sx+n/2,cy=sy+n/2;
+  ctx.fillStyle=L.exit;ctx.beginPath();for(let i=0;i<10;i++){const a=i/10*TAU,r=n*(.5+(i%2?.08:0));ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r)}ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(255,220,170,'+(.4+.4*p)+')';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,n*.24,0,TAU);ctx.stroke();
+  ctx.fillStyle='rgba(255,230,190,'+(.5+.4*p)+')';ctx.fillRect(cx-1,cy-n*.16,2,n*.32);ctx.fillRect(cx-n*.16,cy-1,n*.32,2)}
 function tdCell(ox,oy,x,y,g,cs,L,vis){
   const sx=Math.round(ox+x*cs),sy=Math.round(oy+y*cs),n=Math.ceil(cs),h=hash2(x,y,LEVEL);
   if(g>0){
@@ -80332,10 +80338,7 @@ function tdCell(ox,oy,x,y,g,cs,L,vis){
       ctx.fillStyle=L.door;ctx.fillRect(sx,sy,n,n);ctx.strokeStyle=L.ink;ctx.lineWidth=1.5;ctx.strokeRect(sx+1,sy+1,n-2,n-2);
       ctx.fillStyle='#3a2410';for(const k of [.3,.66])ctx.fillRect(sx+2,sy+n*k,n-4,2);ctx.fillStyle=L.gold;ctx.fillRect(sx+n*.5-1.5,sy+n*.45,3,3);return}
     if(g===5||g===7||(g>=30&&g<100)||(g>=1000&&typeof KH_DOOR!=='undefined'&&KH_DOOR[g])){ // the way out: a red wax seal on the parchment
-      ctx.fillStyle=L.floor[0];ctx.fillRect(sx,sy,n,n);const p=.5+.5*Math.sin(G.time*3),cx=sx+n/2,cy=sy+n/2;
-      ctx.fillStyle=L.exit;ctx.beginPath();for(let i=0;i<10;i++){const a=i/10*TAU,r=n*(.42+(i%2?.06:0));ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r)}ctx.closePath();ctx.fill();
-      ctx.strokeStyle='rgba(255,220,170,'+(.4+.4*p)+')';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,n*.24,0,TAU);ctx.stroke();
-      ctx.fillStyle='rgba(255,230,190,'+(.5+.4*p)+')';ctx.fillRect(cx-1,cy-n*.16,2,n*.32);ctx.fillRect(cx-n*.16,cy-1,n*.32,2);return}
+      tdSeal(sx,sy,n,L);return}
     // a wall: dark inked stone in courses, with a lit edge where it faces the floor
     ctx.fillStyle=L.wall[(h*3)|0];ctx.fillRect(sx,sy,n,n);
     ctx.strokeStyle=L.mortar;ctx.lineWidth=1;ctx.beginPath();const row=((x+y)&1)?n/2:0;
@@ -80372,6 +80375,16 @@ function tdDraw(){
     if(!vis){ctx.fillStyle='rgba(26,18,10,.42)';ctx.fillRect(Math.round(ox+x*cs),Math.round(oy+y*cs),Math.ceil(cs),Math.ceil(cs))}
   }
   const cell=(x,y)=>[ox+(x+.5)*cs,oy+(y+1)*cs-3];
+  // the way out: a pulsing golden glow around the seal, once its square has been seen, and an arrow at the edge of the map pointing to it when it is off screen
+  {const lv=LEVELS[LEVEL],t=lv&&lv._td,ex=t&&t.exit;
+    if(ex&&(G.seen[ex[1]][ex[0]]||TD.vis[ex[1]*MW+ex[0]])){
+      tdSeal(Math.round(ox+ex[0]*cs),Math.round(oy+ex[1]*cs),Math.ceil(cs),L);
+      const p=.5+.5*Math.sin(G.time*3),ex_=ox+(ex[0]+.5)*cs,ey=oy+(ex[1]+.5)*cs,R=cs*(1.6+.5*p);
+      ctx.save();const gr=ctx.createRadialGradient(ex_,ey,cs*.3,ex_,ey,R);gr.addColorStop(0,'rgba(255,214,110,.75)');gr.addColorStop(1,'rgba(255,214,110,0)');ctx.fillStyle=gr;ctx.fillRect(ex_-R,ey-R,R*2,R*2);ctx.restore();
+      const inside=ex_>8&&ex_<VWd-8&&ey>8&&ey<VHd-8;
+      if(!inside){const px=ox+(C.x+.5)*cs,py=oy+(C.y+.5)*cs,a=Math.atan2(ey-py,ex_-px),r=Math.min(VWd/2-18,VHd/2-18)*(.55+.05*p),ax=VWd/2+Math.cos(a)*Math.min(r*1.8,VWd/2-18),ay=VHd/2+Math.sin(a)*r;
+        ctx.save();ctx.translate(ax,ay);ctx.rotate(a);ctx.fillStyle='#ffd66e';ctx.strokeStyle='#241a0e';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(10,0);ctx.lineTo(-5,-7);ctx.lineTo(-2,0);ctx.lineTo(-5,7);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
+        txt('EXIT',ax,ay+(Math.sin(a)>0?-12:16),7,'#ffd66e','center',true)}}}
   // things lying on the ground
   for(const it of G.items){if(it.taken||!tdVisible(it.x,it.y))continue;
     const sx=ox+(it.x+.5)*cs,sy=oy+(it.y+.5)*cs,p=.5+.5*Math.sin(G.time*4+it.x);
@@ -80470,6 +80483,13 @@ function psf4Maze(W,H,seed,o){
   const dead=deadEnds().filter(([x,y])=>!(x===1&&y===1)&&dist[y*W+x]>0).sort((a,b)=>dist[b[1]*W+b[0]]-dist[a[1]*W+a[0]]);
   return {open,rooms,dist,dead,start:[1,1],exit:dead[0]||[W-2,H-2]}}
 /* builds one planet: a top-down maze level. spec = {id,name,W,H,seed,foes:[types],nFoes,nChests,nItems,floor,wall} */
+/* ---------- the four little planets: one lies at the end of each maze; each gives a bonus to the whole party for as long as it is carried in the bag ---------- */
+const PSF4_CHARM={9891:{id:'pl_stone',n:'Little Stone Planet',c:'#9a9484',pas:{maxhp:60},d:"A grey ball of stone no bigger than a plum, with tiny walls and towers drawn on it. It hangs in the air just above the palm. While it is in the bag, every hero has 60 more health."},
+  9892:{id:'pl_ice',n:'Little Ice Planet',c:'#9fd0ec',pas:{spellPct:.1},d:"A small ball of pale blue ice, cold to the touch and cracked all over. While it is in the bag, every spell does 10% more damage."},
+  9893:{id:'pl_grow',n:'Little Growing Planet',c:'#6fb04a',pas:{regen:2},d:"A small green ball with a tuft of moss and a tiny mushroom growing on it. While it is in the bag, every hero heals a little each turn."},
+  9894:{id:'pl_fire',n:'Little Fire Planet',c:'#e0702a',pas:{hitPct:.08},d:"A small black ball of rock with thin lines of lava running over it. It is warm. While it is in the bag, every hero hits 8% more often."}};
+for(const k in PSF4_CHARM){const c=PSF4_CHARM[k];ITEMDEF[c.id]={k:'key',n:c.n,t:'Charm',ic:'ringS',c:c.c,price:0,d:c.d+' Only one of each can be carried.',sw:.1,stack:0,planet:1,pas:c.pas}}
+function psf4Pas(key){let s=0;try{for(const k in PSF4_CHARM){const c=PSF4_CHARM[k];if(c.pas[key]&&bagCount(c.id)>0)s+=c.pas[key]}}catch(e){}return s}
 function psf4Planet(info,spec){
   // the level kit only treats squares 2 to size-3 as floor, so the maze (which starts at 1) is set one square in: maze (x,y) is level (x+1,y+1)
   const id=spec.id,MW0=spec.W,MH0=spec.H,W=MW0+2,H=MH0+2,O=1;
@@ -80498,6 +80518,7 @@ function psf4Planet(info,spec){
   // chests and things lying about go in the dead ends, the far ones first
   const dead=M.dead.slice(1).map(([x,y])=>[x+O,y+O]);let nc=spec.nChests||3;
   for(const [x,y] of dead){if(nc<=0)break;if(!C.free(x,y))continue;if(C.chest(x,y,{gold:2200+((R()*1200)|0),tier:1}))nc--}
+  if(PSF4_CHARM[id]&&!bagCount(PSF4_CHARM[id].id))C.items.push({k:PSF4_CHARM[id].id,x:ex,y:ey,taken:false});   // the little planet lies at the very end, in front of the way out
   let ni=spec.nItems||5;for(const [x,y] of dead.slice().reverse()){if(ni<=0)break;if(C.items.some(i=>i.x===x&&i.y===y)||C.decor.some(d=>d.x===x&&d.y===y))continue;C.items.push({k:'potion6',x,y,taken:false});ni--}
   const L=info.lvl||108,types=spec.foes;
   let nf=spec.nFoes||12;while(nf-->0){const s=take();if(!s)break;pspFoe(C,types[(R()*types.length)|0],s[0],s[1],{lvl:L})}
