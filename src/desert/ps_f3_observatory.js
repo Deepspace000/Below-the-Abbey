@@ -49,7 +49,7 @@ function psf3oBuild(info){
   pspSafeRect(C,24,36,32,41);
   pspRest(C,{x0:34,y0:37,x1:40,y1:41,bed:[36,38],chest:[39,40],name:'The Stargazers\' Loft',line:'A small loft with a narrow bed and a brass lamp. Warm candles burn here, and nothing from the Gallery can come in.'});
   // ---- the Gallery ----
-  for(const y of [18,22,26,30]){C.column(22,y,y%4?'fluted':'twist');C.column(34,y,y%4?'twist':'fluted')}
+  for(const y of [18,22,26,30]){C.column(22,y,'fluted');C.column(34,y,'fluted')}
   put('obs_orrery',28,24,{sc:1.2});C.light(28,24,[1.2,1.2,1.4]);
   for(const x of [22,32,34])pic('obs_starpanel',x,16,[0,-1]);
   for(const y of [18,28])pic('window_stained_tall',20,y,[-1,0]);

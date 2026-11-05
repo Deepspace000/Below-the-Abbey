@@ -42,7 +42,7 @@ function psf4mBuild(info){
   // the iron gate to the Moon Gate room, shut until all four planets are done
   put('iron_gate_big',PSF4M.SEAL[0],PSF4M.SEAL[1],{npc:'psf4_seal',sc:1});
   // the Moon Gate room
-  for(const x of [32,40])for(const y of [5,11])C.column(x,y,'twist');
+  for(const x of [32,40])for(const y of [5,11])C.column(x,y,'fluted');
   C.light(36,6,[1.2,1.25,1.6]);C.light(36,10,[1.0,1.05,1.4]);
   pspRest(C,{x0:31,y0:33,x1:39,y1:39,bed:[33,35],chest:[38,38],name:'The Quiet Loft',line:'A small loft off the Growing Room, with a narrow bed and a brass lamp. Warm candles burn here, and nothing from the floor can come in.'});
   pspSafeRect(C,31,33,39,39);pspSafeRect(C,18,18,28,28);

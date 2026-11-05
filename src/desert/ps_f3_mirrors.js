@@ -57,7 +57,7 @@ function psf3Build(info){
   const MIR=['mirror_haunted_a','mirror_haunted_b','mirror_haunted_c'];
   for(let y=10;y<=27;y+=2){pic(MIR[(y>>1)%3],20,y,[-1,0]);pic(MIR[((y>>1)+1)%3],36,y,[1,0])}
   for(const x of [23,26,29,32,35])pic(MIR[x%3],x,8,[0,-1]);
-  for(const y of [11,15,19,23]){C.column(22,y,y%2?'twist':'fluted');C.column(34,y,y%2?'fluted':'twist')}
+  for(const y of [11,15,19,23]){C.column(22,y,'fluted');C.column(34,y,'fluted')}
   for(const [x,y] of [[24,12],[32,12],[24,25],[32,25]])cand(x,y,[.75,.9,1.25]);
   C.light(28,10,[.9,1.05,1.4]);C.light(28,18,[1.1,1.1,1.3]);C.light(28,26,[.9,1.0,1.3]);
   // the north stair: shut
