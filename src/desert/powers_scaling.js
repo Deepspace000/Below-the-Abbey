@@ -25,7 +25,8 @@ const heroIdx=h=>G.heroes.indexOf(h);
 function uW(h){const r=heroDmgRange(h),w=heroWeapon(h);const crit=weaponCrit(w)+(w&&w.dbl||0)+ringSum(h,'dbl')+pasH(h,'crit');return (r[0]+r[1])/2*(1+pasH(h,'dmgPct'))*(1+.5*crit)}
 function uM(h){return (intB(h)+magicBonus(h)+8)*(1+pasH(h,'spellPct'))}
 function psU(h){return isCaster(clsOf(h))?uM(h):uW(h)}
-const gF=(L,u)=>(1+K*Math.max(0,L-u))*(1+KL*L);
+const LATE=L=>1-.45*Math.max(0,Math.min(1,(L-30)/70)); // powers hit softer as the hero levels: nothing before level 30, then falling to 55 percent by level 100 (late gear made single powers do 6000 and more)
+const gF=(L,u)=>(1+K*Math.max(0,L-u))*(1+KL*L)*LATE(L);
 function useHero(){ // the hero who is using a power now
   try{const h=G.heroes[G.curHero===undefined?G.sel:G.curHero];if(h)return h}catch(e){}
   return null;
@@ -299,5 +300,5 @@ function pwTintIcons(){
     IMG[id]=pToneMap(b,t[1],t[2],1.6,.9,0);p.icn=id}
 }
 {const _m=typeof mxTintIcons==='function'?mxTintIcons:null;if(_m)mxTintIcons=function(){_m.apply(this,arguments);try{pwTintIcons()}catch(e){console.error(e)}}}
-window.PS={K,KL,GT,GE,TAPER,CM,eff,E_CLS,SPEC,psU,gF,uW,uM,NEW_N,ORIG_LEN};
+window.PS={K,KL,GT,GE,TAPER,CM,eff,E_CLS,SPEC,psU,gF,uW,uM,LATE,NEW_N,ORIG_LEN};
 })();
