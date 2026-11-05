@@ -83,3 +83,16 @@ pspRegister(9891,info=>psf4Planet(info,{id:9891,W:37,H:37,seed:9891,rooms:6,brai
   try{if(tdOn()){const lv=LEVELS[LEVEL],t=lv&&lv._td;if(t){const d=DIRS[(G.P.f+rel)%4],nx=G.P.x+d[0],ny=G.P.y+d[1];
     if(nx===t.exit[0]&&ny===t.exit[1]&&PSF4.IDS.includes(LEVEL)){const F=psf4F();if(!F.done[LEVEL]){F.done[LEVEL]=1;msg('The planet is complete. A way opens off its edge.','#bfe8ff');sfx('level')}}}}}catch(e){console.error('psf4 exit',e)}
   return _m.apply(this,arguments)}}
+/* ---------- the party meets the top-down view: told once, before the first maze ---------- */
+CUTS.psPlanet=()=>[
+  {text:'The floor under the party has gone flat. The walls are no longer around you. They are drawn beneath you, in ink, like lines on an old map, and you are standing in the middle of it.'},
+  {who:hn(0),text:'Wait. Are we looking at ourselves from above? That is us. That small round thing is us.'},
+  {who:hn(1),text:'Somebody is watching this maze from the ceiling. This is like being in a game.'},
+  {who:hn(0),text:'It cannot be a game. We are standing in it.'},
+  {who:hn(2),text:'If it has to be a game, I prefer first person. The old kind, where you move one block at a time and turn on the spot. You could see the walls properly. This is a map.'},
+  {who:hn(1),text:'This is a map that is also a game that is also the floor. I do not like it.'},
+  {who:hn(3),text:'I prefer the ones where you swap three of the same colour in a row, and they go away. Nobody gets lost in those.'},
+  {who:hn(2),text:'Nobody gets stabbed in those either.'},
+  {who:hn(3),text:'That is why I prefer them.'},
+  {text:'Somewhere past the first wall, something heavy turns over. The map shows it as a small dark shape.'}];
+pspOnArrive(n=>{if(n!==9891)return;try{const F=psf4F();if(F.intro)return;F.intro=1;later(700,()=>startCut('psPlanet'))}catch(e){console.error('psf4 intro',e)}});

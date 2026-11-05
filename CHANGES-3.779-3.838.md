@@ -85,3 +85,5 @@ The class powers were rebalanced several times. Where they stand now:
 3.844: Observatory chart room pedestals redrawn small and straight on (empty pedestal plus one with each constellation disc); the pedestal menu now lists the constellations in a scrambled order.
 
 3.845: top-down engine (src/desert/topdown.js) and the first planet, The Stone Planet (9891, src/desert/ps_f4_planets.js). Seen from above on a medieval map: parchment floors, inked stone walls, named rooms (Keep, Chapel, Herb Garden, Graveyard, Well Court, Guardroom), compass and border. Same grid, rounds and fights; arrows walk N/E/S/W, walking into a creature strikes it; only the lit squares in line of sight show, seen squares stay on the map. Reach the wax seal to finish the planet. Not yet reachable in play (the Floor of the Moon hub, 9890, is still a stub): jump with goToLevel(9891,{x:2,y:2,f:2}).
+
+3.846: before the first planet maze the party talks about being drawn from above (disbelief, "like a game", first person block-by-block, match three).
