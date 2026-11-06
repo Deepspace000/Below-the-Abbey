@@ -9,3 +9,6 @@ Next: planets 9892 ice, 9893 growth, 9894 fire (own TD.look, foes, zones); the h
 ## Status at 3.847
 Built: hub 9890 (src/desert/ps_f4_moon.js), planets 9891 to 9894 (ps_f4_planets.js, topdown.js), boss The Pale Moon (psmoon), pg_moonstaff, painted planets and Moon in assets/ps (planet_*, moon_boss, moon_bossA). Stair to floor 5 is a stub link to 9900 (prov).
 Still wanted: planet-specific creatures with their own painted idle and attack pictures (the planets reuse existing Pale Spire creatures), ranged attack arrows from above, tap-to-move on the map, painted gear icon for the staff, a first-planet intro for the other planets if wanted.
+
+## Floor 5 (3.854): the Ramparts, level 9900 (src/desert/ps_f5_ramparts.js)
+Outdoor night ramparts, 64x64: flagged walk inside a low parapet, ground falls away outside (hgt -7), watch nook (rest) SW, 18 foes, chests. The Pale Tower stands on a raised dais (hgt 5) in the middle: a solid stepped tower of tall wall cells (5x5 base 3.6 high, 3x3 body 8.5, 1-cell core 14.5), each face a slice of the painted spire (assets/ps/spire_tall, 100 px per square, psf5SpireTile), so it can be walked round. One thin fenced stair (x=32, y 41..52) climbs to the dais; the door in the tower's south face (32,34) is a stub link to 9910 (prov). The stair down (32,58) returns to the Moon gate room.

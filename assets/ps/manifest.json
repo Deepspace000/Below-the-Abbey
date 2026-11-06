@@ -6300,5 +6300,13 @@
 "h": 3.4,
 "kind": "sprite",
 "sheet": "moonboss"
+},
+"spire_tall": {
+"file": "spire_tall.webp",
+"w": 438,
+"px_h": 1400,
+"h": 12.0,
+"kind": "sprite",
+"sheet": "spire"
 }
 }

@@ -88,4 +88,4 @@ pgrItem('pg_moonstaff',{n:'Orrery Staff of the Pale Moon',t:'Staff',ic:'staff',c
   d:"A tall staff of pale moonstone, topped with a small brass orrery that turns by itself. It came from the floating Moon. Adds 200 to the power of spells, spell damage +18%, tiredness fades faster, bosses take 60% more, and foes are sometimes dazed."});
 /* ---------- the links ---------- */
 PSP_L(9881,null,9890,[23,26,0],{name:'the spiral stair up to the Floor of the Moon'});
-PSP_L(9890,[PSF4M.GATE[0],PSF4M.GATE[1]],9900,[20,20,0],{name:'the stair to the fifth floor',prov:1});
+PSP_L(9890,[PSF4M.GATE[0],PSF4M.GATE[1]],9900,[32,56,0],{name:'the stair up to the ramparts'});
