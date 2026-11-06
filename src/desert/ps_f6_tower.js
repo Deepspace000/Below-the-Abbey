@@ -84,7 +84,9 @@ for(let n=1;n<=PSF6.N;n++){
 }
 khNpc('psf6_down11','The spiral stair','ps_stair_spiral_iron',()=>say("The iron stair winds down to the Antechamber of the King.",[['Go down.',()=>{G.talk=null;sfx('door');goToLevel(psf6Id(10),{x:PSF6.ABOVE[0],y:PSF6.ABOVE[1],f:2});return null}],BYE]));
 /* ---------- arriving ---------- */
-pspOnArrive(n=>{const r=psf6Room(n);if(!r)return;try{const F=psf6S();for(const L of LIGHTS)L.calm=true;   // steady candle light
+/* a boss is as wide as its picture is */
+function psf6Fit(){for(let i=1;i<=11;i++){const d=ENEMY_DEF[i===11?'psf6_king':'psf6_e'+i],im=IMG['ps_f6r'+i+'_foe'];if(d&&im&&im.width&&d.ph)d.w=+(d.ph*im.width/im.height).toFixed(2)}}
+pspOnArrive(n=>{const r=psf6Room(n);if(!r)return;try{psf6Fit();const F=psf6S();for(const L of LIGHTS)L.calm=true;   // steady candle light
   if(r<=PSF6.N){if(F.boss[r]===2)for(let i=G.enemies.length-1;i>=0;i--)if(G.enemies[i].t==='psf6_e'+r)G.enemies.splice(i,1);
     const dd=G.decor&&G.decor.find(d=>d.npc==='psf6_chest'+r);
     if(!F.seen)F.seen={};if(!F.seen[r]){F.seen[r]=1;msg(PSF6.INTRO[r-1],'#d8e4ff')}}
