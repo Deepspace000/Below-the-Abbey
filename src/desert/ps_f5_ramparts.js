@@ -35,8 +35,8 @@ function psf5Build(info){
   /* the thin stair: one square wide, from the south walk up to the dais, with a fence both sides that nobody can pass */
   const [sx,sy0,,sy1]=PSF5.STAIR;
   C.rise(sx,sy0,sx,sy1,DH,.3,'y');
-  /* the flanks are solid stone balustrades standing on the slope, so nothing can be seen through them while you climb */
-  for(let y=sy0+1;y<=sy1;y++){C.setFloorCell(sx,y,'marble');for(const x of [sx-1,sx+1]){hgt[ix(x,y)]=hgt[ix(sx,y)];wall(x,y,'dark',1.1)}}
+  /* nothing built beside the stair: the cells at its sides are simply blocked, so you cannot step off it */
+  for(let y=sy0+1;y<=sy1;y++){C.setFloorCell(sx,y,'marble');for(const x of [sx-1,sx+1])block[ix(x,y)]=1}
   /* the spire: a solid tower built of tall wall squares in three steps (5 x 5 base 3.6 high, 3 x 3 body 8.5 high, a single square of 14.5 at the core, so it narrows as it rises); every face is the matching slice of the painted spire,
      100 picture pixels to a square both ways, so the arched windows line up from every side. You can walk all the way round it. Its door is in the middle of the south face. */
   const [px,py]=PSF5.DOOR,cx=px,cy=py-2;
