@@ -5,7 +5,7 @@
    windows glowing pale yellow-green, rising into the clouds. One thin stair, fenced on both sides, climbs from the south walk to the dais and the door at the foot of the spire.
    Door at the foot of the spire: a stub link to 9910 (not built yet).
    ========================================================================== */
-const PSF5={ID:9900,W:64,H:64,STAIR:[32,41,32,54],DAIS:[24,24,40,40],DAISH:4,DOOR:[32,34],DOWN:[32,58],
+const PSF5={ID:9900,W:64,H:64,STAIR:[32,41,32,54],DAIS:[24,24,40,40],DAISH:2.4,DOOR:[32,34],DOWN:[32,58],
   TOWNS:[[.03,70,1],[.11,34,.5],[.19,90,1.2],[.29,46,.7],[.38,110,1.3],[.47,30,.45],[.55,64,.9],[.64,100,1.2],[.72,38,.55],[.8,76,1],[.89,50,.7],[.96,28,.4]]};   // far towns round the horizon: [turns round the compass, width, size]
 /* one wall tile of the spire: column k (-2..2 across the face from the middle) of the painted spire, cut from its foot up to the height wh of the step; the whole picture stands 14.5 squares high, 100 pixels to a square */
 function psf5SpireTile(k,wh){
@@ -48,11 +48,11 @@ function psf5Build(info){
   const RED=[1.7,.5,.3],cand=(name,x,y,sc)=>{if(C.free(x,y)){C.prop(name,x,y,{block:true,sc});return true}return false};
   const ring1=[[29,29],[31,29],[33,29],[35,29],[29,31],[29,33],[35,31],[35,33],[29,35],[35,35],[30,35],[34,35]],
         ring2=[[27,27],[32,27],[37,27],[27,32],[37,32],[27,37],[37,37],[30,37],[34,37],[27,30],[27,34],[37,30],[37,34],[30,27],[34,27]];
-  ring1.forEach(([x,y],i)=>{if(cand(i%2?'candelabra_red2':'candelabra_red',x,y,.85)&&i%2===0)C.light(x,y,RED)});
-  ring2.forEach(([x,y],i)=>{if(cand(i%2?'candelabra_red':'candelabra_red2',x,y,1)&&i%3===0)C.light(x,y,RED)});
+  ring1.forEach(([x,y],i)=>{if(cand(i%2?'candelabra_red2':'candelabra_red',x,y,.85)&&i%4===0)C.light(x,y,RED)});
+  ring2.forEach(([x,y],i)=>{if(cand(i%2?'candelabra_red':'candelabra_red2',x,y,1)&&i%5===0)C.light(x,y,RED)});
   /* gothic lampstands in an outer ring: black iron posts with red lanterns, and triple-lamp standards at the corners and the middle of each side */
   for(const [x,y] of [[26,26],[32,26],[38,26],[26,32],[38,32],[26,38],[38,38]])if(cand('f2_lamp3',x,y,1))C.light(x,y,[1.5,.7,.45]);
-  for(const [x,y] of [[28,26],[30,26],[34,26],[36,26],[26,28],[26,30],[26,34],[26,36],[38,28],[38,30],[38,34],[38,36],[28,38],[30,38],[34,38],[36,38]])if(cand('lantern_red_b',x,y,1)&&(x+y)%4===0)C.light(x,y,RED);
+  for(const [x,y] of [[28,26],[30,26],[34,26],[36,26],[26,28],[26,30],[26,34],[26,36],[38,28],[38,30],[38,34],[38,36],[28,38],[30,38],[34,38],[36,38]])if(cand('lantern_red_b',x,y,1)&&(x+y)%8===0)C.light(x,y,RED);
   /* the way down, in the middle of the south parapet */
   C.links({style:{'the stair down':'stair'}});
   /* lamps and braziers along the walk, banners, statues */
@@ -81,4 +81,5 @@ pspRegister(PSF5.ID,psf5Build);
 /* ---------- the links ---------- */
 PSP_L(9900,PSF5.DOWN,9890,[36,5,2],{name:'the stair down'});
 PSP_L(9900,PSF5.DOOR,9910,[20,20,0],{name:'the door at the foot of the Pale Tower',prov:1});
-pspOnArrive(n=>{if(n!==PSF5.ID)return;try{const F=psf4F();if(!F.ramp){F.ramp=1;msg('The stair ends in the open air. You stand on the ramparts of the castle, at night, and the wind pulls at you. Far below, the dark land runs out on every side. In the middle, a thin black-green spire rises out of sight into the clouds, with tall windows glowing pale green.','#d8e4ff')}}catch(e){console.error('psf5 arrive',e)}});
+pspOnArrive(n=>{if(n!==PSF5.ID)return;try{for(const L of LIGHTS)L.calm=true;   // steady candle light, no strong flicker, so nothing flashes as you walk
+    const F=psf4F();if(!F.ramp){F.ramp=1;msg('The stair ends in the open air. You stand on the ramparts of the castle, at night, and the wind pulls at you. Far below, the dark land runs out on every side. In the middle, a thin black-green spire rises out of sight into the clouds, with tall windows glowing pale green.','#d8e4ff')}}catch(e){console.error('psf5 arrive',e)}});

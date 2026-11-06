@@ -78,9 +78,6 @@ function pshPortrait(i){ // the i-th stand-in portrait: six painted ones, flippe
   const c=pshFilt(src,'hue-rotate('+hue+'deg) saturate('+(.4+((i*7)%5)*.06)+') brightness('+(.85+((i*3)%4)*.07)+')',flip);if(!c)return 'ps_pt_king';c._ps=1;IMG[k]=c;NPC_H[k]=1.35;return k}
 function pshPics(){
   const S=(n,cv,h)=>pshSet(n,cv,h);
-  S('col_fluted',pshFilt('ds_dpillar1','grayscale(1) brightness(.5) contrast(1.15) sepia(.45) hue-rotate(195deg)'),3.0);
-  S('col_twist',pshFilt('hg_pillar','grayscale(1) brightness(.42) contrast(1.2) sepia(.55) hue-rotate(195deg)'),3.0);
-  S('col_silver',pshFilt('ds_wm_crystal_pillar','hue-rotate(290deg) saturate(.8) brightness(.72)'),2.9);
   S('table_long',pshFilt('hl_p_feast','grayscale(.6) sepia(.4) hue-rotate(195deg) brightness(.55)'),.95);
   S('table_high',pshFilt('hl_p_feast','grayscale(.6) sepia(.4) hue-rotate(195deg) brightness(.55)',true),1.0);
   S('chair_high',pshFilt('ds_hgtb_chair','grayscale(.5) brightness(.6) sepia(.4) hue-rotate(195deg)'),1.0);
