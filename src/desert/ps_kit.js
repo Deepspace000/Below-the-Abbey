@@ -91,8 +91,8 @@ function pspFloor(name){
   if(typeof gyFloors==='function')try{gyFloors()}catch(e){}
   const out='psf_'+name,N=128,hs=(a,b,c)=>hash2(a,b,c);
   const tone=(src,g,t)=>FLOORS[src]?gyFloorTone(out,src,g,t):(FLOORS[out]=FLOORS.cobble||FLOORS.grass,out);
-  {const PT={flag:['flagstone',1.7,[.9,1,1.08],.8,.5],flagdark:['flagstone',1.1,[.82,.94,1.04],.8,.5],slate:['flagstone',.95,[.8,.9,1.02],.7,.18],gravel:['gravel',1.5,[.92,1,1.06],.6,.5],cobble:['cobble',1.55,[.92,1,1.08],.5,.45],wet:['cobble_wet',1.45,[.85,.98,1.14],.5,.55],marble:['marble',1.9,[.95,1,1.05]]}[name];
-    const im=PT&&IMG['ps_tex_'+PT[0]];
+  {const PT={flag:['flagstone',1.7,[.9,1,1.08],.8,.5],flagdark:['flagstone',1.1,[.82,.94,1.04],.8,.5],slate:['flagstone',.95,[.8,.9,1.02],.7,.18],gravel:['gravel',1.5,[.92,1,1.06],.6,.5],cobble:['cobble',1.55,[.92,1,1.08],.5,.45],wet:['cobble_wet',1.45,[.85,.98,1.14],.5,.55],marble:['marble',1.9,[.95,1,1.05]]}[name]||(/^f6f\d+$/.test(name)?['f6r'+name.slice(3)+'tex_1',1.1,[1,1,1]]:undefined);   // f6fN: the painted floor of tower room N
+    const im=PT&&(IMG['ps_tex_'+PT[0]]||IMG['ps_'+PT[0]]);
     if(im&&im.width){const c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(im,0,0,N,N);const d=x.getImageData(0,0,N,N).data;
       let mr=0,mg=0,mb=0,mn=0;for(let i=0;i<d.length;i+=4){mr+=d[i];mg+=d[i+1];mb+=d[i+2];mn++}mr/=mn;mg/=mn;mb/=mn;
       const fl=PT[3]===undefined?1:PT[3],sa=PT[4]===undefined?1:PT[4];   // fl: how much of the stone's contrast is kept (the cobbles were noisy), sa: how much of its colour (the lodge floor was tan)

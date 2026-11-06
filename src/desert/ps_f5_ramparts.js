@@ -3,7 +3,7 @@
    The stair from the Floor of the Moon comes out on the castle ramparts. A wide flagged walk runs all round, inside a low parapet, and beyond the parapet the ground falls
    away into the dark, so there are views on every side. In the middle, on a high dais, stands the Pale Tower: a thin, narrow, black-green Gothic spire with tall arched
    windows glowing pale yellow-green, rising into the clouds. One thin stair, fenced on both sides, climbs from the south walk to the dais and the door at the foot of the spire.
-   Door at the foot of the spire: a stub link to 9910 (not built yet).
+   Door at the foot of the spire: a link to 9910, the first tiny room of the tower (ps_f6_tower.js).
    ========================================================================== */
 const PSF5={ID:9900,W:64,H:64,STAIR:[32,41,32,54],DAIS:[24,24,40,40],DAISH:2.4,DOOR:[32,34],DOWN:[32,58],
   TOWNS:[[.03,70,1],[.11,34,.5],[.19,90,1.2],[.29,46,.7],[.38,110,1.3],[.47,30,.45],[.55,64,.9],[.64,100,1.2],[.72,38,.55],[.8,76,1],[.89,50,.7],[.96,28,.4]]};   // far towns round the horizon: [turns round the compass, width, size]
@@ -80,6 +80,6 @@ function psf5Build(info){
 pspRegister(PSF5.ID,psf5Build);
 /* ---------- the links ---------- */
 PSP_L(9900,PSF5.DOWN,9890,[36,5,2],{name:'the stair down'});
-PSP_L(9900,PSF5.DOOR,9910,[20,20,0],{name:'the door at the foot of the Pale Tower',prov:1});
+PSP_L(9900,PSF5.DOOR,9910,[7,9,0],{name:'the door at the foot of the Pale Tower'});
 pspOnArrive(n=>{if(n!==PSF5.ID)return;try{for(const L of LIGHTS)L.calm=true;   // steady candle light, no strong flicker, so nothing flashes as you walk
     const F=psf4F();if(!F.ramp){F.ramp=1;msg('The stair ends in the open air. You stand on the ramparts of the castle, at night, and the wind pulls at you. Far below, the dark land runs out on every side. In the middle, a thin black-green spire rises out of sight into the clouds, with tall windows glowing pale green.','#d8e4ff')}}catch(e){console.error('psf5 arrive',e)}});

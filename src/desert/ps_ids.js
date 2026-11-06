@@ -58,8 +58,17 @@ PSP.LEVELS=[
  PSP_LV(9880,'The Third Floor: the Hall of Mirrors and the Observatory Gallery',112,84,106,0,'in'),
  PSP_LV(9890,'The Floor of the Moon',46,46,110,0,'in'),
  PSP_LV(9900,'The Ramparts',64,64,111,0,'out'),
- PSP_LV(9910,'The Raven Tower and the Great Mews',48,48,108,0,'in',{floors:4}),
- PSP_LV(9920,"The Alchemist's Tower",40,40,109,0,'in',{floors:5}),
+ PSP_LV(9910,'The Vestibule of Candles',14,14,112,0,'in',{tower:1}),
+ PSP_LV(9911,'The Bone Organ',14,14,113,0,'in',{tower:2}),
+ PSP_LV(9912,'The Clock Room',14,14,114,0,'in',{tower:3}),
+ PSP_LV(9913,'The Reliquary',14,14,115,0,'in',{tower:4}),
+ PSP_LV(9914,'The Tapestry Room',14,14,116,0,'in',{tower:5}),
+ PSP_LV(9915,'The Mirror Cabinet',14,14,117,0,'in',{tower:6}),
+ PSP_LV(9916,'The Thorn Library',14,14,118,0,'in',{tower:7}),
+ PSP_LV(9917,'The Weeping Chapel',14,14,119,0,'in',{tower:8}),
+ PSP_LV(9918,'The Crown Armoury',14,14,120,0,'in',{tower:9}),
+ PSP_LV(9919,'The Antechamber of the King',14,14,120,0,'in',{tower:10}),
+ PSP_LV(9920,'The Throne Room of the Pale King',40,32,120,0,'in',{tower:11}),
  PSP_LV(9930,'The Upper Keep: Armoury, Treasury and Reliquary',96,72,110,0,'in'),
  PSP_LV(9940,'The Hanging Forest',96,80,112,0,'atrium'),
  PSP_LV(9950,'The Maze of Mirrors',64,64,112,0,'maze'),
@@ -137,7 +146,7 @@ PSP.KEY2={item:'pskey2',name:'The Second Floor Key',flag:'key2',hiddenIn:9800}; 
 PSP.REST=[9723,9731,9740,9750,9760];                 // levels that hold a quiet rest room (free rest, no creatures, warm candle light); the room names are in the plan
 /* test and jump links (?town=...&lvl=...): name -> [level, x, y, f]; the party level for a link is the level rating of the target, capped at 115 */
 PSP.JUMPS={palespire:[9720,32,52,0],palespire1:[9720,32,52,0],palespire2:[9730,32,49,0],palespire3:[9740,32,44,0],palespire4:[9750,42,22,3],
-  palespire5:[9760,5,22,1],palespire6:[9780,24,5,2],palespire7:[9790,40,5,2],palespire8:[9800,8,5,2],palespirekey:[9800,22,14,2],crookedroad:[9715,40,59,0],palespire9:[9820,28,38,0],illusion1:[9821,24,35,0],illusion2:[9822,24,35,0],illusion3:[9823,24,35,0],illusion4:[9824,24,35,0],illusion5:[9825,24,35,0],illusion6:[9826,24,35,0],illusion7:[9827,24,35,0]};
+  palespire5:[9760,5,22,1],palespire6:[9780,24,5,2],palespire7:[9790,40,5,2],palespire8:[9800,8,5,2],palespirekey:[9800,22,14,2],crookedroad:[9715,40,59,0],palespire9:[9820,28,38,0],palespiretower:[9910,7,9,0],palespirethrone:[9920,20,26,0],illusion1:[9821,24,35,0],illusion2:[9822,24,35,0],illusion3:[9823,24,35,0],illusion4:[9824,24,35,0],illusion5:[9825,24,35,0],illusion6:[9826,24,35,0],illusion7:[9827,24,35,0]};
 /* small readers (no side effects) */
 const pspIs=n=>n>=PSP.LO&&n<=PSP.HI;
 const pspLevel=id=>PSP.LEVELS.find(l=>l.id===id)||null;

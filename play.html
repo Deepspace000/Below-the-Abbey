@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.861';
+const VERSION='3.863';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -72611,8 +72611,17 @@ PSP.LEVELS=[
  PSP_LV(9880,'The Third Floor: the Hall of Mirrors and the Observatory Gallery',112,84,106,0,'in'),
  PSP_LV(9890,'The Floor of the Moon',46,46,110,0,'in'),
  PSP_LV(9900,'The Ramparts',64,64,111,0,'out'),
- PSP_LV(9910,'The Raven Tower and the Great Mews',48,48,108,0,'in',{floors:4}),
- PSP_LV(9920,"The Alchemist's Tower",40,40,109,0,'in',{floors:5}),
+ PSP_LV(9910,'The Vestibule of Candles',14,14,112,0,'in',{tower:1}),
+ PSP_LV(9911,'The Bone Organ',14,14,113,0,'in',{tower:2}),
+ PSP_LV(9912,'The Clock Room',14,14,114,0,'in',{tower:3}),
+ PSP_LV(9913,'The Reliquary',14,14,115,0,'in',{tower:4}),
+ PSP_LV(9914,'The Tapestry Room',14,14,116,0,'in',{tower:5}),
+ PSP_LV(9915,'The Mirror Cabinet',14,14,117,0,'in',{tower:6}),
+ PSP_LV(9916,'The Thorn Library',14,14,118,0,'in',{tower:7}),
+ PSP_LV(9917,'The Weeping Chapel',14,14,119,0,'in',{tower:8}),
+ PSP_LV(9918,'The Crown Armoury',14,14,120,0,'in',{tower:9}),
+ PSP_LV(9919,'The Antechamber of the King',14,14,120,0,'in',{tower:10}),
+ PSP_LV(9920,'The Throne Room of the Pale King',40,32,120,0,'in',{tower:11}),
  PSP_LV(9930,'The Upper Keep: Armoury, Treasury and Reliquary',96,72,110,0,'in'),
  PSP_LV(9940,'The Hanging Forest',96,80,112,0,'atrium'),
  PSP_LV(9950,'The Maze of Mirrors',64,64,112,0,'maze'),
@@ -72690,7 +72699,7 @@ PSP.KEY2={item:'pskey2',name:'The Second Floor Key',flag:'key2',hiddenIn:9800}; 
 PSP.REST=[9723,9731,9740,9750,9760];                 // levels that hold a quiet rest room (free rest, no creatures, warm candle light); the room names are in the plan
 /* test and jump links (?town=...&lvl=...): name -> [level, x, y, f]; the party level for a link is the level rating of the target, capped at 115 */
 PSP.JUMPS={palespire:[9720,32,52,0],palespire1:[9720,32,52,0],palespire2:[9730,32,49,0],palespire3:[9740,32,44,0],palespire4:[9750,42,22,3],
-  palespire5:[9760,5,22,1],palespire6:[9780,24,5,2],palespire7:[9790,40,5,2],palespire8:[9800,8,5,2],palespirekey:[9800,22,14,2],crookedroad:[9715,40,59,0],palespire9:[9820,28,38,0],illusion1:[9821,24,35,0],illusion2:[9822,24,35,0],illusion3:[9823,24,35,0],illusion4:[9824,24,35,0],illusion5:[9825,24,35,0],illusion6:[9826,24,35,0],illusion7:[9827,24,35,0]};
+  palespire5:[9760,5,22,1],palespire6:[9780,24,5,2],palespire7:[9790,40,5,2],palespire8:[9800,8,5,2],palespirekey:[9800,22,14,2],crookedroad:[9715,40,59,0],palespire9:[9820,28,38,0],palespiretower:[9910,7,9,0],palespirethrone:[9920,20,26,0],illusion1:[9821,24,35,0],illusion2:[9822,24,35,0],illusion3:[9823,24,35,0],illusion4:[9824,24,35,0],illusion5:[9825,24,35,0],illusion6:[9826,24,35,0],illusion7:[9827,24,35,0]};
 /* small readers (no side effects) */
 const pspIs=n=>n>=PSP.LO&&n<=PSP.HI;
 const pspLevel=id=>PSP.LEVELS.find(l=>l.id===id)||null;
@@ -72803,7 +72812,8 @@ function pspStand(name){
   x.drawImage(im,0,0);x.setTransform(1,0,0,1,0,0);x.filter='none';
   if(!o.keep){x.globalCompositeOperation='source-atop';x.fillStyle=o.ghost?'rgba(170,240,205,.32)':'rgba(40,96,66,.3)';x.fillRect(0,0,c.width,c.height);x.globalCompositeOperation='source-over'}
   IMG[key]=c;NPC_H[key]=e[0];IMG[key]._ps=1;return key}
-function pspPic(name){const k='ps_'+name;if(!IMG[k])pspStand(name);if(NPC_H[k]===undefined&&PSP_PICS[name])NPC_H[k]=PSP_PICS[name][0];return IMG[k]?k:'gy_column'}
+/* the fluted and twisted columns have leaf capitals, which the owner does not want anywhere: every request for them gets the silver-banded column, and a column that is not loaded yet never falls back to the ivy graveyard column */
+function pspPic(name){if(name==='col_fluted'||name==='col_twist')name='col_silver';const k='ps_'+name;if(!IMG[k])pspStand(name);if(NPC_H[k]===undefined&&PSP_PICS[name])NPC_H[k]=PSP_PICS[name][0];return IMG[k]?k:(/^col_/.test(name)&&IMG.ds_wm_crystal_pillar&&IMG.ds_wm_crystal_pillar.width?'ds_wm_crystal_pillar':'gy_column')}
 /* after the pictures are loaded: every name of the table gets its picture (painted or stand-in); creatures get their width from the picture and the height 'ph' */
 function pspPics(){
   for(const n in PSP_PICS){try{pspPic(n)}catch(e){console.error('pspPic',n,e)}}
@@ -72912,8 +72922,8 @@ function pspFloor(name){
   if(typeof gyFloors==='function')try{gyFloors()}catch(e){}
   const out='psf_'+name,N=128,hs=(a,b,c)=>hash2(a,b,c);
   const tone=(src,g,t)=>FLOORS[src]?gyFloorTone(out,src,g,t):(FLOORS[out]=FLOORS.cobble||FLOORS.grass,out);
-  {const PT={flag:['flagstone',1.7,[.9,1,1.08],.8,.5],flagdark:['flagstone',1.1,[.82,.94,1.04],.8,.5],slate:['flagstone',.95,[.8,.9,1.02],.7,.18],gravel:['gravel',1.5,[.92,1,1.06],.6,.5],cobble:['cobble',1.55,[.92,1,1.08],.5,.45],wet:['cobble_wet',1.45,[.85,.98,1.14],.5,.55],marble:['marble',1.9,[.95,1,1.05]]}[name];
-    const im=PT&&IMG['ps_tex_'+PT[0]];
+  {const PT={flag:['flagstone',1.7,[.9,1,1.08],.8,.5],flagdark:['flagstone',1.1,[.82,.94,1.04],.8,.5],slate:['flagstone',.95,[.8,.9,1.02],.7,.18],gravel:['gravel',1.5,[.92,1,1.06],.6,.5],cobble:['cobble',1.55,[.92,1,1.08],.5,.45],wet:['cobble_wet',1.45,[.85,.98,1.14],.5,.55],marble:['marble',1.9,[.95,1,1.05]]}[name]||(/^f6f\d+$/.test(name)?['f6r'+name.slice(3)+'tex_1',1.1,[1,1,1]]:undefined);   // f6fN: the painted floor of tower room N
+    const im=PT&&(IMG['ps_tex_'+PT[0]]||IMG['ps_'+PT[0]]);
     if(im&&im.width){const c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(im,0,0,N,N);const d=x.getImageData(0,0,N,N).data;
       let mr=0,mg=0,mb=0,mn=0;for(let i=0;i<d.length;i+=4){mr+=d[i];mg+=d[i+1];mb+=d[i+2];mn++}mr/=mn;mg/=mn;mb/=mn;
       const fl=PT[3]===undefined?1:PT[3],sa=PT[4]===undefined?1:PT[4];   // fl: how much of the stone's contrast is kept (the cobbles were noisy), sa: how much of its colour (the lodge floor was tan)
@@ -80669,7 +80679,7 @@ PSP_L(9890,[PSF4M.GATE[0],PSF4M.GATE[1]],9900,[32,56,0],{name:'the stair up to t
    The stair from the Floor of the Moon comes out on the castle ramparts. A wide flagged walk runs all round, inside a low parapet, and beyond the parapet the ground falls
    away into the dark, so there are views on every side. In the middle, on a high dais, stands the Pale Tower: a thin, narrow, black-green Gothic spire with tall arched
    windows glowing pale yellow-green, rising into the clouds. One thin stair, fenced on both sides, climbs from the south walk to the dais and the door at the foot of the spire.
-   Door at the foot of the spire: a stub link to 9910 (not built yet).
+   Door at the foot of the spire: a link to 9910, the first tiny room of the tower (ps_f6_tower.js).
    ========================================================================== */
 const PSF5={ID:9900,W:64,H:64,STAIR:[32,41,32,54],DAIS:[24,24,40,40],DAISH:2.4,DOOR:[32,34],DOWN:[32,58],
   TOWNS:[[.03,70,1],[.11,34,.5],[.19,90,1.2],[.29,46,.7],[.38,110,1.3],[.47,30,.45],[.55,64,.9],[.64,100,1.2],[.72,38,.55],[.8,76,1],[.89,50,.7],[.96,28,.4]]};   // far towns round the horizon: [turns round the compass, width, size]
@@ -80746,9 +80756,239 @@ function psf5Build(info){
 pspRegister(PSF5.ID,psf5Build);
 /* ---------- the links ---------- */
 PSP_L(9900,PSF5.DOWN,9890,[36,5,2],{name:'the stair down'});
-PSP_L(9900,PSF5.DOOR,9910,[20,20,0],{name:'the door at the foot of the Pale Tower',prov:1});
+PSP_L(9900,PSF5.DOOR,9910,[7,9,0],{name:'the door at the foot of the Pale Tower'});
 pspOnArrive(n=>{if(n!==PSF5.ID)return;try{for(const L of LIGHTS)L.calm=true;   // steady candle light, no strong flicker, so nothing flashes as you walk
     const F=psf4F();if(!F.ramp){F.ramp=1;msg('The stair ends in the open air. You stand on the ramparts of the castle, at night, and the wind pulls at you. Far below, the dark land runs out on every side. In the middle, a thin black-green spire rises out of sight into the clouds, with tall windows glowing pale green.','#d8e4ff')}}catch(e){console.error('psf5 arrive',e)}});
+
+/* ---- src/desert/ps_f6_foes.js ---- */
+/* ==========================================================================
+   THE PALE TOWER (floor 6 of the Pale Spire): the ten bosses of rooms 1 to 10, the Pale King of room 11, and the top-level gear (prefix psf6; item ids pg_f6_*).
+   Pictures: 'ps_f6rN_foe' (idle) and 'ps_f6rN_foeA' (attack, swapped in when e.lunge>.2 by the img+'A' convention) for room N; room 11 is the king.
+   State: G.flags.psp.f6 = {boss:{1..10: 2 when dead}, king: 2 when dead}. The ten room bosses do not drop gear (the chests in the rooms hold pg_f6_1..10); the king drops four pieces.
+   Loaded after ps_court.js, ps_gear.js, ps_f4_moon.js and blight_late.js. The level file ps_f6_tower.js uses PSF6_FOES, PSF6_GEAR and may define psf6Won().
+   ========================================================================== */
+const PSF6_FOES=['psf6_e1','psf6_e2','psf6_e3','psf6_e4','psf6_e5','psf6_e6','psf6_e7','psf6_e8','psf6_e9','psf6_e10'];
+const PSF6_GEAR=['pg_f6_1','pg_f6_2','pg_f6_3','pg_f6_4','pg_f6_5','pg_f6_6','pg_f6_7','pg_f6_8','pg_f6_9','pg_f6_10'];
+/* ---------- state and helpers ---------- */
+function psf6F(){if(!G.flags)G.flags={};if(!G.flags.psp)G.flags.psp={};const P=G.flags.psp;if(!P.f6)P.f6={};if(!P.f6.boss)P.f6.boss={};return P.f6}
+/* the phase a boss has just entered (0 when none): cuts are health fractions in falling order, e.g. [.5] or [.75,.5,.25] */
+function psf6Phase(e,cuts){
+  const r=e.hp/(e.maxhp||e.hp||1);let ph=0;for(let i=0;i<cuts.length;i++)if(r<cuts[i])ph=i+1;
+  if(ph<=(e._ph|0))return 0;e._ph=ph;return ph}
+/* call helpers: at most 4 helpers alive, each marked _kid; 'shrink' scales a helper's health (used when a boss is called as a helper) */
+function psf6Call(e,types,lvl,shrink){
+  let n=0;
+  for(const t of types){
+    if(!ENEMY_DEF[t])continue;
+    if(G.enemies.filter(m=>m._kid&&m.hp>0).length>=4)break;
+    const m=bl3Add(t,e.x,e.y,lvl);
+    if(m){m._kid=1;if(shrink){m.hp=m.maxhp=Math.max(1,Math.round(m.hp*shrink))}n++}}
+  return n}
+const psf6Heal=(e,f)=>{e.hp=Math.min(e.maxhp||e.hp,e.hp+Math.round((e.maxhp||e.hp)*f))};
+/* ---------- the ten room bosses ---------- */
+const psf6B=(n,o)=>pscE('psf6_e'+n,Object.assign({img:'ps_f6r'+n+'_foe',ph:2.1,w:.8,hit:.92,boss:true,aboveParty:0,gold:[0,0],ps:1,psf6:n},o));
+Object.assign(ENEMY_DEF,{
+  psf6_e1:psf6B(1,{name:'The Gilded Usher',hp:1200,dmg:[22,32],verb:'cuts',xp:900,blind:1,glow:.5}),
+  psf6_e2:psf6B(2,{name:'The Organist Wraith',hp:1400,dmg:[24,34],verb:'rakes',xp:1050,fly:true,floatH:.3}),
+  psf6_e3:psf6B(3,{name:'The Clock Reaper',hp:1600,dmg:[26,37],verb:'reaps',xp:1200,speed:2}),
+  psf6_e4:psf6B(4,{name:'The Reliquary Mimic',hp:1800,dmg:[28,40],verb:'bites',xp:1350}),
+  psf6_e5:psf6B(5,{name:'The Weaver',hp:2000,dmg:[30,42],verb:'bites',xp:1500,speed:2}),
+  psf6_e6:psf6B(6,{name:'The Mirror Duchess',hp:2200,dmg:[32,45],verb:'slashes',xp:1650}),
+  psf6_e7:psf6B(7,{name:'The Thorn Scribe',hp:2400,dmg:[34,47],verb:'stabs',xp:1800,regrow:1}),
+  psf6_e8:psf6B(8,{name:'The Weeping Saint',hp:2600,dmg:[36,50],verb:'crushes',xp:1950}),
+  psf6_e9:psf6B(9,{name:'The Crown Knight',hp:2900,dmg:[38,53],verb:'cuts',xp:2150}),
+  psf6_e10:psf6B(10,{name:"The King's Executioner",hp:3200,dmg:[40,56],verb:'chops',xp:2400})});
+if(typeof NO_VARY!=='undefined')NO_VARY.push(...PSF6_FOES,'psf6_king');
+if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('psf6_king');
+if(typeof BOSS_GOLD!=='undefined'){
+  const G0=[[5000,6500],[5500,7000],[6000,7500],[6500,8000],[7000,8800],[7500,9400],[8000,10000],[8500,10600],[9000,11300],[9000,12000]];
+  PSF6_FOES.forEach((t,i)=>{BOSS_GOLD[t]=G0[i]});BOSS_GOLD.psf6_king=[12000,16000]}
+if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push(
+  [/^psf6_e1$/,'shaken',.2],[/^psf6_e2$/,'shaken',.3],[/^psf6_e3$/,'cursed',.2],[/^psf6_e4$/,'bleeding',.25],[/^psf6_e5$/,'poisoned',.35],
+  [/^psf6_e6$/,'cursed',.25],[/^psf6_e7$/,'bleeding',.35],[/^psf6_e8$/,'cursed',.3],[/^psf6_e9$/,'shaken',.25],[/^psf6_e10$/,'bleeding',.4],[/^psf6_king$/,'cursed',.3]);
+/* deaths: set the room flag, short plain message (a helper copy of a boss does not count) */
+const psf6Dead=(n,m,col)=>bl3Kill('psf6_e'+n,e=>{if(e._kid)return;psf6F().boss[n]=2;msg(m,col||'#d8d0f0')});
+psf6Dead(1,'The Gilded Usher falls apart. The candle flames go out one by one.');
+psf6Dead(2,'The Organist Wraith stops mid-chord and fades. The organ is silent.');
+psf6Dead(3,'The Clock Reaper stops. Its hands point to midnight and do not move.');
+psf6Dead(4,'The Reliquary Mimic snaps shut and lies still. It is only a box now.');
+psf6Dead(5,'The Weaver curls up on her web and does not move again.');
+psf6Dead(6,'The Mirror Duchess cracks across the face and breaks into a hundred pieces.');
+psf6Dead(7,'The Thorn Scribe drops his pen. His thorns stop growing.');
+psf6Dead(8,'The Weeping Saint cracks and goes grey. The tears stop.');
+psf6Dead(9,'The Crown Knight kneels, and his crown rolls off. He does not get up.');
+psf6Dead(10,"The King's Executioner lets go of his axe and falls. The way up is clear.");
+/* phases: each boss has its own trick at 50 percent health or lower */
+bl3Hit('psf6_e1',e=>{const p=psf6Phase(e,[.5]);if(!p)return;
+  if(psf6Call(e,['psmoth','psmoth'],112))msg('The Usher shakes his head and the candle flames break off. Two swarms of flame-lit moths fill the room.','#ffd88a')});
+bl3Hit('psf6_e2',e=>{const p=psf6Phase(e,[.66,.33]);if(!p)return;
+  if(psf6Call(e,['psstarmoth','psstarmoth'],113))msg('The Wraith plays a long low chord on the air. Two swarms of star moths answer it.','#c8b8f0')});
+bl3Hit('psf6_e3',e=>{const p=psf6Phase(e,[.5,.2]);if(!p)return;
+  psf6Heal(e,.12);msg('The Clock Reaper turns its hands back. It mends 12% of its health.','#ffd88a')});
+bl3Hit('psf6_e4',e=>{const p=psf6Phase(e,[.5]);if(!p)return;
+  if(psf6Call(e,['psgargoyle','psgargoyle'],114))msg('The lid flies open and two small stone shapes jump out of the box.','#d8d0b8')});
+bl3Hit('psf6_e5',e=>{const p=psf6Phase(e,[.66,.33]);if(!p)return;
+  if(psf6Call(e,['psthornsprite','psthornsprite'],115))msg('The Weaver shakes her web. Two small spiders drop out of it.','#e0e0f0')});
+bl3Hit('psf6_e6',e=>{const p=psf6Phase(e,[.66,.33]);if(!p)return;
+  if(psf6Call(e,['psmirrorshade','psmirrorshade'],116))msg("Two reflections step out of the Duchess's mirrors and stand beside her.",'#d0e8ff')});
+bl3Hit('psf6_e7',e=>{const p=psf6Phase(e,[.5]);if(!p)return;
+  psf6Heal(e,.1);if(psf6Call(e,['psthornsprite','psthornsprite'],117))msg('The Scribe writes a line on the air. His wounds close and two thorn sprites climb out of the ink.','#bfe8c8')});
+bl3Hit('psf6_e8',e=>{const p=psf6Phase(e,[.66,.33]);if(!p)return;
+  psf6Heal(e,.08);if(psf6Call(e,['psmourner'],118))msg('The Saint weeps, and a stone mourner rises out of the tears. The Saint heals 8% of her health.','#cfd8ff')});
+bl3Hit('psf6_e9',e=>{const p=psf6Phase(e,[.5]);if(!p)return;
+  if(psf6Call(e,['psguard','psguard'],119))msg('The Crown Knight raises his sword. Two pale guards come running to his side.','#e0e0f0')});
+bl3Hit('psf6_e10',e=>{const p=psf6Phase(e,[.66,.33]);if(!p)return;
+  if(psf6Call(e,['psmarblehound','psmarblehound'],120))msg('The Executioner whistles. Two marble hounds slip in through the door behind you.','#e0e0f0')});
+/* ---------- the Pale King ---------- */
+ENEMY_DEF.psf6_king=pscE('psf6_king',{img:'ps_f6r11_foe',ph:2.6,w:.9,name:'The Pale King',hp:8000,dmg:[60,90],hit:.94,verb:'strikes',xp:20000,boss:true,aboveParty:0,gold:[0,0],ps:1});
+bl3Hit('psf6_king',e=>{
+  const ph=psf6Phase(e,[.75,.5,.25]);if(!ph)return;
+  const T=[null,['psf6_e1','psf6_e2'],['psf6_e5','psf6_e6'],['psf6_e8','psf6_e9'],['psf6_e3','psf6_e10']][ph],
+        M=[null,'The Pale King lifts one hand. The Gilded Usher and the Organist Wraith come back, weaker than before.',
+          'The Pale King lifts one hand. The Weaver and the Mirror Duchess come back, weaker than before.',
+          'The Pale King lifts one hand. The Weeping Saint and the Crown Knight come back, weaker than before.',
+          "The Pale King raises both hands. The Clock Reaper and the King's Executioner come back, weaker than before."][ph];
+  if(psf6Call(e,T,120,.2))msg(M,'#e8e0ff')});
+bl3Kill('psf6_king',e=>{
+  const F=psf6F();F.king=2;
+  msg('The Pale King sinks to his knees, and the pale crown slips from his head. He is silent, and he does not rise again. The tower is yours.','#ffe36a');
+  if(!F.got){F.got=1;for(const id of ['pg_f6_k1','pg_f6_k2','pg_f6_k3','pg_f6_k4'])bl3Give(id);
+    msg("Four pieces lie where he fell: the Black Crown of the Pale King, the Sceptre of the Pale King, and his gauntlets and greaves.",'#ffe36a')}
+  if(typeof psf6Won==='function')psf6Won()});
+/* ---------- gear: like pgrItem but for levels 112 to 120 ---------- */
+function psf6Item(id,lvl,o){
+  const it=Object.assign({k:'weapon',price:0,rar:1,gear:1},o,{lvl});it.id=id;it.pg=1;
+  if(it.k==='weapon'){it.hit=it.hit===undefined?.2:it.hit;if(it.t==='Bow')it.ranged=7}
+  it.d=it.d+' Needs level '+lvl+'.';
+  ITEMDEF[id]=it;if(typeof PGR_ITEMS!=='undefined')PGR_ITEMS[id]=it;return it}
+const C6=(typeof PGR_C!=='undefined')?PGR_C:{vio:'#4a2a6a',blk:'#1a1624',brass:'#b08d3c',verd:'#3f8f7a',bone:'#d8d0b8'};
+/* the ten chest pieces, one per room */
+psf6Item('pg_f6_1',112,{n:'Candleflame Greatsword',t:'Sword',ic:'sword',c:C6.brass,dmg:[980,1120],req:{str:82},eff:{bossdmg:.5,bleed:[.5,8,80],stun:.18},dbl:.22,sw:.7,
+  d:"A black and gold greatsword with a crown of small flames burning along the blade, taken from the Gilded Usher. Wounds bleed hard, about one blow in six knocks the foe down, one blow in five does double damage, and bosses take 50% more."});
+psf6Item('pg_f6_2',113,{n:'Organ-Pipe Staff',t:'Staff',ic:'staff',c:C6.vio,dmg:[340,400],magic:260,req:{int:82},eff:{bossdmg:.7,daze:.4,shock:.25},pas:{spellPct:.2,mpRegen:1.4},sw:.44,
+  d:"A tall staff made of five thin organ pipes bound together, which hum when it is raised. It belonged to the Organist Wraith. Adds 260 to the power of spells, spell damage +20%, tiredness fades much faster, bosses take 70% more, and foes are often dazed."});
+psf6Item('pg_f6_3',114,{n:"Reaper's Minute-Hand",t:'Dagger',ic:'dagger',c:C6.bone,dmg:[900,1020],req:{dex:80},eff:{bleed:[.6,10,80],exec:[.45,4],bossdmg:.35},dbl:.34,pas:{crit:.1},sw:.3,
+  d:"A long brass clock hand with a razor edge, pulled from the Clock Reaper. Wounds bleed hard, a foe under 45% health takes four times the blow, bosses take 35% more, and double hits come 10% more often."});
+psf6Item('pg_f6_4',115,{k:'chest',n:'Reliquary Cuirass',t:'Chest',ic:'chest',c:C6.bone,armor:98,pas:{ward:36,thorns:18,regen:1.2,lifesteal:.06,secondWind:.45},sw:.55,
+  d:"A cuirass of pale gilt plate with small locked reliquary boxes set all over the breast, from the Reliquary Mimic. Armour 98, every blow on the wearer is 36 lighter, every enemy that strikes takes 18 damage, wounds close quickly, the wearer heals 6% of the melee damage dealt, and once per 30 rounds below a quarter health it heals 45%."});
+psf6Item('pg_f6_5',116,{n:"Weaver's Silkstring Bow",t:'Bow',ic:'bow',c:C6.bone,dmg:[960,1100],req:{dex:82},eff:{pierce:1,double:.5,vuln:[.35,5],bossdmg:.45},dbl:.2,sw:.42,
+  d:"A bow of pale bone strung with spider silk that is stronger than wire, taken from the Weaver. Shoots 7 squares, its arrows pass through to the foe behind, half of all shots send a second arrow, a hit often leaves the foe open to harm, and bosses take 45% more."});
+psf6Item('pg_f6_6',117,{k:'shield',n:'Mirror Duchess Aegis',t:'Shield',ic:'shield',c:C6.vio,armor:46,pas:{ward:30,thorns:26,dodge:.1,regen:.9},sw:.5,
+  d:"A tall oval shield of silvered glass in a black frame. Blows that land on it come back on the attacker. Armour 46, every blow on the wearer is 30 lighter, every enemy that strikes takes 26 damage, enemies miss 10% more, and wounds close steadily."});
+psf6Item('pg_f6_7',118,{k:'ring',n:'Thorn Scribe Signet',t:'Ring',ic:'ring',c:C6.verd,pas:{ward:36,crit:.1,dmgPct:.09,regen:1.3,lifesteal:.03},hp:190,dex:11,str:10,sw:.1,
+  d:"A black signet ring with a thorn for a seal, which the Scribe used on every page. Adds 11 Dexterity, 10 Strength and 190 health, every blow on the wearer is 36 lighter, double hits come 10% more often, all damage +9%, wounds close quickly, and the wearer heals 3% of the melee damage dealt."});
+psf6Item('pg_f6_8',119,{n:'Maul of the Weeping Saint',t:'Mace',ic:'mace',c:C6.bone,dmg:[940,1080],req:{str:84},eff:{stun:.35,bossdmg:.5,shock:.25,vuln:[.3,5]},dbl:.2,sw:.9,
+  d:"A heavy mace of grey stone, cut from the Weeping Saint's own hand. Clear water runs from its head after each blow. About one blow in three knocks the foe down, one blow in four shakes the ground and throws down every foe close by, bosses take 50% more, and a hit sometimes leaves the foe open to harm."});
+psf6Item('pg_f6_9',120,{k:'head',n:"Crown Knight's Great Helm",t:'Helm',ic:'head',c:C6.brass,armor:40,pas:{dodge:.1,dmgPct:.1,spellPct:.1,regen:1,mpRegen:1},sw:.4,
+  d:"A tall black helm with a gold crown welded on top, the visor shut for good. It was the Crown Knight's. Armour 40, enemies miss 10% more, all damage +10%, spell damage +10%, wounds close quickly, and tiredness fades faster."});
+psf6Item('pg_f6_10',120,{n:"Headsman's Axe of the Pale King",t:'Axe',ic:'axe',c:C6.blk,dmg:[1000,1160],req:{str:84},eff:{cleave:1,exec:[.45,5],bossdmg:.6,bleed:[.5,8,80]},dbl:.24,sw:.8,
+  d:"A huge black axe with a blade as wide as a door, carried by the King's Executioner. Each blow carries on into the foe behind, a foe under 45% health takes five times the blow, wounds bleed hard, bosses take 60% more, and one blow in four does double damage."});
+/* the king's four drops */
+psf6Item('pg_f6_k1',120,{k:'head',n:'Black Crown of the Pale King',t:'Helm',ic:'head',c:C6.blk,armor:44,pas:{dodge:.12,crit:.1,dmgPct:.12,spellPct:.12,regen:1.2,mpRegen:1.2},sw:.4,
+  d:"A heavy crown of black iron set with seven pale stones, taken from the Pale King. Armour 44, enemies miss 12% more, double hits come 10% more often, all damage +12%, spell damage +12%, wounds close quickly, and tiredness fades faster."});
+psf6Item('pg_f6_k2',120,{n:'Sceptre of the Pale King',t:'Staff',ic:'staff',c:C6.vio,dmg:[380,450],magic:300,req:{int:86},eff:{bossdmg:.8,daze:.4,shock:.3},pas:{spellPct:.25,mpRegen:1.6,regen:.8},sw:.44,
+  d:"A long sceptre of pale stone with a black orb at the tip, held by the Pale King. Adds 300 to the power of spells, spell damage +25%, tiredness fades much faster, wounds close steadily, bosses take 80% more, and foes are often dazed."});
+psf6Item('pg_f6_k3',120,{k:'arms',n:'Gauntlets of the Pale King',t:'Arms',ic:'arms',c:C6.vio,armor:26,pas:{dmgPct:.1,crit:.09,thorns:16,ward:16},sw:.4,
+  d:"Black gauntlets with pale stone knuckles, the Pale King's. Armour 26, all damage +10%, double hits come 9% more often, every enemy that strikes takes 16 damage, and every blow on the wearer is 16 lighter."});
+psf6Item('pg_f6_k4',120,{k:'legs',n:'Greaves of the Pale King',t:'Legs',ic:'legs',c:C6.bone,armor:32,pas:{regen:1.3,dodge:.11,ward:18,mpRegen:.8},sw:.4,
+  d:"Pale grey greaves that never mark or scuff, the Pale King's. Armour 32, wounds close quickly, enemies miss 11% more, every blow on the wearer is 18 lighter, and tiredness fades faster."});
+
+/* ---- src/desert/ps_f6_tower.js ---- */
+/* ==========================================================================
+   THE PALE SPIRE, THE LAST PART: THE PALE TOWER (levels 9910 to 9919 and 9920; prefix psf6).
+   Ten tiny rooms, one above the other, 14 x 14 each. In every room a boss stands between the stairs; a circular stair leads up, and a gilded chest holds a piece of the best gear in the
+   game. Both stay shut until the boss of the room is dead. Room 1 (9910) has a teleport stone. The tenth room's stair leads up to the Throne Room (9920): a big hall with the Pale King on
+   his throne (level 120), and a second teleport stone so the party can go back to shop for gear and potions.
+   Bosses, gear and drops are in ps_f6_foes.js (ENEMY_DEF psf6_e1..psf6_e10, psf6_king; items pg_f6_*). Pictures: assets/ps f6rN* (see tools/PS_F6_ART.md).
+   State: G.flags.psp.f6 = {boss:{N:2 when dead}, chest:{N:1 when opened}, seen, won}.
+   ========================================================================== */
+const PSF6={BASE:9909,THRONE:9920,N:10,W:14,
+  UP:[7,3],DOWN:[7,10],LAND:[7,9],ABOVE:[7,4],BOSS:[7,5],CHEST:[10,9],
+  THEME:['The Vestibule of Candles','The Bone Organ','The Clock Room','The Reliquary','The Tapestry Room','The Mirror Cabinet','The Thorn Library','The Weeping Chapel','The Crown Armoury','The Antechamber of the King'],
+  INTRO:['A hall of gilded gates, thick with candle flames. Something in black and gold armour waits among them.','Great organ pipes of bone and black iron fill the walls. Somewhere a key is being held down.','Gilt clocks of every size tick out of step. Something tall stands under the biggest pendulum.','Gilded boxes and crystal cases of old bones line the walls, each with a small lamp.','Black and red tapestries hang to the floor, woven with spiders and moths. Something pale moves behind them.','Gilt mirrors with black glass cover every wall. A tall figure stands in all of them at once.','Black shelves of books run up into the dark, with thorns grown through the pages. Something sits at the desk and writes.','A small chapel of black marble and gilded cherubs. A stone saint stands at the altar, weeping.','Gilt armour stands and crossed halberds line the walls, and crowns lie on cushions. Something heavy is already awake.','The doors at the top are gilt and shaped like a throne. A hooded giant stands before them with an axe.']};
+const psf6S=()=>{const P=(G.flags.psp=G.flags.psp||{}),F=P.f6=P.f6||{};F.boss=F.boss||{};F.chest=F.chest||{};return F};
+const psf6Id=n=>n>=11?PSF6.THRONE:PSF6.BASE+n;
+const psf6Room=id=>id===PSF6.THRONE?11:(id>PSF6.BASE&&id<=PSF6.BASE+PSF6.N?id-PSF6.BASE:0);
+if(typeof TELE_KEEP_HI!=='undefined'){TELE_KEEP_HI.add(9910);TELE_KEEP_HI.add(9920)}   // the two teleport stones of the tower: room 1 and the throne room
+/* a painted picture of room n (assets/ps), or null while it is not made */
+const psf6Has=name=>{try{const k=pspPic(name);return k!=='gy_column'&&IMG[k]&&IMG[k].width?k:null}catch(e){return null}};
+/* the painted wall of room n, cut from tile 0 of its texture sheet; the plain dark ashlar stands in until it exists */
+function psf6Wall(n,wh){
+  const im=IMG['ps_f6r'+n+'tex_0'];
+  if(im&&im.width){IMG['gyp_pst_f6r'+n+'w']=im;return gyTile('pst_f6r'+n+'w',wh,{gain:1.25,rgb:[1,1,1],tag:'psf6w'+n+'_'+wh})}
+  return pspWallGid('dark',n%5,wh)}
+function psf6Dress(C,n,W,H,wh){
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(C.rows[y][x]!=='.')C.solid(x,y,C.ch(psf6Wall(n,wh)))}
+const PSF6_PROP={centre:1.0,tall:1.0,hang:1.0};
+function psf6Build(info){
+  const id=info.id||PSF6.cur,n=psf6Room(id),W=PSF6.W,H=PSF6.W,wh=3.2;
+  const C=pspMake({id,start:{x:PSF6.LAND[0],y:PSF6.LAND[1],f:0},floor:'f6f'+n,wh,amb:.3,lcol:[1.45,.85,.55],kind:'in',tele:n===1?[3,10]:undefined});
+  C.room(2,2,11,11,{floor:'f6f'+n,name:PSF6.THEME[n-1],at:[7,7]});
+  psf6Dress(C,n,W,H,wh);
+  /* the stairs: a circular stair up in the north wall, one down in the south wall */
+  const put=(name,x,y,o)=>{C.used.delete(x+','+y);return C.dec(pspPic(name),x,y,Object.assign({block:true},o||{}))};
+  put('stair_spiral_iron',PSF6.UP[0],PSF6.UP[1],{npc:'psf6_up'+n,sc:1});
+  put('stair_spiral_iron',PSF6.DOWN[0],PSF6.DOWN[1],{npc:'psf6_down'+n,sc:.9});
+  /* the painted furnishing of the room: a centrepiece, two tall pieces, two hangings; red candelabras in the corners */
+  const cen=psf6Has('f6r'+n+'_centre'),tal=psf6Has('f6r'+n+'_tall'),han=psf6Has('f6r'+n+'_hang');
+  if(cen)C.used.delete('3,7'),C.dec(cen,3,7,{block:true,sc:PSF6_PROP.centre});
+  if(tal){for(const x of [3,11]){C.used.delete(x+',4');C.dec(tal,x,4,{block:true,sc:PSF6_PROP.tall})}}
+  if(han){for(const x of [5,9]){C.used.delete(x+',2');C.dec(han,x,2,{wd:[0,-1]})}}
+  for(const [x,y] of [[3,3],[11,3],[3,10],[11,10]])if(C.free(x,y)){C.prop('candelabra_red',x,y,{block:true,sc:.8})}
+  for(const [x,y] of [[3,3],[11,3],[7,8],[3,10],[11,10]])C.light(x,y,[1.5,.75,.5]);
+  /* the boss, and the chest that opens when it is dead */
+  const F=psf6S();
+  if(F.boss[n]!==2)pspFoe(C,'psf6_e'+n,PSF6.BOSS[0],PSF6.BOSS[1],{lvl:Math.min(111+n,120)});
+  C.used.delete(PSF6.CHEST.join(','));
+  C.dec('gy_chest',PSF6.CHEST[0],PSF6.CHEST[1],{block:true,sc:.75,npc:'psf6_chest'+n});
+  C.mapNames.push({t:PSF6.THEME[n-1],x:7,y:7,k:'place'});
+  return C.finish({start:{x:PSF6.LAND[0],y:PSF6.LAND[1],f:0}})}
+/* the Throne Room: a big hall, a red runner, a row of columns, the great throne at the north end, the Pale King in front of it, a teleport stone by the stair */
+function psf6ThroneBuild(info){
+  const id=PSF6.THRONE,W=40,H=32,wh=4.2;
+  const C=pspMake({id,start:{x:20,y:26,f:0},floor:'f6f11',wh,amb:.5,lcol:[1.45,.85,.55],kind:'in',tele:[8,24]});
+  C.room(4,4,35,27,{floor:'f6f11',name:'The Throne Room',at:[20,15]});
+  for(let y=4;y<=27;y++)C.setFloor(19,y,21,y,'runner');
+  psf6Dress(C,11,W,H,wh);
+  const put=(name,x,y,o)=>{C.used.delete(x+','+y);return C.dec(pspPic(name),x,y,Object.assign({block:true},o||{}))};
+  put('stair_spiral_iron',20,27,{npc:'psf6_down11',sc:.9});
+  const cen=psf6Has('f6r11_centre'),tal=psf6Has('f6r11_tall'),han=psf6Has('f6r11_hang');
+  if(cen)put('f6r11_centre',20,5,{sc:1});
+  for(const y of [8,12,16,20,24])for(const x of [10,29]){if(tal)put('f6r11_tall',x,y,{sc:1});else C.column(x,y,'silver')}
+  if(han)for(const x of [8,14,26,32])C.dec(han,x,4,{wd:[0,-1]});
+  for(const [x,y] of [[7,6],[32,6],[7,23],[32,23],[16,7],[24,7]])if(C.free(x,y))C.prop('candelabra_red',x,y,{block:true,sc:.9});
+  for(const x of [8,14,20,26,32])for(const y of [7,13,19,25])C.light(x,y,[1.5,.75,.5]);   // a lit hall: a candle light every six squares
+  const F=psf6S();
+  if(F.king!==2)pspFoe(C,'psf6_king',20,9,{lvl:120});
+  pspSafeRect(C,6,22,12,26);pspSafeRect(C,17,24,23,27);
+  C.mapNames.push({t:'The Throne Room',x:20,y:15,k:'place'});
+  return C.finish({start:{x:20,y:26,f:0}})}
+for(let n=1;n<=PSF6.N;n++)pspRegister(psf6Id(n),(info)=>psf6Build(Object.assign({},info,{id:psf6Id(n)})));
+pspRegister(PSF6.THRONE,psf6ThroneBuild);
+/* ---------- the stairs and the chests ---------- */
+for(let n=1;n<=PSF6.N;n++){
+  const dead=()=>psf6S().boss[n]===2;
+  khNpc('psf6_up'+n,'The spiral stair','ps_stair_spiral_iron',()=>{
+    if(!dead())return say("An iron grille is shut across the foot of the stair. It will not move while the guardian of this room is alive.",[BYE]);
+    return say(n===PSF6.N?"The stair winds up to the Throne Room of the Pale King. The doors at the top are open.":"The iron stair winds up to the next room of the tower. The grille is open.",[['Go up.',()=>{G.talk=null;sfx('door');goToLevel(psf6Id(n+1),n===PSF6.N?{x:20,y:26,f:0}:{x:PSF6.LAND[0],y:PSF6.LAND[1],f:0});return null}],BYE])});
+  khNpc('psf6_down'+n,'The spiral stair','ps_stair_spiral_iron',()=>say(n===1?"The iron stair winds down to the door at the foot of the Pale Tower, and the ramparts.":"The iron stair winds down to the room below.",[['Go down.',()=>{G.talk=null;sfx('door');if(n===1)goToLevel(9900,{x:32,y:35,f:2});else goToLevel(psf6Id(n-1),{x:PSF6.ABOVE[0],y:PSF6.ABOVE[1],f:2});return null}],BYE]));
+  khNpc('psf6_chest'+n,'A gilded chest','gy_chest',()=>{const F=psf6S();
+    if(F.chest[n])return say("The chest is empty.",[BYE]);
+    if(!dead())return say("A gilded chest with a black iron lock. It will not open while the guardian of this room is alive.",[BYE]);
+    return say("A gilded chest with a black iron lock. The lock has come undone.",[['Open it.',()=>{F.chest[n]=1;G.talk=null;sfx('win');const g=2500+n*700;G.gold+=g;const it=(typeof PSF6_GEAR!=='undefined'&&PSF6_GEAR[n-1])||null;
+      if(it){bl3Give(it);const d=ITEMDEF[it];msg('Inside lies '+(d?d.n:it)+', and '+g+' gold.','#ffe36a')}else msg('Inside lie '+g+' gold.','#ffe36a');return null}],BYE])});
+}
+khNpc('psf6_down11','The spiral stair','ps_stair_spiral_iron',()=>say("The iron stair winds down to the Antechamber of the King.",[['Go down.',()=>{G.talk=null;sfx('door');goToLevel(psf6Id(10),{x:PSF6.ABOVE[0],y:PSF6.ABOVE[1],f:2});return null}],BYE]));
+/* ---------- arriving ---------- */
+pspOnArrive(n=>{const r=psf6Room(n);if(!r)return;try{const F=psf6S();for(const L of LIGHTS)L.calm=true;   // steady candle light
+  if(r<=PSF6.N){if(F.boss[r]===2)for(let i=G.enemies.length-1;i>=0;i--)if(G.enemies[i].t==='psf6_e'+r)G.enemies.splice(i,1);
+    const dd=G.decor&&G.decor.find(d=>d.npc==='psf6_chest'+r);
+    if(!F.seen)F.seen={};if(!F.seen[r]){F.seen[r]=1;msg(PSF6.INTRO[r-1],'#d8e4ff')}}
+  else{if(F.king===2)for(let i=G.enemies.length-1;i>=0;i--)if(G.enemies[i].t==='psf6_king')G.enemies.splice(i,1);
+    if(!F.seen)F.seen={};if(!F.seen[11]){F.seen[11]=1;msg('A great black hall, as long as a church, with a red runner down the middle. At the far end the Pale King sits on a gilded throne, as still as a statue. There is a teleport stone by the stair. If you need more gear or potions, you can go back and shop, and come up again.','#ffe0a0')}}}catch(e){console.error('psf6 arrive',e)}});
+/* the Pale King is dead: the end of the Pale Tower (ps_f6_foes.js calls this) */
+function psf6Won(){const F=psf6S();if(F.won)return;F.won=1;F.king=2;try{f2Chime('open')}catch(e){}
+  msg('The Pale King falls from his throne and does not rise. The great hall goes quiet, and the green light in the windows goes out one pane at a time. The Pale Spire is empty.','#ffe0a0')}
 
 /* ---- src/desert/nt_look.js ---- */
 /* ==========================================================================

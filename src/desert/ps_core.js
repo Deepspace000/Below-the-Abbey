@@ -101,7 +101,8 @@ function pspStand(name){
   x.drawImage(im,0,0);x.setTransform(1,0,0,1,0,0);x.filter='none';
   if(!o.keep){x.globalCompositeOperation='source-atop';x.fillStyle=o.ghost?'rgba(170,240,205,.32)':'rgba(40,96,66,.3)';x.fillRect(0,0,c.width,c.height);x.globalCompositeOperation='source-over'}
   IMG[key]=c;NPC_H[key]=e[0];IMG[key]._ps=1;return key}
-function pspPic(name){const k='ps_'+name;if(!IMG[k])pspStand(name);if(NPC_H[k]===undefined&&PSP_PICS[name])NPC_H[k]=PSP_PICS[name][0];return IMG[k]?k:'gy_column'}
+/* the fluted and twisted columns have leaf capitals, which the owner does not want anywhere: every request for them gets the silver-banded column, and a column that is not loaded yet never falls back to the ivy graveyard column */
+function pspPic(name){if(name==='col_fluted'||name==='col_twist')name='col_silver';const k='ps_'+name;if(!IMG[k])pspStand(name);if(NPC_H[k]===undefined&&PSP_PICS[name])NPC_H[k]=PSP_PICS[name][0];return IMG[k]?k:(/^col_/.test(name)&&IMG.ds_wm_crystal_pillar&&IMG.ds_wm_crystal_pillar.width?'ds_wm_crystal_pillar':'gy_column')}
 /* after the pictures are loaded: every name of the table gets its picture (painted or stand-in); creatures get their width from the picture and the height 'ph' */
 function pspPics(){
   for(const n in PSP_PICS){try{pspPic(n)}catch(e){console.error('pspPic',n,e)}}
