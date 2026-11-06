@@ -5,7 +5,8 @@
    windows glowing pale yellow-green, rising into the clouds. One thin stair, fenced on both sides, climbs from the south walk to the dais and the door at the foot of the spire.
    Door at the foot of the spire: a stub link to 9910 (not built yet).
    ========================================================================== */
-const PSF5={ID:9900,W:64,H:64,STAIR:[32,41,32,52],DAIS:[24,24,40,40],DAISH:5,DOOR:[32,34],DOWN:[32,58]};
+const PSF5={ID:9900,W:64,H:64,STAIR:[32,41,32,52],DAIS:[24,24,40,40],DAISH:5,DOOR:[32,34],DOWN:[32,58],
+  TOWNS:[[.03,70,1],[.11,34,.5],[.19,90,1.2],[.29,46,.7],[.38,110,1.3],[.47,30,.45],[.55,64,.9],[.64,100,1.2],[.72,38,.55],[.8,76,1],[.89,50,.7],[.96,28,.4]]};   // far towns round the horizon: [turns round the compass, width, size]
 /* one wall tile of the spire: column k (-2..2 across the face from the middle) of the painted spire, cut from its foot up to the height wh of the step; the whole picture stands 14.5 squares high, 100 pixels to a square */
 function psf5SpireTile(k,wh){
   const f=IMG[pspPic('spire_tall')],ok=!!(f&&f.width);
@@ -30,7 +31,7 @@ function psf5Build(info){
   const [dx0,dy0,dx1,dy1]=PSF5.DAIS,DH=PSF5.DAISH;
   C.setFloor(dx0,dy0,dx1,dy1,'marble');
   for(let y=dy0;y<=dy1;y++)for(let x=dx0;x<=dx1;x++)hgt[ix(x,y)]=DH;
-  for(let i=dx0-1;i<=dx1+1;i++)for(const [x,y] of [[i,dy0-1],[i,dy1+1],[dx0-1,i],[dx1+1,i]]){if(x===PSF5.STAIR[0]&&y===PSF5.STAIR[1])continue;hgt[ix(x,y)]=.3;wall(x,y,'dark',DH+.4)}
+  for(let i=dx0-1;i<=dx1+1;i++)for(const [x,y] of [[i,dy0-1],[i,dy1+1],[dx0-1,i],[dx1+1,i]]){if(x===PSF5.STAIR[0]&&y===PSF5.STAIR[1])continue;hgt[ix(x,y)]=.3;wall(x,y,'dark',DH-.3)}
   /* the thin stair: one square wide, from the south walk up to the dais, with a fence both sides that nobody can pass */
   const [sx,sy0,,sy1]=PSF5.STAIR;
   C.rise(sx,sy0,sx,sy1,DH,.3,'y');
@@ -63,7 +64,9 @@ function psf5Build(info){
   for(const [x,y] of [[8,8],[55,8],[55,55],[26,26],[38,26]])if(C.free(x,y))C.chest(x,y,{gold:2600+((hs(x,y,9)*1400)|0),tier:1});
   C.mapNames.push({t:'The Ramparts',x:32,y:48,k:'place'},{t:'The Pale Tower',x:32,y:33,k:'place'},{t:'The North Walk',x:32,y:10,k:'place'},{t:'The Watch Nook',x:12,y:52,k:'place'});
   C.glow(8,PSP_PAL.silver);
-  return C.finish({start:{x:32,y:56,f:0}})}
+  const lv=C.finish({start:{x:32,y:56,f:0}});
+  if(lv._ps)lv._ps.towns=PSF5.TOWNS;
+  return lv}
 pspRegister(PSF5.ID,psf5Build);
 /* ---------- the links ---------- */
 PSP_L(9900,PSF5.DOWN,9890,[36,5,2],{name:'the stair down'});

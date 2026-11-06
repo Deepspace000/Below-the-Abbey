@@ -332,6 +332,15 @@ function pspSkyArt(){
   mk('moon_crescent',160,160,(x,w,h)=>{const m=PSP_PAL.moon;x.fillStyle='rgb('+m[0]+','+m[1]+','+m[2]+')';x.beginPath();x.arc(80,80,58,0,6.3);x.fill();x.globalCompositeOperation='destination-out';x.beginPath();x.arc(104,66,52,0,6.3);x.fill();x.globalCompositeOperation='source-over';
     const g=x.createRadialGradient(80,80,40,80,80,80);g.addColorStop(0,'rgba(180,220,235,.0)');g.addColorStop(1,'rgba(150,200,225,0)');x.fillStyle=g;x.fillRect(0,0,w,h)});
   mk('bat_flock',320,110,(x,w,h)=>{x.fillStyle='#04080c';for(let i=0;i<38;i++){const px=20+hash2(i,1,77)*280,py=10+hash2(i,2,77)*90,s=3+hash2(i,3,77)*5;x.beginPath();x.moveTo(px,py);x.quadraticCurveTo(px-s*1.2,py-s,px-s*2.4,py-s*.2);x.quadraticCurveTo(px-s*1.4,py+s*.3,px-s*.5,py+s*.3);x.lineTo(px,py+s*.7);x.lineTo(px+s*.5,py+s*.3);x.quadraticCurveTo(px+s*1.4,py+s*.3,px+s*2.4,py-s*.2);x.quadraticCurveTo(px+s*1.2,py-s,px,py);x.fill()}})}
+/* a far town, seen from high up: a low scatter of tiny warm lit windows with a faint glow under them, hazed a little, on the horizon line of the sky panorama */
+function pspDrawTowns(x,col,towns,t){
+  const base=148;
+  for(let q=0;q<towns.length;q++){const [turn,wd,sz]=towns[q],cu=col(turn*Math.PI*2),n=Math.round(14+sz*26);
+    const gl=x.createRadialGradient(cu,base,0,cu,base,wd*.7);gl.addColorStop(0,'rgba(255,190,100,'+(.4*sz)+')');gl.addColorStop(1,'rgba(255,190,100,0)');
+    x.save();x.translate(0,0);x.scale(1,.18);x.fillStyle=gl;for(const o of [-1024,0,1024]){x.beginPath();x.arc(cu+o,base/.18,wd*.7,0,6.3);x.fill()}x.restore();
+    for(let i=0;i<n;i++){const u=hash2(i,q,901),v=hash2(i,q,902),dx=(u-.5)*wd*(1-.45*v),dy=-v*(3+sz*4)+hash2(i,q,903)*2,tw=.65+.35*Math.sin(t*(.8+hash2(i,q,904)*1.6)+i*2.1);
+      const warm=hash2(i,q,905)<.84,c=warm?'255,'+(190+((hash2(i,q,906)*50)|0))+','+(100+((hash2(i,q,907)*50)|0)):'190,255,210';
+      x.fillStyle='rgba('+c+','+(.55+.4*tw)*(.7+.3*sz)+')';for(const o of [-1024,0,1024])x.fillRect(Math.round(cu+dx+o),Math.round(base+dy),hash2(i,q,908)<.45?3:2,2)}}}
 function pspSkyFrame(){
   const L=LEVELS[LEVEL],P=L&&L._ps;if(!P||!P.out)return;
   const skyB=pspNoiseSky();pspSkyArt();
@@ -348,6 +357,7 @@ function pspSkyFrame(){
   if(!fx&&cs){const st=L.start||{x:px-.5,y:py-.5};fx=cf[LEVEL]={az:Math.atan2(cs.at[1]-(st.y+.5),cs.at[0]-(st.x+.5))}}
   const baseAz=cs&&fx?fx.az:-Math.PI/2;
   put(IMG[pspPic('moon_crescent')],col(baseAz+.5),64,50);
+  if(P.towns)pspDrawTowns(x,col,P.towns,t);   // far towns on the horizon, lit windows (levels that ask for them: P.towns = [[azimuth in turns, width, size], ...])
   put(IMG[pspPic('bat_flock')],col(baseAz-.9+t*.02),84+5*Math.sin(t*.6),38,.9);put(IMG[pspPic('bat_flock')],col(baseAz+1.9-t*.013),100+4*Math.sin(t*.45+2),26,.8);
   if(cs){
     const prog=.42;          // fixed: the castle neither grows nor slides as the party walks
@@ -361,8 +371,8 @@ function pspSkyFrame(){
     x.globalCompositeOperation='source-atop';
     const hz=.55*(1-prog)+.1,m=PSP_PAL.mist,gr=x.createLinearGradient(0,base-H,0,base+lift);gr.addColorStop(0,'rgba('+m[0]+','+m[1]+','+m[2]+','+(hz*.4)+')');gr.addColorStop(.7,'rgba('+m[0]+','+m[1]+','+m[2]+','+(hz*.8)+')');gr.addColorStop(1,'rgba('+m[0]+','+m[1]+','+m[2]+','+Math.min(.95,hz+.3)+')');
     x.fillStyle=gr;x.fillRect(0,base-H-4,1024,H+8+lift);x.globalCompositeOperation='source-over'}
-  const im=x.getImageData(0,0,1024,160).data;
-  for(let i=0,n=1024*160;i<n;i++){const s=i*4,al=im[s+3];if(!al)continue;const k=al/255;live[s]+=(im[s]-live[s])*k;live[s+1]+=(im[s+1]-live[s+1])*k;live[s+2]+=(im[s+2]-live[s+2])*k}}
+  const im=x.getImageData(0,0,1024,184).data;
+  for(let i=0,n=1024*184;i<n;i++){const s=i*4,al=im[s+3];if(!al)continue;const k=al/255;live[s]+=(im[s]-live[s])*k;live[s+1]+=(im[s+1]-live[s+1])*k;live[s+2]+=(im[s+2]-live[s+2])*k}}
 {const _r=render3D;render3D=function(){
   try{if(pspIs(LEVEL)&&G.state==='play'&&LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)pspSkyFrame();else if(PSPK.live&&self.BKSKY_PAN===PSPK.live){self.BKSKY_LV=0}}catch(e){console.error('ps sky',e)}
   return _r.apply(this,arguments)}}
