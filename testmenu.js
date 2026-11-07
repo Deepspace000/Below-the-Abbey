@@ -4,7 +4,7 @@
    done up to about that point of the story, and a couple of side quests done in each town passed. Choose one, press "Go to area", and pick the area on the usual Go to area list: the party is built when you arrive.
    (Quests are only marked done: the story flags that the quests would have set are not all set, so a few doors and talks may still behave as at the start.)
    ========================================================================== */
-const TM={PRESETS:[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100],sel:null,apply:null};
+const TM={PRESETS:[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,105,110,115],sel:null,apply:null};
 const tmGold=n=>Math.round(3.2*n*n+600);
 const tmEffL=d=>d.lvl||Math.min(100,Math.round(Math.sqrt(d.price||0)/1.2));
 const tmOk=(id,d,n)=>d&&tmEffL(d)<=n&&(d.price||0)>0&&(d.price||0)<=40*n*n+300&&!/^pp_/.test(id)&&!d.rar&&d.k!=='quest';
@@ -84,10 +84,10 @@ function tmDraw(){
   const grp=[['Best gear for the level',48,''],['Weaker party: average weapons, not the best of their level',90,'w'],['Real party: front fighters upgraded first, back line cheap, half the gold',132,'r']];
   for(const [title,y0,pre] of grp){
     txt(title,40,y0-3,8.5,'#c8a860','left',true);
-    TM.PRESETS.forEach((n,i)=>{const x=30+i*21,y=y0+2,on=TM.sel&&TM.sel.n===n&&(TM.sel.real?'r':TM.sel.weak?'w':'')===pre; // twenty levels in a row, 5 to 100: the row title says which kind of party
-      ctx.save();ctx.fillStyle=on?'#4a3c1c':'#241c10';ctx.fillRect(x,y,19,24);ctx.lineWidth=1.2;ctx.strokeStyle=on?'#ffe36a':'#8a7448';ctx.strokeRect(x+.5,y+.5,18,23);ctx.restore(); // plain small boxes: the stone buttons are too wide for a number this small
-      ctx.save();ctx.font="bold 9.5px 'IM Fell English SC',Georgia,serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=3;ctx.strokeStyle='#000';ctx.strokeText(String(n),x+9.5,y+12.5);ctx.fillStyle=on?'#ffffff':'#fff0bc';ctx.fillText(String(n),x+9.5,y+12.5);ctx.restore();btn('tm_'+pre+n,x,y,19,24); // bold, bright and outlined so it reads at once
-      if(on){ctx.save();ctx.strokeStyle='#ffe36a';ctx.lineWidth=2;ctx.strokeRect(x-1,y-1,21,26);ctx.restore()}})}
+    TM.PRESETS.forEach((n,i)=>{const x=30+i*18.4,y=y0+2,on=TM.sel&&TM.sel.n===n&&(TM.sel.real?'r':TM.sel.weak?'w':'')===pre; // twenty-three levels in a row, 5 to 115: the row title says which kind of party
+      ctx.save();ctx.fillStyle=on?'#4a3c1c':'#241c10';ctx.fillRect(x,y,17.4,24);ctx.lineWidth=1.2;ctx.strokeStyle=on?'#ffe36a':'#8a7448';ctx.strokeRect(x+.5,y+.5,16.4,23);ctx.restore(); // plain small boxes: the stone buttons are too wide for a number this small
+      ctx.save();ctx.font="bold 9.5px 'IM Fell English SC',Georgia,serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=3;ctx.strokeStyle='#000';ctx.strokeText(String(n),x+8.7,y+12.5);ctx.fillStyle=on?'#ffffff':'#fff0bc';ctx.fillText(String(n),x+8.7,y+12.5);ctx.restore();btn('tm_'+pre+n,x,y,17.4,24); // bold, bright and outlined so it reads at once
+      if(on){ctx.save();ctx.strokeStyle='#ffe36a';ctx.lineWidth=2;ctx.strokeRect(x-1,y-1,19.4,26);ctx.restore()}})}
   const S=TM.sel;
   if(S){const n=S.n,Q=tmQuestPlan(n),tier=tmPotionTier(n).map(id=>ITEMDEF[id].n).reverse().join(' and ');
     const L=[['Party','Warrior, Thief, Mage and Priest (the healer), every hero level '+n+' with full health.'],['Gear',(S.real?'A mix: the front fighters (Warrior and Thief) hold the upgrades, mostly ok pieces, and only the weapon and chest of the Warrior are good. The back line (Mage and Priest) waits with old cheap gear and some empty slots.':S.weak?'An average weapon of the last dozen levels (not the best); the best armour, helm, arms, legs and shield the shops sell by level '+n+', and two rings.':'The best weapon, helm, chest, arms, legs and shield the shops sell by level '+n+', and two rings.')],['Potions',tier+' (6 of the best, 4 of the next), mana potions, antidotes, torches and food.'],['Gold',(S.real?Math.round(tmGold(n)*.5):tmGold(n))+' gold'+(S.real?', half of what a party of this level has in hand (it takes a while to save).':', about what a party of this level has in hand.')],['Quests',Q.main.length+' of '+Q.mainAll+' main quests, and 2 side quests in each of the first '+Q.towns+' towns ('+Q.extra.length+' in all), marked done.']];
