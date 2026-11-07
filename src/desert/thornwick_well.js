@@ -188,7 +188,7 @@ draw(c,x,L,api){
 }});
 
 /* ---- Tiki, the Lost Cat: a skinny white cat sits in a dead end under the well, and a salt herring lies in another ---- */
-QUESTS.twq_cat={title:"Tiki, the Lost Cat",who:'Tiki, the lost cat',desc:"A skinny white cat with one blue eye and one gold eye sits in a dead end in the tunnels under the Thornwick well. Her name is Tiki, and she is hungry. Find a salt herring, which is lying in another dead end in the tunnels (or buy one), and bring it to her.",need:1,goal:()=>(bagCount('herring')>0||G.flags.twCatFed)?1:0,reward:{gold:1200,xp:4500,items:['potion5']}};
+QUESTS.twq_cat={title:"Tiki, the Lost Cat",who:'Tiki, the lost cat',desc:"A skinny white cat with one blue eye and one gold eye sits in a dead end in the tunnels under the Thornwick well. Her name is Tiki, and she is hungry. Find a salt herring, which is lying in another dead end in the tunnels (or buy one), and bring it to her.",need:1,goal:()=>(bagCount('herring')>0||G.flags.twCatFed)?1:0,reward:{gold:120,xp:450,items:['potion5']}};
 QAREA.twq_cat='Thornwick';
 const TWCAT=khQD("Mrrow. (A skinny white cat sits in the dead end with her paws together. Her fur is matted and dirty, one of her eyes is blue and the other is gold. Her name is Tiki. She has the look of a cat who used to catch the rats down here and has now run out of rats she is brave enough to catch. She looks at your bag, and then at you.)",
   "Mrr. (She settles down to wait.)",

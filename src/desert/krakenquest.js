@@ -23,7 +23,7 @@ ENEMY_DEF.kraken.aboveParty=20;   // twenty levels above the party: attacking it
   const _rd=rollDmg;rollDmg=function(h){const r=_rd.apply(this,arguments);try{const w=heroWeapon(h);G._atkW=w&&w.kraken?w:null}catch(e){G._atkW=null}return r};
   const _he=hurtEnemy;hurtEnemy=function(e,d){
     const w=G._atkW;G._atkW=null;
-    if(w&&e&&e.t==='kraken'){d=Math.round(w.kraken[0]+Math.random()*(w.kraken[1]-w.kraken[0]));msg('The harpoon bites deep into the Kraken for '+d+'!','#ffd76a');sfx('crit')}
+    if(w&&e&&e.t==='kraken'){d=Math.round(w.kraken[0]+Math.random()*(w.kraken[1]-w.kraken[0]));msg('The harpoon bites deep into the Kraken for '+d+'!','#ffd76a');sfx('boom')}
     return _he.call(this,e,d)};
 })();
 const kgFound=()=>(G.flags.kgFound||(G.flags.kgFound={}));
@@ -57,7 +57,7 @@ Object.assign(CUTS,{kgIntro:()=>[
   {text:'Menkaure rolls the chart. Behind him, in the dark of the hold, something long and iron rattles in a crate that will, for now, hold nothing.'}]});
 function kgOffer(){
   const F=G.flags;if(!F.page3||F.kgGiven||G.cut||G.talk)return;
-  F.kgGiven=1;startCut('kgIntro',()=>{if(qSt('kg0')===null)qAccept('kg0');if(kgCount()>=4&&qReady('kg0'))qTurnIn('kg0');msg('The Kraken guns: ask Ketra, Sable Maeve, Brother Aldous and Isolde where each lies.','#ffe36a')});
+  F.kgGiven=1;startCut('kgIntro',()=>{if(qSt('kg0')===null)qAccept('kg0');if(qSt('vq5')===null&&!F.oldhavenSeen)qAccept('vq5');if(kgCount()>=4&&qReady('kg0'))qTurnIn('kg0');msg('The Kraken guns: ask Ketra, Sable Maeve, Brother Aldous and Isolde where each lies.','#ffe36a')});
 }
 (function(){const _e=yarEnter;yarEnter=function(n){_e(n);try{if(G.flags.page3&&!G.flags.kgGiven&&(n===SN.ID||emIslandLv(n)))later(900,()=>{if(LEVEL===n)kgOffer()})}catch(e){console.error(e)}}})();
 /* ---- the guns themselves: lying where the clues say ---- */
@@ -93,3 +93,6 @@ khNpc('kg_harp','A Kraken gun','kg_harp1',d=>{
 /* where each Kraken gun lies, for the quest log's map; the fourth is under Last Light, so its dive line is circled on the island */
 for(let n=1;n<=4;n++)QUESTS['kg'+n].spot=()=>{const d=G.decor.find(z=>z.npc==='kg_harp'&&z.cat===n&&!z.found);return d?{x:d.x,y:d.y}:null};
 QUESTS.kg4.targets=['uw_dive_303'];
+/* a gold ! on the four clue-givers while their Kraken gun quest can be taken, a green ? when the harpoon is found */
+{const _qm=questMark;questMark=function(d){const m=_qm(d);if(m===2)return m;const n={ci_ketra:'kg1',sb_maeve:'kg2',ib_aldous:'kg3',ll_isolde:'kg4'}[d.npc];if(n&&G.flags.kgGiven&&!d.found&&!d.hidden){const s=qSt(n);if(s==='active'&&qReady(n))return 2;if(s===null)return 1}return m}}
+if(typeof QWORLD!=='undefined'&&!QWORLD['The Narrow Sea'])QWORLD['The Narrow Sea']='yarrim';   // the Kraken quests get a dot on the world map, as vq5 and yar7 do

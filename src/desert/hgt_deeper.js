@@ -17,9 +17,9 @@ if(typeof NO_VARY!=='undefined')NO_VARY.push('hgdwarden');
 {const _he=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;_he.apply(this,arguments);if(was&&e.hp<=0&&/^hg(larva|wasp|golem|swarm|boss|d)/.test(e.t))G.flags.hgKills=(G.flags.hgKills||0)+1}}
 /* ---------- the quests ---------- */
 const HGD_Q={
-  dh1:{title:'The Corruption in the Deep',who:'Aldous Wend',desc:'Aldous Wend says the Hollow Child-King\'s corruption is seeping up from the deeper Hollow Lands. Find Old Lilac, the great moth, in Glorm. The great creatures that fly can find the way down.',need:1,goal:()=>G.flags.hgdMoth?1:0,reward:{gold:200,xp:900}},
-  dh2:{title:'Jelly for the Moth',who:'Old Lilac, the great moth',desc:'Old Lilac is weak from the corruption in the air. Bring her 6 jars of royal jelly from the hives and she will tell you who can find the gate.',need:6,goal:()=>bagCount('hgjelly'),take:{hgjelly:6},reward:{gold:400,xp:1400,items:['potion3']}},
-  dh3:{title:'The Whale\'s Errand',who:'Bulb, the great whale',desc:'Bulb, the great whale, in Nibb, will carry the party down to the deeper Hollow Lands, but first the hive creatures nearest the gate must be thinned. Kill 8 creatures of the hives.',need:8,cnt:'hgKills',goal:q=>(G.flags.hgKills||0)-(q.base||0),reward:{gold:600,xp:2200,items:['potion3','potion3']}}};
+  dh1:{title:'The Corruption in the Deep',who:'Aldous Wend',desc:'Aldous Wend says the Hollow Child-King\'s corruption is seeping up from the deeper Hollow Lands. Find Old Lilac, the great moth, in Glorm. The great creatures that fly can find the way down.',need:1,goal:()=>G.flags.hgdMoth?1:0,reward:{gold:3000,xp:45000}},
+  dh2:{title:'Jelly for the Moth',who:'Old Lilac, the great moth',desc:'Old Lilac is weak from the corruption in the air. Bring her 6 jars of royal jelly from the hives and she will tell you who can find the gate.',need:6,goal:()=>bagCount('hgjelly'),take:{hgjelly:6},reward:{gold:4000,xp:55000,items:['potion3']}},
+  dh3:{title:'The Whale\'s Errand',who:'Bulb, the great whale',desc:'Bulb, the great whale, in Nibb, will carry the party down to the deeper Hollow Lands, but first the hive creatures nearest the gate must be thinned. Kill 8 creatures of the hives.',need:8,cnt:'hgKills',goal:q=>(G.flags.hgKills||0)-(q.base||0),reward:{gold:5000,xp:70000,items:['potion3','potion3']}}};
 for(const id in HGD_Q){QUESTS[id]=HGD_Q[id];QAREA[id]='The Hollow Grasslands'}
 if(typeof MAIN_QUESTS!=='undefined')['dh1','dh2','dh3'].forEach(id=>MAIN_QUESTS.add(id));
 const QNEXT_HGD={dh1:'dh2',dh2:'dh3'};
@@ -40,8 +40,12 @@ const hgdO=(offer,accept,ready,thanks,after)=>({offer,accept,remind:(g,n)=>(offe
   }
   return _a()};
   NPCS.hg_aldous.root=wrap;KH_KEEPERS.hg_aldous.root=wrap}
+QGIVER.hg_aldous=['hgb1','hgb2','hgb3','hgb4','dh1']; // the gold ! for dh1 once the four books are in
 // the two great creatures
-function hgdGiant(g,root){khNpc(g.id,g.name,g.img,root,{q:g.id==='hgd_moth'?['dh2']:['dh3']})}
+function hgdGiant(g,root){khNpc(g.id,g.name,g.img,root,{q:g.id==='hgd_moth'?['dh2']:['dh3']});
+  Object.defineProperty(QGIVER,g.id,{enumerable:true,configurable:true,get(){ // the mark shows only once the quest can be had
+    if(g.id==='hgd_moth')return qSt('dh1')==='done'||qSt('dh2')!==null?['dh2']:(qSt('dh1')==='active'?['dh1']:null);
+    return qSt('dh2')==='done'||qSt('dh3')!==null?['dh3']:null}})}
 hgdGiant(HGD.MOTH,()=>{
   const F=G.flags;
   if(qSt('dh1')===null)return say('A moth the size of a house hangs from the roof of the plaza, wings folded. It watches you with one huge dull eye and says nothing you can use. It is waiting for someone to ask the right question.',[BYE]);

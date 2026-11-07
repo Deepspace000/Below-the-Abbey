@@ -6918,5 +6918,21 @@
 "h": 2.6,
 "kind": "sprite",
 "sheet": "f6r11foe"
+},
+"f6_chest": {
+"file": "f6_chest.webp",
+"w": 1876,
+"px_h": 1373,
+"h": 1.1,
+"kind": "sprite",
+"sheet": "f6chest"
+},
+"f6_chest_open": {
+"file": "f6_chest_open.webp",
+"w": 1328,
+"px_h": 1400,
+"h": 1.58,
+"kind": "sprite",
+"sheet": "f6chestopen"
 }
 }

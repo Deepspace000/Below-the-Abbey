@@ -57,12 +57,12 @@ SG_FOLK.forEach(f=>{
 
 /* ---- the quests ---- */
 sgq('sg1','Smoke at the East Gate','Captain Aldwyn, of the Gate','Vance\'s Ash Guard have taken the east gate. Fight them off the east road. Kill 6 of them.',6,q=>(G.flags.k_ashguard||0)-(q.base||0),{gold:800,xp:8000},{cnt:'k_ashguard'});
-sgq('sg2','Bread for the Wall','Sergeant Cade, of the garrison','The garrison is short of food. Bring Sergeant Cade 8 loaves of bread. The bakeries, the Cookshop and the stalls sell it.',8,()=>Math.min(8,bagCount('bread')),{gold:400,xp:4000});
-sgq('sg3','Mend the Wall','Dunstan, the mason','The wall near the east gate has a crack. Bring Dunstan 5 pieces of wood to brace it. Wood is sold in general stores.',5,()=>Math.min(5,bagCount('wood')),{gold:500,xp:4500});
-sgq('sg4','The Cats Guild','Gammer Wick, of the Cats Guild','The grain stores are full of rats, and the cats are tired. Give Gammer Wick 3 herrings for the cats.',3,()=>Math.min(3,bagCount('herring')),{gold:300,xp:3500});
+sgq('sg2','Bread for the Wall','Sergeant Cade, of the garrison','The garrison is short of food. Bring Sergeant Cade 8 loaves of bread. The bakeries, the Cookshop and the stalls sell it.',8,()=>Math.min(8,bagCount('bread')),{gold:400,xp:4000},{take:{bread:8}});
+sgq('sg3','Mend the Wall','Dunstan, the mason','The wall near the east gate has a crack. Bring Dunstan 5 pieces of wood to brace it. Wood is sold in general stores.',5,()=>Math.min(5,bagCount('wood')),{gold:500,xp:4500},{take:{wood:5}});
+sgq('sg4','The Cats Guild','Gammer Wick, of the Cats Guild','The grain stores are full of rats, and the cats are tired. Give Gammer Wick 3 herrings for the cats.',3,()=>Math.min(3,bagCount('herring')),{gold:300,xp:3500},{take:{herring:3}});
 sgq('sg5','Pigeon Post','Captain Aldwyn, of the Gate','The city needs word sent to the north fort. Speak to the three pigeon keepers: Rook the falconer, Tobias the crier and Little Ned.',3,()=>Object.keys(SGF().pig).length,{gold:500,xp:5000});
 sgq('sg6','Out of the Fire','Sergeant Cade, of the garrison','Four families near the east wall are still in their homes. Tell each to go to the chapel: a young mother, an old man, an egg seller and a washerwoman.',4,()=>Object.keys(SGF().fam).length,{gold:600,xp:6000});
-sgq('sg7','The Bakery Tunnel','Perrin, the baker','Perrin\'s second oven door leads to an old tunnel under the wall. Bring her 3 torches to light it, and it can carry supplies.',3,()=>Math.min(3,bagCount('torch')),{gold:700,xp:6500});
+sgq('sg7','The Bakery Tunnel','Perrin, the baker','Perrin\'s second oven door leads to an old tunnel under the wall. Bring her 3 torches to light it, and it can carry supplies.',3,()=>Math.min(3,bagCount('torch')),{gold:700,xp:6500},{take:{torch:3}});
 sgq('sg8','The Sortie','Captain Aldwyn, of the Gate','The wall is mended, the people are safe and the tunnel is open. Now take the east gate back. Kill 10 more Ash Guard.',10,q=>(G.flags.k_ashguard||0)-(q.base||0),{gold:2500,xp:18000},{cnt:'k_ashguard'});
 
 const SGD={

@@ -117,6 +117,14 @@ function storyNext(){ // what to do next, from the chapter the party has reached
   if(F.kingBack)return 'The king is home. Go to the throne room in the palace.';
   if(F.mqDay0!==undefined)return 'Wait in Khemetra for the king to return, and stay alive.';
   if(F.scoriaWizard)return 'Ask Ishkander about the king. Be careful in the streets.';
+  if(F.passDone&&qSt('scoria')!=='done'&&!F.khemetraSeen)return 'Speak to Mayor Marigold in Anaea. She sends you north to Khemetra for the wizard Ishkander.';
+  if(F.wanted||qSt('pass')==='active')return 'Cross the Greyfang Pass, east of Ironhill Moor.';
+  if(F.betrayed)return 'Escape the Ironhill dungeons.';
+  if(F.halbrecht)return 'Mayor Halbrecht has work for you. Clear the old mines.';
+  if(F.ironRoad)return 'Take the east gate to Gandrick’s wood and the road west to Ironhill.';
+  if(F.gandrickDead)return 'Take Gandrick’s ledger back to Thornwick.';
+  if(qSt('gandrick')==='active')return 'Kill Gandrick in the cave east of Thornwick.';
+  if(!F.passDone&&!F.scoriaWizard&&!F.khWizardKnown)return 'Speak to Mayor Corbin in Thornwick.';
   return 'Find the wizard Ishkander, hiding in the cisterns of Khemetra.';
 }
 function storyTickDays(){

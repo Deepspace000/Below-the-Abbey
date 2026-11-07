@@ -50,11 +50,11 @@ HG_BOOKS.forEach((b,i)=>{ITEMDEF['hgbook'+(i+1)]={n:b[0],k:'quest',t:'Book',ic:'
 gw('hgsting','Stinger Blade','Sword',70,[62,86],.04,{str:34},5200,'#c89030',{bleed:[.3,6,3]},'A short blade made from the stinger of a giant hive insect. Three hits in ten leave the foe bleeding.');
 gw('hgmandible','Mandible Axe','Axe',70,[68,92],-.02,{str:36},5600,'#8a7a40',{cleave:1},'An axe with a blade of serrated chitin. Every hit also cuts the foe standing behind the first.');
 gw('hgbarb','Barbed Chitin Spear','Sword',64,[52,72],.06,{str:32},3800,'#7a6a3a',{stun:.15},'A long spear with a barbed tip. One hit in seven knocks the foe senseless for a round.');
-ga('hgcarapace','shield','Carapace Shield','Shield',60,26,2400,'#8a8a3a',{thorns:9},'A round shield of overlapping beetle shells. Every enemy that strikes you takes 9 damage.');
+ga('hgcarapace','shield','Carapace Shield','Shield',60,12,6500,'#8a8a3a',{thorns:9},'A round shield of overlapping beetle shells. Every enemy that strikes you takes 9 damage.');
 ARM_SET_OF.hgchit={name:'Chitin Warden',bonus:{thorns:10,ward:6},btxt:'Every enemy that strikes you takes 10 damage, and every blow on you is 6 lighter.',lv:65,key:'hgchit'};
 [['h','head','Chitin Helm','head',.55,'dodge'],['c','chest','Chitin Cuirass','chest',1,'ward'],['a','arms','Chitin Gauntlets','arms',.35,'thorns'],['l','legs','Chitin Greaves','legs',.45,'dodge']].forEach(([sx,slot,nm,ic,f,k])=>{
   const id='ar_hgchit_'+sx,t=3.5,v=k==='dodge'?.07:k==='ward'?9:12,pas={};pas[k]=v;
-  ITEMDEF[id]={n:nm,k:slot,t:slot==='head'?'Helm':slot==='chest'?'Chest':slot==='arms'?'Arms':'Legs',ic,c:'#8a7a3a',armor:Math.max(2,Math.round(34*f)),price:Math.round(2200*f),lvl:65,pas,set:'hgchit',tier:65,
+  ITEMDEF[id]={n:nm,k:slot,t:slot==='head'?'Helm':slot==='chest'?'Chest':slot==='arms'?'Arms':'Legs',ic,c:'#8a7a3a',armor:Math.max(2,Math.round(30*f)),price:Math.round(9500*f),lvl:65,pas,set:'hgchit',tier:65,
     d:(k==='dodge'?'Enemies miss 7% more.':k==='ward'?'Every blow on you is 9 lighter.':'Every enemy that strikes you takes 12 damage.')+' Set: Chitin Warden. All four pieces give: '+ARM_SET_OF.hgchit.btxt+' Needs level 65.',sw:slot==='head'?.38:slot==='chest'?.46:.4,gear:1};
   GEAR.push(id);ARM_IDS.push(id);void t});
 const HG_GEAR=['hgsting','hgmandible','hgbarb','hgcarapace','ar_hgchit_h','ar_hgchit_c','ar_hgchit_a','ar_hgchit_l'];

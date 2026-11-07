@@ -28,6 +28,8 @@ function psf6Build(info){
   const id=info.id||PSF6.cur,n=psf6Room(id),W=PSF6.W,H=PSF6.W,wh=3.2;
   const C=pspMake({id,start:{x:PSF6.LAND[0],y:PSF6.LAND[1],f:0},floor:'f6f'+n,wh,amb:.3,lcol:[1.45,.85,.55],kind:'in',tele:n===1?[3,10]:undefined});
   C.room(2,2,11,11,{floor:'f6f'+n,name:PSF6.THEME[n-1],at:[7,7]});
+  /* the room is small and round: everything outside a circle of radius 4.4 round the middle is wall again */
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(Math.hypot(x-6.5,y-6.5)>4.4){C.rows[y][x]='#';C.block[y*W+x]=1}
   psf6Dress(C,n,W,H,wh);
   /* the stairs: a circular stair up in the north wall, one down in the south wall */
   const put=(name,x,y,o)=>{C.used.delete(x+','+y);return C.dec(pspPic(name),x,y,Object.assign({block:true},o||{}))};
@@ -36,15 +38,16 @@ function psf6Build(info){
   /* the painted furnishing of the room: a centrepiece, two tall pieces, two hangings; red candelabras in the corners */
   const cen=psf6Has('f6r'+n+'_centre'),tal=psf6Has('f6r'+n+'_tall'),han=psf6Has('f6r'+n+'_hang');
   if(cen)C.used.delete('3,7'),C.dec(cen,3,7,{block:true,sc:PSF6_PROP.centre});
-  if(tal){for(const x of [3,11]){C.used.delete(x+',4');C.dec(tal,x,4,{block:true,sc:PSF6_PROP.tall})}}
-  if(han){for(const x of [5,9]){C.used.delete(x+',2');C.dec(han,x,2,{wd:[0,-1]})}}
-  for(const [x,y] of [[3,3],[11,3],[3,10],[11,10]])if(C.free(x,y)){C.prop('candelabra_red',x,y,{block:true,sc:.8})}
-  for(const [x,y] of [[3,3],[11,3],[7,8],[3,10],[11,10]])C.light(x,y,[1.5,.75,.5]);
+  if(tal){for(const x of [3,10]){C.used.delete(x+',4');C.dec(tal,x,4,{block:true,sc:PSF6_PROP.tall})}}
+  if(han){for(const x of [5,8]){C.used.delete(x+',3');C.dec(han,x,3,{wd:[0,-1]})}}
+  for(const [x,y] of [[4,4],[9,4],[4,9],[9,9]])if(C.free(x,y)){C.prop('candelabra_red',x,y,{block:true,sc:.8})}
+  for(const [x,y] of [[4,4],[9,4],[7,8],[4,9],[9,9]])C.light(x,y,[1.5,.75,.5]);
   /* the boss, and the chest that opens when it is dead */
   const F=psf6S();
   if(F.boss[n]!==2)pspFoe(C,'psf6_e'+n,PSF6.BOSS[0],PSF6.BOSS[1],{lvl:Math.min(111+n,120)});
   C.used.delete(PSF6.CHEST.join(','));
-  C.dec('gy_chest',PSF6.CHEST[0],PSF6.CHEST[1],{block:true,sc:.75,npc:'psf6_chest'+n});
+  const chp=psf6Has('f6_chest');   // the painted special chest when it is made, the plain gilded one until then
+  C.dec(chp||'gy_chest',PSF6.CHEST[0],PSF6.CHEST[1],{block:true,sc:chp?.9:.75,npc:'psf6_chest'+n});
   C.mapNames.push({t:PSF6.THEME[n-1],x:7,y:7,k:'place'});
   return C.finish({start:{x:PSF6.LAND[0],y:PSF6.LAND[1],f:0}})}
 /* the Throne Room: a big hall, a red runner, a row of columns, the great throne at the north end, the Pale King in front of it, a teleport stone by the stair */
@@ -77,10 +80,15 @@ for(let n=1;n<=PSF6.N;n++){
     return say(n===PSF6.N?"The stair winds up to the Throne Room of the Pale King. The doors at the top are open.":"The iron stair winds up to the next room of the tower. The grille is open.",[['Go up.',()=>{G.talk=null;sfx('door');goToLevel(psf6Id(n+1),n===PSF6.N?{x:20,y:26,f:0}:{x:PSF6.LAND[0],y:PSF6.LAND[1],f:0});return null}],BYE])});
   khNpc('psf6_down'+n,'The spiral stair','ps_stair_spiral_iron',()=>say(n===1?"The iron stair winds down to the door at the foot of the Pale Tower, and the ramparts.":"The iron stair winds down to the room below.",[['Go down.',()=>{G.talk=null;sfx('door');if(n===1)goToLevel(9900,{x:32,y:35,f:2});else goToLevel(psf6Id(n-1),{x:PSF6.ABOVE[0],y:PSF6.ABOVE[1],f:2});return null}],BYE]));
   khNpc('psf6_chest'+n,'A gilded chest','gy_chest',()=>{const F=psf6S();
-    if(F.chest[n])return say("The chest is empty.",[BYE]);
     if(!dead())return say("A gilded chest with a black iron lock. It will not open while the guardian of this room is alive.",[BYE]);
-    return say("A gilded chest with a black iron lock. The lock has come undone.",[['Open it.',()=>{F.chest[n]=1;G.talk=null;sfx('win');const g=2500+n*700;G.gold+=g;const it=(typeof PSF6_GEAR!=='undefined'&&PSF6_GEAR[n-1])||null;
-      if(it){bl3Give(it);const d=ITEMDEF[it];msg('Inside lies '+(d?d.n:it)+', and '+g+' gold.','#ffe36a')}else msg('Inside lie '+g+' gold.','#ffe36a');return null}],BYE])});
+    /* the usual loot window: the gear and some potions are listed, you take them one by one or press Take all; what is left stays in the chest */
+    if(!F.box)F.box={};
+    if(!F.box[n]){const it=(typeof PSF6_GEAR!=='undefined'&&PSF6_GEAR[n-1])||null,c=[];
+      if(it)c.push({id:it,n:1});for(const p of ['elixir','supermana'])if(ITEMDEF[p])c.push({id:p,n:2});
+      F.box[n]={k:'chest',contents:c,gold:2500+n*700,hs:1}}
+    const b=F.box[n];
+    if(!b.contents.length&&b.goldTaken)return say("The chest is empty.",[BYE]);
+    G.talk=null;openLoot(b);if(G.loot)G.loot.name='Gilded chest';F.chest[n]=1;return null});
 }
 khNpc('psf6_down11','The spiral stair','ps_stair_spiral_iron',()=>say("The iron stair winds down to the Antechamber of the King.",[['Go down.',()=>{G.talk=null;sfx('door');goToLevel(psf6Id(10),{x:PSF6.ABOVE[0],y:PSF6.ABOVE[1],f:2});return null}],BYE]));
 /* ---------- arriving ---------- */
@@ -94,4 +102,4 @@ pspOnArrive(n=>{const r=psf6Room(n);if(!r)return;try{psf6Fit();const F=psf6S();f
     if(!F.seen)F.seen={};if(!F.seen[11]){F.seen[11]=1;msg('A great black hall, as long as a church, with a red runner down the middle. At the far end the Pale King sits on a gilded throne, as still as a statue. There is a teleport stone by the stair. If you need more gear or potions, you can go back and shop, and come up again.','#ffe0a0')}}}catch(e){console.error('psf6 arrive',e)}});
 /* the Pale King is dead: the end of the Pale Tower (ps_f6_foes.js calls this) */
 function psf6Won(){const F=psf6S();if(F.won)return;F.won=1;F.king=2;try{f2Chime('open')}catch(e){}
-  msg('The Pale King falls from his throne and does not rise. The great hall goes quiet, and the green light in the windows goes out one pane at a time. The Pale Spire is empty.','#ffe0a0');if(typeof psf6Ending==='function')psf6Ending()}
+  msg('The Pale King falls from his throne and does not rise. The great hall goes quiet, and the green light in the windows goes out one pane at a time. The Pale Spire is empty.','#ffe0a0');if(typeof psq50Done==='function')psq50Done();if(typeof psf6Ending==='function')psf6Ending()}

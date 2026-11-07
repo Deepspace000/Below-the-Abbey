@@ -140,7 +140,10 @@ function blKit(spec){
   C.near=(x,y,rad,offPath)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const a=x+dx,b=y+dy;if(free(a,b)&&!(offPath&&path.has(a+','+b)))return [a,b]}return null};
   C.foeNear=(t,x,y,rad)=>{const q=C.near(x,y,rad||3,true);return q?C.foe(t,q[0],q[1]):false};
   /* a person: the keeper of an id from KH_KEEPERS (khNpc), standing near x,y */
-  C.person=(npcId,x,y,rad,o)=>{const kp=KH_KEEPERS[npcId];if(!kp)return null;const q=C.near(x,y,rad||3,false);if(!q)return null;
+  C.person=(npcId,x,y,rad,o)=>{const kp=KH_KEEPERS[npcId];if(!kp)return null;let q=C.near(x,y,rad||3,false);
+    if(!q){const bk=new Set(decor.filter(e=>e.block).map(e=>e.x+','+e.y)),pp=new Set(decor.filter(e=>e.npc).map(e=>e.x+','+e.y));
+      for(let r=0;r<=(rad||3)+2&&!q;r++)for(let dy=-r;dy<=r&&!q;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const a=x+dx,b=y+dy,k=a+','+b;if(isOpen(a,b)&&!bk.has(k)&&!pp.has(k)){q=[a,b];break}}}
+    if(!q)return null;
     const d={k:khFaceKey(kp.face),x:q[0],y:q[1],block:false,walk:true,npc:npcId,sc:(o&&o.sc)||kp.sc||1};decor.push(d);used.add(q[0]+','+q[1]);return d};
   /* an object with something to say: walk up and press (khNpc registered by the caller) */
   C.thing=(k,npcId,x,y,o)=>dec(k,x,y,Object.assign({block:true,npc:npcId},o||{}));

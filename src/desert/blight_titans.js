@@ -116,7 +116,7 @@ function ttMapMarks(V,z){
   if(was&&e.hp<=0&&ENEMY_DEF[e.t]&&ENEMY_DEF[e.t].tt){const F=ttF();F.dead[e.t]=1;const left=TT.list.filter(t=>!F.dead[t.id]).length;
     try{msg(ENEMY_DEF[e.t].name+' falls, and the ground shakes. '+(left?left+' of the six giants still walk the road.':'The last of the six giants is dead.'),'#ffb070');sfx('win')}catch(x){}}}}
 /* the talk of the road: an extra question on the people's screens, and Captain Marsh's reward for all six */
-QUESTS.ttgiants={title:'The Six Giants',who:'Captain Eldred Marsh',desc:'Six huge, deformed giants walk the Blighted Road: Gorsemaw the Many-Mouthed, Mother Sallowtide, Hobb Crookspine, Brannock the Stitched, Old Nine-Hands and Old White Eyes. They show as red marks on the world map and as big red rings on the mini map. Kill all six. Each is level 100.',need:6,goal:()=>Object.keys(ttF().dead).length,reward:{gold:40000,xp:600000}};
+QUESTS.ttgiants={title:'The Six Giants',who:'Captain Eldred Marsh',desc:'Six huge, deformed giants walk the Blighted Road: Gorsemaw the Many-Mouthed, Mother Sallowtide, Hobb Crookspine, Brannock the Stitched, Old Nine-Hands and Old White Eyes. They show as red marks on the world map and as big red rings on the mini map. Kill all six. Each is level 100.',need:6,goal:()=>Object.keys(ttF().dead).length,reward:{gold:12000,xp:120000}};
 QAREA.ttgiants='The Blighted Lands';
 function ttMarshQ(){
   const F=ttF();

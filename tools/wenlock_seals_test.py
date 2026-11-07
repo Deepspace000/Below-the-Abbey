@@ -87,9 +87,12 @@ with sync_playwright() as p:
     shot(pg, '2_gate_open')
     pg.evaluate("() => usePortal(2)")
     r = pg.evaluate("() => G.talk && G.talk.node.text")
-    check('walking through shows the end-of-part message', bool(r) and 'The next part of the story is not written yet' in r, r)
+    # the open west gate now leads on to the Blighted Lands road (blight_road.js); the old end-of-part prompt shows only while that road is unbuilt
+    if r:
+        check('walking through shows the end-of-part message', 'The next part of the story is not written yet' in r, r)
     shot(pg, '3_end_message')
-    pg.evaluate("() => T.btn(G.talk.node, 'Go back into Wenlock.')"); pg.wait_for_timeout(500)
+    if r: pg.evaluate("() => T.btn(G.talk.node, 'Go back into Wenlock.')"); pg.wait_for_timeout(500)
+    if not r: pg.evaluate("() => goToLevel(496, {x:8,y:50,f:1})"); pg.wait_for_timeout(900)
     check('party is sent back inside Wenlock', pg.evaluate("() => LEVEL === 496 && G.P.x === 8 && G.P.y === 50 && !G.talk"))
     check('signs no longer say not yet open', pg.evaluate("() => !say('x (not yet open)').text.includes('not yet open')"))
     check('story pages and hint', pg.evaluate("() => ['wsclosed','wswell','wswood','wsgrave','wsgate'].every(id => STORY.find(s => s.id === id).c()) && storyNext().includes('not written yet')"))

@@ -31,6 +31,80 @@ function psf6Slide(i){
   const s=PSF6_END[i];if(!s){G.cut=null;return}
   if(typeof loadImg==='function'&&!IMG[s[0]])loadImg(s[0],'assets/'+s[0]+'.jpg');
   G.cut={id:'psf6end'+i,pic:s[0],i:0,t:G.time,lines:s[2].map(t=>({text:t,title:s[1]})),end:()=>psf6Slide(i+1)};G.hold=null;G.queued=null}
-function psf6Ending(){later(2500,()=>{if(!G.cut)psf6Slide(0)})}
+function psf6Ending(){let n=0;const go=()=>{if(G.cut||G.talk||G.state!=='play'){if(n++<30)later(1500,go);return}psf6Slide(0)};later(2500,go)}   // waits (up to about 45 s) while another scene, a talk or a menu state is open, instead of dropping the ending
 /* the first time in the Throne Room: the talk */
 pspOnArrive(n=>{if(n!==PSF6.THRONE)return;try{const F=psf6S();if(!F.talk&&F.king!==2){F.talk=1;later(900,()=>{if(!G.cut)startCut('psf6King')})}}catch(e){console.error('psf6 story',e)}});
+
+/* ---------- the main goal in the journal: quest psq50 (no giver: taken on the first arrival at the Pale Approach, paid once when the Pale King dies), the Story So Far chapters and the storyNext ladder ---------- */
+const psmGot=()=>{try{return !!pspF().key2||bagCount('pskey2')>0||!!pshF().stairOpen}catch(e){return false}};
+const psmTower=()=>{try{const F=psf6S();return [1,2,3,4,5,6,7,8,9,10].filter(n=>F.boss[n]===2).length}catch(e){return 0}};
+const psmS=[
+  ()=>{try{return psf6S().king===2}catch(e){return false}},
+  ()=>psmTower()>=10,
+  ()=>{try{return psf4F().moon===2}catch(e){return false}},
+  ()=>{try{return psf3oF().reflect===2}catch(e){return false}},
+  ()=>{try{return psf2F().dream===2}catch(e){return false}},
+  psmGot];
+const psmDone=i=>{for(let k=0;k<=i;k++)if(psmS[k]())return true;return false};   // a step counts as done when it, or any later step, is done (so a jump ahead cannot block the reward)
+yrQ('psq50','The Pale King','Wren and Aldous Wend, in Sale',[
+  ['Take the west gate of Sale to the Pale Spire. Find the Second Floor Key in the Oubliette under the castle, and climb the Grand Stair.',()=>psmDone(5)],
+  ['Find the seven pieces of the Sleeper in the Hall of Illusions, wake her, and break the Sovereign\'s Dream.',()=>psmDone(4)],
+  ['On the third floor, light the crystal in the Beam Room and break the Sovereign\'s Reflection in the Observatory.',()=>psmDone(3)],
+  ['On the Floor of the Moon, take the four little planets and kill the Pale Moon.',()=>psmDone(2)],
+  ['Cross the Ramparts and climb the ten rooms of the Pale Tower. '+'Kill the guardian of each room.',()=>psmDone(1)],
+  ['Kill the Pale King in the Throne Room at the top of the Pale Tower.',()=>psmDone(0)]],
+  {gold:60000,xp:400000,items:['elixir','elixir','supermana']});
+QAREA.psq50=PSP.REGION;
+pspOnArrive(n=>{try{if(n>=9720&&qSt('psq50')===null)qAccept('psq50')}catch(e){console.error('psq50 accept',e)}});
+function psq50Done(){try{if(qSt('psq50')===null)qAccept('psq50');if(qSt('psq50')==='active')qTurnIn('psq50')}catch(e){console.error('psq50 done',e)}}
+STORY.push(
+  {id:'pspire',c:()=>{try{return !!(G.flags.psp&&G.flags.psp.last)}catch(e){return false}},t:'The Pale Spire',x:'The west gate of Sale opened on a road to the Pale Spire, the castle of the Pale Sovereign. The party passed the Great Gatehouse and the Gate Captain, crossed the Court of Statues and went into the Great Halls. A tall silver key opens the Grand Stair, and the key lies in the Oubliette at the bottom of the dungeons.'},
+  {id:'pspfloors',c:()=>psmDone(4),t:'The Climb',x:'With the Second Floor Key the party climbed through the Hall of Illusions, the Hall of Mirrors and the Observatory, and on to the Floor of the Moon and the Ramparts. Above the Ramparts stands the Pale Tower.'},
+  {id:'pspking',c:()=>psmTower()>=1||psmDone(1),t:'The Pale Tower',x:'The Pale Tower has ten small rooms, one above the other. A guardian stands in each, and the stair up stays shut until it is dead. The Throne Room of the Pale King lies at the top.'},
+  {id:'pspend',c:()=>psmDone(0),t:'The End of the Pale King',x:'The Pale King fell from his throne in the Throne Room, and every silver ring on the Blighted Road broke. The Pale Lands are healed, and the Pale Spire is empty.'});
+{const _sn=storyNext;storyNext=function(){try{const F=G.flags,P=F.psp;
+  if(P&&P.last){
+    if(psmDone(0))return 'The Pale King is dead and the Pale Spire is empty. The land is healed.';
+    if(psmDone(1))return 'Go up the stair to the Throne Room of the Pale King, and kill him. There is a teleport stone by the stair if you need potions first.';
+    if(psmDone(2))return 'Cross the Ramparts, go in at the foot of the Pale Tower and climb its ten rooms. Kill the guardian of each room to open its stair. '+psmTower()+' of 10 are dead.';
+    if(psmDone(3))return 'On the Floor of the Moon, carry the four little planets to open the iron gate, and kill the Pale Moon.';
+    if(psmDone(4))return 'On the third floor, light the crystal in the Beam Room with the mirrors, then break the Sovereign\'s Reflection in the Observatory Gallery.';
+    if(psmDone(5))return 'Climb the Grand Stair to the Hall of Illusions. Find the seven pieces of the Sleeper, wake her, and break the Sovereign\'s Dream.';
+    return 'You are in the Pale Spire, the castle of the Pale Sovereign. A tall silver key opens the Grand Stair. It lies in the Oubliette at the bottom of the dungeons. Ask the porter, the librarian and the prisoners.'}
+  if(F.saMet)return 'Take the west gate at the end of Candle Street in Sale, and go up the road to the Pale Spire. The Pale Sovereign is at the top.';
+}catch(e){}return _sn.apply(this,arguments)}}
+
+/* ==========================================================================
+   ROBUSTNESS (long-run audit). All small guards, each one wrapping an existing function.
+   1. hurtEnemy on a creature that is already dead paid gold, XP and the kill count again (the core has no guard): now ignored.
+   2. A save in the middle of a boss fight lost the _kid mark of the helper copies (and the phase): after loading, killing a helper copy marked the real boss's room as cleared.
+   3. A cutscene with no line left (or a line that throws) could never be closed: the cut is dropped instead of locking every key.
+   4. A full browser store made autosaves fail without a word: the two oldest backups ('prev2', then 'prev') are removed to make room, and one plain warning is shown if it still fails.
+   5. A quest reward that does not fit in a full bag was lost: it is kept in G.flags.owed and handed over when there is room.
+   ========================================================================== */
+{const _h=hurtEnemy;hurtEnemy=function(e,dmg){if(e&&e.hp<=0)return;return _h.apply(this,arguments)}}
+{const _s=snapshot;snapshot=function(){const s=_s.apply(this,arguments);try{if(s.enemies&&s.enemies.length===G.enemies.length)s.enemies.forEach((o,i)=>{const e=G.enemies[i];if(e&&e._kid)o.kid=1;if(e&&e._ph)o.ph=e._ph})}catch(x){}return s}}
+{const _r=restoreNow;restoreNow=function(sv){const r=_r.apply(this,arguments);try{if(sv&&sv.enemies&&sv.enemies.length===G.enemies.length)sv.enemies.forEach((o,i)=>{const e=G.enemies[i];if(e&&o){if(o.kid)e._kid=1;if(o.ph)e._ph=o.ph}})}catch(x){console.error(x)}return r}}
+{const _c=cutAdvance;cutAdvance=function(){const C=G.cut;if(!C)return;
+  if(!C.lines||!C.lines[C.i]){G.cut=null;if(C.end)try{C.end()}catch(x){console.error(x)}return}
+  try{return _c.apply(this,arguments)}catch(x){console.error('cutAdvance',x);if(G.cut===C)G.cut=null}}}
+{let warnT=-1e9;
+ const freeOne=()=>{for(const k of ['prev2','prev']){try{if(localStorage.getItem('abbeySave_'+k)!==null){localStorage.removeItem('abbeySave_'+k);return true}}catch(e){}}return false};
+ const storeOpen=()=>{try{localStorage.setItem('abbeyProbe','1');localStorage.removeItem('abbeyProbe');return true}catch(e){return false}};
+ const guard=fn=>function(k){let ok=fn.apply(this,arguments);if(ok||k==='prev'||k==='prev2')return ok;
+   try{JSON.stringify(snapshot())}catch(e){return ok}   // a bug in the snapshot is not a full store
+   let freed=0;while(!ok&&freed<2&&freeOne()){freed++;ok=fn.apply(this,arguments)}
+   if(ok&&freed){try{msg('The browser store was nearly full, so the oldest backup save was removed.','#e8c870')}catch(e){}}
+   else if(!ok&&G.time-warnT>300){warnT=G.time;try{msg('The game could not be saved: the browser store is full or blocked. Free some space by clearing an old save slot.','#e8a090')}catch(e){}}
+   return ok};
+ writeSave=guard(writeSave);writeAreaSaves=guard(writeAreaSaves);}
+{const _q=qTurnIn;qTurnIn=function(id){const ob=bagAdd,lost=[];
+  bagAdd=function(it){const r=ob.apply(this,arguments);if(!r&&it&&it.id){lost.push({id:it.id,n:it.n||1});return true}return r};
+  let r;try{r=_q.apply(this,arguments)}finally{bagAdd=ob}
+  if(lost.length){const F=G.flags;F.owed=(F.owed||[]).concat(lost);try{msg('Your bag is full. The rest of the reward will be handed over as soon as there is room.','#d09a80')}catch(x){}}
+  return r}}
+{let t=0;const _u=update;update=function(dt){const r=_u.apply(this,arguments);
+  try{t+=dt||.016;if(t>1){t=0;const F=G.flags,O=F&&F.owed;if(O&&O.length&&G.state==='play'&&!G.cut&&!G.talk&&!G.loot&&G.bag.length<BAGCAP){
+    while(O.length&&G.bag.length<BAGCAP){const o=O[0],it=mkItem(o.id);if(o.n>1)it.n=o.n;if(!bagAdd(it))break;O.shift();msg('Handed over: '+((ITEMDEF[o.id]&&ITEMDEF[o.id].n)||o.id)+'.','#9ae0a0')}
+    if(!O.length)delete F.owed}}}catch(x){console.error('owed',x)}
+  return r}}

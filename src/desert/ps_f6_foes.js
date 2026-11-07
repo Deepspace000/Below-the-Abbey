@@ -131,3 +131,5 @@ psf6Item('pg_f6_k3',120,{k:'arms',n:'Gauntlets of the Pale King',t:'Arms',ic:'ar
   d:"Black gauntlets with pale stone knuckles, the Pale King's. Armour 26, all damage +10%, double hits come 9% more often, every enemy that strikes takes 16 damage, and every blow on the wearer is 16 lighter."});
 psf6Item('pg_f6_k4',120,{k:'legs',n:'Greaves of the Pale King',t:'Legs',ic:'legs',c:C6.bone,armor:32,pas:{regen:1.3,dodge:.11,ward:18,mpRegen:.8},sw:.4,
   d:"Pale grey greaves that never mark or scuff, the Pale King's. Armour 32, wounds close quickly, enemies miss 11% more, every blow on the wearer is 18 lighter, and tiredness fades faster."});
+/* painted icons: assets/icn_<id>.png for the fourteen Pale Tower pieces */
+if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push(...Object.keys(ITEMDEF).filter(k=>k.startsWith('pg_f6_')));

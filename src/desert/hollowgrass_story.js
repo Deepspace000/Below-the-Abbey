@@ -12,6 +12,7 @@ khNpc('hl_banish','The Hollow Child-King','hl_boss3',()=>{
   return say('The Hollow Child-King falls, and he is smiling. The walls of the hall begin to hum, and the hum rises into a note that goes through the bones.',[['Go on.',()=>n2]])});
 function hgsBanish(){
   const F=G.flags;F.hlSealed=1;try{giveXP(60000)}catch(e){}
+  try{const H=HLF();if(!H.towerOpen&&qSt('hc2')!=='done'){H.towerOpen=1;H.hcRevealed=1;if(qSt('hc2')===null)qAccept('hc2');qTurnIn('hc2')}}catch(e){console.error(e)}   // the wizard is gone, so the question at the top is closed for the party
   msg('The Orange Spire is sealed.','#e8a8ff');
   const top=HL.BASE+HL.N-1;
   if(!LEVELS[top]&&KH_LAZY[top])KH_LAZY[top]();

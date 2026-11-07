@@ -54,7 +54,7 @@ const MPLI={
 /* fit a W x H cell grid into the framed area: returns {s, ox, oy, X(cx), Y(cy)} */
 function mplFit(W,H,pad){pad=pad||(LEVEL>=440&&LEVEL<=459?14:4);const A=MPL.AREA,s=Math.min((A.w-2*pad)/W,(A.h-2*pad)/H,LEVEL>=440&&LEVEL<=459?9:1e9),ox=A.x+(A.w-W*s)/2,oy=A.y+(A.h-H*s)/2;return {s,ox,oy,X:c=>ox+c*s,Y:c=>oy+c*s}}
 /* a ruled box for the key, notes, etc. in the side margins */
-function mplPanel(x,a,b,w,h){const S=x.canvas.width/DW;let snap=null;try{snap=x.getImageData(Math.round((a-2)*S),Math.round((b-2)*S),Math.round((w+4)*S),Math.round((h+4)*S))}catch(e){}(MPL.pan=MPL.pan||[]).push({x,a,b,w,h,S,snap});x.save();x.fillStyle='rgba(240,230,196,.55)';x.fillRect(a,b,w,h);x.strokeStyle=MPL.GOLD;x.lineWidth=1.2;x.strokeRect(a,b,w,h);x.strokeStyle=MPL.INK;x.lineWidth=.5;x.strokeRect(a+1.8,b+1.8,w-3.6,h-3.6);x.restore()}
+function mplPanel(x,a,b,w,h){const S=x.canvas.width/DW;let snap=null;try{snap=x.getImageData(Math.round((a-2)*S),Math.round((b-2)*S),Math.round((w+4)*S),Math.round((h+4)*S))}catch(e){}const PL_=(MPL.pan=MPL.pan||[]);PL_.push({x,a,b,w,h,S,snap});if(PL_.length>12)PL_.shift();x.save();x.fillStyle='rgba(240,230,196,.55)';x.fillRect(a,b,w,h);x.strokeStyle=MPL.GOLD;x.lineWidth=1.2;x.strokeRect(a,b,w,h);x.strokeStyle=MPL.INK;x.lineWidth=.5;x.strokeRect(a+1.8,b+1.8,w-3.6,h-3.6);x.restore()}
 /* notes in a side margin: lines wrapped to w, starting at (a,b); returns the y after the last */
 /* a panel that was meant to hold notes is taken away again (the picture under it is put back) */
 function mplUnpanel(x,a,b){const L=MPL.pan||[];for(let i=L.length-1;i>=0;i--){const p=L[i];if(p.x===x&&a>=p.a-3&&a<=p.a+p.w&&b>=p.b-12&&b<=p.b+p.h){if(p.snap)x.putImageData(p.snap,Math.round((p.a-2)*p.S),Math.round((p.b-2)*p.S));L.splice(i,1);return}}}

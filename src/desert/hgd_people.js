@@ -68,6 +68,8 @@ for(const [id,i,,kind,need,title,offer,done] of HGDP_QS){const g=HGDP_FOLK[i];
   if(kind==='fetch')QUESTS[id].take={[need.item]:need.n};
   if(kind==='kill')QUESTS[id].cnt='hgdk_'+need.kind;
   QAREA[id]='The Deeper Hollow'}
+QUESTS.dq11.reward.gold=7000;QUESTS.dq11.reward.xp=90000;QUESTS.dq12.reward.gold=9000;QUESTS.dq12.reward.xp=110000; // main quests pay like their neighbours (items kept)
+if(typeof QWORLD!=='undefined'){QWORLD['The Hollow Grasslands']='hollowgrass';QWORLD['The Deeper Hollow']='deephollow'}
 if(typeof QAREA_ORDER!=='undefined'&&!QAREA_ORDER.includes('The Deeper Hollow'))QAREA_ORDER.push('The Deeper Hollow');
 ITEMDEF.hgdlantern={n:'Lost Lantern',k:'quest',t:'Quest item',ic:'ore',c:'#e8c060',stack:0,price:0,d:'The old lantern of Hedgefoot. The glass is whole.',sw:.5};
 ITEMDEF.hgdshard={n:'Mosaic Shard',k:'quest',t:'Quest item',ic:'ore',c:'#60a8e8',stack:1,price:0,d:'A piece of a smashed mosaic, bright blue.',sw:.2};

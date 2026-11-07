@@ -32,7 +32,7 @@ const HGRS=[
 const hgrOf=n=>HGRS.find(r=>r.ID===n);
 for(const r of HGRS)for(let i=0;i<5;i++){loadImg(r.spr+i,'assets/'+r.spr+i+'.png');NPC_H[r.spr+i]=[1.5,1.4,1.12,1.45,1.45][i]}
 // the spear the villagers give (a reward only: it is not added to the shops or the chests)
-gw('hgfrogspear','Amberthorn Spear','Sword',80,[88,120],.08,{str:38},9000,'#e8a830',{stun:.12,bleed:[.25,10,3]},'The oldest spear of the frogfolk, shaft of pond ash and a head of amber as hard as steel. One hit in eight knocks the foe senseless, and a quarter of the hits leave it bleeding.');
+gw('hgfrogspear','Amberthorn Spear','Sword',80,[270,330],.08,{str:38},9000,'#e8a830',{stun:.12,bleed:[.25,10,3]},'The oldest spear of the frogfolk, shaft of pond ash and a head of amber as hard as steel. One hit in eight knocks the foe senseless, and a quarter of the hits leave it bleeding.');
 {const k=GEAR.indexOf('hgfrogspear');if(k>=0)GEAR.splice(k,1)}
 if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push('hgfrogspear');
 for(const r of HGRS){const own=r.h===3;

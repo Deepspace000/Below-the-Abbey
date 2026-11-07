@@ -44,7 +44,14 @@ function blpTick(){
 const blpLamps=()=>{const m=blF().lamps|0;return (m&1?1:0)+(m&2?1:0)+(m&4?1:0)+(m&8?1:0)};
 const blpPassed=()=>!!(blF().knightYield||blF().knight);
 const BLP_LAMPS=[[17,33],[25,33],[33,33],[41,33]];
-bl3Hide(BLP.ID,'blp_knight',()=>{const F=blF();return !!(F.knightFight||F.knightYield||F.knight)});
+/* the deck is three wide: the two side cells of the knight's row are blocked in the terrain until he is dealt with (applied on every arrival and every change) */
+const BLP_KB=[[51,34],[51,36]];
+function blpDeck(open){try{const T=TERRS[BLP.ID];if(T&&T.block)for(const [x,y] of BLP_KB)T.block[y*BLP.W+x]=open?0:1}catch(e){}}
+bl3Hide(BLP.ID,'blp_knight',()=>{const F=blF(),h=!!(F.knightFight||F.knightYield||F.knight);blpDeck(h);return h});
+/* the Gate of Sale opens for the Gate Key or once the knight has yielded or is dead */
+{const _kb=khBump;khBump=function(nx,ny,g){const d=KH_DOOR[g];
+  if(d&&d.bl&&d.side==='W'&&LEVEL===BLP.ID&&!(blF().knightYield||blF().knight||bagCount('vtgatekey')>0)){sfx('locked');try{msg('The iron gate of Sale is shut. The Pale Knight still holds the bridge. Show him the Gate Key of Sale, or defeat him.','#d09a80')}catch(e){}return true}
+  return _kb.apply(this,arguments)}}
 bl3OnArrive(n=>{
   if(n!==BLP.ID)return;const F=blF();
   if(F.knightFight&&!F.knight&&!G.enemies.some(e=>e.t==='blpaleknight'&&e.hp>0)){const m=bl3Add('blpaleknight',51,35,90);if(m&&F.khp){m.hp=Math.max(1,Math.round(m.maxhp*F.khp));m.alert=true}}
@@ -183,6 +190,7 @@ function blpBuild(p){
   for(const [x,y,i] of [[44,32,0],[58,32,1],[44,38,1],[58,38,0]])C.dec('gy_angel',x,y,{block:true,npc:'blp_angel'+i,sc:.9});
   // the Pale Knight stands on the bridge, a person until the party chooses
   C.dec('bl_paleknight',51,35,{block:true,npc:'blp_knight',sc:1.0});
+  for(const [x,y] of [[51,34],[51,36]])block[ix(x,y)]=1;
   C.foe('blbones',42,31);
   C.post(43,37,'bl_pb_br',[{n:'THE PALE BRIDGE',d:0},{n:'HELD',d:0}],'blp_sign_br','',{i:3});
   C.milestone(42,33);

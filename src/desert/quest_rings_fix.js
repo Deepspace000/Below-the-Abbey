@@ -79,7 +79,7 @@ T.dh1={give:[N(481,'hg_aldous')],act:[N(483,'hgd_moth')],ready:[N(483,'hgd_moth'
 T.dh2={give:[N(483,'hgd_moth')]};
 const hive=/^hg(larva|swarm\d|wasp|golem)$/;
 T.dh3={give:[N(484,'hgd_whale')],act:[E(471,hive),E(472,hive),E(473,hive),E(474,hive)],ready:[N(484,'hgd_whale')]};
-T.dq11={give:[N(475,'hgd_q10')],act:[F(475,()=>{const v=G.flags.hgdVisited||{},o=[];for(let i=0;i<8;i++)if(!v[i])for(const d of G.decor)if(d.npc==='hgd_church'+i&&!d.found)o.push({x:d.x,y:d.y});return o})],ready:[N(475,'hgd_q10')]};
+T.dq11={give:[N(475,'hgd_q10')],act:[F(475,()=>{const v=G.flags.hgdVisited||{},o=[];for(let i=0;i<8;i++)if(!v[i]&&!(typeof HGDP_T!=='undefined'&&v[HGDP_T[i]]))for(const d of G.decor)if(d.npc==='hgd_church'+i&&!d.found)o.push({x:d.x,y:d.y});return o})],ready:[N(475,'hgd_q10')]};
 T.dq12={give:[N(475,'hgd_q11')],act:[E(475,/^hgdwarden$/)],ready:[N(475,'hgd_q11')]};
 T.hgsph={give:[N(475,'hgd_cinder')],act:[E(475,/^hgmini\d$/)],ready:[N(475,'hgd_cinder')]};
 /* ---- Act 8: the Black Swill and the way west (the Underlevel is 476, the Maze of Gardens 490, Wenlock 496) ---- */

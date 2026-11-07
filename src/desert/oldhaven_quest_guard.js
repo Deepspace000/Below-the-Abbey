@@ -9,7 +9,7 @@
    quests the story hands out itself are added by the story: the court on arrival (also for a party that arrived before this, see the check on entering), The Six Names at the pardon
    (oldhaven.js, ohSixQuest). The tool for this check is tools/qaudit/oh_quest_audit.js.
    ========================================================================== */
-QGIVER.oh_cap=['vq6','oq0','sg1','sg5','sg8','oa1'];QGIVER.oh_sergeant=['sg2','sg6'];QGIVER.oh_x_baker=['ox3','sg7'];
+QGIVER.oh_cap=['vq6','oq0','sg1','sg5','sg8','oa1','ad1'];QGIVER.oh_sergeant=['sg2','sg6'];QGIVER.oh_x_baker=['ox3','sg7'];
 const OHQ_GATE={
   ox1:()=>qSt('oq0')==='active',ox2:()=>qSt('oq0')==='active',ox3:()=>qSt('oq0')==='active',ox4:()=>qSt('oq0')==='active',ox5:()=>qSt('oq0')==='active',ox6:()=>qSt('oq0')==='active',
   vq6:()=>false,   // the court quest is added by the story (on arrival), nobody hands it out
@@ -18,7 +18,7 @@ const OHQ_GATE={
   sg3:()=>!!G.flags.siege,sg4:()=>!!G.flags.siege,
   sg7:()=>qSt('sg1')==='done'&&qSt('ox3')==='done',sg8:()=>qSt('sg1')==='done'&&qSt('sg7')==='done',
   oa1:()=>qSt('sg8')==='done',oa6:()=>qSt('oa2')==='done',oa7:()=>qSt('oa3')==='done',
-  oa9:()=>qSt('oa8')==='done',
+  oa9:()=>qSt('oa8')==='done',ad1:()=>!!G.flags.heirReported&&qSt('oa9')==='done',
   oa8:()=>{const O=typeof OAKF==='function'?OAKF():{};return !!O.heir&&!O.crowned}
 };
 {const _qm=questMark;questMark=function(d){

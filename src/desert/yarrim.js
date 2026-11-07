@@ -96,6 +96,8 @@ repWrap('kh_vizier',()=>G.flags.kingOrder,'About the Sea Gate',()=>{
   if(qSt('yar2')==='done')return say('The Sea Gate stands open. Do not make me regret it.',[BYE]);
   return say('The king has ordered the Sea Gate unsealed. I would obey faster if I knew where the key was. It was lost in the cisterns beneath the Potters Market when the old warden died. Bring it to me, and I will have the gate opened by the hour.',[['We will find the key.',()=>{qAccept('yar2');return say('Take a lantern. The cisterns are not kind.',[BYE])}],['Not now.',()=>null]]);
 });
+QGIVER.kh_vizier=['kh_seal','yar2'];QGIVER.kh_captain=['yar3','kh_sea']; // marks for the Sea Gate quests
+{const _qm=questMark;questMark=function(d){const r=_qm.apply(this,arguments);if(r===1&&d&&!d.found&&!d.hidden){if(d.npc==='kh_vizier'&&qSt('kh_seal')==='done'&&qSt('yar2')===null&&!G.flags.kingOrder)return 0;if(d.npc==='kh_captain'&&qSt('yar3')===null&&!G.flags.yarOpen&&qSt('kh_sea')!==null)return 0}return r}}
 /* the warden's key, in a chest in the cisterns */
 khNpc('yar_keychest','An old bronze chest','chest',d=>{const F=G.flags;
   if(qSt('yar2')==='active'&&!F.yarKey){F.yarKey=1;sfx('key');return say('Under the green crust, a heavy iron key on a ring, stamped with a wave. This is the Sea Gate key.',[BYE])}

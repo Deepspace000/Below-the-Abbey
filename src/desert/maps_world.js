@@ -180,7 +180,7 @@ function mpWorldIco(l,x,y,z){wmnIco(l)}
 
 /* the key (live, in screen space) */
 function mpWorldKey(){
-  const c=ctx,x0=338,y0=204,w=124,h=70;c.save();c.fillStyle='rgba(238,226,190,.9)';c.fillRect(x0,y0,w,h);c.restore();mplPanel(c,x0,y0,w,h);
+  const c=ctx,x0=338,y0=204,w=124,h=70;c.save();c.fillStyle='rgba(238,226,190,.9)';c.fillRect(x0,y0,w,h);c.restore();c.save();c.fillStyle='rgba(240,230,196,.55)';c.fillRect(x0,y0,w,h);c.strokeStyle=MPL.GOLD;c.lineWidth=1.2;c.strokeRect(x0,y0,w,h);c.strokeStyle=MPL.INK;c.lineWidth=.5;c.strokeRect(x0+1.8,y0+1.8,w-3.6,h-3.6);c.restore(); /* mplPanel without its per-frame getImageData snapshot (that list grew every frame) */
   const rows=wmnKeyRows(c);
   rows.forEach((r,i)=>{const col=i%2,row=(i/2)|0,xx=x0+9+col*60,yy=y0+8+row*10.4;r[1](xx,yy);mplText(c,r[0],xx+9,yy,6,'#3a2a1c','left')})}
 
