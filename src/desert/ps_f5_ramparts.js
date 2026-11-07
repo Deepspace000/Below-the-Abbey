@@ -13,6 +13,8 @@ function psf5SpireTile(k,wh){
   return gyTile('texBlack_2',wh,{gain:1.05,rgb:[.78,.95,.88],tag:'psf5s'+wh+'_'+k+(ok?'L':'N'),draw:(x,w,h)=>{
     if(!ok)return;const T=14.5,ppc=f.height/T,sw=ppc*(w/128),sy=f.height-wh*ppc,sx=f.width/2+(k-.5)*ppc;
     x.imageSmoothingQuality='high';x.drawImage(f,sx,sy,sw,wh*ppc,0,0,w,h)}})}
+/* these three were never registered, so the game showed the leafy ivy column in their place (the painted pieces are assets/ps/candelabra_red.webp, candelabra_red2.webp and f2_lamp3.webp) */
+PSP_PICS.candelabra_red=[1.7,['candelabra_tall','hpb_candelabra_4'],{}];PSP_PICS.candelabra_red2=[1.7,['candelabra_tall','hpb_candelabra_4'],{}];PSP_PICS.f2_lamp3=[2.1,['candelabra_tall','hpb_candelabra_4'],{}];
 function psf5Build(info){
   const W=PSF5.W,H=PSF5.H,id=PSF5.ID;
   const C=pspMake({id,start:{x:32,y:56,f:0},walled:true,wall:'dark',wh:1.3,floor:'flag',amb:.72,wind:.45,lcol:PSP_PAL.silver,terrace:true});
@@ -52,7 +54,7 @@ function psf5Build(info){
   ring2.forEach(([x,y],i)=>{if(cand(i%2?'candelabra_red':'candelabra_red2',x,y,1)&&i%5===0)C.light(x,y,RED)});
   /* gothic lampstands in an outer ring: black iron posts with red lanterns, and triple-lamp standards at the corners and the middle of each side */
   for(const [x,y] of [[26,26],[32,26],[38,26],[26,32],[38,32],[26,38],[38,38]])if(cand('f2_lamp3',x,y,1))C.light(x,y,[1.5,.7,.45]);
-  for(const [x,y] of [[28,26],[30,26],[34,26],[36,26],[26,28],[26,30],[26,34],[26,36],[38,28],[38,30],[38,34],[38,36],[28,38],[30,38],[34,38],[36,38]])if(cand('lantern_red_b',x,y,1)&&(x+y)%8===0)C.light(x,y,RED);
+  for(const [x,y] of [[28,26],[30,26],[34,26],[36,26],[26,28],[26,30],[26,34],[26,36],[38,28],[38,30],[38,34],[38,36],[28,38],[30,38],[34,38],[36,38]])if(C.free(x,y)){C.prop(['candles_glow_a','candles_glow_b','candles_glow_c'][(x+y)%3],x,y,{block:false,sc:.8});if((x+y)%8===0)C.light(x,y,RED)};
   /* the way down, in the middle of the south parapet */
   C.links({style:{'the stair down':'stair'}});
   /* lamps and braziers along the walk, banners, statues */

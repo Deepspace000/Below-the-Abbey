@@ -27,4 +27,4 @@ const LE_SUPER=[
 for(const it of LE_SUPER){it.sup=1;if(!it.dbl)delete it.dbl}   // sup: cream white name colour (gearCol), above the turquoise band
 if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push(...LE_SUPER.map(i=>i.id));
 khNpc('psf5_smith','Ysolde Vane, the Last Smith','ps_c_psservant',d=>say('"They call me the Last Smith, because I am the one still at the anvil. Nobody has asked me for a plain blade in years. The ones I make now are made from what the tower leaves behind: black iron, star metal, a little of the clock. They are not cheap. One hundred thousand gold each, and I do not haggle with the dead or the living."',
-  [['Show me the weapons',()=>{G.talk=null;openShop(d,LE_SUPER.map(i=>[i.id,1]),"The Last Smith's Anvil");return null}],BYE]),{sc:1});
+  [['Temper my gear',()=>tpStart(d)],['Show me the weapons',()=>{G.talk=null;openShop(d,LE_SUPER.map(i=>[i.id,1]),"The Last Smith's Anvil");return null}],BYE]),{sc:1});
