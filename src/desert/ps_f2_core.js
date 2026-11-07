@@ -13,5 +13,5 @@ function psf2Count(){return PSF2.PARTS.filter(psf2Got).length}
 function psf2All(){return psf2Count()===PSF2.PARTS.length}
 /* a room's puzzle calls this when it is solved: gives the piece once, whatever else happens */
 function psf2Give(part){const F=psf2F();if(!PSF2.ITEMS[part]||F.got[part])return false;F.got[part]=1;
-  const it=mkItem(PSF2.ITEMS[part]);if(!bagAdd(it))G.items.push({k:PSF2.ITEMS[part],x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false});
+  const it=mkItem(PSF2.ITEMS[part]);if(!bagAdd(it))ovfStash(PSF2.ITEMS[part]);
   try{msg('You find '+PSF2.NAMES[part]+'.','#ffe36a');sfx('key')}catch(e){}return true}

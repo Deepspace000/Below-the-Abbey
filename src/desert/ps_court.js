@@ -657,7 +657,7 @@ function pscBuild(info){
   /* ===== THE ORCHARD OF STONE FRUIT (53..57,28..32): trees hung with stone apples; one is real ===== */
   [[54,29],[56,29],[55,30],[54,31],[56,31],[57,32]].forEach(([x,y],i)=>{const id='psc_apple'+i;
     nm(id,'A tree of stone apples',STONETREE,d=>{const Fc=pscF();
-      if(i===2){if(Fc.apple)return say('Only stone apples are left on this tree.',[BYE]);return say('A pale tree hung with apples of grey stone. One of them, on a low branch, has a bruise on its side, and a bruise is not a thing that a stone has.',[['Pick the bruised one.',()=>{Fc.apple=1;if(!bagAdd(mkItem('apple')))G.items.push({k:'apple',x:G.P.x,y:G.P.y,taken:false});sfx('key');G.talk=null;msg('It is a real apple, cold and sweet.','#cfe8c8');return null}],BYE])}
+      if(i===2){if(Fc.apple)return say('Only stone apples are left on this tree.',[BYE]);return say('A pale tree hung with apples of grey stone. One of them, on a low branch, has a bruise on its side, and a bruise is not a thing that a stone has.',[['Pick the bruised one.',()=>{Fc.apple=1;if(!bagAdd(mkItem('apple')))ovfStash('apple');sfx('key');G.talk=null;msg('It is a real apple, cold and sweet.','#cfe8c8');return null}],BYE])}
       return say('A pale tree hung with apples of grey stone. You pick one up. It is stone, all the way through.',[BYE])});
     thing(STONETREE,id,x,y,{sc:1})});
   plaque(53,28,'orchard',['THE ORCHARD','OF STONE FRUIT'],'THE ORCHARD OF STONE FRUIT. A plaque. The fruit is not for eating. One of the apples was left by mistake.');lampAt(55,28,GR);

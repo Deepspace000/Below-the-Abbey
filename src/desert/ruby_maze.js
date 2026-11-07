@@ -190,7 +190,7 @@ ITEMDEF.rubyapple={n:'Red Apple',k:'food',t:'Snack',ic:'apple',c:'#a8302a',heal:
 /* ---- Wren, the sorceress of the maze ---- */
 function rmGive(id,what){
   const F=G.flags,it=mkItem(id);
-  if(!bagAdd(it))G.items.push({k:id,x:G.P.x,y:G.P.y,taken:false});
+  if(!bagAdd(it))ovfStash(id);
   msg(`The sorceress gives you ${what}.`,'#ffe9a0');sfx('key');
 }
 function rmSecret(again){
@@ -230,7 +230,7 @@ NPCS.rubyportal={name:'The ruby portal',img:'rubyportal',root:d=>say('A tall sto
   return r}}
 
 /* ---- Tobin, a young man in Ironhill who misses a girl called Wren ---- */
-function rmBoyGive(){const F=G.flags;if(F.ironhillBoyPotion)return;F.ironhillBoyPotion=1;if(!bagAdd(mkItem('greatermana')))G.items.push({k:'greatermana',x:G.P.x,y:G.P.y,taken:false});msg('Tobin gives you a Greater Mana Draught.','#ffe9a0');sfx('key')}
+function rmBoyGive(){const F=G.flags;if(F.ironhillBoyPotion)return;F.ironhillBoyPotion=1;if(!bagAdd(mkItem('greatermana')))ovfStash('greatermana');msg('Tobin gives you a Greater Mana Draught.','#ffe9a0');sfx('key')}
 function rmBoyNews(){
   const F=G.flags,more=[['Never mind.',()=>null]];
   if(F.rubyKept)return say('He stands very still. "News? What news?"',[['She is alive and well, and we are keeping her secret.',()=>{F.ironhillBoyTold=1;F.ironhillBoyHappy=1;rmBoyGive();

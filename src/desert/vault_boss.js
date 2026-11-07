@@ -36,17 +36,17 @@ function vtBossDied(e){
   const F=vtF(),t=e.t;
   {const L=LEVELS[LEVEL];for(const q of G.enemies)if(q.hp>0&&q.vtAdd){q.hp=0;q.dying=.4}}
   if(t==='vtwarden'){
-    if(!bagAdd(mkItem('vtkey1')))G.items.push({k:'vtkey1',x:e.x,y:e.y,taken:false});F.keyTaken=1;
+    if(!bagAdd(mkItem('vtkey1')))ovfStash('vtkey1');F.keyTaken=1;
     msg('The Barrow Warden falls apart. A key of pale silver lies in the bones on a chain.','#ffe36a');sfx('win');
     later(1200,()=>msg('You have the Pale Silver Key. It opens the pale-silver lock at the south end of the hall.','#ffe36a'))}
   else if(t==='vtsilver'){
-    if(!bagAdd(mkItem('vtseal')))G.items.push({k:'vtseal',x:e.x,y:e.y,taken:false});F.sealTaken=1;
+    if(!bagAdd(mkItem('vtseal')))ovfStash('vtseal');F.sealTaken=1;
     msg('The Silver Warden folds in on himself. A heavy seal of pale silver hangs from his belt on a cord.','#ffe36a');sfx('win');
     later(1200,()=>msg("You have the Sanctum Seal. It fits the lock on the door to Maldrake's Sanctum.",'#ffe36a'))}
   else if(t==='vtmaldrake'){
     F.dead=1;F.fight=2;F.gotKey=1;
-    for(const it of ['potion6','potion6','supermana','supermana','elixir']){if(!bagAdd(mkItem(it)))G.items.push({k:it,x:e.x,y:e.y,taken:false})}
-    for(const it of ['vtgatekey','vtstaff','vtring']){if(!bagAdd(mkItem(it)))G.items.push({k:it,x:e.x,y:e.y,taken:false})}
+    for(const it of ['potion6','potion6','supermana','supermana','elixir']){if(!bagAdd(mkItem(it)))ovfStash(it)}
+    for(const it of ['vtgatekey','vtstaff','vtring']){if(!bagAdd(mkItem(it)))ovfStash(it)}
     msg('You have the Gate Key of Sale.','#ffe36a');sfx('win');
     const LAST="Wystan Maldrake sinks down on one knee, and the silver ring ticks against the floor. He looks at his hands, as if he had not seen them for years. 'Thank you,' he says. 'It was the only way you could, and I would not have let you do it any other way. The key is in my coat. The ring will not come off me, and it will not stop. Somebody must read the paper to the dead. I could not.' He is a heap of grey cloth, and the ring is still cold on a finger that is no longer there. The dead of Underhill have not lain down.";
     later(1500,()=>{G.talk={d:{k:'vti_maldrake',x:G.P.x,y:G.P.y,npc:'vto_maldrake'},n:{name:'Wystan Maldrake',root:()=>null},node:say(LAST,[['Take the key and go.',()=>{vtBossEnd();return null}]]),t:G.time,btns:[]}})}}

@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.866';
+const VERSION='3.867';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -6283,7 +6283,7 @@ function qTurnIn(id){
   for(const k in (q.take||{}))bagRemove(k,q.take[k]);
   const r=q.reward;G.quests[id].st='done';
   if(r.gold)G.gold+=r.gold*QREW_MUL;
-  for(const it of (r.items||[]))if(!bagAdd(mkItem(it)))msg('Your bag is full. A reward was lost.','#d09a80');
+  for(const it of (r.items||[]))if(!bagAdd(mkItem(it)))ovfStash(it);
   if(r.xp)giveXP(r.xp*QREW_MUL);
   msg(`Quest complete: ${q.title}. Reward: ${rewardText(id)}.`,'#ffe36a');sfx('win');
   try{afflQuest(id)}catch(e){}
@@ -7711,7 +7711,7 @@ addEventListener('resize',fit);fit();
 /* ---- src/desert/artlist.js ---- */
 /* written by tools/inject.py */
 const DS_PAINTED=['assassin', 'assassinA', 'bat', 'batA', 'bear', 'bearA', 'bl_arch', 'bl_bell', 'bl_canker', 'bl_grow_1', 'bl_grow_2', 'bl_grow_3', 'bl_grow_4', 'bl_grow_5', 'bl_grow_6', 'bl_hang1', 'bl_hang2', 'bl_ibell2', 'bl_moss', 'bl_stilt1', 'bl_stilt2', 'bl_twist_1', 'bl_twist_2', 'bl_twist_3', 'bl_twist_4', 'bl_twist_5', 'bl_twist_6', 'bl_win_a', 'bl_win_b', 'bl_win_c', 'blh_abbot', 'blh_church', 'blr_tent', 'bo_skapple', 'brazier0', 'brazier1', 'brazier2', 'brazier3', 'bsw', 'bswA', 'camelpE', 'camelpW', 'camelrE', 'camelrW', 'ceil_hgtb_tubeceil', 'ceil_tomb', 'ceil_wm_brick', 'ceil_wm_crystal', 'cobra', 'cobraA', 'corpse0', 'corpse1', 'corpse2', 'corpse3', 'cvnomadA', 'cvnomadB', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'dplant0', 'dplant1', 'dplant2', 'dplant3', 'dpyrgate', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_hgduf', 'floor_hgduf2', 'floor_hgdwf', 'floor_hgdwf2', 'floor_hgt_f0', 'floor_hgt_f1', 'floor_hgt_f2', 'floor_hgt_f3', 'floor_hgt_f4', 'floor_hgt_f5', 'floor_hgt_f6', 'floor_hgt_f7', 'floor_hgtb_deep', 'floor_hgtb_f_checker', 'floor_hgtb_f_checker_dark', 'floor_hgtb_f_circles', 'floor_hgtb_f_diamonds', 'floor_hgtb_f_fish', 'floor_hgtb_f_floral', 'floor_hgtb_f_gutter', 'floor_hgtb_f_hex', 'floor_hgtb_f_lotus', 'floor_hgtb_f_mandala', 'floor_hgtb_f_mandala_dark', 'floor_hgtb_f_marble', 'floor_hgtb_f_mossy', 'floor_hgtb_f_mossy_dark', 'floor_hgtb_f_pearlbands', 'floor_hgtb_f_pearlbands_dark', 'floor_hgtb_f_petals', 'floor_hgtb_f_planks', 'floor_hgtb_f_reed', 'floor_hgtb_f_rosette', 'floor_hgtb_f_scales', 'floor_hgtb_f_shellflags', 'floor_hgtb_f_shellflags_dark', 'floor_hgtb_f_spiral', 'floor_hgtb_f_stained', 'floor_hgtb_f_star', 'floor_hgtb_f_sunburst', 'floor_hgtb_f_terrazzo', 'floor_hgtb_f_terrazzo_dark', 'floor_hgtb_f_waves', 'floor_hgtb_med_00', 'floor_hgtb_med_01', 'floor_hgtb_med_02', 'floor_hgtb_med_03', 'floor_hgtb_med_10', 'floor_hgtb_med_11', 'floor_hgtb_med_12', 'floor_hgtb_med_13', 'floor_hgtb_med_20', 'floor_hgtb_med_21', 'floor_hgtb_med_22', 'floor_hgtb_med_23', 'floor_hgtb_med_30', 'floor_hgtb_med_31', 'floor_hgtb_med_32', 'floor_hgtb_med_33', 'floor_hgtb_pool', 'floor_hgtb_uwcobble', 'floor_hgtb_uwglass', 'floor_hgtb_uwsand', 'floor_hgtb_uwslab', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_seabed1', 'floor_seabed2', 'floor_seabed3', 'floor_seabed4', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'floor_wm_cobble', 'floor_wm_flag', 'floor_wm_moss', 'floor_wm_water', 'fw_bream_0', 'fw_bream_1', 'fw_carp_0', 'fw_carp_1', 'fw_goldfish_0', 'fw_goldfish_1', 'fw_minnows_0', 'fw_minnows_1', 'fw_perch_0', 'fw_perch_1', 'fw_pike_0', 'fw_pike_1', 'fw_tench_0', 'fw_tench_1', 'fw_trout_0', 'fw_trout_1', 'hgdemon0', 'hgdemon1', 'hgdemon2', 'hgdemon3', 'hgdemon4', 'hgdemon5', 'hgdemon6', 'hgdemon7', 'hgdemon8', 'hgdemon9', 'hgdf_plant0', 'hgdf_plant1', 'hgdf_plant2', 'hgdf_plant3', 'hgdf_plant4', 'hgdf_plant5', 'hgdf_plant6', 'hgdf_plant7', 'hgdf_shield0', 'hgdf_shield1', 'hgdf_shield2', 'hgdf_shield3', 'hgdf_shield4', 'hgdf_shield5', 'hgdf_shield6', 'hgdf_shield7', 'hgdf_shield8', 'hgdf_vine0', 'hgdf_vine1', 'hgdf_vine2', 'hgdf_vine3', 'hgdf_wsym0', 'hgdf_wsym1', 'hgdf_wsym10', 'hgdf_wsym11', 'hgdf_wsym12', 'hgdf_wsym13', 'hgdf_wsym14', 'hgdf_wsym15', 'hgdf_wsym2', 'hgdf_wsym3', 'hgdf_wsym4', 'hgdf_wsym5', 'hgdf_wsym6', 'hgdf_wsym7', 'hgdf_wsym8', 'hgdf_wsym9', 'hgdl_bow', 'hgfbeetle', 'hgfbloodworm', 'hgfcatfish', 'hgfcrayfish', 'hgfire0', 'hgfire1', 'hgfire2', 'hgfire3', 'hgfire4', 'hgfire5', 'hgfleech', 'hgfpiranha', 'hgfscorpion', 'hgfsnake', 'hgfspider', 'hgfturtle', 'hgmbeetle', 'hgmcricket', 'hgmdragonfly', 'hgmhornet', 'hgmhorsefly', 'hgmlocust', 'hgmmosquito', 'hgmtoad', 'hgoangler', 'hgobones', 'hgocorpse', 'hgocrab', 'hgoeel', 'hgohag', 'hgokraken', 'hgoleech', 'hgoleviathan', 'hgoserpent', 'hgslime0', 'hgslime1', 'hgslime2', 'hgslime3', 'hgslime4', 'hgslime5', 'hgslime6', 'hgslime7', 'hgslime8', 'hgslime9', 'hgstall_armour', 'hgstall_arms', 'hgstall_church', 'hgstall_general', 'hgstall_inn', 'hgstall_magic', 'hgstall_shrine', 'hgstall_trader', 'hgt_balcony', 'hgt_banner', 'hgt_bulbflower', 'hgt_chime', 'hgt_chimney', 'hgt_cloud_aqua1', 'hgt_cloud_aqua2', 'hgt_cloud_cream1', 'hgt_cloud_cream2', 'hgt_cloud_lilac1', 'hgt_cloud_lilac2', 'hgt_cloud_pink1', 'hgt_cloud_pinkstreak', 'hgt_crystalgrass', 'hgt_cupola', 'hgt_fairytree', 'hgt_fern', 'hgt_finial', 'hgt_fountain', 'hgt_gardenlantern', 'hgt_giantcap', 'hgt_hanglamp', 'hgt_lamppost', 'hgt_lightvine', 'hgt_moon_glow', 'hgt_moon_halo', 'hgt_moon_main', 'hgt_mushrooms', 'hgt_obelisk', 'hgt_pearlbush', 'hgt_planet_coral', 'hgt_planet_cratered', 'hgt_planet_crystal', 'hgt_planet_desert', 'hgt_planet_gas', 'hgt_planet_ice', 'hgt_planet_jade', 'hgt_planet_lava', 'hgt_planet_ocean', 'hgt_planet_orange', 'hgt_planet_pearl', 'hgt_planet_violet', 'hgt_reeds', 'hgt_ring_gold', 'hgt_ring_pastel', 'hgt_shellflower', 'hgt_shrub', 'hgt_vine_cornerBR', 'hgt_vine_cornerTL', 'hgt_vine_creeper', 'hgt_vine_curtain', 'hgt_vine_garland', 'hgt_vine_ivy', 'hgt_vine_roundleaf', 'hgt_vine_stars', 'hgt_vine_tendril', 'hgt_vine_wisteria', 'hgt_vine_wreatharch', 'hgt_vine_wreathround', 'hgt_willow', 'hgtb_amberpup', 'hgtb_aquawhale', 'hgtb_basket', 'hgtb_bench', 'hgtb_bulk_face_amber', 'hgtb_bulk_face_aqua', 'hgtb_bulk_face_lilac', 'hgtb_bulk_face_pink', 'hgtb_bulk_skin_amber', 'hgtb_bulk_skin_aqua', 'hgtb_bulk_skin_lilac', 'hgtb_bulk_skin_pink', 'hgtb_chair', 'hgtb_creamjelly', 'hgtb_creammoth', 'hgtb_deco_banner', 'hgtb_deco_bunting', 'hgtb_deco_fountain', 'hgtb_deco_lanterns', 'hgtb_deco_pearlplinth', 'hgtb_deco_shellstatue', 'hgtb_edge_far', 'hgtb_edge_mid', 'hgtb_edge_near', 'hgtb_elder', 'hgtb_eye1', 'hgtb_eye2', 'hgtb_eye3', 'hgtb_eye4', 'hgtb_eye5', 'hgtb_eye6', 'hgtb_feather_down', 'hgtb_feather_iridescent', 'hgtb_feather_peacock1', 'hgtb_feather_peacock2', 'hgtb_fish_angel', 'hgtb_fish_clam', 'hgtb_fish_crabfish', 'hgtb_fish_eel', 'hgtb_fish_flounder', 'hgtb_fish_glassfish', 'hgtb_fish_insectfish', 'hgtb_fish_jelly', 'hgtb_fish_lanternfish', 'hgtb_fish_nautilus', 'hgtb_fish_neon', 'hgtb_fish_octopus', 'hgtb_fish_pearlray', 'hgtb_fish_puffer', 'hgtb_fish_seadragon', 'hgtb_fish_seahorse', 'hgtb_fish_snailfish', 'hgtb_fish_starfish', 'hgtb_fishbeetle', 'hgtb_fisher', 'hgtb_fishfly', 'hgtb_furn_bed', 'hgtb_furn_books_globe', 'hgtb_furn_bookshelf', 'hgtb_furn_bunk', 'hgtb_furn_cabinet', 'hgtb_furn_chandelier', 'hgtb_furn_chandelier_lantern', 'hgtb_furn_clock', 'hgtb_furn_hearth', 'hgtb_furn_loom', 'hgtb_furn_stage', 'hgtb_furn_table_chairs', 'hgtb_glasspost', 'hgtb_jadeeel', 'hgtb_jadefinmoth', 'hgtb_jar', 'hgtb_lamp_bare', 'hgtb_lamp_bracket', 'hgtb_lamp_hanging', 'hgtb_lamp_short', 'hgtb_lamp_tall', 'hgtb_lamp_vine', 'hgtb_lampwhite', 'hgtb_lantern', 'hgtb_lanternbeetle', 'hgtb_levi_eel_face', 'hgtb_levi_jelly_face', 'hgtb_levi_manta_face', 'hgtb_levi_whale_face', 'hgtb_lilacmoth', 'hgtb_peachwhale', 'hgtb_peacockfan', 'hgtb_pearlslug', 'hgtb_pinkbulb', 'hgtb_plant_barrel', 'hgtb_plant_belltree', 'hgtb_plant_glowshrooms', 'hgtb_plant_lacecoral', 'hgtb_plant_lupin', 'hgtb_plant_orbbush', 'hgtb_plant_potvine', 'hgtb_plant_spiralfern', 'hgtb_plant_tealgrass', 'hgtb_plantbed', 'hgtb_polish', 'hgtb_pups', 'hgtb_read', 'hgtb_rug_amber', 'hgtb_rug_aqua_fish', 'hgtb_rug_cream_mandala', 'hgtb_rug_green_oval', 'hgtb_rug_lilac_runner', 'hgtb_rug_pink_round', 'hgtb_scorp_barbels', 'hgtb_scorp_dorsal', 'hgtb_scorp_eye', 'hgtb_scorp_mouth', 'hgtb_scorp_pectoral', 'hgtb_scorp_pectoral_ruffle1', 'hgtb_scorp_pectoral_ruffle2', 'hgtb_scorp_ref_front', 'hgtb_scorp_ref_side', 'hgtb_scorp_smallfins', 'hgtb_scorp_spine', 'hgtb_scorp_tail', 'hgtb_shrine', 'hgtb_spindleray', 'hgtb_spindlespider', 'hgtb_stall_aqua_jars', 'hgtb_stall_coral_fruit', 'hgtb_stall_lilac_cloth', 'hgtb_stall_navy_books', 'hgtb_stall_orange_pottery', 'hgtb_stall_pink_flowers', 'hgtb_stall_rose_lanterns', 'hgtb_stall_sage_herbs', 'hgtb_stall_teal_fish', 'hgtb_stall_yellow_bread', 'hgtb_stilt_body', 'hgtb_stilt_foot', 'hgtb_stilt_head', 'hgtb_stilt_knee', 'hgtb_sweep', 'hgtb_table', 'hgtb_tank_anemone', 'hgtb_tank_bubbles', 'hgtb_tank_bubbles3', 'hgtb_tank_coral', 'hgtb_tank_kelp', 'hgtb_tank_rock', 'hgtb_tank_round', 'hgtb_tank_ruinarch', 'hgtb_tank_seagrass', 'hgtb_tank_tall', 'hgtb_walk', 'hgtb_watch', 'hgtb_water', 'hgtb_wing_bat', 'hgtb_wing_butterfly', 'hgtb_wing_insect', 'hgthin0', 'hgthin1', 'hgthin2', 'hgthin3', 'hgthin4', 'hgthin5', 'hgthin6', 'hgthin7', 'hgw_croc', 'hgw_crocA', 'hgwm_algae0', 'hgwm_algae1', 'hgwm_grass0', 'hgwm_grass1', 'hgwm_grass2', 'hgwm_moss0', 'hgwm_moss1', 'hgwm_reed0', 'hgwm_rock0', 'hgwm_rock1', 'hgxprop0', 'hgxprop1', 'hgxprop10', 'hgxprop11', 'hgxprop12', 'hgxprop13', 'hgxprop14', 'hgxprop15', 'hgxprop2', 'hgxprop3', 'hgxprop4', 'hgxprop5', 'hgxprop6', 'hgxprop7', 'hgxprop8', 'hgxprop9', 'hgxrock0', 'hgxrock1', 'hgxrock2', 'hgxrock3', 'hgxrock4', 'hgxrock5', 'hgxrock6', 'hgxrock7', 'hgxstat0', 'hgxstat1', 'hgxstat2', 'hgxstat3', 'hgxstat4', 'hgxstat5', 'hgxstat6', 'hgxstat7', 'hgyuck0', 'hgyuck1', 'hgyuck2', 'hgyuck3', 'hgyuck4', 'hgyuck5', 'hgyuck6', 'hgyuck7', 'hgyuck8', 'hgyuck9', 'hpb_barrel_4', 'hpb_barrel_5', 'hpb_barrel_6', 'hpb_barrel_7', 'hpb_bell_4', 'hpb_bell_5', 'hpb_bell_6', 'hpb_bell_7', 'hpb_brazier_4', 'hpb_brazier_5', 'hpb_brazier_6', 'hpb_brazier_7', 'hpb_bucket_4', 'hpb_bucket_5', 'hpb_bucket_6', 'hpb_bucket_7', 'hpb_candelabra_4', 'hpb_candelabra_5', 'hpb_candelabra_6', 'hpb_candelabra_7', 'hpb_cask_4', 'hpb_cask_5', 'hpb_cask_6', 'hpb_cask_7', 'hpb_crate_4', 'hpb_crate_5', 'hpb_crate_6', 'hpb_crate_7', 'hpb_crate_lid_4', 'hpb_crate_lid_5', 'hpb_crate_lid_6', 'hpb_crate_lid_7', 'hpb_keg_4', 'hpb_keg_5', 'hpb_keg_6', 'hpb_keg_7', 'hpb_ladder_4', 'hpb_ladder_5', 'hpb_ladder_6', 'hpb_ladder_7', 'hpb_lantern_hang_4', 'hpb_lantern_hang_5', 'hpb_lantern_hang_6', 'hpb_lantern_hang_7', 'hpb_lantern_lilac_4', 'hpb_lantern_lilac_5', 'hpb_lantern_lilac_6', 'hpb_lantern_lilac_7', 'hpb_lantern_violet_4', 'hpb_lantern_violet_5', 'hpb_lantern_violet_6', 'hpb_lantern_violet_7', 'hpb_mine_cart_4', 'hpb_mine_cart_5', 'hpb_mine_cart_6', 'hpb_mine_cart_7', 'hpb_orb_pedestal_4', 'hpb_orb_pedestal_5', 'hpb_orb_pedestal_6', 'hpb_orb_pedestal_7', 'hpb_ore_cart_4', 'hpb_ore_cart_5', 'hpb_ore_cart_6', 'hpb_ore_cart_7', 'hpb_rune_4', 'hpb_rune_5', 'hpb_rune_6', 'hpb_rune_7', 'hpb_scale_4', 'hpb_scale_5', 'hpb_scale_6', 'hpb_scale_7', 'hpb_shrine_4', 'hpb_shrine_5', 'hpb_shrine_6', 'hpb_shrine_7', 'hpb_signpost_4', 'hpb_signpost_5', 'hpb_signpost_6', 'hpb_signpost_7', 'hpb_skeleton_4', 'hpb_skeleton_5', 'hpb_skeleton_6', 'hpb_skeleton_7', 'hpb_tools_4', 'hpb_tools_5', 'hpb_tools_6', 'hpb_tools_7', 'hpb_windlass_4', 'hpb_windlass_5', 'hpb_windlass_6', 'hpb_windlass_7', 'hs_board', 'hs_hanging', 'hs_marker', 'hs_page', 'hs_plaque', 'hs_post', 'hs_runestone', 'hs_scroll', 'hs_slate', 'hs_tablet', 'hs_warning', 'hs_waymarker', 'messenger', 'messengerA', 'msgr_A', 'msgr_D', 'msgr_E', 'msgr_H', 'msgr_T', 'offering', 'pharaohboss', 'pharaohbossA', 'pservant', 'pservantA', 'rrock0', 'rrock1', 'rrock2', 'rubysorceress', 'shady', 'skel', 'skelA', 'skybirdA', 'skybirdB', 'slime', 'slimeA', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_bsw_gate', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_hgdp_cave', 'tex_hgdp_crack', 'tex_hgdp_dock', 'tex_hgdp_doorkey', 'tex_hgdp_gem', 'tex_hgdp_ladderdn', 'tex_hgdp_ladderup', 'tex_hgdp_planks', 'tex_hgdp_secret', 'tex_hgdp_stepsdn', 'tex_hgdp_stepsup', 'tex_hgdp_vines', 'tex_hgdu_brick', 'tex_hgdu_brick2', 'tex_hgdu_water', 'tex_hgdw_moss', 'tex_hgdw_moss2', 'tex_hgt_d0', 'tex_hgt_d1', 'tex_hgt_d2', 'tex_hgt_d3', 'tex_hgt_w2_bandjade', 'tex_hgt_w2_bubbles', 'tex_hgt_w2_confetti', 'tex_hgt_w2_constellation', 'tex_hgt_w2_crayon', 'tex_hgt_w2_crosshatch', 'tex_hgt_w2_doodleaqua', 'tex_hgt_w2_doorblue', 'tex_hgt_w2_doorteal', 'tex_hgt_w2_dotsyellow', 'tex_hgt_w2_filigree', 'tex_hgt_w2_loopsmint', 'tex_hgt_w2_map', 'tex_hgt_w2_medallions', 'tex_hgt_w2_mosaic', 'tex_hgt_w2_pointillist', 'tex_hgt_w2_polkaaqua', 'tex_hgt_w2_polkapink', 'tex_hgt_w2_portholes', 'tex_hgt_w2_portlilac', 'tex_hgt_w2_quilt', 'tex_hgt_w2_ringbubbles', 'tex_hgt_w2_rings', 'tex_hgt_w2_scales', 'tex_hgt_w2_scribblepink', 'tex_hgt_w2_script', 'tex_hgt_w2_tessel', 'tex_hgt_w2_wavylilac', 'tex_hgt_w2_winaqua', 'tex_hgt_w2_winpink', 'tex_hgt_w3_arcade_cream', 'tex_hgt_w3_arcade_lilac', 'tex_hgt_w3_balcony2_cream', 'tex_hgt_w3_balcony_cream', 'tex_hgt_w3_bunting_aqua', 'tex_hgt_w3_buttress_amber', 'tex_hgt_w3_cornice_cream', 'tex_hgt_w3_dado_pink', 'tex_hgt_w3_fresco_amber', 'tex_hgt_w3_fresco_cream', 'tex_hgt_w3_reed_lilac', 'tex_hgt_w3_relief_aqua', 'tex_hgt_w3_relief_pink', 'tex_hgt_w3_scroll_aqua', 'tex_hgt_w3_scroll_pink', 'tex_hgt_w3_shop_cream', 'tex_hgt_w3_shop_pink', 'tex_hgt_w3_shutters_lilac', 'tex_hgt_wa', 'tex_hgt_wb0', 'tex_hgt_wb1', 'tex_hgt_wb2', 'tex_hgt_wb3', 'tex_hgt_wc', 'tex_hgt_wl', 'tex_hgt_wp', 'tex_hgt_ww0', 'tex_hgt_ww1', 'tex_hgt_ww2', 'tex_hgt_ww3', 'tex_hgtb_angel_banded', 'tex_hgtb_eel_thick', 'tex_hgtb_levi_eel_body', 'tex_hgtb_levi_eel_fin', 'tex_hgtb_levi_jelly_body', 'tex_hgtb_levi_jelly_fin', 'tex_hgtb_levi_manta_body', 'tex_hgtb_levi_manta_wing', 'tex_hgtb_levi_whale_body', 'tex_hgtb_levi_whale_fin', 'tex_hgtb_limbs', 'tex_hgtb_scales', 'tex_hgtb_scorp_belly', 'tex_hgtb_scorp_belly2', 'tex_hgtb_scorp_body', 'tex_hgtb_scorp_tassels', 'tex_hgtb_scorp_warts', 'tex_hgtb_skinamber', 'tex_hgtb_skinaqua', 'tex_hgtb_skinlilac', 'tex_hgtb_skinpink', 'tex_hgtb_stilt_armour', 'tex_hgtb_stilt_foot_shell', 'tex_hgtb_stilt_joint_shell', 'tex_hgtb_stilt_knee_shell', 'tex_hgtb_stilt_leg', 'tex_hgtb_stilt_leg512', 'tex_hgtb_stilt_leg_shell', 'tex_hgtb_tankbg1', 'tex_hgtb_tankbg2', 'tex_hgtb_tankbg3', 'tex_hgtb_tankbg4', 'tex_hgtb_tube', 'tex_hgtb_whale_contrast', 'tex_hpb_blue0', 'tex_hpb_blue1', 'tex_hpb_blue2', 'tex_hpb_blue3', 'tex_hpb_blue4', 'tex_hpb_mos0', 'tex_hpb_mos1', 'tex_hpb_mos2', 'tex_hpb_mos3', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'tex_wm_arch', 'tex_wm_brick_big', 'tex_wm_brick_crack', 'tex_wm_brick_moss', 'tex_wm_brick_old', 'tex_wm_brick_vein', 'tex_wm_brick_wet', 'tex_wm_crystal', 'tex_wm_crystalhole', 'tex_wm_deep', 'tex_wm_door', 'tex_wm_geode', 'tex_wm_grate', 'tex_wm_lilac', 'tex_wm_niche', 'tex_wm_plaque', 'tex_wm_vein', 'tex_wm_violet', 'tex_yarblue', 'tex_yarcoral', 'tex_yardoor', 'tex_yardoor2', 'tex_yardoor3', 'tex_yardoor4', 'tex_yardoor5', 'tex_yardoor6', 'tex_yardoor7', 'tex_yardrift', 'tex_yargreen', 'tex_yarnet', 'tex_yarpink', 'tex_yarrose', 'tex_yarwall', 'tex_yaryellow', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA', 'w_candleknight', 'w_candleknightA', 'w_crowncrab', 'w_crowncrabA', 'w_ferryman', 'w_ferrymanA', 'w_glassstag', 'w_glassstagA', 'w_hollowbride', 'w_hollowbrideA', 'w_manyeyedox', 'w_manyeyedoxA', 'w_marrow', 'w_marrowA', 'w_mossback', 'w_mossbackA', 'w_rattlebones', 'w_rattlebonesA', 'w_saltwife', 'w_saltwifeA', 'w_thistlewick', 'w_thistlewickA', 'w_toll', 'w_tollA', 'w_unfinished', 'w_unfinishedA', 'w_weatherhound', 'w_weatherhoundA', 'wm_barrel', 'wm_barrel_tall', 'wm_bat', 'wm_beetle', 'wm_bell', 'wm_bellflower', 'wm_boat', 'wm_bookshelf', 'wm_brazier', 'wm_bucket', 'wm_button', 'wm_cage_lantern', 'wm_candelabra', 'wm_cask', 'wm_chain', 'wm_chest', 'wm_crab', 'wm_crank', 'wm_crate', 'wm_crate_lid', 'wm_crystal_pillar', 'wm_crystal_small', 'wm_crystal_tall', 'wm_crystal_teal', 'wm_crystal_white', 'wm_cultist', 'wm_fungus', 'wm_geode', 'wm_gold', 'wm_golem', 'wm_keg', 'wm_key', 'wm_keydoor', 'wm_ladder', 'wm_lamp_post', 'wm_lantern_gold', 'wm_lantern_hang', 'wm_lantern_lilac', 'wm_lantern_violet', 'wm_lever_down', 'wm_lever_up', 'wm_mimic', 'wm_mine_cart', 'wm_mirror', 'wm_moss_mound', 'wm_mush_bulb', 'wm_mush_cluster', 'wm_mush_tall', 'wm_mush_tree', 'wm_noticeboard', 'wm_orb_pedestal', 'wm_ore_cart', 'wm_rune', 'wm_scale', 'wm_shrine', 'wm_signpost', 'wm_skeleton', 'wm_slime', 'wm_spider', 'wm_statue', 'wm_tools', 'wm_treasure_chest', 'wm_warden', 'wm_web', 'wm_windlass', 'wm_wraith'];
-const ICN_FILES=['icn_ankhring', 'icn_antidote', 'icn_ar_boar_a', 'icn_ar_boar_c', 'icn_ar_boar_h', 'icn_ar_boar_l', 'icn_ar_ember_a', 'icn_ar_ember_c', 'icn_ar_ember_h', 'icn_ar_ember_l', 'icn_ar_god_a', 'icn_ar_god_c', 'icn_ar_god_h', 'icn_ar_god_l', 'icn_ar_hgchit_a', 'icn_ar_hgchit_c', 'icn_ar_hgchit_h', 'icn_ar_hgchit_l', 'icn_ar_iron_a', 'icn_ar_iron_c', 'icn_ar_iron_h', 'icn_ar_iron_l', 'icn_ar_rime_a', 'icn_ar_rime_c', 'icn_ar_rime_h', 'icn_ar_rime_l', 'icn_ar_star_a', 'icn_ar_star_c', 'icn_ar_star_h', 'icn_ar_star_l', 'icn_ar_storm_a', 'icn_ar_storm_c', 'icn_ar_storm_h', 'icn_ar_storm_l', 'icn_ar_sun_a', 'icn_ar_sun_c', 'icn_ar_sun_h', 'icn_ar_sun_l', 'icn_ar_void_a', 'icn_ar_void_c', 'icn_ar_void_h', 'icn_ar_void_l', 'icn_ar_wyrm_a', 'icn_ar_wyrm_c', 'icn_ar_wyrm_h', 'icn_ar_wyrm_l', 'icn_axe', 'icn_barbedbow', 'icn_batwings', 'icn_bf_brimstone', 'icn_bf_brownargus', 'icn_bf_cabbagewhite', 'icn_bf_camberwell', 'icn_bf_chalkhillblue', 'icn_bf_cloudedyellow', 'icn_bf_comma', 'icn_bf_commonblue', 'icn_bf_darkgreenfrit', 'icn_bf_gatekeeper', 'icn_bf_glasswing', 'icn_bf_greenhairstreak', 'icn_bf_hollyblue', 'icn_bf_marbledwhite', 'icn_bf_meadowbrown', 'icn_bf_moonwing', 'icn_bf_orangetip', 'icn_bf_paintedlady', 'icn_bf_peacock', 'icn_bf_purpleemperor', 'icn_bf_purplehairstreak', 'icn_bf_redadmiral', 'icn_bf_ringlet', 'icn_bf_silverwashed', 'icn_bf_smallcopper', 'icn_bf_smalltortoiseshell', 'icn_bf_speckledwood', 'icn_bf_sunflare', 'icn_bf_swallowtail', 'icn_bf_wallbrown', 'icn_blackberries', 'icn_bluepotion', 'icn_bogeylinks', 'icn_bogeymask', 'icn_bow', 'icn_bracers', 'icn_brigandine', 'icn_bubblehelm', 'icn_butterflycage', 'icn_cap', 'icn_cavemushroom', 'icn_centurion', 'icn_chanterelle', 'icn_chestnuts', 'icn_claymore', 'icn_crownbreaker', 'icn_cuirass', 'icn_cutlass', 'icn_dagger', 'icn_dates', 'icn_divehelm', 'icn_doomhammer', 'icn_dragonshield', 'icn_drowndagger', 'icn_dukesgavel', 'icn_duneboots', 'icn_dunebow', 'icn_edmoss', 'icn_elixir', 'icn_executioner', 'icn_eyering', 'icn_eyesoup', 'icn_figs', 'icn_gem_alexandrite', 'icn_gem_amber', 'icn_gem_amethyst', 'icn_gem_aquamarine', 'icn_gem_blackopal', 'icn_gem_bloodstone', 'icn_gem_bluetopaz', 'icn_gem_carnelian', 'icn_gem_citrine', 'icn_gem_diamond', 'icn_gem_emerald', 'icn_gem_fireopal', 'icn_gem_garnet', 'icn_gem_greentourmaline', 'icn_gem_iolite', 'icn_gem_jade', 'icn_gem_jet', 'icn_gem_lapis', 'icn_gem_malachite', 'icn_gem_moonstone', 'icn_gem_morganite', 'icn_gem_obsidian', 'icn_gem_onyx', 'icn_gem_opal', 'icn_gem_peridot', 'icn_gem_pinksapphire', 'icn_gem_rhodolite', 'icn_gem_rosequartz', 'icn_gem_ruby', 'icn_gem_sapphire', 'icn_gem_smokyquartz', 'icn_gem_sugilite', 'icn_gem_tanzanite', 'icn_gem_tigerseye', 'icn_gem_topaz', 'icn_gem_turquoise', 'icn_gem_violetspinel', 'icn_gem_whitesapphire', 'icn_gem_yellowsapphire', 'icn_gem_zircon', 'icn_gh_ax102', 'icn_gh_ax106', 'icn_gh_ax110', 'icn_gh_ax82', 'icn_gh_ax86', 'icn_gh_ax90', 'icn_gh_ax94', 'icn_gh_ax98', 'icn_gh_bw102', 'icn_gh_bw106', 'icn_gh_bw110', 'icn_gh_bw82', 'icn_gh_bw86', 'icn_gh_bw90', 'icn_gh_bw94', 'icn_gh_bw98', 'icn_gh_mc102', 'icn_gh_mc106', 'icn_gh_mc110', 'icn_gh_mc82', 'icn_gh_mc86', 'icn_gh_mc90', 'icn_gh_mc94', 'icn_gh_mc98', 'icn_gh_sw102', 'icn_gh_sw106', 'icn_gh_sw110', 'icn_gh_sw82', 'icn_gh_sw86', 'icn_gh_sw90', 'icn_gh_sw94', 'icn_gh_sw98', 'icn_ghostsushi', 'icn_gillpotion', 'icn_glowOrb', 'icn_goblintongue', 'icn_goldmail', 'icn_goldplate', 'icn_gravemace', 'icn_greaterheal', 'icn_greatermana', 'icn_greathelm', 'icn_greatsword', 'icn_greenpotion', 'icn_hauberk', 'icn_headsman', 'icn_healdraught', 'icn_helm', 'icn_herb', 'icn_herb_bloodmoss', 'icn_herb_burdock', 'icn_herb_chamomile', 'icn_herb_comfrey', 'icn_herb_dandelion', 'icn_herb_dragonstongue', 'icn_herb_dreamthistle', 'icn_herb_elderflower', 'icn_herb_emberroot', 'icn_herb_feverfew', 'icn_herb_foxglove', 'icn_herb_frostbloom', 'icn_herb_ghostcap', 'icn_herb_lavender', 'icn_herb_mandrake', 'icn_herb_marigold', 'icn_herb_mint', 'icn_herb_moonpetal', 'icn_herb_nettle', 'icn_herb_nightshade', 'icn_herb_rosemary', 'icn_herb_sage', 'icn_herb_silverleaf', 'icn_herb_sunleaf', 'icn_herb_thyme', 'icn_herb_valerian', 'icn_herb_wolfsbane', 'icn_herb_yarrow', 'icn_hgbarb', 'icn_hgbook1', 'icn_hgbook2', 'icn_hgbook3', 'icn_hgbook4', 'icn_hgcarapace', 'icn_hgcomb', 'icn_hgcrystal', 'icn_hgdgem_amber', 'icn_hgdgem_amethyst', 'icn_hgdgem_emerald', 'icn_hgdgem_pearl', 'icn_hgdgem_ruby', 'icn_hgdgem_sapphire', 'icn_hgdi_croc', 'icn_hgdi_dock', 'icn_hgdi_doorgem', 'icn_hgdi_doorkey', 'icn_hgdi_fountain', 'icn_hgdi_hut0', 'icn_hgdi_hut1', 'icn_hgdi_hut2', 'icn_hgdi_hut3', 'icn_hgdi_hut4', 'icn_hgdi_hut5', 'icn_hgdi_hut6', 'icn_hgdi_hut7', 'icn_hgdi_ladder', 'icn_hgdi_pond', 'icn_hgdi_reeds', 'icn_hgdi_sign', 'icn_hgdi_steps', 'icn_hgdi_stone', 'icn_hgdi_tent', 'icn_hgdi_thouse', 'icn_hgdi_tree0', 'icn_hgdi_tree1', 'icn_hgdi_tree2', 'icn_hgdkey_blue', 'icn_hgdkey_gold', 'icn_hgdkey_green', 'icn_hgdkey_red', 'icn_hgdlantern', 'icn_hgdshard', 'icn_hgegg', 'icn_hgescape', 'icn_hgfrogspear', 'icn_hggrubs', 'icn_hgjelly', 'icn_hgkelp', 'icn_hgl70axe', 'icn_hgl70bow', 'icn_hgl70dagger', 'icn_hgl70mace', 'icn_hgl70staff', 'icn_hgl70sword', 'icn_hgmandible', 'icn_hgpond', 'icn_hgreed', 'icn_hgroot', 'icn_hgsting', 'icn_hgsunblade', 'icn_hollowscepter', 'icn_holywater', 'icn_honeycomb', 'icn_hornhelm', 'icn_hunterbow', 'icn_ironaxe', 'icn_ironblade', 'icn_ironcap', 'icn_ironskin', 'icn_jackalhelm', 'icn_jerkin', 'icn_keeneye', 'icn_kharp1', 'icn_kharp2', 'icn_kharp3', 'icn_kharp4', 'icn_khart1', 'icn_khart2', 'icn_khart3', 'icn_khart4', 'icn_khart5', 'icn_khart6', 'icn_khart7', 'icn_kingslayer', 'icn_kiteshield', 'icn_lantern', 'icn_leggings', 'icn_lionplate', 'icn_lockpick', 'icn_lychee', 'icn_mace', 'icn_magicmask', 'icn_manadivine', 'icn_manadraught', 'icn_manamythic', 'icn_manastrong', 'icn_manasupreme', 'icn_manaultra', 'icn_manavery', 'icn_maul', 'icn_mg_app_a', 'icn_mg_app_c', 'icn_mg_app_h', 'icn_mg_app_l', 'icn_mg_arc_a', 'icn_mg_arc_c', 'icn_mg_arc_h', 'icn_mg_arc_l', 'icn_mg_enc_a', 'icn_mg_enc_c', 'icn_mg_enc_h', 'icn_mg_enc_l', 'icn_mg_hed_a', 'icn_mg_hed_c', 'icn_mg_hed_h', 'icn_mg_hed_l', 'icn_mg_mag_a', 'icn_mg_mag_c', 'icn_mg_mag_h', 'icn_mg_mag_l', 'icn_mg_sag_a', 'icn_mg_sag_c', 'icn_mg_sag_h', 'icn_mg_sag_l', 'icn_mg_war_a', 'icn_mg_war_c', 'icn_mg_war_h', 'icn_mg_war_l', 'icn_mg_wiz_a', 'icn_mg_wiz_c', 'icn_mg_wiz_h', 'icn_mg_wiz_l', 'icn_might', 'icn_mountainmaul', 'icn_mysterymeat', 'icn_nautilushelm', 'icn_ore', 'icn_parcel', 'icn_pearl', 'icn_pg_bellring', 'icn_pg_briarring', 'icn_pg_briarstaff', 'icn_pg_cairnring', 'icn_pg_candlecrown', 'icn_pg_candlestaff', 'icn_pg_cathedralplate', 'icn_pg_cobweblegs', 'icn_pg_dawnshield', 'icn_pg_dreamcrown', 'icn_pg_f6_1', 'icn_pg_f6_10', 'icn_pg_f6_2', 'icn_pg_f6_3', 'icn_pg_f6_4', 'icn_pg_f6_5', 'icn_pg_f6_6', 'icn_pg_f6_7', 'icn_pg_f6_8', 'icn_pg_f6_9', 'icn_pg_f6_k1', 'icn_pg_f6_k2', 'icn_pg_f6_k3', 'icn_pg_f6_k4', 'icn_pg_falconarms', 'icn_pg_falconbow', 'icn_pg_gaolheadsman', 'icn_pg_gargcleaver', 'icn_pg_harrowarms', 'icn_pg_keyblade', 'icn_pg_pilgrimlegs', 'icn_pg_pitplate', 'icn_pg_questioner', 'icn_pg_ravenhelm', 'icn_pg_reckoning', 'icn_pg_silencering', 'icn_pg_tearmaul', 'icn_pg_tollblade', 'icn_pg_votiveshield', 'icn_pg_weepingedge', 'icn_pg_winchbow', 'icn_pharaohshield', 'icn_pick', 'icn_pickledtoes', 'icn_potato', 'icn_potion', 'icn_potion2', 'icn_potion3', 'icn_potion4', 'icn_pp_a', 'icn_pp_c', 'icn_pp_h', 'icn_pp_l', 'icn_prismhelm', 'icn_psf_brain', 'icn_psf_chest', 'icn_psf_face', 'icn_psf_foot', 'icn_psf_hand', 'icn_psf_heart', 'icn_psf_legs', 'icn_puffball', 'icn_ragnarok', 'icn_redpotion', 'icn_rosehips', 'icn_roundshield', 'icn_salve', 'icn_sandstaff', 'icn_scarabring', 'icn_shield', 'icn_silverbow', 'icn_sleeptea', 'icn_spikeshield', 'icn_splitaxe', 'icn_staff', 'icn_starbow', 'icn_stormbow2', 'icn_sunblade', 'icn_sunbracers', 'icn_sunderer', 'icn_sundisc', 'icn_superiorheal', 'icn_supermana', 'icn_swiftness', 'icn_swiftshoes', 'icn_sword', 'icn_sylvanbow', 'icn_titanaxe', 'icn_torch', 'icn_towershield', 'icn_truffle', 'icn_twinbow', 'icn_ui_backpack', 'icn_ui_power', 'icn_ui_spell', 'icn_veilpiercer', 'icn_warbow', 'icn_wardblade', 'icn_wardring', 'icn_warlordhelm', 'icn_water', 'icn_watercress', 'icn_wildgarlic', 'icn_wolfaxe', 'icn_worldaxe', 'icn_worldblade', 'icn_wraithmail', 'icn_yellowpotion', 'sp_a10', 'sp_a20', 'sp_a30', 'sp_a40', 'sp_a50', 'sp_b10', 'sp_b20', 'sp_b30', 'sp_b40', 'sp_b50', 'sp_c10', 'sp_c20', 'sp_c30', 'sp_c40', 'sp_c40h', 'sp_c50', 'sp_g10', 'sp_g20', 'sp_g30', 'sp_g40', 'sp_g50', 'sp_k10', 'sp_k20', 'sp_k30', 'sp_k40', 'sp_k50', 'sp_m10', 'sp_m20', 'sp_m30', 'sp_m40', 'sp_m50', 'sp_p10', 'sp_p20', 'sp_p30', 'sp_p40', 'sp_p50', 'sp_r10', 'sp_r20', 'sp_r30', 'sp_r40', 'sp_r50', 'sp_s10', 'sp_s20', 'sp_s30', 'sp_s40', 'sp_s50', 'sp_t10', 'sp_t20', 'sp_t30', 'sp_t40', 'sp_t50', 'sp_w10', 'sp_w20', 'sp_w30', 'sp_w40', 'sp_w50', 'sp_z10', 'sp_z20', 'sp_z30', 'sp_z40', 'sp_z50'];
+const ICN_FILES=['icn_ankhring', 'icn_antidote', 'icn_ar_boar_a', 'icn_ar_boar_c', 'icn_ar_boar_h', 'icn_ar_boar_l', 'icn_ar_ember_a', 'icn_ar_ember_c', 'icn_ar_ember_h', 'icn_ar_ember_l', 'icn_ar_god_a', 'icn_ar_god_c', 'icn_ar_god_h', 'icn_ar_god_l', 'icn_ar_hgchit_a', 'icn_ar_hgchit_c', 'icn_ar_hgchit_h', 'icn_ar_hgchit_l', 'icn_ar_iron_a', 'icn_ar_iron_c', 'icn_ar_iron_h', 'icn_ar_iron_l', 'icn_ar_rime_a', 'icn_ar_rime_c', 'icn_ar_rime_h', 'icn_ar_rime_l', 'icn_ar_star_a', 'icn_ar_star_c', 'icn_ar_star_h', 'icn_ar_star_l', 'icn_ar_storm_a', 'icn_ar_storm_c', 'icn_ar_storm_h', 'icn_ar_storm_l', 'icn_ar_sun_a', 'icn_ar_sun_c', 'icn_ar_sun_h', 'icn_ar_sun_l', 'icn_ar_void_a', 'icn_ar_void_c', 'icn_ar_void_h', 'icn_ar_void_l', 'icn_ar_wyrm_a', 'icn_ar_wyrm_c', 'icn_ar_wyrm_h', 'icn_ar_wyrm_l', 'icn_axe', 'icn_barbedbow', 'icn_batwings', 'icn_bf_brimstone', 'icn_bf_brownargus', 'icn_bf_cabbagewhite', 'icn_bf_camberwell', 'icn_bf_chalkhillblue', 'icn_bf_cloudedyellow', 'icn_bf_comma', 'icn_bf_commonblue', 'icn_bf_darkgreenfrit', 'icn_bf_gatekeeper', 'icn_bf_glasswing', 'icn_bf_greenhairstreak', 'icn_bf_hollyblue', 'icn_bf_marbledwhite', 'icn_bf_meadowbrown', 'icn_bf_moonwing', 'icn_bf_orangetip', 'icn_bf_paintedlady', 'icn_bf_peacock', 'icn_bf_purpleemperor', 'icn_bf_purplehairstreak', 'icn_bf_redadmiral', 'icn_bf_ringlet', 'icn_bf_silverwashed', 'icn_bf_smallcopper', 'icn_bf_smalltortoiseshell', 'icn_bf_speckledwood', 'icn_bf_sunflare', 'icn_bf_swallowtail', 'icn_bf_wallbrown', 'icn_blackberries', 'icn_bluepotion', 'icn_bogeylinks', 'icn_bogeymask', 'icn_bow', 'icn_bracers', 'icn_brigandine', 'icn_bubblehelm', 'icn_butterflycage', 'icn_cap', 'icn_cavemushroom', 'icn_centurion', 'icn_chanterelle', 'icn_chestnuts', 'icn_claymore', 'icn_crownbreaker', 'icn_cuirass', 'icn_cutlass', 'icn_dagger', 'icn_dates', 'icn_divehelm', 'icn_doomhammer', 'icn_dragonshield', 'icn_drowndagger', 'icn_dukesgavel', 'icn_duneboots', 'icn_dunebow', 'icn_edmoss', 'icn_elixir', 'icn_executioner', 'icn_eyering', 'icn_eyesoup', 'icn_figs', 'icn_gem_alexandrite', 'icn_gem_amber', 'icn_gem_amethyst', 'icn_gem_aquamarine', 'icn_gem_blackopal', 'icn_gem_bloodstone', 'icn_gem_bluetopaz', 'icn_gem_carnelian', 'icn_gem_citrine', 'icn_gem_diamond', 'icn_gem_emerald', 'icn_gem_fireopal', 'icn_gem_garnet', 'icn_gem_greentourmaline', 'icn_gem_iolite', 'icn_gem_jade', 'icn_gem_jet', 'icn_gem_lapis', 'icn_gem_malachite', 'icn_gem_moonstone', 'icn_gem_morganite', 'icn_gem_obsidian', 'icn_gem_onyx', 'icn_gem_opal', 'icn_gem_peridot', 'icn_gem_pinksapphire', 'icn_gem_rhodolite', 'icn_gem_rosequartz', 'icn_gem_ruby', 'icn_gem_sapphire', 'icn_gem_smokyquartz', 'icn_gem_sugilite', 'icn_gem_tanzanite', 'icn_gem_tigerseye', 'icn_gem_topaz', 'icn_gem_turquoise', 'icn_gem_violetspinel', 'icn_gem_whitesapphire', 'icn_gem_yellowsapphire', 'icn_gem_zircon', 'icn_gh_ax102', 'icn_gh_ax106', 'icn_gh_ax110', 'icn_gh_ax82', 'icn_gh_ax86', 'icn_gh_ax90', 'icn_gh_ax94', 'icn_gh_ax98', 'icn_gh_bw102', 'icn_gh_bw106', 'icn_gh_bw110', 'icn_gh_bw82', 'icn_gh_bw86', 'icn_gh_bw90', 'icn_gh_bw94', 'icn_gh_bw98', 'icn_gh_mc102', 'icn_gh_mc106', 'icn_gh_mc110', 'icn_gh_mc82', 'icn_gh_mc86', 'icn_gh_mc90', 'icn_gh_mc94', 'icn_gh_mc98', 'icn_gh_sw102', 'icn_gh_sw106', 'icn_gh_sw110', 'icn_gh_sw82', 'icn_gh_sw86', 'icn_gh_sw90', 'icn_gh_sw94', 'icn_gh_sw98', 'icn_ghostsushi', 'icn_gillpotion', 'icn_glowOrb', 'icn_goblintongue', 'icn_goldmail', 'icn_goldplate', 'icn_gravemace', 'icn_greaterheal', 'icn_greatermana', 'icn_greathelm', 'icn_greatsword', 'icn_greenpotion', 'icn_hauberk', 'icn_headsman', 'icn_healdraught', 'icn_helm', 'icn_herb', 'icn_herb_bloodmoss', 'icn_herb_burdock', 'icn_herb_chamomile', 'icn_herb_comfrey', 'icn_herb_dandelion', 'icn_herb_dragonstongue', 'icn_herb_dreamthistle', 'icn_herb_elderflower', 'icn_herb_emberroot', 'icn_herb_feverfew', 'icn_herb_foxglove', 'icn_herb_frostbloom', 'icn_herb_ghostcap', 'icn_herb_lavender', 'icn_herb_mandrake', 'icn_herb_marigold', 'icn_herb_mint', 'icn_herb_moonpetal', 'icn_herb_nettle', 'icn_herb_nightshade', 'icn_herb_rosemary', 'icn_herb_sage', 'icn_herb_silverleaf', 'icn_herb_sunleaf', 'icn_herb_thyme', 'icn_herb_valerian', 'icn_herb_wolfsbane', 'icn_herb_yarrow', 'icn_hgbarb', 'icn_hgbook1', 'icn_hgbook2', 'icn_hgbook3', 'icn_hgbook4', 'icn_hgcarapace', 'icn_hgcomb', 'icn_hgcrystal', 'icn_hgdgem_amber', 'icn_hgdgem_amethyst', 'icn_hgdgem_emerald', 'icn_hgdgem_pearl', 'icn_hgdgem_ruby', 'icn_hgdgem_sapphire', 'icn_hgdi_croc', 'icn_hgdi_dock', 'icn_hgdi_doorgem', 'icn_hgdi_doorkey', 'icn_hgdi_fountain', 'icn_hgdi_hut0', 'icn_hgdi_hut1', 'icn_hgdi_hut2', 'icn_hgdi_hut3', 'icn_hgdi_hut4', 'icn_hgdi_hut5', 'icn_hgdi_hut6', 'icn_hgdi_hut7', 'icn_hgdi_ladder', 'icn_hgdi_pond', 'icn_hgdi_reeds', 'icn_hgdi_sign', 'icn_hgdi_steps', 'icn_hgdi_stone', 'icn_hgdi_tent', 'icn_hgdi_thouse', 'icn_hgdi_tree0', 'icn_hgdi_tree1', 'icn_hgdi_tree2', 'icn_hgdkey_blue', 'icn_hgdkey_gold', 'icn_hgdkey_green', 'icn_hgdkey_red', 'icn_hgdlantern', 'icn_hgdshard', 'icn_hgegg', 'icn_hgescape', 'icn_hgfrogspear', 'icn_hggrubs', 'icn_hgjelly', 'icn_hgkelp', 'icn_hgl70axe', 'icn_hgl70bow', 'icn_hgl70dagger', 'icn_hgl70mace', 'icn_hgl70staff', 'icn_hgl70sword', 'icn_hgmandible', 'icn_hgpond', 'icn_hgreed', 'icn_hgroot', 'icn_hgsting', 'icn_hgsunblade', 'icn_hollowscepter', 'icn_holywater', 'icn_honeycomb', 'icn_hornhelm', 'icn_hunterbow', 'icn_ironaxe', 'icn_ironblade', 'icn_ironcap', 'icn_ironskin', 'icn_jackalhelm', 'icn_jerkin', 'icn_keeneye', 'icn_kharp1', 'icn_kharp2', 'icn_kharp3', 'icn_kharp4', 'icn_khart1', 'icn_khart2', 'icn_khart3', 'icn_khart4', 'icn_khart5', 'icn_khart6', 'icn_khart7', 'icn_kingslayer', 'icn_kiteshield', 'icn_lantern', 'icn_leggings', 'icn_lionplate', 'icn_lockpick', 'icn_lychee', 'icn_mace', 'icn_magicmask', 'icn_manadivine', 'icn_manadraught', 'icn_manamythic', 'icn_manastrong', 'icn_manasupreme', 'icn_manaultra', 'icn_manavery', 'icn_maul', 'icn_mg_app_a', 'icn_mg_app_c', 'icn_mg_app_h', 'icn_mg_app_l', 'icn_mg_arc_a', 'icn_mg_arc_c', 'icn_mg_arc_h', 'icn_mg_arc_l', 'icn_mg_enc_a', 'icn_mg_enc_c', 'icn_mg_enc_h', 'icn_mg_enc_l', 'icn_mg_hed_a', 'icn_mg_hed_c', 'icn_mg_hed_h', 'icn_mg_hed_l', 'icn_mg_mag_a', 'icn_mg_mag_c', 'icn_mg_mag_h', 'icn_mg_mag_l', 'icn_mg_sag_a', 'icn_mg_sag_c', 'icn_mg_sag_h', 'icn_mg_sag_l', 'icn_mg_war_a', 'icn_mg_war_c', 'icn_mg_war_h', 'icn_mg_war_l', 'icn_mg_wiz_a', 'icn_mg_wiz_c', 'icn_mg_wiz_h', 'icn_mg_wiz_l', 'icn_might', 'icn_mountainmaul', 'icn_mysterymeat', 'icn_nautilushelm', 'icn_ore', 'icn_parcel', 'icn_pearl', 'icn_pg_bellring', 'icn_pg_briarring', 'icn_pg_briarstaff', 'icn_pg_cairnring', 'icn_pg_candlecrown', 'icn_pg_candlestaff', 'icn_pg_cathedralplate', 'icn_pg_cobweblegs', 'icn_pg_dawnshield', 'icn_pg_dreamcrown', 'icn_pg_f6_1', 'icn_pg_f6_10', 'icn_pg_f6_2', 'icn_pg_f6_3', 'icn_pg_f6_4', 'icn_pg_f6_5', 'icn_pg_f6_6', 'icn_pg_f6_7', 'icn_pg_f6_8', 'icn_pg_f6_9', 'icn_pg_f6_k1', 'icn_pg_f6_k2', 'icn_pg_f6_k3', 'icn_pg_f6_k4', 'icn_pg_falconarms', 'icn_pg_falconbow', 'icn_pg_gaolheadsman', 'icn_pg_gargcleaver', 'icn_pg_harrowarms', 'icn_pg_keyblade', 'icn_pg_pilgrimlegs', 'icn_pg_pitplate', 'icn_pg_questioner', 'icn_pg_ravenhelm', 'icn_pg_reckoning', 'icn_pg_silencering', 'icn_pg_sw_1', 'icn_pg_sw_2', 'icn_pg_sw_3', 'icn_pg_sw_4', 'icn_pg_sw_5', 'icn_pg_sw_6', 'icn_pg_tearmaul', 'icn_pg_tollblade', 'icn_pg_votiveshield', 'icn_pg_weepingedge', 'icn_pg_winchbow', 'icn_pharaohshield', 'icn_pick', 'icn_pickledtoes', 'icn_potato', 'icn_potion', 'icn_potion2', 'icn_potion3', 'icn_potion4', 'icn_pp_a', 'icn_pp_c', 'icn_pp_h', 'icn_pp_l', 'icn_prismhelm', 'icn_psf_brain', 'icn_psf_chest', 'icn_psf_face', 'icn_psf_foot', 'icn_psf_hand', 'icn_psf_heart', 'icn_psf_legs', 'icn_puffball', 'icn_ragnarok', 'icn_redpotion', 'icn_rosehips', 'icn_roundshield', 'icn_salve', 'icn_sandstaff', 'icn_scarabring', 'icn_shield', 'icn_silverbow', 'icn_sleeptea', 'icn_spikeshield', 'icn_splitaxe', 'icn_staff', 'icn_starbow', 'icn_stormbow2', 'icn_sunblade', 'icn_sunbracers', 'icn_sunderer', 'icn_sundisc', 'icn_superiorheal', 'icn_supermana', 'icn_swiftness', 'icn_swiftshoes', 'icn_sword', 'icn_sylvanbow', 'icn_titanaxe', 'icn_torch', 'icn_towershield', 'icn_truffle', 'icn_twinbow', 'icn_ui_backpack', 'icn_ui_power', 'icn_ui_spell', 'icn_veilpiercer', 'icn_warbow', 'icn_wardblade', 'icn_wardring', 'icn_warlordhelm', 'icn_water', 'icn_watercress', 'icn_wildgarlic', 'icn_wolfaxe', 'icn_worldaxe', 'icn_worldblade', 'icn_wraithmail', 'icn_yellowpotion', 'sp_a10', 'sp_a20', 'sp_a30', 'sp_a40', 'sp_a50', 'sp_b10', 'sp_b20', 'sp_b30', 'sp_b40', 'sp_b50', 'sp_c10', 'sp_c20', 'sp_c30', 'sp_c40', 'sp_c40h', 'sp_c50', 'sp_g10', 'sp_g20', 'sp_g30', 'sp_g40', 'sp_g50', 'sp_k10', 'sp_k20', 'sp_k30', 'sp_k40', 'sp_k50', 'sp_m10', 'sp_m20', 'sp_m30', 'sp_m40', 'sp_m50', 'sp_p10', 'sp_p20', 'sp_p30', 'sp_p40', 'sp_p50', 'sp_r10', 'sp_r20', 'sp_r30', 'sp_r40', 'sp_r50', 'sp_s10', 'sp_s20', 'sp_s30', 'sp_s40', 'sp_s50', 'sp_t10', 'sp_t20', 'sp_t30', 'sp_t40', 'sp_t50', 'sp_w10', 'sp_w20', 'sp_w30', 'sp_w40', 'sp_w50', 'sp_z10', 'sp_z20', 'sp_z30', 'sp_z40', 'sp_z50'];
 
 /* ---- src/desert/artpack.js ---- */
 /* ==========================================================================
@@ -21058,7 +21058,7 @@ const PP_BONUS={ward:10,regen:1.2,secondWind:.5,dmgPct:.15,dodge:.08};
 CUTS.pilgrimDone=()=>[{text:'ACHIEVEMENT. You have completed the pilgrim’s path.'},{text:'Look for a reward in your backpack...'}];
 function ppReward(){
   const F=G.flags;if(F.lpAbbot)return;F.lpAbbot=1;G.gold+=1000;
-  for(const [id] of PP_SET){if(!bagAdd(mkItem(id)))G.items.push({k:id,x:G.P.x,y:G.P.y,taken:false})}
+  for(const [id] of PP_SET){if(!bagAdd(mkItem(id)))ovfStash(id)}
   msg('Achievement: You have completed the pilgrim’s path. Look for a reward in your backpack... (1000 gold and the armour of an abbot)','#ffe36a');sfx('win');
   startCut('pilgrimDone');
 }
@@ -22509,7 +22509,7 @@ function canDigHere(){
   const c=(L.rows[y]||'')[x];return c==='.'||c===undefined;
 }
 function digReward(sh){
-  const F=G.flags,L=LEVELS[LEVEL],pl=partyLevel(),r=Math.random(),give=id=>{if(!bagAdd(mkItem(id))){G.items.push({k:id,x:G.P.x,y:G.P.y,taken:false});msg('Your bag is full: it lies on the ground.','#d09a80')}try{collFound(id)}catch(e){}};
+  const F=G.flags,L=LEVELS[LEVEL],pl=partyLevel(),r=Math.random(),give=id=>{if(!bagAdd(mkItem(id))){ovfStash(id);msg('Your bag is full: it goes into your overflow.','#d09a80')}try{collFound(id)}catch(e){}};
   if(r<.34){const g=10+Math.floor(Math.random()*21);G.gold+=g;{const T=collData('treasure');T._gold=(T._gold||0)+g;const o=T.coins||(T.coins={f:0,s:0,g:0});o.f++}msg(`Under the dirt: ${g} gold coins.`,'#ffe36a');sfx('key');return}
   if(r<.54){const gem=GEM_BY_VALUE[Math.min(39,Math.floor(Math.pow(Math.random(),1.4)*40))];give('gem_'+gem[0]);msg(`A glint in the dirt: a ${gem[1]}!`,'#a8e8ff');sfx('level');return}
   if(r<.62){give('odd_boot');msg('You dig up an old boot.','#c8b898');return}
@@ -46138,7 +46138,7 @@ Object.assign(ITEMDEF,{
   hgl70staff:{n:'Verdant Flame Staff',k:'weapon',t:'Staff',ic:'staff',c:'#58e060',dmg:[139,194],magic:90,req:{int:58},lvl:70,price:10000,rar:1,eff:{bossdmg:.6,daze:.4,shock:.2},sw:.44,d:'Grown in the Green Fire Sphere. Adds 90 to the power of spells, bosses take 60% more, and foes reel dazed. Needs level 70.'},
   hgl70dagger:{n:'Cinder Dagger',k:'weapon',t:'Dagger',ic:'dagger',c:'#e06a20',dmg:[294,350],hit:.25,req:{dex:60},lvl:70,price:10000,rar:1,eff:{exec:[.5,4],bleed:[.6,8,40],double:.4},dbl:.3,sw:.36,d:'Left in the Cinder-Core Sphere. Quick and cruel: a foe under half health takes four times the blow, and most wounds bleed. Needs level 70.'}});
 {const _he=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;_he.apply(this,arguments);if(was&&e.hp<=0&&/^hgmini\d$/.test(e.t)){const F=G.flags,id=HGDM2_W[+e.t.slice(-1)];F.hgdSphDrop=F.hgdSphDrop||{};if(id&&!F.hgdSphDrop[e.t]){F.hgdSphDrop[e.t]=1;
-  if(bagAdd(mkItem(id)))msg('The burning sphere dies, and in the ashes lies '+ITEMDEF[id].n+'!','#ffb060');else{G.items.push({k:id,x:e.x,y:e.y,taken:false});msg(ITEMDEF[id].n+' falls to the ground. Your bag is full.','#ffb060')}}}}}
+  if(bagAdd(mkItem(id)))msg('The burning sphere dies, and in the ashes lies '+ITEMDEF[id].n+'!','#ffb060');else{ovfStash(id);msg(ITEMDEF[id].n+' goes into your overflow.','#ffb060')}}}}}
 
 /* ---------- the weapon curve: the level 28 boss weapons are the best of their time, so every ordinary weapon of level 30 to 64 is raised above them (about 3.4 times at level 30, easing to 2.6 at level 50, 2.9 for the odd ones above it). Then 10% off all of level 30 and above. Done once, when the game loads ---------- */
 {const done=new Set();for(const id in ITEMDEF){const d=ITEMDEF[id];if(!d||d.k!=='weapon'||!d.lvl||d.lvl<30||done.has(d))continue;done.add(d);
@@ -46579,7 +46579,7 @@ const buriedAt=(n,x,y)=>{const L=LEVELS[n];return !!(L&&L.rows&&L.rows[y]&&L.row
     F.dug[dugKey()]=1;{const T=collData('treasure');T._digs=(T._digs||0)+1}sfx('step');advanceTime(5);
     const R=Math.max(1,(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[LEVEL])||(LEVELS[LEVEL]&&LEVELS[LEVEL].diff)||partyLevel()),g=Math.round((30+R*9)*(.8+Math.random()*.5));
     G.gold+=g;{const T=collData('treasure');T._gold=(T._gold||0)+g;const o=T.coins||(T.coins={f:0,s:0,g:0});o.f++}
-    const give=id=>{if(!bagAdd(mkItem(id))){G.items.push({k:id,x:G.P.x,y:G.P.y,taken:false});msg('Your bag is full: it lies on the ground.','#d09a80')}try{collFound(id)}catch(e){}};
+    const give=id=>{if(!bagAdd(mkItem(id))){ovfStash(id);msg('Your bag is full: it goes into your overflow.','#d09a80')}try{collFound(id)}catch(e){}};
     let text='The shovel rings on wood. You dig up a buried strongbox: '+g+' gold';
     if(Math.random()<.55){const gem=GEM_BY_VALUE[Math.min(39,Math.floor(Math.pow(Math.random(),1.3)*Math.min(40,10+R)))];give('gem_'+gem[0]);text+=', and a '+gem[1].toLowerCase()}
     if(Math.random()<.35){try{give(potionFor(Math.random()))}catch(e){}text+=', and a potion'}
@@ -46979,7 +46979,7 @@ function hgvzTold(){
     if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push(line);if(typeof HGDK_SAY!=='undefined')HGDK_SAY.push(line)}}
 function hgvzGive(rw){
   const got={};
-  for(const id of rw.items||[]){const d=ITEMDEF[id];if(!d)continue;let nm=d.n;if(bagAdd(mkItem(id)));else{G.items.push({k:id,x:G.P.x,y:G.P.y,taken:false});nm+=' (on the floor)'}got[nm]=(got[nm]||0)+1}
+  for(const id of rw.items||[]){const d=ITEMDEF[id];if(!d)continue;let nm=d.n;if(bagAdd(mkItem(id)));else{ovfStash(id);nm+=' (on the floor)'}got[nm]=(got[nm]||0)+1}
   const parts=Object.keys(got).map(k=>got[k]>1?k+' x'+got[k]:k);
   if(rw.gold){G.gold+=rw.gold;parts.push(rw.gold+' gold')}
   if(rw.xp&&typeof giveXP==='function')giveXP(rw.xp);
@@ -48393,7 +48393,7 @@ ITEMDEF.rubyapple={n:'Red Apple',k:'food',t:'Snack',ic:'apple',c:'#a8302a',heal:
 /* ---- Wren, the sorceress of the maze ---- */
 function rmGive(id,what){
   const F=G.flags,it=mkItem(id);
-  if(!bagAdd(it))G.items.push({k:id,x:G.P.x,y:G.P.y,taken:false});
+  if(!bagAdd(it))ovfStash(id);
   msg(`The sorceress gives you ${what}.`,'#ffe9a0');sfx('key');
 }
 function rmSecret(again){
@@ -48433,7 +48433,7 @@ NPCS.rubyportal={name:'The ruby portal',img:'rubyportal',root:d=>say('A tall sto
   return r}}
 
 /* ---- Tobin, a young man in Ironhill who misses a girl called Wren ---- */
-function rmBoyGive(){const F=G.flags;if(F.ironhillBoyPotion)return;F.ironhillBoyPotion=1;if(!bagAdd(mkItem('greatermana')))G.items.push({k:'greatermana',x:G.P.x,y:G.P.y,taken:false});msg('Tobin gives you a Greater Mana Draught.','#ffe9a0');sfx('key')}
+function rmBoyGive(){const F=G.flags;if(F.ironhillBoyPotion)return;F.ironhillBoyPotion=1;if(!bagAdd(mkItem('greatermana')))ovfStash('greatermana');msg('Tobin gives you a Greater Mana Draught.','#ffe9a0');sfx('key')}
 function rmBoyNews(){
   const F=G.flags,more=[['Never mind.',()=>null]];
   if(F.rubyKept)return say('He stands very still. "News? What news?"',[['She is alive and well, and we are keeping her secret.',()=>{F.ironhillBoyTold=1;F.ironhillBoyHappy=1;rmBoyGive();
@@ -50481,7 +50481,7 @@ function bswDied(e){
   const F=G.flags;if(F.bswDead)return;F.bswDead=1;
   for(const q of G.enemies)if(q.t==='bswslime'&&q.hp>0){q.hp=0;q.dying=.4}
   msg('The Black Swill is dead!','#ffd76a');
-  for(const id of ['bswmantle','potion6','potion6','potion6']){if(!bagAdd(mkItem(id)))G.items.push({k:id,x:e.x,y:e.y,taken:false})}
+  for(const id of ['bswmantle','potion6','potion6','potion6']){if(!bagAdd(mkItem(id)))ovfStash(id)}
   msg('In the slime where it fell lie a Swillhide Mantle and three potions.','#c8a0f0');
   later(1100,()=>startCut('bswDead',bswEnd))}
 function bswEnd(){
@@ -55138,7 +55138,7 @@ function wmDied(e){
   const F=wmF();if(F.bossDead)return;F.bossDead=1;
   msg('The Well-Warden is dead! His great body cracks along every seam, and the light in his chest goes out.','#ffd76a');
   for(const q of G.enemies)if(q.t==='wmgolem'&&q.hp>0&&q.wmSummoned){q.hp=0;q.dying=.4}
-  for(const id of ['wmblade','potion6','potion6','supermana']){if(!bagAdd(mkItem(id)))G.items.push({k:id,x:e.x,y:e.y,taken:false})}
+  for(const id of ['wmblade','potion6','potion6','supermana']){if(!bagAdd(mkItem(id)))ovfStash(id)}
   msg("In the glittering shards lie the Warden's Amethyst Edge and a few potions. The orb on the pedestal still glows.",'#d8b8ff')}
 {const _u=update;update=function(dt){try{if(wmIn()&&G.state==='play'){const F=G.flags.wm;
     if(F){if(F.bossDead&&G.enemies.some(e=>e.t==='wmwarden'&&e.hp>0))for(const e of G.enemies)if(e.t==='wmwarden'&&e.hp>0){e.hp=0;e.dying=0}
@@ -56967,7 +56967,7 @@ KH_LAZY[GY_AV.ID]=gyAvenueBuild;
 CUTS.avenueDone=()=>[{text:'ACHIEVEMENT. You have cleansed the Avenue of Vaults.'},{text:'Something has been left on the last sarcophagus: a long grey blade, for those who laid the dead to rest. Look in your backpack...'}];
 function gyAvenueReward(){
   const F=G.flags;if(F.gyAvenue)return;F.gyAvenue=1;G.gold+=12000;try{giveXP(90000)}catch(e){console.error(e)}
-  if(!bagAdd(mkItem('gyavenue')))G.items.push({k:'gyavenue',x:G.P.x,y:G.P.y,taken:false});
+  if(!bagAdd(mkItem('gyavenue')))ovfStash('gyavenue');
   msg('Achievement: Cleansed the Avenue of Vaults. 12,000 gold, a great deal of experience, and Vaultbreaker, a level 88 sword.','#ffe36a');sfx('win');startCut('avenueDone')}
 {const _u=update;update=function(dt){const r=_u.apply(this,arguments);
   try{if(LEVEL===GY_AV.ID&&G.state==='play'&&!G.cut&&!G.talk&&G.flags&&!G.flags.gyAvenue&&G.enemies&&G.enemies.every(e=>e.hp<=0)&&(G._gyAvT=(G._gyAvT||0)+dt)>1.5){G._gyAvT=0;gyAvenueReward()}else if(LEVEL!==GY_AV.ID)G._gyAvT=0}catch(e){console.error(e)}
@@ -57245,8 +57245,8 @@ function gyBossDied(e){
   const k=ENEMY_DEF[e.t].gyb,F=gyF();if(F.dead[k])return;F.dead[k]=1;
   {const L=LEVELS[GY.M[k]],B=L&&L._gy&&L._gy.M&&L._gy.M.boss;   // the helpers go with him (also after a saved game, which does not remember who was a helper): nothing else lives in the boss room
    for(const q of G.enemies)if(q.hp>0&&(q.gyAdd||(B&&ENEMY_DEF[q.t].gyb===undefined&&q.x>=B.x0&&q.x<=B.x1&&q.y>=B.y0&&q.y<=B.y1))){q.hp=0;q.dying=.4}}
-  const [id,nm]=GY_GIVE[k];if(!bagAdd(mkItem(id)))G.items.push({k:id,x:e.x,y:e.y,taken:false});
-  for(const it of ['potion6','potion6','supermana']){if(!bagAdd(mkItem(it)))G.items.push({k:it,x:e.x,y:e.y,taken:false})}
+  const [id,nm]=GY_GIVE[k];if(!bagAdd(mkItem(id)))ovfStash(id);
+  for(const it of ['potion6','potion6','supermana']){if(!bagAdd(mkItem(it)))ovfStash(it)}
   msg('You have '+nm+'.','#ffe36a');sfx('win');
   later(1500,()=>{const nm=ENEMY_DEF[e.t].name;G.talk={d:{k:'gyi_'+['vane','grimsby','aldric','morwenna'][k],x:G.P.x,y:G.P.y,npc:'gyo_note'},n:{name:nm,root:()=>null},node:say(GY_LAST[k],[['Climb out of the dark.',()=>{gyReturn(k);return null}]]),t:G.time,btns:[]}})}
 function gyReturn(k){const d=GY_Y.doors[k],dy=d.y<35?1:-1;sfx('door');G.talk=null;goToLevel(GY.ID,{x:d.x,y:d.y+dy,f:d.y<35?2:0});
@@ -58977,11 +58977,11 @@ fplDef(32,c=>{
 const HS_BASE=3300;          // interior level numbers: HS_BASE + 3 * (town number) + size number (3300 to 3399 are free; 6000 to 6999 belong to Oldhaven, the quay, the Pilgrim's Path and the monastery, and 7100 and up are caves)
 const HS_SIZE_IDS=['small','medium','large'];
 const HS_SIZES={
-  small:{name:'Small House',price:20000,w:3,d:2,wh:2.0,sty:'cottage',roof:'kh_yroof3_1',roofW:.5,cap:40,
+  small:{name:'Small House',price:150000,w:3,d:2,wh:2.0,sty:'cottage',roof:'kh_yroof3_1',roofW:.5,cap:40,
     blurb:'One cosy room with a hearth, a bed, a table and a chest. Four places for furniture and two for trophies.',slotsD:4,slotsT:2},
-  medium:{name:'Medium House',price:40000,w:4,d:3,wh:2.4,sty:'timber',roof:'kh_ohroof1_2',roofW:.5,cap:80,
+  medium:{name:'Medium House',price:400000,w:4,d:3,wh:2.4,sty:'timber',roof:'kh_ohroof1_2',roofW:.5,cap:80,
     blurb:'Two rooms: a living room with a hearth and a table, and a bedroom. Eight places for furniture and six for trophies.',slotsD:8,slotsT:6},
-  large:{name:'Large Mansion',price:100000,w:6,d:4,wh:3.0,sty:'golden',roof:'kh_ohroof1_5',roofW:.8,cap:160,
+  large:{name:'Large Mansion',price:1000000,w:6,d:4,wh:3.0,sty:'golden',roof:'kh_ohroof1_5',roofW:.8,cap:160,
     blurb:'A great hall, two wings, and a long trophy hall that shows every boss the party has beaten. Fourteen places for furniture.',slotsD:14,slotsT:67}
 };
 /* The towns. sizes: what the agent sells (a town can sell fewer: Thornwick has only the small house). agent: where he stands, and a free cell for the office board. plots: one per size sold (x0,y0,w,d is the
@@ -65305,7 +65305,7 @@ const wsLying=n=>(G.items||[]).some(i=>i&&!i.taken&&i.k===WSD[n].item);
 /* the seal is handed over: into the bag (or onto the floor if the bag is full), and the quest of that seal is done */
 function wsGive(n,from){
   const D=WSD[n],S=wsF();
-  if(!bagAdd(mkItem(D.item)))G.items.push({k:D.item,x:G.P.x,y:G.P.y,taken:false});
+  if(!bagAdd(mkItem(D.item)))ovfStash(D.item);
   S.got[n]=1;
   msg(from?from:'You have the '+D.name+'.','#ffe36a');sfx('win');
   wsSync()}
@@ -67360,15 +67360,15 @@ khNpc('blt_ledger',"The Wardens' ledger",'gy_book',d=>{
   const F=bltF();
   if(F.ledger&&!F.ledgerDone&&!bagCount('blledger'))return say('The desk is bare where the ledger lay. If you have lost it, there is nothing more here.',[BYE]);
   if(F.ledger)return say('The desk is bare, apart from rings of damp where cups were put down.',[BYE]);
-  return say("A long ledger lies open on the desk. Each line is a day, a weight of pale silver, and the words PAID BY THE SOVEREIGN'S CLERK. The last page is a copy of an order: THE GATE OF WENLOCK TO BE SHUT, THE SEALS SET. SILVER FOR THE VAULT OF MALDRAKE, THIRTY YEARS IN ADVANCE. The dead warden at the desk does not stop you.",[['Take the ledger.',()=>{F.ledger=1;if(!bagAdd(mkItem('blledger')))G.items.push({k:'blledger',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg("You take the Wardens' ledger.",'#ffe36a');return null}],BYE])});
+  return say("A long ledger lies open on the desk. Each line is a day, a weight of pale silver, and the words PAID BY THE SOVEREIGN'S CLERK. The last page is a copy of an order: THE GATE OF WENLOCK TO BE SHUT, THE SEALS SET. SILVER FOR THE VAULT OF MALDRAKE, THIRTY YEARS IN ADVANCE. The dead warden at the desk does not stop you.",[['Take the ledger.',()=>{F.ledger=1;if(!bagAdd(mkItem('blledger')))ovfStash('blledger');sfx('key');msg("You take the Wardens' ledger.",'#ffe36a');return null}],BYE])});
 khNpc('blt_deadwarden','A dead warden','gy_skel',d=>{
   const F=bltF();
-  if(!F.candle&&!F.shrineLit)return say('A Road Warden in a grey tabard sits at the desk with his hands on the wood. He has been dead a long time and has not noticed. A stub of white candle is stuck in his belt, with a shrine stamp on its foot.',[['Take the candle.',()=>{F.candle=1;if(!bagAdd(mkItem('blcandle')))G.items.push({k:'blcandle',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg('You take the white shrine candle.','#ffe36a');return null}],BYE]);
+  if(!F.candle&&!F.shrineLit)return say('A Road Warden in a grey tabard sits at the desk with his hands on the wood. He has been dead a long time and has not noticed. A stub of white candle is stuck in his belt, with a shrine stamp on its foot.',[['Take the candle.',()=>{F.candle=1;if(!bagAdd(mkItem('blcandle')))ovfStash('blcandle');sfx('key');msg('You take the white shrine candle.','#ffe36a');return null}],BYE]);
   return say('The dead warden sits at the desk with his hands on the wood. He does not look up. His belt is empty now.',[BYE])});
 khNpc('blt_sealchest','A strongbox','gy_chest',d=>{
   const F=bltF();
   if(F.chest)return say('The strongbox is open and empty, except for grey wax dust.',[BYE]);
-  return say('An iron strongbox with the toll bar stamped on its lid. It is not locked. Inside are ledger slips, a few coins, and a lump of grey wax stamped with a small pale silver mark.',[['Take what is in it.',()=>{F.chest=1;G.gold+=900;if(!bagAdd(mkItem('blwaxseal')))G.items.push({k:'blwaxseal',x:G.P.x,y:G.P.y,taken:false});sfx('win');msg('You take 900 gold and a pale silver wax seal.','#ffe36a');return null}],BYE])});
+  return say('An iron strongbox with the toll bar stamped on its lid. It is not locked. Inside are ledger slips, a few coins, and a lump of grey wax stamped with a small pale silver mark.',[['Take what is in it.',()=>{F.chest=1;G.gold+=900;if(!bagAdd(mkItem('blwaxseal')))ovfStash('blwaxseal');sfx('win');msg('You take 900 gold and a pale silver wax seal.','#ffe36a');return null}],BYE])});
 function bltShrine(){
   const F=bltF();
   if(F.shrineLit)return say('The white candle burns steadily on the shrine of the Hollow Saint. The air near it is warm and smells of wax. The crows do not come within a stone’s throw.',[BYE]);
@@ -67596,7 +67596,7 @@ khNpc('bla_cellardoor','A trapdoor','gy_hatch2',()=>say('A trapdoor in the kitch
 khNpc('bla_ringspot','Turned earth','gy_mound',()=>{
   const F=blF();
   if(F.ring||F.ringGiven)return say('The furrow is dug up where you took the ring. Nothing else is here.',[BYE]);
-  return say('The long furrow ends at an old stone. The earth at its foot has been turned over once, long ago, and a thin edge of gold shows in it.',[['Dig.',()=>{F.ring=1;if(!bagAdd(mkItem('blring')))G.items.push({k:'blring',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg("You dig up Wilf Sedge's wedding ring.",'#ffe36a');return null}],BYE])});
+  return say('The long furrow ends at an old stone. The earth at its foot has been turned over once, long ago, and a thin edge of gold shows in it.',[['Dig.',()=>{F.ring=1;if(!bagAdd(mkItem('blring')))ovfStash('blring');sfx('key');msg("You dig up Wilf Sedge's wedding ring.",'#ffe36a');return null}],BYE])});
 /* Wilf, with the ring in the bag, gets a branch of his own */
 yrHook('bla_wilf',d=>{const F=blF();
   if(F.ring&&!F.ringGiven&&bagCount('blring')>0)return say('Farmer Wilf sits at the head of the table with his hand flat on the cloth, as if waiting. His fingers are bare.',[['Put the ring on his finger.',()=>{bagRemove('blring',1);F.ringGiven=1;sfx('win');msg('Wilf Sedge looks at his hand for a long time.','#ffe9a0');return say('He turns the ring once, with his thumb. "There," he says, in a perfectly ordinary voice. "That was it." He takes his wife’s hand, and does not say anything else.',[BYE])}],BYE]);
@@ -67612,7 +67612,7 @@ khNpc('bla_sign_farm','A farm signpost','greensign',()=>say('A signpost at the e
 khNpc('bla_pigs','A pig sty','bl_fence',()=>say('A sty with a low roof. The pigs are gone. The mud inside is deeply trodden, in a ring, as if something walked round and round all night.',[BYE]));
 /* the hearth in the kitchen and the cellar door are decor; the heart drops when the great scarecrow dies */
 {const _h=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;const r=_h.apply(this,arguments);
-  try{if(was&&e.hp<=0&&e.t==='blscarebig'){const F=blF();if(!F.heart&&!F.heartBurnt){F.heart=1;if(!bagAdd(mkItem('blheart')))G.items.push({k:'blheart',x:Math.round(e.x),y:Math.round(e.y),taken:false});msg('A pale silver heart falls out of the straw. You take it.','#ffe36a');sfx('win')}}}catch(x){console.error(x)}
+  try{if(was&&e.hp<=0&&e.t==='blscarebig'){const F=blF();if(!F.heart&&!F.heartBurnt){F.heart=1;if(!bagAdd(mkItem('blheart')))ovfStash('blheart');msg('A pale silver heart falls out of the straw. You take it.','#ffe36a');sfx('win')}}}catch(x){console.error(x)}
   return r}}
 /* ---------- the level ---------- */
 function blaBuild(p){
@@ -68572,17 +68572,17 @@ function vtBossDied(e){
   const F=vtF(),t=e.t;
   {const L=LEVELS[LEVEL];for(const q of G.enemies)if(q.hp>0&&q.vtAdd){q.hp=0;q.dying=.4}}
   if(t==='vtwarden'){
-    if(!bagAdd(mkItem('vtkey1')))G.items.push({k:'vtkey1',x:e.x,y:e.y,taken:false});F.keyTaken=1;
+    if(!bagAdd(mkItem('vtkey1')))ovfStash('vtkey1');F.keyTaken=1;
     msg('The Barrow Warden falls apart. A key of pale silver lies in the bones on a chain.','#ffe36a');sfx('win');
     later(1200,()=>msg('You have the Pale Silver Key. It opens the pale-silver lock at the south end of the hall.','#ffe36a'))}
   else if(t==='vtsilver'){
-    if(!bagAdd(mkItem('vtseal')))G.items.push({k:'vtseal',x:e.x,y:e.y,taken:false});F.sealTaken=1;
+    if(!bagAdd(mkItem('vtseal')))ovfStash('vtseal');F.sealTaken=1;
     msg('The Silver Warden folds in on himself. A heavy seal of pale silver hangs from his belt on a cord.','#ffe36a');sfx('win');
     later(1200,()=>msg("You have the Sanctum Seal. It fits the lock on the door to Maldrake's Sanctum.",'#ffe36a'))}
   else if(t==='vtmaldrake'){
     F.dead=1;F.fight=2;F.gotKey=1;
-    for(const it of ['potion6','potion6','supermana','supermana','elixir']){if(!bagAdd(mkItem(it)))G.items.push({k:it,x:e.x,y:e.y,taken:false})}
-    for(const it of ['vtgatekey','vtstaff','vtring']){if(!bagAdd(mkItem(it)))G.items.push({k:it,x:e.x,y:e.y,taken:false})}
+    for(const it of ['potion6','potion6','supermana','supermana','elixir']){if(!bagAdd(mkItem(it)))ovfStash(it)}
+    for(const it of ['vtgatekey','vtstaff','vtring']){if(!bagAdd(mkItem(it)))ovfStash(it)}
     msg('You have the Gate Key of Sale.','#ffe36a');sfx('win');
     const LAST="Wystan Maldrake sinks down on one knee, and the silver ring ticks against the floor. He looks at his hands, as if he had not seen them for years. 'Thank you,' he says. 'It was the only way you could, and I would not have let you do it any other way. The key is in my coat. The ring will not come off me, and it will not stop. Somebody must read the paper to the dead. I could not.' He is a heap of grey cloth, and the ring is still cold on a finger that is no longer there. The dead of Underhill have not lain down.";
     later(1500,()=>{G.talk={d:{k:'vti_maldrake',x:G.P.x,y:G.P.y,npc:'vto_maldrake'},n:{name:'Wystan Maldrake',root:()=>null},node:say(LAST,[['Take the key and go.',()=>{vtBossEnd();return null}]]),t:G.time,btns:[]}})}}
@@ -68740,7 +68740,7 @@ khNpc('vto_shelf1','A bookcase with a red eye','hl_p_shelf',d=>{const F=vtF();
 khNpc('vto_cage','An iron cage','hl_p_cage',()=>gySay("An iron cage, empty but for a tin cup and a rag. Somebody has scratched a calendar on the bars, and given up at nineteen.",[BYE]));
 khNpc('vto_fenn','Private Tam Fenn, of the Oldhaven garrison','kh_ohsold1_1',()=>{const F=vtF(),g=!F.fennGift;
   const t=g?"A soldier is crouched in the corner of the cell with a sword across his knees. 'Quiet,' he whispers. 'Quiet. I am Private Fenn, of Hale's patrol. The sergeant sent six of us in, and I am the only one who got as far as this room, and that is only because I hid. The Warden at the bottom wears a pale key round his neck. And the passage before it has plates on the sides. Walk down the middle.' He presses a flask into your hand. 'It was my mother's. Please. Take it.'":"'Walk down the middle,' Fenn says. 'The passage to the Warden. Down the middle. And whatever you do, do not open the Ring in the wrong order. I did not do it myself. I heard about it.'";
-  if(g){F.fennGift=1;if(!bagAdd(mkItem('potion6')))G.items.push({k:'potion6',x:G.P.x,y:G.P.y,taken:false})}
+  if(g){F.fennGift=1;if(!bagAdd(mkItem('potion6')))ovfStash('potion6')}
   return gySay(t,[BYE])});
 khNpc('vto_sarc','A sarcophagus','gy_sarc',d=>gySay(VT_SARC[vtI(d)%VT_SARC.length],[BYE]));
 khNpc('vto_altar','The altar of Underhill','gy_altar',()=>gySay("A plain altar of grey stone, with a bowl on it, and in the bowl a handful of grey earth from every grave in the village, mixed. It is the oldest thing here, and the only thing in the Vault that has not been touched by the silver.",[BYE]));
@@ -68817,8 +68817,8 @@ function vtMaldrakeFree(){
   const F=vtF();if(F.freed)return;F.freed=1;F.gotKey=1;F.fight=F.fight||0;G.talk=null;bagRemove('vtcontract',1);
   if(AC&&!G.mute){tone(880,220,1.4,'sine',.08,0);tone(1320,330,1.2,'sine',.04,.1);nz(.8,.01,'bandpass',2000,400,0)}
   G.shake=.6;msg('The silver ring breaks across, with a sound like a dropped glass. Far above you, a bell stops.','#cfe0ff');sfx('win');
-  for(const it of ['vtgatekey','vtring2','vtbroken'])if(!bagAdd(mkItem(it)))G.items.push({k:it,x:G.P.x,y:G.P.y,taken:false});
-  for(const it of ['potion6','potion6','supermana','supermana','elixir'])if(!bagAdd(mkItem(it)))G.items.push({k:it,x:G.P.x,y:G.P.y,taken:false});
+  for(const it of ['vtgatekey','vtring2','vtbroken'])if(!bagAdd(mkItem(it)))ovfStash(it);
+  for(const it of ['potion6','potion6','supermana','supermana','elixir'])if(!bagAdd(mkItem(it)))ovfStash(it);
   try{for(const h of G.heroes){h.learned=h.learned||[];if(!h.learned.includes('vtquiet'))h.learned.push('vtquiet')}msg('Maldrake teaches the party Quiet the Dead. It joins the power page of every hero.','#ffe9a0')}catch(e){console.error(e)}
   G.gold+=10000;giveXP(60000);msg('You have the Gate Key of Sale, and 10,000 gold.','#ffe36a');
   vtMaldrakeVanish();
@@ -69210,7 +69210,7 @@ yrHook('blc_saint',d=>{const F=blF();
 khNpc('blc_pauper',"A pauper's niche",'gy_rune',d=>{
   const F=blF();
   if(F.bowl||F.bowlGiven)return say('A plain niche in the wall, with a small bowl cut over the opening. The shelf inside is empty, and swept.',[BYE]);
-  return say('Under the stair, behind the last of the great sarcophagi, a plain niche is let into the wall, with a small bowl cut over the opening. The stone shelf inside is bare, and a flat slab stands before it, with a loose edge.',[['Lift the slab.',()=>{F.bowl=1;if(!bagAdd(mkItem('blalmsbowl')))G.items.push({k:'blalmsbowl',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg('You take the Hollow Saint\'s alms bowl.','#ffe36a');return null}],BYE])});
+  return say('Under the stair, behind the last of the great sarcophagi, a plain niche is let into the wall, with a small bowl cut over the opening. The stone shelf inside is bare, and a flat slab stands before it, with a loose edge.',[['Lift the slab.',()=>{F.bowl=1;if(!bagAdd(mkItem('blalmsbowl')))ovfStash('blalmsbowl');sfx('key');msg('You take the Hollow Saint\'s alms bowl.','#ffe36a');return null}],BYE])});
 khNpc('blc_cof0','A stone coffin','gy_coffin',()=>say('A plain stone coffin. The lid is carved with a hood and has no name. One edge is rubbed smooth, where people have rested a hand on it while going past.',[BYE]));
 khNpc('blc_cof1','A stone coffin','gy_coffin',()=>say('A coffin with its lid pushed a handbreadth off. Inside there is only a folded grey cloth, and a smell of candle smoke.',[BYE]));
 khNpc('blc_cof2','A stone coffin','gy_coffin',()=>say('A coffin with a small mitten set on the lid, and a bunch of dried reeds. Somebody still comes down here.',[BYE]));
@@ -69540,7 +69540,7 @@ khNpc('blg_lamp','A causeway lamp','gy_lantern',d=>{
   return say(i===0?'A lamp on a post at the foot of the causeway. The wick is dry, and a tinder-box hangs beside it on a string. A card says: LIGHT ME FIRST. ALL THE OTHERS LIGHT FROM ME.':'A lamp on a post. The wick is dry. A card hangs from it: LIGHT FROM THE LAST. The lamp behind you burns, and a spill hangs ready.',[['Light the lamp.',()=>{F.lamps=(F.lamps|0)|bit;blgLampLight(i);const n=blgBanish(i);sfx('win');msg('The lamp takes a flame. '+(n?n+(n>1?' wisps burn':' wisp burns')+' away in the light.':'The pale lights in the reeds draw back.'),'#ffe9a0');return null}],BYE])});
 khNpc('blg_lantern',"Osk's lantern",'lamp',d=>{
   const F=blF();if(F.lantern||F.lanternGiven)return say('A bare patch of grass where the lantern lay, with a ring of pressed reeds round it.',[BYE]);
-  return say('A ship\'s lantern lies on its side in the sedge at the water\'s edge, with its horn window turned up to the sky, quite unbroken. Nobody has touched it in forty years. Round it the grass is very flat, as if something had sat beside it, waiting.',[['Take the lantern.',()=>{F.lantern=1;if(!bagAdd(mkItem('blferrylamp')))G.items.push({k:'blferrylamp',x:G.P.x,y:G.P.y,taken:false});d.found=true;d.hidden=true;sfx('key');msg("You take Osk's ferry lantern.",'#ffe36a');return null}],BYE])});
+  return say('A ship\'s lantern lies on its side in the sedge at the water\'s edge, with its horn window turned up to the sky, quite unbroken. Nobody has touched it in forty years. Round it the grass is very flat, as if something had sat beside it, waiting.',[['Take the lantern.',()=>{F.lantern=1;if(!bagAdd(mkItem('blferrylamp')))ovfStash('blferrylamp');d.found=true;d.hidden=true;sfx('key');msg("You take Osk's ferry lantern.",'#ffe36a');return null}],BYE])});
 yrHook('blg_osk',d=>{const F=blF();
   if(qSt('blq11')==='active'&&F.lantern&&!F.lanternGiven&&bagCount('blferrylamp')>0)return say('Osk Brine looks at the lantern in your hand, and for a moment he cannot speak. The window is clean. The wick is dry. It is all there.',[['Give him the lantern.',()=>{bagRemove('blferrylamp',1);F.lanternGiven=1;sfx('win');msg('You give Osk Brine his lantern.','#ffe36a');return say('He takes it in both hands, and turns it to the light, and for a moment you think he will weep. Then he rubs the glass with his sleeve, and nods once, and says nothing at all.',[BYE])}],['Not yet.',()=>null]]);
   return null});
@@ -69578,7 +69578,7 @@ khNpc('blg_nets','Nets','hay',()=>say('A heap of fishing nets, with the floats s
 khNpc('blg_chart','A chart of the mere','greensign',()=>say('A chart of the Gallowmere water, drawn on oiled cloth. The village is a small black square. The dykes are marked in red, and every one of them is crossed through. A note at the margin: THEY WERE OPENED FROM THE INSIDE.',[BYE]));
 /* the Reeve's rod falls when the Reeve falls */
 {const _h=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;const r=_h.apply(this,arguments);
-  try{if(was&&e.hp<=0&&e.t==='blreeve'){const F=blF();if(!F.reeve){F.reeve=1;if(!bagAdd(mkItem('blreevestaff')))G.items.push({k:'blreevestaff',x:Math.round(e.x),y:Math.round(e.y),taken:false});msg("The Drowned Reeve sinks, and the water goes down round him. His rod floats up. You take the Reeve's Rod.",'#ffe36a');sfx('win')}}}catch(x){console.error(x)}
+  try{if(was&&e.hp<=0&&e.t==='blreeve'){const F=blF();if(!F.reeve){F.reeve=1;if(!bagAdd(mkItem('blreevestaff')))ovfStash('blreevestaff');msg("The Drowned Reeve sinks, and the water goes down round him. His rod floats up. You take the Reeve's Rod.",'#ffe36a');sfx('win')}}}catch(x){console.error(x)}
   return r}}
 /* ---------- the level ---------- */
 function blgBuild(p){
@@ -69870,7 +69870,7 @@ const BO_REMAINS=[
 BO_REMAINS.forEach((r,i)=>khNpc('bo_rem'+i,r[0],'gy_bones',d=>{
   const F=boF();F.crestTaken=F.crestTaken||{};
   if(F.crestTaken[i])return say(r[0]+' lies in his place on the slab, with his collar bare. Somebody has closed his eyes.',[BYE]);
-  return say(r[1],[['Take the crest.',()=>{F.crestTaken[i]=1;F.crests=(F.crests|0)+1;if(!bagAdd(mkItem('blcrest')))G.items.push({k:'blcrest',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg('You take the crest of '+r[0]+' ('+F.crests+' of 3).','#ffe36a');return null}],BYE])}));
+  return say(r[1],[['Take the crest.',()=>{F.crestTaken[i]=1;F.crests=(F.crests|0)+1;if(!bagAdd(mkItem('blcrest')))ovfStash('blcrest');sfx('key');msg('You take the crest of '+r[0]+' ('+F.crests+' of 3).','#ffe36a');return null}],BYE])}));
 khNpc('bo_bell','The harvest bell','bo_bell',()=>{
   const F=boF();
   if(F.bell)return say('The harvest bell lies in three pieces on the trampled grass. It has a dull sound now, a flat clack, when the wind moves it.',[BYE]);
@@ -69886,12 +69886,12 @@ khNpc('bo_mallet','Bartle’s mallet','coopstack',()=>{
   const F=boF();
   if(F.mallet||F.bell)return say('The nail by the door where the mallet hung is empty.',[BYE]);
   if(qSt('blq52')!=='active')return say('A long oak mallet hangs by the cellar door, on a nail. It has been used a great deal.',[BYE]);
-  return say('A long oak mallet hangs by the cellar door, on a nail.',[['Take the mallet.',()=>{F.mallet=1;if(!bagAdd(mkItem('blmallet')))G.items.push({k:'blmallet',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg("You take Bartle's cellar mallet.",'#ffe36a');return null}],BYE])});
+  return say('A long oak mallet hangs by the cellar door, on a nail.',[['Take the mallet.',()=>{F.mallet=1;if(!bagAdd(mkItem('blmallet')))ovfStash('blmallet');sfx('key');msg("You take Bartle's cellar mallet.",'#ffe36a');return null}],BYE])});
 khNpc('bo_cask','A sealed cask','barrel',()=>{
   const F=boF();
   if(F.cask||F.caskGiven)return say('The rack where the good cask stood is empty, with a clean ring in the dust.',[BYE]);
   if(qSt('blq53')!=='active')return say('A single small cask stands on its own rack, with a wax seal over the bung and a ribbon round it. It has been put by for somebody.',[BYE]);
-  return say('A single small cask stands on its own rack, with a wax seal over the bung and a ribbon round it. It has been put by for somebody.',[['Take the cask.',()=>{F.cask=1;if(!bagAdd(mkItem('blcask')))G.items.push({k:'blcask',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg('You take the sealed cask.','#ffe36a');return null}],BYE])});
+  return say('A single small cask stands on its own rack, with a wax seal over the bung and a ribbon round it. It has been put by for somebody.',[['Take the cask.',()=>{F.cask=1;if(!bagAdd(mkItem('blcask')))ovfStash('blcask');sfx('key');msg('You take the sealed cask.','#ffe36a');return null}],BYE])});
 khNpc('bo_hallchest','The Reaper-Farmer’s strongbox','gy_chest',()=>{
   const F=boF();
   if(F.chestH)return say('The strongbox is empty, and the straw hat in it has sunk to a flat grey ring.',[BYE]);
@@ -69910,7 +69910,7 @@ khNpc('bo_cart','An apple cart','wl_prop1_5',()=>say('A cart heaped with white f
 khNpc('bo_stone','A grave board','bl_slab',d=>say(['HERE LIES A PICKER. NAME UNKNOWN. HE LOVED THE WORK.','HERE LIES TWO PICKERS, WHO SHARED A BASKET.','HERE LIES MISTRESS ORRIN, WIFE OF THE FARMER. SHE SAID IT WOULD END BADLY.','HERE LIES THE CIDER MASTER. HE IS NOT HERE. THE STONE WAS A GUESS.'][((d.x*7+d.y)|0)%4],[BYE]));
 /* the Reaper-Farmer's death: the scythe falls to the party */
 {const _h=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;const r=_h.apply(this,arguments);
-  try{if(was&&e.hp<=0&&e.t==='blreaper'){const F=boF();if(!F.reaper){F.reaper=1;if(!bagAdd(mkItem('blreapscythe')))G.items.push({k:'blreapscythe',x:Math.round(e.x),y:Math.round(e.y),taken:false});msg('The Reaper-Farmer falls in a drift of straw. His scythe stays upright in the ground, and you take it.','#ffe36a');sfx('win');
+  try{if(was&&e.hp<=0&&e.t==='blreaper'){const F=boF();if(!F.reaper){F.reaper=1;if(!bagAdd(mkItem('blreapscythe')))ovfStash('blreapscythe');msg('The Reaper-Farmer falls in a drift of straw. His scythe stays upright in the ground, and you take it.','#ffe36a');sfx('win');
     for(const q of G.enemies)if(q.hp>0&&q.t==='blpicker'&&Math.hypot(q.x-e.x,q.y-e.y)<8){q.still=1;q.woke=0}}}}catch(x){console.error(x)}
   return r}}
 /* ---------- the level ---------- */
@@ -70104,7 +70104,7 @@ ENEMY_DEF.blmaw.act=e=>gyBossAct(e,{moves:[
   {every:5,all:true,mult:.5,txt:'The Road-Maw heaves, and a foul grey slurry full of buttons and bone breaks over the whole party.',col:'#b8c890',verb:'Slurry burns'},
   {every:3,mult:1.15,near:2,affl:'foodpoison',txt:'The Road-Maw gulps at the nearest hero, and the great jaws close like a gate.',col:'#c8d8a0',verb:'The jaws crush'}]});
 {const _h=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;const r=_h.apply(this,arguments);
-  try{if(was&&e.hp<=0&&e.t==='blmaw'){const F=blrF();if(!F.maw){F.maw=1;F.mawFlag=1;if(!bagAdd(mkItem('blpatrolflag')))G.items.push({k:'blpatrolflag',x:Math.round(e.x),y:Math.round(e.y),taken:false});msg('The Road-Maw collapses into a heap of black earth. In it lies a torn blue flag, still rolled on its staff. You take it.','#ffe36a');sfx('win')}}}catch(x){console.error(x)}
+  try{if(was&&e.hp<=0&&e.t==='blmaw'){const F=blrF();if(!F.maw){F.maw=1;F.mawFlag=1;if(!bagAdd(mkItem('blpatrolflag')))ovfStash('blpatrolflag');msg('The Road-Maw collapses into a heap of black earth. In it lies a torn blue flag, still rolled on its staff. You take it.','#ffe36a');sfx('win')}}}catch(x){console.error(x)}
   return r}}
 /* ---------- art: tents, stocks, a stew pot, banners (filters over the painted Wenlock and witch wood pieces) ---------- */
 function blrArt(){
@@ -70311,12 +70311,12 @@ khNpc('blr_wagon','A burnt supply wagon','wl_prop1_5',d=>{
   const F=blrF();
   if(F.oil||F.beaconLit)return say('The burnt wagon sits on its axle, with the tarpaulin gone to ash. The oil barrel is gone from the back.',[BYE]);
   if(qSt('blq59')!=='active')return say('A supply wagon, burnt black, with two spokes left in one wheel. A barrel lies on its side in the ashes. A soldier’s tabard is still caught in the wheel, and the colour of it has run.',[BYE]);
-  return say('A supply wagon, burnt black, with two spokes left in one wheel. A small barrel lies on its side in the ashes, and it has not burnt. It is sealed, and it sloshes. The label says LAMP OIL, FOR THE BEACON, LANTERNREST.',[['Take the cask of lamp oil.',()=>{F.oil=1;if(!bagAdd(mkItem('bloil')))G.items.push({k:'bloil',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg('You take the cask of lamp oil.','#ffe36a');return null}],BYE])});
+  return say('A supply wagon, burnt black, with two spokes left in one wheel. A small barrel lies on its side in the ashes, and it has not burnt. It is sealed, and it sloshes. The label says LAMP OIL, FOR THE BEACON, LANTERNREST.',[['Take the cask of lamp oil.',()=>{F.oil=1;if(!bagAdd(mkItem('bloil')))ovfStash('bloil');sfx('key');msg('You take the cask of lamp oil.','#ffe36a');return null}],BYE])});
 khNpc('blr_camp','A ruined patrol camp','gy_chest',d=>{
   const F=blrF();
   if(F.flint||F.beaconLit)return say('The ruined camp: three collapsed tents, a cold fire, a row of grey bones in blankets. The oilcloth bundle is gone from the chest.',[BYE]);
   if(qSt('blq59')!=='active')return say('A ruined patrol camp: three collapsed tents, a cold fire ring, and a row of grey bones under blankets, laid out neatly by someone who survived long enough to do it. A small chest stands by the fire.',[BYE]);
-  return say('A ruined patrol camp: three collapsed tents, a cold fire ring, and a row of grey bones under blankets, laid out neatly by someone who survived long enough to do it. A small chest stands by the fire, with a bundle of oilcloth on top.',[['Take the oilcloth bundle.',()=>{F.flint=1;if(!bagAdd(mkItem('blflint')))G.items.push({k:'blflint',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg('You take the flint and steel.','#ffe36a');return null}],BYE])});
+  return say('A ruined patrol camp: three collapsed tents, a cold fire ring, and a row of grey bones under blankets, laid out neatly by someone who survived long enough to do it. A small chest stands by the fire, with a bundle of oilcloth on top.',[['Take the oilcloth bundle.',()=>{F.flint=1;if(!bagAdd(mkItem('blflint')))ovfStash('blflint');sfx('key');msg('You take the flint and steel.','#ffe36a');return null}],BYE])});
 khNpc('blr_beacon','The beacon','hearth',d=>{
   const F=blrF();
   if(F.beaconLit)return say('The beacon burns in its iron cresset, a column of clean gold fire, and the Beacon Room is as bright as noon. Through the arrow slit you can see the whole road, west to the hills and east towards the orchard.',[BYE]);
@@ -70560,7 +70560,7 @@ function bl3Take(id,name,pic,flag,item,before,after,btn,msgText,extra){
   khNpc(id,name,pic,d=>{const F=blF();
     if(F[flag])return say(after,[BYE]);
     return say(before,[[btn,()=>{F[flag]=1;if(d){d.found=true;d.hidden=true}
-      if(item&&!bagAdd(mkItem(item)))G.items.push({k:item,x:G.P.x,y:G.P.y,taken:false});
+      if(item&&!bagAdd(mkItem(item)))ovfStash(item);
       if(extra)try{extra(F)}catch(e){console.error(e)}
       sfx('key');msg(msgText,'#ffe36a');return null}],BYE])});return id}
 function bl3Kill(t,fn){BL3.kill[t]=fn}
@@ -70579,7 +70579,7 @@ function bl3Prop(C,n,x,y,o){try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{
 /* every hero heals (shrines, bells, thanks) */
 function bl3Heal(){try{G.heroes.forEach(h=>{if(h.alive){h.hp=h.max;h.mp=h.mpMax}})}catch(e){}}
 /* put an item in the bag, or on the ground if the bag is full */
-function bl3Give(item){if(!bagAdd(mkItem(item)))G.items.push({k:item,x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false})}
+function bl3Give(item){if(!bagAdd(mkItem(item)))ovfStash(item)}
 /* a cell near (x,y) free of creatures, for a creature that is added while playing */
 function bl3Near(x,y,r){const L=LEVELS[LEVEL],W=L.rows[0].length;
   const bs=new Set(G.decor.filter(d=>d.block&&!d.found).map(d=>d.x+','+d.y));
@@ -73749,17 +73749,17 @@ function psgPorterTalk(){
     ['Who holds the gatehouse?',()=>say("The pale guards, and the halberdiers, and the archers in the slits. They were soldiers once. Now they stand where they stand and do what they did, and the Gate Captain is the worst of them, because he remembers his orders best. He keeps the passage. The two guardrooms open off it, and the stair in the east one goes up to the winch loft, where the portcullis chains are. There is a dead man in the loft who was a Road Warden. I have not had the heart to move him.",[['Back.',back],BYE])],
     [F.sketch?'About that sketch.':'Do you know the way?',()=>{
       if(F.sketch)return say("It is the best I can do. The gatehouse is the bottom of the page. Do not trust the upper floors, I have never seen them.",[['Back.',back],BYE]);
-      F.sketch=1;if(!bagAdd(mkItem('pssketch')))G.items.push({k:'pssketch',x:G.P.x,y:G.P.y,taken:false});
+      F.sketch=1;if(!bagAdd(mkItem('pssketch')))ovfStash('pssketch');
       sfx('key');return say("I know the ground floor, from thirty years of carrying messages. I have drawn it for you on a page of the ledger. Take it. It shows which wing is which, and where the stairs go down.",[['Back.',back],BYE])}],
     BYE])}
 khNpc('psg_horn',"The Warden's Horn",'gy_bell',d=>{const F=psgF();
   if(F.horn)return say('The place on the table where the horn lay.',[BYE]);
-  return say("A long horn of dull horn and tarnished silver lies on the table, beside the bones of the man who carried it. He wore the grey cloak of a Road Warden, and the cloak is still on the chair. The horn is his.",[['Take the horn.',()=>{F.horn=1;if(d){d.found=true;d.hidden=true}if(!bagAdd(mkItem('pshorn')))G.items.push({k:'pshorn',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg("You take the Warden's Horn.",'#ffe36a');return null}],BYE])});
+  return say("A long horn of dull horn and tarnished silver lies on the table, beside the bones of the man who carried it. He wore the grey cloak of a Road Warden, and the cloak is still on the chair. The horn is his.",[['Take the horn.',()=>{F.horn=1;if(d){d.found=true;d.hidden=true}if(!bagAdd(mkItem('pshorn')))ovfStash('pshorn');sfx('key');msg("You take the Warden's Horn.",'#ffe36a');return null}],BYE])});
 bl3Hide(9722,'psg_horn',()=>!!psgF().horn);
 for(let i=0;i<9;i++){const bit=1<<i;
   khNpc('psg_tok'+i,(PSG_TOK_NAMES[i][0].toUpperCase()+PSG_TOK_NAMES[i].slice(1)),'gy_ring',d=>{const F=psgF();
     if((F.tok|0)&bit)return say('Nothing here now.',[BYE]);
-    return say('Lying in the dirt is '+PSG_TOK_NAMES[i]+'. It was left for luck on the way to the Pale Spire.',[["Pick it up.",()=>{F.tok=(F.tok|0)|bit;if(d){d.found=true;d.hidden=true}if(!bagAdd(mkItem('pstoken')))G.items.push({k:'pstoken',x:G.P.x,y:G.P.y,taken:false});
+    return say('Lying in the dirt is '+PSG_TOK_NAMES[i]+'. It was left for luck on the way to the Pale Spire.',[["Pick it up.",()=>{F.tok=(F.tok|0)|bit;if(d){d.found=true;d.hidden=true}if(!bagAdd(mkItem('pstoken')))ovfStash('pstoken');
       sfx('key');msg("You pick up a pilgrim's token ("+psgTok()+' of 9).','#ffe36a');if(qSt('psq1')==='active')yrStep("You have "+bagCount('pstoken')+' of the nine tokens.');return null}],BYE])});
   bl3Hide(9720,'psg_tok'+i,()=>!!((psgF().tok|0)&bit))}
 khNpc('psg_cairn','A cairn of pilgrims\' offerings','bl_stone1',()=>{
@@ -74439,7 +74439,7 @@ function pscBuild(info){
   /* ===== THE ORCHARD OF STONE FRUIT (53..57,28..32): trees hung with stone apples; one is real ===== */
   [[54,29],[56,29],[55,30],[54,31],[56,31],[57,32]].forEach(([x,y],i)=>{const id='psc_apple'+i;
     nm(id,'A tree of stone apples',STONETREE,d=>{const Fc=pscF();
-      if(i===2){if(Fc.apple)return say('Only stone apples are left on this tree.',[BYE]);return say('A pale tree hung with apples of grey stone. One of them, on a low branch, has a bruise on its side, and a bruise is not a thing that a stone has.',[['Pick the bruised one.',()=>{Fc.apple=1;if(!bagAdd(mkItem('apple')))G.items.push({k:'apple',x:G.P.x,y:G.P.y,taken:false});sfx('key');G.talk=null;msg('It is a real apple, cold and sweet.','#cfe8c8');return null}],BYE])}
+      if(i===2){if(Fc.apple)return say('Only stone apples are left on this tree.',[BYE]);return say('A pale tree hung with apples of grey stone. One of them, on a low branch, has a bruise on its side, and a bruise is not a thing that a stone has.',[['Pick the bruised one.',()=>{Fc.apple=1;if(!bagAdd(mkItem('apple')))ovfStash('apple');sfx('key');G.talk=null;msg('It is a real apple, cold and sweet.','#cfe8c8');return null}],BYE])}
       return say('A pale tree hung with apples of grey stone. You pick one up. It is stone, all the way through.',[BYE])});
     thing(STONETREE,id,x,y,{sc:1})});
   plaque(53,28,'orchard',['THE ORCHARD','OF STONE FRUIT'],'THE ORCHARD OF STONE FRUIT. A plaque. The fruit is not for eating. One of the apples was left by mistake.');lampAt(55,28,GR);
@@ -75324,7 +75324,7 @@ function pshGhostTick(dt){
 }
 {const _u=update;update=function(dt){const r=_u.apply(this,arguments);try{if(pshIs(LEVEL)&&G&&G.state==='play')pshGhostTick(dt)}catch(e){console.error('psh ghosts',e)}return r}}
 /* ---------- helpers ---------- */
-function pshGive(item){if(!bagAdd(mkItem(item)))G.items.push({k:item,x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false})}
+function pshGive(item){if(!bagAdd(mkItem(item)))ovfStash(item)}
 function pshDismiss(pred){let n=0;for(const e of G.enemies||[])if(e.hp>0&&!e.dying&&pred(e)){e.hp=0;e.dying=.55;n++}return n}
 function pshTake(id,name,pic,flag,item,before,after,btn,done){
   khNpc(id,name,pic,d=>{const F=pshF();if(F[flag])return say(after,[BYE]);
@@ -76072,7 +76072,7 @@ function pswTake(id,name,flag,item,before,after,btn,msgText){
   khNpc(id,name,'hl_p_note',d=>{const F=pswF();
     if(F[flag])return say(after,[BYE]);
     return say(before,[[btn,()=>{F[flag]=1;if(d){d.found=true;d.hidden=true;d.block=false}
-      if(item&&!bagAdd(mkItem(item)))G.items.push({k:item,x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false});
+      if(item&&!bagAdd(mkItem(item)))ovfStash(item);
       sfx('key');msg(msgText,'#ffe36a');G.talk=null;return null}],BYE])})}
 function pswApplyHidden(n){
   const F=pswF();if(!G.decor)return;
@@ -76108,7 +76108,7 @@ khNpc('psw_well','A wellhouse','hl_p_note',()=>say('A little wellhouse with a pi
 khNpc('psw_well2','The garth well','hl_p_note',()=>say('A stone well in the middle of the garth, with a lid of pale stone and a ring of ivy round the rim. A coin lies on the lid, a silver one, left for luck by somebody a long time ago.',[BYE]));
 khNpc('psw_font','The font','mi_font',()=>{const F=pswF();
   if(F.fontTaken)return say('The font holds clear water, still and cold. A small dove is carved in the middle of the bowl. You have already taken some.',[BYE]);
-  return say('The font is full of clear water, which is odd, because no rain reaches this room. A small dove is carved in the middle of the bowl.',[['Take a little water.',()=>{F.fontTaken=1;if(!bagAdd(mkItem('psfont')))G.items.push({k:'psfont',x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false});sfx('heal');msg('You take a vial of font water.','#c8e0f0');G.talk=null;return null}],BYE])});
+  return say('The font is full of clear water, which is odd, because no rain reaches this room. A small dove is carved in the middle of the bowl.',[['Take a little water.',()=>{F.fontTaken=1;if(!bagAdd(mkItem('psfont')))ovfStash('psfont');sfx('heal');msg('You take a vial of font water.','#c8e0f0');G.talk=null;return null}],BYE])});
 khNpc('psw_altar','The altar','mi_altar',()=>say('A plain stone altar with a white cloth, a cross and two candles that have never been lit. The cloth is clean. Something has been written in the dust on the step, and wiped away.',[BYE]));
 khNpc('psw_bed',"A narrow bed",'hgtb_furn_bed',()=>say('A narrow bed with clean sheets, warm in the candlelight. Nothing in this room means any harm. Rest here?',[['Rest, free.',()=>{G.talk=null;restParty(true);return null}],BYE]));
 khNpc('psw_bed2',"A pilgrim's bed",'hgtb_furn_bed',()=>say("A bed with a grey blanket, made up for any pilgrim who comes. A candle burns beside it. Rest here?",[['Rest, free.',()=>{G.talk=null;restParty(true);return null}],BYE]));
@@ -76124,7 +76124,7 @@ khNpc('psw_reliquary',"The Sacristan's reliquary",'wm_chest',()=>{const F=pswF()
   const alive=G.enemies&&G.enemies.some(e=>e.t==='pssacristan'&&e.hp>0);
   if(alive&&!F.sacristanDead)return say('A reliquary chest of pale wood with silver bands. The lid will not lift. Something that was a man stands guard over it, and he is watching you.',[BYE]);
   return say('The lid of the reliquary lifts. Inside, on a grey cloth, lies a small book bound in grey, and a purse of old gold. The book is the Sacristan\'s journal.',[['Take the journal and the gold.',()=>{
-    F.journalTaken=1;G.gold=(G.gold||0)+6000;try{if(!bagAdd(mkItem('potion6')))G.items.push({k:'potion6',x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false})}catch(e){}
+    F.journalTaken=1;G.gold=(G.gold||0)+6000;try{if(!bagAdd(mkItem('potion6')))ovfStash('potion6')}catch(e){}
     sfx('key');msg('You take the Sacristan\'s journal and 6,000 gold. The last entry reads: the upper keys were sent down with the guards to the oubliette, to be kept where nobody climbs.','#ffe36a');try{pspClue(3)}catch(e){}G.talk=null;return null}],BYE])});
 /* ---------- candles (psq23) ---------- */
 function pswCandle(i){
@@ -76765,7 +76765,7 @@ psdQ('psq36','The Empty Frame','Wilhelmina Gaunt, court painter, in the Oubliett
 psdQ('psq37','Dawnwarden','Sir Edrik Stamford, in the Oubliette',[["Bring Sir Edrik's sword Dawnwarden from the rack in the Armoury (ground floor, west wing) to the Oubliette.",psdHas('psdawnwarden')]],{gold:12000,xp:70000,items:['psdawnsword']},{take:{psdawnwarden:1}});
 psdQ('psq38','The Cup for the Sovereign','Yseult Ardent, cupbearer, in the Oubliette',[["Bring three silver roses from the Rose Garden of the Court of Statues to Yseult Ardent in the Oubliette.",psdHas('psroses',3)]],{gold:11000,xp:65000,items:['psantidote']},{take:{psroses:3}});
 QNOTE.psq33='Down in the Deep Cells the water begins to drain, and for the first time in a year Mother Sedge has dry feet.';
-function psdGive(id,n){for(let i=0;i<n;i++){if(!bagAdd(mkItem(id)))G.items.push({k:id,x:G.P.x,y:G.P.y,taken:false})}}
+function psdGive(id,n){for(let i=0;i<n;i++){if(!bagAdd(mkItem(id)))ovfStash(id)}}
 /* the talk of a prisoner: first meeting, the offer, the reminder, the hand-in, the thanks. D = the texts. */
 function psdOffer(qid,D){return gySay(D.offer,[['We will help.',()=>{qAccept(qid);return gySay(D.accept,[BYE])}],['Not now.',()=>null]])}
 function psdHand(qid,D){return gySay(D.ready,[['Here you are.',()=>{const rw=rewardText(qid);qTurnIn(qid);if(D.done)D.done();return gySay(D.thanks+' (Reward: '+rw+'.)',[BYE])}],BYE])}
@@ -76909,7 +76909,7 @@ khNpc('psd_strongbox','The strongbox','ps_reliquary_chest',()=>{const F=psdF(),P
   if(P.key2||bagCount('pskey2'))return say('The strongbox stands open. On the grey velvet lies the print of a long key, and nothing else.',[BYE]);
   if(!F.hungerDead)return say('A black iron strongbox on a dais, chained to the floor. A faint violet light shines through the keyhole and the seams of the lid. The lid will not lift while the Hunger is alive.',[BYE]);
   return say('The chains fall away. In the strongbox, on grey velvet, lies a tall silver key with a violet stone in the bow, glowing very faintly.',[['Take the key.',()=>{
-    P.key2=true;if(!bagAdd(mkItem('pskey2')))G.items.push({k:'pskey2',x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false});
+    P.key2=true;if(!bagAdd(mkItem('pskey2')))ovfStash('pskey2');
     sfx('key');msg('You take the Second Floor Key. It opens the three stair doors to the second floor. Climb back up: the Grand Stair is at the north end of the Great Halls.','#ffe36a');
     try{if(qSt('psq10')==='active')msg('Journal: you have the key.','#ffe36a')}catch(e){}G.talk=null;return null}],BYE])});
 khNpc('psd_gaolerlog',"The Gaoler's log",'hl_p_note',()=>{try{pspClue(3)}catch(e){}return say("The Gaoler's log lies open on the table. The last page, in square handwriting: 'Dusk. The Sacristan's receipt for the upper keys, sent down to the oubliette with two guards. Locked in the strongbox on the dais, at the bottom of the pit, where nobody will climb for them. The Hunger sits on it. God help whoever wants them.'",[BYE])});
@@ -78026,7 +78026,7 @@ function pgrHas(id){
   if(bagCount(id)>0)return true;
   for(const h of G.heroes||[])if(h&&h.eq)for(const k in h.eq)if(h.eq[k]&&h.eq[k].id===id)return true;
   return false}
-function pgrPut(id){if(!bagAdd(mkItem(id)))G.items.push({k:id,x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false})}
+function pgrPut(id){if(!bagAdd(mkItem(id)))ovfStash(id)}
 /* give a piece once; false if it was given before */
 function pgrGive(id,line){
   const F=pgrF();if(F.got[id]||!ITEMDEF[id])return false;
@@ -78171,7 +78171,7 @@ function psf2Count(){return PSF2.PARTS.filter(psf2Got).length}
 function psf2All(){return psf2Count()===PSF2.PARTS.length}
 /* a room's puzzle calls this when it is solved: gives the piece once, whatever else happens */
 function psf2Give(part){const F=psf2F();if(!PSF2.ITEMS[part]||F.got[part])return false;F.got[part]=1;
-  const it=mkItem(PSF2.ITEMS[part]);if(!bagAdd(it))G.items.push({k:PSF2.ITEMS[part],x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false});
+  const it=mkItem(PSF2.ITEMS[part]);if(!bagAdd(it))ovfStash(PSF2.ITEMS[part]);
   try{msg('You find '+PSF2.NAMES[part]+'.','#ffe36a');sfx('key')}catch(e){}return true}
 
 /* ---- src/desert/ps_f2_kit.js ---- */
@@ -80774,6 +80774,7 @@ function psf5Build(info){
   /* a watch nook in the south-west corner: bed, chest, and nothing from the floor comes in */
   pspRest(C,{x0:9,y0:50,x1:15,y1:55,bed:[11,52],chest:[14,54],name:'The Watch Nook',line:'A lean-to against the parapet, with a narrow bed, a brass lamp and a stove. Warm candles burn here, and nothing from the floor can come in.'});
   pspSafeRect(C,9,50,15,55);pspSafeRect(C,27,50,37,57);
+  C.person('psf5_smith',13,51,1);
   /* the creatures: statues that wake beside the stair, and the walkers of the ramparts */
   pspStatueWake(C,'psgargoyle',30,43);pspStatueWake(C,'psgargoyle',34,43);
   const foes=['psgargoyle','pswraith','psstarwraith','psmirrorshade','psfiend','pssentinel'];
@@ -81148,6 +81149,57 @@ STORY.push(
     while(O.length&&G.bag.length<BAGCAP){const o=O[0],it=mkItem(o.id);if(o.n>1)it.n=o.n;if(!bagAdd(it))break;O.shift();msg('Handed over: '+((ITEMDEF[o.id]&&ITEMDEF[o.id].n)||o.id)+'.','#9ae0a0')}
     if(!O.length)delete F.owed}}}catch(x){console.error('owed',x)}
   return r}}
+
+/* ---- src/desert/bag_overflow.js ---- */
+/* ==========================================================================
+   BAG OVERFLOW. When a drop or a reward does not fit in the full bag it goes into an overflow stash (G.flags.ovf, a list of item ids, saved with the game) instead of lying on the floor
+   or being lost. Every second or so the stash is checked, and whatever fits is moved into the bag as room appears (sell, drop or use something). Up to 300 items wait.
+   ovfStash(id) is called wherever a pickup used to fall to the ground. Pickups the player takes by hand (a chest, a loot window) are unchanged: they stay where they are.
+   ========================================================================== */
+const ovfList=()=>{const F=G.flags;return F.ovf||(F.ovf=[])};
+function ovfStash(id){
+  try{const k=typeof id==='string'?id:(id&&(id.id||id.k));if(!k||!ITEMDEF[k])return;
+    const L=ovfList();if(L.length>=300){msg('Your bag and your overflow are both full. '+ITEMDEF[k].n+' is lost.','#d09a80');return}
+    L.push(k);msg(ITEMDEF[k].n+' goes into your overflow ('+L.length+' waiting). It moves into your bag when you make room.','#e0c090')
+  }catch(e){console.error('ovfStash',e)}}
+function ovfFlush(){
+  try{if(typeof G==='undefined'||!G||!G.flags||!G.bag)return;const L=G.flags.ovf;if(!L||!L.length)return;
+    let n=0,last='';while(L.length){const id=L[0];if(!ITEMDEF[id]){L.shift();continue}if(!bagAdd(mkItem(id)))break;L.shift();n++;last=ITEMDEF[id].n}
+    if(n)msg(n===1?last+' moves from your overflow into your bag.':n+' items move from your overflow into your bag.'+(L.length?' '+L.length+' still waiting.':''),'#9ae0a0')
+  }catch(e){console.error('ovfFlush',e)}}
+setInterval(ovfFlush,1500);
+
+/* ---- src/desert/late_economy.js ---- */
+/* ==========================================================================
+   LATE-GAME ECONOMY. (1) Every quest that pays 5,000 gold or more (as paid, after the x2 of QREW_MUL) now pays half the gold: the late quests were paying far more than anything cost.
+   (2) Six super weapons, about 100,000 gold each, sold by Ysolde Vane, the Last Smith, in the Watch Nook on the ramparts (floor 5 of the Pale Spire). They are the best weapons in the game.
+   Ids pg_sw_1 to pg_sw_6; painted icons assets/icn_pg_sw_<n>.png.
+   ========================================================================== */
+function leHalve(id){const r=QUESTS[id]&&QUESTS[id].reward;if(r&&r.gold&&!r._half&&r.gold*QREW_MUL>=5000){r.gold=Math.round(r.gold/2);r._half=1}}
+for(const id of Object.keys(QUESTS))leHalve(id);
+/* quests added after this file loads, or changed by a later file, are caught when their reward is shown or paid */
+{const _rt=rewardText;rewardText=function(id){leHalve(id);return _rt.apply(this,arguments)}}
+{const _qt=qTurnIn;qTurnIn=function(id){leHalve(id);return _qt.apply(this,arguments)}}
+const LE_SUPER=[
+ ['pg_sw_1','Dawnbreaker Brand','Sword','sword','#e8c060',[1560,1760],{str:90},{bossdmg:.7,bleed:[.6,10,120],stun:.22,exec:[.4,4]},.26,.7,
+  "A tall greatsword of white gold with sunrise light running along the blade. Wounds bleed hard, a foe under 40% health takes four times the blow, about one blow in five knocks the foe down, one blow in four does double damage, and bosses take 70% more."],
+ ['pg_sw_2','Eclipse Cleaver','Axe','axe','#1a1624',[1620,1820],{str:90},{cleave:1,bossdmg:.75,exec:[.45,5],bleed:[.55,10,120]},.26,.8,
+  "A huge double-bladed axe, black as a new moon with a thin ring of light round its edge. Each blow carries on into the foe behind, a foe under 45% health takes five times the blow, wounds bleed hard, and bosses take 75% more."],
+ ['pg_sw_3','Starfall Maul','Mace','mace','#4a5a8a',[1540,1740],{str:90},{stun:.4,bossdmg:.7,shock:.35,vuln:[.4,6]},.24,.9,
+  "A war hammer with a head of dark meteoric iron set with points of cold light. About two blows in five knock the foe down, one in three shakes the ground and throws down every foe close by, a hit often leaves the foe open to harm, and bosses take 70% more."],
+ ['pg_sw_4','Whisper of the Last Hour','Dagger','dagger','#c8b8ff',[1480,1660],{dex:90},{bleed:[.7,12,120],exec:[.5,5],bossdmg:.55},.4,.3,
+  "A slim pale blade with fine sand trapped inside it that never stops falling. Wounds bleed very hard, a foe under half health takes five times the blow, double hits come often, and bosses take 55% more."],
+ ['pg_sw_5','Comet-Tail Longbow','Bow','bow','#a8d0ff',[1560,1760],{dex:90},{pierce:1,double:.6,vuln:[.4,6],bossdmg:.65},.24,.42,
+  "A tall bow of pale silver wood with a streak of blue-white light along the limbs. Shoots 7 squares, its arrows pass through to the foe behind, three shots in five send a second arrow, a hit often leaves the foe open to harm, and bosses take 65% more."],
+ ['pg_sw_6','Staff of the Unwritten Sky','Staff','staff','#e8d890',[520,620],{int:92},{bossdmg:.9,daze:.45,shock:.35},.0,.44,
+  "A tall pale-gold staff, topped by a floating ring that holds a slow swirl of night sky. Adds 420 to the power of spells, spell damage +35%, tiredness fades very fast, bosses take 90% more, and foes are often dazed."]
+].map(a=>{const o={n:a[1],t:a[2],ic:a[3],c:a[4],dmg:a[5],req:a[6],eff:a[7],dbl:a[8],sw:a[9],d:a[10],price:100000};
+  if(a[2]==='Staff'){o.magic=420;o.pas={spellPct:.35,mpRegen:2,regen:.8}}
+  return psf6Item(a[0],120,o)});
+for(const it of LE_SUPER)if(!it.dbl)delete it.dbl;
+if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push(...LE_SUPER.map(i=>i.id));
+khNpc('psf5_smith','Ysolde Vane, the Last Smith','ps_c_psservant',d=>say('"They call me the Last Smith, because I am the one still at the anvil. Nobody has asked me for a plain blade in years. The ones I make now are made from what the tower leaves behind: black iron, star metal, a little of the clock. They are not cheap. One hundred thousand gold each, and I do not haggle with the dead or the living."',
+  [['Show me the weapons',()=>{G.talk=null;openShop(d,LE_SUPER.map(i=>[i.id,1]),"The Last Smith's Anvil");return null}],BYE]),{sc:1});
 
 /* ---- src/desert/nt_look.js ---- */
 /* ==========================================================================

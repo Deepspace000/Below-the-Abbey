@@ -20,7 +20,7 @@ const PP_BONUS={ward:10,regen:1.2,secondWind:.5,dmgPct:.15,dodge:.08};
 CUTS.pilgrimDone=()=>[{text:'ACHIEVEMENT. You have completed the pilgrim’s path.'},{text:'Look for a reward in your backpack...'}];
 function ppReward(){
   const F=G.flags;if(F.lpAbbot)return;F.lpAbbot=1;G.gold+=1000;
-  for(const [id] of PP_SET){if(!bagAdd(mkItem(id)))G.items.push({k:id,x:G.P.x,y:G.P.y,taken:false})}
+  for(const [id] of PP_SET){if(!bagAdd(mkItem(id)))ovfStash(id)}
   msg('Achievement: You have completed the pilgrim’s path. Look for a reward in your backpack... (1000 gold and the armour of an abbot)','#ffe36a');sfx('win');
   startCut('pilgrimDone');
 }

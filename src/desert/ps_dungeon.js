@@ -575,7 +575,7 @@ psdQ('psq36','The Empty Frame','Wilhelmina Gaunt, court painter, in the Oubliett
 psdQ('psq37','Dawnwarden','Sir Edrik Stamford, in the Oubliette',[["Bring Sir Edrik's sword Dawnwarden from the rack in the Armoury (ground floor, west wing) to the Oubliette.",psdHas('psdawnwarden')]],{gold:12000,xp:70000,items:['psdawnsword']},{take:{psdawnwarden:1}});
 psdQ('psq38','The Cup for the Sovereign','Yseult Ardent, cupbearer, in the Oubliette',[["Bring three silver roses from the Rose Garden of the Court of Statues to Yseult Ardent in the Oubliette.",psdHas('psroses',3)]],{gold:11000,xp:65000,items:['psantidote']},{take:{psroses:3}});
 QNOTE.psq33='Down in the Deep Cells the water begins to drain, and for the first time in a year Mother Sedge has dry feet.';
-function psdGive(id,n){for(let i=0;i<n;i++){if(!bagAdd(mkItem(id)))G.items.push({k:id,x:G.P.x,y:G.P.y,taken:false})}}
+function psdGive(id,n){for(let i=0;i<n;i++){if(!bagAdd(mkItem(id)))ovfStash(id)}}
 /* the talk of a prisoner: first meeting, the offer, the reminder, the hand-in, the thanks. D = the texts. */
 function psdOffer(qid,D){return gySay(D.offer,[['We will help.',()=>{qAccept(qid);return gySay(D.accept,[BYE])}],['Not now.',()=>null]])}
 function psdHand(qid,D){return gySay(D.ready,[['Here you are.',()=>{const rw=rewardText(qid);qTurnIn(qid);if(D.done)D.done();return gySay(D.thanks+' (Reward: '+rw+'.)',[BYE])}],BYE])}
@@ -719,7 +719,7 @@ khNpc('psd_strongbox','The strongbox','ps_reliquary_chest',()=>{const F=psdF(),P
   if(P.key2||bagCount('pskey2'))return say('The strongbox stands open. On the grey velvet lies the print of a long key, and nothing else.',[BYE]);
   if(!F.hungerDead)return say('A black iron strongbox on a dais, chained to the floor. A faint violet light shines through the keyhole and the seams of the lid. The lid will not lift while the Hunger is alive.',[BYE]);
   return say('The chains fall away. In the strongbox, on grey velvet, lies a tall silver key with a violet stone in the bow, glowing very faintly.',[['Take the key.',()=>{
-    P.key2=true;if(!bagAdd(mkItem('pskey2')))G.items.push({k:'pskey2',x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false});
+    P.key2=true;if(!bagAdd(mkItem('pskey2')))ovfStash('pskey2');
     sfx('key');msg('You take the Second Floor Key. It opens the three stair doors to the second floor. Climb back up: the Grand Stair is at the north end of the Great Halls.','#ffe36a');
     try{if(qSt('psq10')==='active')msg('Journal: you have the key.','#ffe36a')}catch(e){}G.talk=null;return null}],BYE])});
 khNpc('psd_gaolerlog',"The Gaoler's log",'hl_p_note',()=>{try{pspClue(3)}catch(e){}return say("The Gaoler's log lies open on the table. The last page, in square handwriting: 'Dusk. The Sacristan's receipt for the upper keys, sent down to the oubliette with two guards. Locked in the strongbox on the dais, at the bottom of the pit, where nobody will climb for them. The Hunger sits on it. God help whoever wants them.'",[BYE])});

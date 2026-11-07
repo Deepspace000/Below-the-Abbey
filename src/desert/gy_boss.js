@@ -54,8 +54,8 @@ function gyBossDied(e){
   const k=ENEMY_DEF[e.t].gyb,F=gyF();if(F.dead[k])return;F.dead[k]=1;
   {const L=LEVELS[GY.M[k]],B=L&&L._gy&&L._gy.M&&L._gy.M.boss;   // the helpers go with him (also after a saved game, which does not remember who was a helper): nothing else lives in the boss room
    for(const q of G.enemies)if(q.hp>0&&(q.gyAdd||(B&&ENEMY_DEF[q.t].gyb===undefined&&q.x>=B.x0&&q.x<=B.x1&&q.y>=B.y0&&q.y<=B.y1))){q.hp=0;q.dying=.4}}
-  const [id,nm]=GY_GIVE[k];if(!bagAdd(mkItem(id)))G.items.push({k:id,x:e.x,y:e.y,taken:false});
-  for(const it of ['potion6','potion6','supermana']){if(!bagAdd(mkItem(it)))G.items.push({k:it,x:e.x,y:e.y,taken:false})}
+  const [id,nm]=GY_GIVE[k];if(!bagAdd(mkItem(id)))ovfStash(id);
+  for(const it of ['potion6','potion6','supermana']){if(!bagAdd(mkItem(it)))ovfStash(it)}
   msg('You have '+nm+'.','#ffe36a');sfx('win');
   later(1500,()=>{const nm=ENEMY_DEF[e.t].name;G.talk={d:{k:'gyi_'+['vane','grimsby','aldric','morwenna'][k],x:G.P.x,y:G.P.y,npc:'gyo_note'},n:{name:nm,root:()=>null},node:say(GY_LAST[k],[['Climb out of the dark.',()=>{gyReturn(k);return null}]]),t:G.time,btns:[]}})}
 function gyReturn(k){const d=GY_Y.doors[k],dy=d.y<35?1:-1;sfx('door');G.talk=null;goToLevel(GY.ID,{x:d.x,y:d.y+dy,f:d.y<35?2:0});

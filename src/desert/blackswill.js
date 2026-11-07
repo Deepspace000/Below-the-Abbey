@@ -147,7 +147,7 @@ function bswDied(e){
   const F=G.flags;if(F.bswDead)return;F.bswDead=1;
   for(const q of G.enemies)if(q.t==='bswslime'&&q.hp>0){q.hp=0;q.dying=.4}
   msg('The Black Swill is dead!','#ffd76a');
-  for(const id of ['bswmantle','potion6','potion6','potion6']){if(!bagAdd(mkItem(id)))G.items.push({k:id,x:e.x,y:e.y,taken:false})}
+  for(const id of ['bswmantle','potion6','potion6','potion6']){if(!bagAdd(mkItem(id)))ovfStash(id)}
   msg('In the slime where it fell lie a Swillhide Mantle and three potions.','#c8a0f0');
   later(1100,()=>startCut('bswDead',bswEnd))}
 function bswEnd(){

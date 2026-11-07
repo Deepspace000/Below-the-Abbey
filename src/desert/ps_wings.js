@@ -622,7 +622,7 @@ function pswTake(id,name,flag,item,before,after,btn,msgText){
   khNpc(id,name,'hl_p_note',d=>{const F=pswF();
     if(F[flag])return say(after,[BYE]);
     return say(before,[[btn,()=>{F[flag]=1;if(d){d.found=true;d.hidden=true;d.block=false}
-      if(item&&!bagAdd(mkItem(item)))G.items.push({k:item,x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false});
+      if(item&&!bagAdd(mkItem(item)))ovfStash(item);
       sfx('key');msg(msgText,'#ffe36a');G.talk=null;return null}],BYE])})}
 function pswApplyHidden(n){
   const F=pswF();if(!G.decor)return;
@@ -658,7 +658,7 @@ khNpc('psw_well','A wellhouse','hl_p_note',()=>say('A little wellhouse with a pi
 khNpc('psw_well2','The garth well','hl_p_note',()=>say('A stone well in the middle of the garth, with a lid of pale stone and a ring of ivy round the rim. A coin lies on the lid, a silver one, left for luck by somebody a long time ago.',[BYE]));
 khNpc('psw_font','The font','mi_font',()=>{const F=pswF();
   if(F.fontTaken)return say('The font holds clear water, still and cold. A small dove is carved in the middle of the bowl. You have already taken some.',[BYE]);
-  return say('The font is full of clear water, which is odd, because no rain reaches this room. A small dove is carved in the middle of the bowl.',[['Take a little water.',()=>{F.fontTaken=1;if(!bagAdd(mkItem('psfont')))G.items.push({k:'psfont',x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false});sfx('heal');msg('You take a vial of font water.','#c8e0f0');G.talk=null;return null}],BYE])});
+  return say('The font is full of clear water, which is odd, because no rain reaches this room. A small dove is carved in the middle of the bowl.',[['Take a little water.',()=>{F.fontTaken=1;if(!bagAdd(mkItem('psfont')))ovfStash('psfont');sfx('heal');msg('You take a vial of font water.','#c8e0f0');G.talk=null;return null}],BYE])});
 khNpc('psw_altar','The altar','mi_altar',()=>say('A plain stone altar with a white cloth, a cross and two candles that have never been lit. The cloth is clean. Something has been written in the dust on the step, and wiped away.',[BYE]));
 khNpc('psw_bed',"A narrow bed",'hgtb_furn_bed',()=>say('A narrow bed with clean sheets, warm in the candlelight. Nothing in this room means any harm. Rest here?',[['Rest, free.',()=>{G.talk=null;restParty(true);return null}],BYE]));
 khNpc('psw_bed2',"A pilgrim's bed",'hgtb_furn_bed',()=>say("A bed with a grey blanket, made up for any pilgrim who comes. A candle burns beside it. Rest here?",[['Rest, free.',()=>{G.talk=null;restParty(true);return null}],BYE]));
@@ -674,7 +674,7 @@ khNpc('psw_reliquary',"The Sacristan's reliquary",'wm_chest',()=>{const F=pswF()
   const alive=G.enemies&&G.enemies.some(e=>e.t==='pssacristan'&&e.hp>0);
   if(alive&&!F.sacristanDead)return say('A reliquary chest of pale wood with silver bands. The lid will not lift. Something that was a man stands guard over it, and he is watching you.',[BYE]);
   return say('The lid of the reliquary lifts. Inside, on a grey cloth, lies a small book bound in grey, and a purse of old gold. The book is the Sacristan\'s journal.',[['Take the journal and the gold.',()=>{
-    F.journalTaken=1;G.gold=(G.gold||0)+6000;try{if(!bagAdd(mkItem('potion6')))G.items.push({k:'potion6',x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false})}catch(e){}
+    F.journalTaken=1;G.gold=(G.gold||0)+6000;try{if(!bagAdd(mkItem('potion6')))ovfStash('potion6')}catch(e){}
     sfx('key');msg('You take the Sacristan\'s journal and 6,000 gold. The last entry reads: the upper keys were sent down with the guards to the oubliette, to be kept where nobody climbs.','#ffe36a');try{pspClue(3)}catch(e){}G.talk=null;return null}],BYE])});
 /* ---------- candles (psq23) ---------- */
 function pswCandle(i){

@@ -61,7 +61,7 @@ function wmDied(e){
   const F=wmF();if(F.bossDead)return;F.bossDead=1;
   msg('The Well-Warden is dead! His great body cracks along every seam, and the light in his chest goes out.','#ffd76a');
   for(const q of G.enemies)if(q.t==='wmgolem'&&q.hp>0&&q.wmSummoned){q.hp=0;q.dying=.4}
-  for(const id of ['wmblade','potion6','potion6','supermana']){if(!bagAdd(mkItem(id)))G.items.push({k:id,x:e.x,y:e.y,taken:false})}
+  for(const id of ['wmblade','potion6','potion6','supermana']){if(!bagAdd(mkItem(id)))ovfStash(id)}
   msg("In the glittering shards lie the Warden's Amethyst Edge and a few potions. The orb on the pedestal still glows.",'#d8b8ff')}
 {const _u=update;update=function(dt){try{if(wmIn()&&G.state==='play'){const F=G.flags.wm;
     if(F){if(F.bossDead&&G.enemies.some(e=>e.t==='wmwarden'&&e.hp>0))for(const e of G.enemies)if(e.t==='wmwarden'&&e.hp>0){e.hp=0;e.dying=0}

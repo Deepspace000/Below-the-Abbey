@@ -10,11 +10,11 @@
 const HS_BASE=3300;          // interior level numbers: HS_BASE + 3 * (town number) + size number (3300 to 3399 are free; 6000 to 6999 belong to Oldhaven, the quay, the Pilgrim's Path and the monastery, and 7100 and up are caves)
 const HS_SIZE_IDS=['small','medium','large'];
 const HS_SIZES={
-  small:{name:'Small House',price:20000,w:3,d:2,wh:2.0,sty:'cottage',roof:'kh_yroof3_1',roofW:.5,cap:40,
+  small:{name:'Small House',price:150000,w:3,d:2,wh:2.0,sty:'cottage',roof:'kh_yroof3_1',roofW:.5,cap:40,
     blurb:'One cosy room with a hearth, a bed, a table and a chest. Four places for furniture and two for trophies.',slotsD:4,slotsT:2},
-  medium:{name:'Medium House',price:40000,w:4,d:3,wh:2.4,sty:'timber',roof:'kh_ohroof1_2',roofW:.5,cap:80,
+  medium:{name:'Medium House',price:400000,w:4,d:3,wh:2.4,sty:'timber',roof:'kh_ohroof1_2',roofW:.5,cap:80,
     blurb:'Two rooms: a living room with a hearth and a table, and a bedroom. Eight places for furniture and six for trophies.',slotsD:8,slotsT:6},
-  large:{name:'Large Mansion',price:100000,w:6,d:4,wh:3.0,sty:'golden',roof:'kh_ohroof1_5',roofW:.8,cap:160,
+  large:{name:'Large Mansion',price:1000000,w:6,d:4,wh:3.0,sty:'golden',roof:'kh_ohroof1_5',roofW:.8,cap:160,
     blurb:'A great hall, two wings, and a long trophy hall that shows every boss the party has beaten. Fourteen places for furniture.',slotsD:14,slotsT:67}
 };
 /* The towns. sizes: what the agent sells (a town can sell fewer: Thornwick has only the small house). agent: where he stands, and a free cell for the office board. plots: one per size sold (x0,y0,w,d is the

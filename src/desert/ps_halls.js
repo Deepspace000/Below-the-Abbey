@@ -762,7 +762,7 @@ function pshGhostTick(dt){
 }
 {const _u=update;update=function(dt){const r=_u.apply(this,arguments);try{if(pshIs(LEVEL)&&G&&G.state==='play')pshGhostTick(dt)}catch(e){console.error('psh ghosts',e)}return r}}
 /* ---------- helpers ---------- */
-function pshGive(item){if(!bagAdd(mkItem(item)))G.items.push({k:item,x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false})}
+function pshGive(item){if(!bagAdd(mkItem(item)))ovfStash(item)}
 function pshDismiss(pred){let n=0;for(const e of G.enemies||[])if(e.hp>0&&!e.dying&&pred(e)){e.hp=0;e.dying=.55;n++}return n}
 function pshTake(id,name,pic,flag,item,before,after,btn,done){
   khNpc(id,name,pic,d=>{const F=pshF();if(F[flag])return say(after,[BYE]);

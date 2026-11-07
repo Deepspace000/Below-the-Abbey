@@ -182,7 +182,7 @@ yrHook('blc_saint',d=>{const F=blF();
 khNpc('blc_pauper',"A pauper's niche",'gy_rune',d=>{
   const F=blF();
   if(F.bowl||F.bowlGiven)return say('A plain niche in the wall, with a small bowl cut over the opening. The shelf inside is empty, and swept.',[BYE]);
-  return say('Under the stair, behind the last of the great sarcophagi, a plain niche is let into the wall, with a small bowl cut over the opening. The stone shelf inside is bare, and a flat slab stands before it, with a loose edge.',[['Lift the slab.',()=>{F.bowl=1;if(!bagAdd(mkItem('blalmsbowl')))G.items.push({k:'blalmsbowl',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg('You take the Hollow Saint\'s alms bowl.','#ffe36a');return null}],BYE])});
+  return say('Under the stair, behind the last of the great sarcophagi, a plain niche is let into the wall, with a small bowl cut over the opening. The stone shelf inside is bare, and a flat slab stands before it, with a loose edge.',[['Lift the slab.',()=>{F.bowl=1;if(!bagAdd(mkItem('blalmsbowl')))ovfStash('blalmsbowl');sfx('key');msg('You take the Hollow Saint\'s alms bowl.','#ffe36a');return null}],BYE])});
 khNpc('blc_cof0','A stone coffin','gy_coffin',()=>say('A plain stone coffin. The lid is carved with a hood and has no name. One edge is rubbed smooth, where people have rested a hand on it while going past.',[BYE]));
 khNpc('blc_cof1','A stone coffin','gy_coffin',()=>say('A coffin with its lid pushed a handbreadth off. Inside there is only a folded grey cloth, and a smell of candle smoke.',[BYE]));
 khNpc('blc_cof2','A stone coffin','gy_coffin',()=>say('A coffin with a small mitten set on the lid, and a bunch of dried reeds. Somebody still comes down here.',[BYE]));

@@ -135,7 +135,7 @@ khNpc('vto_shelf1','A bookcase with a red eye','hl_p_shelf',d=>{const F=vtF();
 khNpc('vto_cage','An iron cage','hl_p_cage',()=>gySay("An iron cage, empty but for a tin cup and a rag. Somebody has scratched a calendar on the bars, and given up at nineteen.",[BYE]));
 khNpc('vto_fenn','Private Tam Fenn, of the Oldhaven garrison','kh_ohsold1_1',()=>{const F=vtF(),g=!F.fennGift;
   const t=g?"A soldier is crouched in the corner of the cell with a sword across his knees. 'Quiet,' he whispers. 'Quiet. I am Private Fenn, of Hale's patrol. The sergeant sent six of us in, and I am the only one who got as far as this room, and that is only because I hid. The Warden at the bottom wears a pale key round his neck. And the passage before it has plates on the sides. Walk down the middle.' He presses a flask into your hand. 'It was my mother's. Please. Take it.'":"'Walk down the middle,' Fenn says. 'The passage to the Warden. Down the middle. And whatever you do, do not open the Ring in the wrong order. I did not do it myself. I heard about it.'";
-  if(g){F.fennGift=1;if(!bagAdd(mkItem('potion6')))G.items.push({k:'potion6',x:G.P.x,y:G.P.y,taken:false})}
+  if(g){F.fennGift=1;if(!bagAdd(mkItem('potion6')))ovfStash('potion6')}
   return gySay(t,[BYE])});
 khNpc('vto_sarc','A sarcophagus','gy_sarc',d=>gySay(VT_SARC[vtI(d)%VT_SARC.length],[BYE]));
 khNpc('vto_altar','The altar of Underhill','gy_altar',()=>gySay("A plain altar of grey stone, with a bowl on it, and in the bowl a handful of grey earth from every grave in the village, mixed. It is the oldest thing here, and the only thing in the Vault that has not been touched by the silver.",[BYE]));
@@ -212,8 +212,8 @@ function vtMaldrakeFree(){
   const F=vtF();if(F.freed)return;F.freed=1;F.gotKey=1;F.fight=F.fight||0;G.talk=null;bagRemove('vtcontract',1);
   if(AC&&!G.mute){tone(880,220,1.4,'sine',.08,0);tone(1320,330,1.2,'sine',.04,.1);nz(.8,.01,'bandpass',2000,400,0)}
   G.shake=.6;msg('The silver ring breaks across, with a sound like a dropped glass. Far above you, a bell stops.','#cfe0ff');sfx('win');
-  for(const it of ['vtgatekey','vtring2','vtbroken'])if(!bagAdd(mkItem(it)))G.items.push({k:it,x:G.P.x,y:G.P.y,taken:false});
-  for(const it of ['potion6','potion6','supermana','supermana','elixir'])if(!bagAdd(mkItem(it)))G.items.push({k:it,x:G.P.x,y:G.P.y,taken:false});
+  for(const it of ['vtgatekey','vtring2','vtbroken'])if(!bagAdd(mkItem(it)))ovfStash(it);
+  for(const it of ['potion6','potion6','supermana','supermana','elixir'])if(!bagAdd(mkItem(it)))ovfStash(it);
   try{for(const h of G.heroes){h.learned=h.learned||[];if(!h.learned.includes('vtquiet'))h.learned.push('vtquiet')}msg('Maldrake teaches the party Quiet the Dead. It joins the power page of every hero.','#ffe9a0')}catch(e){console.error(e)}
   G.gold+=10000;giveXP(60000);msg('You have the Gate Key of Sale, and 10,000 gold.','#ffe36a');
   vtMaldrakeVanish();

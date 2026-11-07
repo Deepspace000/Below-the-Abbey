@@ -38,7 +38,7 @@ ENEMY_DEF.blmaw.act=e=>gyBossAct(e,{moves:[
   {every:5,all:true,mult:.5,txt:'The Road-Maw heaves, and a foul grey slurry full of buttons and bone breaks over the whole party.',col:'#b8c890',verb:'Slurry burns'},
   {every:3,mult:1.15,near:2,affl:'foodpoison',txt:'The Road-Maw gulps at the nearest hero, and the great jaws close like a gate.',col:'#c8d8a0',verb:'The jaws crush'}]});
 {const _h=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;const r=_h.apply(this,arguments);
-  try{if(was&&e.hp<=0&&e.t==='blmaw'){const F=blrF();if(!F.maw){F.maw=1;F.mawFlag=1;if(!bagAdd(mkItem('blpatrolflag')))G.items.push({k:'blpatrolflag',x:Math.round(e.x),y:Math.round(e.y),taken:false});msg('The Road-Maw collapses into a heap of black earth. In it lies a torn blue flag, still rolled on its staff. You take it.','#ffe36a');sfx('win')}}}catch(x){console.error(x)}
+  try{if(was&&e.hp<=0&&e.t==='blmaw'){const F=blrF();if(!F.maw){F.maw=1;F.mawFlag=1;if(!bagAdd(mkItem('blpatrolflag')))ovfStash('blpatrolflag');msg('The Road-Maw collapses into a heap of black earth. In it lies a torn blue flag, still rolled on its staff. You take it.','#ffe36a');sfx('win')}}}catch(x){console.error(x)}
   return r}}
 /* ---------- art: tents, stocks, a stew pot, banners (filters over the painted Wenlock and witch wood pieces) ---------- */
 function blrArt(){
@@ -245,12 +245,12 @@ khNpc('blr_wagon','A burnt supply wagon','wl_prop1_5',d=>{
   const F=blrF();
   if(F.oil||F.beaconLit)return say('The burnt wagon sits on its axle, with the tarpaulin gone to ash. The oil barrel is gone from the back.',[BYE]);
   if(qSt('blq59')!=='active')return say('A supply wagon, burnt black, with two spokes left in one wheel. A barrel lies on its side in the ashes. A soldier’s tabard is still caught in the wheel, and the colour of it has run.',[BYE]);
-  return say('A supply wagon, burnt black, with two spokes left in one wheel. A small barrel lies on its side in the ashes, and it has not burnt. It is sealed, and it sloshes. The label says LAMP OIL, FOR THE BEACON, LANTERNREST.',[['Take the cask of lamp oil.',()=>{F.oil=1;if(!bagAdd(mkItem('bloil')))G.items.push({k:'bloil',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg('You take the cask of lamp oil.','#ffe36a');return null}],BYE])});
+  return say('A supply wagon, burnt black, with two spokes left in one wheel. A small barrel lies on its side in the ashes, and it has not burnt. It is sealed, and it sloshes. The label says LAMP OIL, FOR THE BEACON, LANTERNREST.',[['Take the cask of lamp oil.',()=>{F.oil=1;if(!bagAdd(mkItem('bloil')))ovfStash('bloil');sfx('key');msg('You take the cask of lamp oil.','#ffe36a');return null}],BYE])});
 khNpc('blr_camp','A ruined patrol camp','gy_chest',d=>{
   const F=blrF();
   if(F.flint||F.beaconLit)return say('The ruined camp: three collapsed tents, a cold fire, a row of grey bones in blankets. The oilcloth bundle is gone from the chest.',[BYE]);
   if(qSt('blq59')!=='active')return say('A ruined patrol camp: three collapsed tents, a cold fire ring, and a row of grey bones under blankets, laid out neatly by someone who survived long enough to do it. A small chest stands by the fire.',[BYE]);
-  return say('A ruined patrol camp: three collapsed tents, a cold fire ring, and a row of grey bones under blankets, laid out neatly by someone who survived long enough to do it. A small chest stands by the fire, with a bundle of oilcloth on top.',[['Take the oilcloth bundle.',()=>{F.flint=1;if(!bagAdd(mkItem('blflint')))G.items.push({k:'blflint',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg('You take the flint and steel.','#ffe36a');return null}],BYE])});
+  return say('A ruined patrol camp: three collapsed tents, a cold fire ring, and a row of grey bones under blankets, laid out neatly by someone who survived long enough to do it. A small chest stands by the fire, with a bundle of oilcloth on top.',[['Take the oilcloth bundle.',()=>{F.flint=1;if(!bagAdd(mkItem('blflint')))ovfStash('blflint');sfx('key');msg('You take the flint and steel.','#ffe36a');return null}],BYE])});
 khNpc('blr_beacon','The beacon','hearth',d=>{
   const F=blrF();
   if(F.beaconLit)return say('The beacon burns in its iron cresset, a column of clean gold fire, and the Beacon Room is as bright as noon. Through the arrow slit you can see the whole road, west to the hills and east towards the orchard.',[BYE]);

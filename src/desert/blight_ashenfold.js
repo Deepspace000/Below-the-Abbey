@@ -89,7 +89,7 @@ khNpc('bla_cellardoor','A trapdoor','gy_hatch2',()=>say('A trapdoor in the kitch
 khNpc('bla_ringspot','Turned earth','gy_mound',()=>{
   const F=blF();
   if(F.ring||F.ringGiven)return say('The furrow is dug up where you took the ring. Nothing else is here.',[BYE]);
-  return say('The long furrow ends at an old stone. The earth at its foot has been turned over once, long ago, and a thin edge of gold shows in it.',[['Dig.',()=>{F.ring=1;if(!bagAdd(mkItem('blring')))G.items.push({k:'blring',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg("You dig up Wilf Sedge's wedding ring.",'#ffe36a');return null}],BYE])});
+  return say('The long furrow ends at an old stone. The earth at its foot has been turned over once, long ago, and a thin edge of gold shows in it.',[['Dig.',()=>{F.ring=1;if(!bagAdd(mkItem('blring')))ovfStash('blring');sfx('key');msg("You dig up Wilf Sedge's wedding ring.",'#ffe36a');return null}],BYE])});
 /* Wilf, with the ring in the bag, gets a branch of his own */
 yrHook('bla_wilf',d=>{const F=blF();
   if(F.ring&&!F.ringGiven&&bagCount('blring')>0)return say('Farmer Wilf sits at the head of the table with his hand flat on the cloth, as if waiting. His fingers are bare.',[['Put the ring on his finger.',()=>{bagRemove('blring',1);F.ringGiven=1;sfx('win');msg('Wilf Sedge looks at his hand for a long time.','#ffe9a0');return say('He turns the ring once, with his thumb. "There," he says, in a perfectly ordinary voice. "That was it." He takes his wife’s hand, and does not say anything else.',[BYE])}],BYE]);
@@ -105,7 +105,7 @@ khNpc('bla_sign_farm','A farm signpost','greensign',()=>say('A signpost at the e
 khNpc('bla_pigs','A pig sty','bl_fence',()=>say('A sty with a low roof. The pigs are gone. The mud inside is deeply trodden, in a ring, as if something walked round and round all night.',[BYE]));
 /* the hearth in the kitchen and the cellar door are decor; the heart drops when the great scarecrow dies */
 {const _h=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;const r=_h.apply(this,arguments);
-  try{if(was&&e.hp<=0&&e.t==='blscarebig'){const F=blF();if(!F.heart&&!F.heartBurnt){F.heart=1;if(!bagAdd(mkItem('blheart')))G.items.push({k:'blheart',x:Math.round(e.x),y:Math.round(e.y),taken:false});msg('A pale silver heart falls out of the straw. You take it.','#ffe36a');sfx('win')}}}catch(x){console.error(x)}
+  try{if(was&&e.hp<=0&&e.t==='blscarebig'){const F=blF();if(!F.heart&&!F.heartBurnt){F.heart=1;if(!bagAdd(mkItem('blheart')))ovfStash('blheart');msg('A pale silver heart falls out of the straw. You take it.','#ffe36a');sfx('win')}}}catch(x){console.error(x)}
   return r}}
 /* ---------- the level ---------- */
 function blaBuild(p){

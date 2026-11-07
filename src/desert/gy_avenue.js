@@ -47,7 +47,7 @@ KH_LAZY[GY_AV.ID]=gyAvenueBuild;
 CUTS.avenueDone=()=>[{text:'ACHIEVEMENT. You have cleansed the Avenue of Vaults.'},{text:'Something has been left on the last sarcophagus: a long grey blade, for those who laid the dead to rest. Look in your backpack...'}];
 function gyAvenueReward(){
   const F=G.flags;if(F.gyAvenue)return;F.gyAvenue=1;G.gold+=12000;try{giveXP(90000)}catch(e){console.error(e)}
-  if(!bagAdd(mkItem('gyavenue')))G.items.push({k:'gyavenue',x:G.P.x,y:G.P.y,taken:false});
+  if(!bagAdd(mkItem('gyavenue')))ovfStash('gyavenue');
   msg('Achievement: Cleansed the Avenue of Vaults. 12,000 gold, a great deal of experience, and Vaultbreaker, a level 88 sword.','#ffe36a');sfx('win');startCut('avenueDone')}
 {const _u=update;update=function(dt){const r=_u.apply(this,arguments);
   try{if(LEVEL===GY_AV.ID&&G.state==='play'&&!G.cut&&!G.talk&&G.flags&&!G.flags.gyAvenue&&G.enemies&&G.enemies.every(e=>e.hp<=0)&&(G._gyAvT=(G._gyAvT||0)+dt)>1.5){G._gyAvT=0;gyAvenueReward()}else if(LEVEL!==GY_AV.ID)G._gyAvT=0}catch(e){console.error(e)}

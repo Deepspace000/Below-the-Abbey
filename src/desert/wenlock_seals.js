@@ -40,7 +40,7 @@ const wsLying=n=>(G.items||[]).some(i=>i&&!i.taken&&i.k===WSD[n].item);
 /* the seal is handed over: into the bag (or onto the floor if the bag is full), and the quest of that seal is done */
 function wsGive(n,from){
   const D=WSD[n],S=wsF();
-  if(!bagAdd(mkItem(D.item)))G.items.push({k:D.item,x:G.P.x,y:G.P.y,taken:false});
+  if(!bagAdd(mkItem(D.item)))ovfStash(D.item);
   S.got[n]=1;
   msg(from?from:'You have the '+D.name+'.','#ffe36a');sfx('win');
   wsSync()}

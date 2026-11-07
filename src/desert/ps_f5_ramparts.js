@@ -65,6 +65,7 @@ function psf5Build(info){
   /* a watch nook in the south-west corner: bed, chest, and nothing from the floor comes in */
   pspRest(C,{x0:9,y0:50,x1:15,y1:55,bed:[11,52],chest:[14,54],name:'The Watch Nook',line:'A lean-to against the parapet, with a narrow bed, a brass lamp and a stove. Warm candles burn here, and nothing from the floor can come in.'});
   pspSafeRect(C,9,50,15,55);pspSafeRect(C,27,50,37,57);
+  C.person('psf5_smith',13,51,1);
   /* the creatures: statues that wake beside the stair, and the walkers of the ramparts */
   pspStatueWake(C,'psgargoyle',30,43);pspStatueWake(C,'psgargoyle',34,43);
   const foes=['psgargoyle','pswraith','psstarwraith','psmirrorshade','psfiend','pssentinel'];

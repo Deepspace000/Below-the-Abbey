@@ -96,7 +96,7 @@ function pgrHas(id){
   if(bagCount(id)>0)return true;
   for(const h of G.heroes||[])if(h&&h.eq)for(const k in h.eq)if(h.eq[k]&&h.eq[k].id===id)return true;
   return false}
-function pgrPut(id){if(!bagAdd(mkItem(id)))G.items.push({k:id,x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false})}
+function pgrPut(id){if(!bagAdd(mkItem(id)))ovfStash(id)}
 /* give a piece once; false if it was given before */
 function pgrGive(id,line){
   const F=pgrF();if(F.got[id]||!ITEMDEF[id])return false;

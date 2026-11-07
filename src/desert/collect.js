@@ -74,7 +74,7 @@ function canDigHere(){
   const c=(L.rows[y]||'')[x];return c==='.'||c===undefined;
 }
 function digReward(sh){
-  const F=G.flags,L=LEVELS[LEVEL],pl=partyLevel(),r=Math.random(),give=id=>{if(!bagAdd(mkItem(id))){G.items.push({k:id,x:G.P.x,y:G.P.y,taken:false});msg('Your bag is full: it lies on the ground.','#d09a80')}try{collFound(id)}catch(e){}};
+  const F=G.flags,L=LEVELS[LEVEL],pl=partyLevel(),r=Math.random(),give=id=>{if(!bagAdd(mkItem(id))){ovfStash(id);msg('Your bag is full: it goes into your overflow.','#d09a80')}try{collFound(id)}catch(e){}};
   if(r<.34){const g=10+Math.floor(Math.random()*21);G.gold+=g;{const T=collData('treasure');T._gold=(T._gold||0)+g;const o=T.coins||(T.coins={f:0,s:0,g:0});o.f++}msg(`Under the dirt: ${g} gold coins.`,'#ffe36a');sfx('key');return}
   if(r<.54){const gem=GEM_BY_VALUE[Math.min(39,Math.floor(Math.pow(Math.random(),1.4)*40))];give('gem_'+gem[0]);msg(`A glint in the dirt: a ${gem[1]}!`,'#a8e8ff');sfx('level');return}
   if(r<.62){give('odd_boot');msg('You dig up an old boot.','#c8b898');return}

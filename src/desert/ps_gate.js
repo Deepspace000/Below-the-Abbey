@@ -488,17 +488,17 @@ function psgPorterTalk(){
     ['Who holds the gatehouse?',()=>say("The pale guards, and the halberdiers, and the archers in the slits. They were soldiers once. Now they stand where they stand and do what they did, and the Gate Captain is the worst of them, because he remembers his orders best. He keeps the passage. The two guardrooms open off it, and the stair in the east one goes up to the winch loft, where the portcullis chains are. There is a dead man in the loft who was a Road Warden. I have not had the heart to move him.",[['Back.',back],BYE])],
     [F.sketch?'About that sketch.':'Do you know the way?',()=>{
       if(F.sketch)return say("It is the best I can do. The gatehouse is the bottom of the page. Do not trust the upper floors, I have never seen them.",[['Back.',back],BYE]);
-      F.sketch=1;if(!bagAdd(mkItem('pssketch')))G.items.push({k:'pssketch',x:G.P.x,y:G.P.y,taken:false});
+      F.sketch=1;if(!bagAdd(mkItem('pssketch')))ovfStash('pssketch');
       sfx('key');return say("I know the ground floor, from thirty years of carrying messages. I have drawn it for you on a page of the ledger. Take it. It shows which wing is which, and where the stairs go down.",[['Back.',back],BYE])}],
     BYE])}
 khNpc('psg_horn',"The Warden's Horn",'gy_bell',d=>{const F=psgF();
   if(F.horn)return say('The place on the table where the horn lay.',[BYE]);
-  return say("A long horn of dull horn and tarnished silver lies on the table, beside the bones of the man who carried it. He wore the grey cloak of a Road Warden, and the cloak is still on the chair. The horn is his.",[['Take the horn.',()=>{F.horn=1;if(d){d.found=true;d.hidden=true}if(!bagAdd(mkItem('pshorn')))G.items.push({k:'pshorn',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg("You take the Warden's Horn.",'#ffe36a');return null}],BYE])});
+  return say("A long horn of dull horn and tarnished silver lies on the table, beside the bones of the man who carried it. He wore the grey cloak of a Road Warden, and the cloak is still on the chair. The horn is his.",[['Take the horn.',()=>{F.horn=1;if(d){d.found=true;d.hidden=true}if(!bagAdd(mkItem('pshorn')))ovfStash('pshorn');sfx('key');msg("You take the Warden's Horn.",'#ffe36a');return null}],BYE])});
 bl3Hide(9722,'psg_horn',()=>!!psgF().horn);
 for(let i=0;i<9;i++){const bit=1<<i;
   khNpc('psg_tok'+i,(PSG_TOK_NAMES[i][0].toUpperCase()+PSG_TOK_NAMES[i].slice(1)),'gy_ring',d=>{const F=psgF();
     if((F.tok|0)&bit)return say('Nothing here now.',[BYE]);
-    return say('Lying in the dirt is '+PSG_TOK_NAMES[i]+'. It was left for luck on the way to the Pale Spire.',[["Pick it up.",()=>{F.tok=(F.tok|0)|bit;if(d){d.found=true;d.hidden=true}if(!bagAdd(mkItem('pstoken')))G.items.push({k:'pstoken',x:G.P.x,y:G.P.y,taken:false});
+    return say('Lying in the dirt is '+PSG_TOK_NAMES[i]+'. It was left for luck on the way to the Pale Spire.',[["Pick it up.",()=>{F.tok=(F.tok|0)|bit;if(d){d.found=true;d.hidden=true}if(!bagAdd(mkItem('pstoken')))ovfStash('pstoken');
       sfx('key');msg("You pick up a pilgrim's token ("+psgTok()+' of 9).','#ffe36a');if(qSt('psq1')==='active')yrStep("You have "+bagCount('pstoken')+' of the nine tokens.');return null}],BYE])});
   bl3Hide(9720,'psg_tok'+i,()=>!!((psgF().tok|0)&bit))}
 khNpc('psg_cairn','A cairn of pilgrims\' offerings','bl_stone1',()=>{

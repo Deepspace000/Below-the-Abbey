@@ -23,7 +23,7 @@ function bl3Take(id,name,pic,flag,item,before,after,btn,msgText,extra){
   khNpc(id,name,pic,d=>{const F=blF();
     if(F[flag])return say(after,[BYE]);
     return say(before,[[btn,()=>{F[flag]=1;if(d){d.found=true;d.hidden=true}
-      if(item&&!bagAdd(mkItem(item)))G.items.push({k:item,x:G.P.x,y:G.P.y,taken:false});
+      if(item&&!bagAdd(mkItem(item)))ovfStash(item);
       if(extra)try{extra(F)}catch(e){console.error(e)}
       sfx('key');msg(msgText,'#ffe36a');return null}],BYE])});return id}
 function bl3Kill(t,fn){BL3.kill[t]=fn}
@@ -42,7 +42,7 @@ function bl3Prop(C,n,x,y,o){try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{
 /* every hero heals (shrines, bells, thanks) */
 function bl3Heal(){try{G.heroes.forEach(h=>{if(h.alive){h.hp=h.max;h.mp=h.mpMax}})}catch(e){}}
 /* put an item in the bag, or on the ground if the bag is full */
-function bl3Give(item){if(!bagAdd(mkItem(item)))G.items.push({k:item,x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false})}
+function bl3Give(item){if(!bagAdd(mkItem(item)))ovfStash(item)}
 /* a cell near (x,y) free of creatures, for a creature that is added while playing */
 function bl3Near(x,y,r){const L=LEVELS[LEVEL],W=L.rows[0].length;
   const bs=new Set(G.decor.filter(d=>d.block&&!d.found).map(d=>d.x+','+d.y));

@@ -64,7 +64,7 @@ function hgvzTold(){
     if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push(line);if(typeof HGDK_SAY!=='undefined')HGDK_SAY.push(line)}}
 function hgvzGive(rw){
   const got={};
-  for(const id of rw.items||[]){const d=ITEMDEF[id];if(!d)continue;let nm=d.n;if(bagAdd(mkItem(id)));else{G.items.push({k:id,x:G.P.x,y:G.P.y,taken:false});nm+=' (on the floor)'}got[nm]=(got[nm]||0)+1}
+  for(const id of rw.items||[]){const d=ITEMDEF[id];if(!d)continue;let nm=d.n;if(bagAdd(mkItem(id)));else{ovfStash(id);nm+=' (on the floor)'}got[nm]=(got[nm]||0)+1}
   const parts=Object.keys(got).map(k=>got[k]>1?k+' x'+got[k]:k);
   if(rw.gold){G.gold+=rw.gold;parts.push(rw.gold+' gold')}
   if(rw.xp&&typeof giveXP==='function')giveXP(rw.xp);

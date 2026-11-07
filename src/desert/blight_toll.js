@@ -71,15 +71,15 @@ khNpc('blt_ledger',"The Wardens' ledger",'gy_book',d=>{
   const F=bltF();
   if(F.ledger&&!F.ledgerDone&&!bagCount('blledger'))return say('The desk is bare where the ledger lay. If you have lost it, there is nothing more here.',[BYE]);
   if(F.ledger)return say('The desk is bare, apart from rings of damp where cups were put down.',[BYE]);
-  return say("A long ledger lies open on the desk. Each line is a day, a weight of pale silver, and the words PAID BY THE SOVEREIGN'S CLERK. The last page is a copy of an order: THE GATE OF WENLOCK TO BE SHUT, THE SEALS SET. SILVER FOR THE VAULT OF MALDRAKE, THIRTY YEARS IN ADVANCE. The dead warden at the desk does not stop you.",[['Take the ledger.',()=>{F.ledger=1;if(!bagAdd(mkItem('blledger')))G.items.push({k:'blledger',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg("You take the Wardens' ledger.",'#ffe36a');return null}],BYE])});
+  return say("A long ledger lies open on the desk. Each line is a day, a weight of pale silver, and the words PAID BY THE SOVEREIGN'S CLERK. The last page is a copy of an order: THE GATE OF WENLOCK TO BE SHUT, THE SEALS SET. SILVER FOR THE VAULT OF MALDRAKE, THIRTY YEARS IN ADVANCE. The dead warden at the desk does not stop you.",[['Take the ledger.',()=>{F.ledger=1;if(!bagAdd(mkItem('blledger')))ovfStash('blledger');sfx('key');msg("You take the Wardens' ledger.",'#ffe36a');return null}],BYE])});
 khNpc('blt_deadwarden','A dead warden','gy_skel',d=>{
   const F=bltF();
-  if(!F.candle&&!F.shrineLit)return say('A Road Warden in a grey tabard sits at the desk with his hands on the wood. He has been dead a long time and has not noticed. A stub of white candle is stuck in his belt, with a shrine stamp on its foot.',[['Take the candle.',()=>{F.candle=1;if(!bagAdd(mkItem('blcandle')))G.items.push({k:'blcandle',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg('You take the white shrine candle.','#ffe36a');return null}],BYE]);
+  if(!F.candle&&!F.shrineLit)return say('A Road Warden in a grey tabard sits at the desk with his hands on the wood. He has been dead a long time and has not noticed. A stub of white candle is stuck in his belt, with a shrine stamp on its foot.',[['Take the candle.',()=>{F.candle=1;if(!bagAdd(mkItem('blcandle')))ovfStash('blcandle');sfx('key');msg('You take the white shrine candle.','#ffe36a');return null}],BYE]);
   return say('The dead warden sits at the desk with his hands on the wood. He does not look up. His belt is empty now.',[BYE])});
 khNpc('blt_sealchest','A strongbox','gy_chest',d=>{
   const F=bltF();
   if(F.chest)return say('The strongbox is open and empty, except for grey wax dust.',[BYE]);
-  return say('An iron strongbox with the toll bar stamped on its lid. It is not locked. Inside are ledger slips, a few coins, and a lump of grey wax stamped with a small pale silver mark.',[['Take what is in it.',()=>{F.chest=1;G.gold+=900;if(!bagAdd(mkItem('blwaxseal')))G.items.push({k:'blwaxseal',x:G.P.x,y:G.P.y,taken:false});sfx('win');msg('You take 900 gold and a pale silver wax seal.','#ffe36a');return null}],BYE])});
+  return say('An iron strongbox with the toll bar stamped on its lid. It is not locked. Inside are ledger slips, a few coins, and a lump of grey wax stamped with a small pale silver mark.',[['Take what is in it.',()=>{F.chest=1;G.gold+=900;if(!bagAdd(mkItem('blwaxseal')))ovfStash('blwaxseal');sfx('win');msg('You take 900 gold and a pale silver wax seal.','#ffe36a');return null}],BYE])});
 function bltShrine(){
   const F=bltF();
   if(F.shrineLit)return say('The white candle burns steadily on the shrine of the Hollow Saint. The air near it is warm and smells of wax. The crows do not come within a stone’s throw.',[BYE]);

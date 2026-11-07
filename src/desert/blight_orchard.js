@@ -140,7 +140,7 @@ const BO_REMAINS=[
 BO_REMAINS.forEach((r,i)=>khNpc('bo_rem'+i,r[0],'gy_bones',d=>{
   const F=boF();F.crestTaken=F.crestTaken||{};
   if(F.crestTaken[i])return say(r[0]+' lies in his place on the slab, with his collar bare. Somebody has closed his eyes.',[BYE]);
-  return say(r[1],[['Take the crest.',()=>{F.crestTaken[i]=1;F.crests=(F.crests|0)+1;if(!bagAdd(mkItem('blcrest')))G.items.push({k:'blcrest',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg('You take the crest of '+r[0]+' ('+F.crests+' of 3).','#ffe36a');return null}],BYE])}));
+  return say(r[1],[['Take the crest.',()=>{F.crestTaken[i]=1;F.crests=(F.crests|0)+1;if(!bagAdd(mkItem('blcrest')))ovfStash('blcrest');sfx('key');msg('You take the crest of '+r[0]+' ('+F.crests+' of 3).','#ffe36a');return null}],BYE])}));
 khNpc('bo_bell','The harvest bell','bo_bell',()=>{
   const F=boF();
   if(F.bell)return say('The harvest bell lies in three pieces on the trampled grass. It has a dull sound now, a flat clack, when the wind moves it.',[BYE]);
@@ -156,12 +156,12 @@ khNpc('bo_mallet','Bartle’s mallet','coopstack',()=>{
   const F=boF();
   if(F.mallet||F.bell)return say('The nail by the door where the mallet hung is empty.',[BYE]);
   if(qSt('blq52')!=='active')return say('A long oak mallet hangs by the cellar door, on a nail. It has been used a great deal.',[BYE]);
-  return say('A long oak mallet hangs by the cellar door, on a nail.',[['Take the mallet.',()=>{F.mallet=1;if(!bagAdd(mkItem('blmallet')))G.items.push({k:'blmallet',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg("You take Bartle's cellar mallet.",'#ffe36a');return null}],BYE])});
+  return say('A long oak mallet hangs by the cellar door, on a nail.',[['Take the mallet.',()=>{F.mallet=1;if(!bagAdd(mkItem('blmallet')))ovfStash('blmallet');sfx('key');msg("You take Bartle's cellar mallet.",'#ffe36a');return null}],BYE])});
 khNpc('bo_cask','A sealed cask','barrel',()=>{
   const F=boF();
   if(F.cask||F.caskGiven)return say('The rack where the good cask stood is empty, with a clean ring in the dust.',[BYE]);
   if(qSt('blq53')!=='active')return say('A single small cask stands on its own rack, with a wax seal over the bung and a ribbon round it. It has been put by for somebody.',[BYE]);
-  return say('A single small cask stands on its own rack, with a wax seal over the bung and a ribbon round it. It has been put by for somebody.',[['Take the cask.',()=>{F.cask=1;if(!bagAdd(mkItem('blcask')))G.items.push({k:'blcask',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg('You take the sealed cask.','#ffe36a');return null}],BYE])});
+  return say('A single small cask stands on its own rack, with a wax seal over the bung and a ribbon round it. It has been put by for somebody.',[['Take the cask.',()=>{F.cask=1;if(!bagAdd(mkItem('blcask')))ovfStash('blcask');sfx('key');msg('You take the sealed cask.','#ffe36a');return null}],BYE])});
 khNpc('bo_hallchest','The Reaper-Farmer’s strongbox','gy_chest',()=>{
   const F=boF();
   if(F.chestH)return say('The strongbox is empty, and the straw hat in it has sunk to a flat grey ring.',[BYE]);
@@ -180,7 +180,7 @@ khNpc('bo_cart','An apple cart','wl_prop1_5',()=>say('A cart heaped with white f
 khNpc('bo_stone','A grave board','bl_slab',d=>say(['HERE LIES A PICKER. NAME UNKNOWN. HE LOVED THE WORK.','HERE LIES TWO PICKERS, WHO SHARED A BASKET.','HERE LIES MISTRESS ORRIN, WIFE OF THE FARMER. SHE SAID IT WOULD END BADLY.','HERE LIES THE CIDER MASTER. HE IS NOT HERE. THE STONE WAS A GUESS.'][((d.x*7+d.y)|0)%4],[BYE]));
 /* the Reaper-Farmer's death: the scythe falls to the party */
 {const _h=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;const r=_h.apply(this,arguments);
-  try{if(was&&e.hp<=0&&e.t==='blreaper'){const F=boF();if(!F.reaper){F.reaper=1;if(!bagAdd(mkItem('blreapscythe')))G.items.push({k:'blreapscythe',x:Math.round(e.x),y:Math.round(e.y),taken:false});msg('The Reaper-Farmer falls in a drift of straw. His scythe stays upright in the ground, and you take it.','#ffe36a');sfx('win');
+  try{if(was&&e.hp<=0&&e.t==='blreaper'){const F=boF();if(!F.reaper){F.reaper=1;if(!bagAdd(mkItem('blreapscythe')))ovfStash('blreapscythe');msg('The Reaper-Farmer falls in a drift of straw. His scythe stays upright in the ground, and you take it.','#ffe36a');sfx('win');
     for(const q of G.enemies)if(q.hp>0&&q.t==='blpicker'&&Math.hypot(q.x-e.x,q.y-e.y)<8){q.still=1;q.woke=0}}}}catch(x){console.error(x)}
   return r}}
 /* ---------- the level ---------- */
