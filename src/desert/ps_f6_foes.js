@@ -35,6 +35,8 @@ Object.assign(ENEMY_DEF,{
   psf6_e8:psf6B(8,{name:'The Weeping Saint',hp:2600,dmg:[36,50],verb:'crushes',xp:1950}),
   psf6_e9:psf6B(9,{name:'The Crown Knight',hp:2900,dmg:[38,53],verb:'cuts',xp:2150}),
   psf6_e10:psf6B(10,{name:"The King's Executioner",hp:3200,dmg:[40,56],verb:'chops',xp:2400})});
+/* the room bosses are warm-ups: weaker than first made (less than half the health, 60% of the damage). Only the Pale King is hard. */
+for(const t of PSF6_FOES){const d=ENEMY_DEF[t];d.hp=Math.round(d.hp*.42);d.dmg=[Math.round(d.dmg[0]*.6),Math.round(d.dmg[1]*.6)]}
 if(typeof NO_VARY!=='undefined')NO_VARY.push(...PSF6_FOES,'psf6_king');
 if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('psf6_king');
 if(typeof BOSS_GOLD!=='undefined'){
@@ -77,7 +79,7 @@ bl3Hit('psf6_e9',e=>{const p=psf6Phase(e,[.5]);if(!p)return;
 bl3Hit('psf6_e10',e=>{const p=psf6Phase(e,[.66,.33]);if(!p)return;
   if(psf6Call(e,['psmarblehound','psmarblehound'],120))msg('The Executioner whistles. Two marble hounds slip in through the door behind you.','#e0e0f0')});
 /* ---------- the Pale King ---------- */
-ENEMY_DEF.psf6_king=pscE('psf6_king',{img:'ps_f6r11_foe',ph:2.6,w:.9,name:'The Pale King',hp:8000,dmg:[60,90],hit:.94,verb:'strikes',xp:20000,boss:true,aboveParty:0,gold:[0,0],ps:1});
+ENEMY_DEF.psf6_king=pscE('psf6_king',{img:'ps_f6r11_foe',ph:2.6,w:.9,name:'The Pale King',hp:10000,dmg:[70,105],hit:.94,verb:'strikes',xp:20000,boss:true,aboveParty:0,gold:[0,0],ps:1});
 bl3Hit('psf6_king',e=>{
   const ph=psf6Phase(e,[.75,.5,.25]);if(!ph)return;
   const T=[null,['psf6_e1','psf6_e2'],['psf6_e5','psf6_e6'],['psf6_e8','psf6_e9'],['psf6_e3','psf6_e10']][ph],

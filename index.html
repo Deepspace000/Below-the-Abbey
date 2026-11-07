@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.864';
+const VERSION='3.865';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -80798,6 +80798,8 @@ Object.assign(ENEMY_DEF,{
   psf6_e8:psf6B(8,{name:'The Weeping Saint',hp:2600,dmg:[36,50],verb:'crushes',xp:1950}),
   psf6_e9:psf6B(9,{name:'The Crown Knight',hp:2900,dmg:[38,53],verb:'cuts',xp:2150}),
   psf6_e10:psf6B(10,{name:"The King's Executioner",hp:3200,dmg:[40,56],verb:'chops',xp:2400})});
+/* the room bosses are warm-ups: weaker than first made (less than half the health, 60% of the damage). Only the Pale King is hard. */
+for(const t of PSF6_FOES){const d=ENEMY_DEF[t];d.hp=Math.round(d.hp*.42);d.dmg=[Math.round(d.dmg[0]*.6),Math.round(d.dmg[1]*.6)]}
 if(typeof NO_VARY!=='undefined')NO_VARY.push(...PSF6_FOES,'psf6_king');
 if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('psf6_king');
 if(typeof BOSS_GOLD!=='undefined'){
@@ -80840,7 +80842,7 @@ bl3Hit('psf6_e9',e=>{const p=psf6Phase(e,[.5]);if(!p)return;
 bl3Hit('psf6_e10',e=>{const p=psf6Phase(e,[.66,.33]);if(!p)return;
   if(psf6Call(e,['psmarblehound','psmarblehound'],120))msg('The Executioner whistles. Two marble hounds slip in through the door behind you.','#e0e0f0')});
 /* ---------- the Pale King ---------- */
-ENEMY_DEF.psf6_king=pscE('psf6_king',{img:'ps_f6r11_foe',ph:2.6,w:.9,name:'The Pale King',hp:8000,dmg:[60,90],hit:.94,verb:'strikes',xp:20000,boss:true,aboveParty:0,gold:[0,0],ps:1});
+ENEMY_DEF.psf6_king=pscE('psf6_king',{img:'ps_f6r11_foe',ph:2.6,w:.9,name:'The Pale King',hp:10000,dmg:[70,105],hit:.94,verb:'strikes',xp:20000,boss:true,aboveParty:0,gold:[0,0],ps:1});
 bl3Hit('psf6_king',e=>{
   const ph=psf6Phase(e,[.75,.5,.25]);if(!ph)return;
   const T=[null,['psf6_e1','psf6_e2'],['psf6_e5','psf6_e6'],['psf6_e8','psf6_e9'],['psf6_e3','psf6_e10']][ph],
@@ -80990,7 +80992,45 @@ pspOnArrive(n=>{const r=psf6Room(n);if(!r)return;try{psf6Fit();const F=psf6S();f
     if(!F.seen)F.seen={};if(!F.seen[11]){F.seen[11]=1;msg('A great black hall, as long as a church, with a red runner down the middle. At the far end the Pale King sits on a gilded throne, as still as a statue. There is a teleport stone by the stair. If you need more gear or potions, you can go back and shop, and come up again.','#ffe0a0')}}}catch(e){console.error('psf6 arrive',e)}});
 /* the Pale King is dead: the end of the Pale Tower (ps_f6_foes.js calls this) */
 function psf6Won(){const F=psf6S();if(F.won)return;F.won=1;F.king=2;try{f2Chime('open')}catch(e){}
-  msg('The Pale King falls from his throne and does not rise. The great hall goes quiet, and the green light in the windows goes out one pane at a time. The Pale Spire is empty.','#ffe0a0')}
+  msg('The Pale King falls from his throne and does not rise. The great hall goes quiet, and the green light in the windows goes out one pane at a time. The Pale Spire is empty.','#ffe0a0');if(typeof psf6Ending==='function')psf6Ending()}
+
+/* ---- src/desert/ps_f6_story.js ---- */
+/* ==========================================================================
+   THE PALE TOWER: THE STORY (prefix psf6). Two scenes.
+   1. The confrontation: the first time the party enters the Throne Room, the Pale King speaks with them before the fight and ties the whole story together (the Rat King, Vance and Corvane,
+      the Road Wardens, the six pieces of the Orrery, Maldrake's contract, Wren and Aldous Wend). Plays once (flag psf6S().talk).
+   2. The ending: when the Pale King dies, four painted slides (assets/end_*.jpg) show the Blighted Lands healed, Sale freed, the corrupt officials in gaol and King Osric ruling a happy land.
+   ========================================================================== */
+CUTS.psf6King=()=>[
+  {text:'The doors at the top of the stair stand open. A red runner leads the whole length of a black hall to a gilded throne. The Pale King does not stand. He has had a very long time to wait.'},
+  {who:'The Pale King',text:'Ten rooms, and you are still walking. Come closer. I would like to see the faces of the people who finished my work for me.'},
+  {who:hn(0),text:'Finished your work?'},
+  {who:'The Pale King',text:'Under the Abbey there was a tomb, and at its door I set a king of rats to keep it shut. You killed him. That was the first door.'},
+  {who:hn(1),text:'Vance\'s ledger. The silver. Corvane\'s ships.'},
+  {who:'The Pale King',text:'Mine. I paid in silver because silver is what keeps me. Vance wrote my letters and Corvane carried my coin. The Road Wardens kept the west gate shut and were paid to forget what they guarded. And six small people, each with one small piece, built a machine for me.'},
+  {who:hn(2),text:'The Orrery of Hours. It opened the sealed door under the Abbey. We carried every piece to the clockmaker ourselves.'},
+  {who:'The Pale King',text:'And so my tomb was opened by honest hands, which is the only kind that can. But a tomb is only a door. I needed blood to stand in it. Osric is old. His granddaughter wears the oak crown. She is blood of my blood, eleven hundred years down.'},
+  {who:hn(3),text:'Wren. She went west with Aldous Wend. They are in the Sanctuary at Sale, and they have made a pact.'},
+  {who:'The Pale King',text:'I know it. Aldous Wend was my court wizard once, and he ran. Now he teaches the girl to unmake me with my own blood. I let them go. I wanted to see if she would be worthy. She is. That is the worst of it.'},
+  {who:hn(2),text:'Wystan Maldrake signed your paper and read one clause. We read him the rest, and his ring broke.'},
+  {who:'The Pale King',text:'A kindness. I have worn many silver rings, and each one was a village. The Blight is nothing but my silver running through the land, and I have forgotten how to stop it. I forgot how to be anything but a king who does not die.'},
+  {who:hn(0),text:'Then we will stop it for you.'},
+  {who:'The Pale King',text:'Yes. If I fall, every ring breaks and every dead man on the Road lies down. Osric\'s men will find every mayor and clerk who sold a town to me. I will not go quietly. I have not forgotten how to be a king.'},
+  {who:hn(1),text:'There is a teleport stone by the stair, if anyone wants potions first.'},
+  {text:'The Pale King rises from his throne. The candles lean towards him.'}];
+/* the ending: four slides over painted pictures, then a last line */
+const PSF6_END=[
+  ['end_land','The Blighted Lands',['The Pale King is gone, and the silver rings break one by one all along the Blighted Road. The dead lie down in their own graves. The grey fever leaves the dales, and by spring the orchards of the Bone Orchard are in blossom.','The farms of Ashenfold are worked again. The bells of the Church of the Hollow Saint ring the right way up. The fen at Gallowmere drains, and the causeway is a road.']],
+  ['end_sale','Sale',['The gates of Sale are opened from the inside. The shops unbar their doors and the lamps are lit for living people. Wren and Aldous Wend come out of the Sanctuary into the square, and the children of the town run to meet them.','Wystan Maldrake goes home to Underhill. He plants a garden on the barrow and tends it for the rest of his life.']],
+  ['end_prison','The Gaol of Oldhaven',['King Osric\'s men find every name in the ledger. The corrupt mayors, clerks and paymasters who took the Pale Sovereign\'s silver are brought to Oldhaven in chains. Every one of them sits in the gaol, waiting for the judge, and none of them has a coin left.']],
+  ['end_king','King Osric',['King Osric rules for many more years, in a land at peace. His granddaughter Wren sits beside him, and the oak crown on her head does not wilt. The party\'s names are written at the top of the book of Oldhaven, as friends of the crown.','The Abbey is quiet. The crypts are empty. Somewhere far to the west, the sun comes up over green hills.','THE END. Thank you for playing Below the Abbey.']]];
+function psf6Slide(i){
+  const s=PSF6_END[i];if(!s){G.cut=null;return}
+  if(typeof loadImg==='function'&&!IMG[s[0]])loadImg(s[0],'assets/'+s[0]+'.jpg');
+  G.cut={id:'psf6end'+i,pic:s[0],i:0,t:G.time,lines:s[2].map(t=>({text:t,title:s[1]})),end:()=>psf6Slide(i+1)};G.hold=null;G.queued=null}
+function psf6Ending(){later(2500,()=>{if(!G.cut)psf6Slide(0)})}
+/* the first time in the Throne Room: the talk */
+pspOnArrive(n=>{if(n!==PSF6.THRONE)return;try{const F=psf6S();if(!F.talk&&F.king!==2){F.talk=1;later(900,()=>{if(!G.cut)startCut('psf6King')})}}catch(e){console.error('psf6 story',e)}});
 
 /* ---- src/desert/nt_look.js ---- */
 /* ==========================================================================
