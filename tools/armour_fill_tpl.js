@@ -4,6 +4,8 @@
    ========================================================================== */
 const AF_IDS=[];
 {
+  // armour never stands still: a new piece is always at least one point better than the best shop piece of its slot from a lower level
+  const afPrev=(slot,lv)=>{let m=0;for(const id in ITEMDEF){const d=ITEMDEF[id];if(d&&d.k===slot&&d.price&&!d.rar&&!d.pg&&!d.sup&&!/^pp_/.test(id)&&(d.lvl||0)<lv&&(d.lvl||0)>0&&(d.armor||0)>m)m=d.armor}return m};
   const D=/*DATA*/;
   D.S.forEach(([key,name,lv,col,fl,keys,bonus,title,names])=>{
     const t=lv/10,A=Math.round(5+lv*.38),pr=Math.round(400*Math.pow(t,1.7)),btxt=Object.keys(bonus).map(k=>ARM_TXT[k](bonus[k])).join(' ');
@@ -11,11 +13,11 @@ const AF_IDS=[];
     ARM_SETS.push([key,name,lv,col,fl,keys,bonus,title]);
     ARM_SLOTS.forEach(([sx,slot,ty,ic,f],i)=>{
       const id='ar_'+key+'_'+sx,k=keys[i],v=ARM_VAL[k](t),pas={};pas[k]=v;
-      ITEMDEF[id]={n:names[i],k:slot,t:ty,ic,c:col,armor:Math.max(2,Math.round(A*f)),price:Math.max(30,Math.round(pr*f)),lvl:lv,pas,set:key,tier:lv,
+      ITEMDEF[id]={n:names[i],k:slot,t:ty,ic,c:col,armor:Math.max(2,Math.round(A*f),afPrev(slot,lv)+1),price:Math.max(30,Math.round(pr*f)),lvl:lv,pas,set:key,tier:lv,
         d:`${ARM_TXT[k](v)} Set: ${title}. All four pieces give: ${btxt} Needs level ${lv}.`,sw:slot==='head'?.38:slot==='chest'?.46:.4,gear:1};
       GEAR.push(id);ARM_IDS.push(id);AF_IDS.push(id)})});
   D.SH.forEach(([lv,n])=>{const t=lv/10,id='sh_'+lv,pas={dodge:+(.012*t+.02).toFixed(3),thorns:Math.round(1.2*t)};
-    ITEMDEF[id]={n,k:'shield',t:'Shield',ic:'shield',c:'#a0a8b8',armor:Math.round(2+lv*.17),price:Math.round(180*t*t/10)*10,lvl:lv,pas,tier:lv,
+    ITEMDEF[id]={n,k:'shield',t:'Shield',ic:'shield',c:'#a0a8b8',armor:Math.max(Math.round(2+lv*.17),afPrev('shield',lv)+1),price:Math.round(180*t*t/10)*10,lvl:lv,pas,tier:lv,
       d:`A shield. Enemies miss ${Math.round(pas.dodge*100)}% more and take ${pas.thorns} damage for every blow they land. Needs level ${lv}.`,sw:.42,gear:1};
     GEAR.push(id);AF_IDS.push(id)});
   if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push(...AF_IDS);

@@ -6,7 +6,7 @@ const B=window.BALH={out:{},cache:{},SEC_ROUND:5,SEC_FIGHT:25};
 const mulberry=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
 const rndI=(r,a,b)=>a+Math.floor(r()*(b-a+1));
 const yieldUI=()=>new Promise(r=>setTimeout(r,0));
-const post=async(name,obj)=>{B.out[name]=obj;try{await fetch('http://127.0.0.1:8914/'+name+'.json',{method:'POST',body:JSON.stringify(obj)})}catch(e){}};
+const post=async(name,obj)=>{B.out[name]=obj;try{await fetch('http://127.0.0.1:'+(window.BALH_PORT||8914)+'/'+name+'.json',{method:'POST',body:JSON.stringify(obj)})}catch(e){}};
 const bossy=t=>{const d=ENEMY_DEF[t];return !!d&&(isBossy(t)||!!d.aboveParty||(typeof NO_VARY!=='undefined'&&NO_VARY.includes(t)))};
 const lvlOf=(t,r,rnd)=>{const d=ENEMY_DEF[t];if(d.partyLevel)return null;if(d.aboveParty)return r+Math.min(d.aboveParty,8);if(bossy(t))return r;return Math.max(1,r+(rnd?rndI(rnd,-1,1):0))};
 /* ---------- 1. harvest the areas ---------- */
@@ -143,11 +143,13 @@ B.xp=async function(){
   const runP=withQ=>{const rows=[];
   let lvl=1,xp=0,gold=0,qgold=0,qxp=0;
   const needOf=l=>xpNeed(l);
+  // the XP gate of retune.js (v3.870): from area level 25 up, each level the party is above the next rated area (or the area plus one) costs 50 percent of an award (floor 5 percent); no award above two levels' worth
+  const gate=r=>{if(r<25||typeof rtCeil!=='function')return 1;const over=lvl-rtCeil(r);return over>0?Math.max(.05,1-.5*over):1},cap=x=>r=>Math.min(x,2*xpNeed(Math.max(1,lvl)));
   for(const r of R){let kills=0,xpM=0,goldM=0,startL=lvl,chest=0;
-    for(const a of B.areas)if(a.r===r){chest+=a.chest;for(const t in a.c){const d=ENEMY_DEF[t];if(d.partyLevel)continue;for(let n=0;n<a.c[t];n++){const l0=lvlOf(t,r,null),s=enemyStat(t,l0),g=Math.max(1,Math.round(s.xp*Math.min(1.5,Math.max(.3,1-.06*(lvl-l0)))));
+    for(const a of B.areas)if(a.r===r){chest+=a.chest;for(const t in a.c){const d=ENEMY_DEF[t];if(d.partyLevel)continue;for(let n=0;n<a.c[t];n++){const l0=lvlOf(t,r,null),s=enemyStat(t,l0),g=Math.max(1,Math.round(Math.min(2*xpNeed(Math.max(1,lvl)),s.xp*Math.min(1.5,Math.max(.3,1-.06*(lvl-l0)))*gate(r))));
       xp+=g;xpM+=g;kills++;goldM+=expGold(t,l0,lvl);while(xp>=needOf(lvl)){xp-=needOf(lvl);lvl++}}}}
     let qg=0,qx=0;if(withQ)for(const q in qm)if(qm[q].r===r){qg+=qm[q].gold;qx+=qm[q].xp}
-    xp+=qx;while(xp>=needOf(lvl)){xp-=needOf(lvl);lvl++}
+    qx=qx?Math.round(Math.min(qx*gate(r),2*xpNeed(Math.max(1,lvl))*Math.max(1,qx>0?Object.values(qm).filter(q=>q.r===r).length:1))):0;xp+=qx;while(xp>=needOf(lvl)){xp-=needOf(lvl);lvl++}
     gold+=goldM+chest;qgold+=qg;
     rows.push({r,kills,xpMonsters:xpM,questXP:qx,levelStart:startL,levelEnd:lvl,goldMonsters:goldM,chest,questGold:qg,cumGold:gold+qgold,tmGold:tmGold(lvl)})}
   return rows};

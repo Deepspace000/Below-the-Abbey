@@ -95,28 +95,37 @@ dominated = {g: v['dead'] for g, v in GEAR.items()}
 doc = SimpleDocTemplate(OUT, pagesize=A4, leftMargin=14 * mm, rightMargin=14 * mm, topMargin=14 * mm, bottomMargin=14 * mm,
                         title='Below the Abbey: balance report', author='Claude')
 S = []
+wipe = defaultdict(float)
+for b in BOT:
+    if b['m'] in ('w', 'r'): wipe[(b['name'], b['r'])] += b.get('wipes', 0)
+hard = sorted([(w, n, r) for (n, r), w in wipe.items() if w > 0], reverse=True)[:7]
+band = lambda lo, hi: [x['levelEnd'] - x['r'] for x in XR if lo <= x['r'] <= hi and x['r'] >= 25]
+meanlead = lambda lo, hi: (sum(band(lo, hi)) / len(band(lo, hi))) if band(lo, hi) else 0
+gaps = {g: [x for x in v['gapsShop'] if x[0] < 110] for g, v in GEAR.items()}
+gaps = {g: v for g, v in gaps.items() if v}
 S += [Paragraph('Below the Abbey: game balance report', H1),
-      Paragraph('Automated checks of difficulty, levelling, economy and gear, run on the current build (version 3.869 plus the Testing menu). Everything here comes from the game\'s own formulas '
+      Paragraph('Automated checks of difficulty, levelling, economy and gear, run on the current build (version 3.871). Everything here comes from the game\'s own formulas '
                 '(enemyStat, enemyHitC, the shop and gear tables, the experience and gold rules), run by a script in the game page. Numbers are model results, not play tests.', P), Spacer(1, 4)]
 S += [Paragraph('1. Findings in short', H2)]
 f = []
-f.append('<b>Difficulty is flat, with a few sharp spikes.</b> A best-gear party wins about %d%% of ordinary fights even 10 levels below an area and %d%% on level, and it loses roughly %d%% of its health in a fight at every level from 10 to 100 '
-         '(%d%% at 10 levels below, %d%% at 10 levels above). There is no real gradient: being under-levelled costs little, being over-levelled hardly helps. The spikes are where the real party (cheap back line) fails on level: ratings %s.'
-         % (round(100 * meanby('', -10, 'win')), round(100 * meanby('', 0, 'win')), round(100 * meanby('', 0, 'hp')), round(100 * meanby('', -10, 'hp')), round(100 * meanby('', 10, 'hp')),
-            ', '.join(str(r) for r in spikes['r'])))
-f.append('<b>Hard spots (bot clears).</b> Weaker and real parties wipe repeatedly in: The Deeper Hollow (rating 72), The Underlevel (80), Blackbriar Wood (82), The Drowned Maze (74), the Orange Spire (levels 3 to 20, ratings 59 to 65), '
-         'the Pale Approach and Pale Lands areas (100), the Observatory Gallery (107) and the Stone Planet (108). See section 4.')
-f.append('<b>Experience races and then stalls.</b> Clearing every creature once in rating order, the party reaches level 111 by about rating %s (ratings 59 to 65, the Orange Spire, pay %s XP between them), long before the last areas (up to rating 120). '
-         'After rating 77 the XP per kill drops sharply (about 9,700 per kill at level 73 against about 1,500 at level 81), so a level then takes 60 or more kills against 7 earlier. Section 6.' % (first_over, fmt(sum(x['xpMonsters'] for x in XR if 59<=x['r']<=65))))
+f.append('<b>Difficulty by gear.</b> A best-gear party wins %d%% of ordinary fights on level (%d%% 10 levels below, losing about %d%% of its health on level); the real party wins %d%% on level and %d%% 10 levels below; the weaker party %d%% and %d%%. '
+         'So top gear stays strong, and average gear now meets a real challenge, with a clear fall-off below level. Areas where the real party still wins under 90%% on level: ratings %s.'
+         % (round(100 * meanby('', 0, 'win')), round(100 * meanby('', -10, 'win')), round(100 * meanby('', 0, 'hp')), round(100 * meanby('r', 0, 'win')), round(100 * meanby('r', -10, 'win')),
+            round(100 * meanby('w', 0, 'win')), round(100 * meanby('w', -10, 'win')), ', '.join(str(r) for r in spikes['r'])))
+f.append('<b>Hard spots (bot clears).</b> The most wipes by the weaker and real bot parties: %s. See section 4.' % '; '.join('%s (rating %s)' % (n, r) for w, n, r in hard))
+f.append('<b>Experience.</b> Clearing every creature once in rating order, with the XP gate of 3.870, the party ends each area about %.1f levels above its rating at ratings 25 to 60, %.1f at 61 to 90 and %.1f at 91 and up (before the gate it ran 20 or more levels ahead in the middle game), and is level %d once rating 111 is done. '
+         'Areas rated well above their neighbours (the Deeper Hollow, the Blighted Lands) still let the party rise through the whole gap. Section 6.' % (meanlead(25, 60), meanlead(61, 90), meanlead(91, 120), lvl_at(XR, 111)))
 f.append('<b>Economy.</b> A full clear of every area earns about %s gold including quests. The three houses cost 1.55M and the six super weapons 600k, together 2.15M, %s the whole story pays. '
-         'One Large Mansion (1M) is about %d%% of all the gold in the game. The best full gear set of a level-110 party costs about 322k. Section 7.' % (fmt(gold_total), 'more than' if 2150000>gold_total else 'less than', round(100000000/gold_total)))
-f.append('<b>Gear ladder has holes.</b> Dagger and Staff have no shop upgrade after level 40, Sword and Bow stall for 20 levels at a time, armour improves only every 10 levels, shields stop at level 60 and armour at 100. '
-         'Many items are beaten by something two levels earlier (Sword %d of 41, Helm %d of 33, Chest %d of 29, Ring %d of 33). Section 8.' % (dominated['weapon:Sword'], dominated['head'], dominated['chest'], dominated['ring']))
-f.append('<b>Fight length.</b> An ordinary creature takes about %.0f hits (one hero attacking) at levels under 20 and about %.0f at level 100 and above, so fights get about 2.5 times shorter as the game goes on. No ordinary creature takes more than 20 hits or fewer than 2. '
-         '%d bosses can kill an average hero in under 2 of their own hits, the worst being %s. Section 5.'
+         'One Large Mansion (1M) is about %d%% of all the gold in the game. The best full gear set of a level-110 party costs about 322k. Tempering gear at the Last Smith (3.871) adds a sink of about 0.8M per top weapon. Section 7.' % (fmt(gold_total), 'more than' if 2150000>gold_total else 'less than', round(100000000/gold_total)))
+f.append('<b>Gear ladder.</b> %s Many items are still beaten by something two levels earlier (Sword %d of %d, Helm %d, Chest %d, Ring %d). Section 8.'
+         % ('Weapons now improve every 4 levels up to 110 (past 110 there is nothing to buy, as before), armour sets arrive every 5 levels, and shields reach level 110. Whole numbers of armour limit the small slots, so a better arms, legs or shield piece shows up only about every 10 levels; stretches of 10 or more levels with no better piece: ' + '; '.join('%s %s' % (g.replace('weapon:', ''), ', '.join('%d to %d' % tuple(x) for x in v[:4])) for g, v in gaps.items()) + '.' if gaps else 'No group has a stretch of 10 levels or more without a shop upgrade.',
+            dominated['weapon:Sword'], GEAR['weapon:Sword']['count'], dominated['head'], dominated['chest'], dominated['ring']))
+f.append('<b>Fight length.</b> An ordinary creature takes about %.0f hits (one hero attacking) at levels under 20 and about %.0f at level 100 and above. No ordinary creature takes more than 20 hits or fewer than 2. '
+         '%d bosses can kill an average hero in under 2 of their own hits, the worst being %s (the Pale King was changed in 3.871 to 400 to 600 a hit, from 3,600 to 5,500). Section 5.'
          % (statistics.median([r['hitsToKill'] for r in ORD if r['lv'] < 20]), statistics.median([r['hitsToKill'] for r in ORD if r['lv'] >= 100]), len(oneshot), ', '.join('%s (%.1f)' % (r['name'], r['hitsToKillAvg']) for r in oneshot[:4])))
-f.append('<b>Coverage.</b> Only %d of the 120 ratings have any creatures. The longest stretches with none: %s. A party levelling through these meets no fights at all, which is part of the stall in finding 3.'
+f.append('<b>Coverage.</b> %d of the 120 ratings have creatures. The longest stretches with none: %s. Eight optional quest dungeons (3.871) now stand at ratings 22, 52, 54, 92, 94, 96 and 98; ratings 112 and up are the Pale Tower boss rooms and the Pale King.'
          % (len(ratings), ', '.join('%d to %d' % r for r in runs[:8])))
+f.append('<b>Changes since the first report</b> (3.870 and 3.871): weapon ladder filled (36 daggers and wands, swords, bows, axes and maces, 51 new armour pieces and shields); ordinary creature damage fitted area by area from level 30; the XP gate; armour sets every 5 levels; tempering; the Pale King; the Ramparts pictures; eight new dungeons.')
 S += bullets(f)
 S += [Paragraph('2. Method, and what it cannot tell you', H2)]
 S += bullets([
