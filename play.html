@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.868';
+const VERSION='3.869';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -5258,7 +5258,7 @@ addPOIs();
 for(const k in MINIDEFS){const M=MINIDEFS[k];if(M.portals)LEVELS[k].portals=M.portals;LEVELS[k].diff=M.diff||4}
 
 const WALLCH={a:9,b:10,c:11,p:12,w:13,v:14,h:15,k:16,i:17,g:18,r:19,d:20,e:21,f:22,'0':30,'1':31,'2':32,'3':33,'4':34,'5':35,'6':36,'7':37,'8':38,'9':39};
-const DIFF=()=>(!G.flags.autoScaleOn&&typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[LEVEL]!==undefined)?LEVEL_RATING[LEVEL]:((LEVELS[LEVEL]&&LEVELS[LEVEL].diff)||LEVEL);   // with autoscaling off a place has the fixed level of the ladder
+const DIFF=()=>((!G.flags.autoScaleOn&&typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[LEVEL]!==undefined)?LEVEL_RATING[LEVEL]:((LEVELS[LEVEL]&&LEVELS[LEVEL].diff)||LEVEL))+((G.flags.ngOff&&!(typeof ntIs==='function'&&ntIs(LEVEL)))?G.flags.ngOff:0);   // + ngOff: New Game Plus (ng_plus.js)   // with autoscaling off a place has the fixed level of the ladder
 function forestExtras(L){
   if(L._xd)return L._xd;
   const rows=L.rows,H=rows.length,W=rows[0].length,out=[];
@@ -81070,7 +81070,7 @@ const PSF6_END=[
   ['end_prison','The Gaol of Oldhaven',['King Osric\'s men find every name in the ledger. The corrupt mayors, clerks and paymasters who took the Pale Sovereign\'s silver are brought to Oldhaven in chains. Every one of them sits in the gaol, waiting for the judge, and none of them has a coin left.']],
   ['end_king','King Osric',['King Osric rules for many more years, in a land at peace. His granddaughter Wren sits beside him, and the oak crown on her head does not wilt. The party\'s names are written at the top of the book of Oldhaven, as friends of the crown.','The Abbey is quiet. The crypts are empty. Somewhere far to the west, the sun comes up over green hills.','THE END. Thank you for playing Below the Abbey.']]];
 function psf6Slide(i){
-  const s=PSF6_END[i];if(!s){G.cut=null;return}
+  const s=PSF6_END[i];if(!s){G.cut=null;try{ngOffer()}catch(e){console.error(e)}return}
   if(typeof loadImg==='function'&&!IMG[s[0]])loadImg(s[0],'assets/'+s[0]+'.jpg');
   G.cut={id:'psf6end'+i,pic:s[0],i:0,t:G.time,lines:s[2].map(t=>({text:t,title:s[1]})),end:()=>psf6Slide(i+1)};G.hold=null;G.queued=null}
 function psf6Ending(){let n=0;const go=()=>{if(G.cut||G.talk||G.state!=='play'){if(n++<30)later(1500,go);return}psf6Slide(0)};later(2500,go)}   // waits (up to about 45 s) while another scene, a talk or a menu state is open, instead of dropping the ending
@@ -81201,6 +81201,43 @@ for(const it of LE_SUPER){it.sup=1;if(!it.dbl)delete it.dbl}   // sup: cream whi
 if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push(...LE_SUPER.map(i=>i.id));
 khNpc('psf5_smith','Ysolde Vane, the Last Smith','ps_c_psservant',d=>say('"They call me the Last Smith, because I am the one still at the anvil. Nobody has asked me for a plain blade in years. The ones I make now are made from what the tower leaves behind: black iron, star metal, a little of the clock. They are not cheap. One hundred thousand gold each, and I do not haggle with the dead or the living."',
   [['Show me the weapons',()=>{G.talk=null;openShop(d,LE_SUPER.map(i=>[i.id,1]),"The Last Smith's Anvil");return null}],BYE]),{sc:1});
+
+/* ---- src/desert/ng_plus.js ---- */
+/* ==========================================================================
+   NEW GAME PLUS (prefix ng). After the credits of the Pale King (and later from Menu > Gameplay once he is dead) the party may end the game or begin again.
+   New Game Plus: the party goes back to the first dungeon (level 1, the crypts) with everything it owns: heroes at their level, gear, bag, spells and GOLD.
+   Every quest, every town and every area starts again. Creatures are raised: G.flags.ngOff = the party level at completion minus 1, added to the level of every place (DIFF in index.html, and the level 1 crypts),
+   so a level 1 creature stands at the party's level and every later one at its old level plus that. The Never-Ending Tower is kept open and keeps its record (its floors scale by themselves, so no offset there),
+   and so do owned houses with their chest, kill counts for trophies and the game settings. Finishing the game again offers it again, with the new level.
+   ========================================================================== */
+const NG_KEEP=/^(nt|hs|ngp|autoScaleOn|noBarNums|noAdapt|noFog|lookXNormal|diffStep|k_.*)$/;
+const ngReady=()=>{try{return psf6S().king===2}catch(e){return false}};
+function ngTalk(name,text,opts){G.talk={d:{k:'_',x:G.P.x,y:G.P.y},n:{name},node:say(text,opts),t:G.time,btns:[]};G.hold=null;G.queued=null}
+function ngOffer(){
+  const pl=partyLevel(),n=(G.flags.ngp|0);
+  ngTalk('The tale is told','The Pale King is gone and the land is quiet. The party stands at level '+pl+'. You may end the game here, and your save stays as it is. Or you may begin New Game Plus: the party wakes again in the crypts under the abbey, with its level, gear, spells, bag and gold. Every quest starts again, and the creatures grow: a level 1 creature stands at level '+pl+', and every other one at its old level plus '+(pl-1)+'. The Never-Ending Tower stays open.'+(n?' (This would be New Game Plus number '+(n+1)+'.)':''),
+    [['Begin New Game Plus',()=>ngConfirm()],['End the game',()=>{G.talk=null;try{backupAuto();writeSave('auto')}catch(e){}G.cut=null;G.menu=false;G.overview=false;G.state='title';return null}],['Not yet',()=>{G.talk=null;msg('The Gameplay menu offers New Game Plus whenever you want it.','#e0c090');return null}]])}
+function ngConfirm(){
+  return say('This starts a new journey. Your current game is saved first, so Load can bring it back. Are you sure?',[['Yes, begin again',()=>{G.talk=null;ngBegin();return null}],['Back',()=>ngOffer()||null]])}
+function ngBegin(){
+  try{writeSave('auto');backupAuto()}catch(e){console.error(e)}   // the finished game goes into the backup slot
+  const old=G.flags,pl=partyLevel(),heroes=G.heroes,bag=G.bag,gold=G.gold,kept={};
+  for(const k of Object.keys(old))if(NG_KEEP.test(k))kept[k]=old[k];
+  G.talk=null;G.cut=null;G.loot=null;
+  reset();
+  G.heroes=heroes;G.bag=bag;G.gold=gold;
+  for(const h of G.heroes){h.hp=h.max;h.mp=h.mpMax;h.alive=true;h.hurt=0;h.flash=0;h.food=100}
+  Object.assign(G.flags,kept);G.flags.ngp=(old.ngp|0)+1;G.flags.ngOff=pl-1;
+  try{rebalanceEnemies()}catch(e){console.error(e)}
+  G.state='play';
+  msg('New Game Plus. You wake in the crypts below the abbey, as you were. The creatures have grown to match you.','#ffe36a');
+  try{writeAreaSaves()}catch(e){}}
+/* the offset: every place's level goes up by ngOff, except the Never-Ending Tower, which scales by itself */
+{const _c=crypt1Level;crypt1Level=function(e){const r=_c.apply(this,arguments);return r?r+((G.flags&&G.flags.ngOff)||0):r}}
+/* the tower stays open to a New Game Plus party (ntLevelOk in nt_map.js passes when G.flags.ngp is set) */
+/* the Gameplay menu: a button once the Pale King is dead */
+{const _dg=drawGameplay;drawGameplay=function(){_dg.apply(this,arguments);if(ngReady())btnText('gp_ngp','New Game Plus',296,290,106,24)}}
+{const _b=handleBtn;handleBtn=function(id){if(id==='gp_ngp'&&G.menu==='gameplay'){G.menu=false;ngOffer();return}return _b.apply(this,arguments)}}
 
 /* ---- src/desert/nt_look.js ---- */
 /* ==========================================================================
@@ -82159,7 +82196,7 @@ LEVEL_NAMES[NT.BASE]='The Crooked Tower';LEVEL_RATING[NT.BASE]=100;
 const ntF=()=>{const F=G.flags;return F.nt||(F.nt={deepest:0,best:{floor:0,level:0},ms:{}})};
 const ntUnlocked=()=>true;   // the tower is always open; the level gate is ntLevelOk
 /* the party must be level 100 (the highest hero, like partyLevel everywhere else); the jump links set the debug flag and pass */
-const ntLevelOk=()=>partyLevel()>=NTM.MINLVL||!!NT.DEBUG||!!(G.flags&&G.flags.nt&&G.flags.nt.debug);
+const ntLevelOk=()=>partyLevel()>=NTM.MINLVL||!!(G.flags&&G.flags.ngp)||!!NT.DEBUG||!!(G.flags&&G.flags.nt&&G.flags.nt.debug);
 function ntTooLow(){try{sfx('locked');msg('The way in is barred. Only a party of level '+NTM.MINLVL+' or more may enter the Crooked Tower.','#d8e4ff')}catch(e){}}
 /* ---------- the entrance hall ---------- */
 const NTE={W:38,H:30,door:{x0:17,x1:20,y:3},gate:{x0:18,x1:19,y:27}};

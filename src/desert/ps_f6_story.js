@@ -28,7 +28,7 @@ const PSF6_END=[
   ['end_prison','The Gaol of Oldhaven',['King Osric\'s men find every name in the ledger. The corrupt mayors, clerks and paymasters who took the Pale Sovereign\'s silver are brought to Oldhaven in chains. Every one of them sits in the gaol, waiting for the judge, and none of them has a coin left.']],
   ['end_king','King Osric',['King Osric rules for many more years, in a land at peace. His granddaughter Wren sits beside him, and the oak crown on her head does not wilt. The party\'s names are written at the top of the book of Oldhaven, as friends of the crown.','The Abbey is quiet. The crypts are empty. Somewhere far to the west, the sun comes up over green hills.','THE END. Thank you for playing Below the Abbey.']]];
 function psf6Slide(i){
-  const s=PSF6_END[i];if(!s){G.cut=null;return}
+  const s=PSF6_END[i];if(!s){G.cut=null;try{ngOffer()}catch(e){console.error(e)}return}
   if(typeof loadImg==='function'&&!IMG[s[0]])loadImg(s[0],'assets/'+s[0]+'.jpg');
   G.cut={id:'psf6end'+i,pic:s[0],i:0,t:G.time,lines:s[2].map(t=>({text:t,title:s[1]})),end:()=>psf6Slide(i+1)};G.hold=null;G.queued=null}
 function psf6Ending(){let n=0;const go=()=>{if(G.cut||G.talk||G.state!=='play'){if(n++<30)later(1500,go);return}psf6Slide(0)};later(2500,go)}   // waits (up to about 45 s) while another scene, a talk or a menu state is open, instead of dropping the ending

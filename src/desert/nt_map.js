@@ -9,7 +9,7 @@ LEVEL_NAMES[NT.BASE]='The Crooked Tower';LEVEL_RATING[NT.BASE]=100;
 const ntF=()=>{const F=G.flags;return F.nt||(F.nt={deepest:0,best:{floor:0,level:0},ms:{}})};
 const ntUnlocked=()=>true;   // the tower is always open; the level gate is ntLevelOk
 /* the party must be level 100 (the highest hero, like partyLevel everywhere else); the jump links set the debug flag and pass */
-const ntLevelOk=()=>partyLevel()>=NTM.MINLVL||!!NT.DEBUG||!!(G.flags&&G.flags.nt&&G.flags.nt.debug);
+const ntLevelOk=()=>partyLevel()>=NTM.MINLVL||!!(G.flags&&G.flags.ngp)||!!NT.DEBUG||!!(G.flags&&G.flags.nt&&G.flags.nt.debug);
 function ntTooLow(){try{sfx('locked');msg('The way in is barred. Only a party of level '+NTM.MINLVL+' or more may enter the Crooked Tower.','#d8e4ff')}catch(e){}}
 /* ---------- the entrance hall ---------- */
 const NTE={W:38,H:30,door:{x0:17,x1:20,y:3},gate:{x0:18,x1:19,y:27}};
