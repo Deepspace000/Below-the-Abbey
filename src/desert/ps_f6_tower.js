@@ -47,7 +47,7 @@ function psf6Build(info){
   if(F.boss[n]!==2)pspFoe(C,'psf6_e'+n,PSF6.BOSS[0],PSF6.BOSS[1],{lvl:Math.min(111+n,120)});
   C.used.delete(PSF6.CHEST.join(','));
   const chp=psf6Has('f6_chest');   // the painted special chest when it is made, the plain gilded one until then
-  C.dec(chp||'gy_chest',PSF6.CHEST[0],PSF6.CHEST[1],{block:true,sc:chp?.9:.75,npc:'psf6_chest'+n});
+  C.dec(chp||'gy_chest',PSF6.CHEST[0],PSF6.CHEST[1],{block:true,sc:chp?.5:.6,npc:'psf6_chest'+n});
   C.mapNames.push({t:PSF6.THEME[n-1],x:7,y:7,k:'place'});
   return C.finish({start:{x:PSF6.LAND[0],y:PSF6.LAND[1],f:0}})}
 /* the Throne Room: a big hall, a red runner, a row of columns, the great throne at the north end, the Pale King in front of it, a teleport stone by the stair */
