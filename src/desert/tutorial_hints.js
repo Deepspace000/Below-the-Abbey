@@ -2,6 +2,7 @@
    BATTLE AND SURVIVAL HINTS FOR A NEW PLAYER (v3.882). Little boxes in the play screen, spread over the first battles, and a few that appear the first time something happens:
      battle 1: hold the space bar or action button for repeated attacks; power moves hit harder but cost mana or stamina.
      battle 2: if monsters are too hard, come back later.     battle 3: potions can be put in shortcut slots.
+     the first door opened: some doors need keys and odd walls may hide secrets.   the first weapon picked up: equip it from the inventory.
      the first food picked up: food stops starving.   the first rest: resting heals if you have food.   the first meal eaten: buy or find food and potions.
    Each box goes away by itself after 12 seconds or when clicked, and a 'Hints' button on the Gameplay page (kept on this computer: abbeyHintsOff) stops every hint, and each box column ends with a line saying so.
    What has been shown is kept in the game's flags (G.flags.tut), so a hint is not shown twice in a game.
@@ -14,6 +15,7 @@ const TUT_TEXT={
   food:'Food will stop your character from starving.',
   rest:'Resting will heal your character if you have food.',
   eat:'Buy food and potions from shops in towns or find them out in the wild.',
+  door:'Some doors will require keys and some walls that look unusual may hide secret passages or rooms.',
   gear:'Make sure to equip weapons and armour that you find by opening your inventory and choosing which character gets it.'};
 const tutOff=()=>{try{return localStorage.getItem('abbeyHintsOff')==='1'}catch(e){return false}};
 const tutF=()=>{const F=G.flags;return F.tut||(F.tut={n:0,s:{}})};
@@ -52,3 +54,5 @@ let TUT_IN=false;
   return _b.apply(this,arguments)}}
 // the switch: a button on the Gameplay page (Menu > Settings > Gameplay)
 {const _g=drawGameplay;drawGameplay=function(){_g.apply(this,arguments);btnText('gp_hints','Hints: '+(tutOff()?'OFF':'ON'),296,290,106,24)}}
+// the first door opened (pushed, or unlocked with a key)
+{const _m=msg;msg=function(t){const r=_m.apply(this,arguments);try{if(/^You push the door open|^The rusty key turns/.test(String(t)))tutHint('door')}catch(e){}return r}}
