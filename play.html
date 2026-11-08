@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.880';
+const VERSION='3.881';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -5259,7 +5259,7 @@ addPOIs();
 for(const k in MINIDEFS){const M=MINIDEFS[k];if(M.portals)LEVELS[k].portals=M.portals;LEVELS[k].diff=M.diff||4}
 
 const WALLCH={a:9,b:10,c:11,p:12,w:13,v:14,h:15,k:16,i:17,g:18,r:19,d:20,e:21,f:22,'0':30,'1':31,'2':32,'3':33,'4':34,'5':35,'6':36,'7':37,'8':38,'9':39};
-const DIFF=()=>((!G.flags.autoScaleOn&&typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[LEVEL]!==undefined)?LEVEL_RATING[LEVEL]:((LEVELS[LEVEL]&&LEVELS[LEVEL].diff)||LEVEL))+((G.flags.ngOff&&!(typeof ntIs==='function'&&ntIs(LEVEL)))?G.flags.ngOff:0);   // + ngOff: New Game Plus (ng_plus.js)   // with autoscaling off a place has the fixed level of the ladder
+const DIFF=()=>((!G.flags.autoScaleOn&&typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[LEVEL]!==undefined)?LEVEL_RATING[LEVEL]:((LEVELS[LEVEL]&&LEVELS[LEVEL].diff)||LEVEL))+((typeof ngEff==='function'&&ngEff()&&!(typeof ntIs==='function'&&ntIs(LEVEL)))?ngEff():0);   // + ngEff(): New Game Plus (ng_plus.js, ng_title.js), 0 unless the game has been completed and New Game Plus is on   // with autoscaling off a place has the fixed level of the ladder
 function forestExtras(L){
   if(L._xd)return L._xd;
   const rows=L.rows,H=rows.length,W=rows[0].length,out=[];
@@ -81265,7 +81265,7 @@ function tpHero(d,i){const h=G.heroes[i],opts=[];let txt=`${HERO_DEF[i].name}. Y
    and so do owned houses with their chest, kill counts for trophies and the game settings. Finishing the game again offers it again, with the new level.
    ========================================================================== */
 const NG_KEEP=/^(nt|hs|ngp|autoScaleOn|noBarNums|noAdapt|noFog|lookXNormal|diffStep|k_.*)$/;
-const ngReady=()=>{try{return psf6S().king===2}catch(e){return false}};
+const ngReady=()=>{try{return psf6S().king===2&&ngpEnabled()}catch(e){return false}};
 function ngTalk(name,text,opts){G.talk={d:{k:'_',x:G.P.x,y:G.P.y},n:{name},node:say(text,opts),t:G.time,btns:[]};G.hold=null;G.queued=null}
 function ngOffer(){
   const pl=partyLevel(),n=(G.flags.ngp|0);
@@ -81287,7 +81287,7 @@ function ngBegin(){
   msg('New Game Plus. You wake in the crypts below the abbey, as you were. The creatures have grown to match you.','#ffe36a');
   try{writeAreaSaves()}catch(e){}}
 /* the offset: every place's level goes up by ngOff, except the Never-Ending Tower, which scales by itself */
-{const _c=crypt1Level;crypt1Level=function(e){const r=_c.apply(this,arguments);return r?r+((G.flags&&G.flags.ngOff)||0):r}}
+{const _c=crypt1Level;crypt1Level=function(e){const r=_c.apply(this,arguments);return r?r+(typeof ngEff==='function'?ngEff():0):r}}
 /* the tower stays open to a New Game Plus party (ntLevelOk in nt_map.js passes when G.flags.ngp is set) */
 /* the Gameplay menu: a button once the Pale King is dead */
 {const _dg=drawGameplay;drawGameplay=function(){_dg.apply(this,arguments);if(ngReady())btnText('gp_ngp','New Game Plus',296,290,106,24)}}
@@ -85407,7 +85407,7 @@ function ngwCurve(){
     for(let i=1;i<pl.length;i++)if(l<=pl[i][0]){const a=pl[i-1],b=pl[i];return a[1]+(b[1]-a[1])*(l-a[0])/Math.max(1,b[0]-a[0])}return last[1]};
   return NGW_P}
 function ngWeapons(){
-  const off=Math.max(0,(G.flags&&G.flags.ngOff)|0);
+  const off=Math.max(0,typeof ngEff==='function'?ngEff():0);
   if(off===NGW_ON)return;
   const P=ngwCurve();
   for(const id in ITEMDEF){const d=ITEMDEF[id];if(!d||d.k!=='weapon'||!d.dmg)continue;
@@ -85429,6 +85429,46 @@ if(typeof WORLD_LOCS!=='undefined'){
   for(const [id,n] of [[6710,'The Sewers of Oldhaven'],[6711,'The Crypt Under the Chapel'],[6712,'Crowe\u2019s Hideaway']])
     if(!WORLD_LOCS.some(l=>l.k==='ohu'+id))WORLD_LOCS.push({k:'ohu'+id,n,lv:[id],x:1170,y:206,ic:'cave',sc:.34,gap:id,host:305,pref:Math.PI/2});
 }
+
+/* ---- src/desert/ng_title.js ---- */
+/* ==========================================================================
+   (v3.881) 1. THE FIRST RATS. The two rats nearest the start of the crypts (within 8 squares of the start) are level 2 exactly (no spread), and the crypt's creatures are given their levels when a new game starts
+      (they used to stand at the place's level 4 until the first level up).
+   2. NEW GAME PLUS ON THE TITLE SCREEN. Once the Pale King has fallen (in any game on this computer: localStorage abbeyNgpDone) the title screen has a New Game Plus button of its own, which loads a finished
+      game and offers to begin again, and a switch to turn New Game Plus off (abbeyNgpOn). With it off the button goes, the Gameplay menu button goes, and a New Game Plus game plays with no raised creatures
+      and no raised weapons. ngEff() is the one place that says how much New Game Plus raises things: it is 0 unless the game has been completed, New Game Plus is on and this game is a New Game Plus game.
+   ========================================================================== */
+{const _c=crypt1Level;crypt1Level=function(e){
+  const r=_c.apply(this,arguments);
+  try{if(LEVEL===1&&e.t==='rat'&&e._r2===undefined){e._r2=Math.hypot(e.x-1,e.y-14)<=8;if(e._r2){e.zl=2;e.vd=0;e.vr=2}}
+    if(LEVEL===1&&e._r2)return 2+(typeof ngEff==='function'?ngEff():0)}catch(err){}
+  return r}}
+{const _ls=levelSpread;levelSpread=function(e){if(LEVEL===1&&e&&e._r2)return 0;return _ls.apply(this,arguments)}}
+{const _sg=startGame;startGame=function(){const r=_sg.apply(this,arguments);try{rebalanceEnemies()}catch(e){}return r}}
+function ngpUnlocked(){try{return localStorage.getItem('abbeyNgpDone')==='1'}catch(e){return false}}
+function ngpEnabled(){try{return localStorage.getItem('abbeyNgpOn')!=='0'}catch(e){return true}}
+function ngpMark(){try{if(localStorage.getItem('abbeyNgpDone')!=='1')localStorage.setItem('abbeyNgpDone','1')}catch(e){}}
+function ngDone(){try{return psf6S().king===2}catch(e){return false}}
+function ngEff(){const F=G.flags||{};return (F.ngp&&F.ngOff&&ngpUnlocked()&&ngpEnabled())?(F.ngOff|0):0}
+/* the finished game is noticed the moment the king falls, when a finished game is loaded or entered, and (once, at load) in the saves already on this computer */
+{const _w=psf6Won;psf6Won=function(){const r=_w.apply(this,arguments);ngpMark();return r}}
+{const _g=goToLevel;goToLevel=function(){try{if(!ngpUnlocked()&&ngDone())ngpMark()}catch(e){}return _g.apply(this,arguments)}}
+function ngFinishedSave(){for(const [k] of SAVE_SLOTS){if(!hasSave(k))continue;const sv=readSave(k);try{if(sv&&sv.flags&&sv.flags.psp&&sv.flags.psp.f6&&sv.flags.psp.f6.king===2)return [k,sv]}catch(e){}}return null}
+try{if(!ngpUnlocked()&&ngFinishedSave())ngpMark()}catch(e){}
+/* the title screen */
+{const _dt=drawTitle;drawTitle=function(){_dt.apply(this,arguments);
+  try{if(G.state==='title'&&ngpUnlocked()){
+    if(ngpEnabled())btnText('tngp','New Game Plus',296,150,122,21);
+    btnText('tngpt','New Game Plus: '+(ngpEnabled()?'on':'off'),296,ngpEnabled()?176:150,122,21);
+    if(G.ngpNote&&G.time-G.ngpNote<5)txt('No finished game found. Finish the Pale Tower first.',210,298,9,'#e8c878','center',true)}}catch(e){}}}
+{const _tb=titleBtn;titleBtn=function(id){
+  if(id==='tngpt'){try{localStorage.setItem('abbeyNgpOn',ngpEnabled()?'0':'1')}catch(e){}sfx('equip');return}
+  if(id==='tngp'){audioInit();if(!ngpEnabled())return;const f=ngFinishedSave();if(!f){G.ngpNote=G.time;sfx('locked');return}
+    restore(f[1]);const go=()=>{if(G.state!=='play'||G.cut||G.talk){if((go.n=(go.n||0)+1)<40)later(500,go);return}ngOffer()};later(900,go);return}
+  return _tb.apply(this,arguments)}}
+/* never before the game is completed: the offer and the beginning refuse, and the Gameplay menu button needs both a finished game and the switch on */
+{const _no=ngOffer;ngOffer=function(){if(!ngDone()||!ngpEnabled())return;return _no.apply(this,arguments)}}
+{const _nb=ngBegin;ngBegin=function(){if(!ngDone()||!ngpEnabled())return;ngpMark();return _nb.apply(this,arguments)}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

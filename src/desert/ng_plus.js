@@ -6,7 +6,7 @@
    and so do owned houses with their chest, kill counts for trophies and the game settings. Finishing the game again offers it again, with the new level.
    ========================================================================== */
 const NG_KEEP=/^(nt|hs|ngp|autoScaleOn|noBarNums|noAdapt|noFog|lookXNormal|diffStep|k_.*)$/;
-const ngReady=()=>{try{return psf6S().king===2}catch(e){return false}};
+const ngReady=()=>{try{return psf6S().king===2&&ngpEnabled()}catch(e){return false}};
 function ngTalk(name,text,opts){G.talk={d:{k:'_',x:G.P.x,y:G.P.y},n:{name},node:say(text,opts),t:G.time,btns:[]};G.hold=null;G.queued=null}
 function ngOffer(){
   const pl=partyLevel(),n=(G.flags.ngp|0);
@@ -28,7 +28,7 @@ function ngBegin(){
   msg('New Game Plus. You wake in the crypts below the abbey, as you were. The creatures have grown to match you.','#ffe36a');
   try{writeAreaSaves()}catch(e){}}
 /* the offset: every place's level goes up by ngOff, except the Never-Ending Tower, which scales by itself */
-{const _c=crypt1Level;crypt1Level=function(e){const r=_c.apply(this,arguments);return r?r+((G.flags&&G.flags.ngOff)||0):r}}
+{const _c=crypt1Level;crypt1Level=function(e){const r=_c.apply(this,arguments);return r?r+(typeof ngEff==='function'?ngEff():0):r}}
 /* the tower stays open to a New Game Plus party (ntLevelOk in nt_map.js passes when G.flags.ngp is set) */
 /* the Gameplay menu: a button once the Pale King is dead */
 {const _dg=drawGameplay;drawGameplay=function(){_dg.apply(this,arguments);if(ngReady())btnText('gp_ngp','New Game Plus',296,290,106,24)}}

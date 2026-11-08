@@ -20,7 +20,7 @@ function ngwCurve(){
     for(let i=1;i<pl.length;i++)if(l<=pl[i][0]){const a=pl[i-1],b=pl[i];return a[1]+(b[1]-a[1])*(l-a[0])/Math.max(1,b[0]-a[0])}return last[1]};
   return NGW_P}
 function ngWeapons(){
-  const off=Math.max(0,(G.flags&&G.flags.ngOff)|0);
+  const off=Math.max(0,typeof ngEff==='function'?ngEff():0);
   if(off===NGW_ON)return;
   const P=ngwCurve();
   for(const id in ITEMDEF){const d=ITEMDEF[id];if(!d||d.k!=='weapon'||!d.dmg)continue;
