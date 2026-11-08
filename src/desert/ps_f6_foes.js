@@ -33,7 +33,7 @@ Object.assign(ENEMY_DEF,{
   psf6_e6:psf6B(6,{name:'The Mirror Duchess',hp:2200,dmg:[32,45],verb:'slashes',xp:1650}),
   psf6_e7:psf6B(7,{name:'The Thorn Scribe',hp:2400,dmg:[34,47],verb:'stabs',xp:1800,regrow:1}),
   psf6_e8:psf6B(8,{name:'The Weeping Saint',hp:2600,dmg:[36,50],verb:'crushes',xp:1950}),
-  psf6_e9:psf6B(9,{name:'The Crown Knight',hp:2900,dmg:[38,53],verb:'cuts',xp:2150}),
+  psf6_e9:psf6B(9,{name:'The Crown Knight',hp:2900,dmg:[27,37],verb:'cuts',xp:2150}),
   psf6_e10:psf6B(10,{name:"The King's Executioner",hp:3200,dmg:[40,56],verb:'chops',xp:2400})});
 /* the room bosses are warm-ups: weaker than first made (less than half the health, 60% of the damage). Only the Pale King is hard. */
 for(const t of PSF6_FOES){const d=ENEMY_DEF[t];d.hp=Math.round(d.hp*.42);d.dmg=[Math.round(d.dmg[0]*.6),Math.round(d.dmg[1]*.6)]}
