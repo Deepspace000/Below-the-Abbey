@@ -38,7 +38,7 @@ Object.assign(ENEMY_DEF,{
 /* the room bosses are warm-ups: weaker than first made (less than half the health, 60% of the damage). Only the Pale King is hard. */
 for(const t of PSF6_FOES){const d=ENEMY_DEF[t];d.hp=Math.round(d.hp*.42);d.dmg=[Math.round(d.dmg[0]*.6),Math.round(d.dmg[1]*.6)]}
 if(typeof NO_VARY!=='undefined')NO_VARY.push(...PSF6_FOES,'psf6_king');
-if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('psf6_king');
+/* the Pale King is sized in ps_king_size.js (great at first, human size once the fight starts) */
 if(typeof BOSS_GOLD!=='undefined'){
   const G0=[[5000,6500],[5500,7000],[6000,7500],[6500,8000],[7000,8800],[7500,9400],[8000,10000],[8500,10600],[9000,11300],[9000,12000]];
   PSF6_FOES.forEach((t,i)=>{BOSS_GOLD[t]=G0[i]});BOSS_GOLD.psf6_king=[12000,16000]}

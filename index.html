@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.877';
+const VERSION='3.878';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -80840,7 +80840,7 @@ Object.assign(ENEMY_DEF,{
 /* the room bosses are warm-ups: weaker than first made (less than half the health, 60% of the damage). Only the Pale King is hard. */
 for(const t of PSF6_FOES){const d=ENEMY_DEF[t];d.hp=Math.round(d.hp*.42);d.dmg=[Math.round(d.dmg[0]*.6),Math.round(d.dmg[1]*.6)]}
 if(typeof NO_VARY!=='undefined')NO_VARY.push(...PSF6_FOES,'psf6_king');
-if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('psf6_king');
+/* the Pale King is sized in ps_king_size.js (great at first, human size once the fight starts) */
 if(typeof BOSS_GOLD!=='undefined'){
   const G0=[[5000,6500],[5500,7000],[6000,7500],[6500,8000],[7000,8800],[7500,9400],[8000,10000],[8500,10600],[9000,11300],[9000,12000]];
   PSF6_FOES.forEach((t,i)=>{BOSS_GOLD[t]=G0[i]});BOSS_GOLD.psf6_king=[12000,16000]}
@@ -85356,6 +85356,21 @@ function fsSlot(){
     let c=0;for(const k of [0,-18,18,-36,36,-54,54,-72,72]){if(!used.some(u=>Math.abs(u-k)<16)){c=k;break}}
     f._o=c;f.y+=c;f.x+=((used.length%2)?1:-1)*Math.min(12,4+used.length*3)}}
 {const _df=drawFloats;drawFloats=function(dt){try{fsSlot()}catch(e){}return _df.apply(this,arguments)}}
+
+/* ---- src/desert/ps_king_size.js ---- */
+/* ==========================================================================
+   THE PALE KING'S SIZE (v3.878). He used to be drawn at his full great size (2.6 high) all the time, so up close his head was above the top of the view, as if he floated over the party.
+   Now he stands at the great size while the party crosses the hall, and when it comes within about five squares, or he is hurt, he comes down to a human size that fits the window
+   (the same fit as other creatures) over about a second and a half, and stays there for the fight.
+   ========================================================================== */
+{const _fs=fitScale;fitScale=function(t,def,base){
+  const v=_fs.apply(this,arguments);
+  if(t!=='psf6_king')return v;
+  const e=G.enemies.find(q=>q.t==='psf6_king');if(!e)return v;
+  const d=Math.hypot((e.rx!==undefined?e.rx:e.x)-G.C.x,(e.ry!==undefined?e.ry:e.y)-G.C.y);
+  if(e._kS===undefined&&(d<=5.5||(e.maxhp&&e.hp<e.maxhp)))e._kS=G.time;
+  const k=e._kS===undefined?0:Math.min(1,(G.time-e._kS)/1.5),s=k*k*(3-2*k);
+  return 1+(Math.min(v,.5)-1)*s}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
