@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.891';
+const VERSION='3.892';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -83347,7 +83347,7 @@ function epStreet(n,P){const open=(x,y)=>x>=0&&y>=0&&x<MW&&y<MH&&G.grid[y][x]===
     let bad=false;for(let b=-1;b<=1;b++)for(let a=-1;a<=1;a++){if(door(g(a,b)))bad=true;if(P.notNear&&fm&&(a===0||b===0)&&P.notNear.includes(fm[(y+b)*MW+x+a]))bad=true}if(bad)continue; // never beside the road
     if(placed.some(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)<(P.gap||3)))continue;if(hash2(x,y,n*37+1)>=(P.p||.4))continue;
     const nb=placed.filter(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)<8).map(p=>p[2]);let k=ks[(hash2(x,y,n*37+2)*ks.length)|0];for(let t=0;t<ks.length&&nb.includes(k);t++)k=ks[(ks.indexOf(k)+1)%ks.length];
-    placed.push([x,y,k]);G.decor.push({k:'ep_'+k,x,y,block:false,deco:true,epSt:1,loot:false,shop:false,ox:E?.28:Wt?-.28:(hash2(x,y,9)-.5)*.3,oy:S?.28:N?-.28:(hash2(x,y,8)-.5)*.3,sc:+(.85+hash2(x,y,n*37+3)*.3).toFixed(2)})}}
+    placed.push([x,y,k]);G.decor.push({k:'ep_'+k,x,y,block:false,deco:true,epSt:1,loot:false,shop:false,ox:(E?.28:Wt?-.28:(hash2(x,y,9)-.5)*.3)*(k==='crate'?.4:1),oy:(S?.28:N?-.28:(hash2(x,y,8)-.5)*.3)*(k==='crate'?.4:1),sc:+((.85+hash2(x,y,n*37+3)*.3)*(k==='crate'?.6:1)).toFixed(2)})}}
 /* windows that follow the time of day (opt-in: S.night, used by Thornwick and Ironhill). Each lit window picture gets a glow picture (T.e) for every
    step of the day: dim by day (as the grime pass left it), warm amber with a soft halo from dusk, fully lit 19:00 to 05:00, dimming again 05:00 to 07:00.
    A step is one eighth of the way; the pictures are made once, the first time a step is needed, and swapped in only when the step changes. */
@@ -83572,6 +83572,8 @@ const EP_SPEC={
      street:{keys:['orecart','coalheap','coalsacks','toolrack','anvil','orecrate','brazier','coalheap','firewood','rubble','planks','sacks','crate','bucket','rainbarrel','wheel'],p:.6,gap:3,on:'12',notNear:'03456',fence:1,fenceRe:/^(fence|ptree|gtree|pjuniper|pbracken|grocks|gboulder|well)/}}
 };
 setTimeout(()=>{try{epLoad()}catch(e){}},4000); // the early polish pictures are small: fetch them soon after the start, so every first visit has them
+/* the crate picture is wide and was pushed into the wall corner, so it was cut off: every ep_crate is smaller and kept near the middle of its square (done once per level load) */
+{let _lastD=null;const _u=update;update=function(dt){try{if(G.decor&&G.decor!==_lastD){_lastD=G.decor;for(const d of G.decor)if(d.k==='ep_crate'&&!d._cf){d._cf=1;d.sc=Math.min(d.sc||1,.62);d.ox=(d.ox||0)*.35;d.oy=(d.oy||0)*.35}}}catch(e){}return _u.apply(this,arguments)}}
 
 /* ---- src/desert/bones_remake.js ---- */
 /* ==========================================================================
@@ -85482,6 +85484,7 @@ try{if(!ngpUnlocked()&&ngFinishedSave())ngpMark()}catch(e){}
      battle 2: if monsters are too hard, come back later.     battle 3: potions can be put in shortcut slots.
      the first door opened: some doors need keys and odd walls may hide secrets.   the first weapon picked up: equip it from the inventory.
      the first food picked up: food stops starving.   the first rest: resting heals if you have food.   the first meal eaten: buy or find food and potions.
+   The boxes glow and shine (a moving highlight, a breathing gold glow) and have a line along the bottom that runs out, so they look temporary.
    Each box goes away by itself after 12 seconds or when clicked, and a 'Hints' button on the Gameplay page (kept on this computer: abbeyHintsOff) stops every hint, and each box column ends with a line saying so.
    What has been shown is kept in the game's flags (G.flags.tut), so a hint is not shown twice in a game.
    ========================================================================== */
@@ -85521,8 +85524,19 @@ let TUT_IN=false;
     for(const b of TUT_SHOW){
       const lines=wrapText(TUT_TEXT[b.id],w-18,fs),h=lines.length*10+14;
       ctx.save();ctx.globalAlpha=clamp((12-(G.time-b.t))*2,0,1)*clamp((G.time-b.t)*5+.2,0,1);
+      const age=G.time-b.t,pulse=.5+.5*Math.sin(G.time*4+y*.05);
+      // a gold glow that breathes, so the box is easy to notice
+      ctx.shadowColor='rgba(255,214,120,'+(.45+.4*pulse).toFixed(2)+')';ctx.shadowBlur=7+7*pulse;
       ctx.fillStyle='rgba(12,9,5,.88)';rrect(ctx,x,y,w,h,4);ctx.fill();ctx.lineWidth=1.8;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x,y,w,h,4);ctx.stroke();
+      ctx.shadowBlur=0;ctx.shadowColor='transparent';
       lines.forEach((s,i)=>txt(s,x+9,y+12+i*10,fs,'#ece0c0','left',false,undefined,w-18));
+      // a shine that sweeps across the box every couple of seconds
+      ctx.save();rrect(ctx,x,y,w,h,4);ctx.clip();
+      const ph=((G.time*.45+y*.004)%1),sx=x-40+ph*(w+80),sg=ctx.createLinearGradient(sx-22,y,sx+22,y+h);
+      sg.addColorStop(0,'rgba(255,240,190,0)');sg.addColorStop(.5,'rgba(255,240,190,.34)');sg.addColorStop(1,'rgba(255,240,190,0)');
+      ctx.fillStyle=sg;ctx.fillRect(x,y,w,h);ctx.restore();
+      // a thin line along the bottom that runs out: the hint is only there for a while
+      ctx.fillStyle='rgba(232,200,120,.75)';ctx.fillRect(x+4,y+h-3,(w-8)*clamp(1-age/12,0,1),1.4);
       ctx.restore();btn('tut_ok'+b.id,x,y,w,h);y+=h+4}
     // a plain line under the boxes: the switch is in Menu > Settings > Gameplay
     ctx.save();ctx.globalAlpha=.9;txt('Turn hints off in gameplay settings.',x+w-4,y+8,7.6,'#d8c88e','right');ctx.restore()}catch(e){console.error('tut ui',e)}}}

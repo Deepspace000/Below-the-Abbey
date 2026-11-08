@@ -4,6 +4,7 @@
      battle 2: if monsters are too hard, come back later.     battle 3: potions can be put in shortcut slots.
      the first door opened: some doors need keys and odd walls may hide secrets.   the first weapon picked up: equip it from the inventory.
      the first food picked up: food stops starving.   the first rest: resting heals if you have food.   the first meal eaten: buy or find food and potions.
+   The boxes glow and shine (a moving highlight, a breathing gold glow) and have a line along the bottom that runs out, so they look temporary.
    Each box goes away by itself after 12 seconds or when clicked, and a 'Hints' button on the Gameplay page (kept on this computer: abbeyHintsOff) stops every hint, and each box column ends with a line saying so.
    What has been shown is kept in the game's flags (G.flags.tut), so a hint is not shown twice in a game.
    ========================================================================== */
@@ -43,8 +44,19 @@ let TUT_IN=false;
     for(const b of TUT_SHOW){
       const lines=wrapText(TUT_TEXT[b.id],w-18,fs),h=lines.length*10+14;
       ctx.save();ctx.globalAlpha=clamp((12-(G.time-b.t))*2,0,1)*clamp((G.time-b.t)*5+.2,0,1);
+      const age=G.time-b.t,pulse=.5+.5*Math.sin(G.time*4+y*.05);
+      // a gold glow that breathes, so the box is easy to notice
+      ctx.shadowColor='rgba(255,214,120,'+(.45+.4*pulse).toFixed(2)+')';ctx.shadowBlur=7+7*pulse;
       ctx.fillStyle='rgba(12,9,5,.88)';rrect(ctx,x,y,w,h,4);ctx.fill();ctx.lineWidth=1.8;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x,y,w,h,4);ctx.stroke();
+      ctx.shadowBlur=0;ctx.shadowColor='transparent';
       lines.forEach((s,i)=>txt(s,x+9,y+12+i*10,fs,'#ece0c0','left',false,undefined,w-18));
+      // a shine that sweeps across the box every couple of seconds
+      ctx.save();rrect(ctx,x,y,w,h,4);ctx.clip();
+      const ph=((G.time*.45+y*.004)%1),sx=x-40+ph*(w+80),sg=ctx.createLinearGradient(sx-22,y,sx+22,y+h);
+      sg.addColorStop(0,'rgba(255,240,190,0)');sg.addColorStop(.5,'rgba(255,240,190,.34)');sg.addColorStop(1,'rgba(255,240,190,0)');
+      ctx.fillStyle=sg;ctx.fillRect(x,y,w,h);ctx.restore();
+      // a thin line along the bottom that runs out: the hint is only there for a while
+      ctx.fillStyle='rgba(232,200,120,.75)';ctx.fillRect(x+4,y+h-3,(w-8)*clamp(1-age/12,0,1),1.4);
       ctx.restore();btn('tut_ok'+b.id,x,y,w,h);y+=h+4}
     // a plain line under the boxes: the switch is in Menu > Settings > Gameplay
     ctx.save();ctx.globalAlpha=.9;txt('Turn hints off in gameplay settings.',x+w-4,y+8,7.6,'#d8c88e','right');ctx.restore()}catch(e){console.error('tut ui',e)}}}

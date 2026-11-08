@@ -182,7 +182,7 @@ function epStreet(n,P){const open=(x,y)=>x>=0&&y>=0&&x<MW&&y<MH&&G.grid[y][x]===
     let bad=false;for(let b=-1;b<=1;b++)for(let a=-1;a<=1;a++){if(door(g(a,b)))bad=true;if(P.notNear&&fm&&(a===0||b===0)&&P.notNear.includes(fm[(y+b)*MW+x+a]))bad=true}if(bad)continue; // never beside the road
     if(placed.some(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)<(P.gap||3)))continue;if(hash2(x,y,n*37+1)>=(P.p||.4))continue;
     const nb=placed.filter(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)<8).map(p=>p[2]);let k=ks[(hash2(x,y,n*37+2)*ks.length)|0];for(let t=0;t<ks.length&&nb.includes(k);t++)k=ks[(ks.indexOf(k)+1)%ks.length];
-    placed.push([x,y,k]);G.decor.push({k:'ep_'+k,x,y,block:false,deco:true,epSt:1,loot:false,shop:false,ox:E?.28:Wt?-.28:(hash2(x,y,9)-.5)*.3,oy:S?.28:N?-.28:(hash2(x,y,8)-.5)*.3,sc:+(.85+hash2(x,y,n*37+3)*.3).toFixed(2)})}}
+    placed.push([x,y,k]);G.decor.push({k:'ep_'+k,x,y,block:false,deco:true,epSt:1,loot:false,shop:false,ox:(E?.28:Wt?-.28:(hash2(x,y,9)-.5)*.3)*(k==='crate'?.4:1),oy:(S?.28:N?-.28:(hash2(x,y,8)-.5)*.3)*(k==='crate'?.4:1),sc:+((.85+hash2(x,y,n*37+3)*.3)*(k==='crate'?.6:1)).toFixed(2)})}}
 /* windows that follow the time of day (opt-in: S.night, used by Thornwick and Ironhill). Each lit window picture gets a glow picture (T.e) for every
    step of the day: dim by day (as the grime pass left it), warm amber with a soft halo from dusk, fully lit 19:00 to 05:00, dimming again 05:00 to 07:00.
    A step is one eighth of the way; the pictures are made once, the first time a step is needed, and swapped in only when the step changes. */
@@ -407,3 +407,5 @@ const EP_SPEC={
      street:{keys:['orecart','coalheap','coalsacks','toolrack','anvil','orecrate','brazier','coalheap','firewood','rubble','planks','sacks','crate','bucket','rainbarrel','wheel'],p:.6,gap:3,on:'12',notNear:'03456',fence:1,fenceRe:/^(fence|ptree|gtree|pjuniper|pbracken|grocks|gboulder|well)/}}
 };
 setTimeout(()=>{try{epLoad()}catch(e){}},4000); // the early polish pictures are small: fetch them soon after the start, so every first visit has them
+/* the crate picture is wide and was pushed into the wall corner, so it was cut off: every ep_crate is smaller and kept near the middle of its square (done once per level load) */
+{let _lastD=null;const _u=update;update=function(dt){try{if(G.decor&&G.decor!==_lastD){_lastD=G.decor;for(const d of G.decor)if(d.k==='ep_crate'&&!d._cf){d._cf=1;d.sc=Math.min(d.sc||1,.62);d.ox=(d.ox||0)*.35;d.oy=(d.oy||0)*.35}}}catch(e){}return _u.apply(this,arguments)}}
