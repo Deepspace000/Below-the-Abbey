@@ -44,7 +44,12 @@ function psf6Slide(i){
   G.cut={id:'psf6end'+i,pic:s[0],i:0,t:G.time,lines:s[2].map(t=>({text:t,title:s[1]})),frames:s[3]||null,end:()=>psf6Slide(i+1)};G.hold=null;G.queued=null}
 function psf6Ending(){try{for(const f of PSF6_KING_FRAMES)if(typeof loadImg==='function'&&!IMG[f])loadImg(f,'assets/'+f+'.jpg')}catch(e){}let n=0;const go=()=>{if(G.cut||G.talk||G.state!=='play'){if(n++<30)later(1500,go);return}psf6Slide(0)};later(2500,go)}   // waits (up to about 45 s) while another scene, a talk or a menu state is open, instead of dropping the ending
 /* the first time in the Throne Room: the talk */
-pspOnArrive(n=>{if(n!==PSF6.THRONE)return;try{const F=psf6S();if(!F.talk&&F.king!==2){F.talk=1;later(900,()=>{if(!G.cut)startCut('psf6King')})}}catch(e){console.error('psf6 story',e)}});
+// the scene plays BEFORE the fight: it is tried again every 0.6 s (up to about 30 s) until nothing else is open, and the 'played' flag is set only once it has really started
+pspOnArrive(n=>{if(n!==PSF6.THRONE)return;try{const F=psf6S();if(F.talk||F.king===2)return;let tries=0;
+  const go=()=>{try{if(LEVEL!==PSF6.THRONE||F.talk||F.king===2)return;
+    if(G.cut||G.talk||G.menu||G.state!=='play'||hostileNear()){if(tries++<50)later(600,go);return}
+    F.talk=1;startCut('psf6King')}catch(e){console.error('psf6 story',e)}};
+  later(900,go)}catch(e){console.error('psf6 story',e)}});
 
 /* ---------- the main goal in the journal: quest psq50 (no giver: taken on the first arrival at the Pale Approach, paid once when the Pale King dies), the Story So Far chapters and the storyNext ladder ---------- */
 const psmGot=()=>{try{return !!pspF().key2||bagCount('pskey2')>0||!!pshF().stairOpen}catch(e){return false}};
