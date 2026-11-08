@@ -19,7 +19,7 @@ CUTS.psf6King=()=>[
   {who:'The Pale King',text:'A kindness. I have worn many silver rings, and each one was a village. The Blight is nothing but my silver running through the land, and I have forgotten how to stop it. I forgot how to be anything but a king who does not die.'},
   {who:hn(0),text:'Then we will stop it for you.'},
   {who:'The Pale King',text:'Yes. If I fall, every ring breaks and every dead man on the Road lies down. Osric\'s men will find every mayor and clerk who sold a town to me. I will not go quietly. I have not forgotten how to be a king.'},
-  {who:hn(1),text:'There is a teleport stone by the stair, if anyone wants potions first.'},
+  {who:hn(1),text:'The stone is in the room below the stair, if anyone wants potions first. There is none up here.'},
   {text:'The Pale King rises from his throne. The candles lean towards him.'}];
 /* the ending: four slides over painted pictures, then a last line */
 const PSF6_END=[

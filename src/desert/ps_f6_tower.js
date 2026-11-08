@@ -2,7 +2,7 @@
    THE PALE SPIRE, THE LAST PART: THE PALE TOWER (levels 9910 to 9919 and 9920; prefix psf6).
    Ten tiny rooms, one above the other, 14 x 14 each. In every room a boss stands between the stairs; a circular stair leads up, and a gilded chest holds a piece of the best gear in the
    game. Both stay shut until the boss of the room is dead. Room 1 (9910) has a teleport stone. The tenth room's stair leads up to the Throne Room (9920): a big hall with the Pale King on
-   his throne (level 120), and a second teleport stone so the party can go back to shop for gear and potions.
+   his throne (level 120), and no teleport stone. The second stone stands in room 10 (9919), one level below, so the party can go back to shop for gear and potions before the last fight but cannot leave in the middle of it.
    Bosses, gear and drops are in ps_f6_foes.js (ENEMY_DEF psf6_e1..psf6_e10, psf6_king; items pg_f6_*). Pictures: assets/ps f6rN* (see tools/PS_F6_ART.md).
    State: G.flags.psp.f6 = {boss:{N:2 when dead}, chest:{N:1 when opened}, seen, won}.
    ========================================================================== */
@@ -13,7 +13,7 @@ const PSF6={BASE:9909,THRONE:9920,N:10,W:14,
 const psf6S=()=>{const P=(G.flags.psp=G.flags.psp||{}),F=P.f6=P.f6||{};F.boss=F.boss||{};F.chest=F.chest||{};return F};
 const psf6Id=n=>n>=11?PSF6.THRONE:PSF6.BASE+n;
 const psf6Room=id=>id===PSF6.THRONE?11:(id>PSF6.BASE&&id<=PSF6.BASE+PSF6.N?id-PSF6.BASE:0);
-if(typeof TELE_KEEP_HI!=='undefined'){TELE_KEEP_HI.add(9910);TELE_KEEP_HI.add(9920)}   // the two teleport stones of the tower: room 1 and the throne room
+if(typeof TELE_KEEP_HI!=='undefined'){TELE_KEEP_HI.add(9910);TELE_KEEP_HI.add(9919)}   // the two teleport stones of the tower: room 1 and room 10, the antechamber just below the Throne Room (none in the Throne Room itself, so nobody can leave in the middle of the last fight)
 /* a painted picture of room n (assets/ps), or null while it is not made */
 const psf6Has=name=>{try{const k=pspPic(name);return k!=='gy_column'&&IMG[k]&&IMG[k].width?k:null}catch(e){return null}};
 /* the painted wall of room n, cut from tile 0 of its texture sheet; the plain dark ashlar stands in until it exists */
@@ -26,7 +26,7 @@ function psf6Dress(C,n,W,H,wh){
 const PSF6_PROP={centre:1.0,tall:1.0,hang:1.0};
 function psf6Build(info){
   const id=info.id||PSF6.cur,n=psf6Room(id),W=PSF6.W,H=PSF6.W,wh=3.2;
-  const C=pspMake({id,start:{x:PSF6.LAND[0],y:PSF6.LAND[1],f:0},floor:'f6f'+n,wh,amb:.3,lcol:[1.45,.85,.55],kind:'in',tele:n===1?[3,10]:undefined});
+  const C=pspMake({id,start:{x:PSF6.LAND[0],y:PSF6.LAND[1],f:0},floor:'f6f'+n,wh,amb:.3,lcol:[1.45,.85,.55],kind:'in',tele:(n===1||n===10)?[10,7]:undefined});
   C.room(2,2,11,11,{floor:'f6f'+n,name:PSF6.THEME[n-1],at:[7,7]});
   /* the room is small and round: everything outside a circle of radius 4.4 round the middle is wall again */
   for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(Math.hypot(x-6.5,y-6.5)>4.4){C.rows[y][x]='#';C.block[y*W+x]=1}
@@ -50,10 +50,10 @@ function psf6Build(info){
   C.dec(chp||'gy_chest',PSF6.CHEST[0],PSF6.CHEST[1],{block:true,sc:chp?.5:.6,npc:'psf6_chest'+n});
   C.mapNames.push({t:PSF6.THEME[n-1],x:7,y:7,k:'place'});
   return C.finish({start:{x:PSF6.LAND[0],y:PSF6.LAND[1],f:0}})}
-/* the Throne Room: a big hall, a red runner, a row of columns, the great throne at the north end, the Pale King in front of it, a teleport stone by the stair */
+/* the Throne Room: a big hall, a red runner, a row of columns, the great throne at the north end, the Pale King in front of it, no teleport stone (it is one level down) */
 function psf6ThroneBuild(info){
   const id=PSF6.THRONE,W=40,H=32,wh=4.2;
-  const C=pspMake({id,start:{x:20,y:26,f:0},floor:'f6f11',wh,amb:.5,lcol:[1.45,.85,.55],kind:'in',tele:[8,24]});
+  const C=pspMake({id,start:{x:20,y:26,f:0},floor:'f6f11',wh,amb:.5,lcol:[1.45,.85,.55],kind:'in'});   // no teleport stone here: the last one is in the room below
   C.room(4,4,35,27,{floor:'f6f11',name:'The Throne Room',at:[20,15]});
   for(let y=4;y<=27;y++)C.setFloor(19,y,21,y,'runner');
   psf6Dress(C,11,W,H,wh);
@@ -99,7 +99,7 @@ pspOnArrive(n=>{const r=psf6Room(n);if(!r)return;try{psf6Fit();const F=psf6S();f
     const dd=G.decor&&G.decor.find(d=>d.npc==='psf6_chest'+r);
     if(!F.seen)F.seen={};if(!F.seen[r]){F.seen[r]=1;msg(PSF6.INTRO[r-1],'#d8e4ff')}}
   else{if(F.king===2)for(let i=G.enemies.length-1;i>=0;i--)if(G.enemies[i].t==='psf6_king')G.enemies.splice(i,1);
-    if(!F.seen)F.seen={};if(!F.seen[11]){F.seen[11]=1;msg('A great black hall, as long as a church, with a red runner down the middle. At the far end the Pale King sits on a gilded throne, as still as a statue. There is a teleport stone by the stair. If you need more gear or potions, you can go back and shop, and come up again.','#ffe0a0')}}}catch(e){console.error('psf6 arrive',e)}});
+    if(!F.seen)F.seen={};if(!F.seen[11]){F.seen[11]=1;msg('A great black hall, as long as a church, with a red runner down the middle. At the far end the Pale King sits on a gilded throne, as still as a statue. There is no teleport stone up here. The last one is in the room below the stair. If you need more gear or potions, you can go back down and shop, and come up again.','#ffe0a0')}}}catch(e){console.error('psf6 arrive',e)}});
 /* the Pale King is dead: the end of the Pale Tower (ps_f6_foes.js calls this) */
 function psf6Won(){const F=psf6S();if(F.won)return;F.won=1;F.king=2;try{f2Chime('open')}catch(e){}
   msg('The Pale King falls from his throne and does not rise. The great hall goes quiet, and the green light in the windows goes out one pane at a time. The Pale Spire is empty.','#ffe0a0');if(typeof psq50Done==='function')psq50Done();if(typeof psf6Ending==='function')psf6Ending()}
