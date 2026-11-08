@@ -29,7 +29,7 @@ Object.assign(ENEMY_DEF,{
   psf6_e2:psf6B(2,{name:'The Organist Wraith',hp:1400,dmg:[24,34],verb:'rakes',xp:1050,fly:true,floatH:.3}),
   psf6_e3:psf6B(3,{name:'The Clock Reaper',hp:1600,dmg:[26,37],verb:'reaps',xp:1200,speed:2}),
   psf6_e4:psf6B(4,{name:'The Reliquary Mimic',hp:1800,dmg:[28,40],verb:'bites',xp:1350}),
-  psf6_e5:psf6B(5,{name:'The Weaver',hp:2000,dmg:[30,42],verb:'bites',xp:1500,speed:2}),
+  psf6_e5:psf6B(5,{name:'The Weaver',hp:2000,dmg:[21,29],verb:'bites',xp:1500,speed:2}),
   psf6_e6:psf6B(6,{name:'The Mirror Duchess',hp:2200,dmg:[32,45],verb:'slashes',xp:1650}),
   psf6_e7:psf6B(7,{name:'The Thorn Scribe',hp:2400,dmg:[34,47],verb:'stabs',xp:1800,regrow:1}),
   psf6_e8:psf6B(8,{name:'The Weeping Saint',hp:2600,dmg:[36,50],verb:'crushes',xp:1950}),
