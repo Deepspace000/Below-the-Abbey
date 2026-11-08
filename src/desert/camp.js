@@ -81,9 +81,9 @@ const CAMP_ACTS=[
     takeFood(2);advanceTime(60);const r=profPerk('cook');
     G.heroes.forEach(h=>{if(h.alive)h.food=Math.min(100,h.food+40+r*8)});afflInflict('wellfed',-1,true);if(r>=3)G.buffs.push({name:'A Master\'s Stew',b:'regen',amt:.4,left:200,hi:-1});
     profXP('cook',2);msg(['The stew is hot and hearty. The party eats in good spirits.','The meal is plain and filling. Bowls are scraped clean.','Warm food, a warm fire and nobody in a hurry. The party feels the better for it.','It is not a feast, but it is hot, and that is nearly the same thing.','The party eats well tonight, and sleeps better for it.'][(Math.random()*5)|0],'#e8c070');bondRandom(1)}},
-  {id:'sharpen',n:'Sharpen and mend the gear',d:'Blades keen, straps mended: the party deals more damage for the next day of fighting. A smith does it better.',cost:'30 minutes',ok:()=>true,run:hi=>{
-    advanceTime(30);const r=profPerk('smith');G.buffs=G.buffs.filter(b=>b.name!=='Sharpened Blades');G.buffs.push({name:'Sharpened Blades',b:'dmgPct',amt:.06+.025*r,left:400,hi:-1});
-    profXP('smith',2);msg(`Whetstones ring. The party deals ${Math.round((.06+.025*r)*100)}% more damage for a long while.`,'#e0a070')}},
+  {id:'sharpen',n:'Sharpen and mend the gear',d:'Blades keen, straps mended: the party deals more damage for the next 200 rounds of fighting. A smith does it better.',cost:'30 minutes',ok:()=>true,run:hi=>{
+    advanceTime(30);const r=profPerk('smith');G.buffs=G.buffs.filter(b=>b.name!=='Sharpened Blades');G.buffs.push({name:'Sharpened Blades',b:'dmgPct',amt:.06+.025*r,left:200,hi:-1});
+    profXP('smith',2);msg(`Whetstones ring. The party deals ${Math.round((.06+.025*r)*100)}% more damage for the next 200 rounds of fighting.`,'#e0a070')}},
   {id:'tend',n:'Tend the sick',d:'Rest and care for those with afflictions that a healer can ease. Each has a chance of cure; a healer improves it.',cost:'2 hours',ok:()=>afflList().some(e=>AFFL[e.id]&&AFFL[e.id].healer),run:hi=>{
     advanceTime(120);const r=profPerk('healer'),sk=skBase('persuade')*.01;let n=0;
     for(const e of afflList().slice()){const A=AFFL[e.id];if(A&&A.healer&&Math.random()<.35+.12*r+sk){afflRemove(e,true);n++}else if(A&&A.rest&&Math.random()<.5)e.rests++}
