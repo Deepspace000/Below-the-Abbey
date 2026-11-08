@@ -37,12 +37,12 @@ let TUT_IN=false;
     if(G.state!=='play'||!TUT_SHOW.length)return;
     if(tutOff()){TUT_SHOW=[];return}
     TUT_SHOW=TUT_SHOW.filter(b=>G.time-b.t<12);if(!TUT_SHOW.length)return;
-    const x=34,w=258,fs=8.5;let y=30;
+    const w=164,fs=8,x=404-w;let y=30; // right-hand side, narrow: the enemy's name and health bar are top left and the enemy is in the middle
     for(const b of TUT_SHOW){
-      const lines=wrapText(TUT_TEXT[b.id],w-22,fs),h=lines.length*11+16;
+      const lines=wrapText(TUT_TEXT[b.id],w-18,fs),h=lines.length*10+14;
       ctx.save();ctx.globalAlpha=clamp((12-(G.time-b.t))*2,0,1)*clamp((G.time-b.t)*5+.2,0,1);
-      ctx.fillStyle='rgba(12,9,5,.93)';rrect(ctx,x,y,w,h,4);ctx.fill();ctx.lineWidth=1.8;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x,y,w,h,4);ctx.stroke();
-      lines.forEach((s,i)=>txt(s,x+11,y+13+i*11,fs,'#ece0c0','left',false,undefined,w-22));
+      ctx.fillStyle='rgba(12,9,5,.88)';rrect(ctx,x,y,w,h,4);ctx.fill();ctx.lineWidth=1.8;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x,y,w,h,4);ctx.stroke();
+      lines.forEach((s,i)=>txt(s,x+9,y+12+i*10,fs,'#ece0c0','left',false,undefined,w-18));
       ctx.restore();btn('tut_ok'+b.id,x,y,w,h);y+=h+4}
     // the check box
     ctx.save();ctx.fillStyle='rgba(12,9,5,.93)';rrect(ctx,x,y,112,16,3);ctx.fill();ctx.lineWidth=1.4;ctx.strokeStyle='#8a7448';rrect(ctx,x,y,112,16,3);ctx.stroke();
