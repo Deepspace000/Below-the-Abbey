@@ -5,7 +5,7 @@
    so a level 1 creature stands at the party's level and every later one at its old level plus that. The Never-Ending Tower is kept open and keeps its record (its floors scale by themselves, so no offset there),
    and so do owned houses with their chest, kill counts for trophies and the game settings. Finishing the game again offers it again, with the new level.
    ========================================================================== */
-const NG_KEEP=/^(nt|hs|ngp|autoScaleOn|noBarNums|noAdapt|noFog|lookXNormal|diffStep|k_.*)$/;
+const NG_KEEP=/^(nt|hs|ngp|tut|autoScaleOn|noBarNums|noAdapt|noFog|lookXNormal|diffStep|k_.*)$/;
 const ngReady=()=>{try{return psf6S().king===2&&ngpEnabled()}catch(e){return false}};
 function ngTalk(name,text,opts){G.talk={d:{k:'_',x:G.P.x,y:G.P.y},n:{name},node:say(text,opts),t:G.time,btns:[]};G.hold=null;G.queued=null}
 function ngOffer(){
