@@ -203,7 +203,7 @@ for(const n of Object.keys(GAP_HOSTS).map(Number)){
    and of the other marks). Positions are in world map coordinates; GAP_WORLD is only the first guess. */
 const GAP_WORLD={7310:[214,160],7311:[334,152],7312:[788,88],7313:[850,128],7314:[-540,238],7315:[-610,200],7316:[-656,226],7317:[-706,242]};
 if(typeof WORLD_LOCS!=='undefined'&&typeof wmnSpread==='function'){
-  for(const s of GAP_SPECS){const p=GAP_WORLD[s.id];if(p&&!WORLD_LOCS.some(l=>l.k==='gap'+s.id))WORLD_LOCS.push({k:'gap'+s.id,n:s.name,lv:[s.id],x:p[0],y:p[1],ic:'cave',sc:.42,gap:s.id,host:s.host,inside:s.inside})}
+  for(const s of GAP_SPECS){const p=GAP_WORLD[s.id];if(p&&!WORLD_LOCS.some(l=>l.k==='gap'+s.id))WORLD_LOCS.push({k:'gap'+s.id,n:s.name,lv:[s.id],x:p[0],y:p[1],ic:'cave',sc:.42,gap:s.id,host:s.host,inside:s.inside,dy:s.id===7313?-26:0})}
   const _wsp=wmnSpread;
   wmnSpread=function(){
     const mine=WORLD_LOCS.filter(l=>l.gap);for(const g of mine){if(g._x0===undefined){g._x0=g.x;g._y0=g.y}}
@@ -217,15 +217,16 @@ if(typeof WORLD_LOCS!=='undefined'&&typeof wmnSpread==='function'){
       for(const t of WMN_REG){ctx.save();ctx.font=`${t[3]}px ${FTITLE}`;const w=ctx.measureText(t[0]).width+t[0].length*1.5+6;ctx.restore();occ.push([t[1]-w/2-6,t[2]-t[3]*.7-6,t[1]+w/2+6,t[2]+t[3]*.7+6])}
       for(const l of mine){
         const hl=WORLD_LOCS.find(q=>!q.gap&&q.lv&&q.lv.includes(l.host)),hx=hl?hl.x:l._x0,hy=hl?hl.y:l._y0,b=boxOf(l),inside=!!(hl&&l.inside);let best=null;
+        const ORDER=[...Array(48).keys()].map(k=>k/48*Math.PI*2);if(l.pref!==undefined)ORDER.sort((u,v)=>{const d=q=>{const t=Math.abs(q-l.pref)%(Math.PI*2);return Math.min(t,Math.PI*2-t)};return d(u)-d(v)}); // pref: the direction a mark likes to sit in (south for the places under Oldhaven)
         for(let rad=0;rad<=140&&!best;rad+=1.5)for(let a=0;a<48&&!best;a++){
-          const ang=a/48*Math.PI*2,x=Math.round((hx+Math.cos(ang)*rad*1.4)*2)/2,y=Math.round((hy+Math.sin(ang)*rad)*2)/2,bx=[x+b[0]-1,y+b[1]-1,x+b[2]+1,y+b[3]+1];
+          const ang=ORDER[a],x=Math.round((hx+Math.cos(ang)*rad*1.4)*2)/2,y=Math.round((hy+Math.sin(ang)*rad)*2)/2,bx=[x+b[0]-1,y+b[1]-1,x+b[2]+1,y+b[3]+1];
           if(x<-1000||x>1450||y<20||y>380)continue;
           if(inside){ // on an island: the mark stands on the island's own picture, clear of its name and of everything else
             const ib=wmnShape(hl).ib;if(x<ib[0]+4||x>ib[2]-4||y<ib[1]+10||y>ib[3]-8)continue;
             if(occ.some(q=>q[4]!==hl&&wmnHit(bx,q)))continue;
             if(wmnHit(bx,[hl.x-70,ib[3]-3,hl.x+70,ib[3]+16]))continue;best=[x,y,bx];continue}
           if(occ.some(q=>wmnHit(bx,q)))continue;best=[x,y,bx]}
-        if(best){l.x=best[0];l.y=best[1];occ.push(best[2])}else{l.x=l._x0;l.y=l._y0}
+        if(best){l.x=best[0];l.y=best[1]+(l.dy||0);occ.push(best[2])}else{l.x=l._x0;l.y=l._y0}
       }
     }catch(e){console.error('gap marks',e)}
     return r};

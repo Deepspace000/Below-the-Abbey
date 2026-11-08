@@ -27,11 +27,22 @@ const PSF6_END=[
   ['end_sale','Sale',['The gates of Sale are opened from the inside. The shops unbar their doors and the lamps are lit for living people. Wren and Aldous Wend come out of the Sanctuary into the square, and the children of the town run to meet them.','Wystan Maldrake goes home to Underhill. He plants a garden on the barrow and tends it for the rest of his life.']],
   ['end_prison','The Gaol of Oldhaven',['King Osric\'s men find every name in the ledger. The corrupt mayors, clerks and paymasters who took the Pale Sovereign\'s silver are brought to Oldhaven in chains. Every one of them sits in the gaol, waiting for the judge, and none of them has a coin left.']],
   ['end_king','King Osric',['King Osric rules for many more years, in a land at peace. His granddaughter Wren sits beside him, and the oak crown on her head does not wilt. The party\'s names are written at the top of the book of Oldhaven, as friends of the crown.','The Abbey is quiet. The crypts are empty. Somewhere far to the west, the sun comes up over green hills.','THE END. Thank you for playing Below the Abbey.']]];
+/* the first slide: the Pale King lies slumped on the floor of his hall, then vanishes (frames end_pk0 to end_pk7: the same hall, the king dissolving block by block into dust) */
+const PSF6_KING_FRAMES=['end_pk0','end_pk1','end_pk2','end_pk3','end_pk4','end_pk5','end_pk6','end_pk7'],PSF6_FRAME_T=.7;
+PSF6_END.unshift(['end_pk0','The Pale King',['The Pale King lies where he fell. The candles that leaned towards him stand straight again.','The dust lifts from him, a little at a time, until the floor is bare. A crown and a sceptre are all that is left.'],PSF6_KING_FRAMES]);
+{const _da=drawScenePic;drawScenePic=function(){const C=G.cut;
+  if(C&&C.frames){ // the picture sits in the upper part of the screen with the caption below it, so the king and the crown are not hidden behind the text
+    const key=C.i===0?C.frames[0]:C.frames[Math.min(C.frames.length-1,Math.floor((G.time-C.t)/PSF6_FRAME_T))],keep=C.pic;C.pic='__none';
+    try{_da.apply(this,arguments)}finally{C.pic=keep}
+    const im=IMG[key];if(im&&im.width){const h=240,w=h*im.width/im.height;ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(im,(DW-w)/2,0,w,h);ctx.strokeStyle='#8a7448';ctx.lineWidth=1.5;ctx.strokeRect((DW-w)/2+.5,.5,w-1,h-1);ctx.restore()}
+    return}
+  return _da.apply(this,arguments)}}
+{const _ca=cutAdvance;cutAdvance=function(){const C=G.cut;if(C&&C.frames&&C.i===1&&(G.time-C.t)<C.frames.length*PSF6_FRAME_T+.6)return;return _ca.apply(this,arguments)}}
 function psf6Slide(i){
   const s=PSF6_END[i];if(!s){G.cut=null;try{ngOffer()}catch(e){console.error(e)}return}
-  if(typeof loadImg==='function'&&!IMG[s[0]])loadImg(s[0],'assets/'+s[0]+'.jpg');
-  G.cut={id:'psf6end'+i,pic:s[0],i:0,t:G.time,lines:s[2].map(t=>({text:t,title:s[1]})),end:()=>psf6Slide(i+1)};G.hold=null;G.queued=null}
-function psf6Ending(){let n=0;const go=()=>{if(G.cut||G.talk||G.state!=='play'){if(n++<30)later(1500,go);return}psf6Slide(0)};later(2500,go)}   // waits (up to about 45 s) while another scene, a talk or a menu state is open, instead of dropping the ending
+  for(const f of (s[3]||[s[0]]))if(typeof loadImg==='function'&&!IMG[f])loadImg(f,'assets/'+f+'.jpg');
+  G.cut={id:'psf6end'+i,pic:s[0],i:0,t:G.time,lines:s[2].map(t=>({text:t,title:s[1]})),frames:s[3]||null,end:()=>psf6Slide(i+1)};G.hold=null;G.queued=null}
+function psf6Ending(){try{for(const f of PSF6_KING_FRAMES)if(typeof loadImg==='function'&&!IMG[f])loadImg(f,'assets/'+f+'.jpg')}catch(e){}let n=0;const go=()=>{if(G.cut||G.talk||G.state!=='play'){if(n++<30)later(1500,go);return}psf6Slide(0)};later(2500,go)}   // waits (up to about 45 s) while another scene, a talk or a menu state is open, instead of dropping the ending
 /* the first time in the Throne Room: the talk */
 pspOnArrive(n=>{if(n!==PSF6.THRONE)return;try{const F=psf6S();if(!F.talk&&F.king!==2){F.talk=1;later(900,()=>{if(!G.cut)startCut('psf6King')})}}catch(e){console.error('psf6 story',e)}});
 
