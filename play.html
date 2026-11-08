@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.873';
+const VERSION='3.874';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -85340,6 +85340,22 @@ function resSync(d){if(!d||!d.contents)return;const i=d.contents.findIndex(x=>x.
 {const _hb=typeof hgBoughtItem==='function'?hgBoughtItem:null;hgBoughtItem=function(id){
   if(id==='resurrection'){const P=resPool();P.n=Math.max(0,P.n-1);try{const d=G.loot&&G.loot.decor;if(d&&d.contents&&P.n<=0){const i=d.contents.findIndex(x=>x.id==='resurrection');if(i>=0)d.contents.splice(i,1)}}catch(e){}}
   return _hb?_hb.apply(this,arguments):undefined}}
+
+/* ---- src/desert/float_spread.js ---- */
+/* ==========================================================================
+   DAMAGE NUMBERS THAT DO NOT OVERLAP (v3.874). When several hits land on the same creature or near each other in the same moment (a double strike, a spell on a group, poison and a blow together),
+   their floating numbers and splats used to be drawn on top of each other. Each new one now takes the nearest free slot above or below, with a little sideways nudge, once, when it first appears.
+   ========================================================================== */
+function fsSlot(){
+  const F=G.floats;if(!F||!F.length)return;
+  for(let i=0;i<F.length;i++){const f=F[i];if(f._s)continue;f._s=1;
+    const used=[];
+    for(let j=0;j<F.length;j++){const g=F[j];if(g===f||!g._s||g._o===undefined)continue;
+      if(Math.abs(g.x-f.x)<50&&Math.abs(g.y-f.y)<40&&g.t<.75)used.push(g._o)}
+    if(!used.length){f._o=0;continue}
+    let c=0;for(const k of [0,-18,18,-36,36,-54,54,-72,72]){if(!used.some(u=>Math.abs(u-k)<16)){c=k;break}}
+    f._o=c;f.y+=c;f.x+=((used.length%2)?1:-1)*Math.min(12,4+used.length*3)}}
+{const _df=drawFloats;drawFloats=function(dt){try{fsSlot()}catch(e){}return _df.apply(this,arguments)}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
