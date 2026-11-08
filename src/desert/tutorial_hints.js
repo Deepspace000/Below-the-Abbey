@@ -3,7 +3,7 @@
      battle 1: hold the space bar or action button for repeated attacks; power moves hit harder but cost mana or stamina.
      battle 2: if monsters are too hard, come back later.     battle 3: potions can be put in shortcut slots.
      the first food picked up: food stops starving.   the first rest: resting heals if you have food.   the first meal eaten: buy or find food and potions.
-   Each box goes away by itself after 12 seconds or when clicked, and a 'Turn hints off' check box (kept on this computer: abbeyHintsOff) stops every hint for good.
+   Each box goes away by itself after 12 seconds or when clicked, and a 'Hints' button on the Gameplay page (kept on this computer: abbeyHintsOff) stops every hint, and each box column ends with a line saying so.
    What has been shown is kept in the game's flags (G.flags.tut), so a hint is not shown twice in a game.
    ========================================================================== */
 const TUT_TEXT={
@@ -44,11 +44,11 @@ let TUT_IN=false;
       ctx.fillStyle='rgba(12,9,5,.88)';rrect(ctx,x,y,w,h,4);ctx.fill();ctx.lineWidth=1.8;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x,y,w,h,4);ctx.stroke();
       lines.forEach((s,i)=>txt(s,x+9,y+12+i*10,fs,'#ece0c0','left',false,undefined,w-18));
       ctx.restore();btn('tut_ok'+b.id,x,y,w,h);y+=h+4}
-    // the check box
-    ctx.save();ctx.fillStyle='rgba(12,9,5,.93)';rrect(ctx,x,y,112,16,3);ctx.fill();ctx.lineWidth=1.4;ctx.strokeStyle='#8a7448';rrect(ctx,x,y,112,16,3);ctx.stroke();
-    ctx.strokeStyle='#d8c88e';ctx.lineWidth=1.2;ctx.strokeRect(x+6,y+4.5,8,8);ctx.restore();
-    txt('Turn hints off',x+19,y+9,8,'#d8c88e','left');btn('tut_off',x,y,112,16)}catch(e){console.error('tut ui',e)}}}
+    // a plain line under the boxes: the switch is in Menu > Settings > Gameplay
+    ctx.save();ctx.globalAlpha=.9;txt('Turn hints off in gameplay settings.',x+w-4,y+8,7.6,'#d8c88e','right');ctx.restore()}catch(e){console.error('tut ui',e)}}}
 {const _b=handleBtn;handleBtn=function(id){
-  if(id==='tut_off'){try{localStorage.setItem('abbeyHintsOff','1')}catch(e){}TUT_SHOW=[];sfx('equip');return}
+  if(G.menu==='gameplay'&&id==='gp_hints'){try{localStorage.setItem('abbeyHintsOff',tutOff()?'0':'1')}catch(e){}TUT_SHOW=[];sfx('equip');return}
   if(/^tut_ok/.test(id)){const k=id.slice(6);TUT_SHOW=TUT_SHOW.filter(b=>b.id!==k);sfx('equip');return}
   return _b.apply(this,arguments)}}
+// the switch: a button on the Gameplay page (Menu > Settings > Gameplay)
+{const _g=drawGameplay;drawGameplay=function(){_g.apply(this,arguments);btnText('gp_hints','Hints: '+(tutOff()?'OFF':'ON'),296,290,106,24)}}
