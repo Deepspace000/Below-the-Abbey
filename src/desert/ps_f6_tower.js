@@ -1,7 +1,7 @@
 /* ==========================================================================
    THE PALE SPIRE, THE LAST PART: THE PALE TOWER (levels 9910 to 9919 and 9920; prefix psf6).
    Ten tiny rooms, one above the other, 14 x 14 each. In every room a boss stands between the stairs; a circular stair leads up, and a gilded chest holds a piece of the best gear in the
-   game. Both stay shut until the boss of the room is dead. Room 1 (9910) has a teleport stone. The tenth room's stair leads up to the Throne Room (9920): a big hall with the Pale King on
+   game. Both stay shut until the boss of the room is dead. The tenth room's stair leads up to the Throne Room (9920): a big hall with the Pale King on
    his throne (level 120), and no teleport stone. The second stone stands in room 10 (9919), one level below, so the party can go back to shop for gear and potions before the last fight but cannot leave in the middle of it.
    Bosses, gear and drops are in ps_f6_foes.js (ENEMY_DEF psf6_e1..psf6_e10, psf6_king; items pg_f6_*). Pictures: assets/ps f6rN* (see tools/PS_F6_ART.md).
    State: G.flags.psp.f6 = {boss:{N:2 when dead}, chest:{N:1 when opened}, seen, won}.
@@ -13,7 +13,7 @@ const PSF6={BASE:9909,THRONE:9920,N:10,W:14,
 const psf6S=()=>{const P=(G.flags.psp=G.flags.psp||{}),F=P.f6=P.f6||{};F.boss=F.boss||{};F.chest=F.chest||{};return F};
 const psf6Id=n=>n>=11?PSF6.THRONE:PSF6.BASE+n;
 const psf6Room=id=>id===PSF6.THRONE?11:(id>PSF6.BASE&&id<=PSF6.BASE+PSF6.N?id-PSF6.BASE:0);
-if(typeof TELE_KEEP_HI!=='undefined'){TELE_KEEP_HI.add(9910);TELE_KEEP_HI.add(9919)}   // the two teleport stones of the tower: room 1 and room 10, the antechamber just below the Throne Room (none in the Throne Room itself, so nobody can leave in the middle of the last fight)
+if(typeof TELE_KEEP_HI!=='undefined'){TELE_KEEP_HI.add(9919)}   // the tower's one teleport stone: room 10, the antechamber just below the Throne Room (none in the Throne Room itself, so nobody can leave in the middle of the last fight)
 /* a painted picture of room n (assets/ps), or null while it is not made */
 const psf6Has=name=>{try{const k=pspPic(name);return k!=='gy_column'&&IMG[k]&&IMG[k].width?k:null}catch(e){return null}};
 /* the painted wall of room n, cut from tile 0 of its texture sheet; the plain dark ashlar stands in until it exists */
@@ -26,7 +26,7 @@ function psf6Dress(C,n,W,H,wh){
 const PSF6_PROP={centre:1.0,tall:1.0,hang:1.0};
 function psf6Build(info){
   const id=info.id||PSF6.cur,n=psf6Room(id),W=PSF6.W,H=PSF6.W,wh=3.2;
-  const C=pspMake({id,start:{x:PSF6.LAND[0],y:PSF6.LAND[1],f:0},floor:'f6f'+n,wh,amb:.3,lcol:[1.45,.85,.55],kind:'in',tele:(n===1||n===10)?[10,7]:undefined});
+  const C=pspMake({id,start:{x:PSF6.LAND[0],y:PSF6.LAND[1],f:0},floor:'f6f'+n,wh,amb:.3,lcol:[1.45,.85,.55],kind:'in',tele:n===10?[10,7]:undefined});
   C.room(2,2,11,11,{floor:'f6f'+n,name:PSF6.THEME[n-1],at:[7,7]});
   /* the room is small and round: everything outside a circle of radius 4.4 round the middle is wall again */
   for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(Math.hypot(x-6.5,y-6.5)>4.4){C.rows[y][x]='#';C.block[y*W+x]=1}
