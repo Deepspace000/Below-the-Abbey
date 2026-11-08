@@ -76,6 +76,12 @@ function tmApply(n,weak,real){
   // the creatures of the area were sized while the party was being rebuilt at a low level: size them again now that it stands at level n
   for(const e of G.enemies){if(e.hp<=0||e.dying)continue;const fr=e.hp/e.maxhp;e.maxhp=enemyStat(e.t,e.lvl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}
   msg('Testing party, level '+n+(real?' (real party: a mix of cheap and ok gear, two good pieces)':weak?' (weaker, average weapons)':'')+': '+(real?Math.round(tmGold(n)*.5):tmGold(n))+' gold, '+Q.main.length+' main and '+Q.extra.length+' side quests marked done.','#9ae0ff')}
+// the end game sequence on its own: the Pale King is removed and his fall is played as in the real fight (messages, the quest, the ending slides, then the Game Plus offer)
+function tmEnding(){
+  const F=psf6S();F.won=0;F.king=0;F.got=0;
+  const e=G.enemies.find(q=>q.t==='psf6_king'&&q.hp>0);
+  msg('Testing: the Pale King falls.','#9ae0ff');
+  if(e){e.hp=1;hurtEnemy(e,999999)}else psf6Won()}
 // ----- the screen -----
 function tmDraw(){
   BTNS=[];veil(.82);bigPanel(24,8,432,304);
@@ -93,6 +99,7 @@ function tmDraw(){
     const L=[['Party','Warrior, Thief, Mage and Priest (the healer), every hero level '+n+' with full health.'],['Gear',(S.real?'A mix: the front fighters (Warrior and Thief) hold the upgrades, mostly ok pieces, and only the weapon and chest of the Warrior are good. The back line (Mage and Priest) waits with old cheap gear and some empty slots.':S.weak?'An average weapon of the last dozen levels (not the best); the best armour, helm, arms, legs and shield the shops sell by level '+n+', and two rings.':'The best weapon, helm, chest, arms, legs and shield the shops sell by level '+n+', and two rings.')],['Potions',tier+' (6 of the best, 4 of the next), mana potions, antidotes, torches and food.'],['Gold',(S.real?Math.round(tmGold(n)*.5):tmGold(n))+' gold'+(S.real?', half of what a party of this level has in hand (it takes a while to save).':', about what a party of this level has in hand.')],['Quests',Q.main.length+' of '+Q.mainAll+' main quests, and 2 side quests in each of the first '+Q.towns+' towns ('+Q.extra.length+' in all), marked done.']];
     L.forEach(([a,b],i)=>{txt(a,50,188+i*18,9,'#c8a860','left',true);txt(b,104,188+i*18,8,'#ece0c0','left',false,undefined,340)});
   }else txt('Pick a party above.',240,230,10,'#c8b888','center');
+  btnText('tm_end','Pale King falls: the ending',326,11,122,18); // plays the end game sequence (the king's death, the quest, the ending slides, the Game Plus offer) with a level 112 party in the Throne Room
   btnText('tm_back','Back',36,286,58,20);
   btnText('tm_plain','Go to area (no test party)',150,286,170,20);
   if(S)btnText('tm_go','Go to area  >',330,286,110,20);
@@ -104,6 +111,7 @@ function tmDraw(){
 {const _g=gotoBtn;gotoBtn=function(id){
   if(G.testScreen){
     if(id==='tm_back'){G.testScreen=false;G.state='title';return}
+    if(id==='tm_end'){G.testScreen=false;G.testPreset={n:112,weak:false,real:false};G.gotoLvl=112;G.gotoGold=tmGold(112);G.gs=0;TM.ending=1;jumpToLevel(9920,112);return}
     if(id==='tm_plain'){G.testScreen=false;G.testPreset=null;G.gs=0;return} // the plain Go to area list: your own party, raised to the level and gold set there
     if(id==='tm_go'&&TM.sel){G.testScreen=false;G.testPreset=TM.sel;G.gotoLvl=TM.sel.n;G.gotoGold=TM.sel.real?Math.round(tmGold(TM.sel.n)*.5):tmGold(TM.sel.n);G.gs=0;return}
     {const m=/^tm_([wr]?)(\d+)$/.exec(id);if(m){TM.sel={n:+m[2],weak:m[1]==='w',real:m[1]==='r'};return}}
@@ -118,5 +126,6 @@ function tmDraw(){
 {const _j=jumpToLevel;jumpToLevel=function(){TM.apply=G.testPreset||null;return _j.apply(this,arguments)}}
 {const _u=update;update=function(dt){
   try{if(TM.clean&&TM.clean.length&&G.state==='play'&&G.time>=TM.clean[0]){TM.clean.shift();tmCleanse()}}catch(er){}
+  try{if(TM.ending&&!TM.apply&&G.state==='play'&&LEVEL===9920&&G.heroes&&G.heroes.length&&!G.cut&&!G.talk){TM.ending=0;tmEnding()}}catch(er){console.error('tm ending',er);TM.ending=0}
   try{if(TM.apply&&G.state==='play'&&G.heroes&&G.heroes.length&&!G.cut){const a=TM.apply;TM.apply=null;tmApply(a.n,a.weak,a.real)}}catch(e){console.error('tm',e);TM.apply=null}
   return _u.apply(this,arguments)}}
