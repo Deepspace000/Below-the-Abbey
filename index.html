@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.882';
+const VERSION='3.883';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -85486,7 +85486,8 @@ const TUT_TEXT={
   b3:'Potions can be put in shortcut slots that make them easier to access during battle.',
   food:'Food will stop your character from starving.',
   rest:'Resting will heal your character if you have food.',
-  eat:'Buy food and potions from shops in towns or find them out in the wild.'};
+  eat:'Buy food and potions from shops in towns or find them out in the wild.',
+  gear:'Make sure to equip weapons and armour that you find by opening your inventory and choosing which character gets it.'};
 const tutOff=()=>{try{return localStorage.getItem('abbeyHintsOff')==='1'}catch(e){return false}};
 const tutF=()=>{const F=G.flags;return F.tut||(F.tut={n:0,s:{}})};
 let TUT_SHOW=[];
@@ -85500,7 +85501,7 @@ let TUT_IN=false;
       if(T.n===1){tutHint('b1a');tutHint('b1b')}else if(T.n===2)tutHint('b2');else if(T.n===3)tutHint('b3')}
     else if(!h)TUT_IN=false}}catch(e){}
   return r}}
-{const _p=pickup;pickup=function(it){const r=_p.apply(this,arguments);try{if(r&&it&&ITEMDEF[it.k]&&ITEMDEF[it.k].k==='food')tutHint('food')}catch(e){}return r}}
+{const _p=pickup;pickup=function(it){const r=_p.apply(this,arguments);try{if(r&&it&&ITEMDEF[it.k]&&ITEMDEF[it.k].k==='food')tutHint('food');if(r&&it&&ITEMDEF[it.k]&&ITEMDEF[it.k].k==='weapon')tutHint('gear')}catch(e){}return r}}
 {const _r=restParty;restParty=function(inn){const r=_r.apply(this,arguments);try{if(r!==false)tutHint('rest')}catch(e){}return r}}
 {const _h=useHeal;useHeal=function(hi,idx){let food=false;try{const it=G.bag[idx];food=!!(it&&ITEMDEF[it.id]&&ITEMDEF[it.id].k==='food')}catch(e){}const r=_h.apply(this,arguments);if(r&&food)tutHint('eat');return r}}
 // the boxes
