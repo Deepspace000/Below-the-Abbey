@@ -105,7 +105,7 @@ STORY.push(
   if(!C.lines||!C.lines[C.i]){G.cut=null;if(C.end)try{C.end()}catch(x){console.error(x)}return}
   try{return _c.apply(this,arguments)}catch(x){console.error('cutAdvance',x);if(G.cut===C)G.cut=null}}}
 {let warnT=-1e9;
- const freeOne=()=>{for(const k of ['prev2','prev']){try{if(localStorage.getItem('abbeySave_'+k)!==null){localStorage.removeItem('abbeySave_'+k);return true}}catch(e){}}return false};
+ const freeOne=()=>{for(const k of ['prev2','prev']){try{if(localStorage.getItem(SAVE_PFX+k)!==null){localStorage.removeItem(SAVE_PFX+k);return true}}catch(e){}}return false};
  const storeOpen=()=>{try{localStorage.setItem('abbeyProbe','1');localStorage.removeItem('abbeyProbe');return true}catch(e){return false}};
  const guard=fn=>function(k){let ok=fn.apply(this,arguments);if(ok||k==='prev'||k==='prev2')return ok;
    try{JSON.stringify(snapshot())}catch(e){return ok}   // a bug in the snapshot is not a full store

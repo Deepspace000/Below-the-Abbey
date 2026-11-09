@@ -40,6 +40,8 @@ def files():
     for dp, dn, fn in os.walk(base):
         dn[:] = [d for d in dn if d != 'detailed']
         for f in fn:
+            if f.startswith('Gemini_Generated_Image'):
+                continue   # raw generator sources: nothing in the game loads them (desktop/prepare.js leaves them out too)
             yield os.path.relpath(os.path.join(dp, f), ROOT).replace(os.sep, '/')
 
 

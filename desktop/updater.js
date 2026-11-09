@@ -30,7 +30,14 @@ const readJson = (f) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); }
 const sha = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
 // the hash in the list is of the file as git commits it: a text file (no NUL byte in it) with CRLF turned into LF (tools/make_win_manifest.py)
 const norm = (buf) => buf.subarray(0, 8000).includes(0) || !buf.includes(13) ? buf : Buffer.from(buf.toString('latin1').replace(/\r\n/g, '\n'), 'latin1');
-const inDir = (root, rel) => path.join(root, ...rel.split('/'));
+// a name from the list must stay inside its folder: plain parts joined by '/', no '..', no backslash, no drive letter
+const safeRel = (rel) => typeof rel === 'string' && rel.length > 0 && rel.length < 400 && !/[\\:\x00]/.test(rel) && rel.split('/').every((p) => p !== '' && p !== '.' && p !== '..');
+const inDir = (root, rel) => {
+  if (!safeRel(rel)) throw new Error('unsafe file name in the list: ' + String(rel).slice(0, 80));
+  const full = path.resolve(root, ...rel.split('/')), base = path.resolve(root);
+  if (full !== base && !full.startsWith(base + path.sep)) throw new Error('file name leaves its folder: ' + String(rel).slice(0, 80));
+  return full;
+};
 const rmrf = (p) => { try { fs.rmSync(p, { recursive: true, force: true }); } catch (e) { /* ignore */ } };
 
 // the page of the web version carries the loader of the Testing menu; the Windows page has it cut out (as in prepare.js)
@@ -79,6 +86,7 @@ async function check(log) {
   let remote;
   try { remote = await getJson(BASE + 'win-manifest.json?t=' + Date.now()); } catch (e) { log('no update check: ' + e.message); return null; }
   if (!remote || !remote.files || !remote.v) { log('the update list is not valid'); return null; }
+  { const bad = Object.keys(remote.files).find((p) => !safeRel(p)); if (bad !== undefined) { log('the update list holds an unsafe file name, so it is not used: ' + String(bad).slice(0, 80)); return null; } }
   if (cmp(remote.v, cur.v) <= 0) { log('up to date (' + cur.v + ')'); return null; }
   const want = Object.keys(remote.files).filter((p) => !cur.files[p] || cur.files[p][0] !== remote.files[p][0]);
   const bytes = want.reduce((n, p) => n + remote.files[p][1], 0);
@@ -140,4 +148,4 @@ async function check(log) {
   }
 }
 
-module.exports = { init, resolve, check, current };
+module.exports = { init, resolve, check, current, safeRel };

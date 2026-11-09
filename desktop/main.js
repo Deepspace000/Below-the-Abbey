@@ -30,6 +30,9 @@ function createWindow() {
     webPreferences: { preload: path.join(__dirname, 'preload.js'), backgroundThrottling: false, contextIsolation: true }
   });
   Menu.setApplicationMenu(null);
+  // the window only ever shows the game itself: no leaving for another address, and a new window only for the game's own files (the manual)
+  win.webContents.on('will-navigate', (e, url) => { if (!/^app:\/\/game\//i.test(url)) e.preventDefault(); });
+  win.webContents.setWindowOpenHandler(({ url }) => (/^app:\/\/game\//i.test(url) ? { action: 'allow' } : { action: 'deny' }));
   win.loadURL('app://game/index.html');
   startUpdates(win);
   if (SMOKE) {
@@ -87,7 +90,7 @@ app.whenReady().then(() => {
     const u = new URL(req.url);
     let rel = decodeURIComponent(u.pathname).replace(/^\/+/, '');
     if (rel === '') rel = 'index.html';
-    if (rel.split('/').includes('..')) return new Response('Forbidden', { status: 403 });
+    if (!updater.safeRel(rel)) return new Response('Forbidden', { status: 403 });
     const file = updater.resolve(rel);
     if (!require('fs').existsSync(file)) return new Response('Not found', { status: 404 }); // the web version has a few of these too
     return net.fetch(pathToFileURL(file).toString());
