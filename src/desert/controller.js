@@ -43,7 +43,7 @@ function padPress(i){ // a button has just gone down
   if(padPlaying()){
     if(i===12){padKey('ArrowUp',true);PAD.keysDown.up=1;return}if(i===13){padKey('ArrowDown',true);PAD.keysDown.down=1;return}
     if(i===14){padKey('ArrowLeft',true);PAD.keysDown.left=1;return}if(i===15){padKey('ArrowRight',true);PAD.keysDown.right=1;return}
-    if(i<=11){const a=padActOf(i);if(!a)return;if(a[0]==='heroPrev'){G.sel=(G.sel+3)%4;return}if(a[0]==='heroNext'){G.sel=(G.sel+1)%4;return}if(a[2]){padKey(a[2],true);padKey(a[2],false)}return}
+    if(i<=11){const a=padActOf(i);if(!a)return;if(a[0]==='heroPrev'){G.sel=(G.sel+3)%4;return}if(a[0]==='heroNext'){G.sel=(G.sel+1)%4;return}if(a[2]){padKey(a[2],true);padKey(a[2],false)}if(a[0]==='attack')G.hold={id:'attack',t:G.time+.42};return}
     return}
   // menus, dialogue, shops, maps: the frame and the pointer
   if(G.cut&&i===0){padKey('Enter',true);padKey('Enter',false);return}
@@ -56,7 +56,7 @@ function padPress(i){ // a button has just gone down
   else if(i===8){padKey('m',true);padKey('m',false)}
   else if(i===4||i===5){const dir=i===4?-1:1;if(G.menu==='quests'||G.state==='play')padKey(dir<0?'ArrowLeft':'ArrowRight',true),padKey(dir<0?'ArrowLeft':'ArrowRight',false)}
 }
-function padRelease(i){const k={12:'up',13:'down',14:'left',15:'right'}[i],names={up:'ArrowUp',down:'ArrowDown',left:'ArrowLeft',right:'ArrowRight'};if(k&&PAD.keysDown[k]){padKey(names[k],false);delete PAD.keysDown[k]}}
+function padRelease(i){try{const q=i<=11&&padActOf(i);if(q&&q[0]==='attack'&&G.hold&&G.hold.id==='attack')G.hold=null}catch(e){}const k={12:'up',13:'down',14:'left',15:'right'}[i],names={up:'ArrowUp',down:'ArrowDown',left:'ArrowLeft',right:'ArrowRight'};if(k&&PAD.keysDown[k]){padKey(names[k],false);delete PAD.keysDown[k]}}
 function padStickKeys(ax,ay){ // the left stick walks: up and down go forward and back, left and right step sideways. The right stick turns.
   const want={w:ay<-.55,s:ay>.55,a:ax<-.55,d:ax>.55};
   for(const k in want){if(want[k]&&!PAD.keysDown[k]){padKey(k,true);PAD.keysDown[k]=1}else if(!want[k]&&PAD.keysDown[k]){padKey(k,false);delete PAD.keysDown[k]}}}

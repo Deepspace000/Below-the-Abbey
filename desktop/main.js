@@ -47,17 +47,31 @@ function createWindow() {
   });
 }
 
+// A banner over the game (top centre) that stays until it is dismissed. restart=true adds a "Restart now" button.
+function banner(win, text, restart) {
+  if (win.isDestroyed()) return;
+  const js = `(()=>{let d=document.getElementById('bta-upd');if(!d){d=document.createElement('div');d.id='bta-upd';d.style.cssText='position:fixed;left:50%;top:14px;transform:translateX(-50%);background:#1b1409;color:#f0e4b4;border:2px solid #d8b868;padding:10px 16px;font:15px serif;z-index:99999;border-radius:5px;box-shadow:0 0 18px #000c;text-align:center;max-width:80vw';document.body.appendChild(d)}
+d.textContent=${JSON.stringify(text)};
+const mk=(t,f)=>{const b=document.createElement('button');b.textContent=t;b.style.cssText='margin:8px 6px 0;padding:4px 12px;font:14px serif;background:#3a2a10;color:#f0e4b4;border:1px solid #d8b868;cursor:pointer';b.onclick=f;d.appendChild(document.createElement('br'));d.appendChild(b);return b};
+${restart ? "mk('Restart now',()=>window.BTA_DESKTOP.restart());mk('Later',()=>d.remove());" : "setTimeout(()=>d.remove(),8000);"}})()`;
+  win.webContents.executeJavaScript(js).catch(() => {});
+}
+ipcMain.handle('bta-restart', () => { app.relaunch(); app.exit(0); });
+
 // Newer game files: the app looks on GitHub Pages for a newer version (see updater.js), downloads only the files that
 // changed and uses them from the next start. The installed files are what is served until then.
 function startUpdates(win) {
   if ((!app.isPackaged && !UPD_TEST) || (SMOKE && !UPD_TEST)) return;
   setTimeout(async () => {
     let r = null;
-    try { r = await updater.check((m) => { if (UPD_TEST) console.log('UPDATER', m); }); } catch (e) { if (UPD_TEST) console.log('UPDATER error', e.message); }
-    if (r && !win.isDestroyed()) {
-      const v = String(r.v).replace(/[^0-9.]/g, '');
-      win.webContents.executeJavaScript(`(()=>{const d=document.createElement('div');d.textContent='Version ${v} has been downloaded. It will be used the next time you start the game.';d.style.cssText='position:fixed;left:50%;bottom:12px;transform:translateX(-50%);background:#1b1409;color:#f0e4b4;border:1px solid #8a7448;padding:8px 14px;font:14px serif;z-index:99999;border-radius:4px;pointer-events:none';document.body.appendChild(d);setTimeout(()=>d.remove(),9000)})()`).catch(() => {});
-    }
+    const log = (m) => {
+      if (UPD_TEST) console.log('UPDATER', m);
+      const n = /^new version (\S+)/.exec(m);
+      if (n) banner(win, 'Downloading version ' + n[1].replace(/[^0-9.]/g, '') + '...', false);
+      else if (/^update failed/.test(m)) banner(win, 'The new version could not be downloaded. The game will try again next time you start it.', false);
+    };
+    try { r = await updater.check(log); } catch (e) { if (UPD_TEST) console.log('UPDATER error', e.message); }
+    if (r && !win.isDestroyed()) banner(win, 'Version ' + String(r.v).replace(/[^0-9.]/g, '') + ' has been downloaded. Restart the game to play it.', true);
     if (UPD_TEST) setTimeout(() => app.quit(), 500);
   }, UPD_TEST ? 1500 : 5000);
 }

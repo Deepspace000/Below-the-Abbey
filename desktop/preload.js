@@ -4,5 +4,6 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('BTA_DESKTOP', {
   desktop: true, platform: process.platform,
   fullscreen: () => ipcRenderer.invoke('bta-fs', 'get'),
-  toggleFullscreen: () => ipcRenderer.invoke('bta-fs', 'toggle')
+  toggleFullscreen: () => ipcRenderer.invoke('bta-fs', 'toggle'),
+  restart: () => ipcRenderer.invoke('bta-restart')
 });
