@@ -23,13 +23,14 @@ PSP.ID={DOOR:9710,ROAD:9715,APPROACH:9720,GATEHOUSE:9721,WINCH:9722,LODGE:9723,
   SPIRESTAIR:9970,THRONE:9980,CROWN:9990};
 /* planned maps. kind: out outdoor, in indoor, maze, atrium. pkg: the work package that builds it (0 = later, not part of the first build). */
 const PSP_LV=(id,name,W,H,lvl,pkg,kind,o)=>Object.assign({id,name,W,H,lvl,pkg,kind,built:false},o||{});
+/* The way in is rated 94 to 98 (it was 100 throughout), so the step up from Sale (90) to the Court of Statues (101) is climbed in four places and not in one. */
 PSP.LEVELS=[
  PSP_LV(9710,'The Pale Door',48,40,100,0,'in',{note:'where Sale opens onto the Pale Lands; built later with the Sanctuary of Sale (7299)'}),
- PSP_LV(9715,'The Crooked Road',48,64,100,0,'out',{note:'the road from the east postern of the Court of Statues to the Crooked Tower (the Never-Ending Tower, level id 1e9); ps_road.js'}),
- PSP_LV(9720,'The Pale Approach',64,56,100,1,'out'),
- PSP_LV(9721,'The Great Gatehouse',32,24,100,1,'in'),
- PSP_LV(9722,'The Winch Loft',20,18,100,1,'in'),
- PSP_LV(9723,"The Porter's Lodge",18,14,100,1,'in',{rest:1}),
+ PSP_LV(9715,'The Crooked Road',48,64,96,0,'out',{note:'the road from the east postern of the Court of Statues to the Crooked Tower (the Never-Ending Tower, level id 1e9); ps_road.js'}),
+ PSP_LV(9720,'The Pale Approach',64,56,94,1,'out'),
+ PSP_LV(9721,'The Great Gatehouse',32,24,96,1,'in'),
+ PSP_LV(9722,'The Winch Loft',20,18,98,1,'in'),
+ PSP_LV(9723,"The Porter's Lodge",18,14,98,1,'in',{rest:1}),
  PSP_LV(9730,'The Court of Statues',64,56,101,2,'out',{tele:[8,44]}),
  PSP_LV(9731,"The Gardener's Lodge",16,14,101,2,'in',{rest:1}),
  PSP_LV(9732,'The Mews and Stable',20,16,101,2,'in'),

@@ -46,28 +46,44 @@ B.snap=function(mode,P){
   S.pots.sort((a,b)=>a-b);S.potCount=S.pots.length;
   S.hitC=(t,lvl,hi)=>{const k=t+'|'+lvl+'|'+hi;if(S.hc[k]!==undefined)return S.hc[k];return S.hc[k]=enemyHitC(ENEMY_DEF[t],hi,lvl,null)};
   S.stat=(t,lvl)=>{const k=t+'|'+lvl;return S.st[k]||(S.st[k]=enemyStat(t,lvl))};
+  S._ho=healOpts(S); // read now, while the game holds this very party
   B.cache[key]=S;return S};
 /* ---------- 3. the fight model ---------- */
 // state: {hp[],mp[],alive[],pots[]}; foes: [{t,lvl}]. Strategy: a hero below 35 percent health drinks the weakest potion that fills him, else the strongest; the priest heals the most hurt ally below 60 percent while it has mana;
 // otherwise a hero uses its special power or spell while it has the mana, else the plain attack on the front creature. Creatures all strike once a round, front fighters drawn three times as often as the back line.
+/* The priest's heals, as the game has them since heal_scaling.js: a fixed amount (base + per level x the priest's level) x (1 + the healing bonus), at a fixed mana cost.
+   Heal from level 1, Purify (c10) from 10, Restoration (c40h) from 40, the others from the level of the power. Before this the harness healed a share of the patient's health, which the game no longer does. */
+function healOpts(S){const TI=window.HEAL_TIER;if(!TI)return null;const pi=S.h.findIndex(h=>/Priest/.test(h.cls));if(pi<0)return null;const L=S.h[pi].lvl;let bonus=0;try{bonus=pas(pi,'healPct')||0}catch(e){}
+  const un={'Heal':1,'c10':10,'c40h':40};try{for(const p of heroPowers(pi)){if(p&&TI[p.name])un[p.name]=p.lv||1}}catch(e){}
+  const o=[];for(const k in TI){if(un[k]===undefined||un[k]>L)continue;o.push({k,g:TI[k].g,amt:Math.round((TI[k].base+TI[k].lv*L)*(1+bonus)),cost:TI[k].cost})}
+  return {pi,o,un,bonus}}
+B.healOpts=healOpts;
 B.newState=S=>({hp:S.h.map(x=>x.max),mp:S.h.map(x=>x.mp),alive:S.h.map(()=>true),pots:S.pots.slice()});
 function fight(S,st,foes,rnd){
   const F=foes.map(f=>{const s=S.stat(f.t,f.lvl),d=ENEMY_DEF[f.t];return {t:f.t,lvl:f.lvl,hp:s.hp,dmg:s.dmg,xp:s.xp,fly:!!d.fly,alive:true}});
-  const res={win:false,fallen:0,pots:0,rounds:0,xp:0,hpLost:0,mpUsed:0};const hp0=st.hp.slice(),mp0=st.mp.slice();
+  const res={win:false,fallen:0,pots:0,rounds:0,xp:0,hpLost:0,mpUsed:0,taken:0};if(!S._tot)S._tot=S.h.reduce((a,x)=>a+x.max,0);const hp0=st.hp.slice(),mp0=st.mp.slice();
   for(let rd=0;rd<150;rd++){
     res.rounds++;
     for(let i=0;i<4;i++){if(!st.alive[i])continue;const H=S.h[i];const fr=F.find(f=>f.alive);if(!fr)break;
       if(st.hp[i]<H.max*.35&&st.pots.length){let bi=-1;const need=H.max-st.hp[i];for(let k=0;k<st.pots.length;k++){if(st.pots[k]>=need){bi=k;break}}if(bi<0)bi=st.pots.length-1;st.hp[i]=Math.min(H.max,st.hp[i]+st.pots[bi]);st.pots.splice(bi,1);res.pots++;continue}
       const sp=H.spec;
-      if(sp&&sp.heal&&st.mp[i]>=sp.cost&&sp.cost>0){let w=-1,bf=.6;for(let j=0;j<4;j++)if(st.alive[j]){const f=st.hp[j]/S.h[j].max;if(f<bf){bf=f;w=j}}if(w>=0){st.hp[w]=Math.min(S.h[w].max,st.hp[w]+S.h[w].max*sp.share*(.9+rnd()*.2));st.mp[i]-=sp.cost;res.mpUsed+=sp.cost;continue}}
+      if(sp&&sp.heal){let w=-1,bf=.6,low=0;for(let j=0;j<4;j++)if(st.alive[j]){const f=st.hp[j]/S.h[j].max;if(f<.6)low++;if(f<bf){bf=f;w=j}}
+        const HO=S._ho===undefined?(S._ho=healOpts(S)):S._ho;
+        if(w>=0&&HO&&HO.pi===i){ // the priest: the fixed amounts of src/desert/heal_scaling.js, the smallest heal that fills most of what is missing, a group heal when three or more are hurt
+          const miss=S.h[w].max-st.hp[w],af=HO.o.filter(x=>x.cost<=st.mp[i]);let best=null;
+          if(low>=3){const g=af.filter(x=>x.g).sort((a,b)=>b.amt-a.amt)[0];if(g&&g.amt*low>=(af.filter(x=>!x.g).sort((a,b)=>b.amt-a.amt)[0]||{amt:0}).amt)best=g}
+          if(!best){const o=af.filter(x=>!x.g).sort((a,b)=>a.amt-b.amt);best=o.find(x=>x.amt>=miss*.8)||o[o.length-1]}
+          if(best&&best.amt>=Math.min(miss,S.h[w].max*.08)){if(best.g){for(let j=0;j<4;j++)if(st.alive[j])st.hp[j]=Math.min(S.h[j].max,st.hp[j]+best.amt)}else st.hp[w]=Math.min(S.h[w].max,st.hp[w]+best.amt);st.mp[i]-=best.cost;res.mpUsed+=best.cost;continue}}
+        else if(w>=0&&!HO&&st.mp[i]>=sp.cost&&sp.cost>0){st.hp[w]=Math.min(S.h[w].max,st.hp[w]+S.h[w].max*sp.share*(.9+rnd()*.2));st.mp[i]-=sp.cost;res.mpUsed+=sp.cost;continue}}
       let dmg=0,hitp=fr.fly?H.hitF:H.hit;
-      if(sp&&!sp.heal&&sp.dmg&&st.mp[i]>=sp.cost&&sp.cost>0){st.mp[i]-=sp.cost;res.mpUsed+=sp.cost;if(sp.noRoll||rnd()<hitp)dmg=sp.dmg*(.85+rnd()*.3)}
+      const at=sp&&sp.heal?null:sp;
+      if(at&&at.dmg&&st.mp[i]>=at.cost&&at.cost>0){st.mp[i]-=at.cost;res.mpUsed+=at.cost;if(at.noRoll||rnd()<hitp)dmg=at.dmg*(.85+rnd()*.3)}
       else if(rnd()<hitp)dmg=H.basic*(.8+rnd()*.4);
       if(dmg>0){fr.hp-=dmg;if(fr.hp<=0){fr.alive=false}}}
     if(!F.some(f=>f.alive)){res.win=true;break}
     const living=[];for(let j=0;j<4;j++)if(st.alive[j])for(let k=0;k<(j<2?3:1);k++)living.push(j);
     for(const f of F){if(!f.alive||!living.length)continue;const t=living[Math.floor(rnd()*living.length)];if(!st.alive[t])continue;
-      if(rnd()<S.hitC(f.t,f.lvl,t)){const d=Math.max(1,rndI(rnd,f.dmg[0],f.dmg[1])-S.ward[t]);st.hp[t]-=d;if(st.hp[t]<=0){st.hp[t]=0;st.alive[t]=false;res.fallen++}}}
+      if(rnd()<S.hitC(f.t,f.lvl,t)){const d=Math.max(1,rndI(rnd,f.dmg[0],f.dmg[1])-S.ward[t]);st.hp[t]-=d;res.taken+=d/S._tot;if(st.hp[t]<=0){st.hp[t]=0;st.alive[t]=false;res.fallen++}}}
     if(!st.alive.some(x=>x))break}
   let pl=S.P;for(const f of F)if(!f.alive)res.xp+=Math.max(1,Math.round(f.xp*Math.min(1.5,Math.max(.3,1-.06*(pl-f.lvl)))));
   const tot=S.h.reduce((a,x)=>a+x.max,0);let lost=0;for(let i=0;i<4;i++)lost+=Math.max(0,hp0[i]-st.hp[i]);res.hpLost=lost/tot;

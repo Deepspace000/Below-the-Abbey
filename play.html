@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.894';
+const VERSION='3.895';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3825,7 +3825,7 @@ function jumpFromUrl(){
   const q=new URLSearchParams(location.search);let town=(q.get('town')||'').toLowerCase();town=/^(blight|palespire)\d*$/.test(town)?town:town.replace(/[^a-z]/g,'');if(!town)return;
   const target=(typeof ntJumpLevel==='function'&&ntJumpLevel(town,q))||Math.max(1,Math.min(/^palespire/.test(town)?115:/^blight/.test(town)||town==='sale'?90:town==='witchwood'?82:town==='blackswill'||town==='gardens'?80:40,parseInt(q.get('lvl')||(/^palespire/.test(town)?'100':/^blight/.test(town)?'84':'8'),10)||8)); // blight1 to blight10: the Blighted Road (blight_road.js)
   backupAuto();
-  const sv=readSave('auto')||readSave('prev');
+  const sv=JUMP_SEED||readSave('auto')||readSave('prev');
   if(sv&&!['oldhaven','ohsewer','ohcrypt','ohhide','oakwood','landpath','pilgrim','monastery','monasterygate','hollowland','orangetower','orangeboss','hollowgrass','kraken'].includes(town)){restore(sv)}
   else{let p=null;try{p=JSON.parse(localStorage.getItem('abbeyParty')||'null')}catch(e){}setParty(p||DEFAULT_PARTY);reset();G.state='play'}
   G.heroes.forEach((h,i)=>{while(h.lvl<target){h.xp=xpNeed(h.lvl);levelUp(i)}h.alive=true;h.hp=h.max;h.mp=h.mpMax;h.food=Math.max(h.food||0,100)});
@@ -4270,13 +4270,24 @@ function setScroll(d,v){if(d==='saves'){G.svs=clamp(v,0,G.svMax||0);return}if(d=
 /* ==========================================================================
    SAVE / LOAD  (autosave + three manual slots, a backup of the previous run)
    ========================================================================== */
+/* every save key starts with SAVE_PFX. A start-area link (?town=...) is a test visit: it switches to keys of its own (jumpSaveSplit), so the real saves are never changed by it. */
+let SAVE_PFX='abbeySave_',JUMP_SEED=null;
+function jumpSaveSplit(){
+  let town='';try{town=(new URLSearchParams(location.search).get('town')||'').toLowerCase().replace(/[^a-z]/g,'')}catch(e){}
+  if(!town)return false;
+  JUMP_SEED=readSave('auto')||readSave('prev'); // the real party is read, never written
+  SAVE_PFX='abbeyTest_';
+  try{for(const k of Object.keys(localStorage))if(k.startsWith('abbeyTest_'))localStorage.removeItem(k)}catch(e){} // each test visit starts clean
+  return true;
+}
 const SAVE_SLOTS=[['auto','Autosave'],['quick','Quick save'],['1','Slot 1'],['2','Slot 2'],['3','Slot 3'],['prev','Previous run'],['prev2','Older run']];
-const hasSave=k=>{try{return !!localStorage.getItem('abbeySave_'+k)}catch(e){return false}};
-function readSave(k){try{const s=localStorage.getItem('abbeySave_'+k);return s?JSON.parse(s):null}catch(e){return null}}
+const hasSave=k=>{try{return !!localStorage.getItem(SAVE_PFX+k)}catch(e){return false}};
+function readSave(k){try{const s=localStorage.getItem(SAVE_PFX+k);return s?JSON.parse(s):null}catch(e){return null}}
 /* The start of every area is saved twice: as the autosave, and as "area", which the death screen can return to (the beginning of this area, with the party as it came in). */
-function writeAreaSaves(){try{const j=JSON.stringify(snapshot());let ok=true;for(const k of ['auto','area']){try{localStorage.setItem('abbeySave_'+k,j)}catch(e){ok=false}}return ok}catch(e){return false}}
+function writeAreaSaves(){if(frameIsStuck())return false;try{const j=JSON.stringify(snapshot());let ok=true;for(const k of ['auto','area']){try{localStorage.setItem(SAVE_PFX+k,j)}catch(e){ok=false}}return ok}catch(e){return false}}
 function writeSave(k){
-  try{localStorage.setItem('abbeySave_'+k,JSON.stringify(snapshot()));return true}catch(e){return false}
+  if(frameIsStuck())return false; // a game that is stuck on an error is never written over a good save
+  try{localStorage.setItem(SAVE_PFX+k,JSON.stringify(snapshot()));return true}catch(e){return false}
 }
 // keep the old run safe before anything replaces it
 function loadRecent(){
@@ -4285,11 +4296,11 @@ function loadRecent(){
   backupAuto();reset();G.state='play';
 }
 function backupAuto(){ // keep the old run safe, but never push a real run out with a brand new one
-  try{const a=localStorage.getItem('abbeySave_auto');if(!a)return;
+  try{const a=localStorage.getItem(SAVE_PFX+'auto');if(!a)return;
     let trivial=false;try{const j=JSON.parse(a);trivial=(j.rounds||0)<40&&(j.kills||0)===0}catch(e){}
     if(trivial)return;
-    const p=localStorage.getItem('abbeySave_prev');if(p)localStorage.setItem('abbeySave_prev2',p);
-    localStorage.setItem('abbeySave_prev',a)}catch(e){}
+    const p=localStorage.getItem(SAVE_PFX+'prev');if(p)localStorage.setItem(SAVE_PFX+'prev2',p);
+    localStorage.setItem(SAVE_PFX+'prev',a)}catch(e){}
 }
 /* the map the party has seen is stored as runs ("0x120,1x8,...") so a city of 160 000 squares still saves in a few kilobytes */
 function seenPack(rows){const out=[];let prev=-1,run=0;for(const r of rows)for(let i=0;i<r.length;i++){const v=r[i];if(v===prev)run++;else{if(run)out.push(prev+'x'+run);prev=v;run=1}}if(run)out.push(prev+'x'+run);return {rle:out.join(','),w:rows[0]?rows[0].length:0,h:rows.length}}
@@ -4314,19 +4325,57 @@ function snapshot(){
     decor:sparseDecor(),
     torches:LIGHTS.map(l=>l.taken?1:0),torchKeys:LIGHTS.filter(l=>l.taken).map(l=>l.key)};
 }
+/* A save can be damaged, or come from another version of the game. saveOk says whether it is a save at all; saveCleanParty and saveClean mend what can be mended
+   (a missing number, a foe or a thing this version does not know, a place that is not there) so that loading never leaves the game half built. What was mended is listed in SAVE_NOTES. */
+let SAVE_NOTES=[];
+function saveOk(sv){return !!sv&&typeof sv==='object'&&Array.isArray(sv.heroes)&&sv.heroes.length>0&&sv.heroes.every(h=>h&&typeof h==='object')}
+function saveCleanParty(sv){ // before the party is set
+  SAVE_NOTES=[];
+  if(!Array.isArray(sv.party))sv.party=[];
+  for(let i=0;i<4;i++){const q=sv.party[i];if(!q||typeof q!=='object'||!CLASSES[q.cls]){sv.party[i]=Object.assign({},DEFAULT_PARTY[i]);continue}
+    if(typeof q.name!=='string'||!q.name)q.name=DEFAULT_PARTY[i].name;if(!Number.isFinite(q.app))q.app=DEFAULT_PARTY[i].app}
+  sv.party.length=4;
+}
+function saveClean(sv){ // after reset(): the place is loaded, so its own start and the fresh heroes are there to fall back on
+  const fin=Number.isFinite;
+  if(!LEVELS[LEVEL]){ // the place in the save is not in this version of the game: the party goes to Thornwick, with all it carries
+    reset(3);sv.level=sv.lvl=3;sv.P=null;sv.enemies=[];sv.items=[];sv.decor=null;sv.torches=null;sv.torchKeys=null;sv.seen=null;sv.grid=[];
+    SAVE_NOTES.push('The place in this save is not in this version of the game. The party has been brought to Thornwick.')}
+  if(!sv.P||!fin(sv.P.x)||!fin(sv.P.y))sv.P={x:START.x,y:START.y,f:START.f};
+  if(![0,1,2,3].includes(sv.P.f))sv.P.f=START.f;
+  if(sv.heroes.length>4)sv.heroes.length=4;
+  let lostThings=0;
+  sv.heroes.forEach((h,i)=>{const d=G.heroes[i];
+    for(const k of ['hp','max','base','mp','mpMax','lvl','xp','str','dex','int'])if(!fin(h[k]))h[k]=d[k];
+    h.lvl=Math.max(1,Math.floor(h.lvl));if(typeof h.alive!=='boolean')h.alive=h.hp>0;
+    if(!Array.isArray(h.learned))h.learned=[];
+    if(!h.eq||typeof h.eq!=='object')h.eq={};
+    for(const k of Object.keys(h.eq)){const it=h.eq[k];if(!it||!ITEMDEF[it.id]){delete h.eq[k];lostThings++}}});
+  {const bag=Array.isArray(sv.bag)?sv.bag:[],keep=bag.filter(q=>q&&ITEMDEF[q.id]);lostThings+=bag.length-keep.length;sv.bag=keep}
+  if(lostThings)SAVE_NOTES.push(lostThings+(lostThings===1?' thing in this save is':' things in this save are')+' not known to this version of the game and could not be loaded.');
+  for(const k of ['gold','keys','rounds','kills'])if(!fin(sv[k]))sv[k]=0;
+  if(Array.isArray(sv.enemies)){const n=sv.enemies.length;
+    sv.enemies=sv.enemies.filter(e=>e&&ENEMY_DEF[e.t]&&fin(e.x)&&fin(e.y));
+    for(const e of sv.enemies){if(!fin(e.lvl)||e.lvl<1)e.lvl=lvlHere();if(!fin(e.hp))e.hp=1;if(!fin(e.maxhp)||e.maxhp<=0)e.maxhp=Math.max(1,e.hp)}
+    if(sv.enemies.length<n)SAVE_NOTES.push((n-sv.enemies.length)+' of the foes in this save are not known to this version of the game and were left out.')}
+  else sv.enemies=null; // no list of foes in the save: the place keeps the foes it starts with
+  if(!Array.isArray(sv.items))sv.items=[];
+  if(sv.seen&&!Array.isArray(sv.seen)&&(typeof sv.seen.rle!=='string'||!fin(sv.seen.w)||!fin(sv.seen.h)))sv.seen=null;
+  if(LEVEL===1&&!(Array.isArray(sv.grid)&&sv.grid.length===MH&&sv.grid.every(r=>Array.isArray(r)&&r.length===MW)))sv.grid=G.grid.map(r=>r.slice());
+}
 function restore(sv){ // the golden city and the rooms in it are built the first time they are needed
   const l=sv.level||1;if(l===44||(l>=199&&l<=270)||(l>=1000&&l<30000)||(l>=271&&l<=280)||(l>=289&&l<=312)||(l>=360&&l<=364)||(l>=400&&l<=434)||(l>=440&&l<=474)||hgtAny(l)||l>=40000)if((!LEVELS[l]&&!(typeof KH_LAZY!=='undefined'&&KH_LAZY[l]))||LEVELS[44].stub){khThen(()=>restoreNow(sv));return}
   restoreNow(sv);
 }
 function restoreNow(sv){
-  setParty(sv.party);reset(sv.level||1);
+  saveCleanParty(sv);setParty(sv.party);try{reset(sv.level||1)}catch(e){if(LEVELS[sv.level||1])throw e;LEVEL=-1}saveClean(sv); // a place that is not in the game cannot be built: saveClean then takes the party to Thornwick
   sv.heroes.forEach((s,i)=>Object.assign(G.heroes[i],{_rs:s.rs||null,hp:s.hp,max:s.max,base:s.base,mp:s.mp,mpMax:s.mpMax,alive:s.alive,lvl:s.lvl,xp:s.xp,food:s.food===undefined?100:s.food,powSel:s.powSel||0,learned:s.learned||[],str:s.str,dex:s.dex,int:s.int,spellSel:s.spellSel||0,eq:s.eq||{}}));
   G.heroes.forEach((h,i)=>{try{const nb=heroBaseHp(i,h.lvl);if(h.base!==nb){const om=h.max;h.base=nb;recalcMax(i);if(h.hp>=om)h.hp=h.max}}catch(e){console.error(e)}}); // saves made before v3.487: health follows the new rule (a hero at full health stays at full health)
   G.aff=sv.aff||[];G.bag=sv.bag;G.gold=sv.gold;G.potFav=sv.potFav||null;G.potBack=sv.potBack||[null,null];G.keys=sv.keys;G.rounds=sv.rounds;G.kills=sv.kills;G.bossDead=!!sv.bossDead;G.sel=sv.sel||0;G.lightBoost=sv.lightBoost||0;
   G.P={x:sv.P.x,y:sv.P.y,f:sv.P.f,angT:(sv.P.f-1)*Math.PI/2};G.C={x:sv.P.x,y:sv.P.y,a:G.P.angT};
   {const sr=seenRows(sv.seen);if(LEVEL===1){G.grid=sv.grid;if(sr)G.seen=sr}else if(sr&&sr.length===MH&&sr[0].length===MW)G.seen=sr}
   if(G.grid[G.P.y]===undefined||G.grid[G.P.y][G.P.x]!==0||G.decor.some(d=>d.block&&d.x===G.P.x&&d.y===G.P.y)){G.P={x:START.x,y:START.y,f:START.f,angT:(START.f-1)*Math.PI/2};G.C={x:START.x,y:START.y,a:G.P.angT}}
-  G.enemies=sv.enemies.map((e,i)=>({id:i,t:e.t,lvl:e.lvl||lvlHere(),base:e.base,vd:e.vd,x:e.x,y:e.y,rx:e.x,ry:e.y,hp:e.hp>0?Math.max(1,Math.ceil(enemyStat(e.t,e.lvl).hp*e.hp/e.maxhp)):e.hp,maxhp:enemyStat(e.t,e.lvl).hp,alert:!!e.alert,chilled:e.chilled||0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100}));
+  if(sv.enemies)G.enemies=sv.enemies.map((e,i)=>({id:i,t:e.t,lvl:e.lvl||lvlHere(),base:e.base,vd:e.vd,x:e.x,y:e.y,rx:e.x,ry:e.y,hp:e.hp>0?Math.max(1,Math.ceil(enemyStat(e.t,e.lvl).hp*e.hp/e.maxhp)):e.hp,maxhp:enemyStat(e.t,e.lvl).hp,alert:!!e.alert,chilled:e.chilled||0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100}));
   rebalanceEnemies();
   if(sv.items.length===G.items.length)G.items.forEach((it,i)=>{it.taken=!!sv.items[i]});
   applySparseDecor(sv.decor);
@@ -4344,12 +4393,13 @@ function restoreNow(sv){
   }
   if(LEVEL>=41)desertApplyState();
   recountRegions();reveal();msg('Game loaded.','#9ae0a0');
-  try{const a=readSave('area');if(!a||a.level!==sv.level)localStorage.setItem('abbeySave_area',JSON.stringify(sv))}catch(e){} // a game loaded in the middle of an area: that is as far back as this area goes
+  try{const a=readSave('area');if(!a||a.level!==sv.level)localStorage.setItem(SAVE_PFX+'area',JSON.stringify(sv))}catch(e){} // a game loaded in the middle of an area: that is as far back as this area goes
 }
 function refreshSaves(){
   G.saves.rows=SAVE_SLOTS.map(([k,label])=>{
-    const sv=readSave(k);
-    return {k,label,sv:sv?{t:sv.t,area:(LEVELS[sv.level||1]||LEVELS[1]).label||LEVEL_NAMES[sv.level||1],party:sv.party,lvl:Math.max(...sv.heroes.map(h=>h.lvl)),rounds:sv.rounds,gold:sv.gold,alive:sv.heroes.filter(h=>h.alive).length}:null};
+    let sv=readSave(k),bad=false;if(sv&&!saveOk(sv)){sv=null;bad=true} // a slot that does not hold a save is shown as damaged, and the list still opens
+    const party=sv?(Array.isArray(sv.party)?sv.party:[]).filter(q=>q&&typeof q==='object'):null;
+    return {k,label,bad,sv:sv?{t:sv.t,area:(LEVELS[sv.level||1]||LEVELS[1]).label||LEVEL_NAMES[sv.level||1],party:party.length?party:DEFAULT_PARTY,lvl:Math.max(1,...sv.heroes.map(h=>+h.lvl||1)),rounds:sv.rounds,gold:sv.gold,alive:sv.heroes.filter(h=>h.alive).length}:null};
   });
 }
 function openSaves(mode){G.svs=0;G.saves={mode,confirm:null,note:'',noteT:0,rows:[]};refreshSaves()}
@@ -4365,14 +4415,16 @@ function titleBtn(id){
 function importSaveFile(){
   const inp=document.createElement('input');inp.type='file';inp.accept='.json,application/json';
   inp.onchange=()=>{const f=inp.files[0];if(!f)return;const r=new FileReader();
-    r.onload=()=>{try{const j=JSON.parse(r.result);if(!j.heroes||!j.P)throw 0;localStorage.setItem('abbeySave_3',JSON.stringify(j));G.saves.note='Imported into Slot 3.';G.saves.noteT=G.time;refreshSaves()}catch(e){G.saves.note='That file is not a save.';G.saves.noteT=G.time}};
+    r.onload=()=>{try{const j=JSON.parse(r.result);if(!saveOk(j)||!j.P)throw 0;localStorage.setItem(SAVE_PFX+'3',JSON.stringify(j));G.saves.note='Imported into Slot 3.';G.saves.noteT=G.time;refreshSaves()}catch(e){G.saves.note='That file is not a save.';G.saves.noteT=G.time}};
     r.readAsText(f)};
   inp.click();
 }
 function savesBtn(id){
   const S=G.saves;
   if(id==='sv_close'){G.saves=null;return}
-  if(id==='sv_import'){importSaveFile();return}
+  if(id==='sv_import'){ // the file goes into Slot 3: if a save is there already, the button has to be pressed twice
+    if(hasSave('3')&&!(S.impArm&&G.time-S.impArm<8)){S.impArm=G.time;S.note='Slot 3 holds a save. Press Import file again to replace it.';S.noteT=G.time;return}
+    S.impArm=0;importSaveFile();return}
   const m=id.match(/^sv_(load|save|del)_(\w+)$/);if(!m)return;
   const [,what,k]=m;
   if(what!=='del')S.confirm=null;
@@ -4387,7 +4439,7 @@ function savesBtn(id){
     if(G.state==='play'&&G.timers.length===0&&k!=='prev')writeSave('prev'); // so a mistaken load can be undone
     restore(sv);return;
   }
-  if(S.confirm===k){try{localStorage.removeItem('abbeySave_'+k)}catch(e){}S.confirm=null;S.note='Erased.';refreshSaves()}
+  if(S.confirm===k){try{localStorage.removeItem(SAVE_PFX+k)}catch(e){}S.confirm=null;S.note='Erased.';refreshSaves()}
   else{S.confirm=k;S.note='Tap Erase again to confirm.'}
 }
 function drawInitialFrame(x,y,w,h){
@@ -4595,7 +4647,7 @@ function drawSaves(){
       txt(`Level ${r.sv.lvl}   Round ${r.sv.rounds}   Gold ${r.sv.gold}   ${r.sv.alive}/4 alive`,176,y+22,8.5,'#a89878','left',false,undefined,148);
       let when='';try{when=new Date(r.sv.t).toLocaleString([], {dateStyle:'medium',timeStyle:'short'})}catch(e){when=new Date(r.sv.t).toLocaleString()}
       txt(when,176,y+32,8,'#7a6a48','left',false,undefined,148);
-    }else txt('(empty)',176,y+21,10,'#6a5a40','left');
+    }else txt(r.bad?'(this save is damaged)':'(empty)',176,y+21,10,r.bad?'#c08060':'#6a5a40','left');
     const can=!!r.sv;
     ctx.globalAlpha=can?1:.45;stoneFace('sv_load_'+r.k,'Load',332,y+2,48,16,'#cdbf94',9);ctx.globalAlpha=1;sb('sv_load_'+r.k,332,y+2,48,16);
     if(S.mode==='menu'&&r.k!=='auto'&&r.k!=='prev'&&r.k!=='prev2'){stoneFace('sv_save_'+r.k,'Save',382,y+2,46,16,'#cdbf94',9);sb('sv_save_'+r.k,382,y+2,46,16)}
@@ -7447,16 +7499,52 @@ function drawQSave(){ // a little floppy disk in the top left corner: one tap sa
   ctx.lineWidth=1;ctx.strokeStyle='#0a0806';ctx.strokeRect(x+.5,y+.5,w-1,w-1);ctx.restore();
   btn('qsave',x-2,y-2,w+4,w+4);
 }
+/* An error in one frame must never stop the game. The next frame is asked for before anything else, each half of the frame (the rules, the drawing) is tried on its own,
+   and every error is kept in FRAME_ERR.log. When frame after frame fails, the player is told so in plain words, and saving stops until the game runs again,
+   so a stuck game is never written over a good save. */
+const FRAME_ERR={run:0,total:0,log:[],limit:20,quiet:0,shown:false};
+function frameIsStuck(){return FRAME_ERR.run>=FRAME_ERR.limit}
+function frameFail(e,where){
+  FRAME_ERR.total++;
+  const m=String((e&&e.message)||e).slice(0,200),L=FRAME_ERR.log,z=L[L.length-1];
+  if(z&&z.m===m&&z.where===where){z.n++;return}
+  let lv=0,st='';try{lv=LEVEL;st=G.state}catch(x){}
+  L.push({m,where,n:1,stack:String((e&&e.stack)||'').split('\n').slice(0,5).join(' | ').slice(0,500),v:VERSION,level:lv,state:st,t:Date.now()});if(L.length>20)L.shift();
+  try{console.error('error in the game ('+where+')',e)}catch(x){}
+}
+function noteBox(title,text,btns){ // a plain box over the game, for the rare times something has gone wrong
+  let b=document.getElementById('notebox');if(b)b.remove();
+  b=document.createElement('div');b.id='notebox';
+  b.style.cssText='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:99999;width:min(520px,88vw);box-sizing:border-box;background:#1a140c;color:#e8dcc0;border:2px solid #a8905a;border-radius:6px;padding:18px 20px;font:16px/1.45 Georgia,serif;box-shadow:0 8px 40px rgba(0,0,0,.8);text-align:center';
+  const h=document.createElement('div');h.textContent=title;h.style.cssText='font-weight:bold;font-size:18px;color:#ffe36a;margin-bottom:8px';b.appendChild(h);
+  const t=document.createElement('div');t.textContent=text;t.style.cssText='white-space:pre-line;margin-bottom:14px';b.appendChild(t);
+  for(const [label,fn] of btns){const k=document.createElement('button');k.textContent=label;k.style.cssText='margin:4px 6px;padding:8px 14px;font:15px Georgia,serif;background:#3a2c18;color:#e8dcc0;border:1px solid #a8905a;border-radius:4px;cursor:pointer';
+    k.onclick=ev=>{ev.stopPropagation();b.remove();try{if(fn)fn()}catch(e){console.error(e)}};b.appendChild(k)}
+  (document.fullscreenElement&&document.fullscreenElement.appendChild&&document.fullscreenElement.tagName!=='CANVAS'?document.fullscreenElement:document.body).appendChild(b);return b;
+}
+function frameStuck(){
+  const F=FRAME_ERR;F.run++;
+  if(F.run<F.limit||F.shown||performance.now()<F.quiet)return;
+  F.shown=true;const z=F.log[F.log.length-1]||{m:'',level:0};
+  noteBox('The game has hit an error','The game cannot carry on from here. Saving is paused while it is stuck, so your last good save is kept.\n\nYou can reload the game and continue from that save.\n\nThe error: '+z.m+'\n(version '+VERSION+', place '+z.level+')',[
+    ['Reload the game',()=>location.reload()],
+    ['Back to the title screen',()=>{F.shown=false;F.run=0;try{G.timers.length=0}catch(e){}G.menu=false;G.cut=null;G.talk=null;G.saves=null;G.loot=null;G.map=false;try{G.inv.open=false}catch(e){}G.state='title'}],
+    ['Carry on',()=>{F.shown=false;F.quiet=performance.now()+20000}]]);
+}
 function frame(now){
-  if(now-last<15.5){requestAnimationFrame(frame);return}   // 60 frames a second at most (a 144 Hz screen drew 144)
+  requestAnimationFrame(frame); // asked for first, so an error further down can never stop the game for good
+  if(now-last<15.5)return;   // 60 frames a second at most (a 144 Hz screen drew 144)
   const dt=Math.min(.05,(now-last)/1000);last=now;
   const w0=performance.now();
-  update(dt);
+  let bad=false;
+  try{update(dt)}catch(e){bad=true;frameFail(e,'rules')}
+  try{
   // from above: the arrival in Khemetra, and the V key there, lift the camera over the roofs
   if(LEVEL===44){const ramp=khEyeAt(G.C.x,G.C.y);G.lookB=(G.lookB||0)+clamp((G.lookout?2.3:0)-(G.lookB||0),-1.3*dt,1.3*dt);G.eyeB=Math.max(ramp,G.lookB)}else{G.eyeB=0;G.lookB=0;G.lookout=false}
   if(G.eyeB>.01){if(G._cb===undefined)G._cb=CEILH;CEILH=G._cb+G.eyeB;EYE=EYE0+G.eyeB}else{if(G._cb!==undefined){CEILH=G._cb;G._cb=undefined}EYE=EYE0}
   if(window.__ready){render3D();ctx.setTransform(2,0,0,2,0,0);ui(dt);crtPass(G.time)}
-  requestAnimationFrame(frame);
+  }catch(e){bad=true;frameFail(e,'drawing')}
+  if(bad)frameStuck();else FRAME_ERR.run=0;
 }
 function handleBtn(id){
   if(TP)return;
@@ -72612,13 +72700,14 @@ PSP.ID={DOOR:9710,ROAD:9715,APPROACH:9720,GATEHOUSE:9721,WINCH:9722,LODGE:9723,
   SPIRESTAIR:9970,THRONE:9980,CROWN:9990};
 /* planned maps. kind: out outdoor, in indoor, maze, atrium. pkg: the work package that builds it (0 = later, not part of the first build). */
 const PSP_LV=(id,name,W,H,lvl,pkg,kind,o)=>Object.assign({id,name,W,H,lvl,pkg,kind,built:false},o||{});
+/* The way in is rated 94 to 98 (it was 100 throughout), so the step up from Sale (90) to the Court of Statues (101) is climbed in four places and not in one. */
 PSP.LEVELS=[
  PSP_LV(9710,'The Pale Door',48,40,100,0,'in',{note:'where Sale opens onto the Pale Lands; built later with the Sanctuary of Sale (7299)'}),
- PSP_LV(9715,'The Crooked Road',48,64,100,0,'out',{note:'the road from the east postern of the Court of Statues to the Crooked Tower (the Never-Ending Tower, level id 1e9); ps_road.js'}),
- PSP_LV(9720,'The Pale Approach',64,56,100,1,'out'),
- PSP_LV(9721,'The Great Gatehouse',32,24,100,1,'in'),
- PSP_LV(9722,'The Winch Loft',20,18,100,1,'in'),
- PSP_LV(9723,"The Porter's Lodge",18,14,100,1,'in',{rest:1}),
+ PSP_LV(9715,'The Crooked Road',48,64,96,0,'out',{note:'the road from the east postern of the Court of Statues to the Crooked Tower (the Never-Ending Tower, level id 1e9); ps_road.js'}),
+ PSP_LV(9720,'The Pale Approach',64,56,94,1,'out'),
+ PSP_LV(9721,'The Great Gatehouse',32,24,96,1,'in'),
+ PSP_LV(9722,'The Winch Loft',20,18,98,1,'in'),
+ PSP_LV(9723,"The Porter's Lodge",18,14,98,1,'in',{rest:1}),
  PSP_LV(9730,'The Court of Statues',64,56,101,2,'out',{tele:[8,44]}),
  PSP_LV(9731,"The Gardener's Lodge",16,14,101,2,'in',{rest:1}),
  PSP_LV(9732,'The Mews and Stable',20,16,101,2,'in'),
@@ -73575,7 +73664,7 @@ function psgBuildApproach(info){
   FOE('pshalberd',44,38);FOE('pshalberd',37,30);
   for(const [x,y] of [[26,10],[38,13]])FOE('psarcher',x,y);
   for(const [x,y] of [[10,44],[49,33],[21,27],[43,49]])WAKE('pssentinel',x,y);
-  for(const e of C.enemies)e.lvl=Math.max(96,Math.min(100,Math.round(96.5+3.5*(52-e.y)/44)));   // the ramp: level 96 at Sale's gate to 100 at the barbican
+  for(const e of C.enemies)e.lvl=Math.max(92,Math.min(96,Math.round(92.5+3.5*(52-e.y)/44)));   // the ramp: level 92 at Sale's gate to 96 at the barbican (it was 96 to 100)
   C.glow(6.5,SI);
   psgNoLooseArch(C);psgPost(C,false);
   const lv=C.finish({start:{x:32,y:52,f:0}});
@@ -77243,7 +77332,7 @@ function pcrBuild(info){
   FOE('psmourner',G[2],4);FOE('pssentinel',G[2],5,1);FOE('psguard',G[2],6);
   FOE('psmourner',G[3],7);FOE('psguard',G[3],8);
   FOE('pssentinel',G[4],9,1);FOE('pssentinel',G[4],10,1);
-  for(const e of C.enemies)e.lvl=100;
+  for(const e of C.enemies)e.lvl=pspRatingOf(9715);
   C.glow(7,SI);
   /* nothing may be sealed in: a square of open ground that the road cannot reach (ringed by trees) becomes forest wall */
   {const bs=new Set();for(const d of C.decor)if(d.block)bs.add(d.x+','+d.y);
@@ -81151,7 +81240,7 @@ STORY.push(
   if(!C.lines||!C.lines[C.i]){G.cut=null;if(C.end)try{C.end()}catch(x){console.error(x)}return}
   try{return _c.apply(this,arguments)}catch(x){console.error('cutAdvance',x);if(G.cut===C)G.cut=null}}}
 {let warnT=-1e9;
- const freeOne=()=>{for(const k of ['prev2','prev']){try{if(localStorage.getItem('abbeySave_'+k)!==null){localStorage.removeItem('abbeySave_'+k);return true}}catch(e){}}return false};
+ const freeOne=()=>{for(const k of ['prev2','prev']){try{if(localStorage.getItem(SAVE_PFX+k)!==null){localStorage.removeItem(SAVE_PFX+k);return true}}catch(e){}}return false};
  const storeOpen=()=>{try{localStorage.setItem('abbeyProbe','1');localStorage.removeItem('abbeyProbe');return true}catch(e){return false}};
  const guard=fn=>function(k){let ok=fn.apply(this,arguments);if(ok||k==='prev'||k==='prev2')return ok;
    try{JSON.stringify(snapshot())}catch(e){return ok}   // a bug in the snapshot is not a full store
@@ -84610,14 +84699,39 @@ const RT_MUL={30:2.19,31:2.12,32:1.32,34:1.44,36:1.52,37:1.33,39:1.34,41:1.5,42:
 /* the ratings that have creatures: a big area (the Deeper Hollow, the Blighted Lands) is rated for where the party enters it, and the party is meant to rise through the whole gap to the next rating there, so an area's XP is only held back once the party is above the NEXT rating (at least the area's own plus one) */
 const RT_RATES=[4,7,9,10,13,16,19,25,28,29,30,31,32,34,36,37,39,41,42,45,46,48,49,50,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,72,74,77,80,81,82,83,84,85,86,87,88,89,90,100,101,102,103,104,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120];
 const rtCeil=r=>{for(const q of RT_RATES)if(q>r)return Math.max(q,r+1);return r+1};
-const KING_HP=120000,KING_DMG=[400,600];
+const KING_HP=64000,KING_DMG=[400,600];
 const RT_KEYS=Object.keys(RT_MUL).map(Number).sort((a,b)=>a-b);
 const rtMul=l=>{if(l<30)return 1;const k=RT_KEYS;if(l>=k[k.length-1])return 1;for(let i=1;i<k.length;i++)if(l<=k[i]){const a=k[i-1],b=k[i],x=Math.log(RT_MUL[a]),y=Math.log(RT_MUL[b]);return Math.exp(x+(y-x)*(l-a)/(b-a))}return 1};
+/* RETUNE 2 (v3.895), found with the same harness after its healing was made to match the game (fixed amounts, heal_scaling.js).
+   RT_DMG and RT_HP: what an ordinary creature's damage and health are multiplied by (on top of RT_MUL), by the rating of the place (see rtKey), read off between the ratings listed. 1 = unchanged.
+   Bosses: from level 30 up no boss hits harder on average than a third of the health of a front fighter of its level (RT_FRONT), and none has more health than a
+   well equipped party deals in RT_BOSS_ROUNDS rounds (RT_REF). These are ceilings only: a boss below them is not changed. Both follow the difficulty setting. */
+const RT_DMG={4:1,7:0.94,9:1.69,10:1.44,13:1.47,16:1.52,19:1.46,22:1.65,25:1.54,28:1.15,29:1.25,30:0.65,31:0.83,32:0.78,34:0.87,36:0.72,37:0.8,39:0.75,41:0.72,42:0.75,45:0.73,46:0.62,48:0.62,49:0.74,50:0.73,52:1.18,54:0.73,55:0.96,56:0.7,57:0.55,58:0.45,59:0.31,60:0.33,61:0.3,62:0.27,63:0.29,64:0.29,65:0.31,66:0.32,67:0.51,68:0.58,69:0.64,70:0.73,72:0.6,74:0.53,77:0.81,80:0.51,81:0.8,82:0.52,83:0.59,84:0.5,85:0.5,86:0.52,87:0.48,88:0.49,89:0.46,90:0.51,92:0.57,94:0.57,96:0.59,98:0.83,100:0.44,101:0.49,102:0.44,103:0.61,104:0.62,106:0.55,107:0.56,108:0.53,109:0.44,110:0.47,111:0.46,112:1};
+const RT_HP={4:0.68,7:0.73,9:0.68,10:0.83,13:0.84,16:0.79,19:0.37,22:0.55,25:0.74,28:0.75,29:0.54,30:0.81,31:1.06,32:0.74,34:0.81,36:0.76,37:0.63,39:0.72,41:0.9,42:0.81,45:0.96,46:1.24,48:0.88,49:0.81,50:0.64,52:0.97,54:0.95,55:1.21,56:1.11,57:1.3,58:0.85,59:1.07,60:0.83,61:0.83,62:1.26,63:1.18,64:0.89,65:1.07,66:1.18,67:1.5,68:1.69,69:1.11,70:1.24,72:1.3,74:1.49,77:1.71,80:1.36,81:1.5,82:1.16,83:1.78,84:1.77,85:1.67,86:1.65,87:1.91,88:1.87,89:1.65,90:2.07,92:2.22,94:2.15,96:2,98:2.37,100:1.82,101:2.19,102:2.03,103:1.49,104:1.71,106:1.61,107:1.83,108:1.73,109:2.22,110:1.96,111:2.19,112:1};
+const RT_BOSS_ROUNDS=18,RT_BOSS_HITS=3;
+const RT_REF=[[30,470],[40,720],[50,920],[60,1200],[70,1550],[80,1740],[90,1950],[100,2450],[110,2800],[120,2880]];
+const RT_FRONT=l=>15.3*l+19;
+const RT_BOSS_HP={boss:.75}; // the Rat King: a party in the gear the crypts hand out took about thirty rounds
+const rtTab=(T,l)=>{let k=T._k;if(!k)Object.defineProperty(T,'_k',{value:k=Object.keys(T).map(Number).sort((a,b)=>a-b),writable:true});if(l<=k[0])return T[k[0]];if(l>=k[k.length-1])return T[k[k.length-1]];for(let i=1;i<k.length;i++)if(l<=k[i]){const a=k[i-1],b=k[i],x=Math.log(T[a]),y=Math.log(T[b]);return Math.exp(x+(y-x)*(l-a)/(b-a))}return 1};
+const rtRef=l=>{const R=RT_REF;if(l<=R[0][0])return R[0][1];for(let i=1;i<R.length;i++)if(l<=R[i][0])return R[i-1][1]+(R[i][1]-R[i-1][1])*(l-R[i-1][0])/(R[i][0]-R[i-1][0]);return R[R.length-1][1]};
+/* The two tables were measured place by place (each rating has its own mix of creatures), so a creature is looked up by the rating of the place it stands in,
+   not by its own level, which varies by one either way. A creature whose level is far from the level of the place (a fixed level, another place) is looked up by its own level.
+   RT_KEY: the balance harness sets it to the rating it is testing; in the game it stays null. */
+let RT_KEY=null;
+const rtKey=L=>{if(RT_KEY!==null)return RT_KEY;try{const b=LEVEL_RATING[LEVEL];if(b!==undefined&&Math.abs(L-lvlHere())<=2)return b}catch(e){}return L};
 {const _es=enemyStat;enemyStat=function(t,lvl){const r=_es.apply(this,arguments);
   try{const d=ENEMY_DEF[t],L=lvl||lvlHere();
     const bossy=!d||isBossy(t)||d.aboveParty||d.partyLevel||/^w_/.test(t)||(typeof NO_VARY!=='undefined'&&NO_VARY.includes(t));
-    if(t==='psf6_king'){r.hp=KING_HP;r.dmg=[KING_DMG[0],KING_DMG[1]]} // the Pale King hit for 3,600 to 5,500 and one-shot every hero; now 400 to 600, with 120,000 health (the harness: best gear wins about nine in ten, average gear needs healing and care)
-    else if(!bossy&&L>=30){const m=rtMul(L);r.dmg=[Math.max(1,Math.round(r.dmg[0]*m)),Math.max(1,Math.round(r.dmg[1]*m))]}}catch(e){}
+    if(t==='psf6_king'){r.hp=KING_HP;r.dmg=[KING_DMG[0],KING_DMG[1]]} // the Pale King hit for 3,600 to 5,500 and one-shot every hero; now a fixed health and damage (see KING_HP)
+    else if(!bossy){const K=rtKey(L),m=rtMul(L)*rtTab(RT_DMG,K),h=rtTab(RT_HP,K);
+      if(m!==1)r.dmg=[Math.max(1,Math.round(r.dmg[0]*m)),Math.max(1,Math.round(r.dmg[1]*m))];
+      if(h!==1)r.hp=Math.max(1,Math.round(r.hp*h))}
+    else if(d){
+      if(RT_BOSS_HP[t])r.hp=Math.max(1,Math.round(r.hp*RT_BOSS_HP[t]));
+      if(L>=30){let dm=1,hm=1;try{dm=diffDmg();hm=diffHp()}catch(e){}
+        const capD=RT_FRONT(L)/RT_BOSS_HITS*dm,avg=(r.dmg[0]+r.dmg[1])/2;
+        if(avg>capD){const f=capD/avg;r.dmg=[Math.max(1,Math.round(r.dmg[0]*f)),Math.max(1,Math.round(r.dmg[1]*f))]}
+        const capH=Math.round(RT_BOSS_ROUNDS*rtRef(L)*hm);if(r.hp>capH)r.hp=capH}}}catch(e){}
   return r}}
 {const _gx=giveXP;giveXP=function(a){
   try{if(!G.flags.autoScaleOn&&typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[LEVEL]!==undefined){
@@ -85563,6 +85677,44 @@ for(const id of [9760]){const o=KH_LAZY[id];if(!o)continue;
   KH_LAZY[id]=function(){const had=!!LEVELS[id];const r=o.apply(this,arguments);const L=LEVELS[id];
     if(L&&!had&&!L.tele){const t=PSP_MORE_TELE[id];L.tele={x:t[0],y:t[1]};L.noTele=false}return r}}
 
+/* ---- src/desert/safety.js ---- */
+/* safety.js: keep this file LAST in the list of tools/inject.py, so that its wrappers are the outermost ones.
+   A save that will not load must never leave the game half built. Loading is tried inside a guard here. When it fails, the next
+   older save is tried (the autosave, the start of the area, the previous run, the older run). When none of them loads, the game
+   goes back to the title screen and says so. The save that failed is kept under its own key ("broken") so it can still be looked at.
+   The checks themselves (saveOk, saveCleanParty, saveClean) are in index.html, beside restore. */
+const RESTORE_TRY={i:0,first:null,busy:false};
+const RESTORE_KEYS=[['auto','the autosave'],['area','the save from the start of the area'],['prev','the previous run'],['prev2','the older run']];
+function restoreFallback(sv,e){
+  const T=RESTORE_TRY;
+  try{console.error('this save would not load',e)}catch(x){}
+  try{frameFail(e,'load')}catch(x){}
+  if(!T.first){T.first=sv||{};T.i=0;T.kept=false;T.raw='';try{T.raw=JSON.stringify(sv)||''}catch(x){}
+    try{if(sv&&T.raw){localStorage.setItem(SAVE_PFX+'broken',T.raw);T.kept=true}}catch(x){}}
+  while(T.i<RESTORE_KEYS.length){
+    const [k,label]=RESTORE_KEYS[T.i++],c=readSave(k);
+    let same=false;try{same=!!T.raw&&JSON.stringify(c)===T.raw}catch(x){}
+    if(!c||!saveOk(c)||same)continue; // empty, damaged, or the very save that failed
+    T.label=label;restore(c);return;
+  }
+  T.first=null;T.i=0;T.label='';
+  try{reset()}catch(x){console.error(x)}
+  G.menu=false;G.saves=null;G.cut=null;G.talk=null;G.loot=null;G.state='title';
+  noteBox('This save could not be loaded','The save is damaged, or it comes from a version of the game that this one cannot read. It has not been changed.\n\nThe game is back at the title screen. You can load another slot or begin a new game.',[['OK',null]]);
+}
+{const _rn=restoreNow;restoreNow=function(sv){
+  let r;
+  try{r=_rn.apply(this,arguments)}catch(e){restoreFallback(sv,e);return}
+  const T=RESTORE_TRY;
+  if(T.first){const label=T.label,kept=T.kept;T.first=null;T.i=0;T.label='';
+    try{msg('That save could not be loaded. '+label[0].toUpperCase()+label.slice(1)+' was loaded in its place.','#e8a070')}catch(x){}
+    noteBox('An older save was loaded','The save you chose could not be loaded, so '+label+' was loaded in its place.'+(kept?'\n\nA copy of the save that failed has been kept.':''),[['OK',null]])}
+  try{for(const n of SAVE_NOTES)msg(n,'#e8a070');SAVE_NOTES=[]}catch(x){}
+  return r}}
+{const _r=restore;restore=function(sv){
+  if(!saveOk(sv)){restoreFallback(sv,new Error('this is not a save'));return}
+  try{return _r.apply(this,arguments)}catch(e){restoreFallback(sv,e)}}}
+
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
 (async function boot(){
@@ -85690,7 +85842,11 @@ for(const id of [9760]){const o=KH_LAZY[id];if(!o)continue;
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&G.state==='play'&&G.timers.length===0)writeSave('auto')});
   dsApplyPainted(); // once more, after every picture has been built, so a painted desert picture is never replaced by a drawn one
   window.__ready=true;
+  addEventListener('error',e=>{try{if(e&&(e.error||e.message))frameFail(e.error||e.message,'page')}catch(x){}}); // errors outside the game loop (a click, a timer) are kept in the same log
+  addEventListener('unhandledrejection',e=>{try{frameFail(e.reason||'a promise failed','promise')}catch(x){}});
+  const testVisit=jumpSaveSplit();
   try{jumpFromUrl()}catch(e){console.error(e)}
+  if(testVisit)setTimeout(()=>{try{msg('This is a test visit. Its saves are kept apart from your real saves.','#9ad0e8')}catch(e){}},2500);
   requestAnimationFrame(frame);
   ldHide();
 })();

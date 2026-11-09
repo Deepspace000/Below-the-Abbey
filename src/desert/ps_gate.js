@@ -311,7 +311,7 @@ function psgBuildApproach(info){
   FOE('pshalberd',44,38);FOE('pshalberd',37,30);
   for(const [x,y] of [[26,10],[38,13]])FOE('psarcher',x,y);
   for(const [x,y] of [[10,44],[49,33],[21,27],[43,49]])WAKE('pssentinel',x,y);
-  for(const e of C.enemies)e.lvl=Math.max(96,Math.min(100,Math.round(96.5+3.5*(52-e.y)/44)));   // the ramp: level 96 at Sale's gate to 100 at the barbican
+  for(const e of C.enemies)e.lvl=Math.max(92,Math.min(96,Math.round(92.5+3.5*(52-e.y)/44)));   // the ramp: level 92 at Sale's gate to 96 at the barbican (it was 96 to 100)
   C.glow(6.5,SI);
   psgNoLooseArch(C);psgPost(C,false);
   const lv=C.finish({start:{x:32,y:52,f:0}});

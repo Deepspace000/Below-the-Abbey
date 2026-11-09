@@ -135,7 +135,7 @@ function pcrBuild(info){
   FOE('psmourner',G[2],4);FOE('pssentinel',G[2],5,1);FOE('psguard',G[2],6);
   FOE('psmourner',G[3],7);FOE('psguard',G[3],8);
   FOE('pssentinel',G[4],9,1);FOE('pssentinel',G[4],10,1);
-  for(const e of C.enemies)e.lvl=100;
+  for(const e of C.enemies)e.lvl=pspRatingOf(9715);
   C.glow(7,SI);
   /* nothing may be sealed in: a square of open ground that the road cannot reach (ringed by trees) becomes forest wall */
   {const bs=new Set();for(const d of C.decor)if(d.block)bs.add(d.x+','+d.y);
