@@ -20,7 +20,10 @@ wmnLoad();   // the pictures are fetched at start-up, so the map has them the fi
 function wmnDims(name,size,isW){const r=WMN_RECTS[name];if(!r)return [0,0];return isW?[size,size*r[4]/r[3]]:[size*r[3]/r[4],size]}
 const WMN_ICO_SCALE=2;   // places are drawn this much bigger than the sizes in WMN_SPEC
 function wmnDraw(c,name,cx,by,size,isW,flip){
-  const r=WMN_RECTS[name];if(!r||!WMN.ok)return;const im=r[0]==='a'?WMN.a:WMN.s,d=wmnDims(name,size,isW),w=d[0],h=d[1];
+  const r=WMN_RECTS[name];if(!r||!WMN.ok)return;
+  if(window.__VIVID&&/^(i_|l_|c_|rb|sb)/.test(name)){c.save();c.filter=window.__VIVID;try{wmnDraw0(c,name,cx,by,size,isW,flip,r)}finally{c.restore()}return}
+  wmnDraw0(c,name,cx,by,size,isW,flip,r)}
+function wmnDraw0(c,name,cx,by,size,isW,flip,r){const im=r[0]==='a'?WMN.a:WMN.s,d=wmnDims(name,size,isW),w=d[0],h=d[1];
   if(flip){c.save();c.translate(cx,0);c.scale(-1,1);c.drawImage(im,r[1],r[2],r[3],r[4],-w/2,by-h,w,h);c.restore()}
   else c.drawImage(im,r[1],r[2],r[3],r[4],cx-w/2,by-h,w,h)}
 
@@ -117,10 +120,10 @@ function wmnDots(l,nq,c){const L=wmnLay(l);if(!L||!L.rect)return;
 
 /* the scenery: kind 0 broad tree, 1 pine, 2 mountain, 3 hill, 4 dune, 5 palm */
 function wmnItem(c,it,z){
-  const t=it[0],x=it[1],y=it[2],s=it[3],sd=it[4],K=WMN.K;let n;
+  const t=it[0],x=it[1],y=it[2],s=it[3],sd=it[4],K=WMN.K;let n;if(t>=10){wmDecor(c,it,z);return}
   if(t===0){n='oak'+(sd%11);const r=WMN_RECTS[n];wmnDraw(c,n,x,y+1,r[4]*K.oak*s,false)}
   else if(t===1){n='pine'+(sd%12);const r=WMN_RECTS[n];wmnDraw(c,n,x,y+1,r[4]*K.pine*s,false)}
-  else if(t===2){n='mtn'+(sd%12);const r=WMN_RECTS[n];wmnDraw(c,n,x,y+1,r[3]*K.mtn*s,true)}
+  else if(t===2){n='mtn'+WMPK[sd%WMPK.length];const r=WMN_RECTS[n],w=r[3]*K.mtn*s,h=w*r[4]/r[3],im=r[0]==='a'?WMN.a:WMN.s;if(WMN.ok){c.save();c.fillStyle='rgba(60,44,24,.2)';c.beginPath();c.ellipse(x,y+.4,w*.44,Math.max(.6,h*.06),0,0,TAU);c.fill();c.drawImage(im,r[1],r[2],r[3],r[4]*.91,x-w/2,y+1-h*.91,w,h*.91);c.restore()}}
   else if(t===3){const q=sd%16;n='hill'+(q<11?q:(q-11)%8);const r=WMN_RECTS[n];wmnDraw(c,n,x,y+1,r[3]*K.hill*s,true)}
   else if(t===4){n='dune_'+(WMN.TINT[it[5]]||'sand')+(sd%8);const r=WMN_RECTS[n];wmnDraw(c,n,x,y+1,r[3]*K.dune*s,true)}
   else{n='palm'+(sd%4);const r=WMN_RECTS[n];wmnDraw(c,n,x,y+1,r[4]*K.palm*s,false)}}
@@ -196,7 +199,7 @@ function wmnHollow(V,z){
   const lay=wmnLayout(),c=ctx;let h=WMN.hol;
   if(!h||h.key!==WMN.layKey){
     const R=[],add=(a,p)=>R.push([a[0]-p,a[1]-p,a[2]+p,a[3]+p]);
-    for(const k of ['deephollow','hollowgrass','orangecastle']){const L=lay[k];if(!L)continue;add(L.ib,8);if(L.rect)add([L.rect[0],L.rect[1],L.rect[2],L.rect[3]-5],7)}
+    for(const k of ['deephollow','hollowgrass','orangecastle']){const L=lay[k];if(!L)continue;add(L.ib,8);if(k==='deephollow'){const b=L.ib;R.push([b[0]-18,b[1]-18,b[2]+18,b[3]+18,5])}if(L.rect)add([L.rect[0],L.rect[1],L.rect[2],L.rect[3]-5],7)}
     {const t=WMN_REG.find(q=>q[0]==='The Hollow Lands');if(t){c.save();c.font=`${t[3]}px ${FTITLE}`;const w=c.measureText(t[0]).width+t[0].length*1.5+6;c.restore();add([t[1]-w/2,t[2]-t[3]*.7,t[1]+w/2,t[2]+t[3]*.7],8)}}
     for(const [t,x,y,sz] of WMN_SMALL){c.save();c.font=`italic ${sz}px ${FUI}`;const w=c.measureText(t).width;c.restore();add([x-w/2,y-sz*.7,x+w/2,y+sz*.7],8)}
     let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const r of R){x0=Math.min(x0,r[0]);y0=Math.min(y0,r[1]);x1=Math.max(x1,r[2]);y1=Math.max(y1,r[3])}
@@ -204,10 +207,10 @@ function wmnHollow(V,z){
     const S=3,mg=36,X0=x0-mg,Y0=y0-mg,W=Math.ceil((x1-x0+mg*2)),Hh=Math.ceil((y1-y0+mg*2)),pw=W*S,ph=Hh*S;
     const mk=document.createElement('canvas');mk.width=pw;mk.height=ph;const m=mk.getContext('2d',{willReadFrequently:true});
     m.filter='blur('+(3.4*S)+'px)';m.fillStyle='#fff';
-    for(const r of R){const x=(r[0]-X0)*S,y=(r[1]-Y0)*S,w=(r[2]-r[0])*S,hh=(r[3]-r[1])*S,rd=Math.min(w,hh)*.5;m.beginPath();m.roundRect?m.roundRect(x,y,w,hh,rd):m.rect(x,y,w,hh);m.fill()}
-    const id=m.getImageData(0,0,pw,ph),d=id.data,o=document.createElement('canvas');o.width=pw;o.height=ph;const oc=o.getContext('2d'),od=oc.createImageData(pw,ph),q=od.data;
+    for(const r of R){const x=(r[0]-X0)*S,y=(r[1]-Y0)*S,w=(r[2]-r[0])*S,hh=(r[3]-r[1])*S,rd=r[4]!==undefined?r[4]*S:Math.min(w,hh)*.5;m.beginPath();m.roundRect?m.roundRect(x,y,w,hh,rd):m.rect(x,y,w,hh);m.fill()}
+    const DB=lay.deephollow&&lay.deephollow.ib;const id=m.getImageData(0,0,pw,ph),d=id.data,o=document.createElement('canvas');o.width=pw;o.height=ph;const oc=o.getContext('2d'),od=oc.createImageData(pw,ph),q=od.data;
     for(let j=0;j<ph;j++)for(let i=0;i<pw;i++){const k=(j*pw+i)*4,wx=X0+i/S,wy=Y0+j/S;
-      let a=d[k+3]/255;a+=(Math.sin(wx*.043+1.3)*Math.sin(wy*.051+.7)+.6*Math.sin(wx*.11+wy*.07+2)+.35*Math.sin(wx*.21-wy*.17))*.1;
+      const wxo=(6*Math.sin(wy*.19+Math.sin(wx*.11)*2)+3.2*Math.sin(wx*.41+wy*.27)+1.6*Math.sin(wy*.93+wx*.57)+(Math.abs(Math.sin(wx*.52+wy*.33))-.5)*3.4)*S,wyo=(6*Math.sin(wx*.17+Math.sin(wy*.13)*2)+3.2*Math.sin(wy*.39-wx*.29)+1.6*Math.sin(wx*.89-wy*.61)+(Math.abs(Math.sin(wy*.47-wx*.36))-.5)*3.4)*S,i2=Math.max(0,Math.min(pw-1,Math.round(i+wxo))),j2=Math.max(0,Math.min(ph-1,Math.round(j+wyo)));let a=d[(j2*pw+i2)*4+3]/255;if(DB&&wx>DB[0]-5&&wx<DB[2]+5&&wy>DB[1]-5&&wy<DB[3]+5)a=Math.max(a,.9);a+=(Math.sin(wx*.043+1.3)*Math.sin(wy*.051+.7)+.6*Math.sin(wx*.11+wy*.07+2)+.35*Math.sin(wx*.21-wy*.17))*.1;
       if(a<.46){q[k+3]=0;continue}
       const e=Math.min(1,(a-.5)/.5),dk=e<0?0:Math.pow(1-e,1.5);
       let al=.15+.5*dk;const rim=Math.abs(a-.5);if(rim<.022)al=Math.max(al,.7*(1-rim/.022));
