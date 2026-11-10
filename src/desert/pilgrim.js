@@ -6,11 +6,11 @@
 const PP_KMS=[95,90,85,80,75,70,65,60,55,50,45,40,35,30,25,20,15,10,5,0];
 function ppCount(){const f=(G.flags&&G.flags.lpKm)||{};return PP_KMS.filter(k=>f[k]).length}
 const PP_SET=[ // [id, slot, name, type, picture, armour, effects, what it is]
- ['pp_h','head','Abbot’s Mitre of the Pilgrim’s Path','Helm','head',22,{ward:12,secondWind:.5},'A tall white and gold mitre with a blue gem and a golden cross.'],
+ ['pp_h','head','Abbot’s Mitre of the Pilgrim’s Path','Helm','head',22,{ward:12,secondWind:.25},'A tall white and gold mitre with a blue gem and a golden cross.'],
  ['pp_c','chest','Abbot’s Chasuble Plate','Chest','chest',40,{regen:.9,dodge:.08},'Plate cut like the vestment of an abbot, with a long red and gold stole.'],
- ['pp_a','arms','Abbot’s Embroidered Cuffs','Arms','arms',14,{lifesteal:.1,dmgPct:.12},'Wide cuffs of white and gold plate, sewn with small golden crosses.'],
+ ['pp_a','arms','Abbot’s Embroidered Cuffs','Arms','arms',14,{lifesteal:.06,dmgPct:.12},'Wide cuffs of white and gold plate, sewn with small golden crosses.'],
  ['pp_l','legs','Abbot’s Pilgrim Greaves','Legs','legs',18,{mpRegen:.6,hungerSlow:.5},'Greaves like the hem of a robe, with golden pilgrim sandals.']];
-const PP_BONUS={ward:10,regen:1.2,secondWind:.5,dmgPct:.15,dodge:.08};
+const PP_BONUS={ward:10,regen:1.2,secondWind:.25,dmgPct:.15,dodge:.08};
 {const btxt=Object.keys(PP_BONUS).map(k=>ARM_TXT[k](PP_BONUS[k])).join(' ');
  ARM_SET_OF.abbot={name:'Abbot of the Pilgrim’s Path',bonus:PP_BONUS,btxt,lv:1,key:'abbot'};
  for(const [id,slot,n,ty,ic,armor,pas,what] of PP_SET){
