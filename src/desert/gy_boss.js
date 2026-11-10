@@ -10,7 +10,7 @@ function gyFreeAround(e,rad){const out=[];for(let dy=-rad;dy<=rad;dy++)for(let d
 function gyVolley(e,txt,col,all,mult,affl,verb){
   const st=enemyStat(e.t,e.lvl),def=ENEMY_DEF[e.t];msg(txt,col);sfx('screech');G.shake=.4;
   for(const hi of (all?[0,1,2,3]:[0,1])){const h=G.heroes[hi];if(!h||!h.alive||h.hp<=0)continue;
-    if(Math.random()<enemyHitC(def,hi,e.lvl,e)+.05){let d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*mult));if(typeof armourWard==='function')d=Math.max(1,d-armourWard(hi));
+    if(Math.random()<enemyHitC(def,hi,e.lvl,e)+.05){let d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*mult));d=armourCut(d,hi,e.lvl);
       h.hp-=d;h.hurt=1;msg((verb||'It hits')+' '+HERO_DEF[hi].name+' for '+d+'.',col);addFloat(portraitX(hi)+19,250,'-'+d,col);
       try{if(h.hp>0&&affl)afflInflict(affl,hi,true)}catch(x){}
       if(h.hp<=0){h.hp=0;h.alive=false;msg(HERO_DEF[hi].name+' has fallen!','#ff8a7a');try{bondFall(hi)}catch(x){}if(G.sel===hi)nextHero()}}

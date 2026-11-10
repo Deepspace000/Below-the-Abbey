@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.896';
+const VERSION='3.897';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2267,6 +2267,11 @@ function runEnemies(es,i){
   later(dur,()=>runEnemies(es,i+1));
 }
 /* the chance that a creature's blow lands on hero hi (lvl: the creature's level; e: the creature, if any). The desert block (hgd_balance.js) replaces this with the balanced version; this is the plain one */
+/* Armour takes a share off every blow that lands. Armour as good as the best the shops sell at the creature's level (about 20 + the level) takes half off;
+   less armour takes less off in proportion (half of that armour, a quarter off; none, nothing off); never more than 60 percent. The ward of the gear comes off after that. */
+const ARMD={share:.5,max:.6,a0:20,al:1};
+function armourShare(hi,lvl){const h=G.heroes[hi];if(!h)return 0;const L=lvl||lvlHere();return Math.max(0,Math.min(ARMD.max,ARMD.share*heroArmor(h)/(ARMD.a0+ARMD.al*L)))}
+function armourCut(d,hi,lvl){d=Math.max(1,Math.round(d*(1-armourShare(hi,lvl))));if(typeof armourWard==='function')d=Math.max(1,d-armourWard(hi));return d}
 function enemyHitC(def,hi,lvl,e){return clamp(def.hit+(typeof diffHitAdd==='function'?diffHitAdd():0)-heroArmor(G.heroes[hi])*.025-pas(hi,'dodge')-(e&&e.st?mxMiss(e):0)+(typeof BAL!=='undefined'?BAL.ACC:0),.35,.95)}
 function enemyAttack(e){
   const def=ENEMY_DEF[e.t],st=enemyStat(e.t,e.lvl);
@@ -2278,7 +2283,7 @@ function enemyAttack(e){
   const side=dirToE===G.P.f?'':(dirToE===(G.P.f+2)%4?' from behind':' from the side');
   const hitC=enemyHitC(def,t,e.lvl,e),verb=def.verb||(e.t==='skel'?'slashes':'bites');
   if(Math.random()<hitC){
-    if(def.slows){G.slowT=Math.max(G.slowT||0,4);msg('Dead hands drag at the party. You are slowed.','#e8c870')}let d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*(e.st?mxMul(e):1)));if(typeof armourWard==='function')d=Math.max(1,d-armourWard(t));h.hp-=d;h.hurt=1;G.shake=.35;sfx(e.t==='skel'?'hit':'bite');sfx('hurt');
+    if(def.slows){G.slowT=Math.max(G.slowT||0,4);msg('Dead hands drag at the party. You are slowed.','#e8c870')}let d=armourCut(Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*(e.st?mxMul(e):1))),t,e.lvl);h.hp-=d;h.hurt=1;G.shake=.35;sfx(e.t==='skel'?'hit':'bite');sfx('hurt');
     msg(`The ${def.name} ${verb} ${HERO_DEF[t].name}${side} for ${d}.`,'#e8a090');addFloat(portraitX(t)+19,250,'-'+d,'#ff6a5a');
     try{if(h.hp>0){afflHit(e.t,t);if(typeof armourSecondWind==='function')armourSecondWind(t)}}catch(x){}
     {const th=pas(t,'thorns');if(th>0&&e.hp>0){hurtEnemy(e,th);msg(`The ${def.name} is hurt for ${th} by ${HERO_DEF[t].name}'s armour.`,'#e8c870')}}
@@ -6269,7 +6274,7 @@ function enemyShoot(e){
   G.arrows.push({x0:clamp(e.sx,14,406),y0:clamp(e.sy,40,170),x1:210+rnd(-30,30),y1:196,t:G.time});sfx('arrow');
   const hitC=enemyHitC(def,t,e.lvl,e);
   if(Math.random()<hitC){
-    const d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*(e.st?mxMul(e):1)));h.hp-=d;h.hurt=1;G.shake=.3;sfx('hurt');try{if(h.hp>0)afflHit(e.t,t)}catch(x){}
+    const d=armourCut(Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*(e.st?mxMul(e):1))),t,e.lvl);h.hp-=d;h.hurt=1;G.shake=.3;sfx('hurt');try{if(h.hp>0)afflHit(e.t,t)}catch(x){}
     msg(def.shot?`${def.name} hurls ${def.shot} at ${HERO_DEF[t].name} for ${d}.`:`An arrow from the ${def.name} hits ${HERO_DEF[t].name} for ${d}.`,'#e8a090');addFloat(portraitX(t)+19,250,'-'+d,'#ff6a5a');
     if(h.hp<=0){h.hp=0;h.alive=false;msg(`${HERO_DEF[t].name} has fallen!`,'#ff8a7a');if(G.sel===t)nextHero()}
   }else msg(def.shot?`${def.name} hurls ${def.shot}, and it misses ${HERO_DEF[t].name}.`:`An arrow from the ${def.name} whistles past ${HERO_DEF[t].name}.`,'#a09880');
@@ -50540,7 +50545,7 @@ function bswSpit(e){
   const st=enemyStat(e.t,e.lvl),def=ENEMY_DEF[e.t];let hit=0;
   msg('The Black Swill heaves and spits a corroding glob across the front line!','#c8a0f0');sfx('screech');G.shake=.4;
   for(const hi of [0,1]){const h=G.heroes[hi];if(!h||!h.alive||h.hp<=0)continue;
-    if(Math.random()<enemyHitC(def,hi,e.lvl,e)+.05){let d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*1.15));if(typeof armourWard==='function')d=Math.max(1,d-armourWard(hi));
+    if(Math.random()<enemyHitC(def,hi,e.lvl,e)+.05){let d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*1.15));d=armourCut(d,hi,e.lvl);
       h.hp-=d;h.hurt=1;hit++;msg('The glob eats into '+HERO_DEF[hi].name+' for '+d+'.','#e8a090');addFloat(portraitX(hi)+19,250,'-'+d,'#b8f060');
       try{if(h.hp>0)afflInflict('poisoned',hi,true)}catch(x){}
       if(h.hp<=0){h.hp=0;h.alive=false;msg(HERO_DEF[hi].name+' has fallen!','#ff8a7a');try{bondFall(hi)}catch(x){}if(G.sel===hi)nextHero()}}
@@ -55202,7 +55207,7 @@ function wmShatter(e,all){
   const st=enemyStat(e.t,e.lvl),def=ENEMY_DEF[e.t];let n=0;
   msg('The Well-Warden clenches his fists and the amethyst in the walls SHRIEKS. Shards of crystal fly across the hall!','#d8a8ff');sfx('screech');G.shake=.5;
   for(const hi of (all?[0,1,2,3]:[0,1])){const h=G.heroes[hi];if(!h||!h.alive||h.hp<=0)continue;
-    if(Math.random()<enemyHitC(def,hi,e.lvl,e)+.05){let d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*(all?.65:1.15)));if(typeof armourWard==='function')d=Math.max(1,d-armourWard(hi));
+    if(Math.random()<enemyHitC(def,hi,e.lvl,e)+.05){let d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*(all?.65:1.15)));d=armourCut(d,hi,e.lvl);
       h.hp-=d;h.hurt=1;n++;msg('A shard cuts '+HERO_DEF[hi].name+' for '+d+'.','#e8a0d8');addFloat(portraitX(hi)+19,250,'-'+d,'#d890ff');
       try{if(h.hp>0)afflInflict('bleeding',hi,true)}catch(x){}
       if(h.hp<=0){h.hp=0;h.alive=false;msg(HERO_DEF[hi].name+' has fallen!','#ff8a7a');try{bondFall(hi)}catch(x){}if(G.sel===hi)nextHero()}}
@@ -57292,7 +57297,7 @@ function gyFreeAround(e,rad){const out=[];for(let dy=-rad;dy<=rad;dy++)for(let d
 function gyVolley(e,txt,col,all,mult,affl,verb){
   const st=enemyStat(e.t,e.lvl),def=ENEMY_DEF[e.t];msg(txt,col);sfx('screech');G.shake=.4;
   for(const hi of (all?[0,1,2,3]:[0,1])){const h=G.heroes[hi];if(!h||!h.alive||h.hp<=0)continue;
-    if(Math.random()<enemyHitC(def,hi,e.lvl,e)+.05){let d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*mult));if(typeof armourWard==='function')d=Math.max(1,d-armourWard(hi));
+    if(Math.random()<enemyHitC(def,hi,e.lvl,e)+.05){let d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*mult));d=armourCut(d,hi,e.lvl);
       h.hp-=d;h.hurt=1;msg((verb||'It hits')+' '+HERO_DEF[hi].name+' for '+d+'.',col);addFloat(portraitX(hi)+19,250,'-'+d,col);
       try{if(h.hp>0&&affl)afflInflict(affl,hi,true)}catch(x){}
       if(h.hp<=0){h.hp=0;h.alive=false;msg(HERO_DEF[hi].name+' has fallen!','#ff8a7a');try{bondFall(hi)}catch(x){}if(G.sel===hi)nextHero()}}
@@ -84727,16 +84732,16 @@ const RT_MUL={30:2.19,31:2.12,32:1.32,34:1.44,36:1.52,37:1.33,39:1.34,41:1.5,42:
 /* the ratings that have creatures: a big area (the Deeper Hollow, the Blighted Lands) is rated for where the party enters it, and the party is meant to rise through the whole gap to the next rating there, so an area's XP is only held back once the party is above the NEXT rating (at least the area's own plus one) */
 const RT_RATES=[4,7,9,10,13,16,19,25,28,29,30,31,32,34,36,37,39,41,42,45,46,48,49,50,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,72,74,77,80,81,82,83,84,85,86,87,88,89,90,100,101,102,103,104,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120];
 const rtCeil=r=>{for(const q of RT_RATES)if(q>r)return Math.max(q,r+1);return r+1};
-const KING_HP=64000,KING_DMG=[400,600];
+const KING_HP=64000,KING_DMG=[600,900];
 const RT_KEYS=Object.keys(RT_MUL).map(Number).sort((a,b)=>a-b);
 const rtMul=l=>{if(l<30)return 1;const k=RT_KEYS;if(l>=k[k.length-1])return 1;for(let i=1;i<k.length;i++)if(l<=k[i]){const a=k[i-1],b=k[i],x=Math.log(RT_MUL[a]),y=Math.log(RT_MUL[b]);return Math.exp(x+(y-x)*(l-a)/(b-a))}return 1};
 /* RETUNE 2 (v3.895), found with the same harness after its healing was made to match the game (fixed amounts, heal_scaling.js).
    RT_DMG and RT_HP: what an ordinary creature's damage and health are multiplied by (on top of RT_MUL), by the rating of the place (see rtKey), read off between the ratings listed. 1 = unchanged.
    Bosses: from level 30 up no boss hits harder on average than a third of the health of a front fighter of its level (RT_FRONT), and none has more health than a
    well equipped party deals in RT_BOSS_ROUNDS rounds (RT_REF). These are ceilings only: a boss below them is not changed. Both follow the difficulty setting. */
-const RT_DMG={4:1,7:0.88,9:1.4,10:1.1,13:1.33,16:1.24,19:0.83,22:1.05,25:1.08,28:0.82,29:0.75,30:0.46,31:0.56,32:0.5,34:0.56,36:0.49,37:0.52,39:0.5,41:0.47,42:0.48,45:0.47,46:0.45,48:0.46,49:0.48,50:0.46,52:0.78,54:0.45,55:0.6,56:0.48,57:0.38,58:0.3,59:0.25,60:0.25,61:0.25,62:0.25,63:0.25,64:0.25,65:0.25,66:0.26,67:0.37,68:0.4,69:0.42,70:0.46,72:0.38,74:0.33,77:0.6,80:0.32,81:0.51,82:0.33,83:0.39,84:0.3,85:0.3,86:0.34,87:0.3,88:0.3,89:0.29,90:0.34,92:0.39,94:0.26,96:0.27,98:0.51,101:0.34,102:0.3,103:0.39,104:0.37,106:0.35,107:0.38,108:0.36,109:0.34,110:0.32,111:0.32,112:1};
-const RT_HP={4:0.68,7:0.84,9:0.79,10:1.08,13:0.93,16:0.99,19:0.58,22:0.91,25:1.02,28:1.01,29:0.84,30:1.22,31:1.54,32:1.11,34:1.18,36:1.12,37:0.97,39:1.05,41:1.29,42:1.18,45:1.47,46:1.57,48:1.28,49:1.22,50:0.96,52:1.45,54:1.4,55:1.72,56:1.61,57:1.84,58:1.24,59:1.49,60:1.2,61:1.15,62:1.73,63:1.6,64:1.21,65:1.47,66:1.61,67:2.15,68:2.48,69:1.6,70:1.69,72:1.95,74:2.11,77:2.41,80:2,81:2.26,82:1.75,83:2.58,84:2.7,85:2.37,86:2.29,87:2.83,88:2.68,89:2.43,90:2.99,92:3,94:2.59,96:2.64,98:3,101:3,102:2.82,103:2.24,104:2.54,106:2.42,107:2.48,108:2.48,109:3,110:2.87,111:2.98,112:1};
-const RT_BOSS_ROUNDS=18,RT_BOSS_HITS=3;
+const RT_DMG={4:1,7:1.13,9:1.88,10:1.51,13:2.06,16:1.68,19:1.21,22:1.52,25:1.64,28:1.33,29:1.21,30:0.71,31:0.83,32:0.78,34:0.91,36:0.75,37:0.82,39:0.79,41:0.68,42:0.76,45:0.7,46:0.76,48:0.68,49:0.72,50:0.71,52:1.17,54:0.66,55:0.93,56:0.7,57:0.58,58:0.47,59:0.32,60:0.35,61:0.29,62:0.29,63:0.35,64:0.27,65:0.36,66:0.41,67:0.57,68:0.61,69:0.64,70:0.68,72:0.59,74:0.53,77:0.86,80:0.5,81:0.78,82:0.47,83:0.64,84:0.43,85:0.6,86:0.59,87:0.54,88:0.47,89:0.47,90:0.62,92:0.73,94:0.42,96:0.41,98:0.76,101:0.48,102:0.46,103:0.57,104:0.58,106:0.53,107:0.55,108:0.53,109:0.56,110:0.48,111:0.5,112:1};
+const RT_HP={4:0.68,7:0.83,9:0.8,10:1.06,13:0.97,16:0.99,19:0.56,22:0.92,25:1.02,28:1,29:0.84,30:1.22,31:1.53,32:1.1,34:1.21,36:1.1,37:0.95,39:1.05,41:1.31,42:1.17,45:1.46,46:1.59,48:1.27,49:1.19,50:0.97,52:1.45,54:1.37,55:1.78,56:1.59,57:1.83,58:1.24,59:1.49,60:1.19,61:1.16,62:1.76,63:1.61,64:1.24,65:1.5,66:1.62,67:2.14,68:2.55,69:1.55,70:1.71,72:1.88,74:2.09,77:2.4,80:1.96,81:2.19,82:1.76,83:2.58,84:2.6,85:2.39,86:2.33,87:2.77,88:2.6,89:2.46,90:2.99,92:3,94:2.58,96:2.57,98:3,101:3,102:2.92,103:2.17,104:2.46,106:2.33,107:2.52,108:2.48,109:3,110:2.83,111:3,112:1};
+const RT_BOSS_ROUNDS=18,RT_BOSS_HITS=2; // 2 blows before armour: armour now takes up to half off a blow (armourCut), so about 4 blows in the best armour, under 3 in poor armour
 const RT_REF=[[30,470],[40,720],[50,920],[60,1200],[70,1550],[80,1740],[90,1950],[100,2450],[110,2800],[120,2880]];
 const RT_FRONT=l=>15.3*l+19;
 const RT_BOSS_HP={boss:.75}; // the Rat King: a party in the gear the crypts hand out took about thirty rounds

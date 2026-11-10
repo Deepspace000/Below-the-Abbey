@@ -115,7 +115,7 @@ function bswSpit(e){
   const st=enemyStat(e.t,e.lvl),def=ENEMY_DEF[e.t];let hit=0;
   msg('The Black Swill heaves and spits a corroding glob across the front line!','#c8a0f0');sfx('screech');G.shake=.4;
   for(const hi of [0,1]){const h=G.heroes[hi];if(!h||!h.alive||h.hp<=0)continue;
-    if(Math.random()<enemyHitC(def,hi,e.lvl,e)+.05){let d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*1.15));if(typeof armourWard==='function')d=Math.max(1,d-armourWard(hi));
+    if(Math.random()<enemyHitC(def,hi,e.lvl,e)+.05){let d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*1.15));d=armourCut(d,hi,e.lvl);
       h.hp-=d;h.hurt=1;hit++;msg('The glob eats into '+HERO_DEF[hi].name+' for '+d+'.','#e8a090');addFloat(portraitX(hi)+19,250,'-'+d,'#b8f060');
       try{if(h.hp>0)afflInflict('poisoned',hi,true)}catch(x){}
       if(h.hp<=0){h.hp=0;h.alive=false;msg(HERO_DEF[hi].name+' has fallen!','#ff8a7a');try{bondFall(hi)}catch(x){}if(G.sel===hi)nextHero()}}

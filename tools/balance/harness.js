@@ -44,6 +44,7 @@ B.snap=function(mode,P){
     S.ward.push((()=>{try{return typeof armourWard==='function'?armourWard(i)||0:0}catch(e){return 0}})())});
   for(const it of G.bag){const d=ITEMDEF[it.id];if(d&&d.heal&&d.k==='potion')for(let n=0;n<(it.n||1);n++)S.pots.push(d.heal)}
   S.pots.sort((a,b)=>a-b);S.potCount=S.pots.length;
+  S.cut=(d,hi,lvl)=>{const A=(typeof ARMD!=='undefined')?ARMD:null,sh=A?Math.max(0,Math.min(A.max,A.share*S.h[hi].armor/(A.a0+A.al*lvl))):0;return Math.max(1,Math.max(1,Math.round(d*(1-sh)))-S.ward[hi])}; // armourCut of the game, for this party
   S.hitC=(t,lvl,hi)=>{const k=t+'|'+lvl+'|'+hi;if(S.hc[k]!==undefined)return S.hc[k];return S.hc[k]=enemyHitC(ENEMY_DEF[t],hi,lvl,null)};
   S.stat=(t,lvl)=>{const k=t+'|'+lvl;return S.st[k]||(S.st[k]=enemyStat(t,lvl))};
   S._ho=healOpts(S); // read now, while the game holds this very party
@@ -83,7 +84,7 @@ function fight(S,st,foes,rnd){
     if(!F.some(f=>f.alive)){res.win=true;break}
     const living=[];for(let j=0;j<4;j++)if(st.alive[j])for(let k=0;k<(j<2?3:1);k++)living.push(j);
     for(const f of F){if(!f.alive||!living.length)continue;const t=living[Math.floor(rnd()*living.length)];if(!st.alive[t])continue;
-      if(rnd()<S.hitC(f.t,f.lvl,t)){const d=Math.max(1,rndI(rnd,f.dmg[0],f.dmg[1])-S.ward[t]);st.hp[t]-=d;res.taken+=d/S._tot;if(st.hp[t]<=0){st.hp[t]=0;st.alive[t]=false;res.fallen++}}}
+      if(rnd()<S.hitC(f.t,f.lvl,t)){const d=S.cut(rndI(rnd,f.dmg[0],f.dmg[1]),t,f.lvl);st.hp[t]-=d;res.taken+=d/S._tot;if(st.hp[t]<=0){st.hp[t]=0;st.alive[t]=false;res.fallen++}}}
     if(!st.alive.some(x=>x))break}
   let pl=S.P;for(const f of F)if(!f.alive)res.xp+=Math.max(1,Math.round(f.xp*Math.min(1.5,Math.max(.3,1-.06*(pl-f.lvl)))));
   const tot=S.h.reduce((a,x)=>a+x.max,0);let lost=0;for(let i=0;i<4;i++)lost+=Math.max(0,hp0[i]-st.hp[i]);res.hpLost=lost/tot;
@@ -111,8 +112,8 @@ B.kills=async function(){
   const list=Object.values(seen);let i=0;
   for(const o of list){const P=Math.max(1,Math.min(135,o.lv)),S=B.snap('',P),st=S.stat(o.t,o.lv),d=ENEMY_DEF[o.t];
     const avgHit=S.h.reduce((a,x)=>a+x.basic*(d.fly?x.hitF:x.hit),0)/4,sum=S.h.reduce((a,x)=>a+x.basic*(d.fly?x.hitF:x.hit),0);
-    const md=(st.dmg[0]+st.dmg[1])/2;let kf=0,ka=0,wsum=0;for(let j=0;j<4;j++){const hc=S.hitC(o.t,o.lv,j),w=j<2?3:1;const dd=Math.max(1,md-S.ward[j]);kf+=0;ka+=w*(S.h[j].max/(dd*hc));wsum+=w}
-    const hc0=S.hitC(o.t,o.lv,0),front=S.h[0].max/(Math.max(1,md-S.ward[0])*hc0);
+    const md=(st.dmg[0]+st.dmg[1])/2;let kf=0,ka=0,wsum=0;for(let j=0;j<4;j++){const hc=S.hitC(o.t,o.lv,j),w=j<2?3:1;const dd=S.cut(md,j,o.lv);kf+=0;ka+=w*(S.h[j].max/(dd*hc));wsum+=w}
+    const hc0=S.hitC(o.t,o.lv,0),front=S.h[0].max/(S.cut(md,0,o.lv)*hc0);
     rows.push({t:o.t,name:d.name,lv:o.lv,n:o.n,boss:bossy(o.t),hp:st.hp,dmg:st.dmg,hitsToKill:st.hp/avgHit,roundsToKill:st.hp/sum,hitsToKillFront:front,hitsToKillAvg:ka/wsum,areas:[...o.areas].slice(0,3),heroMax:S.h[0].max});
     if(++i%80===0)await yieldUI()}
   await post('kills',rows);return rows.length};

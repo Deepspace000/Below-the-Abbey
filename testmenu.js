@@ -54,7 +54,7 @@ function tmApply(n,weak,real){
     wl.sort((x,y)=>y[1]-x[1]);let pick=wl[0];
     if(weak&&wl.length){const goal=wl[0][1]*.8;pick=wl.reduce((b,q)=>Math.abs(q[1]-goal)<Math.abs(b[1]-goal)?q:b,wl[0])} // an average weapon: about four fifths as good as the best the shops sell by this level
     h.eq={};if(pick)h.eq.main=mkItem(pick[0]);
-    for(const slot of ['head','chest','arms','legs','off']){let bi=null,ba=-1;for(const id of Object.keys(ITEMDEF)){const d=ITEMDEF[id];if(!['head','chest','arms','legs','shield'].includes(d.k)||!tmOk(id,d,n)||!slotFits(slot,d,hi)||reqFail(h,d))continue;if((d.armor||0)>ba){ba=d.armor||0;bi=id}}if(bi)h.eq[slot]=mkItem(bi)}
+    for(const slot of ['head','chest','arms','legs','off']){let bi=null,ba=-1;for(const id of Object.keys(ITEMDEF)){const d=ITEMDEF[id];if(!['head','chest','arms','legs','shield'].includes(d.k)||!tmOk(id,d,n)||!slotFits(slot,d,hi)||reqFail(h,d))continue;if((d.armor||0)>ba){ba=d.armor||0;bi=id}}if(weak&&bi){const goal=ba*.7;let wi=bi,wd=1e9;for(const id of Object.keys(ITEMDEF)){const d=ITEMDEF[id];if(!['head','chest','arms','legs','shield'].includes(d.k)||!tmOk(id,d,n)||!slotFits(slot,d,hi)||reqFail(h,d))continue;const q=Math.abs((d.armor||0)-goal);if(q<wd){wd=q;wi=id}}bi=wi} /* the average set: armour about seven tenths as good as the best the shops sell by this level */ if(bi)h.eq[slot]=mkItem(bi)}
     const rings=Object.keys(ITEMDEF).filter(id=>ITEMDEF[id].k==='ring'&&tmOk(id,ITEMDEF[id],n)).sort((a,b)=>ITEMDEF[b].price-ITEMDEF[a].price);
     ['r0','r1'].forEach((s,i)=>{if(rings[i]&&slotFits(s,ITEMDEF[rings[i]],hi)&&!reqFail(h,ITEMDEF[rings[i]]))h.eq[s]=mkItem(rings[i])});
     Object.assign(h.eq,keep);
