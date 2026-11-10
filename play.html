@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.895';
+const VERSION='3.896';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -20424,7 +20424,7 @@ function drawGameplay(){
   let y=173;for(const p of lines){for(const l of wrapText(p,310,7.6)){txt(l,240,y,7.6,'#cdbf94','center');y+=9.5}y+=4}
   const r=LEVEL_RATING[LEVEL];
   txt(on?'Autoscaling is on.':(r?'This place is level '+r+'.':'This place has no fixed level.'),240,y+4,8.6,'#e8c878','center',true);y+=16;
-  {const ao=!G.flags.noAdapt,at=ao?'Intelligent adjustment is ON. If the party falls four times in a row in one area, the game offers help once a session: an easier game, weaker enemies for 15 minutes, or a 15 minute boost of +5 to STR, DEX and INT. If the party wins fights very fast, the game raises the difficulty a step at a time ("master player detected"). Turn it off to play at exactly the difficulty you set.':'Intelligent adjustment is OFF. The game never offers help and never changes the difficulty by itself: it stays exactly where you set it.';
+  {const ao=!G.flags.noAdapt,at=ao?'Intelligent adjustment is ON. If the party falls four times in a row in one area, the game offers help once a session: an easier game, weaker enemies for 15 minutes, or a 15 minute boost of +5 to STR, DEX and INT. It also watches what each fight costs: when fights cost almost nothing it raises the difficulty a step ("master player detected"), and when they cost a lot (heroes falling, several potions a fight) it lowers it a step. Turn it off to play at exactly the difficulty you set.':'Intelligent adjustment is OFF. The game never offers help and never changes the difficulty by itself: it stays exactly where you set it.';
    for(const l of wrapText(at,312,7.2)){txt(l,240,y,7.2,ao?'#b8d8a0':'#a89c78','center');y+=9}}
   btnText('gp_nums','Bar numbers: '+(G.flags.noBarNums?'OFF':'ON'),78,290,106,24); // the numbers over the health, mana, experience and food bars
   btnText('gp_back','Back',190,290,100,24);
@@ -83191,20 +83191,42 @@ function cs2F(){const F=G.flags;return F.cs2||(F.cs2={})}
    INTELLIGENT ADJUSTMENT (Menu > Gameplay, on by default). The game watches how the party is doing and helps either way:
    1. (Once per play session.) If the party falls four times in a row in the same area (without winning five fights in between), the death screen offers help: make the game a bit easier for good
       (difficulty 30 percent lower), weaker enemies for 15 minutes (difficulty 50 percent lower for a while, then back), or a 15 minute boost of +5 to strength, dexterity and intelligence.
-   2. If the party wins fights very fast (eight quick wins in a row: each enemy dead within two rounds, enemies not far below the party's level), the game puts the difficulty up one step
-      (10 percent) and says "master player detected, putting difficulty up. ;)". If the wins stay that fast, it goes up another step, and so on (never more than 12 steps in all).
-   Turn it off in Menu > Gameplay to play at exactly the difficulty that is set. State is kept in G.flags.ada (saved with the game); the death count and the fast-win count live only in the session.
+   2. A two-way band. Every ordinary kill (enemy not far below the party's level, not a boss) is judged by what it cost since the kill before it:
+      health lost (as a share of the party's full health), potions and food used, heroes fallen, and the rounds the enemy lasted.
+        cheap  (no potion, nobody fell, at most 2.5 percent of health lost, enemy dead within two rounds): meter +1
+        dear   (one potion, or a quarter of the party's health lost): meter -1
+        hard   (a hero fell, two potions or more, or 45 percent of health lost): meter -3
+        anything else: the meter moves one towards 0.      A fall of the whole party: meter -5.
+      Meter at +8: difficulty up one step (10 percent), "master player detected, putting difficulty up. ;)". Meter at -8: difficulty down one step.
+      The steps the game has added itself are in F.up: never more than 12 up, never more than 4 down, and a raise is taken back by the same road when the fights turn dear.
+   Turn it off in Menu > Gameplay to play at exactly the difficulty that is set. State is kept in G.flags.ada (saved with the game); the meter (F.m) is saved too; only the count of falls in a row lives in the session.
    ========================================================================== */
-const ADA={deaths:0,lastLv:-1,killsSince:0,counted:false,offer:false,shown:false,fast:0,boostRounds:0};
+const ADA={deaths:0,lastLv:-1,killsSince:0,counted:false,offer:false,shown:false,boostRounds:0,prev:null,pl:-1,lost:0,pots:0,fell:0};
 const adaOn=()=>!(G.flags&&G.flags.noAdapt);
 function adaF(){return G.flags.ada||(G.flags.ada={up:0,boostLeft:0,boostOn:0,lowLeft:0,lowDelta:0})}
 function adaAvgLvl(){const a=G.heroes.filter(h=>h.alive);return a.length?a.reduce((s,h)=>s+h.lvl,0)/a.length:1}
 function adaBoost(on){const F=adaF();if(on===!!F.boostOn)return;const d=on?5:-5;for(let i=0;i<G.heroes.length;i++){const h=G.heroes[i];h.str+=d;h.dex+=d;h.int+=d;try{recalcMax(i)}catch(e){}}F.boostOn=on?1:0}
 function adaLow(on){const F=adaF();if(on){const was=G.flags.diffStep|0,n=Math.max(DIFF_MIN,was-5);F.lowDelta=was-n;G.flags.diffStep=n}else{const was=G.flags.diffStep|0;G.flags.diffStep=Math.min(DIFF_MAX,was+(F.lowDelta|0));F.lowDelta=0}try{diffApply()}catch(e){}}
+/* the ledger: what the party has paid since the last kill */
+function adaLedger0(){ADA.lost=0;ADA.pots=0;ADA.fell=0}
+function adaWatch(){
+  if(G.state!=='play'||!G.heroes){ADA.prev=null;return}
+  const hs=G.heroes;
+  if(ADA.prev&&ADA.prev.length===hs.length&&ADA.pl===LEVEL){
+    for(let i=0;i<hs.length;i++){const p=ADA.prev[i],h=hs[i],now=h.alive?Math.max(0,h.hp):0;if(now<p.hp)ADA.lost+=p.hp-now;if(p.alive&&!h.alive)ADA.fell++;p.hp=now;p.alive=!!h.alive}}
+  else{ADA.prev=hs.map(h=>({hp:h.alive?Math.max(0,h.hp):0,alive:!!h.alive}));ADA.pl=LEVEL;adaLedger0()}   // a new place, a loaded game, a changed party: start the ledger again
+}
+/* the band: move the difficulty one step when the meter reaches either end */
+function adaBand(){
+  const F=adaF();F.up=F.up|0;F.m=Math.max(-8,Math.min(8,F.m|0));
+  if(F.m>=8){F.m=0;if(F.up<12&&(G.flags.diffStep|0)<DIFF_MAX){const back=F.up<0;F.up++;diffChange(1);msg(back?'The fights are going well again. Difficulty back up one step.':'master player detected, putting difficulty up. ;)','#ffd870')}}
+  else if(F.m<=-8){F.m=0;if(F.up>-4&&(G.flags.diffStep|0)>DIFF_MIN){F.up--;diffChange(-1);msg('These fights are costing the party a lot. Difficulty eased one step.','#a8d8a0')}}
+}
 function adaTick(dt){
+  try{adaWatch()}catch(e){}
   if(G.state==='dead'){
     if(!ADA.counted){ADA.counted=true;
-      if(adaOn()){ADA.deaths=(ADA.lastLv===LEVEL||ADA.lastLv===-1)?ADA.deaths+1:1;ADA.lastLv=LEVEL;ADA.killsSince=0;ADA.fast=0;
+      if(adaOn()){ADA.deaths=(ADA.lastLv===LEVEL||ADA.lastLv===-1)?ADA.deaths+1:1;ADA.lastLv=LEVEL;ADA.killsSince=0;try{adaF().m=(adaF().m|0)-5;adaBand()}catch(e){}
         if(ADA.deaths>=4){ADA.deaths=0;if(!ADA.shown){ADA.shown=true;ADA.offer=true}}}}   // the offer appears once a play session, so it never nags
   }else{ADA.counted=false;if(ADA.offer&&G.state!=='dead')ADA.offer=false}
   if(G.state==='play'&&G.flags&&G.flags.ada){const F=G.flags.ada;
@@ -83212,17 +83234,23 @@ function adaTick(dt){
     if(F.lowDelta){F.lowLeft-=dt;if(F.lowLeft<=0){adaLow(false);msg('The enemies of this area are back to their normal strength.','#c8c8e8')}}}
 }
 {const _u=update;update=function(dt){const r=_u.apply(this,arguments);try{adaTick(dt||.016)}catch(e){console.error('adapt',e)}return r}}
-/* fast wins: how many rounds each enemy took to kill */
+/* potions and food used go in the ledger */
+{const _uh=useHeal;useHeal=function(hi,idx){const r=_uh.apply(this,arguments);try{if(r&&G.state==='play')ADA.pots++}catch(e){}return r}}
+/* a loaded game starts the ledger again, so the health of the save is not counted as health lost */
+{const _rn=restoreNow;restoreNow=function(sv){ADA.prev=null;return _rn.apply(this,arguments)}}
+/* each kill: what did it cost? */
 {const _h=hurtEnemy;hurtEnemy=function(e,dmg){
   const was=e&&e.hp>0;if(was&&e._ada0===undefined)e._ada0=G.rounds;
   const r=_h.apply(this,arguments);
   try{if(was&&e.hp<=0&&adaOn()&&G.state==='play'){
     ADA.killsSince++;if(ADA.killsSince>=5)ADA.deaths=0;   // five wins after a fall and the string of falls is broken
-    const lv=e.lvl||LEVEL_RATING[LEVEL]||0,dur=G.rounds-(e._ada0===undefined?G.rounds:e._ada0);
-    if(lv>=adaAvgLvl()-8&&!(ENEMY_DEF[e.t]&&ENEMY_DEF[e.t].boss&&dur>=3)){
-      if(dur<=1)ADA.fast++;else if(dur>=4)ADA.fast=Math.max(0,ADA.fast-2);
-      const F=adaF();
-      if(ADA.fast>=8&&F.up<12&&(G.flags.diffStep|0)<DIFF_MAX){ADA.fast=0;F.up++;diffChange(1);msg('master player detected, putting difficulty up. ;)','#ffd870')}}}}catch(x){console.error('adapt kill',x)}
+    adaWatch();
+    const lv=e.lvl||LEVEL_RATING[LEVEL]||0,dur=G.rounds-(e._ada0===undefined?G.rounds:e._ada0),D=ENEMY_DEF[e.t]||{};
+    if(lv>=adaAvgLvl()-8&&!D.boss&&!(typeof isBossy==='function'&&isBossy(e.t))){
+      const F=adaF(),mx=G.heroes.reduce((s,h)=>s+(h.max||h.hp||1),0)||1,cost=ADA.lost/mx;
+      const hard=ADA.fell>0||ADA.pots>=2||cost>=.45,dear=!hard&&(ADA.pots===1||cost>=.25),cheap=!hard&&!dear&&cost<=.025&&dur<=2;
+      let m=F.m|0;m=hard?m-3:dear?m-1:cheap?m+1:m>0?m-1:m<0?m+1:0;F.m=m;adaBand()}
+    adaLedger0()}}catch(x){console.error('adapt kill',x)}
   return r}}
 /* the offer on the death screen */
 function adaWrap(t,w,s){return wrapText(t,w,s)}
@@ -83247,7 +83275,7 @@ function adaWrap(t,w,s){return wrapText(t,w,s)}
     ADA.offer=false;ADA.deaths=0;ADA.killsSince=0;sfx('equip');return}
   if(G.menu==='gameplay'&&id==='gp_adapt'){G.flags.noAdapt=G.flags.noAdapt?0:1;
     if(G.flags.noAdapt)msg('Intelligent adjustment is OFF. The difficulty stays exactly where you set it.','#e8d8a0');
-    else{msg('Intelligent adjustment is ON. If the party falls four times in a row in one area, the game offers help (an easier game, weaker enemies for 15 minutes, or a 15 minute +5 boost to STR, DEX and INT).','#e8d8a0');msg('If the party wins fights very fast, the game raises the difficulty one step at a time ("master player detected"). Turn it off here to stop both.','#e8d8a0')}
+    else{msg('Intelligent adjustment is ON. If the party falls four times in a row in one area, the game offers help (an easier game, weaker enemies for 15 minutes, or a 15 minute +5 boost to STR, DEX and INT).','#e8d8a0');msg('The game also watches what each fight costs. If fights cost almost nothing for a while, the difficulty goes up a step ("master player detected"). If they cost a lot (heroes falling, several potions a fight), it goes down a step. Turn it off here to stop all of it.','#e8d8a0')}
     return}
   return _b.apply(this,arguments)}}
 
@@ -84706,8 +84734,8 @@ const rtMul=l=>{if(l<30)return 1;const k=RT_KEYS;if(l>=k[k.length-1])return 1;fo
    RT_DMG and RT_HP: what an ordinary creature's damage and health are multiplied by (on top of RT_MUL), by the rating of the place (see rtKey), read off between the ratings listed. 1 = unchanged.
    Bosses: from level 30 up no boss hits harder on average than a third of the health of a front fighter of its level (RT_FRONT), and none has more health than a
    well equipped party deals in RT_BOSS_ROUNDS rounds (RT_REF). These are ceilings only: a boss below them is not changed. Both follow the difficulty setting. */
-const RT_DMG={4:1,7:0.94,9:1.69,10:1.44,13:1.47,16:1.52,19:1.46,22:1.65,25:1.54,28:1.15,29:1.25,30:0.65,31:0.83,32:0.78,34:0.87,36:0.72,37:0.8,39:0.75,41:0.72,42:0.75,45:0.73,46:0.62,48:0.62,49:0.74,50:0.73,52:1.18,54:0.73,55:0.96,56:0.7,57:0.55,58:0.45,59:0.31,60:0.33,61:0.3,62:0.27,63:0.29,64:0.29,65:0.31,66:0.32,67:0.51,68:0.58,69:0.64,70:0.73,72:0.6,74:0.53,77:0.81,80:0.51,81:0.8,82:0.52,83:0.59,84:0.5,85:0.5,86:0.52,87:0.48,88:0.49,89:0.46,90:0.51,92:0.57,94:0.57,96:0.59,98:0.83,100:0.44,101:0.49,102:0.44,103:0.61,104:0.62,106:0.55,107:0.56,108:0.53,109:0.44,110:0.47,111:0.46,112:1};
-const RT_HP={4:0.68,7:0.73,9:0.68,10:0.83,13:0.84,16:0.79,19:0.37,22:0.55,25:0.74,28:0.75,29:0.54,30:0.81,31:1.06,32:0.74,34:0.81,36:0.76,37:0.63,39:0.72,41:0.9,42:0.81,45:0.96,46:1.24,48:0.88,49:0.81,50:0.64,52:0.97,54:0.95,55:1.21,56:1.11,57:1.3,58:0.85,59:1.07,60:0.83,61:0.83,62:1.26,63:1.18,64:0.89,65:1.07,66:1.18,67:1.5,68:1.69,69:1.11,70:1.24,72:1.3,74:1.49,77:1.71,80:1.36,81:1.5,82:1.16,83:1.78,84:1.77,85:1.67,86:1.65,87:1.91,88:1.87,89:1.65,90:2.07,92:2.22,94:2.15,96:2,98:2.37,100:1.82,101:2.19,102:2.03,103:1.49,104:1.71,106:1.61,107:1.83,108:1.73,109:2.22,110:1.96,111:2.19,112:1};
+const RT_DMG={4:1,7:0.88,9:1.4,10:1.1,13:1.33,16:1.24,19:0.83,22:1.05,25:1.08,28:0.82,29:0.75,30:0.46,31:0.56,32:0.5,34:0.56,36:0.49,37:0.52,39:0.5,41:0.47,42:0.48,45:0.47,46:0.45,48:0.46,49:0.48,50:0.46,52:0.78,54:0.45,55:0.6,56:0.48,57:0.38,58:0.3,59:0.25,60:0.25,61:0.25,62:0.25,63:0.25,64:0.25,65:0.25,66:0.26,67:0.37,68:0.4,69:0.42,70:0.46,72:0.38,74:0.33,77:0.6,80:0.32,81:0.51,82:0.33,83:0.39,84:0.3,85:0.3,86:0.34,87:0.3,88:0.3,89:0.29,90:0.34,92:0.39,94:0.26,96:0.27,98:0.51,101:0.34,102:0.3,103:0.39,104:0.37,106:0.35,107:0.38,108:0.36,109:0.34,110:0.32,111:0.32,112:1};
+const RT_HP={4:0.68,7:0.84,9:0.79,10:1.08,13:0.93,16:0.99,19:0.58,22:0.91,25:1.02,28:1.01,29:0.84,30:1.22,31:1.54,32:1.11,34:1.18,36:1.12,37:0.97,39:1.05,41:1.29,42:1.18,45:1.47,46:1.57,48:1.28,49:1.22,50:0.96,52:1.45,54:1.4,55:1.72,56:1.61,57:1.84,58:1.24,59:1.49,60:1.2,61:1.15,62:1.73,63:1.6,64:1.21,65:1.47,66:1.61,67:2.15,68:2.48,69:1.6,70:1.69,72:1.95,74:2.11,77:2.41,80:2,81:2.26,82:1.75,83:2.58,84:2.7,85:2.37,86:2.29,87:2.83,88:2.68,89:2.43,90:2.99,92:3,94:2.59,96:2.64,98:3,101:3,102:2.82,103:2.24,104:2.54,106:2.42,107:2.48,108:2.48,109:3,110:2.87,111:2.98,112:1};
 const RT_BOSS_ROUNDS=18,RT_BOSS_HITS=3;
 const RT_REF=[[30,470],[40,720],[50,920],[60,1200],[70,1550],[80,1740],[90,1950],[100,2450],[110,2800],[120,2880]];
 const RT_FRONT=l=>15.3*l+19;
