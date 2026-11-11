@@ -22,6 +22,22 @@
 </head>
 <body>
 <div id="loading"><div class="ld-t">Below the Abbey</div><div class="ld-s">Loading the world&hellip;</div><div class="ld-bar"><i id="ldfill"></i></div><div class="ld-n" id="ldnote"></div></div>
+<script>/*SAVEBACKUP*/
+/* Windows app only: a second copy of the saves is kept in a file (Documents\Below the Abbey\Saves, written by desktop/savebackup.js). If the app's own storage holds no saves at start
+   (after an update, say) and that file has some, they are put back here, before the game reads them. Test visits (abbeyTest_) are never copied. */
+(function(){try{
+  var D=window.BTA_DESKTOP;if(!D||!D.saves)return;
+  var P='abbeySave_';
+  function keys(){var o={},n=0;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(P)===0&&k!==P+'broken'){o[k]=localStorage.getItem(k);n++}}return {o:o,n:n}}
+  if(keys().n===0){var b=D.saves.read();if(b&&typeof b==='object'){var c=0;for(var k in b){if(k.indexOf(P)===0&&typeof b[k]==='string'){try{localStorage.setItem(k,b[k]);c++}catch(e){}}}window.__btaRestored=c}}
+  var t=null;function copy(){clearTimeout(t);t=null;try{D.saves.write(keys().o)}catch(e){}}
+  function later(){clearTimeout(t);t=setTimeout(copy,1500)}
+  var sp=Storage.prototype.setItem,rp=Storage.prototype.removeItem;
+  Storage.prototype.setItem=function(k){var r=sp.apply(this,arguments);try{if(this===localStorage&&typeof k==='string'&&k.indexOf(P)===0)later()}catch(e){}return r};
+  Storage.prototype.removeItem=function(k){var r=rp.apply(this,arguments);try{if(this===localStorage&&typeof k==='string'&&k.indexOf(P)===0)later()}catch(e){}return r};
+  addEventListener('pagehide',function(){if(t)copy()});
+}catch(e){}})();
+</script>
 <script>
 window.LOAD={t:0,d:0,req:[],dn:{}};
 /* the loading bar goes by megabytes when the size list (assetsizes.json, written by tools/stamp.py) has arrived: 'Loading the pictures: 40%, 33 of 82 MB'. The itch.io build keeps its own counter (its pictures are packed) and has no size list, so it is left alone. */
@@ -45,7 +61,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.903';
+const VERSION='3.904';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";

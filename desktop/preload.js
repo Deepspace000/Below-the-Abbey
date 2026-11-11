@@ -5,5 +5,7 @@ contextBridge.exposeInMainWorld('BTA_DESKTOP', {
   desktop: true, platform: process.platform,
   fullscreen: () => ipcRenderer.invoke('bta-fs', 'get'),
   toggleFullscreen: () => ipcRenderer.invoke('bta-fs', 'toggle'),
-  restart: () => ipcRenderer.invoke('bta-restart')
+  restart: () => ipcRenderer.invoke('bta-restart'),
+  // a second copy of the saves in Documents\Below the Abbey\Saves (savebackup.js), so an update can never lose them
+  saves: { read: () => ipcRenderer.sendSync('bta-saves-read'), write: (o) => ipcRenderer.send('bta-saves-write', o) }
 });

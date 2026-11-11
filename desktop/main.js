@@ -5,6 +5,8 @@ const { app, BrowserWindow, protocol, net, Menu, globalShortcut, ipcMain } = req
 const path = require('path');
 const { pathToFileURL } = require('url');
 const updater = require('./updater');
+const savebackup = require('./savebackup');
+const saveDir = () => path.join(app.getPath('documents'), 'Below the Abbey', 'Saves');
 
 const SMOKE = !!process.env.BTA_SMOKETEST;
 // in development the game is the folder above; in a built app it is copied into resources/game by prepare.js
@@ -60,6 +62,8 @@ const mk=(t,f)=>{const b=document.createElement('button');b.textContent=t;b.styl
 ${restart ? "mk('Restart now',()=>window.BTA_DESKTOP.restart());mk('Later',()=>d.remove());" : "clearTimeout(window.__btaUt);" + (secs ? "window.__btaUt=setTimeout(()=>d.remove()," + secs * 1000 + ");" : "")}})()`;
   win.webContents.executeJavaScript(js).catch(() => {});
 }
+ipcMain.on('bta-saves-read', (e) => { let r = null; try { r = savebackup.read(saveDir()); } catch (x) { /* none */ } e.returnValue = r; });
+ipcMain.on('bta-saves-write', (e, obj) => { try { savebackup.write(saveDir(), obj); } catch (x) { /* the game goes on without a copy */ } });
 ipcMain.handle('bta-restart', () => { app.relaunch(); app.exit(0); });
 
 // Newer game files: the app looks on GitHub Pages for a newer version (see updater.js), downloads only the files that

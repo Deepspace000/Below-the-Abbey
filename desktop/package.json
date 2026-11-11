@@ -18,6 +18,7 @@
     "files": [
       "main.js",
       "updater.js",
+      "savebackup.js",
       "preload.js",
       "package.json"
     ],
