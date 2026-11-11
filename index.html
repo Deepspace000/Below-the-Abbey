@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.902';
+const VERSION='3.903';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -50091,12 +50091,12 @@ const QREC={on:false,r:[]};
    UNDER THE WELL (level 501, prefix tw / TWL). A small windy maze of grey-blue brick under Thornwick, where the rats of the Rat Catcher quest nest.
    1. The level: a perfect maze (one way only, no loops) of one-wide passages cut from a fixed seed, so it is the same every time. Eight rats stand in it
       (the quest counts rats), spread along the passages, and a chest waits in the dead end that is the longest walk from the stair.
-   2. The way in: a new well in Thornwick (level 3), a few squares west of Goodwife Edda (36,16), at 29,17 (kept well clear of every door). Talk to it (or step on it) to climb down.
+   2. The way in: a new well in Thornwick (level 3), a few squares west of Goodwife Edda (36,16), at 35,21, the old well beside the inn's east wall, off the road (kept clear of every door). Talk to it (or step on it) to climb down.
       The way out is the door at the foot of the stair, which puts the party back beside the well.
    3. The walls are the plain stone wall recoloured grey-blue (made when the level is first entered); the floor is the wet cobble, darkened and leaned to blue.
    4. The map is a little hand-inked sheet (the same pen work as the Queen's Hive map): names and a key only.
    ========================================================================== */
-const TWL={ID:501,W:25,H:19,EX:3,WX:29,WY:17,M:null};
+const TWL={ID:501,W:25,H:19,EX:3,WX:35,WY:21,M:null};
 
 function twBuild(){
   const W=TWL.W,H=TWL.H,R=rmRng(70417),g=[];
@@ -50157,7 +50157,7 @@ function twBuild(){
   floor.forEach(([x,y],i)=>{if(near(x,y)||d[y*W+x]<5)return;const h=hash2(x,y,9917);
     if(h<.045)decor.push({k:'bones',x,y,block:false});
     else if(h<.06&&deg.get(x+','+y)===1&&g[y][x]==='.')decor.push({k:'barrel',x,y,block:true})});
-  return {rows:g.map(r=>r.join('')),fmap:fm,start:{x:sx,y:sy,f:0},enemies,items,decor,lights,info,chest};
+  return {rows:g.map(r=>r.join('')),fmap:fm,start:{x:sx,y:sy,f:Math.max(0,[[0,-1],[1,0],[0,1],[-1,0]].findIndex(([a,b])=>g[sy+b][sx+a]==='.'))},enemies,items,decor,lights,info,chest};
 }
 {const M=twBuild();TWL.M=M;
   LEVELS[TWL.ID]={rows:M.rows,fmap:M.fmap,start:M.start,enemies:M.enemies,items:M.items,decor:M.decor,lights:M.lights,day:0,torchGap:4.2,
@@ -50210,11 +50210,18 @@ function twSwapWalls(on){
   return _lf.apply(this,arguments)}}
 
 /* ---- the well in Thornwick: a few squares west of Goodwife Edda ---- */
-function twDescend(){if(LEVEL!==3||G.state!=='play')return;msg('The party climbs down the well, into the tunnels below Thornwick.','#9ec4e8');sfx('level');const st=LEVELS[TWL.ID].start;goToLevel(TWL.ID,{x:st.x,y:st.y,f:st.f});G.state='play'}
+function twDescend(){if(LEVEL!==3||G.state!=='play')return;msg('The party climbs down the well, into the tunnels below Thornwick.','#9ec4e8');sfx('level');const Lw=LEVELS[TWL.ID],st=Lw.start;
+  // the way back up puts the party on the square it came from, facing away from the well
+  try{const p=Lw.portals[0];if(p&&G.P&&!(G.P.x===TWL.WX&&G.P.y===TWL.WY)){p.x=G.P.x;p.y=G.P.y;p.f=(G.P.f+2)%4}}catch(e){console.error(e)}
+  goToLevel(TWL.ID,{x:st.x,y:st.y,f:st.f});G.state='play'}
 NPCS.thornwell={name:'The well',img:'well',root:d=>say('You look into the well and hear scratching sounds far below. Do you descend?',[['Descend.',()=>{twDescend();return null}],['Not.',()=>null]])};
 function twTownSetup(){
   const L=LEVELS[3];if(!L||!L.decor||L._twWell)return;L._twWell=1;
-  L.decor.push({k:'well',x:TWL.WX,y:TWL.WY,block:false,walk:true,npc:'thornwell'});
+  // the town's old well (the one the map names) is the way down; the crate that was drawn on the same square is cleared, and the party must walk up to it and ask, not stumble onto it
+  L.decor=L.decor.filter(d=>!(d.k==='crate'&&d.x===TWL.WX&&d.y===TWL.WY));
+  let w=L.decor.find(d=>d.k==='well'&&d.x===TWL.WX&&d.y===TWL.WY);
+  if(!w){w={k:'well',x:TWL.WX,y:TWL.WY};L.decor.push(w)}
+  w.npc='thornwell';w.block=true;w.solid=1;w.walk=false;
 }
 twTownSetup();
 {const _dm=doMove;doMove=function(){const r=_dm.apply(this,arguments);
@@ -50288,6 +50295,13 @@ const TWCAT=khQD("Mrrow. (A skinny white cat sits in the dead end with her paws 
 NPCS.twcat={name:'Tiki, the lost cat',img:'ep_tw_tiki',root:d=>qNode('twq_cat',TWCAT)};
 Object.defineProperty(QGIVER,'twcat',{enumerable:true,configurable:true,get(){return qSt('twq_cat')==='done'?null:['twq_cat']}});
 {const _t=qTurnIn;qTurnIn=function(id){const r=_t.apply(this,arguments);try{if(r&&id==='twq_cat'){G.flags.twCatFed=1;if(bagCount('herring')>0)bagRemove('herring',1)}}catch(e){console.error(e)}return r}}
+
+/* ---- the quest rings: the way out of the tunnels is not a place for quests that are about somewhere else (the Gandrick rings on the exit door) ---- */
+setTimeout(()=>{const _qs=questSpots;questSpots=function(){   // wrapped after every other module has loaded, so it sees the rings the quest ring module adds
+  const out=_qs.apply(this,arguments);
+  if(LEVEL!==TWL.ID)return out;
+  const keep=out.filter(z=>z.kind!=='goal'||!(z.x===TWL.EX&&z.y===TWL.H-1));
+  keep.away=out.away;return keep}},0);
 
 /* ---- src/desert/no_trap.js ---- */
 /* ==========================================================================
