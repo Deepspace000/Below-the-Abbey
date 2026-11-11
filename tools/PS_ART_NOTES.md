@@ -58,3 +58,10 @@ Palette now (owner, round 2): black and charcoal stone, slate blue-grey, cold te
 
 ## Level-100 gear icons
 * All 26 assets/icn_pg_*.png (128x128, transparent) from tools/PS_GEAR_ICONS.md are painted with tools/ingest_icon.py. Weapons are drawn diagonally (tip upper right) to match the existing icn_ files; armour, shields and rings are front view. python tools/inject.py was NOT run (it edits index.html, outside my files): run it to rebuild ICN_FILES.
+
+
+## Buttresses, teleporter, Never-Ending Tower
+* buttress_a (289x720) and buttress_b (319x720), h 3.6, in assets/ps (names the builders ask for: ps_buttress_a/b).
+* Teleporter: assets/ps/tele0.webp (asleep, dark runes) and tele1..tele4.webp (awake, pulsing teal runes), all 394x420, h 1.0 (the code stone used NPC_H.teleporter .62). The renderer draws IMG['tele'+n] (n=0 asleep, 1..4 awake) for decor k 'teleporter'; makeTeleSprites() fills IMG.tele0..4 from code. After pspLoadOwn, copy IMG.ps_tele0..4 over IMG.tele0..4 and set NPC_H.teleporter=1.0 (code change, not done).
+* i_neverending: assets/ps/i_neverending.webp, 407x640, transparent, ink and wash style, h 6. The world map icons live in the atlas assets/wm_a.png (WMN_RECTS rect [a,x,y,w,h]); it is not in the atlas yet, so either paste it into the atlas and add the rect, or draw this standalone image in wmnDraw.
+* nt_tower_front: assets/nt/tower_front.webp (1572x900, aspect 1.75 = 4 tiles by 2.3 cells, transparent where the stone front ends) with assets/nt/manifest.json {"tower_front":{"file":"tower_front.webp"}}; ntLoadOwn loads it as IMG.nt_tower_front.

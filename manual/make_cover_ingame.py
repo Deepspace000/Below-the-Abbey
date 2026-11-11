@@ -19,7 +19,7 @@ Only the glue is made here: soft masks, fog, rim light, a warm key light, a gild
 Fixed seeds everywhere, so the same inputs always give the same pictures.
 --shoot starts its own `python -m http.server` on a free port of its own (never port 8399) and stops it again afterwards.
 """
-import os, sys, io, json, time, math, base64, socket, subprocess
+import os, sys, io, re, json, time, math, base64, socket, subprocess
 import numpy as np
 import cv2
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
@@ -532,13 +532,65 @@ def put_logo(canvas, logo_w, logo_top, logo_max_h, halo=1.0, glow_k=.62, brighte
     # the warm golden glow (screen blend, so it only ever adds light)
     a_arr = np.asarray(al).astype(np.float32) / 255
     canvas = add_title_glow(canvas, a_arr, w, glow_k)
+    canvas = title_shadow(canvas, logo, x, y)
     rgb = np.asarray(logo.convert('RGB')).astype(np.float32) / 255
     rgb = np.clip(rgb ** brighten, 0, 1)
     lg = Image.fromarray((rgb * 255 + .5).astype(np.uint8)).convert('RGBA')
     lg.putalpha(logo.getchannel('A'))
     top = Image.new('RGBA', (W, H), (0, 0, 0, 0))
     top.paste(lg, (x, y), lg)
-    return Image.alpha_composite(canvas, top), (x, y, w, h)
+    return a_shadow(Image.alpha_composite(canvas, top), logo, x, y), (x, y, w, h)
+
+
+TITLE_A_RE = re.compile(r'"A":\[([\d.]+),([\d.]+),([\d.]+),([\d.]+)\]')
+
+
+def title_a():
+    """Where the big illuminated A stands in the logo, as fractions of the logo (read from src/desert/titlelogo.js, which tools/ingest_title.py keeps up to date)."""
+    try:
+        m = TITLE_A_RE.search(open(os.path.join(ROOT, 'src', 'desert', 'titlelogo.js'), encoding='utf-8').read())
+        return tuple(float(v) for v in m.groups())
+    except Exception:
+        return (0.0401, 0.0653, 0.4455, 0.9239)
+
+
+def title_shadow(canvas, logo, x, y):
+    """The shadow of the whole title, the big A too: the same dark edge and soft shadow as the lettering under the title (gold_text),
+    laid on the picture under the logo."""
+    W, H = canvas.size
+    lw, lh = logo.size
+    a = np.asarray(logo.getchannel('A')).copy()
+    full = np.zeros((H, W), np.uint8)
+    full[y:y + lh, x:x + lw] = a[:max(0, min(lh, H - y)), :max(0, min(lw, W - x))]
+    sw = max(2, round(W / 600))                                                                              # the edge, as wide as the one on the tagline
+    k = 2 * sw + 1
+    edge = cv2.dilate(full, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))
+    sh = np.zeros_like(edge); sh[sw:, sw:] = edge[:-sw, :-sw]
+    sh = np.clip(cv2.GaussianBlur(sh.astype(np.float32), (0, 0), W / 300) * 1.5, 0, 255).astype(np.uint8)
+    out = Image.alpha_composite(canvas, Image.merge('RGBA', (*[Image.new('L', (W, H), 0)] * 3, Image.fromarray(sh))))
+    out = Image.alpha_composite(out, Image.merge('RGBA', (*[Image.new('L', (W, H), c) for c in (38, 22, 8)], Image.fromarray(edge))))
+    return out
+
+
+def a_shadow(canvas, logo, x, y, strength=.42):
+    """A little shadow on the big A itself: the gold of the letter and of its frame casts a soft shadow down and to the right onto the blue and red of the panel."""
+    W, H = canvas.size
+    lw, lh = logo.size
+    ax0, ay0, ax1, ay1 = title_a()
+    x0, y0, x1, y1 = int(ax0 * lw), int(ay0 * lh), int(ax1 * lw), int(ay1 * lh)
+    reg = np.asarray(logo.convert('RGB')).astype(np.float32)[y0:y1, x0:x1]
+    r, g, b = reg[..., 0], reg[..., 1], reg[..., 2]
+    gold = ((r > 140) & (g > 100) & (b < 125) & (r - b > 70) & (r >= g)).astype(np.float32)
+    gold = cv2.GaussianBlur(gold, (0, 0), max(.8, lw / 1400))
+    d = max(2, round(W / 450))
+    sh = np.zeros_like(gold); sh[d:, d:] = gold[:-d, :-d]
+    sh = np.clip(cv2.GaussianBlur(sh, (0, 0), W / 380) * 1.4, 0, 1) * (1 - np.clip(gold * 1.6, 0, 1)) * strength
+    base = np.asarray(canvas.convert('RGB')).astype(np.float32)
+    tile = base[y + y0:y + y0 + sh.shape[0], x + x0:x + x0 + sh.shape[1]]
+    tile *= (1 - sh[..., None] * np.array([.95, .98, .9], np.float32))
+    out = Image.fromarray(np.clip(base, 0, 255).astype(np.uint8)).convert('RGBA')
+    out.putalpha(canvas.getchannel('A'))
+    return out
 
 
 def add_title_glow(canvas, alpha, w, k, tint=(1.0, .76, .38)):
