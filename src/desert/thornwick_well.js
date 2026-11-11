@@ -176,7 +176,7 @@ draw(c,x,L,api){
   // the chest at the dead end, and the way out
   const k=S/4.1,ch=(L.decor||[]).find(d=>d.k==='chest');
   if(ch){mpQhChest(x,X(ch.x+.5),Y(ch.y+.5),'#a8742e',k*1.2)}
-  {let dx=-1,dy=-1;for(let cy=0;cy<H0;cy++)for(let cx=0;cx<W0;cx++)if(/[^#.]/.test(L.rows[cy][cx])){dx=cx;dy=cy}
+  {let dx=-1,dy=-1;for(let cy=0;cy<H0;cy++)for(let cx=0;cx<W0;cx++)if(L.rows[cy][cx]==='0'){dx=cx;dy=cy}
     if(dx>=0){mpQhDoor(x,X(dx+.5),Y(dy+.4),k*1.25);api.text(x,'Stair to the well',X(dx+.5)+9,Y(dy+.5)+7,5.6,'#1a1208','left')}}
   api.title(x,'Under the Well','Tunnels below Thornwick');
   api.panel(x,392,38,84,56);api.text(x,'KEY',434,47,7,MPL.VERM);
